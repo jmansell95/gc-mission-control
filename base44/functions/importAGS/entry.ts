@@ -637,6 +637,7 @@ Deno.serve(async (req) => {
         matched_job_reference: delJob?.job_reference || '', created_job: false,
         outcome: 'deleted', log_count: deletedLogs,
         summary: `Hole ${klbHoleId} deleted — removed ${deletedLogs} log entries${delJob ? ` from ${delJob.name}` : ''}.`,
+        debug_payload: debugPayload,
       });
       return Response.json({
         status: 'success', event: 'hole_deleted', hole_id: klbHoleId,
@@ -681,6 +682,35 @@ Deno.serve(async (req) => {
     }
     const groups = parseAGS(text);
     const groupSummary = Object.entries(groups).map(([name, g]) => ({ name, row_count: g.rows.length }));
+
+    // === TEMPORARY DEBUG CAPTURE ===
+    // Capture the raw KLB webhook body keys + AGS group headings/first-row samples
+    // for the activity groups so we can reverse-engineer the driller-name field and
+    // the structured activity column layout. Stored in debug_payload on the webhook log.
+    let debugPayload = '';
+    try {
+      const activityGroupNames = ['SHFT', 'DLOG', 'HDIA', 'PTIM', 'HDPH', 'DREM', 'HORN', 'LOCA', 'PROJ'];
+      const groupDebug: Record<string, any> = {};
+      for (const gn of activityGroupNames) {
+        const g = groups[gn];
+        if (g && g.headings && g.rows.length > 0) {
+          groupDebug[gn] = {
+            headings: g.headings,
+            firstRow: g.rows[0],
+            rowCount: g.rows.length,
+          };
+        }
+      }
+      const klbBodyKeys = isKlbWebhook ? Object.keys(klbBody || {}) : [];
+      const klbDataKeys = isKlbWebhook ? Object.keys(klbBody?.data || {}) : [];
+      debugPayload = JSON.stringify({
+        isKlbWebhook,
+        klbBodyKeys,
+        klbDataKeys,
+        klbBodySample: isKlbWebhook ? klbBody : null,
+        groupDebug,
+      });
+    } catch (e) { debugPayload = `debug capture error: ${e.message}`; }
 
     // Resolve the target job
     let createdJob = false;
@@ -741,6 +771,7 @@ Deno.serve(async (req) => {
         log_count: 0,
         summary: `No matching job found for "${refHint || '—'}" — no data imported.`,
         error: 'Could not match an existing job. No job was created.',
+        debug_payload: debugPayload,
       });
       return Response.json({
         error: 'Could not match an existing job. No job was created and no data was imported.',
@@ -1241,6 +1272,7 @@ Deno.serve(async (req) => {
         outcome: 'no_data', log_count: 0,
         summary: `No LOCA/GEOL/CORE/SAMP/SPT/TREM/WSTG records found. Groups: ${found || '(none)'}.`,
         error: 'No data groups found in AGS file.',
+        debug_payload: debugPayload,
       });
       return Response.json({
         error: `No LOCA, GEOL, CORE, SAMP, SPT/ISPT, TREM or WSTG records were found in this AGS file. Groups found: ${found || '(none)'}.`
@@ -1327,6 +1359,7 @@ Deno.serve(async (req) => {
       matched_job_reference: job.job_reference || '', created_job: createdJob,
       outcome: 'success', log_count: inserted,
       summary: `Imported ${inserted} log entries into ${job.name}.`,
+      debug_payload: debugPayload,
     });
     return Response.json({
       status: 'success', job_id: job.id, job_name: job.name,

@@ -79,6 +79,10 @@
     "error": {
       "type": "string",
       "description": "Error message when outcome is 'error' or 'no_data'. Blank on success."
+    },
+    "debug_payload": {
+      "type": "string",
+      "description": "Temporary debug capture \u2014 JSON blob of the raw KLB webhook body keys + AGS group headings/first-row samples for the activity groups (SHFT, DLOG, HDIA, PTIM, HDPH, DREM, HORN). Used to reverse-engineer the KeyLogBook driller-name field and structured activity column layout. Remove once the parser is finalised."
     }
   },
   "required": [
