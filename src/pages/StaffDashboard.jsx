@@ -38,6 +38,7 @@ import WeeklyRotaView from '@/components/staff/WeeklyRotaView';
 import OfflineBanner from '@/components/field/OfflineBanner';
 import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
+import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 
 
 export default function StaffDashboard() {
@@ -597,6 +598,9 @@ export default function StaffDashboard() {
           <OfflineBanner />
           <SyncHUD />
 
+          {/* KeyLogBook afternoon prompt — drillers only */}
+          <KeyLogBookPromptBanner staff={staff} />
+
           {/* Consolidated alert — single line */}
           <StaffAlerts isOnline={isOnline} staff={staff} />
 
@@ -888,7 +892,7 @@ export default function StaffDashboard() {
           staffId={staff.id}
           crewAssignments={allAssignments.filter(a => a.job_id === assignments.find(a2 => a2.id === shiftWizard.assignmentId)?.job_id && a.assigned_date === assignments.find(a2 => a2.id === shiftWizard.assignmentId)?.assigned_date)}
           visibleAssignments={visibleAssignments}
-          isDriller={(() => { const job = jobs.find(j => j.id === assignments.find(a => a.id === shiftWizard.assignmentId)?.job_id); if (!job) return false; const jt = jobTypes.find(t => t.key === job.job_type); return !!(jt?.is_drilling || ['cp','rotary','mixed'].includes(job.drilling_method)); })()}
+          isDriller={/driller/i.test(staff?.job_title || '')}
           isLastJob={shiftWizard.isLastJob}
           forceStep={shiftWizard.forceStep}
           onArrivedConfirm={handleArrivedConfirm}

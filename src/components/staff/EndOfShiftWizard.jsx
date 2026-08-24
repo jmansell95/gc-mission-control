@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { X, CheckCircle2, Car, Ruler, FileText, ClipboardCheck, Send, ChevronRight, AlertTriangle, Coffee, Briefcase, Info, ShieldCheck, Clock, Receipt, Boxes, DoorOpen, Truck } from 'lucide-react';
+import { X, CheckCircle2, Car, Ruler, FileText, ClipboardCheck, Send, ChevronRight, AlertTriangle, Coffee, Briefcase, Info, ShieldCheck, Clock, Receipt, Boxes, DoorOpen, Truck, Tablet, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import DailyExpenseStep from './DailyExpenseStep';
 import AssetRecoveryStep from './AssetRecoveryStep';
@@ -69,6 +69,7 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
   }, [open]);
 
   const steps = [
+    ...(isDriller ? [{ key: 'klb', label: 'KeyLogBook' }] : []),
     { key: 'review', label: 'Review' },
     ...(isDriller ? [{ key: 'meterage', label: 'Meterage' }] : []),
     { key: 'notes', label: 'Notes' },
@@ -194,6 +195,33 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-5">
+              {/* Pre-step: KeyLogBook reminder (drillers only) */}
+              {currentStep.key === 'klb' && (
+                <div className="space-y-4">
+                  <div className="rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] p-5 text-white">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-11 h-11 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center flex-shrink-0">
+                        <Tablet className="w-5 h-5 text-white" strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <p className="text-base font-bold leading-tight">Have you logged in KeyLogBook today?</p>
+                        <p className="text-sm text-white/85 mt-1.5 leading-relaxed">
+                          Your daily activities need to be logged on KeyLogBook before you close off your shift. All data is sent back to the office automatically and links to your rates — no manual entry needed here.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white/10 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-white/70 flex-shrink-0" />
+                      <p className="text-xs text-white/80">Once you've finished logging on your tablet, tap Continue below to review your shift.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400 px-1">
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>KeyLogBook activities auto-price via the rate card keyword matcher — financial figures flow into your AFP automatically.</span>
+                  </div>
+                </div>
+              )}
+
               {/* Step 1: Review Tasks */}
               {currentStep.key === 'review' && (
                 <div className="space-y-4">

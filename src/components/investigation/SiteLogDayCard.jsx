@@ -200,8 +200,13 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
               </span>
             )}
             {log.chargeable && log.charge_amount && (
-              <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">
+              <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">
                 £{Number(log.charge_amount).toFixed(0)}
+              </span>
+            )}
+            {log.pricing_review_status === 'pending_review' && (
+              <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Pending pricing
               </span>
             )}
             {log.manager_review_status === 'queried' && (
