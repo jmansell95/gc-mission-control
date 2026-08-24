@@ -48,8 +48,32 @@ interface ParsedActivity {
 // (parseRemarks + professionaliseActivities are imported above).
 // ============================================================
 
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+function londonToday(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+}
+
+// Parse a date input as a Europe/London calendar date (YYYY-MM-DD).
+// Handles bare dates (YYYY-MM-DD), ISO timestamps, and DD/MM/YYYY.
+// Returns null if the input can't be parsed.
+function londonDateFromInput(input: string): string | null {
+  if (!input) return null;
+  const s = str(input);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  try {
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/London',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(d);
+    }
+  } catch (e) {}
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  return null;
 }
 
 function num(v: any): number | null {
@@ -97,7 +121,9 @@ Deno.serve(async (req) => {
 
     const jobRef = str(body.job_reference || body.project_id);
     const explicitJobId = str(body.job_id);
-    const workDate = str(body.date) || todayStr();
+    const parsedDate = londonDateFromInput(str(body.date));
+    const workDate = parsedDate || londonToday();
+    const dateUnconfirmed = !parsedDate;
     const meterage = num(body.meterage);
     const rawRemarks = str(body.remarks || body.notes);
 
@@ -218,7 +244,7 @@ Deno.serve(async (req) => {
         description: cleanDesc,
         completed_by_type: 'internal_staff',
         completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
-        manager_review_status: 'pending',
+        manager_review_status: dateUnconfirmed ? 'queried' : 'pending',
         chargeable: !!match,
         billing_status: match ? 'auto' : 'no_charge',
         charge_amount: match ? match.total : null,
@@ -246,7 +272,7 @@ Deno.serve(async (req) => {
         description: rawRemarks,
         completed_by_type: 'internal_staff',
         completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
-        manager_review_status: 'pending',
+        manager_review_status: dateUnconfirmed ? 'queried' : 'pending',
         chargeable: false,
         billing_status: 'no_charge',
       });
@@ -262,7 +288,7 @@ Deno.serve(async (req) => {
       logs.push({
         job_id: job.id,
         staff_id: null,
-        date: str(bh.date) || workDate,
+        date: londonDateFromInput(str(bh.date)) || workDate,
         log_type: 'borehole_progress',
         borehole_ref: bhRef || null,
         depth_to: bhDepth || null,
@@ -292,7 +318,7 @@ Deno.serve(async (req) => {
         job_id: job.id,
         staff_id: isRemarkLog ? (leadDrillerId || null) : null,
         staff_name: isRemarkLog ? (leadDrillerName || '') : '',
-        date: str(gl.date) || workDate,
+        date: londonDateFromInput(str(gl.date)) || workDate,
         log_type: isRemarkLog ? 'other' : (str(gl.log_type) || 'borehole_progress'),
         borehole_ref: str(gl.borehole_ref || gl.reference) || null,
         depth_from: num(gl.depth_from),
@@ -305,7 +331,7 @@ Deno.serve(async (req) => {
         logged_by_role: isRemarkLog ? 'driller' : undefined,
         completed_by_type: 'internal_staff',
         completed_by_name: isRemarkLog ? (leadDrillerName || 'KeyLogBook Webhook') : 'KeyLogBook Webhook',
-        manager_review_status: isRemarkLog ? 'pending' : 'approved',
+        manager_review_status: isRemarkLog ? (dateUnconfirmed ? 'queried' : 'pending') : 'approved',
         chargeable: false,
         billing_status: 'no_charge',
       });
