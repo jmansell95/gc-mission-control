@@ -61,6 +61,10 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const jobId: string = body.job_id;
     if (!jobId) return Response.json({ error: 'job_id is required' }, { status: 400 });
+    // Optional sub-scopes: per-borehole and per-staff exports narrow the
+    // approved logs within the job to a single borehole ref or staff member.
+    const boreholeRef: string | undefined = body.borehole_ref;
+    const staffId: string | undefined = body.staff_id;
 
     const job = await base44.asServiceRole.entities.Job.get(jobId);
     if (!job) return Response.json({ error: 'Job not found' }, { status: 404 });
@@ -68,7 +72,9 @@ Deno.serve(async (req) => {
     // Fetch ALL logs for this job — both staff-entered and KeyLogBook imports.
     // Only APPROVED logs are exported (the user reviews everything first).
     const allLogs = await base44.asServiceRole.entities.InvestigationLog.filter({ job_id: jobId });
-    const logs = allLogs.filter((l: any) => (l.manager_review_status || 'pending') === 'approved');
+    let logs = allLogs.filter((l: any) => (l.manager_review_status || 'pending') === 'approved');
+    if (boreholeRef) logs = logs.filter((l: any) => l.borehole_ref === boreholeRef);
+    if (staffId) logs = logs.filter((l: any) => l.staff_id === staffId);
 
     if (logs.length === 0) {
       return Response.json({ error: 'No approved logs to export. Review and approve logs in Log QC first.' }, { status: 422 });
@@ -297,7 +303,8 @@ Deno.serve(async (req) => {
 
     const agsContent = blocks.join('\n') + '\n';
     const safeName = (job.name || job.id).replace(/[^a-zA-Z0-9-_]/g, '_');
-    const filename = `${safeName}_OpenGround_${new Date().toISOString().slice(0, 10)}.ags`;
+    const scopeTag = boreholeRef ? `_BH-${boreholeRef.replace(/[^a-zA-Z0-9-_]/g, '_')}` : (staffId ? `_Staff` : '');
+    const filename = `${safeName}${scopeTag}_OpenGround_${new Date().toISOString().slice(0, 10)}.ags`;
 
     return new Response(agsContent, {
       status: 200,
