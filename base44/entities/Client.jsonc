@@ -21,15 +21,48 @@
     },
     "contact_name": {
       "type": "string",
-      "description": "Primary contact person"
+      "description": "Primary contact person (legacy single-contact field, kept for backward compatibility). Prefer the 'contacts' array for multiple contacts."
     },
     "contact_email": {
       "type": "string",
-      "description": "Contact email"
+      "description": "Contact email (legacy single-contact field)."
     },
     "contact_phone": {
       "type": "string",
-      "description": "Contact phone number"
+      "description": "Contact phone number (legacy single-contact field)."
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Contact person name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Contact role/job title (e.g. Project Manager, Accounts)"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "email": {
+            "type": "string",
+            "description": "Contact email address"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about this contact"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "default": [],
+      "description": "All contacts for this client \u2014 unlimited, no primary designation. Each entry has name, role, phone, email, notes. Used for comms and portal invite recipient selection."
     },
     "yard_address": {
       "type": "string",

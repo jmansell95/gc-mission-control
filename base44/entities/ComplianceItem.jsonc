@@ -89,6 +89,32 @@
       ],
       "default": "auto",
       "description": "Override the auto-calculated status. 'auto' derives from expiry_date, 'missing' marks it as not yet provided, 'not_required' exempts it."
+    },
+    "review_status": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "pending_review",
+        "rejected"
+      ],
+      "default": "approved",
+      "description": "Manager review state for staff-submitted documents. 'approved' = manager confirmed the document is valid (counts toward compliance); 'pending_review' = staff uploaded via self-service, awaiting manager confirmation (shows a 'Pending Review' badge, NOT counted as valid until approved); 'rejected' = manager rejected the upload (document removed from compliance, staff notified). Defaults to 'approved' so manager-created items are immediately valid."
+    },
+    "submitter_location": {
+      "type": "string",
+      "description": "Location the staff member entered when they submitted/uploaded this document \u2014 where they are now (e.g. 'Cambridge North site', 'Home'). Helps the manager context-check the submission."
+    },
+    "reviewed_by": {
+      "type": "string",
+      "description": "Name of the manager who approved or rejected this staff-submitted document."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "ISO timestamp when the manager reviewed this document."
+    },
+    "review_note": {
+      "type": "string",
+      "description": "Note from the manager when approving or rejecting the document (e.g. reason for rejection)."
     }
   },
   "required": [

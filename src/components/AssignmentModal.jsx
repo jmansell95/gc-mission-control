@@ -181,20 +181,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     // Keep the clicked date (defaultDate), don't override with the job's planned start.
     // Only fall back to the job start if no date was clicked (e.g. editing with no defaultDate).
     const dateToUse = formData.assigned_date || plannedStart;
-    setFormData(prev => {
-      const next = { ...prev, job_id: jobId, assigned_date: dateToUse, start_delayed: false, actual_start_date: '' };
-      if (dateToUse) {
-        const weekend = isWeekend(dateToUse);
-        if (weekend && !prev.is_overtime && prev.rate_multiplier === '') {
-          next.is_overtime = true;
-          next.rate_multiplier = String(rateMap[new Date(dateToUse + 'T00:00:00').getDay()] ?? 1.5);
-        }
-        if (!weekend && prev.is_overtime && prev.rate_multiplier === '') {
-          next.is_overtime = false;
-        }
-      }
-      return next;
-    });
+    setFormData(prev => ({ ...prev, job_id: jobId, assigned_date: dateToUse, start_delayed: false, actual_start_date: '' }));
     if (dateToUse && formData.staff_id) {
       const res = checkConflicts(formData.staff_id, dateToUse, formData.vehicle_id, formData.start_time, formData.end_time);
       setConflictWarnings(res.warnings);
@@ -253,13 +240,6 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     setFormData(prev => {
       const next = { ...prev, assigned_date: date };
       if (suggested) { next.start_time = suggested.start_time; next.end_time = suggested.end_time; }
-      if (weekend && !prev.is_overtime && prev.rate_multiplier === '') {
-        next.is_overtime = true;
-        next.rate_multiplier = String(rateMap[new Date(date + 'T00:00:00').getDay()] ?? 1.5);
-      }
-      if (!weekend && prev.is_overtime && prev.rate_multiplier === '') {
-        next.is_overtime = false;
-      }
       return next;
     });
     if (date && formData.staff_id) {
@@ -763,11 +743,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                   <Clock className="w-4 h-4 text-amber-500" />
                   <div>
                     <p className="text-xs font-semibold text-slate-800">Overtime Shift</p>
-                    <p className="text-[11px] text-slate-400">
-                      {isWeekend(formData.assigned_date)
-                        ? 'Weekend date — overtime suggested.'
-                        : 'Enable to bill this shift at an overtime rate.'}
-                    </p>
+                    <p className="text-[11px] text-slate-400">Enable to bill this shift at an overtime rate.</p>
                   </div>
                 </div>
                 <button type="button" onClick={() => toggleOvertime(!formData.is_overtime)}
