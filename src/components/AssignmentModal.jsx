@@ -678,7 +678,10 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               <select value={formData.vehicle_id} onChange={(e) => handleVehicleChange(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
                 <option value="">Select Vehicle (Optional)</option>
-                {sortAZ(vehicles, 'registration_number').map(v => <option key={v.id} value={v.id}>{v.registration_number} — {v.name}</option>)}
+                {sortAZ(vehicles, 'registration_number').map(v => {
+                  const keeper = v.geotab_keeper_name || v.current_operator_name;
+                  return <option key={v.id} value={v.id}>{v.registration_number} — {v.name}{keeper ? ` (${keeper})` : ''}</option>;
+                })}
               </select>
             </div>
             {isDrillerStaff && (
