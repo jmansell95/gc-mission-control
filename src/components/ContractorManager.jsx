@@ -7,6 +7,7 @@ import SearchFilterBar from '@/components/SearchFilterBar';
 import CISBatchVerifyWidget from '@/components/contractors/CISBatchVerifyWidget';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
+import ContactsEditor from '@/components/ContactsEditor';
 
 const ACCENT = '#2E5A1A';
 
@@ -35,7 +36,7 @@ const ACCREDITATION_LABELS = {
 const SERVICE_OPTIONS = ['drilling', 'groundworks', 'coring', 'trial_pit', 'enabling', 'cp_drilling', 'rotary_drilling', 'depot'];
 
 const emptyForm = {
-  name: '', contact_name: '', contact_email: '', contact_phone: '', notes: '',
+  name: '', contact_name: '', contact_email: '', contact_phone: '', contacts: [], notes: '',
   onboarding_status: 'pending',
   services_offered: [],
   company_reg_number: '', vat_number: '', hse_registration: '',
@@ -255,6 +256,11 @@ export default function ContractorManager() {
               <input type="text" value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
             </div>
+            <ContactsEditor
+              value={formData.contacts}
+              onChange={(contacts) => setFormData((prev) => ({ ...prev, contacts }))}
+              label="Additional Contacts"
+            />
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">SafetyCulture Email</label>
               <input type="email" value={formData.safetyculture_email} onChange={(e) => setFormData({ ...formData, safetyculture_email: e.target.value })}

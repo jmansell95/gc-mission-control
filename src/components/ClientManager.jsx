@@ -6,9 +6,10 @@ import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import SearchFilterBar from '@/components/SearchFilterBar';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
+import ContactsEditor from '@/components/ContactsEditor';
 
 const inputCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm';
-const blank = { name: '', parent_client_id: '', is_holding: false, contact_name: '', contact_email: '', contact_phone: '', yard_address: '', lat: '', lng: '', geofence_radius_override: '', is_partner: false, partner_color: '' };
+const blank = { name: '', parent_client_id: '', is_holding: false, contact_name: '', contact_email: '', contact_phone: '', contacts: [], yard_address: '', lat: '', lng: '', geofence_radius_override: '', is_partner: false, partner_color: '' };
 
 export default function ClientManager() {
   const [showForm, setShowForm] = useState(false);
@@ -39,7 +40,8 @@ export default function ClientManager() {
     setFormData({
       name: c.name || '', parent_client_id: c.parent_client_id || '', is_holding: c.is_holding || false,
       contact_name: c.contact_name || '', contact_email: c.contact_email || '',
-      contact_phone: c.contact_phone || '', yard_address: c.yard_address || '',
+      contact_phone: c.contact_phone || '', contacts: c.contacts || [],
+      yard_address: c.yard_address || '',
       lat: c.lat ?? '', lng: c.lng ?? '', geofence_radius_override: c.geofence_radius_override ?? '',
       is_partner: c.is_partner || false, partner_color: c.partner_color || '',
     });
@@ -107,6 +109,11 @@ export default function ClientManager() {
               <input type="tel" value={formData.contact_phone} onChange={e => setFormData({ ...formData, contact_phone: e.target.value })}
                 className={inputCls} />
             </div>
+            <ContactsEditor
+              value={formData.contacts}
+              onChange={(contacts) => setFormData((prev) => ({ ...prev, contacts }))}
+              label="Additional Contacts"
+            />
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-slate-600 mb-1">Yard / Collection Point Address</label>
               <input type="text" value={formData.yard_address} onChange={e => setFormData({ ...formData, yard_address: e.target.value })}

@@ -36,7 +36,7 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
   const [backUrl, setBackUrl] = useState(null);
   const [extracting, setExtracting] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: '', card_number: '', issue_date: '', expiry_date: '', notes: '' });
+  const [form, setForm] = useState({ title: '', card_number: '', issue_date: '', expiry_date: '', notes: '', location: '' });
 
   const requiresBack = docType?.requiresFrontBack;
 
@@ -133,6 +133,8 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
         back_document_url: bUrl || null,
         back_document_name: backFile?.name || null,
         status_override: 'auto',
+        review_status: 'pending_review',
+        submitter_location: form.location || null,
       });
       queryClient.invalidateQueries({ queryKey: ['staff-documents', staffId] });
       queryClient.invalidateQueries({ queryKey: ['staff-compliance', staffId] });
@@ -152,7 +154,7 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
     setBackFile(null);
     setFrontUrl(null);
     setBackUrl(null);
-    setForm({ title: '', card_number: '', issue_date: '', expiry_date: '', notes: '' });
+    setForm({ title: '', card_number: '', issue_date: '', expiry_date: '', notes: '', location: '' });
   };
 
   // === STEP: TYPE SELECTION ===
@@ -314,6 +316,12 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
               <label className={labelClass}>Notes (optional)</label>
               <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2}
                 className={`${inputClass} resize-none`} placeholder="Anything your manager should know" />
+            </div>
+            <div>
+              <label className={labelClass}>Your current location (optional)</label>
+              <input type="text" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
+                className={inputClass} placeholder="e.g. Cambridge North site, Home, Dartford depot" />
+              <p className="text-[11px] text-slate-400 mt-1">Tells your manager where you are when uploading — helps them context-check.</p>
             </div>
           </div>
 

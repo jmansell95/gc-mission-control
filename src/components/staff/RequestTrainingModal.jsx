@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  GraduationCap, X, Sparkles, Loader2, Check, ChevronRight, AlertTriangle, Calendar,
+  GraduationCap, X, Sparkles, Loader2, Check, ChevronRight, AlertTriangle, Calendar, MapPin, Paperclip,
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { complianceDaysUntil } from '@/utils/complianceDate';
@@ -26,6 +26,8 @@ export default function RequestTrainingModal({ staffId, staffName, onClose }) {
   const [selected, setSelected] = useState(null);
   const [requestText, setRequestText] = useState('');
   const [preferredDate, setPreferredDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [attachedFile, setAttachedFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -54,10 +56,32 @@ export default function RequestTrainingModal({ staffId, staffName, onClose }) {
     }
     setSubmitting(true);
     try {
+      // If a certificate document is attached, upload it and create a pending-review
+      // ComplianceItem so the manager can confirm it in the Training tab.
+      if (attachedFile) {
+        try {
+          const uploadRes = await base44.integrations.Core.UploadFile({ file: attachedFile });
+          await base44.entities.ComplianceItem.create({
+            category: 'staff',
+            title: selected?.label || 'Training Document',
+            qualification_type: selected?.qualification_type || 'other',
+            reference_id: staffId,
+            reference_name: staffName,
+            document_url: uploadRes.file_url,
+            document_name: attachedFile.name || 'upload',
+            notes: requestText || null,
+            submitter_location: location || null,
+            status_override: 'auto',
+            review_status: 'pending_review',
+          });
+          queryClient.invalidateQueries({ queryKey: ['staff-documents', staffId] });
+          queryClient.invalidateQueries({ queryKey: ['pending-training-reviews'] });
+        } catch (_) { /* non-blocking — request still goes through */ }
+      }
       const res = await base44.functions.invoke('requestStaffTraining', {
         staff_id: staffId,
         staff_name: staffName,
-        request_text: requestText,
+        request_text: location ? `${requestText}\n\nCurrent location: ${location}` : requestText,
         qualification_type: selected?.qualification_type || 'other',
         preferred_date: preferredDate || null,
       });
@@ -196,6 +220,36 @@ export default function RequestTrainingModal({ staffId, staffName, onClose }) {
                 min={format(new Date(), 'yyyy-MM-dd')}
                 className={inputClass}
               />
+            </div>
+
+            {/* Current location */}
+            <div>
+              <label className={labelClass}>Your current location (optional)</label>
+              <input
+                type="text"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                className={inputClass}
+                placeholder="e.g. Cambridge North site, Home, Dartford depot"
+              />
+            </div>
+
+            {/* Optional certificate attachment */}
+            <div>
+              <label className={labelClass}>Attach a certificate (optional)</label>
+              <label className="flex items-center gap-2 px-3.5 py-3 border border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-violet-400 hover:bg-violet-50/30 transition">
+                <Paperclip className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <span className="text-sm text-slate-600 truncate flex-1">
+                  {attachedFile ? attachedFile.name : 'Attach a scan or photo of your certificate'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={e => setAttachedFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-[11px] text-slate-400 mt-1">If you attach a document it's saved immediately but stays "pending review" until your manager confirms it.</p>
             </div>
 
             {/* AI hint */}

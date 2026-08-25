@@ -10,10 +10,11 @@ import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
+import ContactsEditor from '@/components/ContactsEditor';
 
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
 
-const blank = { name: '', contact_name: '', contact_email: '', contact_phone: '', notes: '', is_maintenance_provider: false, emergency_mobile: '', technical_email: '', portal_login_url: '', maintenance_services: [], account_number: '', lat: '', lng: '', geofence_radius_override: '' };
+const blank = { name: '', contact_name: '', contact_email: '', contact_phone: '', contacts: [], notes: '', is_maintenance_provider: false, emergency_mobile: '', technical_email: '', portal_login_url: '', maintenance_services: [], account_number: '', lat: '', lng: '', geofence_radius_override: '' };
 
 const MAINT_SERVICE_OPTS = [
   { value: 'mot', label: 'MOT' },
@@ -50,7 +51,7 @@ export default function SupplierManager() {
   const startAdd = () => { setForm(blank); setEditingId(null); setAdding(true); };
   const startEdit = (s) => {
     setForm({
-      name: s.name, contact_name: s.contact_name || '', contact_email: s.contact_email || '', contact_phone: s.contact_phone || '', notes: s.notes || '',
+      name: s.name, contact_name: s.contact_name || '', contact_email: s.contact_email || '', contact_phone: s.contact_phone || '', contacts: s.contacts || [], notes: s.notes || '',
       is_maintenance_provider: s.is_maintenance_provider || false, emergency_mobile: s.emergency_mobile || '',
       technical_email: s.technical_email || '', portal_login_url: s.portal_login_url || '',
       maintenance_services: s.maintenance_services || [], account_number: s.account_number || '',
@@ -154,6 +155,11 @@ export default function SupplierManager() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
               <input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className={inputCls} />
             </div>
+            <ContactsEditor
+              value={form.contacts}
+              onChange={(contacts) => setForm((prev) => ({ ...prev, contacts }))}
+              label="Additional Contacts"
+            />
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
               <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="2" className={inputCls} />

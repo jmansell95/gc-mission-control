@@ -6,6 +6,7 @@ import { format, isPast, isFuture } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import TrainingOutcomeModal from '@/components/TrainingOutcomeModal';
+import PendingReviewQueue from '@/components/training/PendingReviewQueue';
 
 const CATEGORIES = [
   { value: 'cscs_card', label: 'CSCS Card' },
@@ -298,6 +299,8 @@ export default function TrainingManager() {
           <Plus className="w-4 h-4" /> New Course
         </button>
       </div>
+
+      <PendingReviewQueue />
 
       {showForm && (
         <form onSubmit={handleCourseSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">

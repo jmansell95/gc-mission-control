@@ -74,6 +74,7 @@ export default function AssetHub() {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [showSmartImport, setShowSmartImport] = useState(false);
   const [showBulkQR, setShowBulkQR] = useState(false);
+  const [groupBy, setGroupBy] = useState('none');
 
   const { data: allAssets = [], isLoading } = useQuery({
     queryKey: ['site-assets'],
@@ -282,6 +283,12 @@ export default function AssetHub() {
                   <button onClick={() => setDepotOnly(d => !d)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${depotOnly ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
                     <Warehouse className="w-4 h-4" /> {depotOnly ? 'Depot Only' : 'Depot'}
                   </button>
+                  <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                    <option value="none">No grouping</option>
+                    <option value="type">Group by Type</option>
+                    <option value="location">Group by Location</option>
+                    <option value="status">Group by Status</option>
+                  </select>
                   {category !== 'rig' && (
                     <button onClick={() => { setSelectionMode(m => !m); setSelected(new Set()); }} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${selectionMode ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
                       <CheckSquare className="w-4 h-4" /> {selectionMode ? 'Done' : 'Select'}
@@ -304,6 +311,7 @@ export default function AssetHub() {
               compFilter={compFilter}
               sourceFilter={sourceFilter}
               depotOnly={depotOnly}
+              groupBy={groupBy}
               selectionMode={selectionMode}
               selected={selected}
               setSelected={setSelected}

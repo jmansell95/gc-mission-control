@@ -209,6 +209,7 @@ function StatPill({ icon: Icon, label, value, tone }) {
  */
 export default function AssetInventoryGrid({
   assets, rigs, category, search, compFilter, sourceFilter = 'all', depotOnly = false,
+  groupBy = 'none',
   selectionMode, selected, setSelected,
   onOpenRig, onOpenEquip, onCertVault, onUploadCert,
 }) {
@@ -397,21 +398,44 @@ export default function AssetInventoryGrid({
       )}
 
       {/* Equipment cards */}
-      {showEquip && filteredEquip.length > 0 && (
-        <div className="space-y-2.5">
+      {showEquip && filteredEquip.length > 0 && (() => {
+        // Group equipment by the selected dimension (none/type/location/status)
+        const groupKey = (eq) => {
+          if (groupBy === 'type') return eq.asset_type || 'other';
+          if (groupBy === 'location') return eq.storage_location || 'Unspecified';
+          if (groupBy === 'status') return derivedComplianceStatus(eq) || 'unknown';
+          return 'all';
+        };
+        const groupLabel = (key) => {
+          if (groupBy === 'type') return (ASSET_TYPE_META[key]?.label || key);
+          if (groupBy === 'status') return (COMPLIANCE_META[key]?.label || key);
+          return key;
+        };
+        const groups = groupBy === 'none'
+          ? [{ key: 'all', items: filteredEquip }]
+          : Object.entries(
+              filteredEquip.reduce((m, entry) => {
+                const k = groupKey(entry.equip);
+                (m[k] = m[k] || []).push(entry);
+                return m;
+              }, {})
+            ).map(([key, items]) => ({ key, items }));
+
+        return groups.map((group) => (
+        <div key={group.key} className="space-y-2.5">
           <div className="flex items-center gap-2 px-1">
             <Wrench className="w-4 h-4 text-slate-500" />
             <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
-              {depotOnly ? 'Depot Equipment' : 'Equipment'} <span className="text-slate-400 font-normal normal-case tracking-normal">({filteredEquip.length})</span>
+              {depotOnly && groupBy === 'none' ? 'Depot Equipment' : 'Equipment'} {groupBy !== 'none' && <span className="text-slate-500 normal-case tracking-normal">· {groupLabel(group.key)}</span>} <span className="text-slate-400 font-normal normal-case tracking-normal">({group.items.length})</span>
             </h3>
-            {depotOnly && (
+            {depotOnly && groupBy === 'none' && (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
                 <Warehouse className="w-3 h-3" /> Ready to assign
               </span>
             )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredEquip.map(({ equip, parentRig }) => {
+            {group.items.map(({ equip, parentRig }) => {
               const liveStatus = derivedComplianceStatus(equip);
               const meta = COMPLIANCE_META[liveStatus];
               const Icon = TYPE_ICON[equip.asset_type] || Wrench;
@@ -512,7 +536,8 @@ export default function AssetInventoryGrid({
             })}
           </div>
         </div>
-      )}
+        ));
+      })()}
     </div>
   );
 }
