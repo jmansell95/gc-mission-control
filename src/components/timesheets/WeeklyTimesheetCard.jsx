@@ -197,7 +197,7 @@ export default function WeeklyTimesheetCard({ staffMember, weekStart, dailySumma
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold">
-              <Clock className="w-3.5 h-3.5" /> {workedDays.filter((d) => d.entries.some((e) => e.status === 'submitted')).length} pending
+              <Clock className="w-3.5 h-3.5" /> {workedDays.filter((d) => d.status === 'submitted').length} pending
             </span>
           )}
         </div>

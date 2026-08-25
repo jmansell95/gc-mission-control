@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Drill, TrendingUp, Ruler, Users, Loader2, Wrench, ChevronRight,
+  PoundSterling, HardHat,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -16,10 +17,12 @@ const fmtGBP = (v) => {
  * Rig Performance Widget — shows today's meterage and revenue per rig,
  * with the crew working on each rig. "This rig earnt £X today."
  *
- * Revenue calculation:
- *  - meterage_rate jobs: assignment.meterage × job.meterage_rate
- *  - day_rate jobs: job.unit_price (if set) or rig day rate from RateCardItem
- *  - flat_fee: job.client_charge
+ * Revenue calculation (per assignment's job):
+ *  1. meterage_rate: assignment.meterage × rate (from disciplines or job.meterage_rate)
+ *  2. day_rate: rate from disciplines, job.unit_price, or rig day rate from RateCardItem
+ *  3. flat_fee: job.client_charge
+ *  4. Fallback: rig day rate from RateCardItem (so a rig always shows its day rate
+ *     even before meterage is entered at end of shift)
  */
 export default function RigPerformanceWidget({ divisionId, onRigClick }) {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
@@ -31,10 +34,33 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-all'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
+  const { data: teams = [] } = useQuery({ queryKey: ['teams-rig-perf'], queryFn: () => base44.entities.Team.list() });
   const { data: rateCards = [] } = useQuery({
     queryKey: ['rate-cards-rig-day'],
     queryFn: () => base44.entities.RateCardItem.filter({ category: 'plant' }),
   });
+
+  const drillingTeamIds = useMemo(() => {
+    const ids = new Set();
+    teams.forEach(t => {
+      if (t.job_type === 'cp_drilling' || t.job_type === 'rotary_drilling') ids.add(t.id);
+    });
+    return ids;
+  }, [teams]);
+
+  // Resolve the day rate for a rig from the rate card (best-effort name match)
+  const rigDayRate = useMemo(() => {
+    const map = {};
+    rigs.forEach(rig => {
+      const name = (rig.name || '').toLowerCase();
+      const match = rateCards.find(rc => {
+        const rcName = (rc.item_name || rc.description || '').toLowerCase();
+        return rcName.includes(name) || name.includes(rcName);
+      });
+      if (match) map[rig.id] = Number(match.unit_price || match.rate || 0) || 0;
+    });
+    return map;
+  }, [rigs, rateCards]);
 
   const rigStats = useMemo(() => {
     const rigAssignments = assignments.filter(a => a.rig_asset_id);
@@ -43,18 +69,28 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
       if (!byRig[a.rig_asset_id]) byRig[a.rig_asset_id] = { assignments: [], totalMeterage: 0, totalRevenue: 0 };
       byRig[a.rig_asset_id].assignments.push(a);
       const job = jobs.find(j => j.id === a.job_id);
-      // Calculate revenue for this assignment
+
+      // Find the drilling discipline on this job (if any) for per-discipline rates
+      const disciplines = Array.isArray(job?.disciplines) ? job.disciplines : [];
+      const drillDisc = disciplines.find(d => d.type === 'drilling') || {};
+
       let rev = 0;
       if (job) {
-        if (job.revenue_method === 'meterage_rate' && job.meterage_rate && a.meterage) {
-          rev = a.meterage * job.meterage_rate;
-        } else if (job.revenue_method === 'day_rate' && job.unit_price) {
-          rev = job.unit_price;
-        } else if (job.revenue_method === 'flat_fee' && job.client_charge) {
+        const meterageRate = drillDisc.meterage_rate || job.meterage_rate;
+        const dayRate = drillDisc.unit_price || job.unit_price;
+        const revMethod = drillDisc.revenue_method || job.revenue_method;
+
+        if (revMethod === 'meterage_rate' && meterageRate && a.meterage) {
+          rev = a.meterage * meterageRate;
+        } else if (revMethod === 'day_rate') {
+          rev = dayRate || rigDayRate[a.rig_asset_id] || 0;
+        } else if (revMethod === 'flat_fee' && job.client_charge) {
           rev = job.client_charge;
-        } else if (job.meterage_rate && a.meterage) {
-          // Fallback: if job has meterage_rate even without explicit revenue_method
-          rev = a.meterage * job.meterage_rate;
+        } else if (meterageRate && a.meterage) {
+          rev = a.meterage * meterageRate;
+        } else {
+          // Fallback: rig day rate so the widget always shows what the rig earns
+          rev = rigDayRate[a.rig_asset_id] || 0;
         }
       }
       byRig[a.rig_asset_id].totalRevenue += rev;
@@ -75,7 +111,19 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
         assignmentCount: data.assignments.length,
       };
     }).sort((a, b) => b.revenue - a.revenue);
-  }, [assignments, jobs, rigs, allStaff]);
+  }, [assignments, jobs, rigs, allStaff, rigDayRate]);
+
+  // Drilling crews out today — counts crew on drilling teams even without a rig linked
+  const drillingCrewsOut = useMemo(() => {
+    const crewOut = new Set();
+    assignments.forEach(a => {
+      const staffMember = allStaff.find(s => s.id === a.staff_id);
+      if (staffMember && drillingTeamIds.has(staffMember.team_id)) {
+        crewOut.add(a.staff_id);
+      }
+    });
+    return crewOut.size;
+  }, [assignments, allStaff, drillingTeamIds]);
 
   const totalRevenue = rigStats.reduce((sum, r) => sum + r.revenue, 0);
   const totalMeterage = rigStats.reduce((sum, r) => sum + r.meterage, 0);
@@ -91,21 +139,30 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
 
   if (activeRigCount === 0) {
     return (
-      <div className="insight-card rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-            <Drill className="w-4 h-4 text-[#2E5A1A]" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900">Rig Performance</h3>
-            <p className="text-[11px] text-slate-400">No rigs deployed today</p>
+      <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] px-4 py-3 text-white">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
+              <Drill className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Rig Performance Today</h3>
+              <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')}</p>
+            </div>
           </div>
         </div>
-        <div className="text-center py-6">
+        <div className="p-5 text-center">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-2">
             <Wrench className="w-6 h-6 text-slate-300" />
           </div>
-          <p className="text-sm text-slate-400">No drilling crews are out today.</p>
+          <p className="text-sm font-semibold text-slate-700">No rigs deployed today</p>
+          {drillingCrewsOut > 0 ? (
+            <p className="text-xs text-slate-500 mt-1">
+              {drillingCrewsOut} drilling crew{drillingCrewsOut !== 1 ? 's' : ''} out — assign a rig to track earnings.
+            </p>
+          ) : (
+            <p className="text-xs text-slate-400 mt-1">No drilling crews are out today.</p>
+          )}
         </div>
       </div>
     );
@@ -122,12 +179,13 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
             </div>
             <div>
               <h3 className="text-sm font-bold">Rig Performance Today</h3>
-              <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')}</p>
+              <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')} · {activeRigCount} rig{activeRigCount !== 1 ? 's' : ''} deployed</p>
             </div>
           </div>
           <div className="text-right">
+            <p className="text-[10px] text-white/60 uppercase font-semibold tracking-wide">Earned today</p>
             <p className="text-lg font-bold tabular-nums leading-none">{fmtGBP(totalRevenue)}</p>
-            <p className="text-[10px] text-white/70 mt-0.5">{totalMeterage.toFixed(1)}m drilled · {activeRigCount} rig{activeRigCount !== 1 ? 's' : ''}</p>
+            {totalMeterage > 0 && <p className="text-[10px] text-white/70 mt-0.5">{totalMeterage.toFixed(1)}m drilled</p>}
           </div>
         </div>
       </div>
@@ -145,8 +203,8 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition active:scale-[0.99] text-left"
           >
             {/* Rig icon */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center flex-shrink-0">
-              <Drill className="w-5 h-5 text-slate-600" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">
+              <Drill className="w-5 h-5 text-[#2E5A1A]" />
             </div>
 
             {/* Rig name + crew */}
@@ -155,7 +213,7 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
               <div className="flex items-center gap-1.5 mt-0.5">
                 {stat.crew.length > 0 ? (
                   <>
-                    <Users className="w-3 h-3 text-slate-400" />
+                    <HardHat className="w-3 h-3 text-slate-400" />
                     <span className="text-xs text-slate-500 truncate">{stat.crew.map(c => c.name).join(', ')}</span>
                   </>
                 ) : (
@@ -170,14 +228,16 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
             {/* Revenue + meterage */}
             <div className="text-right flex-shrink-0">
               <div className="flex items-center gap-1 justify-end">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                <PoundSterling className="w-3.5 h-3.5 text-emerald-600" />
                 <p className="text-sm font-bold text-emerald-700 tabular-nums">{fmtGBP(stat.revenue)}</p>
               </div>
-              {stat.meterage > 0 && (
+              {stat.meterage > 0 ? (
                 <div className="flex items-center gap-1 justify-end mt-0.5">
                   <Ruler className="w-3 h-3 text-amber-500" />
                   <p className="text-xs font-semibold text-amber-600 tabular-nums">{stat.meterage.toFixed(1)}m</p>
                 </div>
+              ) : (
+                <p className="text-[10px] text-slate-400 mt-0.5">day rate</p>
               )}
             </div>
             {onRigClick && <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />}

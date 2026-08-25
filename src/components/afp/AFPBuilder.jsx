@@ -6,7 +6,7 @@ import {
   Plus, Loader2, Clock, Receipt, PoundSterling,
   MessageSquare, X, FileBarChart,
   TrendingUp, Zap, CheckSquare, Square, Trash2, Search,
-  ChevronDown, ChevronRight, GitBranch, Package, Upload, ClipboardCheck, Save,
+  ChevronDown, ChevronRight, GitBranch, Package, Upload, ClipboardCheck, Save, Layers,
 } from 'lucide-react';
 import useAutoSave from '@/hooks/useAutoSave';
 import CreateFirstAFPModal from './CreateFirstAFPModal';
@@ -80,7 +80,7 @@ export default function AFPBuilder({ job }) {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [groupBy, setGroupBy] = useState('category');
-  const [viewMode, setViewMode] = useState('list');
+  const [activeTab, setActiveTab] = useState('measured-works');
   const [collapsedCats, setCollapsedCats] = useState(new Set());
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [showDatesEditor, setShowDatesEditor] = useState(false);
@@ -157,10 +157,13 @@ export default function AFPBuilder({ job }) {
 
   // Totals — always computed from ALL line items (not filtered)
   const totals = useMemo(() => {
-    let original = 0, disputed = 0, agreed = 0;
+    let original = 0, disputed = 0, agreed = 0, claimed = 0, assessed = 0, balance = 0;
     for (const li of lineItems) {
       const amt = li.amount || 0;
       original += li.original_amount || amt;
+      claimed += Number(li.applied_in_period) || amt;
+      assessed += Number(li.assessed_in_period) || Number(li.agreed_amount) || 0;
+      balance += Number(li.balance_value) || Math.max(0, (Number(li.amount) || 0) - (Number(li.gross_applied) || 0));
       if (li.dispute_status === 'disputed' || li.dispute_status === 'counter_offered') {
         disputed += amt;
       }
@@ -168,7 +171,7 @@ export default function AFPBuilder({ job }) {
         agreed += li.agreed_amount || amt;
       }
     }
-    return { original, disputed, agreed };
+    return { original, disputed, agreed, claimed, assessed, balance };
   }, [lineItems]);
 
   const freshness = useMemo(() => {
@@ -661,8 +664,25 @@ export default function AFPBuilder({ job }) {
             </div>
           </div>
 
-          {/* Contract value summary with progress bar */}
-          <div className="px-4 py-3.5 space-y-3">
+          {/* Prominent stat tiles — Claimed / Assessed / Balance */}
+          <div className="px-4 py-4 space-y-3">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="relative overflow-hidden rounded-xl stat-gradient-brand text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Claimed</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.claimed)}</p>
+                {totals.disputed > 0 && <p className="text-[10px] text-amber-200 font-medium mt-0.5">{fmt(totals.disputed)} disputed</p>}
+              </div>
+              <div className="relative overflow-hidden rounded-xl stat-gradient-blue text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Assessed</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.assessed)}</p>
+                <p className="text-[10px] text-white/60 font-medium mt-0.5">client valuation</p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl stat-gradient-emerald text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Balance</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.balance)}</p>
+                <p className="text-[10px] text-white/60 font-medium mt-0.5">remaining</p>
+              </div>
+            </div>
             {selectedAfp.contract_value > 0 && (() => {
               const pct = Math.min(100, Math.round((totals.agreed / selectedAfp.contract_value) * 100));
               return (
@@ -680,20 +700,6 @@ export default function AFPBuilder({ job }) {
                 </div>
               );
             })()}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="text-center px-2 py-2 rounded-xl bg-slate-50">
-                <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-wide">Claimed</p>
-                <p className="text-base sm:text-lg font-bold text-slate-700 tabular-nums">{fmt(totals.original)}</p>
-              </div>
-              <div className={`text-center px-2 py-2 rounded-xl ${totals.disputed > 0 ? 'bg-amber-50' : 'bg-slate-50'}`}>
-                <p className="text-[10px] text-amber-600 uppercase font-semibold tracking-wide">Disputed</p>
-                <p className={`text-base sm:text-lg font-bold tabular-nums ${totals.disputed > 0 ? 'text-amber-700' : 'text-slate-400'}`}>{fmt(totals.disputed)}</p>
-              </div>
-              <div className="text-center px-2 py-2 rounded-xl bg-emerald-50">
-                <p className="text-[10px] text-emerald-700 uppercase font-semibold tracking-wide">Agreed</p>
-                <p className="text-base sm:text-lg font-bold text-emerald-700 tabular-nums">{fmt(totals.agreed)}</p>
-              </div>
-            </div>
           </div>
 
           {/* Data freshness + auto-save indicator */}
@@ -726,33 +732,41 @@ export default function AFPBuilder({ job }) {
         </div>
       )}
 
-      {/* ── Category Filter Pills + Granularity Toggle ── */}
-      <div className="space-y-2">
-        {/* Category filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {CATEGORIES.map(cat => {
-            const count = cat.id === 'all' ? lineItems.length : (categoryCounts[cat.id] || 0);
-            if (cat.id !== 'all' && count === 0) return null;
+      {/* ── AFP Tab Navigation ── */}
+      <div className="insight-card rounded-2xl p-2">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'measured-works', label: 'Measured Works', icon: FileText, count: lineItems.filter(li => li.sheet_name === 'measured_works').length },
+            { id: 'variations', label: 'Variations', icon: GitBranch, count: lineItems.filter(li => li.sheet_name === 'variations').length },
+            { id: 'compensation', label: 'Compensation', icon: Package, count: lineItems.filter(li => li.sheet_name === 'compensation_item').length },
+            { id: 'materials', label: 'Materials', icon: Package, count: lineItems.filter(li => li.sheet_name === 'materials').length },
+            { id: 'all-lines', label: 'All Lines', icon: Layers, count: lineItems.length },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <button
-                key={cat.id}
-                onClick={() => setCategoryFilter(cat.id)}
-                className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition active:scale-95 ${
-                  categoryFilter === cat.id
-                    ? 'bg-[#2E5A1A] text-white shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 ${
+                  isActive ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {cat.label}
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${categoryFilter === cat.id ? 'bg-white/20' : 'bg-slate-100'}`}>
-                  {count}
-                </span>
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+                {tab.count > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-100'}`}>
+                    {tab.count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
+      </div>
 
-        {/* Search + Group-by + Add Line */}
+      {/* ── All Lines: search + group controls + add line ── */}
+      {activeTab === 'all-lines' && (
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[140px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
@@ -765,53 +779,34 @@ export default function AFPBuilder({ job }) {
             />
           </div>
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === 'list' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
-            >
-              List
-            </button>
-            <button
-              onClick={() => setViewMode('sheets')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${viewMode === 'sheets' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
-            >
-              Sheets
-            </button>
+            {CATEGORIES.map(cat => {
+              const count = cat.id === 'all' ? lineItems.length : (categoryCounts[cat.id] || 0);
+              if (cat.id !== 'all' && count === 0) return null;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${categoryFilter === cat.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
-          {viewMode === 'list' && (
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
-            <button
-              onClick={() => setGroupBy('category')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'category' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
-            >
-              By Category
-            </button>
-            <button
-              onClick={() => setGroupBy('time')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'time' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
-            >
-              By Time
-            </button>
+            <button onClick={() => setGroupBy('category')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'category' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>By Category</button>
+            <button onClick={() => setGroupBy('time')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'time' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>By Time</button>
           </div>
-          )}
           {groupBy === 'time' && (
             <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
               {['day', 'week', 'month'].map(g => (
-                <button
-                  key={g}
-                  onClick={() => setGranularity(g)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition capitalize ${granularity === g ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
-                >
-                  {g}
-                </button>
+                <button key={g} onClick={() => setGranularity(g)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition capitalize ${granularity === g ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>{g}</button>
               ))}
             </div>
           )}
           <button
             onClick={() => {
-              if (!showAddManual) {
-                setManualItem(p => ({ ...p, source_date: selectedAfp?.period_end_date || new Date().toISOString().slice(0, 10) }));
-              }
+              if (!showAddManual) setManualItem(p => ({ ...p, source_date: selectedAfp?.period_end_date || new Date().toISOString().slice(0, 10) }));
               setShowAddManual(!showAddManual);
             }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50 transition active:scale-95"
@@ -819,7 +814,7 @@ export default function AFPBuilder({ job }) {
             <Plus className="w-3.5 h-3.5" /> Add Line
           </button>
         </div>
-      </div>
+      )}
 
       {/* ── Bulk Action Toolbar ── */}
       {selectedItems.size > 0 && (
@@ -1013,12 +1008,20 @@ export default function AFPBuilder({ job }) {
         </div>
       )}
 
-      {/* ── Sheets view (dual-side Measured Works + Variation lifecycle + Compensation Items + Materials) ── */}
-      {viewMode === 'sheets' && (
+      {/* ── Measured Works tab (dual-side table) ── */}
+      {activeTab === 'measured-works' && (
+        <AFPDualSideTable afp={selectedAfp} lineItems={lineItems} canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'} onAutoSave={scheduleSave} />
+      )}
+
+      {/* ── Variations tab ── */}
+      {activeTab === 'variations' && (
         <div className="space-y-3">
-          <AFPDualSideTable afp={selectedAfp} lineItems={lineItems} canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'} onAutoSave={scheduleSave} />
-          {/* Variations with cost-agreement lifecycle */}
-          {lineItems.filter(li => li.sheet_name === 'variations').length > 0 && (
+          {lineItems.filter(li => li.sheet_name === 'variations').length === 0 ? (
+            <div className="insight-card rounded-2xl p-6 text-center">
+              <GitBranch className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No variations in this AFP</p>
+            </div>
+          ) : (
             <div className="insight-card rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
                 <GitBranch className="w-4 h-4 text-violet-600" />
@@ -1041,9 +1044,21 @@ export default function AFPBuilder({ job }) {
               </div>
             </div>
           )}
-          <AFPCompensationItems lineItems={lineItems} />
-          {/* Materials */}
-          {lineItems.filter(li => li.sheet_name === 'materials').length > 0 && (
+        </div>
+      )}
+
+      {/* ── Compensation tab ── */}
+      {activeTab === 'compensation' && <AFPCompensationItems lineItems={lineItems} />}
+
+      {/* ── Materials tab ── */}
+      {activeTab === 'materials' && (
+        <div className="space-y-3">
+          {lineItems.filter(li => li.sheet_name === 'materials').length === 0 ? (
+            <div className="insight-card rounded-2xl p-6 text-center">
+              <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No materials in this AFP</p>
+            </div>
+          ) : (
             <div className="insight-card rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
                 <Package className="w-4 h-4 text-amber-600" />
@@ -1067,7 +1082,7 @@ export default function AFPBuilder({ job }) {
       )}
 
       {/* ── Category-grouped view (collapsible sections with subtotals) ── */}
-      {viewMode === 'list' && groupBy === 'category' && (
+      {activeTab === 'all-lines' && groupBy === 'category' && (
         <div className="space-y-2.5">
           {categoryGroupedItems.length === 0 ? (
             <div className="insight-card rounded-2xl p-6 text-center">
@@ -1124,7 +1139,7 @@ export default function AFPBuilder({ job }) {
       )}
 
       {/* ── Line Items — Mobile card view (time-grouped) ── */}
-      {viewMode === 'list' && groupBy === 'time' && (
+      {activeTab === 'all-lines' && groupBy === 'time' && (
       <div className="sm:hidden space-y-3">
         {groupedItems.length === 0 ? (
           <div className="insight-card rounded-2xl p-6 text-center">
@@ -1179,7 +1194,7 @@ export default function AFPBuilder({ job }) {
       )}
 
       {/* ── Line Items Table (grouped by time bucket) — Desktop only ── */}
-      {viewMode === 'list' && groupBy === 'time' && (
+      {activeTab === 'all-lines' && groupBy === 'time' && (
       <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">

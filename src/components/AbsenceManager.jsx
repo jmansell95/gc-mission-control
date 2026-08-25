@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   CalendarX, Plus, CheckCircle2, XCircle, Trash2, Repeat, Clock, Users,
-  CalendarDays, Power, Sparkles
+  CalendarDays, Power, Sparkles, ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
@@ -33,6 +33,7 @@ export default function AbsenceManager() {
   const [formData, setFormData] = useState({ staff_id: '', start_date: '', end_date: '', reason: 'holiday', notes: '' });
   const [recurringForm, setRecurringForm] = useState({ staff_id: '', days_of_week: [], label: 'Weekends', reason: 'weekend' });
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [expandedStaff, setExpandedStaff] = useState(new Set());
   const queryClient = useQueryClient();
 
   const { data: absences = [] } = useQuery({ queryKey: ['absences'], queryFn: () => base44.entities.Absence.list('-created_date', 100) });
@@ -96,6 +97,20 @@ export default function AbsenceManager() {
   const activeRecurring = recurring.filter(r => r.is_active !== false);
 
   const filteredAbsences = absences.filter(a => statusFilter === 'all' || a.status === statusFilter);
+
+  const requestsByStaff = staff.map(s => ({
+    staff: s,
+    items: filteredAbsences.filter(a => a.staff_id === s.id)
+  })).filter(x => x.items.length > 0);
+
+  const toggleStaffExpand = (id) => {
+    setExpandedStaff(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const recurringByStaff = staff.map(s => ({
     staff: s,
@@ -196,44 +211,76 @@ export default function AbsenceManager() {
             </form>
           )}
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            {filteredAbsences.length === 0 ? (
-              <div className="px-5 py-12 text-center text-slate-400 text-sm">No absence requests</div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {filteredAbsences.map(a => {
-                  const member = staff.find(s => s.id === a.staff_id);
-                  const reason = reasonConfig[a.reason] || reasonConfig.other;
-                  const status = statusConfig[a.status] || statusConfig.pending;
-                  return (
-                    <div key={a.id} className="px-5 py-4 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-                          <CalendarX className="w-4 h-4 text-slate-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 truncate">{member?.name || 'Unknown'}</p>
-                          <p className="text-xs text-slate-500">{format(new Date(a.start_date + 'T00:00:00'), 'dd MMM')} → {format(new Date(a.end_date + 'T00:00:00'), 'dd MMM yyyy')}</p>
-                          {a.notes && <p className="text-xs text-slate-400 truncate mt-0.5">{a.notes}</p>}
-                        </div>
+          {requestsByStaff.length === 0 ? (
+            <div className="bg-white rounded-xl border border-slate-200 p-10 text-center text-slate-400 text-sm">
+              No absence requests{statusFilter !== 'all' ? ` with status "${statusFilter}"` : ''}.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requestsByStaff.map(({ staff: s, items }) => {
+                const pendingN = items.filter(a => a.status === 'pending').length;
+                const isExpanded = expandedStaff.has(s.id);
+                const nextUp = items
+                  .filter(a => a.status === 'pending' || (a.status === 'approved' && a.end_date >= today))
+                  .sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
+                return (
+                  <div key={s.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <button onClick={() => toggleStaffExpand(s.id)}
+                      className="w-full px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition text-left">
+                      <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-emerald-700 font-bold text-xs">{s.name.charAt(0)}</span>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${reason.badge}`}>{reason.label}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.badge}`}>{status.label}</span>
-                        {a.status === 'pending' && (
-                          <>
-                            <button onClick={() => handleApprove(a.id)} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Approve"><CheckCircle2 className="w-4 h-4" /></button>
-                            <button onClick={() => handleReject(a.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition" title="Reject"><XCircle className="w-4 h-4" /></button>
-                          </>
-                        )}
-                        <button onClick={() => handleDelete(a.id)} className="p-1.5 text-slate-300 hover:text-red-500 rounded-lg transition" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-slate-900 text-sm truncate">{s.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {items.length} request{items.length !== 1 ? 's' : ''}
+                          {nextUp && <span className="text-slate-400"> · Next: {format(new Date(nextUp.start_date + 'T00:00:00'), 'dd MMM')} → {format(new Date(nextUp.end_date + 'T00:00:00'), 'dd MMM')}</span>}
+                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                      {pendingN > 0 && (
+                        <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 flex-shrink-0">
+                          {pendingN} pending
+                        </span>
+                      )}
+                      <ChevronRight className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    </button>
+                    {isExpanded && (
+                      <div className="divide-y divide-slate-50 border-t border-slate-100">
+                        {items.map(a => {
+                          const reason = reasonConfig[a.reason] || reasonConfig.other;
+                          const status = statusConfig[a.status] || statusConfig.pending;
+                          return (
+                            <div key={a.id} className="px-5 py-3.5 flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                  <CalendarX className="w-3.5 h-3.5 text-slate-500" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-slate-900 truncate">{format(new Date(a.start_date + 'T00:00:00'), 'dd MMM')} → {format(new Date(a.end_date + 'T00:00:00'), 'dd MMM yyyy')}</p>
+                                  {a.notes && <p className="text-xs text-slate-400 truncate mt-0.5">{a.notes}</p>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${reason.badge}`}>{reason.label}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${status.badge}`}>{status.label}</span>
+                                {a.status === 'pending' && (
+                                  <>
+                                    <button onClick={() => handleApprove(a.id)} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Approve"><CheckCircle2 className="w-4 h-4" /></button>
+                                    <button onClick={() => handleReject(a.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition" title="Reject"><XCircle className="w-4 h-4" /></button>
+                                  </>
+                                )}
+                                <button onClick={() => handleDelete(a.id)} className="p-1.5 text-slate-300 hover:text-red-500 rounded-lg transition" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

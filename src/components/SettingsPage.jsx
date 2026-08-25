@@ -32,6 +32,7 @@ import TimesheetManager from '@/components/TimesheetManager';
 import BillingPage from '@/components/BillingPage';
 import FinancialDataExchange from '@/components/billing/FinancialDataExchange';
 import AGSImportSettings from '@/components/AGSImportSettings';
+import GeotechSettings from '@/components/settings/GeotechSettings';
 import ImportDashboard from '@/pages/ImportDashboard';
 import SafetyCultureSettings from '@/components/SafetyCultureSettings';
 import SystemLogicGuide from '@/components/SystemLogicGuide';
@@ -163,7 +164,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'timesheets': return <TimesheetManager />;
       case 'invoicing': return <BillingPage onSelectJob={onSelectJob} />;
       case 'data-exchange': return <FinancialDataExchange />;
-      case 'ags-import': return <AGSImportSettings />;
+      case 'ags-import': return <GeotechSettings />;
       case 'planner-import': return <ImportDashboard />;
       case 'safety-culture': return <SafetyCultureSettings />;
       case 'system-guide': return <SystemLogicGuide />;
@@ -199,7 +200,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'zapier-webhooks': return <ZapierWebhookSettings />;
       case 'push-notifications': return <PushNotificationSettings />;
       case 'incremental-import': return <IncrementalImportSettings />;
-      case 'openground-sync': return <OpenGroundSettings />;
+      case 'openground-sync': return <GeotechSettings />;
       case 'rewards': return <RewardsManager />;
       default: return null;
     }
