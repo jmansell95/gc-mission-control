@@ -87,7 +87,7 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
         onClick={onClose}
       />
       {/* Panel — right-side drawer on desktop, full-screen sheet on mobile/tablet */}
-      <div className="fixed inset-y-0 right-0 z-50 w-full sm:max-w-lg md:max-w-xl bg-white shadow-2xl flex flex-col animate-slide-up">
+      <div className="fixed inset-y-0 right-0 z-50 w-full lg:max-w-xl bg-white shadow-2xl flex flex-col animate-slide-up">
         {/* Header */}
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-start gap-2 flex-shrink-0">
           <div className="flex-1 min-w-0">

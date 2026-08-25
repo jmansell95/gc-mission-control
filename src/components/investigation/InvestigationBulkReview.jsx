@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { CheckCircle2, XCircle, Loader2, MessageSquare, Briefcase } from 'lucide-react';
@@ -126,5 +126,3 @@ export default function InvestigationBulkReview({ logs = [], jobs = [], onDone }
     </div>
   );
 }
-
-import { useMemo } from 'react';
