@@ -13,13 +13,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 /**
  * StaffRotaManager — per-staff rota editor for the Weekly Rota Builder.
  *
- * Lets a manager fix mistakes after assigning a week's rota to a crew member:
- *   • Delete the crew member's ENTIRE rota for the week (all jobs).
- *   • Per job: edit the date of any individual shift, or remove the crew
- *     member from that job for the whole week.
+ * Lets a manager fix mistakes after assigning a crew member's rota by
+ * operating across the crew member's FULL assignment span (not just the
+ * current week):
+ *   • Delete the crew member's ENTIRE rota for the visible span (all jobs).
+ *   • Per job: edit the date of any individual shift, shift all dates by a
+ *     number of days, or remove the crew member from that job for the span.
  *
- * Only operates on the current week (week_start filter) and only on job
- * assignments (leave/sick/training rows are left untouched).
+ * A From/To date filter (defaulting to the crew member's full span) scopes
+ * which assignments are shown and acted on. Only job assignments are
+ * editable — leave/sick/training rows are left untouched.
  */
 export default function StaffRotaManager({ open, onClose, staff, weekStartStr, rotas = [], jobs = [], vehicles = [] }) {
   const queryClient = useQueryClient();
@@ -166,19 +169,10 @@ export default function StaffRotaManager({ open, onClose, staff, weekStartStr, r
   const handleRemoveFromJob = async (jid, assignments) => {
     const job = jobs.find(j => j.id === jid);
     const name = jid === 'unassigned' ? 'this job' : (job?.name || 'this job');
-    if (!confirm(`Remove ${staff.name} from ${name} for the whole week?\n\n${assignments.length} shift${assignments.length === 1 ? '' : 's'} will be deleted.`)) return;
+    if (!confirm(`Remove ${staff.name} from ${name} for this span?\n\n${assignments.length} shift${assignments.length === 1 ? '' : 's'} will be deleted.`)) return;
     setDeleting(true);
     try {
-      if (jid === 'unassigned') {
-        // No real job_id to filter on — delete each shift by ID.
-        await Promise.all(assignments.map(a => base44.entities.RotaAssignment.delete(a.id)));
-      } else {
-        await base44.entities.RotaAssignment.deleteMany({
-          staff_id: staff.id,
-          job_id: jid,
-          week_start: weekStartStr,
-        });
-      }
+      await Promise.all(assignments.map(a => base44.entities.RotaAssignment.delete(a.id)));
       setRemovedJobIds(prev => new Set(prev).add(jid));
       invalidateAll();
       toast({ title: `Removed from ${name}`, description: `${assignments.length} shift${assignments.length === 1 ? '' : 's'} deleted` });
@@ -192,19 +186,17 @@ export default function StaffRotaManager({ open, onClose, staff, weekStartStr, r
   // Delete the crew member's ENTIRE rota for the week (all jobs).
   const handleDeleteAll = async () => {
     if (staffRotas.length === 0) { toast({ title: 'No shifts to delete' }); return; }
+    const spanLabel = (dateFrom || dateTo) ? `${dateFrom || '…'} → ${dateTo || '…'}` : 'all weeks';
     if (!confirm(
-      `DELETE ${staff.name.toUpperCase()}'S ENTIRE ROTA FOR THIS WEEK?\n\n` +
-      `${staffRotas.length} shift${staffRotas.length === 1 ? '' : 's'} across ${jobEntries.length} job${jobEntries.length === 1 ? '' : 's'} will be permanently removed.\n\n` +
+      `DELETE ${staff.name.toUpperCase()}'S ROTA FOR THIS SPAN?\n\n` +
+      `${staffRotas.length} shift${staffRotas.length === 1 ? '' : 's'} across ${jobEntries.length} job${jobEntries.length === 1 ? '' : 's'} (${spanLabel}) will be permanently removed.\n\n` +
       `This cannot be undone.`
     )) return;
     setDeleting(true);
     try {
-      await base44.entities.RotaAssignment.deleteMany({
-        staff_id: staff.id,
-        week_start: weekStartStr,
-      });
+      await Promise.all(staffRotas.map(r => base44.entities.RotaAssignment.delete(r.id)));
       invalidateAll();
-      toast({ title: 'Entire week\'s rota deleted', description: `${staffRotas.length} shift${staffRotas.length === 1 ? '' : 's'} removed` });
+      toast({ title: 'Rota deleted', description: `${staffRotas.length} shift${staffRotas.length === 1 ? '' : 's'} removed (${spanLabel})` });
       onClose();
     } catch (e) {
       toast({ title: 'Failed to delete rota', description: e.message, variant: 'destructive' });
@@ -232,19 +224,40 @@ export default function StaffRotaManager({ open, onClose, staff, weekStartStr, r
             <div className="min-w-0">
               <p className="truncate">{staff.name}</p>
               <p className="text-xs font-normal text-slate-500 flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Rota manager · week of {weekStartStr}
+                <CalendarRange className="w-3 h-3" /> Rota manager · full assignment span
               </p>
             </div>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Date range filter — defaults to the crew member's full span */}
+        <div className="flex items-end gap-2 mb-3 px-1">
+          <div>
+            <label className="block text-[11px] font-medium text-slate-500 mb-0.5">From</label>
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-emerald-600" />
+          </div>
+          <div>
+            <label className="block text-[11px] font-medium text-slate-500 mb-0.5">To</label>
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+              className="px-2 py-1.5 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-emerald-600" />
+          </div>
+          {(dateFrom || dateTo) && (
+            <button type="button" onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="px-2.5 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition">
+              Clear
+            </button>
+          )}
+          <span className="ml-auto text-xs text-slate-400 self-center">{staffRotas.length} shift{staffRotas.length === 1 ? '' : 's'} shown</span>
+        </div>
 
         {staffRotas.length === 0 ? (
           <div className="py-10 text-center">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
               <Calendar className="w-6 h-6 text-slate-300" />
             </div>
-            <p className="text-sm font-semibold text-slate-600">No shifts this week</p>
-            <p className="text-xs text-slate-400 mt-1">This crew member has no assignments for the selected week.</p>
+            <p className="text-sm font-semibold text-slate-600">No shifts in this span</p>
+            <p className="text-xs text-slate-400 mt-1">This crew member has no assignments for the selected date range.</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -346,7 +359,7 @@ export default function StaffRotaManager({ open, onClose, staff, weekStartStr, r
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-700 border-2 border-dashed border-red-300 rounded-xl hover:bg-red-100 transition text-sm font-bold disabled:opacity-50"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                Delete {staff.name.split(' ')[0]}'s entire rota for this week ({totalActive} shifts)
+                Delete {staff.name.split(' ')[0]}'s rota for this span ({totalActive} shifts)
               </button>
               <p className="text-xs text-slate-400 text-center mt-2 flex items-center justify-center gap-1">
                 <AlertTriangle className="w-3 h-3" /> This removes every shift across all jobs — use only to start over.
