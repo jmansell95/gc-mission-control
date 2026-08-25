@@ -6,7 +6,7 @@ import {
   Plus, Calendar, ChevronLeft, ChevronRight, X, Copy,
   MapPin, Truck, Clock, CheckCircle2, PlayCircle, ClipboardCheck,
   Users, Briefcase, Search, Filter, StickyNote, Save, Send, Loader2, CalendarDays,
-  LogIn, LogOut, Repeat, Layers
+  LogIn, LogOut, Repeat, Layers, Trash2, AlertTriangle
 } from 'lucide-react';
 import AssignmentModal from '@/components/AssignmentModal';
 import ComplianceBlockModal from '@/components/ComplianceBlockModal';
@@ -340,6 +340,43 @@ export default function WeeklyRotaBuilder() {
     }
   };
 
+  // Delete the entire draft week: removes all assignments for this week and the
+  // RotaWeek record itself. Only available while the week is still a draft
+  // (not yet published to staff). Published weeks are protected.
+  const [deletingDraft, setDeletingDraft] = useState(false);
+  const handleDeleteDraft = async () => {
+    if (isPublished) return;
+    const label = `${format(weekStart, 'dd MMM')} – ${format(addDays(weekStart, 6), 'dd MMM yyyy')}`;
+    const count = rotas.length;
+    if (!confirm(
+      `DELETE THIS DRAFT ROTA?\n\n` +
+      `Week of ${label}\n\n` +
+      `This will permanently remove ${count} assignment${count === 1 ? '' : 's'} and clear the draft.\n` +
+      `Staff will NOT be notified (the rota was never published).\n\n` +
+      `This cannot be undone.`
+    )) return;
+    setDeletingDraft(true);
+    try {
+      // Remove all assignments for this week
+      if (count > 0) {
+        await base44.entities.RotaAssignment.deleteMany({ week_start: weekStartStr });
+      }
+      // Remove the draft RotaWeek record so the week resets to "unscheduled"
+      if (weekRecord) {
+        await base44.entities.RotaWeek.delete(weekRecord.id);
+      }
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+      queryClient.invalidateQueries({ queryKey: ['rota-week'] });
+      queryClient.invalidateQueries({ queryKey: ['rota-weeks'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+      setNotice({ type: 'success', msg: `Draft rota deleted — ${count} assignment${count === 1 ? '' : 's'} removed.` });
+    } catch (e) {
+      setNotice({ type: 'error', msg: e.message || 'Failed to delete draft rota' });
+    } finally {
+      setDeletingDraft(false);
+    }
+  };
+
   const goToPrevWeek = () => setSelectedWeek(prev => addDays(prev, -7));
   const goToNextWeek = () => setSelectedWeek(prev => addDays(prev, 7));
 
@@ -488,6 +525,13 @@ export default function WeeklyRotaBuilder() {
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-400 transition text-sm font-semibold disabled:opacity-50 shadow-sm">
                 {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} <span className="hidden sm:inline">{isPublished ? 'Resend' : 'Publish'}</span>
               </button>
+              {weekRecord && !isPublished && (
+                <button onClick={handleDeleteDraft} disabled={deletingDraft || rotas.length === 0}
+                  title={rotas.length === 0 ? 'No assignments to delete' : 'Delete this draft rota and all its assignments'}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+                  {deletingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} <span className="hidden sm:inline">Delete Draft</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -497,6 +541,27 @@ export default function WeeklyRotaBuilder() {
         <div className={`mb-4 rounded-xl border px-4 py-3 text-sm flex items-start gap-2 ${notice.type === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}`}>
           <span className="font-medium flex-1">{notice.msg}</span>
           <button onClick={() => setNotice(null)} className="text-current opacity-60 hover:opacity-100"><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
+      {/* Draft state banner — makes it unmistakable that this week has NOT been
+          published to staff yet. Shown whenever a draft RotaWeek record exists. */}
+      {weekRecord && !isPublished && (
+        <div className="mb-4 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50 px-4 py-3 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-5 h-5 text-amber-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-900">This is a DRAFT rota — staff cannot see it yet</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              {rotas.length > 0
+                ? `${rotas.length} assignment${rotas.length === 1 ? '' : 's'} saved as draft. Click Publish to email the schedule to your crew, or Delete Draft to scrap it and start over.`
+                : 'No assignments yet. Add shifts, then Publish to email the schedule to your crew.'}
+            </p>
+          </div>
+          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-200 text-amber-900 text-xs font-bold uppercase tracking-wide flex-shrink-0">
+            <Clock className="w-3.5 h-3.5" /> Draft
+          </span>
         </div>
       )}
 
