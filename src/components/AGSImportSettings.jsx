@@ -206,7 +206,9 @@ export default function AGSImportSettings() {
           semicolon-delimited files are auto-detected. Field names are matched by stripping the group prefix
           (e.g. <code>GEOL_TOP_GEOL</code> → <code>TOP</code>) so KeyLogBook's naming variants are all recognised.
           Imported technical logs are marked as non-chargeable and attributed to "AGS Import (KeyLogBook)". They appear in
-          the job's Borehole Data Explorer. Re-importing a file overwrites the previous AGS data for the selected job.
+          the job's Borehole Data Explorer. Re-importing a file only overwrites the boreholes present in that file —
+          boreholes not in the file are left untouched, so a full-project upload followed by a single-borehole webhook
+          push keeps all boreholes intact.
           <br /><br />
           <span className="font-semibold text-slate-600">Driller remarks:</span> Any time-stamped daily diary text found in <code>*_REM</code>, <code>*_NOTE</code>, or <code>REMARK</code>/<code>DIARY</code> fields
           (e.g. <code>"7:30_8:45 = Start briefing…"</code>) is parsed into individual activities, professionalised, and saved as pending Site Logs —

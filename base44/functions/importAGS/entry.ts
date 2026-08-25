@@ -974,19 +974,6 @@ Deno.serve(async (req) => {
     // keeps the required field non-empty when no crew is assigned at all.
     if (!staffId) staffId = drillerStaffId || 'ags_import';
 
-    // Count existing AGS-imported + KeyLogBook remarks logs for this job.
-    // Used by the overwrite safeguard to warn when a re-import would replace
-    // a larger dataset with a smaller one. The actual delete happens later
-    // (after the new logs are staged) so we can compare counts first.
-    let existingLogCount = 0;
-    try {
-      const existing = await base44.asServiceRole.entities.InvestigationLog.filter({
-        job_id: job.id,
-        source: { $in: ['ags_import', 'keylogbook_remarks'] },
-      });
-      existingLogCount = existing.length;
-    } catch (e) { /* continue with insert */ }
-
     const today = new Date().toISOString().slice(0, 10);
     const locaDates = buildLocaDates(groups, today);
 
@@ -1337,16 +1324,6 @@ Deno.serve(async (req) => {
     });
 
     if (structuredActivities.length > 0) {
-      // Delete previous remarks logs for this job (manual re-import) once,
-      // before inserting structured activities.
-      try {
-        const prevRemarks = await base44.asServiceRole.entities.InvestigationLog.filter({ job_id: job.id, source: 'keylogbook_remarks' });
-        if (prevRemarks.length > 0) {
-          await base44.asServiceRole.entities.InvestigationLog.deleteMany({ job_id: job.id, source: 'keylogbook_remarks' });
-          deletedCount += prevRemarks.length;
-        }
-      } catch (e) { /* continue */ }
-
       // Professionalise the structured activity descriptions in a single LLM call
       const activitiesToClean = structuredActivities.map(a => ({
         start_time: a.start_time,
@@ -1381,18 +1358,6 @@ Deno.serve(async (req) => {
     }
 
     if (uncoveredChunks.length > 0) {
-      // Only delete previous remarks if structured activities didn't already
-      // do so (both paths share the same delete to avoid double-deletion).
-      if (structuredActivities.length === 0) {
-        try {
-          const prevRemarks = await base44.asServiceRole.entities.InvestigationLog.filter({ job_id: job.id, source: 'keylogbook_remarks' });
-          if (prevRemarks.length > 0) {
-            await base44.asServiceRole.entities.InvestigationLog.deleteMany({ job_id: job.id, source: 'keylogbook_remarks' });
-            deletedCount += prevRemarks.length;
-          }
-        } catch (e) { /* continue */ }
-      }
-
       // Build the staged remark entries from chunks NOT covered by structured
       // time groups. Timed chunks parse into individual time-stamped activities
       // (AI-professionalised in one call); plain (non-timed) remarks become a
@@ -1475,44 +1440,72 @@ Deno.serve(async (req) => {
       return (a.borehole_ref || '').localeCompare(b.borehole_ref || '');
     });
 
-    // ---- Overwrite safeguard ----
+    // ---- Borehole-scoped overwrite ----
+    // Collect the set of borehole refs present in this file. The overwrite
+    // delete only removes existing logs for these boreholes — boreholes not
+    // in the file are left untouched. Logs with a blank borehole_ref (project-
+    // level remarks, undated diary with no ref) are scoped to a blank-ref
+    // bucket so they're replaced without touching real-ref logs.
+    const refsInFile = [...new Set(logs.map((l: any) => l.borehole_ref).filter(Boolean))];
+    const hasBlankRef = logs.some((l: any) => !l.borehole_ref);
+    const refListLabel = refsInFile.length > 0 ? refsInFile.join(', ') : '(blank ref)';
+
+    // Build a scoped filter that matches only the boreholes in this file.
+    const buildScopedFilter = (source: string) => {
+      const filter: any = { job_id: job.id, source };
+      const orConds: any[] = [];
+      if (refsInFile.length > 0) orConds.push({ borehole_ref: { $in: refsInFile } });
+      if (hasBlankRef) orConds.push({ borehole_ref: { $in: ['', null] } });
+      if (orConds.length === 1) Object.assign(filter, orConds[0]);
+      else if (orConds.length > 1) filter.$or = orConds;
+      return filter;
+    };
+
+    // ---- Overwrite safeguard (borehole-scoped) ----
     // Warn when a manual re-import would replace a larger existing dataset
-    // with a smaller one. Only applies to manual uploads (not webhooks).
+    // with a smaller one — scoped to the boreholes in this file only, so a
+    // single-borehole re-upload doesn't false-trigger against a job with
+    // many boreholes. Only applies to manual uploads (not webhooks).
     const newLogCount = logs.length;
-    if (!isKlbWebhook && !forceImport && existingLogCount > 10 && newLogCount < existingLogCount * 0.5) {
+    let existingScopedCount = 0;
+    if (!isKlbWebhook && !forceImport) {
+      try {
+        const existingAgs = await base44.asServiceRole.entities.InvestigationLog.filter(buildScopedFilter('ags_import'));
+        const existingRem = await base44.asServiceRole.entities.InvestigationLog.filter(buildScopedFilter('keylogbook_remarks'));
+        existingScopedCount = existingAgs.length + existingRem.length;
+      } catch (e) { /* continue */ }
+    }
+    if (!isKlbWebhook && !forceImport && existingScopedCount > 10 && newLogCount < existingScopedCount * 0.5) {
       await logWebhookRequest(base44, {
         event_type: 'manual_upload',
         hole_id: '', project_name: '', project_number: '',
         group_summary: groupSummary, matched_job_id: job.id, matched_job_name: job.name,
         matched_job_reference: job.job_reference || '', created_job: false,
         outcome: 'error', log_count: 0,
-        summary: `Overwrite safeguard: file has ${newLogCount} entries but ${existingLogCount} exist — confirmation required.`,
-        error: `needsConfirmation: ${newLogCount} new vs ${existingLogCount} existing`,
+        summary: `Overwrite safeguard: file has ${newLogCount} entries but ${existingScopedCount} exist for [${refListLabel}] — confirmation required.`,
+        error: `needsConfirmation: ${newLogCount} new vs ${existingScopedCount} existing (scoped to ${refListLabel})`,
         debug_payload: '',
       });
       return Response.json({
         needsConfirmation: true,
-        existingCount: existingLogCount,
+        existingCount: existingScopedCount,
         newCount: newLogCount,
-        error: `This file contains ${newLogCount} entries but ${existingLogCount} already exist for this job. Re-importing will replace all existing AGS data. Continue?`,
+        error: `This file contains ${newLogCount} entries but ${existingScopedCount} already exist for borehole(s) [${refListLabel}]. Re-importing will replace the existing data for those boreholes. Continue?`,
       }, { status: 409 });
     }
 
-    // Overwrite mode: delete existing AGS-imported logs for this job
+    // Borehole-scoped overwrite: delete existing ags_import + keylogbook_remarks
+    // logs for only the boreholes in this file, then insert the new set.
     let deletedCount = 0;
-    try {
-      const existing = await base44.asServiceRole.entities.InvestigationLog.filter({
-        job_id: job.id,
-        source: 'ags_import',
-      });
-      deletedCount = existing.length;
-      if (deletedCount > 0) {
-        await base44.asServiceRole.entities.InvestigationLog.deleteMany({
-          job_id: job.id,
-          source: 'ags_import',
-        });
-      }
-    } catch (e) { /* continue with insert */ }
+    for (const source of ['ags_import', 'keylogbook_remarks']) {
+      try {
+        const existing = await base44.asServiceRole.entities.InvestigationLog.filter(buildScopedFilter(source));
+        if (existing.length > 0) {
+          await base44.asServiceRole.entities.InvestigationLog.deleteMany(buildScopedFilter(source));
+          deletedCount += existing.length;
+        }
+      } catch (e) { /* continue with insert */ }
+    }
 
     let inserted = 0;
     const createdLogs: any[] = [];
@@ -1529,7 +1522,13 @@ Deno.serve(async (req) => {
     // samples (matched by job_id + sample_id) are skipped to avoid duplicates
     // on re-imports.
     if (samplesToCreate.length > 0) {
-      const existingSamples = await base44.asServiceRole.entities.Sample.filter({ job_id: job.id });
+      const sampleFilter: any = { job_id: job.id };
+      const sampleOrConds: any[] = [];
+      if (refsInFile.length > 0) sampleOrConds.push({ borehole_ref: { $in: refsInFile } });
+      if (hasBlankRef) sampleOrConds.push({ borehole_ref: { $in: ['', null] } });
+      if (sampleOrConds.length === 1) Object.assign(sampleFilter, sampleOrConds[0]);
+      else if (sampleOrConds.length > 1) sampleFilter.$or = sampleOrConds;
+      const existingSamples = await base44.asServiceRole.entities.Sample.filter(sampleFilter);
       const existingKeys = new Set(existingSamples.map((s: any) => `${s.job_id}|${s.sample_id}`));
 
       // Match staged samples to their created InvestigationLog by sample_id + borehole_ref
@@ -1568,7 +1567,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.KeyLogBookConfig.update(agsSyncConfig.id, {
           last_ags_sync_at: new Date().toISOString(),
           last_ags_sync_status: 'success',
-          last_ags_sync_summary: `Imported ${inserted} log entries into ${job.name}.`,
+          last_ags_sync_summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.`,
         });
       } catch (e) { /* best-effort status update */ }
     }
@@ -1579,13 +1578,13 @@ Deno.serve(async (req) => {
       group_summary: groupSummary, matched_job_id: job.id, matched_job_name: job.name,
       matched_job_reference: job.job_reference || '', created_job: createdJob,
       outcome: 'success', log_count: inserted,
-      summary: `Imported ${inserted} log entries into ${job.name}.`,
+      summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.`,
       debug_payload: debugPayload,
     });
     return Response.json({
       status: 'success', job_id: job.id, job_name: job.name,
       job_reference: job.job_reference, created_job: createdJob,
-      deleted: deletedCount, inserted,
+      deleted: deletedCount, inserted, scoped_boreholes: refsInFile,
       duplicates: counts.duplicates, counts, samples_created: counts.samplesCreated, groups: groupDebug,
     });
   } catch (error) {
