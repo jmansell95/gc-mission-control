@@ -679,8 +679,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
                 <option value="">Select Vehicle (Optional)</option>
                 {sortAZ(vehicles, 'registration_number').map(v => {
-                  const keeper = v.geotab_keeper_name || v.current_operator_name;
-                  return <option key={v.id} value={v.id}>{v.registration_number} — {v.name}{keeper ? ` (${keeper})` : ''}</option>;
+                  const driver = v.geotab_keeper_name || v.geotab_driver_name || v.current_operator_name;
+                  return <option key={v.id} value={v.id}>{v.registration_number}{driver ? ` — ${driver}` : ''}</option>;
                 })}
               </select>
             </div>
