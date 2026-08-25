@@ -92,7 +92,7 @@ function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType }) {
   );
 }
 
-export default function JobScheduleOverview({ primaryType, assignedStaff, rotas, allStaff, vehicles, rotasByDate, sortedDates }) {
+export default function JobScheduleOverview({ job, primaryType, assignedStaff, rotas, allStaff, vehicles, rotasByDate, sortedDates }) {
   const [expandedDays, setExpandedDays] = useState(() => new Set(sortedDates.length <= 3 ? sortedDates : []));
   const [expandedWeeks, setExpandedWeeks] = useState({});
 
@@ -142,7 +142,7 @@ export default function JobScheduleOverview({ primaryType, assignedStaff, rotas,
       <AssignedStaffGroups assignedStaff={assignedStaff} rotas={rotas} vehicles={vehicles} primaryType={primaryType} />
 
       {/* Subcontractor crew names (from SubcontractorLog — free-text names not in Staff records) */}
-      <SubcontractorCrewSection jobId={rotas[0]?.job_id || ''} />
+      <SubcontractorCrewSection jobId={job?.id || ''} />
 
       {/* Daily Schedule — collapsible, grouped by week */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

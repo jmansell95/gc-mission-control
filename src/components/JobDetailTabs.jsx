@@ -156,22 +156,12 @@ export default function JobDetailTabs({
               ]}
             />
             <PermanentCrewCard job={job} />
-            <JobScheduleOverview primaryType={primaryType} assignedStaff={assignedStaff} rotas={rotas} allStaff={allStaff} vehicles={vehicles} rotasByDate={rotasByDate} sortedDates={sortedDates} />
+            <JobScheduleOverview job={job} primaryType={primaryType} assignedStaff={assignedStaff} rotas={rotas} allStaff={allStaff} vehicles={vehicles} rotasByDate={rotasByDate} sortedDates={sortedDates} />
           </>
         ) : scheduleSub === 'delays' ? (
           <DelayLogManager job={job} />
         ) : (
-          <>
-            <TabStatRibbon
-              icon={Hotel}
-              title="Accommodation"
-              stats={[
-                { icon: Hotel, value: hotelBookings?.length || 0, label: 'Hotel Bookings', iconColor: 'text-amber-600' },
-                { icon: Users, value: assignedStaff.length, label: 'Crew', iconColor: 'text-emerald-600' },
-              ]}
-            />
-            <JobHotelBookings job={job} assignedStaff={assignedStaff} allStaff={allStaff} />
-          </>
+          <JobHotelBookings job={job} assignedStaff={assignedStaff} allStaff={allStaff} />
         )}
       </TabsContent>
 
