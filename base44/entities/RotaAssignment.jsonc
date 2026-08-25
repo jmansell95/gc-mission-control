@@ -154,6 +154,15 @@
       "type": "string",
       "description": "End-of-shift progress notes for multi-day jobs \u2014 visible to management and the next shift"
     },
+    "daily_checks_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the crew member has completed the daily pre-work checklist (vehicle walk-round, plant/power, PPE checks) in the ShiftWizard. Gates the shift \u2014 the Arrive step is blocked until this is true. The checks are completed in Mitti first, then confirmed here."
+    },
+    "daily_checks_completed_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the daily pre-work checklist was confirmed complete."
+    },
     "notes": {
       "type": "string",
       "description": "Staff notes for this assignment"

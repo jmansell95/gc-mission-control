@@ -5,16 +5,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   X, MapPin, Car, Clock, CheckCircle2, AlertTriangle, ShieldCheck,
   PlayCircle, ClipboardCheck, ChevronRight, Briefcase, Coffee, Send,
-  Ruler, FileText, Info, Timer,
+  Ruler, FileText, Info, Timer, Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import JobBriefingModal from '@/components/staff/JobBriefingModal';
 import EndOfShiftWizard from '@/components/staff/EndOfShiftWizard';
 import WorkingStep from '@/components/staff/WorkingStep';
+import DailyChecksStep from '@/components/staff/DailyChecksStep';
 import WeatherCard from '@/components/staff/WeatherCard';
 import JobContextCard from '@/components/staff/JobContextCard';
 import ShiftStepRail from '@/components/staff/ShiftStepRail';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
 
 const fmtDur = (mins) => {
   const m = Math.round(Number(mins) || 0);
@@ -25,7 +27,7 @@ const fmtDur = (mins) => {
 };
 
 // ── Arrive Step ──────────────────────────────────────────────────────────
-function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId }) {
+function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehicleId }) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const [departHome, setDepartHome] = useState('');
   const [arriveSite, setArriveSite] = useState(() => {
@@ -33,6 +35,7 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId }) {
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
   const [gpsPrefilled, setGpsPrefilled] = useState(false);
+  const [geofencePrefilled, setGeofencePrefilled] = useState(false);
 
   // Fetch Geotab auto-generated travel times for today to pre-fill the form
   const { data: geotabEntries = [] } = useQuery({
@@ -52,21 +55,23 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId }) {
     }
   }, [geotabEntries, gpsPrefilled]);
 
-  // Browser GPS auto-arrival — if the crew is within the job's geofence
-  // radius, show an "on site" banner so they know arrival was auto-detected.
-  const { position } = useGeolocation({ watch: true, enabled: !!job?.site_lat && !!job?.site_lng });
-  const onSiteDetected = (() => {
-    if (!position || !job?.site_lat || !job?.site_lng) return false;
-    const R = 6371000;
-    const toRad = (d) => (d * Math.PI) / 180;
-    const dLat = toRad(position.lat - job.site_lat);
-    const dLng = toRad(position.lng - job.site_lng);
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(toRad(job.site_lat)) * Math.cos(toRad(position.lat)) * Math.sin(dLng / 2) ** 2;
-    const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return dist < (job.geofence_radius_override || 200);
-  })();
+  // Real-time geofence detection — combines phone GPS + vehicle Geotab data
+  const { onSite: onSiteDetected, arrivalTime: geofenceArrival, source: detectionSource, phoneOnSite, vehicleOnSite } = useGeofenceDetection({
+    job,
+    vehicleId,
+    staffId,
+    enabled: !!job?.site_lat && !!job?.site_lng,
+  });
+
+  // Auto-fill arrival time from geofence detection
+  useEffect(() => {
+    if (geofencePrefilled) return;
+    if (geofenceArrival && onSiteDetected) {
+      setArriveSite(geofenceArrival);
+      setGeofencePrefilled(true);
+    }
+  }, [geofenceArrival, onSiteDetected, geofencePrefilled]);
+
   const useMyLocation = () => {
     const now = new Date();
     setArriveSite(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
@@ -102,11 +107,18 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId }) {
         </p>
       </div>
 
-      {/* On-site auto-detection — browser GPS confirms the crew is at the job */}
+      {/* On-site auto-detection — phone GPS or vehicle Geotab confirms the crew is at the job */}
       {onSiteDetected && (
         <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-3">
           <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
-          <p className="text-xs text-[#2E5A1A] font-semibold flex-1">You're on site — arrival time auto-filled.</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-[#2E5A1A] font-semibold">
+              You're on site — arrival time auto-filled.
+            </p>
+            <p className="text-[10px] text-[#2E5A1A]/70 mt-0.5">
+              Detected via {phoneOnSite && vehicleOnSite ? 'phone GPS + vehicle GPS' : phoneOnSite ? 'phone GPS' : 'vehicle GPS (Geotab)'}
+            </p>
+          </div>
           <button type="button" onClick={useMyLocation} className="text-[11px] font-bold text-[#2E5A1A] underline flex-shrink-0">
             Re-sync now
           </button>
@@ -206,6 +218,8 @@ export default function ShiftWizard({
   const buildSteps = () => {
     const steps = [];
     if (!assignment) return steps;
+    // Daily checks come first — block everything until completed
+    if (!assignment.daily_checks_completed) steps.push('checks');
     if (!assignment.arrived_on_site_at) steps.push('arrive');
     if (needsBriefing) steps.push('briefing');
     if ((assignment.status || 'assigned') !== 'completed') steps.push('working');
@@ -219,6 +233,7 @@ export default function ShiftWizard({
     if (open && assignment) {
       // If a specific step is forced (e.g. early leave → end_of_shift), use it
       if (forceStep) setStep(forceStep);
+      else if (!assignment.daily_checks_completed) setStep('checks');
       else if (!assignment.arrived_on_site_at) setStep('arrive');
       else if (needsBriefing) setStep('briefing');
       else if ((assignment.status || 'assigned') !== 'completed') setStep('working');
@@ -267,12 +282,14 @@ export default function ShiftWizard({
   if (!open || !assignment) return null;
 
   const stepLabels = {
+    checks: 'Checks',
     arrive: 'Arrive',
     briefing: 'Briefing',
     working: 'Tasks',
     end_of_shift: 'Finish',
   };
   const stepIcons = {
+    checks: ClipboardCheck,
     arrive: MapPin,
     briefing: ShieldCheck,
     working: Briefcase,
@@ -326,11 +343,11 @@ export default function ShiftWizard({
           <div className="hero-gradient px-5 py-3.5 text-white flex-shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center flex-shrink-0">
-                {step === 'arrive' ? <MapPin className="w-5 h-5 text-white" /> : <Briefcase className="w-5 h-5 text-white" />}
+                {step === 'arrive' ? <MapPin className="w-5 h-5 text-white" /> : step === 'checks' ? <ClipboardCheck className="w-5 h-5 text-white" /> : <Briefcase className="w-5 h-5 text-white" />}
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg font-bold leading-tight">
-                  {step === 'arrive' ? 'Arrived on Site' : "Today's Tasks"}
+                  {step === 'arrive' ? 'Arrived on Site' : step === 'checks' ? 'Daily Checks' : "Today's Tasks"}
                 </h2>
                 <p className="text-white/70 text-xs truncate">{job?.name || 'Shift'}</p>
               </div>
@@ -379,6 +396,14 @@ export default function ShiftWizard({
                   exit={{ x: -30, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
+                  {step === 'checks' && (
+                    <DailyChecksStep
+                      assignment={assignment}
+                      job={job}
+                      staff={staff}
+                      saving={saving}
+                    />
+                  )}
                   {step === 'arrive' && (
                     <ArriveStep
                       job={job}
@@ -386,6 +411,7 @@ export default function ShiftWizard({
                       inductionRequired={needsBriefing}
                       saving={saving}
                       staffId={staffId}
+                      vehicleId={assignment?.vehicle_id}
                     />
                   )}
                   {step === 'working' && (
@@ -403,6 +429,37 @@ export default function ShiftWizard({
 
           {/* Footer */}
           <div className="border-t border-slate-100 p-4 flex gap-2.5 flex-shrink-0 safe-area-bottom">
+            {step === 'checks' && (
+              <>
+                <button onClick={onClose} disabled={saving}
+                  className="flex items-center justify-center gap-2 px-5 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-base font-semibold touch-manipulation">
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    const el = document.getElementById('daily-checks-complete');
+                    if (!el || el.value !== '1') return;
+                    setSaving(true);
+                    try {
+                      await base44.entities.RotaAssignment.update(assignment.id, {
+                        daily_checks_completed: true,
+                        daily_checks_completed_at: new Date().toISOString(),
+                      });
+                      setSaving(false);
+                      setStep('arrive');
+                    } catch (e) {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
+                >
+                  {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+                  {saving ? 'Saving...' : 'Confirm Checks Complete'}
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
             {step === 'arrive' && (
               <>
                 <button onClick={onClose} disabled={saving}

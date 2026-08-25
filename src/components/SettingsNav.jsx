@@ -40,6 +40,7 @@ export const settingsGroups = [
   {
     label: 'System Configuration',
     items: [
+      { id: 'daily-checklists', label: 'Daily Checklists', icon: ClipboardCheck, desc: 'Configure the pre-work checklist crew complete before each shift — vehicle, plant, PPE checks per crew type' },
       { id: 'dropdowns', label: 'Dropdown Manager', icon: ListChecks, desc: 'Add, rename, reorder or remove options in every dropdown — qualifications, asset types, revenue streams & more' },
       { id: 'global-branding', label: 'Global Branding', icon: Palette, desc: 'Default colours, banner and footer for all automated emails' },
       { id: 'login-branding', label: 'Login Page Customiser', icon: Palette, desc: 'Customise the staff login page — background, colours, logo, welcome text & live preview', roles: ['admin'] },

@@ -8,7 +8,6 @@ import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
 import MissingRatesBanner from '@/components/staff/MissingRatesBanner';
-import StaffDirectoryGrid from '@/components/staff/StaffDirectoryGrid';
 import CrewProfilesTab from '@/components/staff/CrewProfilesTab';
 import StaffCostAnalytics from '@/components/staff/StaffCostAnalytics';
 import StaffUtilizationWidget from '@/components/dashboard/StaffUtilizationWidget';
@@ -20,7 +19,7 @@ const TAB_MAP = {
   'staff': { tab: 'people', sub: 'staff' },
   'staff-reviews': { tab: 'people', sub: 'staff-reviews' },
   'teams': { tab: 'people', sub: 'teams' },
-  'directory': { tab: 'people', sub: 'directory' },
+  'directory': { tab: 'people', sub: 'staff' },
   'cost-analytics': { tab: 'people', sub: 'insights' },
   'utilization': { tab: 'people', sub: 'insights' },
   'timesheets': { tab: 'time-pay', sub: 'timesheets' },
@@ -42,7 +41,6 @@ const TABS = [
       { id: 'staff', label: 'Crew Members' },
       { id: 'teams', label: 'Crew Types' },
       { id: 'staff-reviews', label: 'Reviews' },
-      { id: 'directory', label: 'Directory' },
       { id: 'insights', label: 'Insights' },
     ],
   },
@@ -120,8 +118,6 @@ export default function StaffPage() {
         <TrainingMatrixHub />
       ) : tab === 'people' && renderTab === 'crew-profiles' ? (
         <CrewProfilesTab />
-      ) : tab === 'people' && renderTab === 'directory' ? (
-        <StaffDirectoryGrid onSelect={(s) => navigate('/admin', { state: { section: 'staff-detail', staff: s } })} />
       ) : tab === 'people' && renderTab === 'insights' ? (
         <div className="space-y-4">
           <StaffCostAnalytics />

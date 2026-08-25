@@ -33,6 +33,7 @@ import BillingPage from '@/components/BillingPage';
 import FinancialDataExchange from '@/components/billing/FinancialDataExchange';
 import AGSImportSettings from '@/components/AGSImportSettings';
 import GeotechSettings from '@/components/settings/GeotechSettings';
+import DailyChecklistManager from '@/components/settings/DailyChecklistManager';
 import ImportDashboard from '@/pages/ImportDashboard';
 import SafetyCultureSettings from '@/components/SafetyCultureSettings';
 import SystemLogicGuide from '@/components/SystemLogicGuide';
@@ -151,6 +152,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'login-branding': return <LoginBrandingSettings />;
       case 'portal-branding': return <PortalBrandingEditor />;
       case 'automations': return <AutomationCenter />;
+      case 'daily-checklists': return <DailyChecklistManager />;
       case 'dropdowns': return <DropdownConfigManager />;
       case 'rate-card': return <RateCardManager />;
       case 'billing': return <BillingRulesManager />;

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { X, CheckCircle2, Car, Ruler, FileText, ClipboardCheck, Send, ChevronRight, AlertTriangle, Coffee, Briefcase, Info, ShieldCheck, Clock, Receipt, Boxes, DoorOpen, Truck, Tablet, ExternalLink } from 'lucide-react';
+import { X, CheckCircle2, Car, Ruler, FileText, ClipboardCheck, Send, ChevronRight, AlertTriangle, Coffee, Briefcase, Info, ShieldCheck, Clock, Receipt, Boxes, DoorOpen, Truck, Tablet, ExternalLink, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import DailyExpenseStep from './DailyExpenseStep';
 import AssetRecoveryStep from './AssetRecoveryStep';
 import VoiceToTextButton from '@/components/ui/VoiceToTextButton';
+import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
 
 const fmtDur = (mins) => {
   const m = Math.round(Number(mins) || 0);
@@ -43,6 +44,37 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
   const [confirmations, setConfirmations] = useState({ tasks: false, travel: false, hours: false });
 
   const isDecommissioning = job?.status === 'decommissioning';
+
+  // Real-time geofence detection — auto-fills departure time when crew leaves site
+  // (works even if they leave the tracked vehicle behind and travel home by train,
+  //  because phone GPS location tracking detects them leaving the geofence)
+  const { departureTime: geofenceDeparture, source: departureSource, phoneOnSite, vehicleOnSite } = useGeofenceDetection({
+    job,
+    vehicleId: assignment?.vehicle_id,
+    staffId,
+    enabled: isLastJob && !!job?.site_lat && !!job?.site_lng,
+  });
+
+  // Auto-fill "Left site" from geofence departure detection
+  useEffect(() => {
+    if (geofenceDeparture && !departSite) {
+      setDepartSite(geofenceDeparture);
+    }
+  }, [geofenceDeparture]);
+
+  // Auto-fill "Arrived home" with current time when the wizard opens (crew is at home completing it)
+  useEffect(() => {
+    if (open && isLastJob && !arriveHome && !departSite) {
+      // If no departure detected yet, pre-fill arrive home with current time
+      // (the crew is at home filling this out)
+      const now = new Date();
+      const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      // Only auto-fill if it's late enough to plausibly be "arriving home"
+      if (now.getHours() >= 16 || now.getHours() <= 2) {
+        setArriveHome(time);
+      }
+    }
+  }, [open, isLastJob]);
 
   const { data: todayEntries = [], isLoading } = useQuery({
     queryKey: ['daily-tasks', staffId, today],
@@ -399,6 +431,22 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
                     </div>
                     <p className="text-xs text-emerald-50 mt-1.5 leading-relaxed">Log your travel home before submitting your timesheet.</p>
                   </div>
+
+                  {/* Geofence auto-detection banner */}
+                  {geofenceDeparture && (
+                    <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-200 rounded-xl px-3.5 py-3">
+                      <MapPin className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-blue-900">Departure auto-detected</p>
+                        <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
+                          You left site at {geofenceDeparture} — detected via {phoneOnSite ? 'phone GPS' : 'vehicle GPS (Geotab)'}.
+                          This works even if you left your tracked vehicle on site and travelled home by train.
+                          Adjust the times below if needed.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-slate-600 mb-1.5">Left site</label>

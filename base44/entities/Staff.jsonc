@@ -50,7 +50,7 @@
     },
     "team_id": {
       "type": "string",
-      "description": "Team/group assignment \u2014 determines which jobs this staff member can assigned to"
+      "description": "Team/group assignment \u2014 determines which jobs this staff member can be assigned to"
     },
     "permission_group_id": {
       "type": "string",
@@ -113,6 +113,11 @@
     "schedule_acknowledged_at": {
       "type": "string",
       "description": "ISO timestamp of when the staff member last acknowledged their weekly schedule"
+    },
+    "phone_gps_consent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the staff member has consented to phone GPS location tracking for automated travel-time detection. When true, the app uses the crew member's phone GPS (via the browser Geolocation API) to detect arrival at and departure from job sites via geofencing \u2014 even when they're not in a tracked vehicle (e.g. travelling home by train). Set via the staff profile or a consent prompt in the shift wizard."
     }
   },
   "required": [
