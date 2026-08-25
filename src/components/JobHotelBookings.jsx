@@ -9,8 +9,10 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import HotelCalendarView from '@/components/jobs/HotelCalendarView';
+import HotelConflictAlerts from '@/components/jobs/HotelConflictAlerts';
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 text-sm";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm";
 
 const STAFF_COLORS = [
   'bg-emerald-100 text-emerald-700',
@@ -368,21 +370,29 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
 
   return (
     <div className="space-y-4">
-      {/* Summary stats */}
+      {/* Summary stats — brand gradient tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatTile icon={Hotel} label="Hotels Booked" value={bookings.length} gradient="bg-gradient-to-br from-blue-500 to-blue-700" />
-        <StatTile icon={UserCheck} label="Crew Covered" value={`${assignedToAnyBooking.size}/${assignedStaff.length}`} sub={`${unassignedStaff.length} unassigned`} gradient="bg-gradient-to-br from-emerald-500 to-emerald-700" />
-        <StatTile icon={BedDouble} label="Total Nights" value={totalNights} gradient="bg-gradient-to-br from-violet-500 to-violet-700" />
-        <StatTile icon={PoundSterling} label="Total Cost" value={`£${totalCost.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} gradient="bg-gradient-to-br from-amber-500 to-amber-700" />
+        <StatTile icon={Hotel} label="Hotels Booked" value={bookings.length} gradient="stat-gradient-brand" />
+        <StatTile icon={UserCheck} label="Crew Covered" value={`${assignedToAnyBooking.size}/${assignedStaff.length}`} sub={`${unassignedStaff.length} unassigned`} gradient="stat-gradient-emerald" />
+        <StatTile icon={BedDouble} label="Total Nights" value={totalNights} gradient="stat-gradient-violet" />
+        <StatTile icon={PoundSterling} label="Total Cost" value={`£${totalCost.toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} gradient="stat-gradient-amber" />
       </div>
 
+      {/* Conflict detection — duplicate bookings & double-booked crew */}
+      <HotelConflictAlerts bookings={bookings} />
+
+      {/* Calendar week view */}
+      {bookings.length > 0 && <HotelCalendarView bookings={bookings} />}
+
       {/* Main person-centric list */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="insight-card rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-          <Hotel className="w-5 h-5 text-blue-600" />
+          <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
+            <Hotel className="w-4 h-4 text-[#2E5A1A]" />
+          </div>
           <h3 className="font-semibold text-slate-900 text-sm">Crew Accommodation</h3>
-          <span className="ml-auto text-xs text-slate-400">Tap a row to expand details</span>
-          <button onClick={handleAdd} className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold ml-2">
+          <span className="ml-auto text-xs text-slate-400 hidden sm:block">Tap a row to expand details</span>
+          <button onClick={handleAdd} className="flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold ml-2">
             <Plus className="w-3.5 h-3.5" /> Add Hotel
           </button>
         </div>

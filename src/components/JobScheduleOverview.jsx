@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Calendar, User, Truck, ShieldCheck, PlayCircle, CheckCircle2, MessageSquare, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Users, Calendar, User, Truck, ShieldCheck, PlayCircle, CheckCircle2, MessageSquare, ChevronDown, ChevronsUpDown, HardHat, Briefcase } from 'lucide-react';
 import { format, startOfWeek, addWeeks } from 'date-fns';
 import { getCrewLabel } from '@/utils/terminology';
+import SubcontractorCrewSection from '@/components/jobs/SubcontractorCrewSection';
 
 const roleLabels = {
   groundworker: 'Groundworker', cp_driller: 'CP Driller', rotary_driller: 'Rotary Driller',
@@ -13,6 +14,83 @@ const workerTypeBadge = {
   subcontractor: 'bg-orange-100 text-orange-700',
   agency: 'bg-blue-100 text-blue-700',
 };
+
+const SECTION_META = {
+  direct_employee: { label: 'Direct Employees', icon: Users, badge: 'bg-emerald-100 text-emerald-700', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-700' },
+  subcontractor: { label: 'Subcontractors', icon: HardHat, badge: 'bg-orange-100 text-orange-700', iconBg: 'bg-orange-50', iconColor: 'text-orange-600' },
+  agency: { label: 'Agency Staff', icon: Briefcase, badge: 'bg-blue-100 text-blue-700', iconBg: 'bg-blue-50', iconColor: 'text-blue-700' },
+};
+
+function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType }) {
+  const groups = {
+    direct_employee: [],
+    subcontractor: [],
+    agency: [],
+  };
+  assignedStaff.forEach(member => {
+    const wt = member.worker_type || 'direct_employee';
+    if (groups[wt]) groups[wt].push(member);
+    else groups.direct_employee.push(member);
+  });
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(groups).map(([wt, members]) => {
+        const meta = SECTION_META[wt] || SECTION_META.direct_employee;
+        const Icon = meta.icon;
+        return (
+          <div key={wt} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-lg ${meta.iconBg} flex items-center justify-center`}>
+                <Icon className={`w-4 h-4 ${meta.iconColor}`} />
+              </div>
+              <h3 className="font-semibold text-slate-900 text-sm">{meta.label}</h3>
+              <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${meta.badge}`}>
+                {members.length} {members.length === 1 ? 'person' : 'people'}
+              </span>
+            </div>
+            {members.length === 0 ? (
+              <div className="px-5 py-6 text-center text-slate-400 text-sm">None assigned</div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {members.map(member => {
+                  const memberRotas = rotas.filter(r => r.staff_id === member.id);
+                  const memberVehicleIds = [...new Set(memberRotas.map(r => r.vehicle_id).filter(Boolean))];
+                  const memberVehicles = memberVehicleIds.map(id => vehicles.find(v => v.id === id)).filter(Boolean);
+                  return (
+                    <div key={member.id} className="px-5 py-4 flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                          <span className="text-slate-600 font-bold text-sm">{member.name.charAt(0)}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">{member.name}</p>
+                          <p className="text-xs text-slate-500">{roleLabels[member.job_role] || getCrewLabel(primaryType, 1)}</p>
+                          {memberVehicles.length > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Truck className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs text-slate-500">{memberVehicles.map(v => v.registration_number).join(', ')}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${workerTypeBadge[member.worker_type] || 'bg-slate-100 text-slate-600'}`}>
+                          {member.worker_type?.replace(/_/g, ' ')}
+                        </span>
+                        <span className="text-xs text-slate-400">{memberRotas.length} {memberRotas.length === 1 ? 'shift' : 'shifts'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function JobScheduleOverview({ primaryType, assignedStaff, rotas, allStaff, vehicles, rotasByDate, sortedDates }) {
   const [expandedDays, setExpandedDays] = useState(() => new Set(sortedDates.length <= 3 ? sortedDates : []));
@@ -60,50 +138,11 @@ export default function JobScheduleOverview({ primaryType, assignedStaff, rotas,
 
   return (
     <div className="space-y-6 mb-6">
-      {/* Assigned Staff */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><Users className="w-4 h-4 text-emerald-700" /></div>
-          <h3 className="font-semibold text-slate-900 text-sm">Assigned Staff</h3>
-          <span className="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{assignedStaff.length} {assignedStaff.length === 1 ? 'person' : 'people'}</span>
-        </div>
-        {assignedStaff.length === 0 ? (
-          <div className="px-5 py-8 text-center text-slate-400 text-sm">No crew assigned yet</div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {assignedStaff.map(member => {
-              const memberRotas = rotas.filter(r => r.staff_id === member.id);
-              const memberVehicleIds = [...new Set(memberRotas.map(r => r.vehicle_id).filter(Boolean))];
-              const memberVehicles = memberVehicleIds.map(id => vehicles.find(v => v.id === id)).filter(Boolean);
-              return (
-                <div key={member.id} className="px-5 py-4 flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-emerald-700 font-bold text-sm">{member.name.charAt(0)}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-slate-900 truncate">{member.name}</p>
-                      <p className="text-xs text-slate-500">{roleLabels[member.job_role] || getCrewLabel(primaryType, 1)}</p>
-                      {memberVehicles.length > 0 && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <Truck className="w-3.5 h-3.5 text-slate-400" />
-                          <span className="text-xs text-slate-500">{memberVehicles.map(v => v.registration_number).join(', ')}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${workerTypeBadge[member.worker_type] || 'bg-slate-100 text-slate-600'}`}>
-                      {member.worker_type?.replace(/_/g, ' ')}
-                    </span>
-                    <span className="text-xs text-slate-400">{memberRotas.length} {memberRotas.length === 1 ? 'shift' : 'shifts'}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* Assigned Staff — split by worker type */}
+      <AssignedStaffGroups assignedStaff={assignedStaff} rotas={rotas} vehicles={vehicles} primaryType={primaryType} />
+
+      {/* Subcontractor crew names (from SubcontractorLog — free-text names not in Staff records) */}
+      <SubcontractorCrewSection jobId={rotas[0]?.job_id || ''} />
 
       {/* Daily Schedule — collapsible, grouped by week */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

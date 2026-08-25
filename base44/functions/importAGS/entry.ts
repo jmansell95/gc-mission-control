@@ -408,6 +408,99 @@ function assignChunkDates(rawChunks: RemarkChunk[], locaDates: Record<string, st
   return out;
 }
 
+// ============================================================
+// Structured time group parsing (SHFT, DLOG, PTIM, DREM, HORN)
+// ============================================================
+// KeyLogBook stores the driller's shift diary in structured AGS groups
+// with dedicated time columns — the times are NOT embedded in the remark
+// text. The existing parseRemarks() pipeline only finds inline HH:MM_HH:MM
+// patterns, so activities from these structured groups end up with null
+// start_time / end_time / duration_minutes. This function parses the
+// structured groups and returns activities with proper times so the
+// Site Logs tab shows real clock times instead of dashes.
+//
+// Groups parsed (in priority order — first match wins per borehole+date):
+//   DLOG — daily log entries with start/end/description
+//   PTIM — time entries with start/end/description
+//   DREM — driller remarks with time
+//   SHFT — shift start/end (one per day, used as a fallback window)
+//   HORN — hours worked (duration only, no start/end)
+
+interface StructuredActivity {
+  borehole_ref: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  description: string;
+}
+
+function parseStructuredTimeGroups(groups: Record<string, GroupData>): StructuredActivity[] {
+  const activities: StructuredActivity[] = [];
+  const TIME_GROUP_NAMES = ['DLOG', 'PTIM', 'DREM', 'SHFT', 'HORN'];
+
+  for (const groupName of TIME_GROUP_NAMES) {
+    const g = groups[groupName];
+    if (!g || !g.headings || g.rows.length === 0) continue;
+
+    for (const row of g.rows) {
+      const r = buildRow(g, row);
+      const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
+      const date = normaliseDate(pick(r, 'DATE', 'DLOG_DATE', 'PTIM_DATE', 'DREM_DATE', 'SHFT_DATE', 'DAY', 'LOCA_DATE'));
+      const startTime = normaliseTime(pick(r, 'START', 'START_TIME', 'TIME_FROM', 'FROM', 'BEGIN', 'COMMENCE', 'DLOG_START', 'PTIM_START', 'SHFT_START', 'DREM_TIME', 'TIME'));
+      const endTime = normaliseTime(pick(r, 'END', 'END_TIME', 'TIME_TO', 'TO', 'FINISH', 'COMPLETE', 'DLOG_END', 'PTIM_END', 'SHFT_END', 'END_TIME'));
+      const durationHours = num(pick(r, 'DURATION', 'DURATION_HOURS', 'HOURS', 'HORN_HOURS', 'DLOG_HOURS', 'PTIM_HOURS', 'DUR', 'MINS', 'MINUTES'));
+      const description = pick(r, 'DESC', 'DESCRIPTION', 'REM', 'REMARK', 'NOTE', 'NOTES', 'ACTIVITY', 'TASK', 'COMMENT', 'DLOG_DESC', 'PTIM_DESC', 'DREM_DESC', 'SHFT_DESC');
+
+      // Skip rows with no time information at all
+      if (!startTime && !endTime && durationHours == null) continue;
+
+      // Calculate duration from start/end if not provided directly
+      let durationMinutes = 0;
+      if (durationHours != null && durationHours > 0) {
+        // If the field looks like minutes (< 24), treat as minutes; otherwise hours
+        durationMinutes = durationHours < 24 ? durationHours : durationHours * 60;
+      } else if (startTime && endTime) {
+        const startMins = timeToMins(startTime);
+        const endMins = timeToMins(endTime);
+        if (startMins != null && endMins != null) {
+          durationMinutes = endMins > startMins ? endMins - startMins : (endMins + 1440) - startMins;
+        }
+      }
+
+      activities.push({
+        borehole_ref: ref || '',
+        date: date || '',
+        start_time: startTime || '',
+        end_time: endTime || '',
+        duration_minutes: durationMinutes,
+        description: description || '',
+      });
+    }
+  }
+
+  return activities;
+}
+
+// Build a map of borehole ref + date → structured activities, so the remark
+// processing can look up times for a specific borehole+date. Returns both
+// the lookup map and a set of borehole+date keys that have structured
+// activities (used to skip remark-text parsing for those combinations).
+function buildTimeLookup(activities: StructuredActivity[]): {
+  lookup: Record<string, StructuredActivity[]>;
+  keys: Set<string>;
+} {
+  const lookup: Record<string, StructuredActivity[]> = {};
+  const keys = new Set<string>();
+  for (const a of activities) {
+    const key = `${a.borehole_ref || ''}|${a.date || ''}`;
+    if (!lookup[key]) lookup[key] = [];
+    lookup[key].push(a);
+    keys.add(key);
+  }
+  return { lookup, keys };
+}
+
 // Build a map of borehole ref → date from the LOCA group, used to date
 // every technical log (strata, samples, SPT, installations, readings)
 // and the driller remarks harvested from those boreholes.
@@ -1213,16 +1306,31 @@ Deno.serve(async (req) => {
     }
 
     // ---- Driller remarks (daily diary) — same pipeline as the webhook ----
-    // Harvest time-stamped remark text from *_REM / *_NOTE fields and
-    // REMARK/DIARY groups, tagged with the borehole's date. Parse into
-    // activities, AI-professionalise in a single call, and save as
-    // source='keylogbook_remarks' (pending review) so the manager can
-    // approve them into a timesheet from the Site Logs tab.
+    // Two sources of driller activities:
+    //   1. Structured time groups (DLOG, PTIM, DREM, SHFT, HORN) — have proper
+    //      start_time / end_time columns. These are the preferred source when
+    //      available because they always have times.
+    //   2. Remark text (*_REM fields, REMARK/DIARY groups) — may have inline
+    //      HH:MM_HH:MM patterns. When the structured groups cover a borehole+
+    //      date, we skip the remark text for that combination to avoid
+    //      duplicates. Otherwise we fall back to remark text parsing.
+    const structuredActivities = parseStructuredTimeGroups(groups);
+    const { lookup: timeLookup, keys: structuredKeys } = buildTimeLookup(structuredActivities);
+
     const rawChunks = extractRemarkChunks(groups);
     const remarkChunks = assignChunkDates(rawChunks, locaDates, job.start_date || today, today);
-    if (remarkChunks.length > 0) {
-      // Overwrite previous remarks logs for this job (manual re-import) once,
-      // before inserting either timed activities or plain remark entries.
+
+    // Filter out remark chunks that are covered by structured time groups
+    // (same borehole+date) — the structured groups have proper times and will
+    // be saved separately. This prevents duplicate activities.
+    const uncoveredChunks = remarkChunks.filter(c => {
+      const key = `${c.borehole_ref || ''}|${c.date || ''}`;
+      return !structuredKeys.has(key);
+    });
+
+    if (structuredActivities.length > 0) {
+      // Delete previous remarks logs for this job (manual re-import) once,
+      // before inserting structured activities.
       try {
         const prevRemarks = await base44.asServiceRole.entities.InvestigationLog.filter({ job_id: job.id, source: 'keylogbook_remarks' });
         if (prevRemarks.length > 0) {
@@ -1231,15 +1339,60 @@ Deno.serve(async (req) => {
         }
       } catch (e) { /* continue */ }
 
-      // Build the staged remark entries. Timed chunks parse into individual
-      // time-stamped activities (AI-professionalised in one call); plain
-      // (non-timed) remarks become a single entry each so they still reach the
-      // Site Logs tab. The KLB webhook hole ref fills in any chunk with no
-      // borehole ref so remarks are linked to the correct borehole.
+      // Professionalise the structured activity descriptions in a single LLM call
+      const activitiesToClean = structuredActivities.map(a => ({
+        start_time: a.start_time,
+        end_time: a.end_time,
+        duration_minutes: a.duration_minutes,
+        raw_description: a.description,
+      }));
+      const cleanedDescs = await professionaliseActivities(base44, activitiesToClean);
+
+      structuredActivities.forEach((sa, i) => {
+        const cleanDesc = cleanedDescs[i] || sa.description;
+        if (addLog({
+          job_id: job.id,
+          staff_id: drillerStaffId || staffId,
+          staff_name: drillerName || importerName,
+          date: sa.date || today,
+          log_type: 'other',
+          borehole_ref: sa.borehole_ref || null,
+          source: 'keylogbook_remarks',
+          logged_by_role: 'driller',
+          start_time: sa.start_time || undefined,
+          end_time: sa.end_time || undefined,
+          duration_minutes: sa.duration_minutes || undefined,
+          description: cleanDesc || sa.description || 'Driller activity',
+          completed_by_type: 'internal_staff',
+          completed_by_name: drillerName || importerName,
+          manager_review_status: 'pending',
+          chargeable: false,
+          billing_status: 'no_charge',
+        })) counts.remarks++;
+      });
+    }
+
+    if (uncoveredChunks.length > 0) {
+      // Only delete previous remarks if structured activities didn't already
+      // do so (both paths share the same delete to avoid double-deletion).
+      if (structuredActivities.length === 0) {
+        try {
+          const prevRemarks = await base44.asServiceRole.entities.InvestigationLog.filter({ job_id: job.id, source: 'keylogbook_remarks' });
+          if (prevRemarks.length > 0) {
+            await base44.asServiceRole.entities.InvestigationLog.deleteMany({ job_id: job.id, source: 'keylogbook_remarks' });
+            deletedCount += prevRemarks.length;
+          }
+        } catch (e) { /* continue */ }
+      }
+
+      // Build the staged remark entries from chunks NOT covered by structured
+      // time groups. Timed chunks parse into individual time-stamped activities
+      // (AI-professionalised in one call); plain (non-timed) remarks become a
+      // single entry each so they still reach the Site Logs tab.
       const staged: { date: string; borehole_ref: string; start_time?: string; end_time?: string; duration_minutes?: number; description: string }[] = [];
       const activitiesToClean: any[] = [];
       const activityIndexes: number[] = [];
-      for (const chunk of remarkChunks) {
+      for (const chunk of uncoveredChunks) {
         const ref = chunk.borehole_ref || (isKlbWebhook ? klbHoleId : '') || null;
         if (chunk.timed) {
           const acts = parseRemarks(chunk.text);
