@@ -127,6 +127,69 @@ Deno.serve(async (req) => {
       }
     } catch (e) { ciResult = { error: e.message }; }
 
+    // ── Part 1b: Auto-create training bookings for staff compliance items expiring within 30 days ──
+    let trainingResult = { checked: 0, bookingsCreated: 0, coursesCreated: 0, skipped: 0 };
+    try {
+      const allItems = await base44.asServiceRole.entities.ComplianceItem.list('-created_date', 500);
+      const allStaff = await base44.asServiceRole.entities.Staff.list();
+      const existingBookings = await base44.asServiceRole.entities.TrainingBooking.list('-created_date', 500);
+      const allCourses = await base44.asServiceRole.entities.TrainingCourse.list('-created_date', 500);
+      const now = new Date();
+      const cutoff30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      for (const c of allItems) {
+        if (c.category !== 'staff') continue;
+        if (c.status_override === 'not_required' || c.status_override === 'missing') continue;
+        if (!c.expiry_date) continue;
+        const expiry = parseDate(c.expiry_date);
+        if (!expiry || isNaN(expiry.getTime())) continue;
+        if (expiry > cutoff30) continue; // only act within 30 days of expiry
+        trainingResult.checked++;
+        // Skip if a booked training already exists for this compliance item
+        if (existingBookings.some(b => b.linked_compliance_id === c.id && b.status === 'booked')) {
+          trainingResult.skipped++; continue;
+        }
+        const staffMember = allStaff.find(s => s.id === c.reference_id || s.name === c.reference_name);
+        if (!staffMember) { trainingResult.skipped++; continue; }
+        // Find a scheduled course matching the qualification type with a future start date
+        const matchingCourse = allCourses.find(course =>
+          course.category === c.qualification_type &&
+          course.status === 'scheduled' &&
+          course.start_date && new Date(course.start_date + 'T00:00:00') >= now
+        );
+        let courseId;
+        if (matchingCourse) {
+          courseId = matchingCourse.id;
+        } else {
+          // Create a placeholder renewal course 14 days out for the manager to confirm
+          const startDate = new Date(now.getTime() + 14 * 86400000).toISOString().slice(0, 10);
+          try {
+            const created = await base44.asServiceRole.entities.TrainingCourse.create({
+              title: c.title + ' Renewal — ' + staffMember.name,
+              category: c.qualification_type || 'other',
+              start_date: startDate,
+              end_date: startDate,
+              status: 'scheduled',
+              description: 'Auto-created from 30-day compliance expiry alert for ' + staffMember.name + '. Book a real date and venue, then update this course.',
+            });
+            courseId = created.id;
+            trainingResult.coursesCreated++;
+          } catch (e) { trainingResult.skipped++; continue; }
+        }
+        try {
+          await base44.asServiceRole.entities.TrainingBooking.create({
+            course_id: courseId,
+            staff_id: staffMember.id,
+            staff_name: staffMember.name,
+            status: 'booked',
+            linked_compliance_id: c.id,
+            notes: 'Auto-booked from 30-day compliance expiry alert. Confirm the course date and venue.',
+          });
+          trainingResult.bookingsCreated++;
+        } catch (e) { trainingResult.skipped++; }
+      }
+    } catch (e) { trainingResult = { ...trainingResult, error: e.message }; }
+
     // ── Part 2: SiteAsset certificate expiry — alerts, recert tasks, deactivation ──
     let assetResult = { checked: 0, alertsSent: 0, tasksCreated: 0, tasksUpdated: 0, deactivated: 0 };
     try {
@@ -246,7 +309,7 @@ Deno.serve(async (req) => {
       }
     } catch (e) { assetResult = { ...assetResult, error: e.message }; }
 
-    return Response.json({ complianceItems: ciResult, assets: assetResult });
+    return Response.json({ complianceItems: ciResult, trainingBookings: trainingResult, assets: assetResult });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

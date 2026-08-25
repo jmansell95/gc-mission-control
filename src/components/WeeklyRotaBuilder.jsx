@@ -22,6 +22,7 @@ import { computeRotaWarnings } from '@/utils/rotaWarnings';
 import RotaWarningsPanel from '@/components/RotaWarningsPanel';
 import { useDivision } from '@/contexts/DivisionContext';
 import { sortAZ } from '@/utils';
+import RotaWeatherBadge from '@/components/rota/RotaWeatherBadge';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -413,16 +414,19 @@ export default function WeeklyRotaBuilder() {
         onClick={() => handleEditAssignment(assignment)}>
         <div className="flex items-start justify-between gap-1 mb-1">
           <span className="font-bold text-slate-900 truncate flex-1 leading-tight">{job?.name || 'Unknown'}</span>
-          {isMulti && (
-            <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold whitespace-nowrap flex-shrink-0">
-              #{jobIndex}
-            </span>
-          )}
-          {assignment.is_overtime && (
-            <span className="text-[9px] px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold whitespace-nowrap flex-shrink-0">
-              OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
-            </span>
-          )}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {job && <RotaWeatherBadge job={job} />}
+            {isMulti && (
+              <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold whitespace-nowrap">
+                #{jobIndex}
+              </span>
+            )}
+            {assignment.is_overtime && (
+              <span className="text-[9px] px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold whitespace-nowrap">
+                OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
+              </span>
+            )}
+          </div>
           <button onClick={(e) => { e.stopPropagation(); handleDeleteAssignment(assignment.id); }}
             className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 rounded transition">
             <X className="w-3 h-3" />
@@ -1007,8 +1011,11 @@ export default function WeeklyRotaBuilder() {
                               <div key={assignment.id} className={`rounded-lg border-l-[3px] cursor-pointer hover:shadow-sm transition ${colors.bg} ${colors.border} px-2.5 py-2 ${isMulti ? 'relative' : ''}`}
                                 onClick={() => handleEditAssignment(assignment)}>
                                 <div className="flex items-start justify-between gap-1 mb-1">
-                                  <span className="font-bold text-slate-900 truncate flex-1 text-xs leading-tight">{assignment.assignment_type === 'yard_depot' ? 'Depot Duty' : (job?.name || '—')}</span>
-                                  {isMulti && <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold flex-shrink-0">#{idx + 1}</span>}
+                                   <span className="font-bold text-slate-900 truncate flex-1 text-xs leading-tight">{assignment.assignment_type === 'yard_depot' ? 'Depot Duty' : (job?.name || '—')}</span>
+                                   <div className="flex items-center gap-1 flex-shrink-0">
+                                     {job && <RotaWeatherBadge job={job} />}
+                                     {isMulti && <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold">#{idx + 1}</span>}
+                                   </div>
                                   <div className="flex items-center gap-0.5 flex-shrink-0">
                                     <button onClick={(e) => { e.stopPropagation(); setSwapAssignment(assignment); }} className="p-1 text-emerald-500 hover:bg-emerald-50 rounded transition" title="Swap / add staff">
                                       <Repeat className="w-3 h-3" />

@@ -55,7 +55,7 @@ export default function PresentationPack() {
             <PreviewItem icon={Smartphone} title="Field Crew Experience" desc="Mobile-first, offline, less admin not more" />
             <PreviewItem icon={TrendingUp} title="Financial Performance" desc="5 points with proof lines + pull quote" />
             <PreviewItem icon={Users} title="Payroll & CIS" desc="One-click export, CIS-aware pay, budget alerts" />
-            <PreviewItem icon={Sparkles} title="AI & Automation" desc="5 intelligent features with proof lines" />
+            <PreviewItem icon={Sparkles} title="AI & Automation" desc="8 intelligent features with proof lines" />
             <PreviewItem icon={HardHat} title="Predictive Maintenance" desc="Usage-based servicing & rig lockdown" />
             <PreviewItem icon={Building2} title="Client Portal" desc="Verified milestones, controlled visibility" />
             <PreviewItem icon={ScrollText} title="Audit & Compliance Trail" desc="Tamper-evident log + one-click Job Packs" />

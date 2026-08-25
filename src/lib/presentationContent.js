@@ -108,6 +108,21 @@ export const aiPoints = [
     body: 'When a manager approves an investigation log, the system automatically posts a "Verified Milestone" update to the client portal and emails the project manager. Clients see real-time, verified progress without anyone picking up the phone or writing a progress email.',
     proof: 'Triggered by the approval action itself — zero manual steps between log approval and client notification.',
   },
+  {
+    title: 'Real-time AFP auto-population',
+    body: 'Every Application for Payment is populated automatically and continuously from live field data — deliveries, collections, hired equipment, driller logs, subcontractor logs, daily costs, approved timesheets and BOQ variations. The moment a field record is created or a delivery is signed off, the matching AFP line item is upserted. No manual "Refresh from Field Data" — the AFP is always current, always complete, and always ready to submit before the deadline.',
+    proof: 'Nine entity automations wire every billable source to the AFP in real time; upserts are idempotent and only touch draft AFPs.',
+  },
+  {
+    title: 'Automated training bookings from compliance expiry',
+    body: 'When a staff compliance certificate enters its 30-day expiry window, the system automatically creates a training booking — finding a matching scheduled course or creating a placeholder renewal course — so renewals are booked before they lapse. No one has to remember to chase expiring cards; the system books the refresher and flags it for the manager to confirm the date.',
+    proof: 'The nightly compliance expiry check auto-creates TrainingBooking records linked to the expiring ComplianceItem, preventing duplicate bookings.',
+  },
+  {
+    title: 'Weather-aware rota flags',
+    body: 'The rota builder shows a live weather flag on every job card — temperature and condition icon, colour-coded for safety. Sites with dangerous wind, thunderstorms or freezing rain show a red "do not work" indicator so managers can re-plan crews before they arrive at an unsafe site, not after.',
+    proof: 'Each card fetches live weather for the job coordinates (cached 10 min, deduplicated by location) and applies the same threshold logic as the site weather card.',
+  },
 ];
 
 export const dashboardPoints = [
@@ -267,6 +282,11 @@ export const finAssurance = [
     body: 'When a job is ready to invoice, the system assembles every chargeable line — cost items, hotel bookings, chargeable deliveries, approved timesheets, meterage revenue — into a formatted invoice with a single click. No manual line-item assembly, no missed charges.',
     proof: 'The autoGenerateInvoice function builds the full line-item list from live data.',
   },
+  {
+    title: 'AFP auto-population from all field data',
+    body: 'Every AFP is continuously populated from live field records — deliveries, collections, equipment hires, driller logs, subcontractor logs, daily costs, approved timesheets and BOQ variations. A delivery signed off on site appears on the AFP within seconds. The billing team never has to re-key field data into the AFP, and nothing is missed because the system watches every source automatically.',
+    proof: 'Nine entity automations upsert AFP line items in real time; the AFP is always a complete, current picture of earned revenue.',
+  },
 ];
 
 export const payrollPoints = [
@@ -294,6 +314,8 @@ export const taskData = [
   { label: 'Client progress updates', manual: 4, automated: 0.5 },
   { label: 'Morning stand-up calls', manual: 3, automated: 0.1 },
   { label: 'Rig maintenance scheduling', manual: 4, automated: 0.5 },
+  { label: 'AFP line-item assembly', manual: 5, automated: 0.2 },
+  { label: 'Training renewal booking', manual: 2, automated: 0.1 },
 ];
 
 export const roiPoints = [
