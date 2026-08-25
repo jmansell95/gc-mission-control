@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
+import { useDivision } from '@/contexts/DivisionContext';
 import {
   X, Trash2, Calendar, Save, Loader2, AlertTriangle, User, Briefcase,
-  MapPin, Truck, Clock, ArrowRight
+  MapPin, Truck, Clock, ArrowRight, CalendarRange
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -25,16 +26,53 @@ export default function StaffRotaManager({ open, onClose, staff, weekStartStr, r
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
-  // This staff member's job assignments for the week, grouped by job.
-  const staffRotas = useMemo(
-    () => rotas.filter(r =>
+  const { activeDivisionId } = useDivision();
+
+  // Fetch ALL of this crew member's rota assignments across every week (not
+  // just the current one) so the manager can edit the full job duration.
+  const { data: allStaffRotas = [], isLoading: loadingRotas } = useQuery({
+    queryKey: ['staff-all-rotas', staff?.id, activeDivisionId || 'overview'],
+    queryFn: async () => {
+      if (!staff?.id) return [];
+      const res = await base44.functions.invoke('getDivisionScopedData', {
+        entity: 'RotaAssignment',
+        division_id: activeDivisionId,
+        filter: { staff_id: staff.id },
+      });
+      return res.data?.data || [];
+    },
+    enabled: open && !!staff?.id,
+  });
+
+  // Default the date filter to the crew member's full assignment span once data loads.
+  useEffect(() => {
+    if (open && allStaffRotas.length > 0 && !dateFrom && !dateTo) {
+      const dates = allStaffRotas
+        .filter(r => r.staff_id === staff?.id && (!r.assignment_type || r.assignment_type === 'job'))
+        .map(r => r.assigned_date)
+        .filter(Boolean)
+        .sort();
+      if (dates.length > 0) {
+        setDateFrom(dates[0]);
+        setDateTo(dates[dates.length - 1]);
+      }
+    }
+  }, [open, allStaffRotas, staff?.id]);
+
+  // This staff member's job assignments across the full span (filtered by the
+  // From/To date range), grouped by job.
+  const staffRotas = useMemo(() => {
+    let arr = allStaffRotas.filter(r =>
       r.staff_id === staff?.id &&
-      r.week_start === weekStartStr &&
       (!r.assignment_type || r.assignment_type === 'job')
-    ).sort((a, b) => (a.assigned_date || '').localeCompare(b.assigned_date || '')),
-    [rotas, staff, weekStartStr]
-  );
+    );
+    if (dateFrom) arr = arr.filter(r => r.assigned_date >= dateFrom);
+    if (dateTo) arr = arr.filter(r => r.assigned_date <= dateTo);
+    return arr.sort((a, b) => (a.assigned_date || '').localeCompare(b.assigned_date || ''));
+  }, [allStaffRotas, staff?.id, dateFrom, dateTo]);
 
   const byJob = useMemo(() => {
     const map = {};

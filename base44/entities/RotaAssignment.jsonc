@@ -131,6 +131,11 @@
       "type": "number",
       "description": "Pay multiplier for this overtime shift (e.g. 1.5 = time-and-a-half, 2.0 = double time). Falls back to the default OvertimeRate for the day when not set."
     },
+    "work_weekends": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this assignment explicitly includes weekend (Sat/Sun) working days. Set per-assignment in the AssignmentModal 'Work weekends' toggle. When false (default), multi-day assignment generation skips Saturdays and Sundays for this crew member. The rota grid still hides weekend columns unless the view-level weekend toggle is on."
+    },
     "start_delayed": {
       "type": "boolean",
       "default": false,

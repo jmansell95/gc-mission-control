@@ -21,6 +21,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { computeRotaWarnings } from '@/utils/rotaWarnings';
 import RotaWarningsPanel from '@/components/RotaWarningsPanel';
 import { useDivision } from '@/contexts/DivisionContext';
+import { sortAZ } from '@/utils';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -630,7 +631,7 @@ export default function WeeklyRotaBuilder() {
               <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}
                 className="text-sm focus:outline-none bg-transparent text-slate-700 font-medium">
                 <option value="">All Teams</option>
-                {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {sortAZ(teams, 'name').map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             </div>
             <button onClick={() => setShowWeekends(v => !v)}
@@ -744,7 +745,7 @@ export default function WeeklyRotaBuilder() {
             : 0;
           const isToday = dayStr === todayStr;
           return (
-            <div key={dayStr} className={`flex-1 min-w-[130px] rounded-xl border px-2.5 py-2 text-center transition ${isToday ? 'border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-200' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+            <div key={dayStr} className={`flex-1 rounded-xl border px-2.5 py-2 text-center transition ${isToday ? 'border-emerald-500 bg-emerald-50 shadow-sm ring-1 ring-emerald-200' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
               <p className={`text-[10px] font-bold uppercase tracking-wide ${isToday ? 'text-emerald-700' : 'text-slate-400'}`}>{format(day, 'EEE')}</p>
               <p className={`text-lg font-bold leading-tight ${isToday ? 'text-emerald-700' : 'text-slate-800'}`}>{dayRotas.length}</p>
               <p className="text-[9px] text-slate-400">{dayCrew} crew · shifts</p>
@@ -807,7 +808,7 @@ export default function WeeklyRotaBuilder() {
           <ErrorState message="Couldn't load the rota" onRetry={refetchStaff} />
         ) : (
         <div className="overflow-x-auto">
-          <DragDropContext onDragEnd={onDragEnd}><table className="w-full border-collapse min-w-[800px]">
+          <DragDropContext onDragEnd={onDragEnd}><table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-700 text-white">
                 <th className="px-4 py-3.5 text-left font-semibold text-sm w-44 sticky left-0 z-10 bg-gradient-to-r from-emerald-900 to-emerald-800 border-r border-white/10">Staff</th>
@@ -873,7 +874,7 @@ export default function WeeklyRotaBuilder() {
                     const isToday = dayStr === todayStr;
                     const ls = leaveState(member.id, dayStr);
                     return (
-                      <td key={`${member.id}-${dayIdx}`} className={`px-2 py-2 align-top min-w-[130px] ${isToday ? 'bg-emerald-50/40' : ''} ${ls ? (ls.recurring ? 'bg-slate-100/70' : ls.type === 'yard_depot' ? 'bg-amber-50/60' : 'bg-red-50/60') : ''} group/cell`}>
+                      <td key={`${member.id}-${dayIdx}`} className={`px-2 py-2 align-top ${isToday ? 'bg-emerald-50/40' : ''} ${ls ? (ls.recurring ? 'bg-slate-100/70' : ls.type === 'yard_depot' ? 'bg-amber-50/60' : 'bg-red-50/60') : ''} group/cell`}>
                         <Droppable droppableId={`${member.id}|${dayStr}`}>
                           {(provided, snapshot) => (
                             <div ref={provided.innerRef} {...provided.droppableProps}

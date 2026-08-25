@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, AlertTriangle, Trash2, RotateCcw, Loader2, CheckCircle2, Clock, MapPin, Calendar, CalendarClock, User, Phone, Briefcase, FileText, ShieldX, ShieldAlert, Drill, Search } from 'lucide-react';
+import { X, AlertTriangle, Trash2, RotateCcw, Loader2, CheckCircle2, Clock, MapPin, Calendar, CalendarClock, CalendarDays, User, Phone, Briefcase, FileText, ShieldX, ShieldAlert, Drill, Search } from 'lucide-react';
 import { evaluateAssignmentCompliance, qualLabel } from '@/utils/complianceLock';
+import { sortAZ } from '@/utils';
+import LeaveCaptureModal from '@/components/rota/LeaveCaptureModal';
 
 function JobStatusBadge({ status }) {
   const config = {
@@ -22,7 +24,8 @@ import { isWeekend, buildRateMap } from '@/utils/overtime';
 import { findConflict, suggestAutoTimes, getDailyShiftSummary } from '@/utils/rotaScheduling';
 
 export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas }) {
-  const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '' });
+  const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '', work_weekends: false });
+  const [leaveModal, setLeaveModal] = useState(null); // { staffId, staffName, jobId, jobName, spanStart, spanEnd }
   const [conflictWarnings, setConflictWarnings] = useState([]);
   const [timeConflict, setTimeConflict] = useState(null);
   const [resetting, setResetting] = useState(false);
@@ -54,12 +57,16 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     return format(monday, 'yyyy-MM-dd');
   };
 
-  const buildDateRange = (startStr, endStr) => {
+  const buildDateRange = (startStr, endStr, workWeekends = false) => {
     const days = [];
     let d = new Date(startStr + 'T00:00:00');
     const end = new Date(endStr + 'T00:00:00');
     while (d <= end) {
-      days.push(format(d, 'yyyy-MM-dd'));
+      const dow = d.getDay();
+      const isWeekendDay = dow === 0 || dow === 6;
+      if (workWeekends || !isWeekendDay) {
+        days.push(format(d, 'yyyy-MM-dd'));
+      }
       d = addDays(d, 1);
     }
     return days;
@@ -82,7 +89,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           is_overtime: !!assignment.is_overtime,
           rate_multiplier: assignment.rate_multiplier != null ? String(assignment.rate_multiplier) : '',
           start_delayed: !!assignment.start_delayed,
-          actual_start_date: assignment.actual_start_date || ''
+          actual_start_date: assignment.actual_start_date || '',
+          work_weekends: !!assignment.work_weekends
         });
       } else {
         const defaults = getStaffDefaultTimes(defaultStaffId);
@@ -98,7 +106,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           is_overtime: false,
           rate_multiplier: '',
           start_delayed: false,
-          actual_start_date: ''
+          actual_start_date: '',
+          work_weekends: false
         });
       }
       setConflictWarnings([]);
@@ -224,7 +233,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   const customEndValid = assignmentMode === 'custom' && customEndDate && effectiveStartDisplay && customEndDate >= effectiveStartDisplay;
   const fullJobEnd = assignmentMode === 'full_job' && jobEndDate && effectiveStartDisplay && jobEndDate > effectiveStartDisplay ? jobEndDate : '';
   const rangeEndDate = customEndValid ? customEndDate : fullJobEnd;
-  const multiDayDays = (!isEditing && rangeEndDate) ? buildDateRange(effectiveStartDisplay, rangeEndDate) : [];
+  const multiDayDays = (!isEditing && rangeEndDate) ? buildDateRange(effectiveStartDisplay, rangeEndDate, formData.work_weekends) : [];
   const teamMismatch = isStaffOutsideJobTeams(selectedStaff, selectedJob, teams);
   const requiredTeamNames = selectedJob ? getJobTeamIds(selectedJob).map(id => teams.find(t => t.id === id)?.name).filter(Boolean) : [];
   const selectedStaffTeamName = selectedStaff ? (teams.find(t => t.id === selectedStaff.team_id)?.name || 'No team') : '';
@@ -329,6 +338,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       return;
     }
     try {
+      let openLeaveModal = false;
       const rateMultiplier = formData.rate_multiplier === '' ? null : Number(formData.rate_multiplier);
       const effectiveStart = formData.start_delayed && formData.actual_start_date ? formData.actual_start_date : formData.assigned_date;
       const customEndValid = assignmentMode === 'custom' && customEndDate && effectiveStart && customEndDate >= effectiveStart;
@@ -347,7 +357,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
         if (formData.start_delayed && formData.actual_start_date) payload.assigned_date = formData.actual_start_date;
         await base44.entities.RotaAssignment.update(assignment.id, payload);
       } else if (isMultiDay) {
-        const days = buildDateRange(effectiveStart, rangeEnd);
+        const days = buildDateRange(effectiveStart, rangeEnd, formData.work_weekends);
         const assignments = days.map((dateStr, idx) => ({
           job_id: formData.job_id,
           staff_id: formData.staff_id,
@@ -361,11 +371,25 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           notes: formData.notes || '',
           is_overtime: !!formData.is_overtime,
           rate_multiplier: rateMultiplier,
+          work_weekends: !!formData.work_weekends,
           start_delayed: idx === 0 ? !!formData.start_delayed : false,
           actual_start_date: idx === 0 ? (formData.start_delayed ? (formData.actual_start_date || null) : null) : null,
           status: 'assigned'
         }));
         await base44.entities.RotaAssignment.bulkCreate(assignments);
+        // Auto-open the leave capture popup so the manager can log annual-leave
+        // date ranges that fall within this assignment span (skippable).
+        const createdStaff = staff.find(s => s.id === formData.staff_id);
+        const createdJob = jobs.find(j => j.id === formData.job_id);
+        setLeaveModal({
+          staffId: formData.staff_id,
+          staffName: createdStaff?.name || '',
+          jobId: formData.job_id,
+          jobName: createdJob?.name || '',
+          spanStart: effectiveStart,
+          spanEnd: rangeEnd,
+        });
+        openLeaveModal = true;
       } else {
         await base44.entities.RotaAssignment.create({
           job_id: formData.job_id,
@@ -380,6 +404,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           notes: formData.notes || '',
           is_overtime: !!formData.is_overtime,
           rate_multiplier: rateMultiplier,
+          work_weekends: !!formData.work_weekends,
           start_delayed: !!formData.start_delayed,
           actual_start_date: formData.start_delayed ? (formData.actual_start_date || null) : null,
           status: 'assigned'
@@ -387,7 +412,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       }
       queryClient.invalidateQueries({ queryKey: ['rotas'] });
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-      onClose();
+      if (!openLeaveModal) onClose();
     } catch (error) {
       console.error('Error saving assignment:', error);
     }
@@ -573,7 +598,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               <select value={formData.staff_id} onChange={(e) => handleStaffChange(e.target.value)} required
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
                 <option value="">Select Staff</option>
-                {staff.map(s => {
+                {sortAZ(staff, 'name').map(s => {
                   const teamName = teams.find(t => t.id === s.team_id)?.name || 'No team';
                   const aligned = selectedJob ? !isStaffOutsideJobTeams(s, selectedJob, teams) : false;
                   return <option key={s.id} value={s.id}>{s.name} — {teamName}{selectedJob && aligned ? ' ✓' : ''}</option>;
@@ -653,7 +678,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               <select value={formData.vehicle_id} onChange={(e) => handleVehicleChange(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
                 <option value="">Select Vehicle (Optional)</option>
-                {vehicles.map(v => <option key={v.id} value={v.id}>{v.registration_number} — {v.name}</option>)}
+                {sortAZ(vehicles, 'registration_number').map(v => <option key={v.id} value={v.id}>{v.registration_number} — {v.name}</option>)}
               </select>
             </div>
             {isDrillerStaff && (
@@ -667,7 +692,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 <select value={formData.rig_asset_id} onChange={(e) => setFormData({ ...formData, rig_asset_id: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm bg-white">
                   <option value="">Select Rig</option>
-                  {rigs.map(r => <option key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</option>)}
+                  {sortAZ(rigs, 'name').map(r => <option key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</option>)}
                 </select>
                 {selectedRig && (
                   <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
@@ -765,6 +790,34 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                   )}
                 </div>
               )}
+            </div>
+            {/* Work weekends toggle — per-assignment. Off by default; multi-day
+                generation skips Sat/Sun unless this is on. */}
+            <div className="sm:col-span-2 rounded-lg border border-slate-200 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="w-4 h-4 text-emerald-700" />
+                  <div>
+                    <p className="text-xs font-semibold text-slate-800">Work weekends</p>
+                    <p className="text-[11px] text-slate-400">Include Sat/Sun in this assignment range (off by default — no weekend work for active jobs).</p>
+                  </div>
+                </div>
+                <button type="button" onClick={() => setFormData(prev => ({ ...prev, work_weekends: !prev.work_weekends }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition flex-shrink-0 ${formData.work_weekends ? 'bg-emerald-600' : 'bg-slate-200'}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${formData.work_weekends ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              {!formData.work_weekends && multiDayDays.length > 0 && (() => {
+                const skipped = (() => {
+                  const all = buildDateRange(effectiveStartDisplay, rangeEndDate, true);
+                  return all.filter(d => !multiDayDays.includes(d));
+                })();
+                return skipped.length > 0 ? (
+                  <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+                    <CalendarDays className="w-3 h-3" /> {skipped.length} weekend day{skipped.length === 1 ? '' : 's'} skipped in this range.
+                  </p>
+                ) : null;
+              })()}
             </div>
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-slate-600 mb-1">Notes</label>
@@ -874,6 +927,18 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           </div>
         </form>
       </div>
+      {leaveModal && (
+        <LeaveCaptureModal
+          open={!!leaveModal}
+          onClose={() => setLeaveModal(null)}
+          staffId={leaveModal.staffId}
+          staffName={leaveModal.staffName}
+          jobId={leaveModal.jobId}
+          jobName={leaveModal.jobName}
+          spanStart={leaveModal.spanStart}
+          spanEnd={leaveModal.spanEnd}
+        />
+      )}
     </div>
   );
 }
