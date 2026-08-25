@@ -903,21 +903,20 @@ Deno.serve(async (req) => {
       }, { status: 422 });
     }
 
-    // Resolve staff_id for the imported logs. When the caller couldn't be
-    // identified (published site), staff_id stays empty here and is filled
-    // from the resolved driller / rota below so the required field is never blank.
-    let staffId = user?.id || '';
-    let importerName = (user?.full_name || user?.email || 'AGS Import (KeyLogBook)');
-    if (user) {
-      try {
-        const staff = await base44.asServiceRole.entities.Staff.filter({ user_id: user.id });
-        if (staff.length) staffId = staff[0].id;
-      } catch (e) { /* fall back to user.id */ }
-    }
+    // --- Build borehole date map (needed for driller resolution + log dating) ---
+    const today = new Date().toISOString().slice(0, 10);
+    const locaDates = buildLocaDates(groups, today);
 
-    // --- Resolve the actual driller for this job (for remarks / Site Logs) ---
+    // Resolve the caller's identity for audit fields (completed_by_name). The
+    // admin who uploaded is still recorded as the importer — they just aren't
+    // attributed as the staff_id on the technical logs (the driller is).
+    let importerName = (user?.full_name || user?.email || 'AGS Import (KeyLogBook)');
+
+    // --- Resolve the actual driller for this job ---
     // Priority: 1) Driller / engineer name found in the AGS file itself
-    //           2) Staff assigned to the job whose team is a drilling crew (cp/rotary)
+    //           2) Staff assigned to the job (date-scoped) whose team is a
+    //              drilling crew (cp/rotary) — matching the webhook's date-
+    //              scoped rota lookup, with a fallback to job-level assignments
     //           3) First assigned staff member
     let drillerName = '';
     let drillerStaffId = '';
@@ -951,9 +950,16 @@ Deno.serve(async (req) => {
     }
     if (!drillerRole) drillerRole = 'ags_import';
 
-    // 2 & 3) Resolve from the rota — prefer a staff member on a drilling team
+    // 2 & 3) Resolve from the rota — date-scoped to the earliest borehole date
+    // (matching the webhook's date-scoped approach), falling back to job-level
+    // assignments when no date-specific assignments exist. Prefer a staff member
+    // on a drilling team (cp/rotary).
+    const workDate = Object.values(locaDates).sort()[0] || job.start_date || today;
     try {
-      const assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id });
+      let assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id, assigned_date: workDate });
+      if (assignments.length === 0) {
+        assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id });
+      }
       if (assignments.length > 0) {
         const teams = await base44.asServiceRole.entities.Team.list('-created_date', 500);
         const drillingJobTypes = ['cp_drilling', 'rotary_drilling'];
@@ -968,14 +974,12 @@ Deno.serve(async (req) => {
       }
     } catch (e) { /* skip */ }
 
-    // If the caller identity wasn't available (published site), fall back to
-    // the resolved driller / first rota assignment so staff_id is populated
-    // for the technical (non-remarks) logs that use it. A final placeholder
-    // keeps the required field non-empty when no crew is assigned at all.
-    if (!staffId) staffId = drillerStaffId || 'ags_import';
-
-    const today = new Date().toISOString().slice(0, 10);
-    const locaDates = buildLocaDates(groups, today);
+    // Technical logs (ags_import) use the resolved driller's staff_id — matching
+    // webhook behaviour where the driller is attributed, not the admin who
+    // uploaded. The admin's identity is preserved in completed_by_name for audit.
+    // A final placeholder keeps the required field non-empty when no crew is
+    // assigned at all.
+    const staffId = drillerStaffId || 'ags_import';
 
     const logs: any[] = [];
     const samplesToCreate: any[] = [];
