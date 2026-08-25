@@ -1,0 +1,186 @@
+{
+  "name": "ReportTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name (e.g. 'Monthly Fleet Utilisation', 'Q3 Job Profitability')."
+    },
+    "owner_id": {
+      "type": "string",
+      "description": "ID of the user who created this template. Set automatically from the current user on creation."
+    },
+    "owner_name": {
+      "type": "string",
+      "description": "Name of the template owner (denormalised for display in the library grid)."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "overview",
+        "financial",
+        "jobs",
+        "fleet",
+        "staff",
+        "compliance",
+        "assets",
+        "geotech",
+        "logistics",
+        "powerbi",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "Which report category this template belongs to. Drives where it appears in the Reports Hub sidebar."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of what this report shows."
+    },
+    "source_entity": {
+      "type": "string",
+      "description": "The entity name this report pulls from (e.g. 'Job', 'Staff', 'Vehicle', 'SiteAsset'). For built-in templates this may be blank (multi-source)."
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Selected fields/columns for this report. For chart-based templates, the fields included in the visualization."
+    },
+    "group_by": {
+      "type": "string",
+      "description": "The field used to group/aggregate the data (e.g. 'status', 'division_id', 'asset_type')."
+    },
+    "chart_type": {
+      "type": "string",
+      "enum": [
+        "bar",
+        "pie",
+        "line",
+        "area",
+        "table",
+        "stat"
+      ],
+      "default": "bar",
+      "description": "How the data is visualised."
+    },
+    "filters": {
+      "type": "object",
+      "description": "Saved filter configuration: date preset, dateFrom, dateTo, divisionId, status, etc. Applied when the template is re-run.",
+      "properties": {
+        "datePreset": {
+          "type": "string"
+        },
+        "dateFrom": {
+          "type": "string",
+          "format": "date"
+        },
+        "dateTo": {
+          "type": "string",
+          "format": "date"
+        },
+        "divisionId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "is_shared": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this template is shared with the whole organisation (visible to all users in the library). False = private to the owner."
+    },
+    "schedule_cadence": {
+      "type": "string",
+      "enum": [
+        "none",
+        "weekly",
+        "monthly",
+        "quarterly"
+      ],
+      "default": "none",
+      "description": "How often this report is automatically generated and emailed. 'none' = on-demand only."
+    },
+    "schedule_recipients": {
+      "type": "string",
+      "description": "Comma-separated email addresses to send the scheduled report to."
+    },
+    "schedule_message": {
+      "type": "string",
+      "description": "Optional message included in the scheduled report email."
+    },
+    "last_run_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last time this template was run (manually or by the scheduler)."
+    },
+    "last_pdf_url": {
+      "type": "string",
+      "description": "URL of the last generated PDF for this template (for download links)."
+    }
+  },
+  "required": [
+    "name",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "data.is_shared": true
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    }
+  }
+}
