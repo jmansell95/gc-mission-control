@@ -83,6 +83,10 @@ export default function SettingsHubOverview({ onNavigate }) {
       { id: 'system-guide', icon: BookOpen, label: 'System Logic Guide', value: 'PDF', sub: 'Every stat & rule explained', color: 'emerald' },
       { id: 'rewards', icon: Gift, label: 'Rewards Manager', value: '—', sub: 'Gift cards, points catalogue & redemptions', color: 'amber' },
     ]},
+    { group: 'Geotechnical', icon: FileUp, accent: 'from-amber-500 to-orange-600', items: [
+      { id: 'ags-import', icon: FileUp, label: 'KeyLogBook', value: '—', sub: 'AGS & borehole data sync', color: 'amber' },
+      { id: 'openground-sync', icon: Database, label: 'OpenGround', value: '—', sub: 'Push logs to Bentley OpenGround', color: 'blue' },
+    ]},
   ];
 
   const accent = {

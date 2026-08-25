@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Link2 } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Link2, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
@@ -13,6 +13,7 @@ export default function AGSImportSettings() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [confirmOverwrite, setConfirmOverwrite] = useState(null);
 
   const { data: jobs = [] } = useQuery({
     queryKey: ['jobs-ags-import'],
@@ -25,30 +26,39 @@ export default function AGSImportSettings() {
     setError('');
   };
 
-  const handleImport = async () => {
-    if (!file) { setError('Please choose an AGS file first.'); return; }
+  const runImport = async (force = false) => {
     setBusy(true);
     setError('');
     setResult(null);
     try {
-      // Send the AGS file directly to the import function as a multipart
-      // upload. We deliberately do NOT use the UploadFile integration here:
-      // on the published site that integration requires admin-level file
-      // access and throws "authentication required to view users" for
-      // non-admin managers. Passing the File object straight to
-      // functions.invoke uses multipart/form-data (no JSON body size limit,
-      // no admin-only integration), and the backend reads it via req.formData().
-      const res = await base44.functions.invoke('importAGS', { file, job_id: jobId || null });
+      const res = await base44.functions.invoke('importAGS', { file, job_id: jobId || null, force });
       setResult(res.data);
       toast({ title: 'AGS data imported', description: `${res.data.inserted} log entries added to ${res.data.job_name}.` });
       setFile(null);
     } catch (err) {
       console.error('AGS import error:', err);
-      const msg = err?.response?.data?.error || err?.data?.error || err?.message || 'Import failed';
-      setError(msg);
+      const errData = err?.response?.data || err?.data || {};
+      // Overwrite safeguard: backend returns 409 with needsConfirmation when
+      // the new file has far fewer entries than the existing dataset.
+      if (errData.needsConfirmation) {
+        setConfirmOverwrite({ existingCount: errData.existingCount, newCount: errData.newCount });
+      } else {
+        setError(errData.error || err?.message || 'Import failed');
+      }
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleImport = () => {
+    if (!file) { setError('Please choose an AGS file first.'); return; }
+    setConfirmOverwrite(null);
+    runImport(false);
+  };
+
+  const handleConfirmOverwrite = () => {
+    setConfirmOverwrite(null);
+    runImport(true);
   };
 
   return (
@@ -202,12 +212,46 @@ export default function AGSImportSettings() {
           (e.g. <code>"7:30_8:45 = Start briefing…"</code>) is parsed into individual activities, professionalised, and saved as pending Site Logs —
           identical to the real-time webhook flow. Approve them in the Site Logs tab to generate the timesheet.
         </p>
-      </div>
-    </div>
-  );
-}
+        </div>
 
-function ResultStat({ label, value }) {
+        {/* Overwrite safeguard confirmation dialog */}
+        {confirmOverwrite && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 animate-pop-in">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Replace existing AGS data?</h2>
+              <p className="text-sm text-slate-600 mt-1">
+                This file contains <strong className="text-slate-900">{confirmOverwrite.newCount}</strong> entries,
+                but <strong className="text-slate-900">{confirmOverwrite.existingCount}</strong> already exist for this job.
+                Re-importing will <span className="text-red-600 font-medium">permanently delete</span> the existing data and replace it with this file's content.
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+            This often happens when the AGS export only covers one borehole or one day. Check with the driller if a more complete export is available before proceeding.
+          </p>
+          <div className="flex items-center justify-end gap-2">
+            <button onClick={() => setConfirmOverwrite(null)}
+              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition">
+              Cancel
+            </button>
+            <button onClick={handleConfirmOverwrite}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-semibold hover:bg-amber-700 transition">
+              <UploadCloud className="w-4 h-4" /> Replace & Import
+            </button>
+          </div>
+        </div>
+        </div>
+        )}
+        </div>
+        );
+        }
+
+        function ResultStat({ label, value }) {
   return (
     <div className="bg-white rounded-lg border border-emerald-100 px-3 py-2 text-center">
       <p className="text-lg font-extrabold text-emerald-700 tabular-nums">{value || 0}</p>

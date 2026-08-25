@@ -83,7 +83,7 @@ import { base44 } from '@/api/base44Client';
 // IDs managed by the Integrations Hub — back button returns to 'integrations' from these
 const INTEGRATION_IDS = new Set([
   'geotab-sync', 'holman-sync', 'asset-panda', 'bob-hr', 'concur-sync',
-  'safety-culture', 'ags-import', 'openground-sync', 'cis-verification', 'payroll-export',
+  'safety-culture', 'cis-verification', 'payroll-export',
   'met-office', 'google-maps', 'whatsapp', 'accounting-sync', 'payment-gateway',
   'microsoft-365',
 ]);

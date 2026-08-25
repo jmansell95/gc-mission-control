@@ -31,6 +31,13 @@ export const settingsGroups = [
   // been moved to Enterprise Settings (/enterprise/settings). They are no longer shown
   // in the division-level settings sidebar to avoid split-brain configuration.
   {
+    label: 'Geotechnical',
+    items: [
+      { id: 'ags-import', label: 'KeyLogBook', icon: FileUp, desc: 'KeyLogBook AGS & borehole data sync — webhook config, manual AGS upload, and pull sync settings' },
+      { id: 'openground-sync', label: 'OpenGround', icon: Database, desc: 'Push approved borehole logs to Bentley OpenGround cloud database' },
+    ],
+  },
+  {
     label: 'System Configuration',
     items: [
       { id: 'dropdowns', label: 'Dropdown Manager', icon: ListChecks, desc: 'Add, rename, reorder or remove options in every dropdown — qualifications, asset types, revenue streams & more' },
@@ -72,7 +79,7 @@ export const settingsGroups = [
       { id: 'compliance-rules', label: 'Compliance Rules', icon: Gauge, desc: 'Default LOLER, PUWER & PAT inspection intervals & expiry warnings', roles: ['admin'] },
       { id: 'system-audit-log', label: 'System Audit Log', icon: ShieldCheck, desc: 'ISO 27001 tamper-evident audit trail with SHA-256 record hashing & chain linking for non-repudiation', roles: ['admin'] },
       { id: 'audit-trail', label: 'Audit Trail & Job Packs', icon: History, desc: 'ISO-compliant audit trail — search for a job and expand its full Job Pack', roles: ['admin'] },
-      { id: 'log-qc', label: 'Log QC', icon: FlaskConical, desc: 'Investigation log quality control & manager review', roles: ['admin', 'manager'] },
+
       { id: 'asset-manifests', label: 'Van Manifest QRs', icon: QrCode, desc: 'Create QR print-outs for bulky items (casing, rig tooling) — crews scan one sheet to log returns', roles: ['admin'] },
       { id: 'equipment-library', label: 'Equipment Sets', icon: Package, desc: 'Pre-built equipment sets (presets) — individual items now sync from Asset Panda' },
       { id: 'asset-lifecycle', label: 'Asset Lifecycle', icon: Wrench, desc: 'Track assets from acquisition to disposal — depreciation, book value & replacement planning', roles: ['admin'] },

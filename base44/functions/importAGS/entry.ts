@@ -753,6 +753,7 @@ Deno.serve(async (req) => {
     //   4. A previously-uploaded file URL (file_url) — legacy fallback.
     let text: string;
     let jobId: string | null = null;
+    let forceImport = false;
     if (isKlbWebhook && klbBody) {
       const agsB64 = klbBody.data?.agsFile || klbBody.ags_file || klbBody.agsFile || '';
       if (!agsB64) return Response.json({ error: 'No AGS file provided for hole event.' }, { status: 400 });
@@ -764,12 +765,14 @@ Deno.serve(async (req) => {
       const formData = await req.formData();
       const filePart = formData.get('file');
       jobId = (formData.get('job_id') as string) || null;
+      forceImport = formData.get('force') === 'true';
       if (!filePart) return Response.json({ error: 'An AGS file is required.' }, { status: 400 });
       text = await (filePart as File).text();
     } else if (klbBody) {
       const fileContent = klbBody.file_content;
       const fileUrl = klbBody.file_url;
       jobId = klbBody.job_id || null;
+      forceImport = klbBody.force === true;
       if (!fileContent && !fileUrl) return Response.json({ error: 'An AGS file is required.' }, { status: 400 });
       if (fileContent) {
         text = String(fileContent);
@@ -971,20 +974,17 @@ Deno.serve(async (req) => {
     // keeps the required field non-empty when no crew is assigned at all.
     if (!staffId) staffId = drillerStaffId || 'ags_import';
 
-    // Overwrite mode: delete existing AGS-imported logs for this job
-    let deletedCount = 0;
+    // Count existing AGS-imported + KeyLogBook remarks logs for this job.
+    // Used by the overwrite safeguard to warn when a re-import would replace
+    // a larger dataset with a smaller one. The actual delete happens later
+    // (after the new logs are staged) so we can compare counts first.
+    let existingLogCount = 0;
     try {
       const existing = await base44.asServiceRole.entities.InvestigationLog.filter({
         job_id: job.id,
-        source: 'ags_import',
+        source: { $in: ['ags_import', 'keylogbook_remarks'] },
       });
-      deletedCount = existing.length;
-      if (deletedCount > 0) {
-        await base44.asServiceRole.entities.InvestigationLog.deleteMany({
-          job_id: job.id,
-          source: 'ags_import',
-        });
-      }
+      existingLogCount = existing.length;
     } catch (e) { /* continue with insert */ }
 
     const today = new Date().toISOString().slice(0, 10);
@@ -1474,6 +1474,45 @@ Deno.serve(async (req) => {
       if (av !== bv) return av - bv;
       return (a.borehole_ref || '').localeCompare(b.borehole_ref || '');
     });
+
+    // ---- Overwrite safeguard ----
+    // Warn when a manual re-import would replace a larger existing dataset
+    // with a smaller one. Only applies to manual uploads (not webhooks).
+    const newLogCount = logs.length;
+    if (!isKlbWebhook && !forceImport && existingLogCount > 10 && newLogCount < existingLogCount * 0.5) {
+      await logWebhookRequest(base44, {
+        event_type: 'manual_upload',
+        hole_id: '', project_name: '', project_number: '',
+        group_summary: groupSummary, matched_job_id: job.id, matched_job_name: job.name,
+        matched_job_reference: job.job_reference || '', created_job: false,
+        outcome: 'error', log_count: 0,
+        summary: `Overwrite safeguard: file has ${newLogCount} entries but ${existingLogCount} exist — confirmation required.`,
+        error: `needsConfirmation: ${newLogCount} new vs ${existingLogCount} existing`,
+        debug_payload: '',
+      });
+      return Response.json({
+        needsConfirmation: true,
+        existingCount: existingLogCount,
+        newCount: newLogCount,
+        error: `This file contains ${newLogCount} entries but ${existingLogCount} already exist for this job. Re-importing will replace all existing AGS data. Continue?`,
+      }, { status: 409 });
+    }
+
+    // Overwrite mode: delete existing AGS-imported logs for this job
+    let deletedCount = 0;
+    try {
+      const existing = await base44.asServiceRole.entities.InvestigationLog.filter({
+        job_id: job.id,
+        source: 'ags_import',
+      });
+      deletedCount = existing.length;
+      if (deletedCount > 0) {
+        await base44.asServiceRole.entities.InvestigationLog.deleteMany({
+          job_id: job.id,
+          source: 'ags_import',
+        });
+      }
+    } catch (e) { /* continue with insert */ }
 
     let inserted = 0;
     const createdLogs: any[] = [];

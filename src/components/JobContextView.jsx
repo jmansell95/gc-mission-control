@@ -129,39 +129,24 @@ function CrewCompositionBar({ assignedStaff, rotas, contractors, onAddStaff }) {
         ))}
       </div>
 
-      {/* Type cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Type cards — compact inline row */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
         {segments.map(s => {
           const Icon = s.icon;
           const staffList = s.label === 'Direct' ? assignedStaff.filter(st => !st.worker_type || st.worker_type === 'direct_employee')
             : s.label === 'Subcontractor' ? assignedStaff.filter(st => st.worker_type === 'subcontractor')
             : assignedStaff.filter(st => st.worker_type === 'agency');
+          const withShifts = staffList.filter(st => rotas.some(r => r.staff_id === st.id)).length;
           return (
-            <div key={s.label} className={'rounded-xl p-3 border ' + s.light + ' border-slate-200'}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className={'w-7 h-7 rounded-lg ' + s.color + ' flex items-center justify-center'}>
-                  <Icon className="w-3.5 h-3.5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={'text-xs font-bold ' + s.text}>{s.label}</p>
-                  <p className="text-lg font-bold text-slate-900 leading-none">{s.count}</p>
-                </div>
+            <div key={s.label} className={'flex-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5 border ' + s.light + ' border-slate-200'}>
+              <div className={'w-8 h-8 rounded-lg ' + s.color + ' flex items-center justify-center flex-shrink-0'}>
+                <Icon className="w-4 h-4 text-white" />
               </div>
-              <div className="space-y-1">
-                {staffList.slice(0, 5).map(st => {
-                  const stRotas = rotas.filter(r => r.staff_id === st.id);
-                  const shifts = stRotas.length;
-                  const contractorRec = st.agency_id ? contractors.find(c => c.id === st.agency_id) : null;
-                  return (
-                    <div key={st.id} className="flex items-center gap-1.5 text-[11px]">
-                      <div className={'w-1.5 h-1.5 rounded-full ' + s.color + ' flex-shrink-0'} />
-                      <span className="text-slate-700 font-medium truncate flex-1">{st.name}</span>
-                      {contractorRec && <span className="text-slate-400 text-[10px] truncate hidden sm:inline">{contractorRec.name}</span>}
-                      {shifts > 0 && <span className="text-slate-400 text-[10px] flex-shrink-0">{shifts}d</span>}
-                    </div>
-                  );
-                })}
-                {staffList.length > 5 && <p className="text-[10px] text-slate-400 pl-3">+{staffList.length - 5} more</p>}
+              <div className="min-w-0">
+                <p className={'text-xs font-bold ' + s.text}>{s.label}</p>
+                <p className="text-sm font-bold text-slate-900 leading-tight">
+                  {s.count} <span className="text-xs font-normal text-slate-500">· {withShifts} with shifts</span>
+                </p>
               </div>
             </div>
           );
