@@ -11,6 +11,7 @@ import {
 import AssignmentModal from '@/components/AssignmentModal';
 import ComplianceBlockModal from '@/components/ComplianceBlockModal';
 import StaffSwapModal from '@/components/StaffSwapModal';
+import StaffRotaManager from '@/components/rota/StaffRotaManager';
 import { EmptyState, ErrorState, RotaSkeleton, Skeleton, SkeletonText } from '@/components/StateViews';
 import { formatJobType } from '@/utils/format';
 import { getJobPrimaryType } from '@/utils/jobTeams';
@@ -56,6 +57,7 @@ export default function WeeklyRotaBuilder() {
   const [complianceViolations, setComplianceViolations] = useState(null);
   const [swapAssignment, setSwapAssignment] = useState(null);
   const [todayCrewExpanded, setTodayCrewExpanded] = useState(false);
+  const [rotaManagerStaff, setRotaManagerStaff] = useState(null);
 
   const queryClient = useQueryClient();
   const { activeDivisionId } = useDivision();
@@ -785,6 +787,18 @@ export default function WeeklyRotaBuilder() {
         />
       )}
 
+      {rotaManagerStaff && (
+        <StaffRotaManager
+          open={!!rotaManagerStaff}
+          onClose={() => setRotaManagerStaff(null)}
+          staff={rotaManagerStaff}
+          weekStartStr={weekStartStr}
+          rotas={rotas}
+          jobs={jobs}
+          vehicles={vehicles}
+        />
+      )}
+
       {/* Desktop Grid */}
       <div className="hidden lg:block bg-white rounded-xl overflow-hidden border border-slate-200 shadow-sm">
         {staffLoading ? (
@@ -827,7 +841,7 @@ export default function WeeklyRotaBuilder() {
                       <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                         <span className="text-emerald-700 font-bold text-xs">{member.name.charAt(0)}</span>
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <p className="font-medium text-slate-900 text-sm whitespace-nowrap truncate">{member.name}</p>
                           {member.worker_type === 'agency' && (
@@ -837,7 +851,16 @@ export default function WeeklyRotaBuilder() {
                             <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-100 text-blue-700 flex-shrink-0">SUBCON</span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-400">{teams.find(t => t.id === member.team_id)?.name || (member.worker_type === 'agency' ? 'Agency Worker' : member.worker_type === 'subcontractor' ? 'Subcontractor' : 'Unassigned')}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs text-slate-400 truncate">{teams.find(t => t.id === member.team_id)?.name || (member.worker_type === 'agency' ? 'Agency Worker' : member.worker_type === 'subcontractor' ? 'Subcontractor' : 'Unassigned')}</p>
+                          <button
+                            onClick={() => setRotaManagerStaff(member)}
+                            title="Manage this crew member's rota — edit dates or delete"
+                            className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 px-1.5 py-0.5 rounded transition flex items-center gap-0.5 flex-shrink-0"
+                          >
+                            <Calendar className="w-2.5 h-2.5" /> Manage
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -963,6 +986,12 @@ export default function WeeklyRotaBuilder() {
                               <Layers className="w-2.5 h-2.5" /> {staffAssignments.length} jobs
                             </span>
                           )}
+                          <button
+                            onClick={() => setRotaManagerStaff(member)}
+                            className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-md transition flex items-center gap-0.5 flex-shrink-0"
+                          >
+                            <Calendar className="w-3 h-3" /> Manage
+                          </button>
                         </div>
                         {/* Stacked job cards */}
                         <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
