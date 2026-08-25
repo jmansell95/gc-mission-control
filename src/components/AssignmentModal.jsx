@@ -933,7 +933,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       {leaveModal && (
         <LeaveCaptureModal
           open={!!leaveModal}
-          onClose={() => setLeaveModal(null)}
+          onClose={() => { setLeaveModal(null); onClose(); }}
           staffId={leaveModal.staffId}
           staffName={leaveModal.staffName}
           jobId={leaveModal.jobId}
