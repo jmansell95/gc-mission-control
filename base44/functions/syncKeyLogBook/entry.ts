@@ -206,7 +206,36 @@ export default async function(req: Request): Promise<Response> {
           const workDate = str(rem.date || rem.log_date) || new Date().toISOString().slice(0, 10);
           const drillerName = str(rem.driller_name || rem.lead_driller_name || rem.logged_by);
 
-          const activities = parseRemarks(rawRemarks);
+          let activities = parseRemarks(rawRemarks);
+
+          // If inline parsing found no activities but the API object has
+          // structured time fields, build activities from those instead so
+          // site logs get real clock times rather than null.
+          if (activities.length === 0) {
+            const remStart = str(rem.start_time);
+            const remEnd = str(rem.end_time);
+            const remDuration = num(rem.duration_minutes);
+            if (remStart || remEnd || remDuration != null) {
+              activities = [{
+                start_time: remStart,
+                end_time: remEnd,
+                duration_minutes: remDuration || 0,
+                raw_description: rawRemarks || str(rem.description || rem.activity || 'Driller activity'),
+              }];
+            }
+            // Also check for an activities array on the remark object
+            if (activities.length === 0 && Array.isArray(rem.activities)) {
+              activities = rem.activities
+                .filter((a: any) => str(a.start_time) || str(a.end_time) || num(a.duration_minutes) != null)
+                .map((a: any) => ({
+                  start_time: str(a.start_time),
+                  end_time: str(a.end_time),
+                  duration_minutes: num(a.duration_minutes) || 0,
+                  raw_description: str(a.description || a.text || a.activity || 'Driller activity'),
+                }));
+            }
+          }
+
           const professionalised = activities.length > 0 ? await professionaliseActivities(base44, activities) : [];
 
           // Fallback: raw remarks that didn't parse into activities

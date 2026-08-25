@@ -455,11 +455,19 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
       // Skip rows with no time information at all
       if (!startTime && !endTime && durationHours == null) continue;
 
+      // Skip HORN and SHFT entries without a description — HORN is just a
+      // total-hours summary and SHFT is just a shift boundary. Neither
+      // represents an individual activity, so without a description they
+      // add no value to the Site Logs tab (the DLOG entries already cover
+      // the actual activities with proper times).
+      if ((groupName === 'HORN' || groupName === 'SHFT') && !description) continue;
+
       // Calculate duration from start/end if not provided directly
       let durationMinutes = 0;
       if (durationHours != null && durationHours > 0) {
-        // If the field looks like minutes (< 24), treat as minutes; otherwise hours
-        durationMinutes = durationHours < 24 ? durationHours : durationHours * 60;
+        // Values <= 24 are hours (you can't work > 24 hours in a day);
+        // values > 24 are already in minutes (e.g. 90 = 1.5h).
+        durationMinutes = durationHours <= 24 ? durationHours * 60 : durationHours;
       } else if (startTime && endTime) {
         const startMins = timeToMins(startTime);
         const endMins = timeToMins(endTime);
