@@ -684,9 +684,12 @@ Deno.serve(async (req) => {
     const groupSummary = Object.entries(groups).map(([name, g]) => ({ name, row_count: g.rows.length }));
 
     // === TEMPORARY DEBUG CAPTURE ===
-    // Capture the raw KLB webhook body keys + AGS group headings/first-row samples
-    // for the activity groups so we can reverse-engineer the driller-name field and
-    // the structured activity column layout. Stored in debug_payload on the webhook log.
+    // Capture the KLB webhook body structure (keys + value types + truncated
+    // sample values) and AGS group headings/first-row samples — WITHOUT the
+    // oversized base64 agsFile blob that previously caused debug_payload to
+    // be stripped to null by the entity field size limit. Stored in
+    // debug_payload on the webhook log so we can identify the account name
+    // field KeyLogBook sends alongside the AGS file.
     let debugPayload = '';
     try {
       const activityGroupNames = ['SHFT', 'DLOG', 'HDIA', 'PTIM', 'HDPH', 'DREM', 'HORN', 'LOCA', 'PROJ'];
@@ -701,13 +704,31 @@ Deno.serve(async (req) => {
           };
         }
       }
+      // Dump every key in the webhook body with its value type and a truncated
+      // sample value — skipping the base64 agsFile blob that blows the field
+      // size limit. This lets us spot the account/user name field.
       const klbBodyKeys = isKlbWebhook ? Object.keys(klbBody || {}) : [];
       const klbDataKeys = isKlbWebhook ? Object.keys(klbBody?.data || {}) : [];
+      const bodyDump: Record<string, any> = {};
+      if (isKlbWebhook && klbBody) {
+        for (const [k, v] of Object.entries(klbBody)) {
+          if (k === 'agsFile' || k === 'ags_file' || k === 'agsFileB64') continue;
+          bodyDump[k] = { type: typeof v, value: typeof v === 'string' ? v.slice(0, 200) : v };
+        }
+        const d = klbBody.data || {};
+        const dataDump: Record<string, any> = {};
+        for (const [k, v] of Object.entries(d)) {
+          if (k === 'agsFile' || k === 'ags_file' || k === 'agsFileB64') continue;
+          dataDump[k] = { type: typeof v, value: typeof v === 'string' ? v.slice(0, 200) : v };
+        }
+        bodyDump.__data_keys = klbDataKeys;
+        bodyDump.__data_values = dataDump;
+      }
       debugPayload = JSON.stringify({
         isKlbWebhook,
         klbBodyKeys,
         klbDataKeys,
-        klbBodySample: isKlbWebhook ? klbBody : null,
+        bodyDump,
         groupDebug,
       });
     } catch (e) { debugPayload = `debug capture error: ${e.message}`; }
