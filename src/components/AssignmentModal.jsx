@@ -19,7 +19,6 @@ function JobStatusBadge({ status }) {
 import { format, differenceInDays, addDays } from 'date-fns';
 import { isStaffOutsideJobTeams, getJobTeamIds } from '@/utils/jobTeams';
 import { isWeekend, buildRateMap } from '@/utils/overtime';
-import { getCurrentTimeStr, SITE_CLOSE_TIME } from '@/utils/siteHours';
 import { findConflict, suggestAutoTimes, getDailyShiftSummary } from '@/utils/rotaScheduling';
 
 export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas }) {
@@ -304,19 +303,6 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Block creating assignments for past days or today after working hours
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
-    const isDateLocked = (dateStr) => {
-      if (!dateStr) return false;
-      if (dateStr < todayStr) return true;
-      if (dateStr === todayStr) return getCurrentTimeStr() > SITE_CLOSE_TIME;
-      return false;
-    };
-    const effectiveDate = formData.start_delayed && formData.actual_start_date ? formData.actual_start_date : formData.assigned_date;
-    if (!isEditing && isDateLocked(effectiveDate)) {
-      alert('Cannot create assignments for past days or after the working day has ended.');
-      return;
-    }
     // Hard block: expired or missing required qualifications can't be assigned unless overridden.
     if (complianceBlocked && !complianceOverride) {
       alert(`Compliance hard-lock — ${selectedStaff?.name || 'this staff member'} is missing or has expired required qualifications:\n\n${complianceEval.blocked.map(q => '• ' + qualLabel(q)).join('\n')}\n\nTo assign anyway, tick "Override compliance block" in the warning below.`);
