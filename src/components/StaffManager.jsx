@@ -11,12 +11,12 @@ import SearchFilterBar from '@/components/SearchFilterBar';
 import PrintReportButton from '@/components/PrintReportButton';
 import { CardGridSkeleton } from '@/components/StateViews';
 import StaffShiftEditor from '@/components/StaffShiftEditor';
+import StaffFormModal from '@/components/staff/StaffFormModal';
 import AvailabilityCalendar from '@/components/staff/AvailabilityCalendar';
 import StaffIDCard from '@/components/staff/StaffIDCard';
 import ICalFeedButton from '@/components/staff/ICalFeedButton';
 import { formatWorkerType } from '@/utils/format';
 import { format } from 'date-fns';
-import { useConfigLists } from '@/hooks/useConfigLists';
 import { useAuth } from '@/lib/AuthContext';
 
 const workerBadge = {
@@ -40,13 +40,9 @@ const roleLabel = Object.fromEntries(SYSTEM_ROLES.map(r => [r.value, r.label]));
 
 export default function StaffManager() {
   const { toast } = useToast();
-  const { getOptions } = useConfigLists();
-  const workerTypeOptions = getOptions('worker_types');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(null);
-  const [inviteOnCreate, setInviteOnCreate] = useState(true);
   const [shiftOpenId, setShiftOpenId] = useState(null);
   const [complianceStaff, setComplianceStaff] = useState(null);
   const [hotelStaff, setHotelStaff] = useState(null);
@@ -55,18 +51,8 @@ export default function StaffManager() {
   const [workerFilter, setWorkerFilter] = useState('all');
   const [showAvailability, setShowAvailability] = useState(false);
   const [showIdCards, setShowIdCards] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', date_of_birth: '', ni_number: '', worker_type: 'direct_employee', team_id: '', default_vehicle_id: '', manager_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false, system_role: 'field' });
 
   const queryClient = useQueryClient();
-
-  const cleanPayload = (data) => {
-    const cleaned = { ...data };
-    // team_id is required — never strip it (let validation catch a missing crew)
-    ['default_vehicle_id', 'manager_id', 'system_role'].forEach(k => {
-      if (cleaned[k] === '') delete cleaned[k];
-    });
-    return cleaned;
-  };
 
   const { data: staff = [], isLoading: staffLoading } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
@@ -109,86 +95,7 @@ export default function StaffManager() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (submitting) return;
-    setSubmitting(true);
-    try {
-      const payload = cleanPayload(formData);
-      // Explicit validation before API call — gives a clear error message
-      // instead of a cryptic backend validation failure.
-      if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id) {
-        toast({ title: 'Missing required fields', description: 'Name, email, worker type and crew are all required.', variant: 'destructive' });
-        setSubmitting(false);
-        return;
-      }
-      if (editingId) {
-        const original = staff.find(s => s.id === editingId);
-        if (original && original.email && original.email.toLowerCase() !== (formData.email || '').toLowerCase()) {
-          payload.invite_sent = false;
-        }
-        await base44.entities.Staff.update(editingId, payload);
-        // Sync the linked User's platform role to match the new access level
-        // so permissions (e.g. platform admin for super_admin/admin) stay correct.
-        const updatedMember = { ...original, ...payload, id: editingId };
-        const linkedUser = getUserForStaff(updatedMember);
-        if (linkedUser) {
-          const wantsAdmin = (formData.system_role === 'admin' || formData.system_role === 'super_admin');
-          const targetRole = wantsAdmin ? 'admin' : 'user';
-          if (linkedUser.role !== targetRole || !updatedMember.user_id) {
-            try {
-              if (!updatedMember.user_id) await base44.entities.Staff.update(editingId, { user_id: linkedUser.id });
-              if (linkedUser.role !== targetRole) await base44.entities.User.update(linkedUser.id, { role: targetRole });
-              queryClient.invalidateQueries({ queryKey: ['users-list'] });
-            } catch (_) {}
-          }
-        }
-        toast({ title: 'Crew member updated' });
-      } else {
-        const created = await base44.entities.Staff.create(payload);
-        if (inviteOnCreate && formData.email) {
-          try {
-            await base44.users.inviteUser(formData.email, 'user');
-            await base44.entities.Staff.update(created.id, { invite_sent: true });
-            // Also send the customisable branded invitation email (editable
-            // in Settings → Email Alerts → App Invitation) so the crew member
-            // receives your custom message in addition to the platform invite.
-            try {
-              await base44.functions.invoke('manageEmailAlerts', { action: 'send_invitation', email: formData.email, staff_name: formData.name });
-            } catch (e) { /* branded invite is non-fatal */ }
-            // Link the new Staff record to the User account created by the
-            // invite and sync the platform role so permissions resolve immediately.
-            await queryClient.refetchQueries({ queryKey: ['users-list'] });
-            const freshUsers = queryClient.getQueryData(['users-list']) || [];
-            const matchedUser = freshUsers.find(u => u.email?.toLowerCase() === formData.email.toLowerCase());
-            if (matchedUser) {
-              try { await base44.entities.Staff.update(created.id, { user_id: matchedUser.id }); } catch (_) {}
-              const wantsAdmin = formData.system_role === 'admin' || formData.system_role === 'super_admin';
-              if (matchedUser.role !== (wantsAdmin ? 'admin' : 'user')) {
-                try { await base44.entities.User.update(matchedUser.id, { role: wantsAdmin ? 'admin' : 'user' }); } catch (_) {}
-              }
-            }
-            toast({ title: 'Crew member added', description: `Invite sent to ${formData.email}${matchedUser ? ' · account linked' : ''}` });
-          } catch (err) {
-            toast({ title: 'Crew member added', description: 'App invite could not be sent — use the "Send app invite" button on the card.', variant: 'destructive' });
-          }
-        } else {
-          toast({ title: 'Crew member added' });
-        }
-      }
-      queryClient.invalidateQueries({ queryKey: ['staff'] });
-      queryClient.invalidateQueries({ queryKey: ['users-list'] });
-      setFormData({ name: '', email: '', phone: '', date_of_birth: '', ni_number: '', worker_type: 'direct_employee', team_id: '', default_vehicle_id: '', manager_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false, system_role: 'field' });
-      setShowForm(false);
-      setEditingId(null);
-    } catch (error) {
-      toast({ title: 'Could not save crew member', description: error?.message || 'Please check all fields and try again.', variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEdit = (m) => { setFormData(m); setEditingId(m.id); setShowForm(true); };
+  const handleEdit = (m) => { setEditingId(m.id); setShowForm(true); };
 
   const handleDelete = async (member) => {
     const linkedUser = getUserForStaff(member);
@@ -277,9 +184,8 @@ export default function StaffManager() {
   };
 
   const resetForm = () => {
-    setShowForm(!showForm);
     setEditingId(null);
-    setFormData({ name: '', email: '', phone: '', worker_type: 'direct_employee', team_id: '', default_vehicle_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false, system_role: '' });
+    setShowForm(true);
   };
 
   const activeCount = staff.filter(s => getUserForStaff(s)).length;
@@ -512,126 +418,16 @@ export default function StaffManager() {
         </div>
       )}
 
-      {/* Edit / Add Crew Member Sheet */}
-      <Sheet open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditingId(null); } }}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-emerald-600" />
-              {editingId ? 'Edit Crew Member' : 'New Crew Member'}
-            </SheetTitle>
-          </SheetHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { label: 'Full Name', key: 'name', type: 'text', required: true },
-                { label: 'Email Address', key: 'email', type: 'email', required: true },
-                { label: 'Phone Number', key: 'phone', type: 'tel', required: false },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">{f.label}{f.required && ' *'}</label>
-                  <input type={f.type} value={formData[f.key]} onChange={e => setFormData({ ...formData, [f.key]: e.target.value })} required={f.required}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
-                </div>
-              ))}
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Worker Type</label>
-                <select value={formData.worker_type} onChange={e => setFormData({ ...formData, worker_type: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                  {workerTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Crew *</label>
-                <select value={formData.team_id} onChange={e => setFormData({ ...formData, team_id: e.target.value })} required
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                  <option value="">Select Crew</option>
-                  {teams.map(t => {
-                    const parent = teams.find(p => p.id === t.parent_team_id);
-                    return <option key={t.id} value={t.id}>{parent ? `${parent.name} — ${t.name}` : t.name}</option>;
-                  })}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                  <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                  <p className="text-xs text-blue-700 font-medium">Access permissions are managed at the enterprise level via Settings → Access Levels.</p>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Default Vehicle</label>
-                <select value={formData.default_vehicle_id} onChange={e => setFormData({ ...formData, default_vehicle_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                  <option value="">None (Optional)</option>
-                  {vehicles.map(v => <option key={v.id} value={v.id}>{v.registration_number} — {v.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Timesheet Manager</label>
-                <select value={formData.manager_id || ''} onChange={e => setFormData({ ...formData, manager_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                  <option value="">None (Admin approves)</option>
-                  {staff.filter(s => s.id !== editingId).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Date of Birth</label>
-                <input type="date" value={formData.date_of_birth || ''} onChange={e => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">NI Number</label>
-                <input type="text" value={formData.ni_number || ''} onChange={e => setFormData({ ...formData, ni_number: e.target.value.toUpperCase() })} placeholder="AB123456C"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm font-mono uppercase" />
-              </div>
-            </div>
-
-            {!editingId && (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={inviteOnCreate} onChange={e => setInviteOnCreate(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                <span className="text-sm text-slate-600 flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
-                  Send app invite so they can log in and see their schedule
-                </span>
-              </label>
-            )}
-
-            {editingId && (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={formData.email_notifications_enabled !== false} onChange={e => setFormData({ ...formData, email_notifications_enabled: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                <span className="text-sm text-slate-600 flex items-center gap-1.5">
-                  <Bell className="w-3.5 h-3.5 text-emerald-600" />
-                  Receive schedule and assignment emails
-                </span>
-              </label>
-            )}
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={formData.delivery_dashboard_enabled === true} onChange={e => setFormData({ ...formData, delivery_dashboard_enabled: e.target.checked })}
-                className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-              <span className="text-sm text-slate-600 flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5 text-emerald-600" />
-                Driver — delivery dashboard access
-              </span>
-            </label>
-            {formData.delivery_dashboard_enabled && !formData.system_role && (
-              <p className="text-xs text-amber-600 ml-6">Field staff with this enabled see the Delivery Dashboard only — they won't see their schedule or profile.</p>
-            )}
-
-            <div className="flex gap-2 pt-2 sticky bottom-0 bg-white pb-1">
-              <button type="submit" disabled={submitting} className="flex-1 px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-                {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                {submitting ? 'Saving...' : editingId ? 'Update Crew Member' : 'Add Crew Member'}
-              </button>
-              <button type="button" onClick={() => { setShowForm(false); setEditingId(null); }} className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">
-                Cancel
-              </button>
-            </div>
-          </form>
-        </SheetContent>
-      </Sheet>
+      {/* Edit / Add Crew Member — standardised FormModal popup */}
+      <StaffFormModal
+        open={showForm}
+        onClose={() => { setShowForm(false); setEditingId(null); }}
+        editing={editingId}
+        staff={editingId ? staff.find(s => s.id === editingId) : null}
+        teams={teams}
+        vehicles={vehicles}
+        staffList={staff}
+      />
 
       {/* Compliance Editor Sheet */}
       <Sheet open={!!complianceStaff} onOpenChange={(open) => !open && setComplianceStaff(null)}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { Phone, Mail, Bell, Truck, Save, Loader2, ShieldCheck, UserCog, Camera, Trash2 } from 'lucide-react';
+import { Phone, Mail, Bell, Truck, Save, Loader2, ShieldCheck, UserCog, Camera, Trash2, MapPin } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/use-toast';
 import { Switch } from '@/components/ui/switch';
@@ -15,7 +15,7 @@ import ProfileAvatar from '@/components/ui/ProfileAvatar';
 export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ phone: '', email_notifications_enabled: true, delivery_dashboard_enabled: false, avatar_url: '' });
+  const [form, setForm] = useState({ phone: '', email_notifications_enabled: true, delivery_dashboard_enabled: false, avatar_url: '', phone_gps_consent: false });
   const [saving, setSaving] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -27,6 +27,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
         email_notifications_enabled: staff.email_notifications_enabled ?? true,
         delivery_dashboard_enabled: staff.delivery_dashboard_enabled ?? false,
         avatar_url: staff.avatar_url || '',
+        phone_gps_consent: staff.phone_gps_consent ?? false,
       });
     }
   }, [staff, open]);
@@ -43,6 +44,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
         email_notifications_enabled: form.email_notifications_enabled,
         delivery_dashboard_enabled: form.delivery_dashboard_enabled,
         avatar_url: form.avatar_url,
+        phone_gps_consent: form.phone_gps_consent,
       });
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast({ title: 'Profile updated', description: 'Your changes have been saved.' });
@@ -179,6 +181,22 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
               <Switch
                 checked={form.delivery_dashboard_enabled}
                 onCheckedChange={(v) => setForm({ ...form, delivery_dashboard_enabled: v })}
+              />
+            </div>
+
+            <div className="insight-card rounded-xl p-4 flex items-center justify-between gap-4">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-800">Phone GPS Tracking</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Allow your phone GPS to auto-detect site arrival and departure — even when you're not in a tracked vehicle (e.g. travelling home by train).</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.phone_gps_consent}
+                onCheckedChange={(v) => setForm({ ...form, phone_gps_consent: v })}
               />
             </div>
           </div>
