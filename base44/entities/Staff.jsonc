@@ -44,6 +44,10 @@
       "type": "string",
       "description": "Linked Contractor (Agency) record \u2014 set when worker_type is 'agency'. Identifies which agency company supplies this labourer so payroll and financials can be grouped by supplier."
     },
+    "company": {
+      "type": "string",
+      "description": "The company this external worker is from (subcontractor firm or agency name). Captured during the minimal Market Dojo onboarding in the Staff Hub Contacts tab. Blank for direct employees."
+    },
     "job_title": {
       "type": "string",
       "description": "Staff member's job title / role (e.g. 'Cable Percussion Driller', 'Groundworker'). Derived from the crew section during spreadsheet import."
@@ -118,13 +122,20 @@
       "type": "boolean",
       "default": false,
       "description": "Whether the staff member has consented to phone GPS location tracking for automated travel-time detection. When true, the app uses the crew member's phone GPS (via the browser Geolocation API) to detect arrival at and departure from job sites via geofencing \u2014 even when they're not in a tracked vehicle (e.g. travelling home by train). Set via the staff profile or a consent prompt in the shift wizard."
+    },
+    "market_dojo_onboarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this subcontractor or agency worker has been onboarded in Market Dojo (the external onboarding/compliance system). Ticked manually by the manager after onboarding is completed outside this system. Shown as a green-tick pill (onboarded) or red-cross pill (not onboarded) on contact cards and the edit modal."
+    },
+    "market_dojo_onboarded_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the manager ticked 'Onboarded in Market Dojo' for this worker."
     }
   },
   "required": [
     "name",
-    "email",
-    "worker_type",
-    "team_id"
+    "worker_type"
   ],
   "rls": {
     "read": {

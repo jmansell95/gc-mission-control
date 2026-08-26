@@ -27,7 +27,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { isDriverStaff } from '@/utils/driverDetection';
 
 export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas, absences = [], recurring = [], driverStaffIds }) {
-  const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '', work_weekends: false });
+  const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '', work_weekends: false, rig_note: '' });
   const [leaveModal, setLeaveModal] = useState(null); // { staffId, staffName, jobId, jobName, spanStart, spanEnd }
   const [conflictWarnings, setConflictWarnings] = useState([]);
   const [timeConflict, setTimeConflict] = useState(null);
@@ -91,6 +91,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           start_time: assignment.start_time || '',
           end_time: assignment.end_time || '',
           notes: assignment.notes || '',
+          rig_note: assignment.rig_note || '',
           is_overtime: !!assignment.is_overtime,
           rate_multiplier: assignment.rate_multiplier != null ? String(assignment.rate_multiplier) : '',
           start_delayed: !!assignment.start_delayed,
@@ -109,6 +110,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           start_time: defaults.start_time,
           end_time: defaults.end_time,
           notes: '',
+          rig_note: '',
           is_overtime: false,
           rate_multiplier: '',
           start_delayed: false,
@@ -405,6 +407,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           start_time: formData.start_time || '',
           end_time: formData.end_time || '',
           notes: formData.notes || '',
+          rig_note: formData.rig_note || '',
           is_overtime: !!formData.is_overtime,
           rate_multiplier: rateMultiplier,
           work_weekends: !!formData.work_weekends,
@@ -445,6 +448,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           start_time: formData.start_time || '',
           end_time: formData.end_time || '',
           notes: formData.notes || '',
+          rig_note: formData.rig_note || '',
           is_overtime: !!formData.is_overtime,
           rate_multiplier: rateMultiplier,
           work_weekends: !!formData.work_weekends,
@@ -898,6 +902,17 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 placeholder="Add any notes for this assignment..."
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm resize-none" />
             </div>
+            {selectedStaff?.worker_type === 'subcontractor' && (
+              <div className="sm:col-span-2 rounded-lg border border-blue-200 bg-blue-50/50 p-3">
+                <label className="block text-xs font-medium text-slate-600 mb-1 flex items-center gap-1.5">
+                  <Drill className="w-3.5 h-3.5 text-blue-600" /> Rig being used
+                </label>
+                <input type="text" value={formData.rig_note} onChange={(e) => setFormData({ ...formData, rig_note: e.target.value })}
+                  placeholder="e.g. CP Rig 3, Hire rig — Terratest"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-600 text-sm bg-white" />
+                <p className="text-[11px] text-slate-400 mt-1">Note the rig this subcontractor is using to complete the job. Shown as a tag on the rota.</p>
+              </div>
+            )}
           </div>
           {teamMismatch && (
             <div className="mt-3 flex items-start gap-2 text-sm text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
