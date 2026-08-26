@@ -332,6 +332,25 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       const rangeEnd = customEndValid ? customEndDate : fullJobEnd;
       const isMultiDay = !isEditing && !!rangeEnd;
       const staffDivisionId = getStaffDivisionId(formData.staff_id);
+      // Continuous depot duty — create a recurring rule instead of shift records.
+      if (!isEditing && isDepotMode && assignmentMode === 'continuous') {
+        await base44.entities.RecurringDepotDuty.create({
+          staff_id: formData.staff_id,
+          division_id: staffDivisionId,
+          days_of_week: [1, 2, 3, 4, 5],
+          start_time: formData.start_time || '',
+          end_time: formData.end_time || '',
+          notes: formData.notes || '',
+          is_active: true,
+          start_date: effectiveStart,
+          end_date: '',
+        });
+        queryClient.invalidateQueries({ queryKey: ['rotas'] });
+        queryClient.invalidateQueries({ queryKey: ['recurring-depot-duty'] });
+        queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+        onClose();
+        return;
+      }
       if (isEditing) {
         const payload = {
           ...formData,
@@ -449,11 +468,11 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
             {/* Mode toggle: Job shift vs Yard/Depot duty */}
             <div className="sm:col-span-2">
               <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
-                <button type="button" onClick={() => { setShiftMode('job'); setFormData(prev => ({ ...prev, job_id: '' })); }}
+                <button type="button" onClick={() => { setShiftMode('job'); setFormData(prev => ({ ...prev, job_id: '' })); setAssignmentMode('today'); }}
                   className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${!isDepotMode ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                   <Briefcase className="w-4 h-4" /> Job shift
                 </button>
-                <button type="button" onClick={() => { setShiftMode('depot'); setFormData(prev => ({ ...prev, job_id: '' })); }}
+                <button type="button" onClick={() => { setShiftMode('depot'); setFormData(prev => ({ ...prev, job_id: '' })); setAssignmentMode('today'); }}
                   className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${isDepotMode ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                   <Warehouse className="w-4 h-4" /> Yard / Depot duty
                 </button>
@@ -650,11 +669,18 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                     className={`px-2 py-2 rounded-lg text-xs font-medium border transition ${assignmentMode === 'custom' ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                     Custom range
                   </button>
-                  <button type="button" onClick={() => setAssignmentMode('full_job')}
-                    disabled={!jobEndDate || jobEndDate <= effectiveStartDisplay}
-                    className={`px-2 py-2 rounded-lg text-xs font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed ${assignmentMode === 'full_job' ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-                    Full job
-                  </button>
+                  {isDepotMode ? (
+                    <button type="button" onClick={() => setAssignmentMode('continuous')}
+                      className={`px-2 py-2 rounded-lg text-xs font-medium border transition ${assignmentMode === 'continuous' ? 'bg-amber-50 border-amber-400 text-amber-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      Continuous (Mon–Fri)
+                    </button>
+                  ) : (
+                    <button type="button" onClick={() => setAssignmentMode('full_job')}
+                      disabled={!jobEndDate || jobEndDate <= effectiveStartDisplay}
+                      className={`px-2 py-2 rounded-lg text-xs font-medium border transition disabled:opacity-40 disabled:cursor-not-allowed ${assignmentMode === 'full_job' ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                      Full job
+                    </button>
+                  )}
                 </div>
                 {assignmentMode === 'custom' && (
                   <div>
@@ -669,6 +695,12 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 )}
                 {assignmentMode === 'full_job' && (!jobEndDate || jobEndDate <= effectiveStartDisplay) && (
                   <p className="text-[11px] text-slate-400">This job has no end date beyond the assignment date — use "Today only" or "Custom range".</p>
+                )}
+                {assignmentMode === 'continuous' && (
+                  <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2.5 text-xs text-amber-800 flex items-start gap-2">
+                    <Warehouse className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <span>Depot duty will repeat every Mon–Fri from <strong>{format(new Date(effectiveStartDisplay + 'T00:00:00'), 'dd MMM yyyy')}</strong> until you stop it from the rota. No end date needed.</span>
+                  </div>
                 )}
               </div>
             )}
@@ -914,7 +946,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           )}
           <div className="flex gap-3 mt-5">
             <button type="submit" className="flex-1 px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm">
-              {isEditing ? 'Update Assignment' : multiDayDays.length > 1 ? `Add ${multiDayDays.length} Assignments` : 'Add Assignment'}
+              {isEditing ? 'Update Assignment' : (!isEditing && isDepotMode && assignmentMode === 'continuous') ? 'Start Continuous Depot Duty' : multiDayDays.length > 1 ? `Add ${multiDayDays.length} Assignments` : 'Add Assignment'}
             </button>
             {isEditing && assignment.briefing_signed && (
               <button type="button" onClick={handleResetBriefing} disabled={resetting}

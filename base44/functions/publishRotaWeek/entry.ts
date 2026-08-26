@@ -213,6 +213,63 @@ Deno.serve(async (req) => {
       { $set: { superseded: true } }
     );
 
+    // ── Materialise continuous depot duty ──
+    // For each active RecurringDepotDuty rule, create yard_depot RotaAssignment
+    // records for each matching weekday in the published week where no
+    // assignment already exists, so the staff schedule + DepotShiftWizard have
+    // a real record to work for that week.
+    try {
+      const depotRules = await base44.asServiceRole.entities.RecurringDepotDuty.filter({ is_active: true });
+      if (depotRules.length > 0) {
+        const existingWeekRotas = await base44.asServiceRole.entities.RotaAssignment.filter({ week_start: weekStart });
+        const existingKey = new Set(existingWeekRotas.map((r) => r.staff_id + '|' + r.assigned_date));
+        const weekStartObj = new Date(weekStart + 'T00:00:00');
+        const weekDates: { dateStr: string; dow: number }[] = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(weekStartObj);
+          d.setDate(d.getDate() + i);
+          weekDates.push({ dateStr: d.toISOString().split('T')[0], dow: d.getDay() });
+        }
+        const newDepotAssignments: any[] = [];
+        for (const rule of depotRules) {
+          if (!rule.staff_id) continue;
+          const days = Array.isArray(rule.days_of_week) && rule.days_of_week.length > 0 ? rule.days_of_week : [1, 2, 3, 4, 5];
+          for (const wd of weekDates) {
+            if (!days.includes(wd.dow)) continue;
+            if (rule.start_date && wd.dateStr < rule.start_date) continue;
+            if (rule.end_date && wd.dateStr > rule.end_date) continue;
+            if (existingKey.has(rule.staff_id + '|' + wd.dateStr)) continue;
+            const dObj = new Date(wd.dateStr + 'T00:00:00');
+            const day = dObj.getDay();
+            const diff = day === 0 ? -6 : 1 - day;
+            const monday = new Date(dObj);
+            monday.setDate(dObj.getDate() + diff);
+            newDepotAssignments.push({
+              job_id: '',
+              assignment_type: 'yard_depot',
+              staff_id: rule.staff_id,
+              division_id: rule.division_id || '',
+              assigned_date: wd.dateStr,
+              vehicle_id: '',
+              rig_asset_id: '',
+              week_start: monday.toISOString().split('T')[0],
+              start_time: rule.start_time || '',
+              end_time: rule.end_time || '',
+              notes: rule.notes || '',
+              is_overtime: false,
+              rate_multiplier: null,
+              work_weekends: false,
+              status: 'assigned',
+            });
+            existingKey.add(rule.staff_id + '|' + wd.dateStr);
+          }
+        }
+        if (newDepotAssignments.length > 0) {
+          await base44.asServiceRole.entities.RotaAssignment.bulkCreate(newDepotAssignments);
+        }
+      }
+    } catch (e) { /* non-fatal — don't block rota publish for depot materialisation */ }
+
     const cfgList = await base44.asServiceRole.entities.EmailAlertSetting.filter({ alert_key: 'staff_schedule' });
     const cfg = cfgList[0];
     // Only skip emails when the alert has been explicitly disabled.

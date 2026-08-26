@@ -1,0 +1,172 @@
+{
+  "name": "RecurringDepotDuty",
+  "type": "object",
+  "properties": {
+    "staff_id": {
+      "type": "string",
+      "description": "Staff member on continuous depot/yard duty."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this recurring depot duty belongs to (inherited from the staff member's division). Drives division-scoped rota views."
+    },
+    "days_of_week": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "description": "Weekday numbers this depot duty recurs on (1=Mon \u2026 7=Sun). Defaults to Mon\u2013Fri [1,2,3,4,5]."
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Shift start time (HH:MM)."
+    },
+    "end_time": {
+      "type": "string",
+      "description": "Shift end time (HH:MM)."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes inherited by each materialised depot shift."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "True while the continuous depot duty is ongoing. Set to false (and end_date set) when the manager stops it, so no future weeks render depot cards."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "First date the recurring depot duty applies from. Depot cards render on/after this date."
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last date the recurring depot duty applies to. Blank = ongoing (no end date). Set to today when the manager stops the duty."
+    }
+  },
+  "required": [
+    "staff_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "director"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "director"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "role": "director"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

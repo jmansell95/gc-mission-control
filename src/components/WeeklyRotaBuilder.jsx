@@ -23,6 +23,7 @@ import RotaWarningsPanel from '@/components/RotaWarningsPanel';
 import { useDivision } from '@/contexts/DivisionContext';
 import { sortAZ } from '@/utils';
 import RotaWeatherBadge from '@/components/rota/RotaWeatherBadge';
+import VirtualDepotCard from '@/components/rota/VirtualDepotCard';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -73,6 +74,7 @@ export default function WeeklyRotaBuilder() {
   const { data: absences = [] } = useQuery({ queryKey: ['absences'], queryFn: () => base44.entities.Absence.list() });
   const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
+  const { data: recurringDepot = [] } = useQuery({ queryKey: ['recurring-depot-duty'], queryFn: () => base44.entities.RecurringDepotDuty.filter({ is_active: true }) });
 
   const { data: rotas = [] } = useQuery({
     queryKey: ['rotas', weekStartStr, activeDivisionId || 'overview'],
@@ -107,21 +109,28 @@ export default function WeeklyRotaBuilder() {
   // where field crews, depot staff, and management are for any given day.
   const STAFF_GROUPS = [
     { key: 'field_ops', label: 'Field Team Staff', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-300' },
-          { key: 'depot', label: 'Depot Team Staff', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' },
+    { key: 'agency', label: 'Agency Staff', color: 'text-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-300' },
+    { key: 'subcontractor', label: 'Subcontractors', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-300' },
+    { key: 'depot', label: 'Depot Team Staff', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' },
     { key: 'management', label: 'Management', color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-300' },
     { key: 'unassigned', label: 'Unassigned', color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-300' },
   ];
   const staffByGroup = STAFF_GROUPS.map(g => ({
     ...g,
     members: filteredStaff.filter(s => {
+      // Agency and subcontractor workers always group under their own headers,
+      // regardless of team assignment, so managers see all external labour together.
+      if (g.key === 'agency') return s.worker_type === 'agency';
+      if (g.key === 'subcontractor') return s.worker_type === 'subcontractor';
       const team = teams.find(t => t.id === s.team_id);
       const cat = team?.category;
-      // Agency workers and subcontractors without a depot/management team
-      // are treated as field team staff so managers see them on the rota.
-      const isExternalFieldWorker = s.worker_type === 'agency' || s.worker_type === 'subcontractor';
-      if (g.key === 'field_ops') return cat === 'field_ops' || (!cat && isExternalFieldWorker);
-      if (g.key === 'unassigned') return !cat && !isExternalFieldWorker;
-      return cat === g.key;
+      const isExternal = s.worker_type === 'agency' || s.worker_type === 'subcontractor';
+      if (isExternal) return false;
+      if (g.key === 'field_ops') return cat === 'field_ops';
+      if (g.key === 'depot') return cat === 'depot';
+      if (g.key === 'management') return cat === 'management';
+      if (g.key === 'unassigned') return !cat;
+      return false;
     }),
   }));
 
@@ -174,6 +183,25 @@ export default function WeeklyRotaBuilder() {
       ? (stripped || member.job_title || 'Drilling Crew')
       : (name || (member.worker_type === 'agency' ? 'Agency Worker' : member.worker_type === 'subcontractor' ? 'Subcontractor' : 'Unassigned'));
     return { isDynamic, displayName };
+  };
+
+  // Continuous depot duty — virtual card helpers
+  const getDepotRuleForStaff = (staffId) => recurringDepot.find(r => r.staff_id === staffId && r.is_active !== false);
+  const isDepotDutyDate = (rule, dateStr) => {
+    if (!rule) return false;
+    if (rule.start_date && dateStr < rule.start_date) return false;
+    if (rule.end_date && dateStr > rule.end_date) return false;
+    const dow = new Date(dateStr + 'T00:00:00').getDay();
+    const days = Array.isArray(rule.days_of_week) && rule.days_of_week.length > 0 ? rule.days_of_week : [1, 2, 3, 4, 5];
+    return days.includes(dow);
+  };
+  const handleStopDepotDuty = async (rule) => {
+    if (!confirm('Stop this continuous depot duty?\n\nNo future weeks will show depot duty for this staff member. Already-scheduled shifts stay intact.')) return;
+    try {
+      await base44.entities.RecurringDepotDuty.update(rule.id, { is_active: false, end_date: format(new Date(), 'yyyy-MM-dd') });
+      queryClient.invalidateQueries({ queryKey: ['recurring-depot-duty'] });
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+    } catch (e) { console.error('Error stopping depot duty:', e); }
   };
 
   const handleCellClick = (staffId, dateStr) => {
@@ -975,6 +1003,14 @@ export default function WeeklyRotaBuilder() {
                                   )}
                                 </Draggable>
                               ))}
+                              {(() => {
+                                const depotRule = getDepotRuleForStaff(member.id);
+                                const hasRealDepot = dayAssignments.some(a => a.assignment_type === 'yard_depot');
+                                if (depotRule && isDepotDutyDate(depotRule, dayStr) && !hasRealDepot && !ls) {
+                                  return <VirtualDepotCard rule={depotRule} dayStr={dayStr} onStop={handleStopDepotDuty} />;
+                                }
+                                return null;
+                              })()}
                               {provided.placeholder}
                               {!isDateLocked(dayStr) && (
                                 <button onClick={() => handleCellClick(member.id, dayStr)}
@@ -1068,6 +1104,18 @@ export default function WeeklyRotaBuilder() {
                             <Zap className="w-2.5 h-2.5" /> DYNAMIC
                           </span>
                         )}
+                        {(() => {
+                          const depotRule = getDepotRuleForStaff(staffId);
+                          const hasRealDepot = staffAssignments.some(a => a.assignment_type === 'yard_depot');
+                          if (depotRule && isDepotDutyDate(depotRule, dayStr) && !hasRealDepot) {
+                            return (
+                              <div className="mb-1.5">
+                                <VirtualDepotCard rule={depotRule} dayStr={dayStr} onStop={handleStopDepotDuty} />
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
                         {/* Stacked job cards */}
                         <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
                           {staffAssignments.map((assignment, idx) => {
