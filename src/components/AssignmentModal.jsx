@@ -22,6 +22,7 @@ import { format, differenceInDays, addDays } from 'date-fns';
 import { isStaffOutsideJobTeams, getJobTeamIds } from '@/utils/jobTeams';
 import { isWeekend, buildRateMap } from '@/utils/overtime';
 import { findConflict, suggestAutoTimes, getDailyShiftSummary } from '@/utils/rotaScheduling';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas }) {
   const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '', work_weekends: false });
@@ -619,15 +620,18 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
             )}
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
-              <select value={formData.staff_id} onChange={(e) => handleStaffChange(e.target.value)} required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                <option value="">Select Staff</option>
-                {sortAZ(staff, 'name').map(s => {
-                  const teamName = teams.find(t => t.id === s.team_id)?.name || 'No team';
-                  const aligned = selectedJob ? !isStaffOutsideJobTeams(s, selectedJob, teams) : false;
-                  return <option key={s.id} value={s.id}>{s.name} — {teamName}{selectedJob && aligned ? ' ✓' : ''}</option>;
-                })}
-              </select>
+              <Select value={formData.staff_id} onValueChange={(v) => handleStaffChange(v)}>
+                <SelectTrigger className="w-full h-9 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm bg-white">
+                  <SelectValue placeholder="Select Staff" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortAZ(staff, 'name').map(s => {
+                    const teamName = teams.find(t => t.id === s.team_id)?.name || 'No team';
+                    const aligned = selectedJob ? !isStaffOutsideJobTeams(s, selectedJob, teams) : false;
+                    return <SelectItem key={s.id} value={s.id}>{s.name} — {teamName}{selectedJob && aligned ? ' ✓' : ''}</SelectItem>;
+                  })}
+                </SelectContent>
+              </Select>
               {selectedJob && (
                 <p className="text-[11px] text-slate-400 mt-1">All staff are listed. Those in the required teams are marked ✓.</p>
               )}
