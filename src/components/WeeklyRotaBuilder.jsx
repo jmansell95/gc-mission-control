@@ -168,8 +168,8 @@ export default function WeeklyRotaBuilder() {
   const getDynamicTeamInfo = (member) => {
     const team = teams.find(t => t.id === member.team_id);
     const name = team?.name || '';
-    const isDynamic = /^dynamic$/i.test(name.trim());
-    const stripped = name.replace(/^dynamic\s*/i, '').trim();
+    const isDynamic = /\bdynamic\b/i.test(name);
+    const stripped = name.replace(/\s*\(?\bdynamic\b\)?\s*/gi, ' ').replace(/\s+/g, ' ').trim();
     const displayName = isDynamic
       ? (stripped || member.job_title || 'Drilling Crew')
       : (name || (member.worker_type === 'agency' ? 'Agency Worker' : member.worker_type === 'subcontractor' ? 'Subcontractor' : 'Unassigned'));
