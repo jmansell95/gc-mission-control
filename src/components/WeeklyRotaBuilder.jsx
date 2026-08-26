@@ -868,12 +868,12 @@ export default function WeeklyRotaBuilder() {
                           {member.worker_type === 'subcontractor' && (
                             <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-100 text-blue-700 flex-shrink-0">SUBCON</span>
                           )}
-                          {getDynamicTeamInfo(member).isDynamic && (
-                            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 flex-shrink-0 inline-flex items-center gap-0.5">
-                              <Zap className="w-2.5 h-2.5" /> DYNAMIC
-                            </span>
-                          )}
                         </div>
+                        {getDynamicTeamInfo(member).isDynamic && (
+                          <span className="mt-0.5 inline-flex items-center gap-0.5 self-start text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 flex-shrink-0">
+                            <Zap className="w-2.5 h-2.5" /> DYNAMIC
+                          </span>
+                        )}
                         <div className="min-w-0">
                           <p className="text-xs text-slate-400 truncate">{getDynamicTeamInfo(member).displayName}</p>
                           <button
@@ -1004,11 +1004,6 @@ export default function WeeklyRotaBuilder() {
                             <span className="text-emerald-700 font-bold text-xs">{member?.name?.charAt(0) || '?'}</span>
                           </div>
                           <p className="text-sm font-semibold text-slate-900 truncate flex-1">{member?.name || 'Unknown'}</p>
-                          {member && getDynamicTeamInfo(member).isDynamic && (
-                            <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 flex-shrink-0 inline-flex items-center gap-0.5">
-                              <Zap className="w-2.5 h-2.5" /> DYNAMIC
-                            </span>
-                          )}
                           {isMulti && (
                             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#2E5A1A] text-white">
                               <Layers className="w-2.5 h-2.5" /> {staffAssignments.length} jobs
@@ -1021,6 +1016,11 @@ export default function WeeklyRotaBuilder() {
                             <Calendar className="w-3 h-3" /> Manage
                           </button>
                         </div>
+                        {member && getDynamicTeamInfo(member).isDynamic && (
+                          <span className="inline-flex items-center gap-0.5 self-start text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 mb-2">
+                            <Zap className="w-2.5 h-2.5" /> DYNAMIC
+                          </span>
+                        )}
                         {/* Stacked job cards */}
                         <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
                           {staffAssignments.map((assignment, idx) => {
