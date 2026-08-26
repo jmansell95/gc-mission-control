@@ -5,25 +5,27 @@ import { useDivision } from '@/contexts/DivisionContext';
 import { useToast } from '@/components/ui/use-toast';
 import MarketDojoPill from './MarketDojoPill';
 import {
-  Plus, Search, X, Loader2, Building2, User, Briefcase,
+  Plus, Search, X, Loader2, Building2, Briefcase,
   Wrench, UserCog, Trash2, Edit2, CheckCircle2,
 } from 'lucide-react';
 
-const TYPES = [
-  { key: 'subcontractor', label: 'Subcontractors', icon: Wrench, color: '#2563eb', isStaff: true },
-  { key: 'agency', label: 'Agency Workers', icon: UserCog, color: '#7c3aed', isStaff: true },
-  { key: 'client', label: 'Clients', icon: Building2, color: '#059669', isStaff: false },
-  { key: 'supplier', label: 'Suppliers', icon: Briefcase, color: '#d97706', isStaff: false },
-];
+// Map StaffPage sub-pill IDs to contact type metadata
+const SUB_TO_TYPE = {
+  clients: { key: 'client', label: 'Clients', singular: 'Client', icon: Building2, color: '#059669', isStaff: false },
+  contractors: { key: 'subcontractor', label: 'Subcontractors', singular: 'Subcontractor', icon: Wrench, color: '#2563eb', isStaff: true },
+  suppliers: { key: 'supplier', label: 'Suppliers', singular: 'Supplier', icon: Briefcase, color: '#d97706', isStaff: false },
+  agency: { key: 'agency', label: 'Agency Workers', singular: 'Agency Worker', icon: UserCog, color: '#7c3aed', isStaff: true },
+};
 
-const emptyAdd = { full_name: '', job_title: '', company: '' };
+const emptyForm = { full_name: '', job_title: '', company: '', market_dojo_onboarded: false };
 
-export default function ContactsOnboardingTab() {
-  const [activeType, setActiveType] = useState('subcontractor');
+export default function ContactsTab({ activeSub }) {
+  const meta = SUB_TO_TYPE[activeSub] || SUB_TO_TYPE.contractors;
+  const isStaffType = meta.isStaff;
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
-  const [addForm, setAddForm] = useState(emptyAdd);
-  const [editing, setEditing] = useState(null); // { kind: 'staff'|'client'|'supplier', record }
+  const [addForm, setAddForm] = useState(emptyForm);
+  const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -31,29 +33,24 @@ export default function ContactsOnboardingTab() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const typeMeta = TYPES.find(t => t.key === activeType);
-  const isStaffType = typeMeta.isStaff;
-  const typeSingular = typeMeta.label.replace(/s$/, '');
-
   const { data: staff = [], isLoading: staffLoading } = useQuery({
-    queryKey: ['contacts-staff', activeType],
-    queryFn: () => base44.entities.Staff.filter({ worker_type: activeType }, 'name', 500),
+    queryKey: ['contacts-staff', meta.key],
+    queryFn: () => base44.entities.Staff.filter({ worker_type: meta.key }, 'name', 500),
     enabled: isStaffType,
   });
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['contacts-clients'],
     queryFn: () => base44.entities.Client.list(),
-    enabled: activeType === 'client',
+    enabled: meta.key === 'client',
   });
   const { data: suppliers = [], isLoading: suppliersLoading } = useQuery({
     queryKey: ['contacts-suppliers'],
     queryFn: () => base44.entities.Supplier.list(),
-    enabled: activeType === 'supplier',
+    enabled: meta.key === 'supplier',
   });
 
-  const isLoading = isStaffType ? staffLoading : activeType === 'client' ? clientsLoading : suppliersLoading;
+  const isLoading = isStaffType ? staffLoading : meta.key === 'client' ? clientsLoading : suppliersLoading;
 
-  // Normalise records into a unified shape: { id, full_name, job_title, company, raw, onboarded }
   const records = useMemo(() => {
     const q = search.toLowerCase().trim();
     let list = [];
@@ -66,7 +63,7 @@ export default function ContactsOnboardingTab() {
         onboarded: !!s.market_dojo_onboarded,
         raw: s,
       }));
-    } else if (activeType === 'client') {
+    } else if (meta.key === 'client') {
       list = clients.map(c => {
         const contact = (c.contacts && c.contacts[0]) || {};
         return {
@@ -99,7 +96,7 @@ export default function ContactsOnboardingTab() {
       );
     }
     return list;
-  }, [isStaffType, activeType, staff, clients, suppliers, search]);
+  }, [isStaffType, meta.key, staff, clients, suppliers, search]);
 
   const onboardedCount = isStaffType ? records.filter(r => r.onboarded).length : 0;
 
@@ -114,16 +111,17 @@ export default function ContactsOnboardingTab() {
       if (isStaffType) {
         await base44.entities.Staff.create({
           name: addForm.full_name.trim(),
-          worker_type: activeType,
+          worker_type: meta.key,
           job_title: addForm.job_title.trim(),
           company: addForm.company.trim(),
           division_id: activeDivisionId || '',
           is_active: true,
-          market_dojo_onboarded: false,
+          market_dojo_onboarded: !!addForm.market_dojo_onboarded,
+          market_dojo_onboarded_at: addForm.market_dojo_onboarded ? new Date().toISOString() : null,
         });
-        queryClient.invalidateQueries({ queryKey: ['contacts-staff', activeType] });
+        queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
         queryClient.invalidateQueries({ queryKey: ['staff'] });
-      } else if (activeType === 'client') {
+      } else if (meta.key === 'client') {
         await base44.entities.Client.create({
           name: addForm.company.trim(),
           contact_name: addForm.full_name.trim(),
@@ -140,8 +138,8 @@ export default function ContactsOnboardingTab() {
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
       }
-      toast({ title: `${typeSingular} added`, description: `${addForm.full_name} · ${addForm.company}` });
-      setAddForm(emptyAdd);
+      toast({ title: `${meta.singular} added` });
+      setAddForm(emptyForm);
       setShowAdd(false);
     } catch (err) {
       toast({ title: 'Failed to add', description: err.message, variant: 'destructive' });
@@ -151,24 +149,14 @@ export default function ContactsOnboardingTab() {
   };
 
   const openEdit = (rec) => {
-    if (isStaffType) {
-      setEditForm({
-        kind: 'staff',
-        id: rec.id,
-        full_name: rec.full_name,
-        job_title: rec.job_title,
-        company: rec.company,
-        market_dojo_onboarded: rec.onboarded,
-      });
-    } else {
-      setEditForm({
-        kind: activeType,
-        id: rec.id,
-        full_name: rec.full_name,
-        job_title: rec.job_title,
-        company: rec.company,
-      });
-    }
+    setEditForm({
+      kind: isStaffType ? 'staff' : meta.key,
+      id: rec.id,
+      full_name: rec.full_name,
+      job_title: rec.job_title,
+      company: rec.company,
+      market_dojo_onboarded: rec.onboarded,
+    });
     setEditing(rec);
   };
 
@@ -188,7 +176,7 @@ export default function ContactsOnboardingTab() {
         if (nowOnboarded && !wasOnboarded) payload.market_dojo_onboarded_at = new Date().toISOString();
         if (!nowOnboarded) payload.market_dojo_onboarded_at = null;
         await base44.entities.Staff.update(editForm.id, payload);
-        queryClient.invalidateQueries({ queryKey: ['contacts-staff', activeType] });
+        queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
         queryClient.invalidateQueries({ queryKey: ['staff'] });
       } else if (editForm.kind === 'client') {
         await base44.entities.Client.update(editForm.id, {
@@ -220,9 +208,9 @@ export default function ContactsOnboardingTab() {
     try {
       if (isStaffType) {
         await base44.entities.Staff.delete(rec.id);
-        queryClient.invalidateQueries({ queryKey: ['contacts-staff', activeType] });
+        queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
         queryClient.invalidateQueries({ queryKey: ['staff'] });
-      } else if (activeType === 'client') {
+      } else if (meta.key === 'client') {
         await base44.entities.Client.delete(rec.id);
         queryClient.invalidateQueries({ queryKey: ['contacts-clients'] });
       } else {
@@ -237,44 +225,28 @@ export default function ContactsOnboardingTab() {
     }
   };
 
+  const Icon = meta.icon;
+
   return (
     <div className="space-y-4">
-      {/* Type tabs + Add button */}
+      {/* Search + Add */}
       <div className="insight-card rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-              <User className="w-4 h-4 text-[#2E5A1A]" /> Contacts & Onboarding
+              <Icon className="w-4 h-4" style={{ color: meta.color }} /> {meta.label}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Minimal onboarding — full name, job title & company. Compliance is handled in Market Dojo.
+              {isStaffType ? 'Creates staff records for rota assignment. Onboarding tracked via Market Dojo.' : 'Contact directory — not assignable to rotas.'}
             </p>
           </div>
           <button
-            onClick={() => { setAddForm(emptyAdd); setShowAdd(true); }}
+            onClick={() => { setAddForm(emptyForm); setShowAdd(true); }}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm flex-shrink-0"
           >
-            <Plus className="w-4 h-4" /> Add Contact
+            <Plus className="w-4 h-4" /> Add {meta.singular}
           </button>
         </div>
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {TYPES.map(t => {
-            const Icon = t.icon;
-            const active = activeType === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => { setActiveType(t.key); setSearch(''); }}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${active ? 'text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                style={active ? { background: t.color } : {}}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {t.label}
-              </button>
-            );
-          })}
-        </div>
-        {/* Search + onboarding summary */}
         <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-slate-100">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -308,15 +280,15 @@ export default function ContactsOnboardingTab() {
         </div>
       ) : records.length === 0 ? (
         <div className="insight-card rounded-2xl p-10 text-center">
-          <User className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">No {typeMeta.label.toLowerCase()} yet. Click "Add Contact" to onboard one.</p>
+          <Icon className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No {meta.label.toLowerCase()} yet. Click "Add {meta.singular}" to create one.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {records.map(rec => (
             <div key={rec.id} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-slate-300 transition group">
               <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm" style={{ background: typeMeta.color }}>
+                <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm" style={{ background: meta.color }}>
                   {(rec.full_name || rec.company || '?').charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -357,18 +329,14 @@ export default function ContactsOnboardingTab() {
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
               <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                <typeMeta.icon className="w-4 h-4" style={{ color: typeMeta.color }} />
-                Add {typeSingular}
+                <Icon className="w-4 h-4" style={{ color: meta.color }} />
+                Add {meta.singular}
               </h3>
               <button onClick={() => setShowAdd(false)} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
                 <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
             <form onSubmit={handleAdd} className="p-5 space-y-3">
-              <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-500 flex items-start gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
-                <span>Onboarding & compliance is completed in Market Dojo. We only capture the basics here.</span>
-              </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Full Name *</label>
                 <input
@@ -397,9 +365,23 @@ export default function ContactsOnboardingTab() {
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
                 />
               </div>
+              {isStaffType && (
+                <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
+                  <input
+                    type="checkbox"
+                    checked={!!addForm.market_dojo_onboarded}
+                    onChange={e => setAddForm({ ...addForm, market_dojo_onboarded: e.target.checked })}
+                    className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Onboarded in Market Dojo</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Tick once onboarding & compliance is completed in Market Dojo.</p>
+                  </div>
+                </label>
+              )}
               <div className="flex gap-3 pt-2">
                 <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-1.5">
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add Contact
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add {meta.singular}
                 </button>
                 <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
               </div>
@@ -415,7 +397,7 @@ export default function ContactsOnboardingTab() {
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl">
               <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                <Edit2 className="w-4 h-4 text-[#2E5A1A]" /> Edit {typeSingular}
+                <Edit2 className="w-4 h-4 text-[#2E5A1A]" /> Edit {meta.singular}
               </h3>
               <button onClick={() => setEditing(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
                 <X className="w-4 h-4 text-slate-500" />
@@ -464,7 +446,7 @@ export default function ContactsOnboardingTab() {
                   />
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Onboarded in Market Dojo</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Tick this once onboarding & compliance is completed in Market Dojo. Shows a green-tick pill on their contact card and rota.</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Tick once onboarding & compliance is completed in Market Dojo.</p>
                   </div>
                 </label>
               )}

@@ -13,6 +13,7 @@ import StaffCostAnalytics from '@/components/staff/StaffCostAnalytics';
 import StaffUtilizationWidget from '@/components/dashboard/StaffUtilizationWidget';
 import TrainingMatrixHub from '@/components/staff/TrainingMatrixHub';
 import RunReportButton from '@/components/reports/RunReportButton';
+import ContactsTab from '@/components/staff/ContactsTab';
 
 // Map legacy tab IDs onto the new 4-tab structure so deep links don't break
 const TAB_MAP = {
@@ -58,6 +59,7 @@ const TABS = [
       { id: 'clients', label: 'Clients' },
       { id: 'contractors', label: 'Subcontractors' },
       { id: 'suppliers', label: 'Suppliers' },
+      { id: 'agency', label: 'Agency' },
     ],
   },
 ];
@@ -123,6 +125,8 @@ export default function StaffPage() {
           <StaffCostAnalytics />
           <StaffUtilizationWidget onNavigate={(section) => navigate('/admin', { state: { section } })} />
         </div>
+      ) : tab === 'contacts' ? (
+        <ContactsTab activeSub={renderTab} />
       ) : (
         <SettingsPage
           key={renderTab}

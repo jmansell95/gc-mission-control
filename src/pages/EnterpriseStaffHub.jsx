@@ -4,10 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
-import ContactsOnboardingTab from '@/components/staff/ContactsOnboardingTab';
 import {
   Users, ArrowLeft, Search, Mail, Phone, Wrench, Building2,
-  UserCheck, AlertCircle, ShieldCheck, HardHat, UserCog, Contact,
+  UserCheck, AlertCircle, ShieldCheck, HardHat, UserCog,
 } from 'lucide-react';
 
 export default function EnterpriseStaffHub() {
@@ -15,7 +14,6 @@ export default function EnterpriseStaffHub() {
   const { divisions, permittedDivisionIds } = useDivision();
   const [search, setSearch] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('all');
-  const [view, setView] = useState('staff'); // 'staff' | 'contacts'
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['enterprise-staff-all'],
@@ -168,25 +166,6 @@ export default function EnterpriseStaffHub() {
       {/* Body */}
       <div className="px-4 xl:px-6 pb-24 xl:pb-6 space-y-4 max-w-7xl mx-auto">
 
-        {/* View tabs */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setView('staff')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition ${view === 'staff' ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
-          >
-            <Users className="w-4 h-4" /> Staff Directory
-          </button>
-          <button
-            onClick={() => setView('contacts')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition ${view === 'contacts' ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
-          >
-            <Contact className="w-4 h-4" /> Contacts & Onboarding
-          </button>
-        </div>
-
-        {view === 'contacts' && <ContactsOnboardingTab />}
-
-        {view === 'staff' && (
         <div className="space-y-4">
         {/* Search + Division filters */}
         <div className="insight-card rounded-2xl p-4 space-y-3">
@@ -332,7 +311,6 @@ export default function EnterpriseStaffHub() {
           </div>
         )}
         </div>
-        )}
       </div>
     </div>
   );

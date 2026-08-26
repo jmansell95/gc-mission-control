@@ -163,10 +163,6 @@
       "type": "string",
       "description": "ISO timestamp of when the daily pre-work checklist was confirmed complete."
     },
-    "rig_note": {
-      "type": "string",
-      "description": "Short note of the rig the assigned subcontractor is using to complete the job (e.g. 'CP Rig 3', 'Hire rig \u2014 Terratest'). Only shown on the assignment when the assigned person is a subcontractor. Rendered as a tiny rig-tag on the rota grid cell."
-    },
     "notes": {
       "type": "string",
       "description": "Staff notes for this assignment"
