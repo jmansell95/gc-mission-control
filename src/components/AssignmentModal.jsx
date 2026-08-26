@@ -5,6 +5,7 @@ import { X, AlertTriangle, Trash2, RotateCcw, Loader2, CheckCircle2, Clock, MapP
 import { evaluateAssignmentCompliance, qualLabel } from '@/utils/complianceLock';
 import { sortAZ } from '@/utils';
 import LeaveCaptureModal from '@/components/rota/LeaveCaptureModal';
+import { useToast } from '@/components/ui/use-toast';
 
 function JobStatusBadge({ status }) {
   const config = {
@@ -23,8 +24,9 @@ import { isStaffOutsideJobTeams, getJobTeamIds } from '@/utils/jobTeams';
 import { isWeekend, buildRateMap } from '@/utils/overtime';
 import { findConflict, suggestAutoTimes, getDailyShiftSummary } from '@/utils/rotaScheduling';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { isDriverStaff } from '@/utils/driverDetection';
 
-export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas }) {
+export default function AssignmentModal({ isOpen, onClose, assignment, defaultStaffId, defaultDate, weekStartStr, staff, jobs, vehicles, existingRotas, absences = [], recurring = [], driverStaffIds }) {
   const [formData, setFormData] = useState({ job_id: '', staff_id: '', assigned_date: '', vehicle_id: '', rig_asset_id: '', start_time: '', end_time: '', notes: '', is_overtime: false, rate_multiplier: '', start_delayed: false, actual_start_date: '', work_weekends: false });
   const [leaveModal, setLeaveModal] = useState(null); // { staffId, staffName, jobId, jobName, spanStart, spanEnd }
   const [conflictWarnings, setConflictWarnings] = useState([]);
@@ -39,9 +41,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   const [assignmentMode, setAssignmentMode] = useState('today'); // 'today' | 'custom' | 'full_job'
   const [customEndDate, setCustomEndDate] = useState('');
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
-  const { data: absences = [] } = useQuery({ queryKey: ['absences'], queryFn: () => base44.entities.Absence.list() });
-  const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
   const { data: overtimeRates = [] } = useQuery({ queryKey: ['overtime-rates'], queryFn: () => base44.entities.OvertimeRate.list() });
   const { data: complianceItems = [] } = useQuery({ queryKey: ['compliance-staff-all'], queryFn: () => base44.entities.ComplianceItem.filter({ category: 'staff' }) });
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-active'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true, is_active: true }) });
@@ -131,7 +132,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     let timeConflict = null;
     if (staffId && date) {
       const dup = existingRotas.some(r => r.staff_id === staffId && r.assigned_date === date && r.id !== assignment?.id);
-      if (dup) warnings.push('This staff member already has an assignment on this date — multi-job days are supported. The times below auto-adjust so they won\'t overlap.');
+      const isDriver = isDriverStaff(staffId, staff, driverStaffIds || new Set(), teams);
+      if (dup && isDriver) warnings.push('This driver already has a drop on this date — multiple drops per day are supported. The times below auto-adjust so they won\'t overlap.');
       const dow = new Date(date + 'T00:00:00').getDay();
       const rec = recurring.find(r => r.staff_id === staffId && r.is_active !== false && Array.isArray(r.days_of_week) && r.days_of_week.includes(dow));
       if (rec) warnings.push(`Staff is regularly off (${rec.label || 'Day Off'}) on this day.`);
@@ -166,8 +168,9 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     // When the staff already has a shift this date, auto-suggest a non-overlapping slot.
     let suggested = null;
     if (!isEditing && staffId && formData.assigned_date) {
+      const isDriver = isDriverStaff(staffId, staff, driverStaffIds || new Set(), teams);
       const dayCount = existingRotas.filter(r => r.staff_id === staffId && r.assigned_date === formData.assigned_date).length;
-      if (dayCount > 0) {
+      if (dayCount > 0 && isDriver) {
         suggested = suggestAutoTimes(existingRotas, staffId, formData.assigned_date);
       }
     }
@@ -205,6 +208,13 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   const selectedStaff = staff.find(s => s.id === formData.staff_id);
   const selectedStaffTeam = selectedStaff ? teams.find(t => t.id === selectedStaff.team_id) : null;
   const isDrillerStaff = selectedStaffTeam && (selectedStaffTeam.job_type === 'cp_drilling' || selectedStaffTeam.job_type === 'rotary_drilling');
+  // Driver staff are exempt from the one-assignment-per-day rule (multiple drops/day).
+  const isSelectedStaffDriver = isDriverStaff(formData.staff_id, staff, driverStaffIds || new Set(), teams);
+  // Hard block: a non-driver already has an assignment on the selected date.
+  const existingOnSelectedDate = formData.staff_id && formData.assigned_date
+    ? existingRotas.filter(r => r.staff_id === formData.staff_id && r.assigned_date === formData.assigned_date && r.id !== assignment?.id && (!r.assignment_type || r.assignment_type === 'job' || r.assignment_type === 'yard_depot'))
+    : [];
+  const onePerDayBlocked = !isEditing && !isSelectedStaffDriver && existingOnSelectedDate.length > 0;
   // Active jobs shown by default; completed jobs included only when searching or toggled
   const activeStatuses = ['planning', 'in_progress'];
   const filteredJobsList = jobs.filter(job => {
@@ -240,8 +250,9 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
 
   const handleDateChange = (date) => {
     const weekend = isWeekend(date);
+    const isDriver = isDriverStaff(formData.staff_id, staff, driverStaffIds || new Set(), teams);
     const dayCount = formData.staff_id ? existingRotas.filter(r => r.staff_id === formData.staff_id && r.assigned_date === date && r.id !== assignment?.id).length : 0;
-    const suggested = (dayCount > 0 && !isEditing) ? suggestAutoTimes(existingRotas, formData.staff_id, date) : null;
+    const suggested = (dayCount > 0 && !isEditing && isDriver) ? suggestAutoTimes(existingRotas, formData.staff_id, date) : null;
     setFormData(prev => {
       const next = { ...prev, assigned_date: date };
       if (suggested) { next.start_time = suggested.start_time; next.end_time = suggested.end_time; }
@@ -293,7 +304,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   const daySummary = (formData.staff_id && formData.assigned_date)
     ? getDailyShiftSummary(existingRotas, formData.staff_id, formData.assigned_date)
     : null;
-  const showAutoSuggest = daySummary && daySummary.assignments.length > 0 && !isEditing;
+  const showAutoSuggest = daySummary && daySummary.assignments.length > 0 && !isEditing && isSelectedStaffDriver;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -320,6 +331,11 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     }
     if (!formData.assigned_date) {
       alert('Please select a date for this assignment.');
+      return;
+    }
+    // Hard block: non-driver staff already have a shift on this date.
+    if (onePerDayBlocked) {
+      alert(`${selectedStaff?.name || 'This staff member'} already has a shift on ${format(new Date(formData.assigned_date + 'T00:00:00'), 'dd MMM')}. Drivers can have multiple drops; all other staff are limited to one shift per day.`);
       return;
     }
     try {
@@ -365,7 +381,18 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
         if (formData.start_delayed && formData.actual_start_date) payload.assigned_date = formData.actual_start_date;
         await base44.entities.RotaAssignment.update(assignment.id, payload);
       } else if (isMultiDay) {
-        const days = buildDateRange(effectiveStart, rangeEnd, formData.work_weekends);
+        const allDays = buildDateRange(effectiveStart, rangeEnd, formData.work_weekends);
+        // Skip dates where a non-driver already has an assignment (prevent duplicates).
+        const skippedDates = [];
+        const days = isSelectedStaffDriver ? allDays : allDays.filter(dateStr => {
+          const has = existingRotas.some(r => r.staff_id === formData.staff_id && r.assigned_date === dateStr && r.id !== assignment?.id && (!r.assignment_type || r.assignment_type === 'job' || r.assignment_type === 'yard_depot'));
+          if (has) skippedDates.push(dateStr);
+          return !has;
+        });
+        if (days.length === 0) {
+          alert(`All ${allDays.length} date(s) in this range already have a shift for ${selectedStaff?.name || 'this staff member'}. Nothing new to create — drivers can have multiple drops, but all other staff are limited to one shift per day.`);
+          return;
+        }
         const assignments = days.map((dateStr, idx) => ({
           job_id: jobId,
           assignment_type: assignmentType,
@@ -386,6 +413,12 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           status: 'assigned'
         }));
         await base44.entities.RotaAssignment.bulkCreate(assignments);
+        if (skippedDates.length > 0) {
+          toast({
+            title: `${skippedDates.length} date${skippedDates.length === 1 ? '' : 's'} skipped`,
+            description: `${selectedStaff?.name || 'This staff'} already had a shift on ${skippedDates.length === 1 ? format(new Date(skippedDates[0] + 'T00:00:00'), 'dd MMM') : `${skippedDates.length} days`}. ${days.length} new shift${days.length === 1 ? '' : 's'} created.`,
+          });
+        }
         // Auto-open the leave capture popup so the manager can log annual-leave
         // date ranges that fall within this assignment span (skippable).
         const createdStaff = staff.find(s => s.id === formData.staff_id);
@@ -948,8 +981,17 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               ))}
             </div>
           )}
+          {onePerDayBlocked && (
+            <div className="mt-3 flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2.5">
+              <ShieldX className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Already has a shift on this date</p>
+                <p className="text-xs text-red-600 mt-0.5">{selectedStaff?.name} already has an assignment on {format(new Date(formData.assigned_date + 'T00:00:00'), 'dd MMM yyyy')}. Drivers can have multiple drops; all other staff are limited to one shift per day.</p>
+              </div>
+            </div>
+          )}
           <div className="flex gap-3 mt-5">
-            <button type="submit" className="flex-1 px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm">
+            <button type="submit" disabled={onePerDayBlocked} className="flex-1 px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {isEditing ? 'Update Assignment' : (!isEditing && isDepotMode && assignmentMode === 'continuous') ? 'Start Continuous Depot Duty' : multiDayDays.length > 1 ? `Add ${multiDayDays.length} Assignments` : 'Add Assignment'}
             </button>
             {isEditing && assignment.briefing_signed && (

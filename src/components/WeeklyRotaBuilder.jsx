@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { startOfWeek, addDays, format, subWeeks } from 'date-fns';
@@ -22,6 +22,7 @@ import { computeRotaWarnings } from '@/utils/rotaWarnings';
 import RotaWarningsPanel from '@/components/RotaWarningsPanel';
 import { useDivision } from '@/contexts/DivisionContext';
 import { sortAZ } from '@/utils';
+import { buildDriverStaffIds } from '@/utils/driverDetection';
 import RotaWeatherBadge from '@/components/rota/RotaWeatherBadge';
 import VirtualDepotCard from '@/components/rota/VirtualDepotCard';
 const jobTypeColors = {
@@ -75,6 +76,8 @@ export default function WeeklyRotaBuilder() {
   const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
   const { data: recurringDepot = [] } = useQuery({ queryKey: ['recurring-depot-duty'], queryFn: () => base44.entities.RecurringDepotDuty.filter({ is_active: true }) });
+  const { data: deliveries = [] } = useQuery({ queryKey: ['deliveries-for-drivers'], queryFn: () => base44.entities.DeliveryLog.list() });
+  const driverStaffIds = useMemo(() => buildDriverStaffIds(deliveries), [deliveries]);
 
   const { data: rotas = [] } = useQuery({
     queryKey: ['rotas', weekStartStr, activeDivisionId || 'overview'],
@@ -389,6 +392,22 @@ export default function WeeklyRotaBuilder() {
   // RotaWeek record itself. Only available while the week is still a draft
   // (not yet published to staff). Published weeks are protected.
   const [deletingDraft, setDeletingDraft] = useState(false);
+  const [cleaningUp, setCleaningUp] = useState(false);
+  const handleCleanupDuplicates = async () => {
+    if (!confirm('Delete duplicate assignments?\n\nThis removes extra shifts so each staff member (except drivers) has at most one assignment per day. The earliest shift on each duplicate day is kept; the rest are deleted.')) return;
+    setCleaningUp(true);
+    try {
+      const res = await base44.functions.invoke('cleanupDuplicateAssignments', {});
+      const d = res.data || {};
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+      setNotice({ type: 'success', msg: d.message || `Deleted ${d.deleted} duplicate assignment(s).` });
+    } catch (e) {
+      setNotice({ type: 'error', msg: e.message || 'Failed to clean up duplicates' });
+    } finally {
+      setCleaningUp(false);
+    }
+  };
   const handleDeleteDraft = async () => {
     if (isPublished) return;
     const label = `${format(weekStart, 'dd MMM')} – ${format(addDays(weekStart, 6), 'dd MMM yyyy')}`;
@@ -611,6 +630,11 @@ export default function WeeklyRotaBuilder() {
               <button onClick={() => setModal({ isOpen: true, assignment: null, defaultStaffId: '', defaultDate: '' })}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm">
                 <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Shift</span>
+              </button>
+              <button onClick={handleCleanupDuplicates} disabled={cleaningUp}
+                title="Remove duplicate assignments (keep one shift per staff per day; drivers exempt)"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium disabled:opacity-50">
+                {cleaningUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} <span className="hidden sm:inline">{cleaningUp ? 'Cleaning…' : 'Clean Duplicates'}</span>
               </button>
               <button onClick={handleSaveDraft} disabled={savingDraft}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50">
@@ -859,6 +883,9 @@ export default function WeeklyRotaBuilder() {
         jobs={jobs}
         vehicles={vehicles}
         existingRotas={rotas}
+        absences={absences}
+        recurring={recurring}
+        driverStaffIds={driverStaffIds}
       />
 
       <ComplianceBlockModal
