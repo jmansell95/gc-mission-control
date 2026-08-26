@@ -33,7 +33,7 @@ export default function StaffCostAnalytics() {
 
   const isLoading = sl || tl || rl;
 
-  const { chartData, totalCost, staffWithoutRate } = useMemo(() => {
+  const { chartData, totalCost, depotCost, jobCost, staffWithoutRate } = useMemo(() => {
     const rateMap = {};
     rateCards.forEach(r => {
       if (r.staff_id && r.price) {
@@ -66,7 +66,16 @@ export default function StaffCostAnalytics() {
     const total = data.reduce((sum, d) => sum + d.cost, 0);
     const noRate = staff.filter(s => !rateMap[s.id] && hoursByStaff[s.id]).length;
 
-    return { chartData: data.slice(0, 10), totalCost: total, staffWithoutRate: noRate };
+    // Depot overhead: cost from non-chargeable (depot duty) timesheets
+    const depotCost = timesheets
+      .filter(t => t.chargeable === false)
+      .reduce((sum, t) => {
+        const dayRate = rateMap[t.staff_id] || 0;
+        return sum + ((t.total_hours || 0) / 8) * dayRate;
+      }, 0);
+    const jobCost = Math.max(0, total - depotCost);
+
+    return { chartData: data.slice(0, 10), totalCost: total, depotCost: Math.round(depotCost), jobCost: Math.round(jobCost), staffWithoutRate: noRate };
   }, [staff, timesheets, rateCards]);
 
   if (isLoading) return <Skeleton className="h-64 rounded-xl" />;
@@ -86,6 +95,11 @@ export default function StaffCostAnalytics() {
         <div className="text-right">
           <p className="text-lg font-bold text-slate-900 tabular-nums">{gbp(totalCost)}</p>
           <p className="text-[11px] text-slate-500">Total spend</p>
+          {depotCost > 0 && (
+            <p className="text-[10px] text-amber-700 mt-0.5">
+              <span className="font-semibold">{gbp(depotCost)}</span> depot overhead · <span className="font-semibold">{gbp(jobCost)}</span> job labour
+            </p>
+          )}
         </div>
       </div>
 

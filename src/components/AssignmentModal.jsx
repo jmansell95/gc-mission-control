@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, AlertTriangle, Trash2, RotateCcw, Loader2, CheckCircle2, Clock, MapPin, Calendar, CalendarClock, CalendarDays, User, Phone, Briefcase, FileText, ShieldX, ShieldAlert, Drill, Search } from 'lucide-react';
+import { X, AlertTriangle, Trash2, RotateCcw, Loader2, CheckCircle2, Clock, MapPin, Calendar, CalendarClock, CalendarDays, User, Phone, Briefcase, FileText, ShieldX, ShieldAlert, Drill, Search, Warehouse } from 'lucide-react';
 import { evaluateAssignmentCompliance, qualLabel } from '@/utils/complianceLock';
 import { sortAZ } from '@/utils';
 import LeaveCaptureModal from '@/components/rota/LeaveCaptureModal';
@@ -34,6 +34,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   const [jobSearch, setJobSearch] = useState('');
   const [jobDropdownOpen, setJobDropdownOpen] = useState(false);
   const [showCompletedJobs, setShowCompletedJobs] = useState(false);
+  const [shiftMode, setShiftMode] = useState('job'); // 'job' | 'depot'
   const [assignmentMode, setAssignmentMode] = useState('today'); // 'today' | 'custom' | 'full_job'
   const [customEndDate, setCustomEndDate] = useState('');
   const queryClient = useQueryClient();
@@ -73,10 +74,12 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
   };
 
   const isEditing = !!assignment;
+  const isDepotMode = shiftMode === 'depot';
 
   useEffect(() => {
     if (isOpen) {
       if (assignment) {
+        setShiftMode(assignment.assignment_type === 'yard_depot' ? 'depot' : 'job');
         setFormData({
           job_id: assignment.job_id || '',
           staff_id: assignment.staff_id || '',
@@ -93,6 +96,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           work_weekends: !!assignment.work_weekends
         });
       } else {
+        setShiftMode('job');
         const defaults = getStaffDefaultTimes(defaultStaffId);
         setFormData({
           job_id: '',
@@ -320,6 +324,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
     try {
       let openLeaveModal = false;
       const rateMultiplier = formData.rate_multiplier === '' ? null : Number(formData.rate_multiplier);
+      const assignmentType = isDepotMode ? 'yard_depot' : 'job';
+      const jobId = isDepotMode ? '' : formData.job_id;
       const effectiveStart = formData.start_delayed && formData.actual_start_date ? formData.actual_start_date : formData.assigned_date;
       const customEndValid = assignmentMode === 'custom' && customEndDate && effectiveStart && customEndDate >= effectiveStart;
       const fullJobEnd = assignmentMode === 'full_job' && selectedJob?.end_date && selectedJob.end_date > effectiveStart ? selectedJob.end_date : '';
@@ -329,6 +335,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       if (isEditing) {
         const payload = {
           ...formData,
+          assignment_type: assignmentType,
+          job_id: jobId,
           division_id: staffDivisionId,
           rig_asset_id: formData.rig_asset_id || '',
           rate_multiplier: rateMultiplier,
@@ -339,7 +347,8 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       } else if (isMultiDay) {
         const days = buildDateRange(effectiveStart, rangeEnd, formData.work_weekends);
         const assignments = days.map((dateStr, idx) => ({
-          job_id: formData.job_id,
+          job_id: jobId,
+          assignment_type: assignmentType,
           staff_id: formData.staff_id,
           division_id: staffDivisionId,
           assigned_date: dateStr,
@@ -369,10 +378,11 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           spanStart: effectiveStart,
           spanEnd: rangeEnd,
         });
-        openLeaveModal = true;
+        if (!isDepotMode) openLeaveModal = true;
       } else {
         await base44.entities.RotaAssignment.create({
-          job_id: formData.job_id,
+          job_id: jobId,
+          assignment_type: assignmentType,
           staff_id: formData.staff_id,
           division_id: staffDivisionId,
           assigned_date: effectiveStart,
@@ -429,13 +439,27 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl">
-          <h3 className="font-semibold text-slate-900">{isEditing ? 'Edit Shift' : 'New Shift'}</h3>
+          <h3 className="font-semibold text-slate-900">{isDepotMode ? (isEditing ? 'Edit Depot Duty' : 'New Depot Duty') : (isEditing ? 'Edit Shift' : 'New Shift')}</h3>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
             <X className="w-4 h-4 text-slate-500" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+            {/* Mode toggle: Job shift vs Yard/Depot duty */}
+            <div className="sm:col-span-2">
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                <button type="button" onClick={() => { setShiftMode('job'); setFormData(prev => ({ ...prev, job_id: '' })); }}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${!isDepotMode ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                  <Briefcase className="w-4 h-4" /> Job shift
+                </button>
+                <button type="button" onClick={() => { setShiftMode('depot'); setFormData(prev => ({ ...prev, job_id: '' })); }}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${isDepotMode ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                  <Warehouse className="w-4 h-4" /> Yard / Depot duty
+                </button>
+              </div>
+            </div>
+            {!isDepotMode && (
             <div className="sm:col-span-2">
               <label className="block text-xs font-medium text-slate-600 mb-1">Job *</label>
               <div className="relative">
@@ -496,6 +520,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 <p className="text-[11px] text-slate-400 mt-1">Required teams: {requiredTeamNames.join(', ')}</p>
               )}
             </div>
+            )}
             {selectedJob && (
               <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2.5">
                 <div className="flex items-center gap-2 pb-1 border-b border-slate-200">
@@ -610,7 +635,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
               <p className="text-[11px] text-slate-400 mt-1">{defaultDate ? 'The day you clicked in the rota' : 'Pick a date for this shift'}</p>
             </div>
-            {!isEditing && selectedJob && effectiveStartDisplay && (
+            {!isEditing && effectiveStartDisplay && (isDepotMode || selectedJob) && (
               <div className="sm:col-span-2 rounded-lg border border-slate-200 bg-slate-50/50 p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <CalendarClock className="w-4 h-4 text-emerald-700" />
@@ -664,7 +689,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 })}
               </select>
             </div>
-            {isDrillerStaff && (
+            {isDrillerStaff && !isDepotMode && (
               <div className="sm:col-span-2 rounded-lg border border-emerald-300 bg-emerald-50/50 p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <Drill className="w-4 h-4 text-emerald-700" />
@@ -820,7 +845,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               <span>{selectedStaff.name} is in a required team for this job.</span>
             </div>
           )}
-          {complianceBlocked && (
+          {selectedJob && complianceBlocked && (
             <div className="mt-3 rounded-lg border border-red-300 bg-red-50 px-3 py-3 space-y-2.5">
               <div className="flex items-start gap-2">
                 <ShieldX className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
@@ -849,7 +874,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               </label>
             </div>
           )}
-          {!complianceBlocked && complianceExpiring && (
+          {selectedJob && !complianceBlocked && complianceExpiring && (
             <div className="mt-3 flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
               <ShieldAlert className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <div>
@@ -860,7 +885,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
               </div>
             </div>
           )}
-          {rigComplianceBlocked && (
+          {selectedJob && rigComplianceBlocked && (
             <div className="mt-3 rounded-lg border border-red-300 bg-red-50 px-3 py-3 space-y-2.5">
               <div className="flex items-start gap-2">
                 <ShieldX className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />

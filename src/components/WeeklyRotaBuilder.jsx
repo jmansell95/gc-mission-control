@@ -6,7 +6,7 @@ import {
   Plus, Calendar, ChevronLeft, ChevronRight, X, Copy,
   MapPin, Truck, Clock, CheckCircle2, PlayCircle, ClipboardCheck,
   Users, Briefcase, Search, Filter, StickyNote, Save, Send, Loader2, CalendarDays,
-  LogIn, LogOut, Repeat, Layers, Trash2, AlertTriangle, Zap
+  LogIn, LogOut, Repeat, Layers, Trash2, AlertTriangle, Zap, Warehouse
 } from 'lucide-react';
 import AssignmentModal from '@/components/AssignmentModal';
 import ComplianceBlockModal from '@/components/ComplianceBlockModal';
@@ -130,7 +130,7 @@ export default function WeeklyRotaBuilder() {
   rotas.forEach(rota => {
     // Non-job assignments (annual_leave, sick, training) are shown via the
     // leaveState banner, not as job cards — skip them here to avoid "Unknown".
-    if (rota.assignment_type && rota.assignment_type !== 'job') return;
+    if (rota.assignment_type && rota.assignment_type !== 'job' && rota.assignment_type !== 'yard_depot') return;
     const dayIndex = days.findIndex(d => format(d, 'yyyy-MM-dd') === rota.assigned_date);
     if (dayIndex !== -1 && rotasByStaff[rota.staff_id]) {
       rotasByStaff[rota.staff_id][dayIndex].push(rota);
@@ -422,6 +422,53 @@ export default function WeeklyRotaBuilder() {
 
     const status = statusConfig[assignment.status || 'assigned'] || statusConfig.assigned;
     const StatusIcon = status.icon;
+
+    // Yard / Depot duty — non-billable overhead shift (no job)
+    if (assignment.assignment_type === 'yard_depot') {
+      return (
+        <div key={assignment.id} className="group relative px-2.5 py-2 rounded-lg text-xs border-l-[3px] border-amber-400 bg-amber-50 cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-150"
+          onClick={() => handleEditAssignment(assignment)}>
+          <div className="flex items-start justify-between gap-1 mb-1">
+            <span className="font-bold text-amber-900 truncate flex-1 leading-tight flex items-center gap-1">
+              <Warehouse className="w-3 h-3 flex-shrink-0" /> Depot Duty
+            </span>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {assignment.is_overtime && (
+                <span className="text-[9px] px-1 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold whitespace-nowrap">
+                  OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
+                </span>
+              )}
+            </div>
+            <button onClick={(e) => { e.stopPropagation(); handleDeleteAssignment(assignment.id); }}
+              className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 rounded transition">
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+          {(assignment.start_time || assignment.end_time) && (
+            <div className="flex items-center gap-1 text-amber-700 mb-1">
+              <Clock className="w-2.5 h-2.5 flex-shrink-0" />
+              <span className="truncate">{assignment.start_time || '—'} - {assignment.end_time || '—'}</span>
+            </div>
+          )}
+          {assignment.notes && (
+            <div className="flex items-start gap-1 text-amber-700 mb-1">
+              <StickyNote className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
+              <span className="truncate italic">{assignment.notes}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 pt-1 border-t border-amber-200/50">
+            <span className={`inline-flex items-center gap-0.5 ${status.text}`}>
+              <StatusIcon className="w-2.5 h-2.5" />
+              <span className="text-[10px] font-medium">{status.label}</span>
+            </span>
+            {assignment.completed_at && (
+              <span className="text-[10px] text-amber-600 font-medium">Submitted</span>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div key={assignment.id} className={`group relative px-2.5 py-2 rounded-lg text-xs border-l-[3px] cursor-pointer hover:shadow-md hover:scale-[1.02] transition-all duration-150 ${assignment.is_overtime ? 'border-l-amber-400 ring-1 ring-amber-200/60' : ''} ${colors.bg} ${colors.border}`}
         onClick={() => handleEditAssignment(assignment)}>
@@ -901,7 +948,7 @@ export default function WeeklyRotaBuilder() {
                           {(provided, snapshot) => (
                             <div ref={provided.innerRef} {...provided.droppableProps}
                               className={`space-y-1.5 min-h-[44px] rounded-lg transition ${snapshot.isDraggingOver ? 'bg-emerald-50/70 ring-2 ring-emerald-300/60' : ''}`}>
-                              {ls && (
+                              {ls && ls.type !== 'yard_depot' && (
                                 <div className={`px-2 py-1 rounded text-[10px] font-bold text-center ${
                                   ls.recurring ? 'bg-slate-200 text-slate-600' :
                                   ls.type === 'sick' ? 'bg-rose-100 text-rose-600' :
@@ -1027,7 +1074,9 @@ export default function WeeklyRotaBuilder() {
                             const job = jobs.find(j => j.id === assignment.job_id);
                             const vehicle = vehicles.find(v => v.id === assignment.vehicle_id);
                             const client = clients.find(c => c.id === job?.client_id);
-                            const colors = jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot;
+                            const colors = assignment.assignment_type === 'yard_depot'
+                              ? { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' }
+                              : (jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot);
                             const status = statusConfig[assignment.status || 'assigned'] || statusConfig.assigned;
                             const StatusIcon = status.icon;
                             return (

@@ -12,6 +12,7 @@ import JobBriefingModal from '@/components/staff/JobBriefingModal';
 import EndOfShiftWizard from '@/components/staff/EndOfShiftWizard';
 import WorkingStep from '@/components/staff/WorkingStep';
 import DailyChecksStep from '@/components/staff/DailyChecksStep';
+import DepotShiftWizard from '@/components/staff/DepotShiftWizard';
 import WeatherCard from '@/components/staff/WeatherCard';
 import JobContextCard from '@/components/staff/JobContextCard';
 import ShiftStepRail from '@/components/staff/ShiftStepRail';
@@ -280,6 +281,19 @@ export default function ShiftWizard({
 
   // ── Render ──
   if (!open || !assignment) return null;
+
+  // Depot / Yard duty assignments use a lighter wizard (checks + clock in/out)
+  if (assignment.assignment_type === 'yard_depot') {
+    return (
+      <DepotShiftWizard
+        open={open}
+        onClose={onClose}
+        assignment={assignment}
+        staff={staff}
+        staffId={staffId}
+      />
+    );
+  }
 
   const stepLabels = {
     checks: 'Checks',

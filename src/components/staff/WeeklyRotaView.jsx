@@ -133,7 +133,7 @@ function DayColumn({ date, assignments, jobFor, isToday, grid }) {
 function RotaShiftCard({ assignment, job }) {
   return (
     <div className="rounded-xl p-2.5 bg-slate-50 border border-slate-200">
-      <p className="text-xs font-bold text-slate-900 truncate">{job?.name || 'Shift'}</p>
+      <p className="text-xs font-bold text-slate-900 truncate">{assignment.assignment_type === 'yard_depot' ? 'Depot Duty' : (job?.name || 'Shift')}</p>
       <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-500">
         {assignment.start_time && (
           <span className="flex items-center gap-0.5">

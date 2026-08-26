@@ -7,6 +7,7 @@ import { format, isFuture, isPast } from 'date-fns';
 import { motion } from 'framer-motion';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
+import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
 import EndOfDayCard from '@/components/staff/EndOfDayCard';
 import { useToast } from '@/components/ui/use-toast';
 import { syncAllOfflineData, getOfflineDeliveryCount, saveOrQueue } from '@/utils/offlineSync';
@@ -740,6 +741,15 @@ export default function StaffDashboard() {
               />
               {/* Active / next job — hero card with big action button */}
               {nextTodayAssignment && (
+                nextTodayAssignment.assignment_type === 'yard_depot' ? (
+                  <DepotAssignmentCard
+                    assignment={nextTodayAssignment}
+                    staff={staff}
+                    onOpenShiftWizard={(id, opts) => handleOpenShiftWizard(id, opts)}
+                    canPerformActions={canPerformActions}
+                    defaultExpanded
+                  />
+                ) : (
                 <div>
                   {!activeStarted && todaysSorted.length > 1 && (
                     <div className="flex items-center gap-2 mb-2">
@@ -762,10 +772,13 @@ export default function StaffDashboard() {
                     );
                   })()}
                 </div>
+                )
               )}
               {/* Other jobs today — compact cards */}
               {todaysSorted.filter(a => a.id !== nextTodayAssignment?.id).map(a => (
-                <AssignmentCard key={a.id} {...cardProps(a)} />
+                a.assignment_type === 'yard_depot'
+                  ? <DepotAssignmentCard key={a.id} assignment={a} staff={staff} onOpenShiftWizard={(id, opts) => handleOpenShiftWizard(id, opts)} canPerformActions={canPerformActions} defaultExpanded />
+                  : <AssignmentCard key={a.id} {...cardProps(a)} />
               ))}
             </div>
           )}
