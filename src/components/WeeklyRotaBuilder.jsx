@@ -6,7 +6,7 @@ import {
   Plus, Calendar, ChevronLeft, ChevronRight, X, Copy,
   MapPin, Truck, Clock, CheckCircle2, PlayCircle, ClipboardCheck,
   Users, Briefcase, Search, Filter, StickyNote, Save, Send, Loader2, CalendarDays,
-  LogIn, LogOut, Repeat, Layers, Trash2, AlertTriangle, Zap, Warehouse
+  LogIn, LogOut, Repeat, Layers, Trash2, AlertTriangle, Zap, Warehouse, Drill
 } from 'lucide-react';
 import AssignmentModal from '@/components/AssignmentModal';
 import ComplianceBlockModal from '@/components/ComplianceBlockModal';
@@ -551,6 +551,18 @@ export default function WeeklyRotaBuilder() {
             <span className="font-mono truncate">{vehicle.registration_number}</span>
           </div>
         )}
+        {(() => {
+          const member = staff.find(s => s.id === assignment.staff_id);
+          if (member?.worker_type === 'subcontractor' && assignment.rig_note) {
+            return (
+              <div className="flex items-center gap-1 text-blue-700 mb-1 bg-blue-50 rounded px-1.5 py-0.5">
+                <Drill className="w-2.5 h-2.5 flex-shrink-0" />
+                <span className="truncate font-medium text-[10px]">Rig: {assignment.rig_note}</span>
+              </div>
+            );
+          }
+          return null;
+        })()}
         {(assignment.start_time || assignment.end_time) && (
           <div className="flex items-center gap-1 text-slate-500 mb-1">
             <Clock className="w-2.5 h-2.5 flex-shrink-0" />
@@ -1175,6 +1187,7 @@ export default function WeeklyRotaBuilder() {
                                 <div className="flex flex-wrap gap-1.5 text-xs">
                                   {job && <span className={`px-1.5 py-0.5 rounded-full font-medium ${colors.badge}`}>{formatJobType(getJobPrimaryType(job, teams))}</span>}
                                   {vehicle && <span className="flex items-center gap-0.5 text-slate-500"><Truck className="w-3 h-3" />{vehicle.registration_number}</span>}
+                                  {member?.worker_type === 'subcontractor' && assignment.rig_note && <span className="flex items-center gap-0.5 text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded-full font-medium"><Drill className="w-3 h-3" />Rig: {assignment.rig_note}</span>}
                                   {job?.location && <span className="flex items-center gap-0.5 text-slate-500"><MapPin className="w-3 h-3" />{job.location}</span>}
                                   {(assignment.start_time || assignment.end_time) && <span className="flex items-center gap-0.5 text-slate-500"><Clock className="w-3 h-3" />{assignment.start_time || '—'}{assignment.end_time ? `–${assignment.end_time}` : ''}</span>}
                                   <span className={`inline-flex items-center gap-0.5 ${status.text}`}><StatusIcon className="w-3 h-3" />{status.label}</span>
