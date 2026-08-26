@@ -739,7 +739,7 @@ export default function WeeklyRotaBuilder() {
       })()}
 
       {/* Per-day capacity strip */}
-      <div className="hidden lg:flex gap-2 mb-3 pl-[180px]">
+      <div className="hidden lg:flex gap-2 mb-3 pl-[228px]">
         {days.map(day => {
           const dayStr = format(day, 'yyyy-MM-dd');
           const dayRotas = rotas.filter(r => r.assigned_date === dayStr && (!r.assignment_type || r.assignment_type === 'job' || r.assignment_type === 'yard_depot'));
@@ -815,7 +815,7 @@ export default function WeeklyRotaBuilder() {
           <DragDropContext onDragEnd={onDragEnd}><table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
             <thead>
               <tr className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-700 text-white">
-                <th className="px-4 py-3.5 text-left font-semibold text-sm w-44 sticky left-0 z-10 bg-gradient-to-r from-emerald-900 to-emerald-800 border-r border-white/10">Staff</th>
+                <th className="px-4 py-3.5 text-left font-semibold text-sm w-56 sticky left-0 z-10 bg-gradient-to-r from-emerald-900 to-emerald-800 border-r border-white/10">Staff</th>
                 {days.map(day => {
                   const isToday = format(day, 'yyyy-MM-dd') === todayStr;
                   return (
