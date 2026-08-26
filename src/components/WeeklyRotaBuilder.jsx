@@ -856,12 +856,12 @@ export default function WeeklyRotaBuilder() {
                             <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-blue-100 text-blue-700 flex-shrink-0">SUBCON</span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="min-w-0">
                           <p className="text-xs text-slate-400 truncate">{teams.find(t => t.id === member.team_id)?.name || (member.worker_type === 'agency' ? 'Agency Worker' : member.worker_type === 'subcontractor' ? 'Subcontractor' : 'Unassigned')}</p>
                           <button
                             onClick={() => setRotaManagerStaff(member)}
                             title="Manage this crew member's rota — edit dates or delete"
-                            className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 px-1.5 py-0.5 rounded transition flex items-center gap-0.5 flex-shrink-0"
+                            className="mt-0.5 text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 px-1.5 py-0.5 rounded transition inline-flex items-center gap-0.5"
                           >
                             <Calendar className="w-2.5 h-2.5" /> Manage
                           </button>

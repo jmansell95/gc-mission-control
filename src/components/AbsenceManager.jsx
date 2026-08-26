@@ -91,12 +91,13 @@ export default function AbsenceManager() {
     setBulkLoading(false);
   };
 
-  const pendingCount = absences.filter(a => a.status === 'pending').length;
+  const validAbsences = absences.filter(a => staff.some(s => s.id === a.staff_id));
+  const pendingCount = validAbsences.filter(a => a.status === 'pending').length;
   const today = format(new Date(), 'yyyy-MM-dd');
-  const onLeaveToday = absences.filter(a => a.status === 'approved' && a.start_date <= today && a.end_date >= today);
+  const onLeaveToday = validAbsences.filter(a => a.status === 'approved' && a.start_date <= today && a.end_date >= today);
   const activeRecurring = recurring.filter(r => r.is_active !== false);
 
-  const filteredAbsences = absences.filter(a => statusFilter === 'all' || a.status === statusFilter);
+  const filteredAbsences = validAbsences.filter(a => statusFilter === 'all' || a.status === statusFilter);
 
   const requestsByStaff = staff.map(s => ({
     staff: s,
@@ -137,7 +138,7 @@ export default function AbsenceManager() {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <p className="text-xs text-slate-500 font-medium">Total Requests</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{absences.length}</p>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{validAbsences.length}</p>
         </div>
       </div>
 
