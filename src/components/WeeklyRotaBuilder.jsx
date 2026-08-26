@@ -108,7 +108,7 @@ export default function WeeklyRotaBuilder() {
   // Each group gets a coloured header row so managers can instantly see
   // where field crews, depot staff, and management are for any given day.
   const STAFF_GROUPS = [
-    { key: 'field_ops', label: 'Field Team Staff', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-300' },
+    { key: 'field_ops', label: 'Direct Staff', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-300' },
     { key: 'agency', label: 'Agency Staff', color: 'text-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-300' },
     { key: 'subcontractor', label: 'Subcontractors', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-300' },
     { key: 'depot', label: 'Depot Team Staff', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' },
