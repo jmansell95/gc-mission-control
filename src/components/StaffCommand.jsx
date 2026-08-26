@@ -216,7 +216,9 @@ export default function StaffCommand() {
                     <p className="text-sm font-semibold text-slate-900 truncate">{m.name}</p>
                     <p className="text-xs text-slate-400 truncate">{teamName(m.team_id)}</p>
                   </div>
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${linked ? 'bg-emerald-500' : m.invite_sent ? 'bg-blue-400' : 'bg-amber-400'}`} title={linked ? 'Active' : m.invite_sent ? 'Awaiting' : 'No invite'} />
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${linked ? 'bg-emerald-100 text-emerald-700' : m.invite_sent ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {linked ? 'Active' : m.invite_sent ? 'Awaiting' : 'No invite'}
+                  </span>
                 </button>
               );
             })}
