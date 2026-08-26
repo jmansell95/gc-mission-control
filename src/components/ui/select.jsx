@@ -49,20 +49,9 @@ const SelectScrollDownButton = React.forwardRef(({ className, ...props }, ref) =
 SelectScrollDownButton.displayName =
   SelectPrimitive.ScrollDownButton.displayName
 
-const SEARCH_THRESHOLD = 7
-
 const SelectContent = React.forwardRef(({ className, children, position = "popper", ...props }, ref) => {
   const [search, setSearch] = React.useState("")
-  const [showSearch, setShowSearch] = React.useState(false)
   const viewportRef = React.useRef(null)
-
-  // Count options once mounted; only show the search bar for longer lists
-  React.useLayoutEffect(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-    const options = viewport.querySelectorAll('[role="option"]')
-    setShowSearch(options.length > SEARCH_THRESHOLD)
-  }, [])
 
   // Filter options by the search query (DOM-level, works with any children shape)
   React.useEffect(() => {
@@ -95,21 +84,19 @@ const SelectContent = React.forwardRef(({ className, children, position = "poppe
         position={position}
         {...props}>
         <SelectScrollUpButton />
-        {showSearch && (
-          <div className="sticky top-0 z-10 border-b border-border/60 bg-popover p-2">
-            <div className="flex items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5">
-              <Search className="h-3.5 w-3.5 text-muted-foreground" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                onKeyUp={(e) => e.stopPropagation()}
-                placeholder="Search…"
-                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </div>
+        <div className="sticky top-0 z-10 border-b border-border/60 bg-popover p-2">
+          <div className="flex items-center gap-1.5 rounded-md border border-input bg-background px-2 py-1.5">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
+              onKeyUp={(e) => e.stopPropagation()}
+              placeholder="Search…"
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
           </div>
-        )}
+        </div>
         <SelectPrimitive.Viewport
           ref={viewportRef}
           className={cn("p-1", position === "popper" &&
