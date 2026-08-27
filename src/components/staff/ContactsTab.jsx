@@ -6,20 +6,22 @@ import { useToast } from '@/components/ui/use-toast';
 import MarketDojoPill from './MarketDojoPill';
 import AddressBookModal from './AddressBookModal';
 import CrewEditorModal from './CrewEditorModal';
+import AgencyWorkersModal from './AgencyWorkersModal';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase,
-  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw,
+  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw, Users,
 } from 'lucide-react';
 
 const SUB_TO_TYPE = {
   clients: { key: 'client', label: 'Clients', singular: 'Client', icon: Building2, color: '#059669', isStaff: false },
   contractors: { key: 'subcontractor', label: 'Subcontractors', singular: 'Subcontractor', icon: Wrench, color: '#2563eb', isStaff: true, showCrews: true },
   suppliers: { key: 'supplier', label: 'Suppliers', singular: 'Supplier', icon: Briefcase, color: '#d97706', isStaff: false },
-  agency: { key: 'agency', label: 'Agency Workers', singular: 'Agency Worker', icon: UserCog, color: '#7c3aed', isStaff: true },
+  agency: { key: 'agency', label: 'Agency Workers', singular: 'Agency Worker', icon: UserCog, color: '#7c3aed', isStaff: true, showWorkers: true },
 };
 
 const emptyForm = {
   full_name: '', job_title: '', company: '', market_dojo_onboarded: false,
+  email: '', phone: '', mobile: '',
 };
 
 export default function ContactsTab({ activeSub }) {
@@ -34,6 +36,7 @@ export default function ContactsTab({ activeSub }) {
   const [deletingId, setDeletingId] = useState(null);
   const [addressBook, setAddressBook] = useState(null);
   const [crewEditor, setCrewEditor] = useState(null);
+  const [workersEditor, setWorkersEditor] = useState(null);
   const [migrating, setMigrating] = useState(false);
   const { activeDivisionId } = useDivision();
   const { toast } = useToast();
@@ -87,9 +90,10 @@ export default function ContactsTab({ activeSub }) {
     const q = search.toLowerCase().trim();
     let list = [];
     if (isStaffType) {
-      // Filter out individual driller Staff records (crew_parent_id set) —
-      // these are crew members managed via the CrewEditorModal, not standalone
-      // contact entries. Only parent company records appear in the list.
+      // Filter out individual worker Staff records (crew_parent_id set) —
+      // these are crew members / agency workers managed via their respective
+      // editor modals, not standalone contact entries. Only parent company
+      // records appear in the list.
       list = staff.filter(s => !s.crew_parent_id).map(s => ({
         id: s.id,
         full_name: s.name || '',
@@ -97,9 +101,20 @@ export default function ContactsTab({ activeSub }) {
         company: s.company || '',
         onboarded: !!s.market_dojo_onboarded,
         crew_count: allCrews.filter(c => c.parent_staff_id === s.id).length,
+        worker_count: 0, // populated below for agency
         contacts: s.contacts || [],
         raw: s,
       }));
+      // For agency, count individual workers per parent
+      if (meta.key === 'agency') {
+        const workerCounts = {};
+        staff.forEach(s => {
+          if (s.crew_parent_id) {
+            workerCounts[s.crew_parent_id] = (workerCounts[s.crew_parent_id] || 0) + 1;
+          }
+        });
+        list.forEach(r => { r.worker_count = workerCounts[r.id] || 0; });
+      }
     } else if (meta.key === 'client') {
       list = clients.map(c => {
         const contact = (c.contacts && c.contacts[0]) || {};
@@ -121,6 +136,9 @@ export default function ContactsTab({ activeSub }) {
           full_name: s.contact_name || contact.name || '',
           job_title: contact.role || '',
           company: s.name || '',
+          email: s.contact_email || contact.email || '',
+          phone: s.contact_phone || contact.phone || '',
+          mobile: s.emergency_mobile || '',
           onboarded: false,
           contacts: s.contacts || [],
           raw: s,
@@ -135,7 +153,7 @@ export default function ContactsTab({ activeSub }) {
       );
     }
     return list;
-  }, [isStaffType, meta.key, staff, clients, suppliers, search]);
+  }, [isStaffType, meta.key, staff, clients, suppliers, search, allCrews]);
 
   const onboardedCount = isStaffType ? records.filter(r => r.onboarded).length : 0;
 
@@ -172,7 +190,10 @@ export default function ContactsTab({ activeSub }) {
         await base44.entities.Supplier.create({
           name: addForm.company.trim(),
           contact_name: addForm.full_name.trim(),
-          contacts: [{ name: addForm.full_name.trim(), role: addForm.job_title.trim() }],
+          contact_email: addForm.email.trim() || '',
+          contact_phone: addForm.phone.trim() || '',
+          emergency_mobile: addForm.mobile.trim() || '',
+          contacts: [{ name: addForm.full_name.trim(), role: addForm.job_title.trim(), email: addForm.email.trim(), phone: addForm.phone.trim() }],
           division_id: activeDivisionId || '',
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
@@ -195,6 +216,9 @@ export default function ContactsTab({ activeSub }) {
       job_title: rec.job_title,
       company: rec.company,
       market_dojo_onboarded: rec.onboarded,
+      email: rec.email || '',
+      phone: rec.phone || '',
+      mobile: rec.mobile || '',
     });
     setEditing(rec);
   };
@@ -228,7 +252,10 @@ export default function ContactsTab({ activeSub }) {
         await base44.entities.Supplier.update(editForm.id, {
           name: editForm.company.trim(),
           contact_name: editForm.full_name.trim(),
-          contacts: [{ name: editForm.full_name.trim(), role: editForm.job_title.trim() }],
+          contact_email: editForm.email?.trim() || '',
+          contact_phone: editForm.phone?.trim() || '',
+          emergency_mobile: editForm.mobile?.trim() || '',
+          contacts: [{ name: editForm.full_name.trim(), role: editForm.job_title.trim(), email: editForm.email?.trim() || '', phone: editForm.phone?.trim() || '' }],
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
       }
@@ -267,15 +294,27 @@ export default function ContactsTab({ activeSub }) {
   const Icon = meta.icon;
 
   const crewBadge = (rec) => {
-    if (meta.key !== 'subcontractor') return null;
-    if (rec.crew_count > 0) {
-      return (
-        <span className="text-[10px] text-blue-700 font-medium truncate mt-0.5 inline-flex items-center gap-0.5">
-          <HardHat className="w-3 h-3" /> {rec.crew_count} crew{rec.crew_count !== 1 ? 's' : ''}
-        </span>
-      );
+    if (meta.key === 'subcontractor') {
+      if (rec.crew_count > 0) {
+        return (
+          <span className="text-[10px] text-blue-700 font-medium truncate mt-0.5 inline-flex items-center gap-0.5">
+            <HardHat className="w-3 h-3" /> {rec.crew_count} crew{rec.crew_count !== 1 ? 's' : ''}
+          </span>
+        );
+      }
+      return <span className="text-[10px] text-slate-400 truncate mt-0.5">No crews yet</span>;
     }
-    return <span className="text-[10px] text-slate-400 truncate mt-0.5">No crews yet</span>;
+    if (meta.key === 'agency') {
+      if (rec.worker_count > 0) {
+        return (
+          <span className="text-[10px] text-violet-700 font-medium truncate mt-0.5 inline-flex items-center gap-0.5">
+            <Users className="w-3 h-3" /> {rec.worker_count} worker{rec.worker_count !== 1 ? 's' : ''}
+          </span>
+        );
+      }
+      return <span className="text-[10px] text-slate-400 truncate mt-0.5">No workers yet</span>;
+    }
+    return null;
   };
 
   return (
@@ -389,6 +428,15 @@ export default function ContactsTab({ activeSub }) {
                     <HardHat className="w-3 h-3" /> Crews
                   </button>
                 )}
+                {meta.key === 'agency' && (
+                  <button
+                    onClick={() => setWorkersEditor({ staff: rec.raw, divisionId: rec.raw.division_id })}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-lg hover:bg-violet-100 transition text-xs font-medium"
+                    title="Manage individual agency workers"
+                  >
+                    <Users className="w-3 h-3" /> Workers
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(rec)}
                   disabled={deletingId === rec.id}
@@ -429,6 +477,24 @@ export default function ContactsTab({ activeSub }) {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company *</label>
                 <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
+              {meta.key === 'supplier' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Email</label>
+                    <input type="email" value={addForm.email} onChange={e => setAddForm({ ...addForm, email: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Phone</label>
+                      <input type="text" value={addForm.phone} onChange={e => setAddForm({ ...addForm, phone: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Mobile</label>
+                      <input type="text" value={addForm.mobile} onChange={e => setAddForm({ ...addForm, mobile: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                    </div>
+                  </div>
+                </>
+              )}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
                   <input type="checkbox" checked={!!addForm.market_dojo_onboarded} onChange={e => setAddForm({ ...addForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
@@ -480,6 +546,24 @@ export default function ContactsTab({ activeSub }) {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
                 <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
+              {meta.key === 'supplier' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Email</label>
+                    <input type="email" value={editForm.email || ''} onChange={e => setEditForm({ ...editForm, email: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Phone</label>
+                      <input type="text" value={editForm.phone || ''} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-600 mb-1">Mobile</label>
+                      <input type="text" value={editForm.mobile || ''} onChange={e => setEditForm({ ...editForm, mobile: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                    </div>
+                  </div>
+                </>
+              )}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
                   <input type="checkbox" checked={!!editForm.market_dojo_onboarded} onChange={e => setEditForm({ ...editForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
@@ -519,6 +603,16 @@ export default function ContactsTab({ activeSub }) {
           onClose={() => setCrewEditor(null)}
           parentStaff={crewEditor.staff}
           parentDivisionId={crewEditor.divisionId}
+        />
+      )}
+
+      {/* Agency Workers modal — individual agency workers per agency company */}
+      {workersEditor && (
+        <AgencyWorkersModal
+          open={!!workersEditor}
+          onClose={() => setWorkersEditor(null)}
+          parentStaff={workersEditor.staff}
+          parentDivisionId={workersEditor.divisionId}
         />
       )}
     </div>
