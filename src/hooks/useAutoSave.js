@@ -29,20 +29,22 @@ export default function useAutoSave(entityClient, queryClient, queryKey) {
     const pending = pendingRef.current;
     if (pending.size === 0) return;
     const entries = Array.from(pending.entries());
-    pending.clear();
-    setPendingCount(0);
     setSaveStatus('saving');
 
     // Use bulkUpdate for efficiency — different updates per record
     const bulkPayload = entries.map(([id, updates]) => ({ id, ...updates }));
     try {
       await entityClient.bulkUpdate(bulkPayload);
+      // Only clear pending once the save has actually landed on the server
+      for (const [id] of entries) pending.delete(id);
+      setPendingCount(pending.size);
       if (queryClient && queryKey) {
         queryClient.invalidateQueries({ queryKey });
       }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 1500);
     } catch (e) {
+      // Keep the pending edits so they aren't lost — user can retry or switch back
       console.error('Auto-save failed:', e);
       setSaveStatus('idle');
     }
