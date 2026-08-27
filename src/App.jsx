@@ -12,6 +12,7 @@ import AppLayout from '@/components/AppLayout';
 import HubReadinessGate from '@/components/HubReadinessGate';
 import Home from './pages/Home';
 import PendingAccess from './pages/PendingAccess';
+import Onboarding from './pages/Onboarding';
 import EnterpriseDashboard from './pages/EnterpriseDashboard';
 import BusinessUnitPage from './pages/BusinessUnitPage';
 import EnterpriseProfile from './pages/EnterpriseProfile';
@@ -100,6 +101,7 @@ const AuthenticatedApp = () => {
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
           {/* Staff pages — full-screen, no admin header bar; they render their own mobile-first headers */}

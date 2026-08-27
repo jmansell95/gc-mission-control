@@ -10,35 +10,49 @@ async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
     img.src = imageSrc;
   });
 
+  // Downscale large source images so the intermediate canvas stays well
+  // within browser canvas size limits. Hitting the limit makes toBlob
+  // silently return null, which hangs the cropper — the "bugs out"
+  // profile-photo issue.
+  const MAX_DIM = 1280;
+  const scale = Math.min(1, MAX_DIM / Math.max(image.width, image.height));
+  const iw = image.width * scale;
+  const ih = image.height * scale;
+  const crop = {
+    x: pixelCrop.x * scale,
+    y: pixelCrop.y * scale,
+    width: pixelCrop.width * scale,
+    height: pixelCrop.height * scale,
+  };
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  const maxSize = Math.max(image.width, image.height);
+  const maxSize = Math.max(iw, ih);
   const safeArea = 2 * Math.round(maxSize / 2);
   canvas.width = safeArea;
   canvas.height = safeArea;
 
   ctx.translate(safeArea / 2, safeArea / 2);
   if (rotation) ctx.rotate((rotation * Math.PI) / 180);
-  ctx.translate(-image.width / 2, -image.height / 2);
-  ctx.drawImage(image, 0, 0);
+  ctx.translate(-iw / 2, -ih / 2);
+  ctx.drawImage(image, 0, 0, iw, ih);
 
   const data = ctx.getImageData(0, 0, safeArea, safeArea);
 
-  canvas.width = pixelCrop.width;
-  canvas.height = pixelCrop.height;
+  canvas.width = crop.width;
+  canvas.height = crop.height;
 
   ctx.putImageData(
     data,
-    Math.round(0 - safeArea / 2 + image.width / 2 - pixelCrop.x),
-    Math.round(0 - safeArea / 2 + image.height / 2 - pixelCrop.y)
+    Math.round(0 - safeArea / 2 + iw / 2 - crop.x),
+    Math.round(0 - safeArea / 2 + ih / 2 - crop.y)
   );
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => {
-      if (!blob) return;
-      const file = new File([blob], 'cropped.jpg', { type: 'image/jpeg' });
-      resolve(file);
+      if (!blob) { resolve(null); return; }
+      resolve(new File([blob], 'cropped.jpg', { type: 'image/jpeg' }));
     }, 'image/jpeg', 0.92);
   });
 }
@@ -59,7 +73,7 @@ export default function ImageCropper({ imageSrc, aspect = 1.586, onConfirm, onCa
     setProcessing(true);
     try {
       const file = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
-      onConfirm(file);
+      if (file) onConfirm(file);
     } catch (e) {
       console.error(e);
     }

@@ -68,8 +68,8 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
     setAvatarSrc(null);
     setUploadingAvatar(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file: croppedFile });
-      setForm(f => ({ ...f, avatar_url: res.file_url }));
+      const res = await base44.functions.invoke('uploadProfilePhoto', { file: croppedFile });
+      setForm(f => ({ ...f, avatar_url: res.data?.file_url || '' }));
       toast({ title: 'Photo updated', description: 'Save changes to confirm.' });
     } catch (e) {
       toast({ title: 'Upload failed', description: e?.message, variant: 'destructive' });

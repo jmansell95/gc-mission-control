@@ -34,6 +34,11 @@ export default function Home() {
           return;
         }
 
+        // First-time users who haven't completed profile setup go to onboarding
+        if (profile?.onboarding_complete === false) {
+          navigate('/onboarding', { replace: true });
+          return;
+        }
         const landing = resolveRoleLandingPage(profile, false);
         navigate(landing, { replace: true });
       } catch (err) {

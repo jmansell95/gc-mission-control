@@ -29,7 +29,7 @@
     },
     "avatar_url": {
       "type": "string",
-      "description": "Profile picture URL \u2014 uploaded by the staff member via the profile editor. Displayed in the admin sidebar and profile header."
+      "description": "Profile picture URL \u2014 uploaded by the staff member via the profile editor or the first-login onboarding screen. Displayed in the admin sidebar and profile header."
     },
     "worker_type": {
       "type": "string",
@@ -180,6 +180,11 @@
     "market_dojo_onboarded_at": {
       "type": "string",
       "description": "ISO timestamp of when the manager ticked 'Onboarded in Market Dojo' for this worker."
+    },
+    "onboarding_complete": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once the staff member has completed the first-login profile setup screen (photo + phone). When false, Home.jsx routes them to /onboarding instead of their landing page so new invitees finish their profile before entering the app. Existing staff are backfilled to true so only genuinely new users see the gate."
     }
   },
   "required": [

@@ -78,6 +78,7 @@ export async function buildMyProfile(base44, user) {
       delivery_dashboard_enabled: isAdmin,
       system_role: isAdmin ? 'super_admin' : 'user',
       last_acknowledged_week: null,
+      onboarding_complete: false,
     };
   }
 
@@ -121,9 +122,12 @@ export async function buildMyProfile(base44, user) {
     'Field': 'field',
     'Read Only': 'read_only',
   };
+  // When no permission group is assigned, infer the role from the team
+  // category so office staff (management teams) aren't misclassified as
+  // field staff. 'management' → office role; depot/field_ops/no team → field.
   const derivedRole = effectivePermissionGroup
     ? (GROUP_NAME_TO_ROLE[effectivePermissionGroup.name] || s.system_role || 'field')
-    : (s.system_role || 'field');
+    : (team?.category === 'management' ? 'management' : (s.system_role || 'field'));
 
   return {
     id: s.id,
@@ -168,5 +172,6 @@ export async function buildMyProfile(base44, user) {
         }
       : null,
     last_acknowledged_week: s.last_acknowledged_week || null,
+    onboarding_complete: s.onboarding_complete === true,
   };
 }
