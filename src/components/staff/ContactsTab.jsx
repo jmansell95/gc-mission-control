@@ -8,7 +8,7 @@ import AddressBookModal from './AddressBookModal';
 import CrewEditorModal from './CrewEditorModal';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase,
-  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat,
+  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw,
 } from 'lucide-react';
 
 const SUB_TO_TYPE = {
