@@ -24,6 +24,18 @@
       "default": true,
       "description": "When true, incoming audit reports are automatically matched to a job by site name / job reference found in the audit metadata."
     },
+    "vehicle_check_url": {
+      "type": "string",
+      "description": "Direct SafetyCulture/Mitti inspection link for the daily vehicle walk-round check. Shown to crew in the ShiftWizard Checks step (before they leave for site). When blank, falls back to the built-in default SafetyCulture audit link."
+    },
+    "powra_url": {
+      "type": "string",
+      "description": "Direct SafetyCulture/Mitti inspection link for the Point of Work Risk Assessment (POWRA). Shown to crew on arrival at site. When blank, falls back to the built-in default SafetyCulture audit link."
+    },
+    "equipment_check_url": {
+      "type": "string",
+      "description": "Direct SafetyCulture/Mitti inspection link for the equipment/plant check. Shown during the site briefing. When blank, falls back to the built-in default SafetyCulture audit link."
+    },
     "last_webhook_at": {
       "type": "string",
       "description": "ISO timestamp of the last webhook payload received from Mitti."

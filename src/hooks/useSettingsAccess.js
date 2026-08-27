@@ -32,7 +32,7 @@ export function useSettingsAccess() {
     if (settingId) {
       await base44.entities.AppSetting.update(settingId, payload);
     } else {
-      const created = await base44.entities.AppSetting.create(payload);
+      await base44.entities.AppSetting.create(payload);
     }
     queryClient.invalidateQueries({ queryKey: ['settings-access-control'] });
   };

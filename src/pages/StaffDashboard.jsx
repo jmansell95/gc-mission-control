@@ -47,7 +47,7 @@ export default function StaffDashboard() {
   const [staff, setStaff] = useState(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const isPlatformAdmin = user?.role === 'admin';
+  const isPlatformAdmin = user?.role === 'admin' || user?.role === 'director';
   const { activeDivision } = useDivision();
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);

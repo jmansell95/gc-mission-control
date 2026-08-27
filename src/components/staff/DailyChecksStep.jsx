@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2, ClipboardCheck } from 'lucide-react';
 import { format } from 'date-fns';
+import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
+import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 
 /**
  * DailyChecksStep — the pre-work checklist step of the ShiftWizard.
@@ -19,6 +21,7 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
   const today = format(new Date(), 'yyyy-MM-dd');
   const [checkedItems, setCheckedItems] = useState({});
   const [photos, setPhotos] = useState({});
+  const { vehicleCheckUrl } = useMittiCheckLinks();
 
   // Fetch the daily checklist config
   const { data: checklistConfig, isLoading } = useQuery({
@@ -84,26 +87,17 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
 
   return (
     <div className="space-y-4 px-5 py-2">
-      {/* Mitti hand-off banner */}
-      <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-200 rounded-2xl px-4 py-4">
-        <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <Info className="w-5 h-5 text-indigo-600" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-indigo-900">Complete all checks in Mitti first</p>
-          <p className="text-xs text-indigo-700 mt-1 leading-relaxed">
-            All daily vehicle, plant and safety checks must be completed in the Mitti app.
-            Once you've finished your checks there, come back here and tick each item below to confirm.
-          </p>
-          <a
-            href="https://mitti.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-bold text-indigo-700 mt-2 hover:underline"
-          >
-            Open Mitti <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
+      {/* Vehicle check — the first and most important Mitti prompt.
+          Framed as "before you leave for site" so crew do it at the yard,
+          not after they arrive. */}
+      <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
+
+      {/* Generic Mitti hand-off note for plant / PPE checks */}
+      <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
+        <Info className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-slate-600 leading-relaxed">
+          Complete your plant, PPE and any remaining safety checks in Mitti too. Once you have finished there, come back here and tick each item below to confirm.
+        </p>
       </div>
 
       {/* Progress bar */}

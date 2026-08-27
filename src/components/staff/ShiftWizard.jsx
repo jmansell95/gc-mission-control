@@ -16,6 +16,8 @@ import DepotShiftWizard from '@/components/staff/DepotShiftWizard';
 import WeatherCard from '@/components/staff/WeatherCard';
 import JobContextCard from '@/components/staff/JobContextCard';
 import ShiftStepRail from '@/components/staff/ShiftStepRail';
+import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
+import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
 
@@ -37,6 +39,7 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
   });
   const [gpsPrefilled, setGpsPrefilled] = useState(false);
   const [geofencePrefilled, setGeofencePrefilled] = useState(false);
+  const { powraUrl } = useMittiCheckLinks();
 
   // Fetch Geotab auto-generated travel times for today to pre-fill the form
   const { data: geotabEntries = [] } = useQuery({
@@ -136,6 +139,10 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
 
       {/* Job context — site contact, notes, safety info */}
       <JobContextCard job={job} />
+
+      {/* POWRA reminder — now you are on site, complete your Point of Work
+          Risk Assessment in Mitti before starting work. */}
+      <MittiSafetyPrompt type="powra" url={powraUrl} />
 
       <div className="grid grid-cols-2 gap-3">
         <div>

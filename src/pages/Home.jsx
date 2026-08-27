@@ -45,7 +45,7 @@ export default function Home() {
         if (cancelled) return;
         // Fallback: check division_id from the user record before sending to pending
         if (user?.division_id) {
-          navigate(user.role === 'admin' ? '/enterprise' : '/staff-schedule', { replace: true });
+          navigate((user.role === 'admin' || user.role === 'director') ? '/enterprise' : '/staff-schedule', { replace: true });
         } else {
           navigate('/pending-access', { replace: true });
         }

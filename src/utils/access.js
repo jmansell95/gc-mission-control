@@ -21,6 +21,8 @@ export const ROLE_SECTIONS = {
 export function resolveRole(profile, isPlatformAdmin) {
   if (!profile) return null;
   if (isPlatformAdmin || profile.is_admin) return 'super_admin';
+  // Directors are enterprise-level admins for access purposes
+  if (profile.system_role === 'director') return 'super_admin';
   return profile.system_role || 'field';
 }
 
@@ -93,6 +95,7 @@ export function canViewCosts(profile, isPlatformAdmin) {
   const role = resolveRole(profile, isPlatformAdmin);
   if (role === 'field') return false;
   if (profile.worker_type === 'subcontractor') return false;
+  if (profile.worker_type === 'agency') return false;
   return true;
 }
 // Alias for legacy imports

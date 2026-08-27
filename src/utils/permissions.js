@@ -64,6 +64,8 @@ export const SECTION_TO_MODULE = {
   import: 'settings',
   audit: 'audit-trail',
   'access-levels': 'settings',
+  performance: 'billing',
+  investigation: 'jobs',
 };
 
 // Build a default permissions object (all modules = 'none').

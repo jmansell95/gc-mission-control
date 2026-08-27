@@ -50,6 +50,9 @@ export default function MittiSettings() {
         api_token: config.api_token || '',
         enabled: !!config.enabled,
         auto_link_to_jobs: config.auto_link_to_jobs !== false,
+        vehicle_check_url: config.vehicle_check_url || '',
+        powra_url: config.powra_url || '',
+        equipment_check_url: config.equipment_check_url || '',
       });
     }
   }, [config]);
@@ -92,6 +95,9 @@ export default function MittiSettings() {
         api_token: form.api_token,
         enabled: form.enabled,
         auto_link_to_jobs: form.auto_link_to_jobs,
+        vehicle_check_url: form.vehicle_check_url,
+        powra_url: form.powra_url,
+        equipment_check_url: form.equipment_check_url,
       });
       queryClient.invalidateQueries({ queryKey: ['mitti-config'] });
     } catch (e) {
@@ -214,6 +220,33 @@ export default function MittiSettings() {
               onChange={(e) => setForm({ ...form, api_token: e.target.value })}
               placeholder="For future pull-based sync"
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+          </div>
+          <div className="pt-2 border-t border-slate-100">
+            <p className="text-xs font-bold text-slate-700 mb-2">Crew Safety Check Links (Mitti / SafetyCulture)</p>
+            <p className="text-[11px] text-slate-400 mb-3">These links power the "Open Mitti" buttons crew see in their daily shift wizard. Leave blank to use the built-in defaults.</p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Daily Vehicle Check URL</label>
+                <input type="text" value={form.vehicle_check_url}
+                  onChange={(e) => setForm({ ...form, vehicle_check_url: e.target.value })}
+                  placeholder="SafetyCulture inspection link — shown before crew leave for site"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">POWRA URL</label>
+                <input type="text" value={form.powra_url}
+                  onChange={(e) => setForm({ ...form, powra_url: e.target.value })}
+                  placeholder="SafetyCulture inspection link — shown on arrival at site"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Equipment / Plant Check URL</label>
+                <input type="text" value={form.equipment_check_url}
+                  onChange={(e) => setForm({ ...form, equipment_check_url: e.target.value })}
+                  placeholder="SafetyCulture inspection link — shown during site briefing"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+              </div>
+            </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Webhook Endpoint URL</label>
