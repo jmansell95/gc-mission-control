@@ -21,6 +21,16 @@ export default function SubcontractorCrewCard({ job }) {
     queryFn: () => base44.entities.Contractor.list('-created_date', 500),
     enabled: subconLogs.length > 0,
   });
+  // Pull Staff records (subcontractor/agency) assigned to the job via rota,
+  // so we can show their lead/second man names alongside the SubcontractorLog entries.
+  // Declared before the drillingCrews query so crewStaffIds is initialized when
+  // drillingCrews' enabled option references it (avoids a temporal-dead-zone crash).
+  const { data: crewRotas = [] } = useQuery({
+    queryKey: ['subcon-crew-rotas', job.id],
+    queryFn: () => base44.entities.RotaAssignment.filter({ job_id: job.id }),
+    enabled: !!job.id,
+  });
+  const crewStaffIds = [...new Set(crewRotas.map(r => r.staff_id).filter(Boolean))];
   // Fetch DrillingCrew groupings for subcontractor crew pairings (Lead + Second Man)
   const { data: drillingCrews = [] } = useQuery({
     queryKey: ['subcon-crew-drilling-crews'],
@@ -36,15 +46,6 @@ export default function SubcontractorCrewCard({ job }) {
     }
     return map;
   }, [drillingCrews]);
-
-  // Also pull Staff records (subcontractor/agency) assigned to the job via rota,
-  // so we can show their lead/second man names alongside the SubcontractorLog entries.
-  const { data: crewRotas = [] } = useQuery({
-    queryKey: ['subcon-crew-rotas', job.id],
-    queryFn: () => base44.entities.RotaAssignment.filter({ job_id: job.id }),
-    enabled: !!job.id,
-  });
-  const crewStaffIds = [...new Set(crewRotas.map(r => r.staff_id).filter(Boolean))];
   const { data: crewStaff = [] } = useQuery({
     queryKey: ['subcon-crew-staff', crewStaffIds.join(',')],
     queryFn: () => base44.entities.Staff.list(),
