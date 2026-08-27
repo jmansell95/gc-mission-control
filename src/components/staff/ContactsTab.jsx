@@ -34,9 +34,30 @@ export default function ContactsTab({ activeSub }) {
   const [deletingId, setDeletingId] = useState(null);
   const [addressBook, setAddressBook] = useState(null);
   const [crewEditor, setCrewEditor] = useState(null);
+  const [migrating, setMigrating] = useState(false);
   const { activeDivisionId } = useDivision();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleMigrateCrews = async () => {
+    if (!confirm('Migrate legacy Lead Driller / Second Man text fields into the new DrillingCrew grouping structure? This is a one-time operation.')) return;
+    setMigrating(true);
+    try {
+      const res = await base44.functions.invoke('migrateCrews', {});
+      const data = res.data || res;
+      toast({
+        title: 'Migration complete',
+        description: `${data.stats?.migrated || 0} subcontractor(s) migrated · ${data.stats?.crews_created || 0} crew(s) created · ${data.stats?.drillers_created || 0} driller(s) created.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
+      queryClient.invalidateQueries({ queryKey: ['drilling-crews-all'] });
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+    } catch (err) {
+      toast({ title: 'Migration failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setMigrating(false);
+    }
+  };
 
   const { data: staff = [], isLoading: staffLoading } = useQuery({
     queryKey: ['contacts-staff', meta.key],
@@ -270,12 +291,24 @@ export default function ContactsTab({ activeSub }) {
               {isStaffType ? 'Creates staff records for rota assignment. Onboarding tracked via Market Dojo.' : 'Contact directory — not assignable to rotas.'}
             </p>
           </div>
-          <button
-            onClick={() => { setAddForm(emptyForm); setShowAdd(true); }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm flex-shrink-0"
-          >
-            <Plus className="w-4 h-4" /> Add {meta.singular}
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {meta.key === 'subcontractor' && (
+              <button
+                onClick={handleMigrateCrews}
+                disabled={migrating}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-slate-600 border border-slate-200 rounded-lg hover:border-[#2E5A1A]/40 transition text-sm font-semibold disabled:opacity-50"
+                title="One-time migration: convert legacy Lead/Second Man text fields into DrillingCrew groupings"
+              >
+                {migrating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Migrate Crews
+              </button>
+            )}
+            <button
+              onClick={() => { setAddForm(emptyForm); setShowAdd(true); }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm"
+            >
+              <Plus className="w-4 h-4" /> Add {meta.singular}
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap pt-2 border-t border-slate-100">
           <div className="relative flex-1 min-w-[200px]">

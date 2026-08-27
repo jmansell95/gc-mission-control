@@ -71,7 +71,7 @@ export default function CrewEditorModal({ open, onClose, parentStaff, parentDivi
     setSaving(true);
     try {
       const leadName = form.lead_name.trim();
-      const secondName = form.second_man_name.trim() || null;
+      const secondName = form.second_name.trim() || null;
       const leadPhone = form.lead_phone.trim() || null;
       const secondPhone = form.second_phone.trim() || null;
 
