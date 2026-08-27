@@ -60,6 +60,7 @@ export default function AFPUploadModal({ job, onClose }) {
         description: `${data.total_line_items || data.line_item_count || 0} line items across ${afpsCreated} AFP${afpsCreated > 1 ? 's' : ''}, ${data.variation_count || 0} variations, £${Number(data.total_claimed || 0).toLocaleString()} total claimed.`,
       });
       queryClient.invalidateQueries({ queryKey: ['afp', job.id] });
+      queryClient.invalidateQueries({ queryKey: ['afp-line-items'] });
       queryClient.invalidateQueries({ queryKey: ['cvr-portfolio'] });
       setStage('done');
       setTimeout(onClose, 800);

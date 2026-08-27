@@ -84,14 +84,10 @@ export default async function(req: Request): Promise<Response> {
 
     // ── Multi-AFP split mode ──
     if (afpSplit.length > 0) {
-      // Clean up existing AFPs for this job that came from a previous upload
-      // (only draft AFPs — don't touch submitted/approved/invoiced)
+      // Fetch existing AFPs for this job so we can upsert by afp_number.
+      // Only draft AFPs are updated in place; submitted/approved/invoiced AFPs
+      // are never touched — their periods are skipped entirely.
       const existingAfps = await base44.entities.AFP.filter({ job_id }, 'afp_number', 50);
-      const draftAfps = existingAfps.filter(a => a.status === 'draft');
-      for (const a of draftAfps) {
-        await base44.entities.AFPLineItem.deleteMany({ afp_id: a.id });
-        await base44.entities.AFP.delete(a.id);
-      }
 
       const createdAfpIds: string[] = [];
       let totalLineItems = 0;
@@ -129,8 +125,21 @@ export default async function(req: Request): Promise<Response> {
           last_updated_by: userName,
         };
 
-        const afp = await base44.entities.AFP.create(afpData);
-        const afpId = afp.id;
+        // Upsert by afp_number: reuse existing draft AFP if present, skip
+        // non-draft AFPs entirely, create new when no match exists.
+        const existingForNumber = existingAfps.find(a => a.afp_number === period.afp_number);
+        if (existingForNumber && existingForNumber.status !== 'draft') {
+          continue; // already submitted/approved/invoiced — don't touch
+        }
+        let afpId: string;
+        if (existingForNumber) {
+          await base44.entities.AFPLineItem.deleteMany({ afp_id: existingForNumber.id });
+          await base44.entities.AFP.update(existingForNumber.id, afpData);
+          afpId = existingForNumber.id;
+        } else {
+          const afp = await base44.entities.AFP.create(afpData);
+          afpId = afp.id;
+        }
         createdAfpIds.push(afpId);
 
         const lineItems: any[] = [];
@@ -304,9 +313,16 @@ export default async function(req: Request): Promise<Response> {
           }
         }
 
-        // Bulk create line items
+        // Bulk create line items, verifying they actually persisted
+        // (bulkCreate can silently fail for certain batch compositions)
         if (lineItems.length > 0) {
           await base44.entities.AFPLineItem.bulkCreate(lineItems);
+          const verifyItems = await base44.entities.AFPLineItem.filter({ afp_id: afpId }, undefined, 1);
+          if (verifyItems.length === 0) {
+            for (const li of lineItems) {
+              await base44.entities.AFPLineItem.create(li);
+            }
+          }
           totalLineItems += lineItems.length;
         }
 
@@ -368,6 +384,7 @@ export default async function(req: Request): Promise<Response> {
 
       return Response.json({
         afps_created: createdAfpIds.length,
+        afp_ids: createdAfpIds,
         total_line_items: totalLineItems,
         total_claimed: Math.round(totalClaimed * 100) / 100,
         variation_count: variationCount,
