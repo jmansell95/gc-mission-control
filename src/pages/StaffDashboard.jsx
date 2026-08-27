@@ -44,12 +44,34 @@ import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 
 export default function StaffDashboard() {
   const navigate = useNavigate();
-  const [staff, setStaff] = useState(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const isPlatformAdmin = user?.role === 'admin' || user?.role === 'director';
   const { activeDivision } = useDivision();
-  const [loading, setLoading] = useState(true);
+  // Shared profile query — RouteGuard, Home, and StaffDashboard all read the
+  // same cache so the profile is fetched once and stays in sync across the app.
+  const { data: staff = null, isLoading: loading } = useQuery({
+    queryKey: ['my-staff-profile'],
+    queryFn: async () => {
+      try {
+        const res = await base44.functions.invoke('getMyStaffProfile');
+        const profile = res.data;
+        if (profile && (profile.id || profile.is_admin)) return profile;
+        if (isPlatformAdmin) {
+          return { id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true, delivery_dashboard_enabled: true };
+        }
+        return null;
+      } catch (error) {
+        console.error('Error loading staff:', error);
+        if (isPlatformAdmin) {
+          return { id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true, delivery_dashboard_enabled: true };
+        }
+        return null;
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [shiftWizard, setShiftWizard] = useState(null);
   const [earlyLeaveAssignment, setEarlyLeaveAssignment] = useState(null);
@@ -63,28 +85,6 @@ export default function StaffDashboard() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    async function loadStaff() {
-      try {
-        const res = await base44.functions.invoke('getMyStaffProfile');
-        const profile = res.data;
-        if (profile && (profile.id || profile.is_admin)) {
-          setStaff(profile);
-        } else if (isPlatformAdmin) {
-          // Super admin with no linked crew profile — preview the schedule
-          // instead of hitting the "No crew profile found" dead-end.
-          // Include delivery_dashboard_enabled so the Truck icon shows.
-          setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true, delivery_dashboard_enabled: true });
-        }
-      } catch (error) {
-        console.error('Error loading staff:', error);
-        if (isPlatformAdmin) {
-          setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true, delivery_dashboard_enabled: true });
-        }
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadStaff();
     const handleOnline = () => {
       setIsOnline(true);
       syncAllOfflineData().then(result => {
@@ -429,7 +429,7 @@ export default function StaffDashboard() {
     try {
       const res = await base44.functions.invoke('acknowledgeSchedule', { week_start: weekStart });
       const ackAt = res?.data?.acknowledged_at || new Date().toISOString();
-      setStaff(prev => prev ? { ...prev, last_acknowledged_week: weekStart, schedule_acknowledged_at: ackAt } : prev);
+      queryClient.setQueryData(['my-staff-profile'], prev => prev ? { ...prev, last_acknowledged_week: weekStart, schedule_acknowledged_at: ackAt } : prev);
     } catch (error) {
       console.error('Error acknowledging schedule:', error);
     } finally {
