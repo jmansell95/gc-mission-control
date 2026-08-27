@@ -3,8 +3,9 @@ import React from 'react';
 /**
  * SubPills — secondary segmented control rendered below a hub's main TabBar.
  *
- * Uses the same slick glass + dark-green gradient style as TabBar so every
- * tab nav across the app looks consistent.
+ * Distinct from the main TabBar: a recessed brand-tinted track with bright
+ * leaf-green active pills so sub-pages clearly read as a level below the
+ * main hub tabs.
  *
  * Props:
  *  - pills: [{ id, label, icon?, badge?, count? }]
@@ -16,7 +17,7 @@ import React from 'react';
 export default function SubPills({ pills = [], active, onChange }) {
   if (!pills || pills.length <= 1) return null;
   return (
-    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-sm p-1.5 flex gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="relative bg-gradient-to-b from-slate-50/90 to-[#2E5A1A]/[0.04] backdrop-blur-md rounded-2xl border border-[#2E5A1A]/12 shadow-[inset_0_1px_3px_rgba(46,90,26,0.08)] p-1.5 flex gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {pills.map(p => {
         const Icon = p.icon;
         const isActive = active === p.id;
@@ -25,19 +26,19 @@ export default function SubPills({ pills = [], active, onChange }) {
             key={p.id}
             onClick={() => onChange(p.id)}
             type="button"
-            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
+            className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
               isActive
-                ? 'bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white shadow-sm shadow-emerald-200/60'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-gradient-to-br from-[#8DC63F] to-[#6fa828] text-[#1c4a12] shadow-sm shadow-emerald-500/30 ring-1 ring-[#8DC63F]/40'
+                : 'text-slate-500 hover:bg-white/70 hover:text-[#2E5A1A]'
             }`}
           >
-            {Icon && <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />}
+            {Icon && <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-[#1c4a12]' : 'text-slate-400 group-hover:text-[#2E5A1A]'}`} />}
             {p.label}
             {p.badge != null && p.badge > 0 && (
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-600'}`}>{p.badge}</span>
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#1c4a12]/15 text-[#1c4a12]' : 'bg-rose-100 text-rose-600'}`}>{p.badge}</span>
             )}
             {p.count != null && (
-              <span className={`ml-0.5 text-xs font-normal ${isActive ? 'text-white/70' : 'text-slate-400'}`}>{p.count}</span>
+              <span className={`ml-0.5 text-xs font-normal ${isActive ? 'text-[#1c4a12]/70' : 'text-slate-400'}`}>{p.count}</span>
             )}
           </button>
         );
