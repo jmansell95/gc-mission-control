@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  Building2, Phone, Mail, Award, Plus, X, Edit2, Trash2, Search, ShieldCheck, Loader2,
+  Building2, Phone, Mail, Award, Plus, X, Edit2, Trash2, Search, ShieldCheck, Loader2, Sparkles, Settings,
 } from 'lucide-react';
+import { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
 
 const TRAINING_SERVICES = [
   { value: 'cscs_card', label: 'CSCS Card' },
@@ -43,7 +44,7 @@ const ACCREDITATIONS = [
  * flagged is_training_provider = true). Shows company name, phone, email,
  * what they provide, and accreditations. Add/edit/delete inline.
  */
-export default function TrainingProvidersTab() {
+export default function TrainingProvidersTab({ onBulkImport, onManage }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -80,27 +81,15 @@ export default function TrainingProvidersTab() {
   return (
     <div className="space-y-4">
       {/* Header + actions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg stat-gradient-brand flex items-center justify-center">
-            <Building2 className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h2 className="text-sm font-extrabold text-slate-900">Training Providers</h2>
-            <p className="text-xs text-slate-500">{filtered.length} provider{filtered.length !== 1 ? 's' : ''}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search providers…"
-              className="pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 w-48" />
-          </div>
-          <button onClick={() => { setEditing(null); setShowForm(true); }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm">
-            <Plus className="w-4 h-4" /> Add Provider
-          </button>
-        </div>
+      <ViewHeader icon={Building2} title="Training Providers" subtitle={`${filtered.length} provider${filtered.length !== 1 ? 's' : ''} · what they deliver drives course linking`}>
+        <button onClick={() => { setEditing(null); setShowForm(true); }} className={PRIMARY_BTN} type="button"><Plus className="w-4 h-4" /> Add Provider</button>
+        <button onClick={onBulkImport} className={SECONDARY_BTN} type="button"><Sparkles className="w-4 h-4" /> Bulk Import</button>
+        <button onClick={onManage} className={SECONDARY_BTN} type="button"><Settings className="w-4 h-4" /> Categories</button>
+      </ViewHeader>
+      <div className="relative max-w-sm mb-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search providers…"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10" />
       </div>
 
       {/* Provider cards */}

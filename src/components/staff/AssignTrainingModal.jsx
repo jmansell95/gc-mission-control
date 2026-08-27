@@ -156,18 +156,19 @@ export default function AssignTrainingModal({ preselectedStaffIds = [], preselec
                 </div>
               ))}
             </div>
-            {/* Per-course provider picker */}
+            {/* Per-course provider picker — smart-linked to the course's category */}
             <div className="space-y-1.5">
               {selectedCourses.map(c => {
                 const currentProviderId = providerOverrides[c.id] !== undefined ? providerOverrides[c.id] : (c.provider_id || '');
+                const matchingProviders = c.category ? providers.filter(p => p.training_services?.includes(c.category)) : providers;
                 return (
                   <div key={c.id} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-100">
                     <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                     <span className="text-xs font-medium text-slate-600 truncate flex-1 min-w-0">{c.title}</span>
                     <select value={currentProviderId} onChange={e => setProviderOverrides(prev => ({ ...prev, [c.id]: e.target.value }))}
                       className="px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#2E5A1A] bg-white max-w-[160px]">
-                      <option value="">No provider</option>
-                      {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      <option value="">{c.category && matchingProviders.length === 0 ? 'No match' : 'No provider'}</option>
+                      {matchingProviders.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                     </select>
                   </div>
                 );

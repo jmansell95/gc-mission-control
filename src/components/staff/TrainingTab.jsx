@@ -73,7 +73,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
   }, [requirements]);
 
   const myCompliance = useMemo(
-    () => compliance.filter(c => c.reference_id === staffId || (staffName && c.reference_name === staffName)),
+    () => compliance.filter(c => (c.reference_id === staffId || (staffName && c.reference_name === staffName)) && c.review_status !== 'rejected'),
     [compliance, staffId, staffName]
   );
 
@@ -83,6 +83,8 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
     for (const item of items) {
       if (item.status_override === 'not_required') return 'not_required';
       if (item.status_override === 'missing') continue;
+      // Pending-review documents don't count as valid yet (awaiting manager approval)
+      if (item.review_status === 'pending_review') continue;
       const days = complianceDaysUntil(item.expiry_date);
       if (days === null) return 'valid';
       if (days < 0) continue;

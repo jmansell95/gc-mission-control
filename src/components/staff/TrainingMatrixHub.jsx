@@ -2,21 +2,20 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  GraduationCap, Users, AlertTriangle, CheckCircle2, Clock, Calendar,
-  Search, ShieldCheck, BookOpen, Plus, Trash2, X, Settings, GripVertical,
-  IdCard, Car, Award, CreditCard, FileText, Edit2,
+  Users, Calendar, BookOpen, Building2, Settings, Sparkles, Plus, X, Edit2, Trash2, GripVertical,
+  IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap,
 } from 'lucide-react';
-import { format, isFuture } from 'date-fns';
 import { complianceDaysUntil } from '@/utils/complianceDate';
-import TrainingManager from '@/components/TrainingManager';
 import TrainingStaffCardGrid from '@/components/training/TrainingStaffCardGrid';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import AssignTrainingModal from '@/components/staff/AssignTrainingModal';
 import TrainingProvidersTab from '@/components/staff/TrainingProvidersTab';
 import BulkTrainingImportModal from '@/components/staff/BulkTrainingImportModal';
+import TrainingManager from '@/components/TrainingManager';
+import AutoBookerModal from '@/components/staff/AutoBookerModal';
+import TrainingHubRail, { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
 import { CardGridSkeleton } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';
-import { Building2, Sparkles } from 'lucide-react';
 
 const ICON_MAP = { IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap };
 
@@ -34,59 +33,23 @@ export default function TrainingMatrixHub() {
   const [view, setView] = useState('cards');
   const [showManage, setShowManage] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
-  const { data: requirements = [] } = useQuery({ queryKey: ['training-requirements'], queryFn: () => base44.entities.TrainingRequirement.list('sort_order', 100) });
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 w-fit overflow-x-auto no-scrollbar">
-          <button onClick={() => setView('cards')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
-              (view === 'cards' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
-            <Users className="w-3.5 h-3.5" /> Staff Cards
-          </button>
-          <button onClick={() => setView('calendar')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
-              (view === 'calendar' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
-            <Calendar className="w-3.5 h-3.5" /> Calendar
-          </button>
-          <button onClick={() => setView('courses')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
-              (view === 'courses' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
-            <BookOpen className="w-3.5 h-3.5" /> Courses
-          </button>
-          <button onClick={() => setView('providers')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
-              (view === 'providers' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
-            <Building2 className="w-3.5 h-3.5" /> Providers
-          </button>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowBulkImport(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold hover:brightness-110 transition shadow-sm">
-            <Sparkles className="w-4 h-4" /> Bulk Import
-          </button>
-          <button onClick={() => setShowManage(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition bg-white">
-            <Settings className="w-4 h-4" /> Categories
-          </button>
-        </div>
+    <div className="flex flex-col md:flex-row gap-4">
+      <TrainingHubRail view={view} setView={setView} />
+      <div className="flex-1 min-w-0">
+        {view === 'cards' && <CardsView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
+        {view === 'calendar' && <CalendarView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
+        {view === 'courses' && <TrainingManager onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
+        {view === 'providers' && <TrainingProvidersTab onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
       </div>
-      {view === 'cards' && <CardsView />}
-      {view === 'calendar' && <CalendarView />}
-      {view === 'courses' && <TrainingManager />}
-      {view === 'providers' && <TrainingProvidersTab />}
-      {showManage && (
-        <ManageCategoriesModal requirements={requirements} onClose={() => setShowManage(false)} />
-      )}
-      {showBulkImport && (
-        <BulkTrainingImportModal onClose={() => setShowBulkImport(false)} />
-      )}
+      {showManage && <ManageCategoriesModal onClose={() => setShowManage(false)} />}
+      {showBulkImport && <BulkTrainingImportModal onClose={() => setShowBulkImport(false)} />}
     </div>
   );
 }
 
-/** Shared data fetcher — used by both CardsView and CalendarView. */
+/** Shared data fetcher — used by CardsView and CalendarView. */
 function useTrainingData() {
   const { data: staff = [], isLoading } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
@@ -121,17 +84,24 @@ function useTrainingData() {
     const m = {}; courses.forEach(c => { m[c.id] = c.category; }); return m;
   }, [courses]);
 
+  // Aligned with the staff profile TrainingTab logic: a category is only
+  // 'not_required' when the team HAS required qualifications AND this one
+  // isn't in them. When the team has no required quals, every category shows
+  // its real status — so a person with no training shows as gaps, not OK.
   const getQualStatus = (staffMember, qualType) => {
     const team = teams.find(t => t.id === staffMember.team_id);
     const required = team?.required_qualifications || [];
-    if (!required.includes(qualType)) return 'not_required';
+    if (required.length > 0 && !required.includes(qualType)) return 'not_required';
     const items = compliance.filter(c =>
       (c.reference_id === staffMember.id || c.reference_name === staffMember.name) &&
-      c.qualification_type === qualType
+      c.qualification_type === qualType &&
+      c.review_status !== 'rejected'
     );
     for (const item of items) {
       if (item.status_override === 'not_required') return 'not_required';
       if (item.status_override === 'missing') continue;
+      // Pending-review documents don't count as valid yet
+      if (item.review_status === 'pending_review') continue;
       const days = complianceDaysUntil(item.expiry_date);
       if (days === null) return 'valid';
       if (days < 0) continue;
@@ -146,9 +116,10 @@ function useTrainingData() {
   return { staff, teams, compliance, bookings, courses, requirements, categories, getQualStatus, isLoading };
 }
 
-function CardsView() {
+function CardsView({ onBulkImport, onManage }) {
   const data = useTrainingData();
   const [showAssign, setShowAssign] = useState(false);
+  const [showAutoBooker, setShowAutoBooker] = useState(false);
   const [assignPreselect, setAssignPreselect] = useState({ ids: [], category: null });
 
   if (data.isLoading) return <CardGridSkeleton count={4} />;
@@ -159,7 +130,13 @@ function CardsView() {
   };
 
   return (
-    <>
+    <div className="space-y-4">
+      <ViewHeader icon={Users} title="Staff Cards" subtitle="Training compliance across your crews">
+        <button onClick={() => openAssign([])} className={PRIMARY_BTN} type="button"><Users className="w-4 h-4" /> Assign Training</button>
+        <button onClick={() => setShowAutoBooker(true)} className={SECONDARY_BTN} type="button"><Sparkles className="w-4 h-4" /> Auto-Booker</button>
+        <button onClick={onBulkImport} className={SECONDARY_BTN} type="button"><Sparkles className="w-4 h-4" /> Bulk Import</button>
+        <button onClick={onManage} className={SECONDARY_BTN} type="button"><Settings className="w-4 h-4" /> Categories</button>
+      </ViewHeader>
       <TrainingStaffCardGrid
         staff={data.staff}
         teams={data.teams}
@@ -180,26 +157,46 @@ function CardsView() {
           onClose={() => setShowAssign(false)}
         />
       )}
-    </>
+      {showAutoBooker && (
+        <AutoBookerModal
+          staff={data.staff}
+          teams={data.teams}
+          compliance={data.compliance}
+          bookings={data.bookings}
+          courses={data.courses}
+          categories={data.categories}
+          onClose={() => setShowAutoBooker(false)}
+        />
+      )}
+    </div>
   );
 }
 
-function CalendarView() {
+function CalendarView({ onBulkImport, onManage }) {
   const data = useTrainingData();
   if (data.isLoading) return <CardGridSkeleton count={4} />;
-  return <TrainingCalendar courses={data.courses} bookings={data.bookings} staff={data.staff} teams={data.teams} />;
+  return (
+    <div className="space-y-4">
+      <ViewHeader icon={Calendar} title="Training Calendar" subtitle="Who's booked on what, and when">
+        <button onClick={onBulkImport} className={SECONDARY_BTN} type="button"><Sparkles className="w-4 h-4" /> Bulk Import</button>
+        <button onClick={onManage} className={SECONDARY_BTN} type="button"><Settings className="w-4 h-4" /> Categories</button>
+      </ViewHeader>
+      <TrainingCalendar courses={data.courses} bookings={data.bookings} staff={data.staff} teams={data.teams} />
+    </div>
+  );
 }
 
-/** Manage Categories Modal — kept from the original implementation. */
-function ManageCategoriesModal({ requirements, onClose }) {
+/** Manage Categories Modal — restyled to Clean Kanban. */
+function ManageCategoriesModal({ onClose }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: requirements = [] } = useQuery({ queryKey: ['training-requirements'], queryFn: () => base44.entities.TrainingRequirement.list('sort_order', 100) });
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     label: '', short_code: '', qualification_type: '', requires_front_back: false,
-    is_card: false, icon: 'Award', sort_order: requirements.length, is_active: true,
+    is_card: false, icon: 'Award', sort_order: 0, is_active: true,
   });
 
   const sorted = [...requirements].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
@@ -260,7 +257,7 @@ function ManageCategoriesModal({ requirements, onClose }) {
     }
   };
 
-  const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputClass = 'w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
   const labelClass = 'block text-xs font-medium text-slate-500 mb-1';
 
   return (
@@ -283,7 +280,6 @@ function ManageCategoriesModal({ requirements, onClose }) {
             const Icon = ICON_MAP[req.icon] || Award;
             return (
               <div key={req.id} className={'flex items-center gap-3 p-3 rounded-xl border transition ' + (req.is_active === false ? 'border-slate-100 bg-slate-50/50 opacity-60' : 'border-slate-200 bg-white')}>
-                <GripVertical className="w-4 h-4 text-slate-300 flex-shrink-0" />
                 <div className={'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ' + (req.is_card ? 'bg-violet-50' : 'bg-emerald-50')}>
                   <Icon className={'w-4 h-4 ' + (req.is_card ? 'text-violet-600' : 'text-emerald-600')} />
                 </div>

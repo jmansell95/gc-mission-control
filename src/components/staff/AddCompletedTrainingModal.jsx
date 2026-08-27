@@ -50,7 +50,22 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
     requirements.filter(r => r.is_active !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
   [requirements]);
 
+  // Smart-linked providers: only show training providers whose services match
+  // the selected category. Falls back to all providers when no category set.
+  const filteredProviders = useMemo(() => {
+    if (!form.qualification_type) return providers;
+    return providers.filter(p => p.training_services?.includes(form.qualification_type));
+  }, [providers, form.qualification_type]);
+
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const handleCategoryChange = (val) => {
+    setForm(prev => {
+      const matching = val ? providers.filter(p => p.training_services?.includes(val)) : providers;
+      const providerStillValid = matching.some(p => p.id === prev.provider_id);
+      return { ...prev, qualification_type: val, provider_id: providerStillValid ? prev.provider_id : '' };
+    });
+  };
 
   const handleFile = async (file) => {
     if (!file) return;
@@ -144,7 +159,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Category *</label>
-              <select value={form.qualification_type} onChange={e => set('qualification_type', e.target.value)} className={inputCls}>
+              <select value={form.qualification_type} onChange={e => handleCategoryChange(e.target.value)} className={inputCls}>
                 <option value="">Select…</option>
                 {categories.map(c => <option key={c.id} value={c.qualification_type}>{c.label}</option>)}
               </select>
@@ -184,8 +199,8 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
             <div>
               <label className={labelCls}>Provider</label>
               <select value={form.provider_id} onChange={e => set('provider_id', e.target.value)} className={inputCls}>
-                <option value="">None</option>
-                {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                <option value="">{form.qualification_type && filteredProviders.length === 0 ? 'No matching provider' : 'None'}</option>
+                {filteredProviders.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
           </div>
