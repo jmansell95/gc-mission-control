@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { X, UserPlus, Loader2, CheckCircle2, AlertCircle, Users } from 'lucide-react';
-import { sendPasswordSetupEmail } from '@/lib/passwordSetupEmail';
 
 /**
  * Bulk Invite Modal — paste a list of email addresses (one per line or
@@ -30,18 +29,9 @@ export default function BulkInviteModal({ onClose }) {
     const failed = [];
     for (const email of emailList) {
       try {
+        // The platform invite email contains the password-setup link.
         await base44.users.inviteUser(email, role);
-        // Send a password-setup email so the invited user gets a direct link
-        // to set their password (the platform invite email dead-ends at /login).
-        const pwResult = await sendPasswordSetupEmail(email);
-        if (pwResult.ok) {
-          succeeded.push(email);
-        } else {
-          // Invite went out, but password email failed — flag it so the admin
-          // knows to resend the password link manually from the staff card.
-          succeeded.push(email);
-          failed.push({ email, error: 'Invite sent, but password-setup email failed — resend via key icon' });
-        }
+        succeeded.push(email);
       } catch (e) {
         failed.push({ email, error: e.message || 'Failed' });
       }

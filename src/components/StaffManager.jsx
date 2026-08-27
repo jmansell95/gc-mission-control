@@ -18,7 +18,6 @@ import ICalFeedButton from '@/components/staff/ICalFeedButton';
 import { formatWorkerType } from '@/utils/format';
 import { format } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
-import { sendPasswordSetupEmail } from '@/lib/passwordSetupEmail';
 
 const workerBadge = {
   direct_employee: 'bg-emerald-100 text-emerald-700',
@@ -122,13 +121,11 @@ export default function StaffManager() {
     try {
       await base44.users.inviteUser(member.email, 'user');
       await base44.entities.Staff.update(member.id, { invite_sent: true });
-      // Send a password-setup email so the invited user gets a direct link
-      // to set their password (the platform invite email only links to the
-      // app root, which dead-ends at /login for a user with no password).
-      // The helper waits for the account to propagate and retries once;
-      // if it still fails we warn the admin to use the manual key-icon button.
-      const pwResult = await sendPasswordSetupEmail(member.email);
-      // Link the Staff record to the newly created User account and sync role
+      // The platform invite email contains the password-setup link — there is
+      // no separate password email (resetPasswordRequest silently no-ops for
+      // users without an account, and SendEmail to non-registered users needs
+      // a custom domain). The key-icon button on the card remains for users
+      // who already have an account but forgot their password.
       await queryClient.refetchQueries({ queryKey: ['users-list'] });
       const freshUsers = queryClient.getQueryData(['users-list']) || [];
       const matchedUser = freshUsers.find(u => u.email?.toLowerCase() === member.email.toLowerCase());
@@ -140,15 +137,7 @@ export default function StaffManager() {
         }
       }
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      if (pwResult.ok) {
-        toast({ title: 'Invite sent', description: `${member.email}${matchedUser ? ' · account linked' : ''}` });
-      } else {
-        toast({
-          title: 'Invite sent — password email failed',
-          description: `${member.email} got the invite, but the password-setup email didn't send. Click the key icon on their card to resend it.`,
-          variant: 'destructive',
-        });
-      }
+      toast({ title: 'Invite sent', description: `${member.email} — the invite email contains a link to set up their password.${matchedUser ? ' Account linked.' : ''}` });
     } catch (error) {
       toast({ title: 'Could not send invite', description: error?.message || 'User may already have an account', variant: 'destructive' });
     }
