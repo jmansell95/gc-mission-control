@@ -88,6 +88,7 @@ export default function JobSummaryCard({
   const hasCoords = job.site_lat != null && job.site_lng != null;
 
   return (
+    <>
     <div
       className="vibrant-card rounded-xl overflow-hidden flex flex-col group cursor-pointer"
       onClick={() => onView(job)}
@@ -254,8 +255,12 @@ export default function JobSummaryCard({
         </div>
       </div>
 
-      {/* Quick edit modal */}
-      <QuickEditJobModal open={showQuickEdit} onClose={() => setShowQuickEdit(false)} job={job} />
     </div>
+
+      {/* Quick edit modal — rendered OUTSIDE the card so the card's hover
+          transform doesn't create a containing block that traps the
+          fixed-position popup inside the card. */}
+      <QuickEditJobModal open={showQuickEdit} onClose={() => setShowQuickEdit(false)} job={job} />
+    </>
   );
 }
