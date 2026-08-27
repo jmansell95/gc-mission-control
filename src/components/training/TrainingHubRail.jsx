@@ -9,24 +9,22 @@ const TABS = [
 ];
 
 /**
- * TrainingHubRail — left vertical dark-green icon rail for the four training
- * hub tabs. Replaces the old top tab bar. On mobile it collapses to a
- * horizontal pill bar; on desktop it's a full-height vertical rail with
- * icon + label buttons and a soft green glow on the active tab.
+ * TrainingHubRail — top tab bar for the four training hub tabs. Matches the
+ * horizontal pill-tab style used across the rest of the app.
  */
 export default function TrainingHubRail({ view, setView }) {
   return (
-    <nav className="flex md:flex-col gap-1.5 p-2 rounded-2xl bg-[#2E5A1A] shadow-lg md:w-44 flex-shrink-0 overflow-x-auto no-scrollbar">
+    <nav className="flex gap-1.5 p-1.5 rounded-2xl bg-slate-100/80 border border-slate-200 overflow-x-auto no-scrollbar mb-4">
       {TABS.map(tab => {
         const Icon = tab.icon;
         const active = view === tab.key;
         return (
           <button key={tab.key} onClick={() => setView(tab.key)} type="button"
-            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition whitespace-nowrap flex-shrink-0 md:w-full
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl transition whitespace-nowrap flex-shrink-0
               ${active
-                ? 'bg-white text-[#2E5A1A] shadow-[0_0_18px_-4px_rgba(141,198,63,0.7)] font-bold'
-                : 'text-white/70 hover:text-white hover:bg-white/10 font-medium'}`}>
-            <Icon className="w-5 h-5 flex-shrink-0" />
+                ? 'bg-white text-[#2E5A1A] shadow-sm font-bold'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-white/60 font-medium'}`}>
+            <Icon className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm">{tab.label}</span>
           </button>
         );
