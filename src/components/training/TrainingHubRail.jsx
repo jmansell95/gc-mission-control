@@ -1,36 +1,20 @@
 import React from 'react';
 import { Users, Calendar, BookOpen, Building2 } from 'lucide-react';
+import TabBar from '@/components/TabBar';
 
 const TABS = [
-  { key: 'cards', label: 'Staff Cards', icon: Users },
-  { key: 'calendar', label: 'Calendar', icon: Calendar },
-  { key: 'courses', label: 'Courses', icon: BookOpen },
-  { key: 'providers', label: 'Providers', icon: Building2 },
+  { id: 'cards', label: 'Staff Cards', icon: Users },
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'courses', label: 'Courses', icon: BookOpen },
+  { id: 'providers', label: 'Providers', icon: Building2 },
 ];
 
 /**
- * TrainingHubRail — top tab bar for the four training hub tabs. Matches the
- * horizontal pill-tab style used across the rest of the app.
+ * TrainingHubRail — top tab bar for the four training hub tabs. Now uses the
+ * shared TabBar so it matches every other tab nav across the app.
  */
 export default function TrainingHubRail({ view, setView }) {
-  return (
-    <nav className="flex gap-1.5 p-1.5 rounded-2xl bg-slate-100/80 border border-slate-200 overflow-x-auto no-scrollbar mb-4">
-      {TABS.map(tab => {
-        const Icon = tab.icon;
-        const active = view === tab.key;
-        return (
-          <button key={tab.key} onClick={() => setView(tab.key)} type="button"
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl transition whitespace-nowrap flex-shrink-0
-              ${active
-                ? 'bg-white text-[#2E5A1A] shadow-sm font-bold'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-white/60 font-medium'}`}>
-            <Icon className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm">{tab.label}</span>
-          </button>
-        );
-      })}
-    </nav>
-  );
+  return <TabBar tabs={TABS} activeTab={view} onChange={setView} />;
 }
 
 /**

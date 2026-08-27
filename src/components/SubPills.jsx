@@ -3,8 +3,8 @@ import React from 'react';
 /**
  * SubPills — secondary segmented control rendered below a hub's main TabBar.
  *
- * Used by the consolidated hubs to group related sub-views inside a single
- * merged tab (e.g. "People" → Crew Members | Crew Types | Reviews | Directory).
+ * Uses the same slick glass + dark-green gradient style as TabBar so every
+ * tab nav across the app looks consistent.
  *
  * Props:
  *  - pills: [{ id, label, icon?, badge?, count? }]
@@ -16,7 +16,7 @@ import React from 'react';
 export default function SubPills({ pills = [], active, onChange }) {
   if (!pills || pills.length <= 1) return null;
   return (
-    <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+    <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-200/70 shadow-sm p-1.5 flex gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {pills.map(p => {
         const Icon = p.icon;
         const isActive = active === p.id;
@@ -25,21 +25,19 @@ export default function SubPills({ pills = [], active, onChange }) {
             key={p.id}
             onClick={() => onChange(p.id)}
             type="button"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
               isActive
-                ? 'bg-[#2E5A1A]/10 text-[#2E5A1A] border border-[#2E5A1A]/20'
-                : 'text-slate-500 hover:bg-slate-100 border border-transparent'
+                ? 'bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white shadow-sm shadow-emerald-200/60'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            {Icon && <Icon className="w-3.5 h-3.5" />}
+            {Icon && <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />}
             {p.label}
             {p.badge != null && p.badge > 0 && (
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-[#2E5A1A]/15 text-[#2E5A1A]' : 'bg-rose-100 text-rose-600'}`}>
-                {p.badge}
-              </span>
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-600'}`}>{p.badge}</span>
             )}
             {p.count != null && (
-              <span className={`ml-0.5 text-xs font-normal ${isActive ? 'text-[#2E5A1A]/70' : 'text-slate-400'}`}>{p.count}</span>
+              <span className={`ml-0.5 text-xs font-normal ${isActive ? 'text-white/70' : 'text-slate-400'}`}>{p.count}</span>
             )}
           </button>
         );

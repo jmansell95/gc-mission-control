@@ -1,9 +1,9 @@
 import React from 'react';
 
 /**
- * Shared tab bar — consistent, modern styling across all admin pages.
- * Glass card with gradient active state, icons, and optional badges/counts.
- * Horizontally scrollable on small screens, wraps on larger ones.
+ * Shared tab bar — the canonical slick style used across every hub and page.
+ * Glass card container with a dark-green gradient active state, icons, and
+ * optional badges/counts. Horizontally scrollable on small screens.
  */
 export default function TabBar({ tabs, activeTab, onChange, className = '' }) {
   return (
