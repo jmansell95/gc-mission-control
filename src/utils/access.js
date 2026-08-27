@@ -173,6 +173,9 @@ export function canAccessRoute(profile, isPlatformAdmin, path) {
 
 // Resolve landing page based on role.
 export function resolveRoleLandingPage(profile, isPlatformAdmin) {
+  // Per-staff landing page override (set at creation/edit) takes precedence
+  if (profile?.default_landing_page) return profile.default_landing_page;
+
   // Scanner-only users go straight to the scanner — they see nothing else
   if (isScannerOnly(profile)) return '/scanner';
 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import { useConfigLists } from '@/hooks/useConfigLists';
 import { useAuth } from '@/lib/AuthContext';
+import { useDivision } from '@/contexts/DivisionContext';
 import FormModal from '@/components/ui/FormModal';
-import { Mail, Bell, Truck, ShieldCheck, MapPin } from 'lucide-react';
+import { Mail, Bell, Truck, ShieldCheck, MapPin, KeyRound, LogIn } from 'lucide-react';
 
 /**
  * StaffFormModal — standardised popup for creating/editing a crew member.
@@ -18,6 +19,11 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   const workerTypeOptions = getOptions('worker_types');
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
+  const { activeDivisionId } = useDivision();
+  const { data: permissionGroups = [] } = useQuery({
+    queryKey: ['permission-groups-all'],
+    queryFn: () => base44.entities.PermissionGroup.list('name', 100),
+  });
 
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -28,6 +34,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     worker_type: 'direct_employee', team_id: '', default_vehicle_id: '',
     manager_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false,
     system_role: 'field', phone_gps_consent: false,
+    permission_group_id: '', default_landing_page: '',
   };
 
   useEffect(() => {
@@ -42,10 +49,13 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   }, [open, editing, staff]);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+  const filteredTeams = activeDivisionId
+    ? teams.filter(t => t.division_id === activeDivisionId)
+    : teams;
 
   const cleanPayload = (data) => {
     const cleaned = { ...data };
-    ['default_vehicle_id', 'manager_id', 'system_role'].forEach(k => {
+    ['default_vehicle_id', 'manager_id', 'system_role', 'permission_group_id', 'default_landing_page'].forEach(k => {
       if (cleaned[k] === '') delete cleaned[k];
     });
     return cleaned;
@@ -56,6 +66,11 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     setSaving(true);
     try {
       const payload = cleanPayload(form);
+      // Auto-set division_id from the selected team's division (denormalized RLS cache)
+      const selectedTeam = teams.find(t => t.id === payload.team_id);
+      if (selectedTeam?.division_id) {
+        payload.division_id = selectedTeam.division_id;
+      }
       if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id) {
         toast({ title: 'Missing required fields', description: 'Name, email, worker type and crew are all required.', variant: 'destructive' });
         setSaving(false);
@@ -79,6 +94,10 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           const targetRole = wantsAdmin ? 'admin' : 'user';
           if (linkedUser.role !== targetRole) {
             try { await base44.entities.User.update(linkedUser.id, { role: targetRole }); } catch (_) {}
+          }
+          // Sync division_id from the team so RLS rules resolve correctly
+          if (selectedTeam?.division_id && linkedUser.division_id !== selectedTeam.division_id) {
+            try { await base44.entities.User.update(linkedUser.id, { division_id: selectedTeam.division_id }); } catch (_) {}
           }
         }
         toast({ title: 'Crew member updated' });
@@ -169,7 +188,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               <label className={labelCls}>Crew *</label>
               <select value={form.team_id || ''} onChange={e => set('team_id', e.target.value)} required className={inputCls}>
                 <option value="">Select Crew</option>
-                {teams.map(t => {
+                {filteredTeams.map(t => {
                   const parent = teams.find(p => p.id === t.parent_team_id);
                   return <option key={t.id} value={t.id}>{parent ? `${parent.name} — ${t.name}` : t.name}</option>;
                 })}
@@ -207,9 +226,35 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           </div>
         </div>
 
-        {/* Access & Notifications */}
+        {/* Access & Landing Page */}
         <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access & Notifications</p>
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access & Landing Page</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-2.5">
+            <div>
+              <label className={labelCls}>Permission Group</label>
+              <select value={form.permission_group_id || ''} onChange={e => set('permission_group_id', e.target.value)} className={inputCls}>
+                <option value="">None (legacy role-based)</option>
+                {permissionGroups.map(pg => <option key={pg.id} value={pg.id}>{pg.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Landing Page</label>
+              <select value={form.default_landing_page || ''} onChange={e => set('default_landing_page', e.target.value)} className={inputCls}>
+                <option value="">Auto (from role)</option>
+                <option value="/admin">Admin Dashboard</option>
+                <option value="/staff-schedule">My Schedule</option>
+                <option value="/staff-profile">My Profile</option>
+                <option value="/deliveries">Delivery Dashboard</option>
+                <option value="/scanner">Scanner</option>
+                <option value="/subcontractor">Subcontractor Portal</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div>
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Notifications</p>
           <div className="space-y-2.5">
             {!editing && (
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-blue-50/60 border border-blue-100">

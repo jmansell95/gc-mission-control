@@ -8,7 +8,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "The division this staff member belongs to. Set in Settings \u2192 Divisions. Drives division-scoped views across the platform (a staff member only sees jobs, rotas and data within their division). Blank = unassigned (visible to enterprise admins only)."
+      "description": "Auto-synced from the staff member's team division. No longer independently editable \u2014 change the team to change the division. Kept as a denormalized cache so RLS rules (which reference data.division_id) continue to work. The source of truth is Team.division_id."
     },
     "email": {
       "type": "string",
@@ -66,7 +66,7 @@
     },
     "second_man_name": {
       "type": "string",
-      "description": "Second Man Driller name for this subcontractor or agency crew. Captured in the Staff Hub Contacts tab Add/Edit modal. Shown as a sub-line on the rota grid and job details page."
+      "description": "Second Man Driller name for this subcontractor or agency crew. Captured in the Staff Hub Contacts tab Add/Edit modal. Shown as a sub-line on the rota grid and job details page. Blank for direct employees."
     },
     "second_man_phone": {
       "type": "string",
@@ -107,11 +107,23 @@
     },
     "team_id": {
       "type": "string",
-      "description": "Team/group assignment \u2014 determines which jobs this staff member can be assigned to"
+      "description": "Team/group assignment \u2014 determines which jobs this staff member can be assigned to AND which division they belong to (division is inherited from the team)."
     },
     "permission_group_id": {
       "type": "string",
-      "description": "Direct permission group assignment \u2014 controls this staff member's access to every admin module and settings page. When set, this overrides the crew type's permission group. Manage groups in Settings \u2192 Access Levels."
+      "description": "Direct permission group assignment \u2014 controls this staff member's access to every admin module and settings page. This is the single source of truth for access (no longer inherited from the team). Manage groups in Settings \u2192 Access Levels."
+    },
+    "default_landing_page": {
+      "type": "string",
+      "enum": [
+        "/admin",
+        "/staff-schedule",
+        "/staff-profile",
+        "/deliveries",
+        "/scanner",
+        "/subcontractor"
+      ],
+      "description": "Where this staff member lands after login. When set, this overrides the role-based default. Blank = auto (derived from the permission group / role). Chosen per-staff at creation or edit."
     },
     "default_vehicle_id": {
       "type": "string",

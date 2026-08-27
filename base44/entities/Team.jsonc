@@ -8,7 +8,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "The division this team belongs to. Set automatically from the active division when the team is created. Drives division-scoped filtering \u2014 a division only sees its own teams. Blank = unassigned (visible to enterprise admins only)."
+      "description": "The division this team belongs to. Set automatically from the active division when the team is created. This is the single source of truth for a staff member's division \u2014 staff inherit their division from their team. Drives division-scoped filtering \u2014 a division only sees its own teams. Blank = unassigned (visible to enterprise admins only)."
     },
     "description": {
       "type": "string",
@@ -42,7 +42,7 @@
         "/staff-schedule",
         "/admin"
       ],
-      "description": "Where staff in this team land first after login. Field teams \u2192 /staff-schedule, Depot/Management \u2192 /admin."
+      "description": "Deprecated \u2014 landing pages are now set per-staff (Staff.default_landing_page). Kept for backward compatibility; no longer read by buildMyProfile or resolveRoleLandingPage."
     },
     "allowed_tool_access": {
       "type": "array",
@@ -53,7 +53,7 @@
     },
     "permission_group_id": {
       "type": "string",
-      "description": "Linked PermissionGroup that defines this team's granular access levels (read/write/none) per admin module. Takes precedence over allowed_tool_access when set. Leave blank to use the legacy allowed_tool_access list."
+      "description": "Deprecated \u2014 permission groups are now assigned per-staff (Staff.permission_group_id), not per-team. Kept for backward compatibility; no longer read by buildMyProfile."
     },
     "revenue_stream_type": {
       "type": "string",

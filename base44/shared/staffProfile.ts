@@ -93,6 +93,16 @@ export async function buildMyProfile(base44, user) {
     } catch (_) {}
   }
 
+  // Sync User.division_id from the team's division so RLS rules resolve correctly.
+  // Division is now inherited from the team — Staff no longer carries an
+  // independently editable division_id. This runs on every login to keep the
+  // User record in sync (e.g. after an admin moves a staff member to a new team).
+  if (team?.division_id && user.id && user.division_id !== team.division_id) {
+    try {
+      await base44.asServiceRole.entities.User.update(user.id, { division_id: team.division_id });
+    } catch (_) {}
+  }
+
   // Direct permission group
   let directPermissionGroup = null;
   if (s.permission_group_id) {
@@ -102,16 +112,7 @@ export async function buildMyProfile(base44, user) {
     } catch (_) {}
   }
 
-  // Team's permission group (fallback)
-  let teamPermissionGroup = null;
-  if (team?.permission_group_id) {
-    try {
-      const pgList = await base44.asServiceRole.entities.PermissionGroup.filter({ id: team.permission_group_id });
-      teamPermissionGroup = pgList[0] || null;
-    } catch (_) {}
-  }
-
-  const effectivePermissionGroup = directPermissionGroup || teamPermissionGroup;
+  const effectivePermissionGroup = directPermissionGroup;
 
   const GROUP_NAME_TO_ROLE = {
     'Super Admin': 'super_admin',
@@ -134,7 +135,8 @@ export async function buildMyProfile(base44, user) {
     name: s.name,
     email: s.email,
     avatar_url: s.avatar_url || null,
-    division_id: s.division_id || null,
+    division_id: team?.division_id || null,
+    default_landing_page: s.default_landing_page || null,
     job_role: s.job_role,
     worker_type: s.worker_type,
     team_id: s.team_id,
@@ -146,16 +148,8 @@ export async function buildMyProfile(base44, user) {
           job_type: team.job_type || null,
           default_landing_page: team.default_landing_page || null,
           allowed_tool_access: team.allowed_tool_access || [],
-          permission_group_id: team.permission_group_id || null,
-          permission_group: teamPermissionGroup
-            ? {
-                id: teamPermissionGroup.id,
-                name: teamPermissionGroup.name,
-                is_read_only: teamPermissionGroup.is_read_only === true,
-                is_system: teamPermissionGroup.is_system === true,
-                permissions: teamPermissionGroup.permissions || {},
-              }
-            : null,
+          permission_group_id: null,
+          permission_group: null,
         }
       : null,
     is_admin: isAdmin,
