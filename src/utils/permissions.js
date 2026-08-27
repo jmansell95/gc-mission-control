@@ -179,16 +179,6 @@ export function resolveModuleLevel(profile, isPlatformAdmin, moduleKey) {
     return normalizePermissions(group.permissions)[moduleKey] || 'none';
   }
 
-  // Fallback: the team's permission group (for staff not yet assigned directly)
-  const teamGroup = profile?.team?.permission_group;
-  if (teamGroup) {
-    if (teamGroup.is_read_only) {
-      const level = normalizePermissions(teamGroup.permissions)[moduleKey];
-      return level === 'none' ? 'none' : 'read';
-    }
-    return normalizePermissions(teamGroup.permissions)[moduleKey] || 'none';
-  }
-
   // Last resort: role-based defaults (derived from group name by getMyStaffProfile)
   const role = (isPlatformAdmin || profile.is_admin) ? 'super_admin' : (profile.system_role || 'field');
   if (role === 'super_admin' || role === 'admin') return 'write';

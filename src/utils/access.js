@@ -38,7 +38,7 @@ export function canAccessSection(profile, sectionId, isPlatformAdmin) {
 
   // Primary: check the staff member's assigned permission group
   const moduleKey = SECTION_TO_MODULE[sectionId];
-  if (moduleKey && (profile.permission_group || profile?.team?.permission_group)) {
+  if (moduleKey && profile.permission_group) {
     return canReadModule(profile, isPlatformAdmin, moduleKey);
   }
 
@@ -68,7 +68,7 @@ export function canEditModule(profile, isPlatformAdmin, sectionId) {
 
   // Primary: check the staff member's assigned permission group
   const moduleKey = SECTION_TO_MODULE[sectionId];
-  if (moduleKey && (profile?.permission_group || profile?.team?.permission_group)) {
+  if (moduleKey && profile?.permission_group) {
     return canWriteModule(profile, isPlatformAdmin, moduleKey);
   }
 

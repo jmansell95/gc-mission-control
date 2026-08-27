@@ -15,6 +15,17 @@
       "type": "string",
       "description": "Unique audit ID from SafetyCulture (iAuditor). Used to de-duplicate incoming webhooks."
     },
+    "audit_category": {
+      "type": "string",
+      "enum": [
+        "vehicle_check",
+        "powra",
+        "equipment",
+        "general"
+      ],
+      "default": "general",
+      "description": "Auto-classified audit type. 'vehicle_check' = daily vehicle walk-round (gates the pre-departure Checks step). 'powra' = Point of Work Risk Assessment (gates the start-work step on arrival). 'equipment' = plant/equipment check. 'general' = any other audit. Classification is inferred from the audit template name by keyword matching in receiveMittiData."
+    },
     "audit_template_name": {
       "type": "string",
       "description": "Name of the SafetyCulture template the audit was built from (e.g. 'Site Risk Assessment', 'Daily Plant Inspection', 'Permit to Dig')."
@@ -29,7 +40,11 @@
     },
     "auditor_email": {
       "type": "string",
-      "description": "Email of the auditor \u2014 used to auto-link the report to a sub-contractor record."
+      "description": "Email of the auditor \u2014 used to auto-link the report to a sub-contractor record and to match the staff member's RotaAssignment for check verification."
+    },
+    "auditor_staff_id": {
+      "type": "string",
+      "description": "The Staff record matched by the auditor's email. Used to stamp the matching RotaAssignment's Mitti check timestamps so the ShiftWizard shows live verification."
     },
     "job_id": {
       "type": "string",

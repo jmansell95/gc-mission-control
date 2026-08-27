@@ -163,6 +163,18 @@
       "type": "string",
       "description": "ISO timestamp of when the daily pre-work checklist was confirmed complete."
     },
+    "mitti_vehicle_check_at": {
+      "type": "string",
+      "description": "ISO timestamp auto-stamped when a Mitti/SafetyCulture vehicle-check audit is received for this staff member on this assignment's date. When set, the ShiftWizard Checks step shows a live green 'verified by Mitti' badge. When Mitti is connected, this gates the Arrive step \u2014 crew cannot proceed until the vehicle check is verified (or they manually confirm if Mitti is not connected)."
+    },
+    "mitti_powra_at": {
+      "type": "string",
+      "description": "ISO timestamp auto-stamped when a Mitti/SafetyCulture POWRA audit is received for this staff member + job on this assignment's date. When set, the Arrive step shows a live green 'POWRA verified by Mitti' badge. When Mitti is connected, this gates the start-work step."
+    },
+    "mitti_equipment_check_at": {
+      "type": "string",
+      "description": "ISO timestamp auto-stamped when a Mitti/SafetyCulture equipment/plant-check audit is received for this staff member on this assignment's date. Shown as a verified badge in the briefing step."
+    },
     "notes": {
       "type": "string",
       "description": "Staff notes for this assignment"

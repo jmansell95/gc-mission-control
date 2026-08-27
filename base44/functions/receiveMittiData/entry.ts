@@ -7,6 +7,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // shared webhook secret against the MittiConfig singleton,
 // then stores each audit as a SafetyReport — auto-matching the auditor's
 // email to a Contractor record and the audit site name to a Job.
+//
+// Also classifies each audit (vehicle_check / powra / equipment / general)
+// by keyword matching the template name, matches the auditor's email to a
+// Staff record, and stamps the corresponding RotaAssignment's Mitti check
+// timestamp so the ShiftWizard shows live verification and gates work.
 
 function num(v: any): number | null {
   if (v == null || v === '') return null;
@@ -28,6 +33,18 @@ function deepGet(obj: any, ...paths: string[]): any {
     if (ok && cur != null && cur !== '') return cur;
   }
   return '';
+}
+
+// Classify an audit by its template/title name into one of the three
+// crew-flow check categories (or 'general'). Keyword lists are deliberately
+// broad so variations in template naming still match.
+function classifyAudit(templateName: string, auditTitle: string): string {
+  const hay = `${templateName} ${auditTitle}`.toLowerCase();
+  const has = (kw: string[]) => kw.some((k) => hay.includes(k));
+  if (has(['vehicle', 'van check', 'daily check', 'walk round', 'walk-round', 'pre-start', 'pre start', 'pre-use', 'pre use', 'driver check'])) return 'vehicle_check';
+  if (has(['powra', 'point of work', 'risk assessment', 'risk-assessment', 'rams', 'permit to work', 'ptw', 'dynamic risk'])) return 'powra';
+  if (has(['equipment', 'plant', 'machinery', 'rig check', 'lifting gear', 'lolcr', 'puwer', 'pat'])) return 'equipment';
+  return 'general';
 }
 
 Deno.serve(async (req) => {
@@ -151,14 +168,31 @@ Deno.serve(async (req) => {
       } catch (e) { /* continue */ }
     }
 
+    // Match the auditor's email to a Staff record so we can stamp their
+    // RotaAssignment with the verified-check timestamp.
+    let auditorStaffId: string | null = null;
+    if (auditorEmail) {
+      try {
+        const allStaff = await base44.asServiceRole.entities.Staff.list('-created_date', 500);
+        const lc = auditorEmail.toLowerCase();
+        const matched = allStaff.find((s: any) => s.email && s.email.toLowerCase() === lc);
+        if (matched) auditorStaffId = matched.id;
+      } catch (e) { /* continue */ }
+    }
+
+    // Classify the audit type from the template/title name
+    const auditCategory = classifyAudit(templateName, auditTitle);
+
     const computedPct = scorePct != null ? scorePct : (overallScore != null && maxScore && maxScore > 0 ? Math.round((overallScore / maxScore) * 10000) / 100 : null);
 
     const report: any = {
       safetyculture_audit_id: auditId,
+      audit_category: auditCategory,
       audit_template_name: templateName,
       audit_title: auditTitle,
       auditor_name: auditorName,
       auditor_email: auditorEmail,
+      auditor_staff_id: auditorStaffId,
       job_id: jobId || null,
       job_name: jobName,
       contractor_id: contractorId,
@@ -186,8 +220,44 @@ Deno.serve(async (req) => {
       storedId = created.id;
     }
 
+    // ── Stamp the matching RotaAssignment with the verified check timestamp ──
+    // Finds today's (or the audit's conducted-date) job assignment for the
+    // auditor and sets the appropriate mitti_*_at field. This is what the
+    // ShiftWizard reads to show the live "verified by Mitti" badge and to
+    // gate progression when Mitti is connected.
+    if (auditorStaffId && auditCategory !== 'general') {
+      try {
+        // Use the audit's conducted date if available, otherwise today
+        let checkDate = new Date().toISOString().slice(0, 10);
+        if (conductedAt) {
+          const d = new Date(conductedAt);
+          if (!isNaN(d.getTime())) checkDate = d.toISOString().slice(0, 10);
+        }
+        const assignments = await base44.asServiceRole.entities.RotaAssignment.filter({
+          staff_id: auditorStaffId,
+          assigned_date: checkDate,
+          assignment_type: 'job',
+        });
+        const stampField =
+          auditCategory === 'vehicle_check' ? 'mitti_vehicle_check_at' :
+          auditCategory === 'powra' ? 'mitti_powra_at' :
+          auditCategory === 'equipment' ? 'mitti_equipment_check_at' : null;
+        if (stampField && assignments && assignments.length > 0) {
+          const nowIso = new Date().toISOString();
+          for (const a of assignments) {
+            // If we matched a job, prefer stamping the assignment for that job;
+            // otherwise stamp all of today's job assignments for this staff.
+            if (jobId && a.job_id && a.job_id !== jobId) continue;
+            try {
+              await base44.asServiceRole.entities.RotaAssignment.update(a.id, { [stampField]: nowIso });
+            } catch (e) { /* best-effort */ }
+          }
+        }
+      } catch (e) { /* best-effort — never fail the webhook on stamping */ }
+    }
+
     // Update config status
-    const summary = `Stored audit ${auditTitle || templateName || auditId}${actionItems.length > 0 ? ` · ${actionItems.length} action item${actionItems.length === 1 ? '' : 's'}` : ''}${jobName ? ` · linked to ${jobName}` : ''}`;
+    const summary = `Stored audit ${auditTitle || templateName || auditId}${actionItems.length > 0 ? ` · ${actionItems.length} action item${actionItems.length === 1 ? '' : 's'}` : ''}${jobName ? ` · linked to ${jobName}` : ''}${auditCategory !== 'general' ? ` · ${auditCategory.replace('_', ' ')} verified` : ''}`;
     try {
       await base44.asServiceRole.entities.MittiConfig.update(config.id, {
         last_webhook_at: new Date().toISOString(),
@@ -196,7 +266,7 @@ Deno.serve(async (req) => {
       });
     } catch (e) { /* non-fatal */ }
 
-    return Response.json({ status: 'success', audit_id: auditId, report_id: storedId, job_matched: !!jobId, contractor_matched: !!contractorId, action_items: actionItems.length });
+    return Response.json({ status: 'success', audit_id: auditId, report_id: storedId, job_matched: !!jobId, contractor_matched: !!contractorId, staff_matched: !!auditorStaffId, audit_category: auditCategory, action_items: actionItems.length });
   } catch (error) {
     // Record failure on the config if we can reach it
     try {

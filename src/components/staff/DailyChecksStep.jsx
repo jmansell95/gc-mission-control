@@ -4,7 +4,9 @@ import { base44 } from '@/api/base44Client';
 import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2, ClipboardCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
+import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
+import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
 
 /**
  * DailyChecksStep — the pre-work checklist step of the ShiftWizard.
@@ -22,6 +24,11 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
   const [checkedItems, setCheckedItems] = useState({});
   const [photos, setPhotos] = useState({});
   const { vehicleCheckUrl } = useMittiCheckLinks();
+  const { isConnected, vehicleVerified, vehicleCheckAt } = useMittiCheckStatus({
+    assignmentId: assignment?.id,
+    staffId: staff?.id,
+    jobDate: assignment?.assigned_date,
+  });
 
   // Fetch the daily checklist config
   const { data: checklistConfig, isLoading } = useQuery({
@@ -57,9 +64,17 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
     { id: 'mitti_completed', label: 'All checks completed in Mitti', required: true, photo_required: false },
   ];
 
-  const items = checklistItems.length > 0 ? checklistItems : defaultItems;
+  const allItems = checklistItems.length > 0 ? checklistItems : defaultItems;
+  // When Mitti is connected, the vehicle check is auto-verified by Mitti —
+  // remove it from the manual tick list so crew only tick the remaining
+  // items (plant, PPE). When not connected, all items are manual.
+  const MITTI_MANAGED_IDS = isConnected ? new Set(['vehicle_walkround', 'mitti_completed']) : new Set();
+  const items = allItems.filter(i => !MITTI_MANAGED_IDS.has(i.id));
   const requiredItems = items.filter(i => i.required !== false);
   const allRequiredChecked = requiredItems.every(i => checkedItems[i.id]);
+  // Gate: when connected, the vehicle check must be verified by Mitti.
+  const vehicleGatePassed = isConnected ? vehicleVerified : true;
+  const allDone = allRequiredChecked && vehicleGatePassed;
 
   const toggleItem = (id) => {
     setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
@@ -87,10 +102,20 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
 
   return (
     <div className="space-y-4 px-5 py-2">
-      {/* Vehicle check — the first and most important Mitti prompt.
-          Framed as "before you leave for site" so crew do it at the yard,
-          not after they arrive. */}
-      <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
+      {/* Vehicle check — verified live by Mitti when connected, otherwise a
+          prominent "do this before you leave" prompt with manual confirmation. */}
+      {isConnected ? (
+        vehicleVerified ? (
+          <MittiVerificationBadge type="vehicle" verified verifiedAt={vehicleCheckAt} url={vehicleCheckUrl} />
+        ) : (
+          <div className="space-y-2.5">
+            <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
+            <MittiVerificationBadge type="vehicle" verified={false} isConnected url={vehicleCheckUrl} />
+          </div>
+        )
+      ) : (
+        <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
+      )}
 
       {/* Generic Mitti hand-off note for plant / PPE checks */}
       <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
@@ -186,8 +211,9 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
         })}
       </div>
 
-      {/* Hidden confirm signal for the wizard footer */}
-      <input type="hidden" id="daily-checks-complete" value={allRequiredChecked ? '1' : '0'} />
+      {/* Hidden confirm signal for the wizard footer — gated by Mitti
+          vehicle verification when Mitti is connected. */}
+      <input type="hidden" id="daily-checks-complete" value={allDone ? '1' : '0'} />
     </div>
   );
 }

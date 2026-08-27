@@ -4,6 +4,11 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { canAccessRoute, resolveRoleLandingPage } from '@/utils/access';
 
+// Routes where a brand-new user who hasn't finished their first-login profile
+// setup should be redirected to /onboarding. Deep-linking to these would
+// otherwise bypass the onboarding gate that Home.jsx applies.
+const ONBOARDING_GATED_ROUTES = ['/staff-schedule', '/staff-profile', '/admin', '/deliveries', '/scanner'];
+
 // Route-level guard that enforces the site-wide lockdown.
 // Drivers see deliveries only, field staff see schedule + profile only,
 // office staff see admin. Anyone hitting a route they can't access is
@@ -65,6 +70,18 @@ export default function RouteGuard({ children }) {
       landing = '/staff-schedule';
     }
     return <Navigate to={landing} replace />;
+  }
+
+  // Onboarding gate — new users who haven't completed their first-login
+  // profile setup are sent to /onboarding before they can enter a gated app
+  // route (even via deep link). /onboarding itself and /pending-access are
+  // exempt so the flow doesn't loop.
+  if (
+    profile.onboarding_complete === false &&
+    ONBOARDING_GATED_ROUTES.includes(location.pathname) &&
+    location.pathname !== '/onboarding'
+  ) {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return children;

@@ -17,7 +17,9 @@ import WeatherCard from '@/components/staff/WeatherCard';
 import JobContextCard from '@/components/staff/JobContextCard';
 import ShiftStepRail from '@/components/staff/ShiftStepRail';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
+import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
+import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
 
@@ -30,7 +32,7 @@ const fmtDur = (mins) => {
 };
 
 // ── Arrive Step ──────────────────────────────────────────────────────────
-function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehicleId }) {
+function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehicleId, assignment }) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const [departHome, setDepartHome] = useState('');
   const [arriveSite, setArriveSite] = useState(() => {
@@ -40,6 +42,11 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
   const [gpsPrefilled, setGpsPrefilled] = useState(false);
   const [geofencePrefilled, setGeofencePrefilled] = useState(false);
   const { powraUrl } = useMittiCheckLinks();
+  const { isConnected: mittiConnected, powraVerified, powraAt } = useMittiCheckStatus({
+    assignmentId: assignment?.id,
+    staffId,
+    jobDate: assignment?.assigned_date,
+  });
 
   // Fetch Geotab auto-generated travel times for today to pre-fill the form
   const { data: geotabEntries = [] } = useQuery({
@@ -140,9 +147,19 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
       {/* Job context — site contact, notes, safety info */}
       <JobContextCard job={job} />
 
-      {/* POWRA reminder — now you are on site, complete your Point of Work
-          Risk Assessment in Mitti before starting work. */}
-      <MittiSafetyPrompt type="powra" url={powraUrl} />
+      {/* POWRA — verified live by Mitti when connected, otherwise a prompt. */}
+      {mittiConnected ? (
+        powraVerified ? (
+          <MittiVerificationBadge type="powra" verified verifiedAt={powraAt} url={powraUrl} />
+        ) : (
+          <div className="space-y-2.5">
+            <MittiSafetyPrompt type="powra" url={powraUrl} />
+            <MittiVerificationBadge type="powra" verified={false} isConnected url={powraUrl} />
+          </div>
+        )
+      ) : (
+        <MittiSafetyPrompt type="powra" url={powraUrl} />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -433,6 +450,7 @@ export default function ShiftWizard({
                       saving={saving}
                       staffId={staffId}
                       vehicleId={assignment?.vehicle_id}
+                      assignment={assignment}
                     />
                   )}
                   {step === 'working' && (
