@@ -52,6 +52,55 @@
       "type": "string",
       "description": "Staff member's job title / role (e.g. 'Cable Percussion Driller', 'Groundworker'). Derived from the crew section during spreadsheet import."
     },
+    "lead_driller_name": {
+      "type": "string",
+      "description": "Lead Driller name for this subcontractor or agency crew. Captured in the Staff Hub Contacts tab Add/Edit modal. Shown as a sub-line on the rota grid and job details page. Blank for direct employees."
+    },
+    "lead_driller_phone": {
+      "type": "string",
+      "description": "Lead Driller mobile phone number. Captured alongside lead_driller_name. Shown on the job details Subcontractors card."
+    },
+    "second_man_name": {
+      "type": "string",
+      "description": "Second Man Driller name for this subcontractor or agency crew. Captured in the Staff Hub Contacts tab Add/Edit modal. Shown as a sub-line on the rota grid and job details page."
+    },
+    "second_man_phone": {
+      "type": "string",
+      "description": "Second Man Driller mobile phone number. Captured alongside second_man_name. Shown on the job details Subcontractors card."
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Contact person name"
+          },
+          "role": {
+            "type": "string",
+            "description": "Contact role/job title (e.g. Operations Director, Site Agent)"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Contact phone number"
+          },
+          "email": {
+            "type": "string",
+            "description": "Contact email address"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about this contact"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "default": [],
+      "description": "All contacts for this subcontractor/agency worker \u2014 managed via the address book popup in the Staff Hub Contacts tab. Each entry has name, role, phone, email, notes."
+    },
     "team_id": {
       "type": "string",
       "description": "Team/group assignment \u2014 determines which jobs this staff member can be assigned to"

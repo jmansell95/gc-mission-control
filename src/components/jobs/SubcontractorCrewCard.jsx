@@ -22,7 +22,25 @@ export default function SubcontractorCrewCard({ job }) {
     enabled: subconLogs.length > 0,
   });
 
-  if (subconLogs.length === 0) return null;
+  // Also pull Staff records (subcontractor/agency) assigned to the job via rota,
+  // so we can show their lead/second man names alongside the SubcontractorLog entries.
+  const { data: crewRotas = [] } = useQuery({
+    queryKey: ['subcon-crew-rotas', job.id],
+    queryFn: () => base44.entities.RotaAssignment.filter({ job_id: job.id }),
+    enabled: !!job.id,
+  });
+  const crewStaffIds = [...new Set(crewRotas.map(r => r.staff_id).filter(Boolean))];
+  const { data: crewStaff = [] } = useQuery({
+    queryKey: ['subcon-crew-staff', crewStaffIds.join(',')],
+    queryFn: () => base44.entities.Staff.list(),
+    enabled: crewStaffIds.length > 0,
+  });
+  const subconStaff = crewStaff.filter(s =>
+    (s.worker_type === 'subcontractor' || s.worker_type === 'agency') &&
+    crewStaffIds.includes(s.id)
+  );
+
+  if (subconLogs.length === 0 && subconStaff.length === 0) return null;
 
   const contractorById = new Map(contractors.map(c => [c.id, c]));
 
@@ -49,6 +67,31 @@ export default function SubcontractorCrewCard({ job }) {
     for (const n of names) if (!entry.crew_names.includes(n)) entry.crew_names.push(n);
   }
 
+  // Merge in Staff records (subcontractor/agency) assigned via rota that aren't
+  // already captured by SubcontractorLog entries, so their lead/second man names show.
+  for (const s of subconStaff) {
+    const key = s.id;
+    if (!bySub.has(key)) {
+      bySub.set(key, {
+        name: s.name || s.company || 'Unknown',
+        type: s.worker_type || 'subcontractor',
+        work_types: new Set(),
+        dates: new Set(crewRotas.filter(r => r.staff_id === s.id).map(r => r.assigned_date).filter(Boolean)),
+        total_sell: 0,
+        crew_names: [],
+        lead_driller_name: s.lead_driller_name || '',
+        lead_driller_phone: s.lead_driller_phone || '',
+        second_man_name: s.second_man_name || '',
+        second_man_phone: s.second_man_phone || '',
+      });
+    } else {
+      const entry = bySub.get(key);
+      entry.lead_driller_name = s.lead_driller_name || entry.lead_driller_name;
+      entry.lead_driller_phone = s.lead_driller_phone || entry.lead_driller_phone;
+      entry.second_man_name = s.second_man_name || entry.second_man_name;
+      entry.second_man_phone = s.second_man_phone || entry.second_man_phone;
+    }
+  }
   const subs = [...bySub.values()];
   const subcontractors = subs.filter(s => s.type === 'subcontractor');
   const agencies = subs.filter(s => s.type === 'agency');
@@ -138,6 +181,14 @@ export default function SubcontractorCrewCard({ job }) {
               {s.crew_names.length > 0 && (
                 <p className="text-[10px] text-slate-500 truncate">
                   {s.crew_names.join(' · ')}
+                </p>
+              )}
+              {(s.lead_driller_name || s.second_man_name) && (
+                <p className="text-[10px] text-blue-600 font-medium truncate">
+                  {[
+                    s.lead_driller_name && `Lead: ${s.lead_driller_name}${s.lead_driller_phone ? ` (${s.lead_driller_phone})` : ''}`,
+                    s.second_man_name && `Second: ${s.second_man_name}${s.second_man_phone ? ` (${s.second_man_phone})` : ''}`,
+                  ].filter(Boolean).join(' · ')}
                 </p>
               )}
               <p className="text-[10px] text-slate-400 truncate">

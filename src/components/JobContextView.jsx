@@ -152,6 +152,33 @@ function CrewCompositionBar({ assignedStaff, rotas, contractors, onAddStaff }) {
           );
         })}
       </div>
+
+      {/* Staff listing with lead/second man for subcontractor/agency workers */}
+      {(() => {
+        const externalStaff = assignedStaff.filter(s => s.worker_type === 'subcontractor' || s.worker_type === 'agency');
+        const withCrew = externalStaff.filter(s => s.lead_driller_name || s.second_man_name);
+        if (withCrew.length === 0) return null;
+        return (
+          <div className="mt-3 space-y-1">
+            {withCrew.map(s => {
+              const parts = [];
+              if (s.lead_driller_name) parts.push(`Lead: ${s.lead_driller_name}`);
+              if (s.second_man_name) parts.push(`Second: ${s.second_man_name}`);
+              return (
+                <div key={s.id} className="flex items-center gap-2 py-1 px-2 rounded-lg bg-slate-50">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${s.worker_type === 'agency' ? 'bg-blue-100' : 'bg-orange-100'}`}>
+                    {s.worker_type === 'agency' ? <Briefcase className="w-2.5 h-2.5 text-blue-600" /> : <HardHat className="w-2.5 h-2.5 text-orange-600" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-slate-700 truncate">{s.name}</p>
+                    <p className="text-[10px] text-blue-600 font-medium truncate">{parts.join(' · ')}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
     </div>
   );
 }

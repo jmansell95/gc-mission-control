@@ -40,6 +40,17 @@ const statusConfig = {
   completed: { label: 'Done', icon: CheckCircle2, dot: 'bg-emerald-500', text: 'text-emerald-600' }
 };
 
+// Lead/Second Man sub-line for subcontractor and agency workers.
+// Shows 'Lead: X · Second: Y' beneath the staff name on the rota grid.
+const crewSubLine = (member) => {
+  if (!member) return null;
+  if (member.worker_type !== 'subcontractor' && member.worker_type !== 'agency') return null;
+  const parts = [];
+  if (member.lead_driller_name) parts.push(`Lead: ${member.lead_driller_name}`);
+  if (member.second_man_name) parts.push(`Second: ${member.second_man_name}`);
+  return parts.length > 0 ? parts.join(' · ') : null;
+};
+
 export default function WeeklyRotaBuilder() {
   const [selectedWeek, setSelectedWeek] = useState(new Date());
   const [smartFillLoading, setSmartFillLoading] = useState(false);
@@ -979,6 +990,9 @@ export default function WeeklyRotaBuilder() {
                         )}
                         <div className="min-w-0">
                           <p className="text-xs text-slate-400 truncate">{getDynamicTeamInfo(member).displayName}</p>
+                          {crewSubLine(member) && (
+                            <p className="text-[10px] text-blue-600 font-medium truncate">{crewSubLine(member)}</p>
+                          )}
                           <button
                             onClick={() => setRotaManagerStaff(member)}
                             title="Manage this crew member's rota — edit dates or delete"
@@ -1127,6 +1141,9 @@ export default function WeeklyRotaBuilder() {
                             <Calendar className="w-3 h-3" /> Manage
                           </button>
                         </div>
+                        {crewSubLine(member) && (
+                          <p className="text-[10px] text-blue-600 font-medium truncate ml-9 -mt-1 mb-1">{crewSubLine(member)}</p>
+                        )}
                         {member && getDynamicTeamInfo(member).isDynamic && (
                           <span className="inline-flex items-center gap-0.5 self-start text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 mb-2">
                             <Zap className="w-2.5 h-2.5" /> DYNAMIC

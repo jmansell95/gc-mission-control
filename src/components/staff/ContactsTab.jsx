@@ -4,12 +4,12 @@ import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useToast } from '@/components/ui/use-toast';
 import MarketDojoPill from './MarketDojoPill';
+import AddressBookModal from './AddressBookModal';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase,
-  Wrench, UserCog, Trash2, Edit2, CheckCircle2,
+  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone,
 } from 'lucide-react';
 
-// Map StaffPage sub-pill IDs to contact type metadata
 const SUB_TO_TYPE = {
   clients: { key: 'client', label: 'Clients', singular: 'Client', icon: Building2, color: '#059669', isStaff: false },
   contractors: { key: 'subcontractor', label: 'Subcontractors', singular: 'Subcontractor', icon: Wrench, color: '#2563eb', isStaff: true },
@@ -17,7 +17,10 @@ const SUB_TO_TYPE = {
   agency: { key: 'agency', label: 'Agency Workers', singular: 'Agency Worker', icon: UserCog, color: '#7c3aed', isStaff: true },
 };
 
-const emptyForm = { full_name: '', job_title: '', company: '', market_dojo_onboarded: false };
+const emptyForm = {
+  full_name: '', job_title: '', company: '', market_dojo_onboarded: false,
+  lead_driller_name: '', lead_driller_phone: '', second_man_name: '', second_man_phone: '',
+};
 
 export default function ContactsTab({ activeSub }) {
   const meta = SUB_TO_TYPE[activeSub] || SUB_TO_TYPE.contractors;
@@ -29,6 +32,7 @@ export default function ContactsTab({ activeSub }) {
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [addressBook, setAddressBook] = useState(null);
   const { activeDivisionId } = useDivision();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -61,6 +65,11 @@ export default function ContactsTab({ activeSub }) {
         job_title: s.job_title || '',
         company: s.company || '',
         onboarded: !!s.market_dojo_onboarded,
+        lead_driller_name: s.lead_driller_name || '',
+        lead_driller_phone: s.lead_driller_phone || '',
+        second_man_name: s.second_man_name || '',
+        second_man_phone: s.second_man_phone || '',
+        contacts: s.contacts || [],
         raw: s,
       }));
     } else if (meta.key === 'client') {
@@ -72,6 +81,7 @@ export default function ContactsTab({ activeSub }) {
           job_title: contact.role || '',
           company: c.name || '',
           onboarded: false,
+          contacts: c.contacts || [],
           raw: c,
         };
       });
@@ -84,6 +94,7 @@ export default function ContactsTab({ activeSub }) {
           job_title: contact.role || '',
           company: s.name || '',
           onboarded: false,
+          contacts: s.contacts || [],
           raw: s,
         };
       });
@@ -118,6 +129,10 @@ export default function ContactsTab({ activeSub }) {
           is_active: true,
           market_dojo_onboarded: !!addForm.market_dojo_onboarded,
           market_dojo_onboarded_at: addForm.market_dojo_onboarded ? new Date().toISOString() : null,
+          lead_driller_name: addForm.lead_driller_name.trim() || null,
+          lead_driller_phone: addForm.lead_driller_phone.trim() || null,
+          second_man_name: addForm.second_man_name.trim() || null,
+          second_man_phone: addForm.second_man_phone.trim() || null,
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
         queryClient.invalidateQueries({ queryKey: ['staff'] });
@@ -156,6 +171,10 @@ export default function ContactsTab({ activeSub }) {
       job_title: rec.job_title,
       company: rec.company,
       market_dojo_onboarded: rec.onboarded,
+      lead_driller_name: rec.lead_driller_name || '',
+      lead_driller_phone: rec.lead_driller_phone || '',
+      second_man_name: rec.second_man_name || '',
+      second_man_phone: rec.second_man_phone || '',
     });
     setEditing(rec);
   };
@@ -172,6 +191,10 @@ export default function ContactsTab({ activeSub }) {
           job_title: editForm.job_title.trim(),
           company: editForm.company.trim(),
           market_dojo_onboarded: nowOnboarded,
+          lead_driller_name: editForm.lead_driller_name.trim() || null,
+          lead_driller_phone: editForm.lead_driller_phone.trim() || null,
+          second_man_name: editForm.second_man_name.trim() || null,
+          second_man_phone: editForm.second_man_phone.trim() || null,
         };
         if (nowOnboarded && !wasOnboarded) payload.market_dojo_onboarded_at = new Date().toISOString();
         if (!nowOnboarded) payload.market_dojo_onboarded_at = null;
@@ -226,6 +249,37 @@ export default function ContactsTab({ activeSub }) {
   };
 
   const Icon = meta.icon;
+
+  const leadSecondLine = (rec) => {
+    const parts = [];
+    if (rec.lead_driller_name) parts.push(`Lead: ${rec.lead_driller_name}`);
+    if (rec.second_man_name) parts.push(`Second: ${rec.second_man_name}`);
+    return parts.length > 0 ? parts.join(' · ') : null;
+  };
+
+  const LeadSecondFields = ({ form, setForm }) => (
+    <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-3 space-y-2">
+      <p className="text-xs font-bold text-blue-800 uppercase tracking-wide">Drilling Crew</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Name</label>
+          <input type="text" value={form.lead_driller_name || ''} onChange={e => setForm({ ...form, lead_driller_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+        </div>
+        <div>
+          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Phone</label>
+          <input type="text" value={form.lead_driller_phone || ''} onChange={e => setForm({ ...form, lead_driller_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+        </div>
+        <div>
+          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Name</label>
+          <input type="text" value={form.second_man_name || ''} onChange={e => setForm({ ...form, second_man_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+        </div>
+        <div>
+          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Phone</label>
+          <input type="text" value={form.second_man_phone || ''} onChange={e => setForm({ ...form, second_man_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -300,6 +354,9 @@ export default function ContactsTab({ activeSub }) {
                   <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
                     <Building2 className="w-3 h-3 flex-shrink-0" /> {rec.company || 'No company'}
                   </p>
+                  {isStaffType && leadSecondLine(rec) && (
+                    <p className="text-[10px] text-blue-600 font-medium truncate mt-0.5">{leadSecondLine(rec)}</p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-50">
@@ -308,6 +365,13 @@ export default function ContactsTab({ activeSub }) {
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-xs font-medium"
                 >
                   <Edit2 className="w-3 h-3" /> Edit
+                </button>
+                <button
+                  onClick={() => setAddressBook({ type: isStaffType ? 'staff' : meta.key, id: rec.id, name: rec.full_name || rec.company, contacts: rec.contacts || [] })}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 rounded-lg hover:bg-[#2E5A1A]/5 transition text-xs font-medium"
+                  title="Address book — manage multiple contacts"
+                >
+                  <BookUser className="w-3 h-3" /> Contacts
                 </button>
                 <button
                   onClick={() => handleDelete(rec)}
@@ -326,8 +390,8 @@ export default function ContactsTab({ activeSub }) {
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAdd(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl z-10">
               <h3 className="font-semibold text-slate-900 flex items-center gap-2">
                 <Icon className="w-4 h-4" style={{ color: meta.color }} />
                 Add {meta.singular}
@@ -339,40 +403,20 @@ export default function ContactsTab({ activeSub }) {
             <form onSubmit={handleAdd} className="p-5 space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Full Name *</label>
-                <input
-                  type="text"
-                  value={addForm.full_name}
-                  onChange={e => setAddForm({ ...addForm, full_name: e.target.value })}
-                  autoFocus
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={addForm.full_name} onChange={e => setAddForm({ ...addForm, full_name: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
-                <input
-                  type="text"
-                  value={addForm.job_title}
-                  onChange={e => setAddForm({ ...addForm, job_title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={addForm.job_title} onChange={e => setAddForm({ ...addForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company *</label>
-                <input
-                  type="text"
-                  value={addForm.company}
-                  onChange={e => setAddForm({ ...addForm, company: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
+              {isStaffType && <LeadSecondFields form={addForm} setForm={setAddForm} />}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                  <input
-                    type="checkbox"
-                    checked={!!addForm.market_dojo_onboarded}
-                    onChange={e => setAddForm({ ...addForm, market_dojo_onboarded: e.target.checked })}
-                    className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0"
-                  />
+                  <input type="checkbox" checked={!!addForm.market_dojo_onboarded} onChange={e => setAddForm({ ...addForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Onboarded in Market Dojo</p>
                     <p className="text-xs text-slate-500 mt-0.5">Tick once onboarding & compliance is completed in Market Dojo.</p>
@@ -395,7 +439,7 @@ export default function ContactsTab({ activeSub }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setEditing(null)} />
           <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl z-10">
               <h3 className="font-semibold text-slate-900 flex items-center gap-2">
                 <Edit2 className="w-4 h-4 text-[#2E5A1A]" /> Edit {meta.singular}
               </h3>
@@ -411,39 +455,20 @@ export default function ContactsTab({ activeSub }) {
               )}
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={editForm.full_name || ''}
-                  onChange={e => setEditForm({ ...editForm, full_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={editForm.full_name || ''} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
-                <input
-                  type="text"
-                  value={editForm.job_title || ''}
-                  onChange={e => setEditForm({ ...editForm, job_title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={editForm.job_title || ''} onChange={e => setEditForm({ ...editForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
-                <input
-                  type="text"
-                  value={editForm.company || ''}
-                  onChange={e => setEditForm({ ...editForm, company: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm"
-                />
+                <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
+              {isStaffType && <LeadSecondFields form={editForm} setForm={setEditForm} />}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
-                  <input
-                    type="checkbox"
-                    checked={!!editForm.market_dojo_onboarded}
-                    onChange={e => setEditForm({ ...editForm, market_dojo_onboarded: e.target.checked })}
-                    className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0"
-                  />
+                  <input type="checkbox" checked={!!editForm.market_dojo_onboarded} onChange={e => setEditForm({ ...editForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-slate-800">Onboarded in Market Dojo</p>
                     <p className="text-xs text-slate-500 mt-0.5">Tick once onboarding & compliance is completed in Market Dojo.</p>
@@ -459,6 +484,18 @@ export default function ContactsTab({ activeSub }) {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Address Book modal */}
+      {addressBook && (
+        <AddressBookModal
+          open={!!addressBook}
+          onClose={() => setAddressBook(null)}
+          entityType={addressBook.type}
+          recordId={addressBook.id}
+          recordName={addressBook.name}
+          initialContacts={addressBook.contacts}
+        />
       )}
     </div>
   );
