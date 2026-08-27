@@ -506,7 +506,7 @@ function parseSheet(sheet, sheetName) {
       if (looksLikeCompanyName(row[c])) { entityName = normalizeName(row[c]); isCompanyName = true; entityNameCol = c; break; }
     }
     // In subcontractor sections, also check for subbie-specific abbreviations
-    // (e.g. "SI" = Site Investigations) that looksLikeCompanyName misses
+    // (e.g. "SI" = Geotechnical SI) that looksLikeCompanyName misses
     if (!entityName && isSubSection) {
       for (let c = 0; c < 6; c++) {
         const val = row[c];

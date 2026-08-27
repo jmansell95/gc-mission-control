@@ -25,7 +25,7 @@ export function StepIdentity({ form, setForm, divisions, divisionsLoading, apply
       <BlankSlateBanner stepLabel="Identity" />
       <div>
         <label className={labelCls}>Business Stream Name{requiredMark}</label>
-        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Geotechnical Site Investigation"
+        <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. Geotechnical SI"
           className={inputClass(!form.name.trim())} autoFocus />
         {!form.name.trim() && <p className="text-[11px] text-rose-500 mt-1 font-semibold">Business Stream name is required</p>}
       </div>

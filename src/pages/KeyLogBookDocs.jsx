@@ -235,7 +235,7 @@ export default function KeyLogBookDocs() {
     addCodeBlock(`{
   "status": "success",
   "job_id": "uuid-here",
-  "job_name": "EWR Site Investigation - Lot 1",
+  "job_name": "EWR Geotechnical SI - Lot 1",
   "deleted": 5,
   "logs_inserted": 8,
   "remarks_activities": 5,

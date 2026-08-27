@@ -7,7 +7,7 @@ import { Waves } from 'lucide-react';
  * Hierarchy:
  *  - Ground Control (ultimate parent company) — Logo / LogoFull
  *  - Land & Water Solutions (group inside Ground Control) — LandWaterLogo
- *  - Divisions (Geotechnical Site Investigation, etc.) — division cards
+ *  - Divisions (Geotechnical SI, etc.) — division cards
  */
 
 // Ground Control original logo — transparent background full lockup

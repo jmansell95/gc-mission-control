@@ -33,7 +33,7 @@
     },
     "record_summary": {
       "type": "string",
-      "description": "Human-readable summary of the record (e.g. 'Job: Site Investigation \u2014 Baker Street'). Used for display without joining."
+      "description": "Human-readable summary of the record (e.g. 'Job: Geotechnical SI \u2014 Baker Street'). Used for display without joining."
     },
     "record_hash": {
       "type": "string",

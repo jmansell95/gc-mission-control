@@ -408,7 +408,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Project Name <span className="text-red-500">*</span></label>
-                    <input autoFocus type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Riverside Site Investigation" className={inputCls} />
+                    <input autoFocus type="text" value={form.name} onChange={e => set('name', e.target.value)} placeholder="e.g. Riverside Geotechnical SI" className={inputCls} />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">Location <span className="text-red-500">*</span></label>

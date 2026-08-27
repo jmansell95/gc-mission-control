@@ -5,7 +5,7 @@ import { HardHat, Loader2, User } from 'lucide-react';
 
 const WORK_TYPE_LABELS = {
   drilling: 'Drilling', coring: 'Coring', groundworks: 'Groundworks',
-  trial_pit: 'Trial Pit', enabling_works: 'Enabling', site_investigation: 'Site Investigation',
+  trial_pit: 'Trial Pit', enabling_works: 'Enabling', site_investigation: 'Geotechnical SI',
   equipment_hire: 'Equipment Hire', materials_supply: 'Materials', transport: 'Transport',
   supervision: 'Supervision', other: 'Other',
 };
