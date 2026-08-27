@@ -119,13 +119,22 @@ export default function StaffManager() {
   const handleInvite = async (member) => {
     setInviteLoading(member.id);
     try {
-      await base44.users.inviteUser(member.email, 'user');
+      // Try the branded invite first — sends a Ground Control dark-green
+      // branded email with a direct link to /register. This only works once
+      // a custom domain is connected; otherwise it falls back to the
+      // platform invite email (which can't be branded but does carry a
+      // working registration link).
+      let brandedSent = false;
+      try {
+        const res = await base44.functions.invoke('sendBrandedInvite', { email: member.email, staff_name: member.name });
+        brandedSent = (res.data || res)?.sent === true;
+      } catch (_) { /* fall back to platform invite below */ }
+
+      if (!brandedSent) {
+        await base44.users.inviteUser(member.email, 'user');
+      }
+
       await base44.entities.Staff.update(member.id, { invite_sent: true });
-      // The platform invite email contains the password-setup link — there is
-      // no separate password email (resetPasswordRequest silently no-ops for
-      // users without an account, and SendEmail to non-registered users needs
-      // a custom domain). The key-icon button on the card remains for users
-      // who already have an account but forgot their password.
       await queryClient.refetchQueries({ queryKey: ['users-list'] });
       const freshUsers = queryClient.getQueryData(['users-list']) || [];
       const matchedUser = freshUsers.find(u => u.email?.toLowerCase() === member.email.toLowerCase());
@@ -137,7 +146,12 @@ export default function StaffManager() {
         }
       }
       queryClient.invalidateQueries({ queryKey: ['staff'] });
-      toast({ title: 'Invite sent', description: `${member.email} — the invite email contains a link to set up their password.${matchedUser ? ' Account linked.' : ''}` });
+      toast({
+        title: 'Invite sent',
+        description: brandedSent
+          ? `${member.email} — branded invite sent with a link to set up their password.`
+          : `${member.email} — invite sent. Connect a custom domain in Settings for branded emails.${matchedUser ? ' Account linked.' : ''}`,
+      });
     } catch (error) {
       toast({ title: 'Could not send invite', description: error?.message || 'User may already have an account', variant: 'destructive' });
     }

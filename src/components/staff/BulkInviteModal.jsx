@@ -29,8 +29,17 @@ export default function BulkInviteModal({ onClose }) {
     const failed = [];
     for (const email of emailList) {
       try {
-        // The platform invite email contains the password-setup link.
-        await base44.users.inviteUser(email, role);
+        // Try branded invite first (Ground Control dark-green email with a
+        // direct /register link). Falls back to the platform invite if no
+        // custom domain is connected.
+        let brandedSent = false;
+        try {
+          const res = await base44.functions.invoke('sendBrandedInvite', { email, staff_name: email.split('@')[0] });
+          brandedSent = (res.data || res)?.sent === true;
+        } catch (_) { /* fall back below */ }
+        if (!brandedSent) {
+          await base44.users.inviteUser(email, role);
+        }
         succeeded.push(email);
       } catch (e) {
         failed.push({ email, error: e.message || 'Failed' });
