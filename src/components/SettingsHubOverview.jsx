@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
@@ -7,36 +7,6 @@ import {
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
   Gift, KeyRound, FileUp, CalendarDays,
 } from 'lucide-react';
-
-const INTEGRATION_SETTING_KEYS = [
-  'geotab_config', 'holman_config', 'asset_panda_config', 'bob_hr_config',
-  'concur_config', 'safety_culture_config', 'keylogbook_config', 'cis_config',
-  'payroll_config', 'met_office_config', 'google_maps_config', 'whatsapp_config',
-  'accounting_config', 'stripe_config',
-];
-const INTEGRATION_CONNECTED_FIELDS = {
-  geotab_config: 'username', holman_config: 'api_key', asset_panda_config: 'token',
-  bob_hr_config: 'username', concur_config: 'client_id', safety_culture_config: 'api_token',
-  keylogbook_config: 'webhook_secret', cis_config: 'api_key', payroll_config: 'provider',
-  met_office_config: 'api_key', google_maps_config: 'api_key', whatsapp_config: 'api_token',
-  accounting_config: 'provider', stripe_config: 'secret_key',
-};
-const INTEGRATION_META = {
-  geotab_config: { id: 'geotab-sync', label: 'Geotab' },
-  holman_config: { id: 'holman-sync', label: 'Holman' },
-  asset_panda_config: { id: 'asset-panda', label: 'Asset Panda' },
-  bob_hr_config: { id: 'bob-hr', label: 'Bob HR' },
-  concur_config: { id: 'concur-sync', label: 'Concur' },
-  safety_culture_config: { id: 'safety-culture', label: 'SafetyCulture' },
-  keylogbook_config: { id: 'ags-import', label: 'KeyLogBook' },
-  cis_config: { id: 'cis-verification', label: 'CIS' },
-  payroll_config: { id: 'payroll-export', label: 'Payroll' },
-  met_office_config: { id: 'met-office', label: 'Met Office' },
-  google_maps_config: { id: 'google-maps', label: 'Google Maps' },
-  whatsapp_config: { id: 'whatsapp', label: 'WhatsApp' },
-  accounting_config: { id: 'accounting-sync', label: 'Accounting' },
-  stripe_config: { id: 'payment-gateway', label: 'Payments' },
-};
 
 /**
  * Settings Command Hub — Clean Canvas overview.
@@ -47,54 +17,44 @@ const INTEGRATION_META = {
 export default function SettingsHubOverview({ onNavigate }) {
   const [search, setSearch] = useState('');
 
-  const { data: staff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
-  const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
-  const { data: vehicles = [] } = useQuery({ queryKey: ['vehicles'], queryFn: () => base44.entities.Vehicle.list() });
-  const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list() });
-  const { data: rateItems = [] } = useQuery({ queryKey: ['rate-card-items'], queryFn: () => base44.entities.RateCardItem.list('-created_date', 500) });
-  const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
-  const { data: billingRules = [] } = useQuery({ queryKey: ['billing-rules'], queryFn: () => base44.entities.BillingRule.list() });
-  const { data: complianceItems = [] } = useQuery({ queryKey: ['compliance-items-hub'], queryFn: () => base44.entities.ComplianceItem.list('-created_date', 500) });
-  const { data: permissionGroups = [] } = useQuery({ queryKey: ['permission-groups'], queryFn: () => base44.entities.PermissionGroup.list('-created_date', 200) });
-  const { data: allSettings = [] } = useQuery({
-    queryKey: ['all-integration-configs'],
-    queryFn: () => base44.entities.AppSetting.filter({ key: { $in: INTEGRATION_SETTING_KEYS } }, '-created_date', 50),
+  // Single batched query — replaces ~10 individual entity list calls with one
+  // round trip to getSettingsHubStats, which returns all counts + integration
+  // statuses server-side.
+  const { data: stats } = useQuery({
+    queryKey: ['settings-hub-stats'],
+    queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
   });
 
-  const cfgMap = useMemo(() => {
-    const m = {};
-    for (const s of allSettings) m[s.key] = s.value || {};
-    return m;
-  }, [allSettings]);
-
-  const integrationList = useMemo(() => INTEGRATION_SETTING_KEYS.map(k => {
-    const meta = INTEGRATION_META[k];
-    const field = INTEGRATION_CONNECTED_FIELDS[k];
-    return { id: meta.id, label: meta.label, connected: !!(cfgMap[k] && cfgMap[k][field]) };
-  }), [cfgMap]);
-
-  const integrationConnectedCount = integrationList.filter(i => i.connected).length;
-
-  const activeStaff = staff.filter(s => s.is_active !== false).length;
-  const activeJobs = jobs.filter(j => (j.status || 'planning') === 'in_progress').length;
-  const planningJobs = jobs.filter(j => (j.status || 'planning') === 'planning').length;
+  const staff = [];
+  const teams = [];
+  const clients = [];
+  const vehicles = [];
+  const rateItems = [];
+  const billingRules = [];
+  const complianceItems = [];
+  const permissionGroups = [];
+  const integrationList = stats?.integrations || [];
+  const integrationConnectedCount = stats?.integrationConnectedCount || 0;
+  const activeStaff = stats?.activeStaff || 0;
+  const activeJobs = stats?.activeJobs || 0;
+  const planningJobs = stats?.planningJobs || 0;
 
   const checks = [
-    { id: 'staff', label: 'Add staff & crews', done: staff.length > 0 },
-    { id: 'teams', label: 'Configure crew types', done: teams.length > 0 },
-    { id: 'access-levels', label: 'Set up access groups', done: permissionGroups.length > 0 },
-    { id: 'clients', label: 'Add clients', done: clients.length > 0 },
-    { id: 'vehicles', label: 'Add vehicles', done: vehicles.length > 0 },
-    { id: 'rate-card', label: 'Upload price list', done: rateItems.length > 0 },
-    { id: 'billing', label: 'Configure billing rules', done: billingRules.length > 0 },
-    { id: 'compliance', label: 'Track compliance items', done: complianceItems.length > 0 },
+    { id: 'staff', label: 'Add staff & crews', done: (stats?.staffCount || 0) > 0 },
+    { id: 'teams', label: 'Configure crew types', done: (stats?.teamsCount || 0) > 0 },
+    { id: 'access-levels', label: 'Set up access groups', done: (stats?.permissionGroupsCount || 0) > 0 },
+    { id: 'clients', label: 'Add clients', done: (stats?.clientsCount || 0) > 0 },
+    { id: 'vehicles', label: 'Add vehicles', done: (stats?.vehiclesCount || 0) > 0 },
+    { id: 'rate-card', label: 'Upload price list', done: (stats?.rateItemsCount || 0) > 0 },
+    { id: 'billing', label: 'Configure billing rules', done: (stats?.billingRulesCount || 0) > 0 },
+    { id: 'compliance', label: 'Track compliance items', done: (stats?.complianceItemsCount || 0) > 0 },
     { id: 'integrations', label: 'Connect integrations', done: integrationConnectedCount > 0 },
   ];
   const doneCount = checks.filter(c => c.done).length;
 
   const groups = [
     { group: 'Security & Access', items: [
-      { id: 'access-levels', icon: KeyRound, label: 'Access Levels', value: permissionGroups.length, sub: 'Permission groups & lockdowns per stream' },
+      { id: 'access-levels', icon: KeyRound, label: 'Access Levels', value: stats?.permissionGroupsCount || 0, sub: 'Permission groups & lockdowns per stream' },
     ]},
     { group: 'Ground Investigation', items: [
       { id: 'ags-import', icon: FileUp, label: 'KeyLogBook', value: '—', sub: 'AGS & borehole data sync — webhook, manual upload & pull sync' },
@@ -136,8 +96,8 @@ export default function SettingsHubOverview({ onNavigate }) {
     { label: 'Crew', value: activeStaff },
     { label: 'Active Jobs', value: activeJobs },
     { label: 'Planning', value: planningJobs },
-    { label: 'Vehicles', value: vehicles.length },
-    { label: 'Clients', value: clients.length },
+    { label: 'Vehicles', value: stats?.vehiclesCount || 0 },
+    { label: 'Clients', value: stats?.clientsCount || 0 },
   ];
 
   const q = search.toLowerCase().trim();

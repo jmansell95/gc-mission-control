@@ -9,9 +9,17 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
-    // --- Read configuration ---
-    const configs = await base44.asServiceRole.entities.AssetPandaConfig.filter({ key: 'global' });
-    const config = configs && configs[0];
+    // --- Read configuration (division-scoped when a division_id is passed) ---
+    const body = await req.json().catch(() => ({}));
+    const divisionId = body.division_id || null;
+    const configFilter = divisionId ? { key: 'global', division_id: divisionId } : { key: 'global', division_id: null };
+    let configs = await base44.asServiceRole.entities.AssetPandaConfig.filter(configFilter);
+    let config = configs && configs[0];
+    // Fallback to global config when no division-scoped record exists
+    if (!config && divisionId) {
+      configs = await base44.asServiceRole.entities.AssetPandaConfig.filter({ key: 'global' });
+      config = configs && configs[0];
+    }
     if (!config) {
       return Response.json({ skipped: true, reason: 'No Asset Panda configuration found. Add your API details in Settings → Asset Panda Sync Data.' });
     }

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
+import { useDivisionAppSetting } from '@/hooks/useDivisionAppSetting';
 
 const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
 
@@ -40,7 +41,6 @@ const WEBHOOK_RELATIVE = '/functions/holmanWebhook';
 export default function HolmanSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -53,19 +53,7 @@ export default function HolmanSettings() {
 
   const genSecret = () => Array.from({ length: 32 }, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('');
 
-  // Load saved config from AppSetting on mount
-  const { data: settingsRec, isLoading: loadingSettings } = useQuery({
-    queryKey: ['holman-config'],
-    queryFn: () => base44.entities.AppSetting.filter({ key: 'holman_config' }, '-created_date', 5),
-  });
-
-  useEffect(() => {
-    if (settingsRec && settingsRec.length > 0 && settingsRec[0].value) {
-      setConfig({ ...DEFAULT_CONFIG, ...settingsRec[0].value });
-    }
-  }, [settingsRec]);
-
-  const configId = settingsRec?.[0]?.id;
+  const { config, setConfig, save, activeDivisionId } = useDivisionAppSetting('holman_config', { label: 'Holman Fleet Sync Configuration', defaultValue: DEFAULT_CONFIG });
 
   // Build the full webhook URL from the current origin
   const webhookUrl = buildWebhookUrl(WEBHOOK_RELATIVE);
@@ -73,18 +61,12 @@ export default function HolmanSettings() {
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
-    try {
-      const payload = { key: 'holman_config', label: 'Holman Fleet Sync Configuration', value: config };
-      if (configId) {
-        await base44.entities.AppSetting.update(configId, payload);
-      } else {
-        await base44.entities.AppSetting.create(payload);
-      }
-      queryClient.invalidateQueries({ queryKey: ['holman-config'] });
+    const ok = await save();
+    if (ok) {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch (e) {
-      toast({ title: 'Save failed', description: e.message || 'Please try again.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Save failed', description: 'Please try again.', variant: 'destructive' });
     }
     setSaving(false);
   };
@@ -93,7 +75,7 @@ export default function HolmanSettings() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'test' });
+      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'test', division_id: activeDivisionId });
       const d = res.data || res;
       setTestResult({ ok: !!d.ok, msg: d.message || d.error || 'Unknown response' });
     } catch (e) {
@@ -106,7 +88,7 @@ export default function HolmanSettings() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'sync' });
+      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'sync', division_id: activeDivisionId });
       const d = res.data || res;
       setSyncResult({
         ok: !!d.ok,
@@ -115,7 +97,7 @@ export default function HolmanSettings() {
         unmatched: d.unmatched || 0,
         total: d.total || 0,
       });
-      queryClient.invalidateQueries({ queryKey: ['holman-config'] });
+      queryClient.invalidateQueries({ queryKey: ['app-setting', 'holman_config'] });
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
     } catch (e) {
       setSyncResult({ ok: false, msg: e.message || 'Sync failed' });
@@ -127,7 +109,7 @@ export default function HolmanSettings() {
     setFuelSyncing(true);
     setFuelSyncResult(null);
     try {
-      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'sync_fuel' });
+      const res = await base44.functions.invoke('syncHolmanFleet', { action: 'sync_fuel', division_id: activeDivisionId });
       const d = res.data || res;
       setFuelSyncResult({
         ok: !!d.ok,
@@ -139,7 +121,7 @@ export default function HolmanSettings() {
         unmatched: d.unmatched || 0,
         total: d.total || 0,
       });
-      queryClient.invalidateQueries({ queryKey: ['holman-config'] });
+      queryClient.invalidateQueries({ queryKey: ['app-setting', 'holman_config'] });
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       queryClient.invalidateQueries({ queryKey: ['vehicles-maintenance-bookings'] });
     } catch (e) {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LogOut, HelpCircle, User, CalendarDays, Truck, Bell, Crown } from 'lucide-react';
+import { X, LogOut, HelpCircle, User, CalendarDays, Truck, Bell, Crown, ScanLine, Sparkles } from 'lucide-react';
 import Logo from '@/components/Logo';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
-export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSection, onNavigate, onLogout, onHelp, onProfile, onDeliveries, onNotifications, notifCount = 0, profile, onEnterprise }) {
+export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSection, onNavigate, onLogout, onHelp, onProfile, onDeliveries, onNotifications, notifCount = 0, profile, onEnterprise, onScan, onAIHub }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -80,6 +80,45 @@ export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSecti
                 );
               })}
             </nav>
+
+            {/* Footer — quick actions matching the desktop sidebar */}
+            <div className="px-3 py-3 border-t border-white/10 space-y-1.5 flex-shrink-0">
+              {onScan && (
+                <button type="button" onClick={() => { onScan(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition touch-manipulation select-none">
+                  <ScanLine className="w-5 h-5 flex-shrink-0 text-[#8DC63F]" />
+                  <span>Scan Asset</span>
+                </button>
+              )}
+              {onAIHub && (
+                <button type="button" onClick={() => { onAIHub(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white hover:opacity-90 transition touch-manipulation select-none shadow-lg glow-brand">
+                  <Sparkles className="w-5 h-5 flex-shrink-0" />
+                  <span>AI Hubs</span>
+                </button>
+              )}
+              {onDeliveries && (
+                <button type="button" onClick={() => { onDeliveries(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition touch-manipulation select-none">
+                  <Truck className="w-5 h-5 flex-shrink-0" />
+                  <span>Deliveries</span>
+                </button>
+              )}
+              {onHelp && (
+                <button type="button" onClick={() => { onHelp(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition touch-manipulation select-none">
+                  <HelpCircle className="w-5 h-5 flex-shrink-0" />
+                  <span>Help Guides</span>
+                </button>
+              )}
+              {onLogout && (
+                <button type="button" onClick={() => { onLogout(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-rose-300 hover:bg-rose-500/10 hover:text-rose-200 transition touch-manipulation select-none">
+                  <LogOut className="w-5 h-5 flex-shrink-0" />
+                  <span>Logout</span>
+                </button>
+              )}
+            </div>
 
           </motion.aside>
         </>

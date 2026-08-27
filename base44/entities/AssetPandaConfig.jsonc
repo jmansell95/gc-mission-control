@@ -4,7 +4,11 @@
   "properties": {
     "key": {
       "type": "string",
-      "description": "Singleton key \u2014 always 'global'. Used to fetch the single config record."
+      "description": "Config key \u2014 always 'global'. Used together with division_id to fetch the config record for a specific business stream."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The business stream this Asset Panda config belongs to. When set, this record holds the per-stream Asset Panda credentials so each stream can connect its own Asset Panda account. Blank/null = global/shared config (used when no division is active, and as the backend fallback)."
     },
     "api_token": {
       "type": "string",

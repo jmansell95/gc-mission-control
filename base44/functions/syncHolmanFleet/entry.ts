@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { getAppSetting } from '../../shared/appSettings.ts';
 
 // ============================================================
 // Holman Fleet sync — manual pull & connection test
@@ -53,10 +54,10 @@ export default async function(req: Request): Promise<Response> {
 
     const payload = await req.json().catch(() => ({}));
     const action = payload.action || 'test';
+    const divisionId = payload.division_id || null;
 
-    // Load Holman config
-    const configs = await base44.asServiceRole.entities.AppSetting.filter({ key: 'holman_config' });
-    const configRec = configs && configs[0];
+    // Load Holman config — division-scoped when a division_id is passed.
+    const configRec = await getAppSetting(base44, 'holman_config', divisionId);
     if (!configRec) {
       return Response.json({ ok: false, message: 'Holman is not configured. Add your API credentials in Settings first.' });
     }

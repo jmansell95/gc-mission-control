@@ -10,6 +10,7 @@ import AssetPandaLinkReview from '@/components/assetpanda/AssetPandaLinkReview';
 import AssetPandaWebhookSection from '@/components/assetpanda/AssetPandaWebhookSection';
 import AssetPandaSyncStatus from '@/components/assetpanda/AssetPandaSyncStatus';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
+import { useDivision } from '@/contexts/DivisionContext';
 
 export default function AssetPandaSettings() {
   const { toast } = useToast();
@@ -26,11 +27,20 @@ export default function AssetPandaSettings() {
     auto_deactivate: true,
   });
 
-  const { data: configs = [] } = useQuery({
-    queryKey: ['asset-panda-config'],
-    queryFn: () => base44.entities.AssetPandaConfig.filter({ key: 'global' }),
+  const { activeDivisionId } = useDivision();
+  const { data: config } = useQuery({
+    queryKey: ['asset-panda-config', activeDivisionId || 'global'],
+    queryFn: async () => {
+      if (activeDivisionId) {
+        const scoped = await base44.entities.AssetPandaConfig.filter({ key: 'global', division_id: activeDivisionId });
+        if (scoped.length) return scoped[0];
+      }
+      const globalRecs = await base44.entities.AssetPandaConfig.filter({ key: 'global', division_id: null });
+      if (globalRecs.length) return globalRecs[0];
+      const any = await base44.entities.AssetPandaConfig.filter({ key: 'global' });
+      return any[0] || null;
+    },
   });
-  const config = configs[0];
 
   useEffect(() => {
     if (config) {
@@ -66,7 +76,7 @@ export default function AssetPandaSettings() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = { key: 'global', ...form };
+      const payload = { key: 'global', division_id: activeDivisionId || null, ...form };
       if (config?.id) {
         await base44.entities.AssetPandaConfig.update(config.id, payload);
       } else {
@@ -84,7 +94,7 @@ export default function AssetPandaSettings() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const res = await base44.functions.invoke('syncAssetPanda', {});
+      const res = await base44.functions.invoke('syncAssetPanda', { division_id: activeDivisionId });
       const data = res?.data || res;
       queryClient.invalidateQueries({ queryKey: ['site-assets-panda'] });
       queryClient.invalidateQueries({ queryKey: ['site-assets'] });
@@ -112,7 +122,7 @@ export default function AssetPandaSettings() {
   const handlePushAll = async () => {
     setPushing(true);
     try {
-      const res = await base44.functions.invoke('pushAllToAssetPanda', {});
+      const res = await base44.functions.invoke('pushAllToAssetPanda', { division_id: activeDivisionId });
       const data = res?.data || res;
       queryClient.invalidateQueries({ queryKey: ['site-assets-panda'] });
       queryClient.invalidateQueries({ queryKey: ['site-assets'] });

@@ -8,6 +8,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 import GeofenceSettings from '@/components/settings/GeofenceSettings';
+import { useDivisionAppSetting } from '@/hooks/useDivisionAppSetting';
 
 const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
 
@@ -26,7 +27,6 @@ const DEFAULT_CONFIG = {
 export default function GeotabSettings() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -37,30 +37,18 @@ export default function GeotabSettings() {
   const [tsSyncing, setTsSyncing] = useState(false);
   const [tsResult, setTsResult] = useState(null);
 
-  const { data: settingsRec } = useQuery({
-    queryKey: ['geotab-config'],
-    queryFn: () => base44.entities.AppSetting.filter({ key: 'geotab_config' }, '-created_date', 5),
-  });
-
-  useEffect(() => {
-    if (settingsRec?.[0]?.value) setConfig({ ...DEFAULT_CONFIG, ...settingsRec[0].value });
-  }, [settingsRec]);
-
-  const configId = settingsRec?.[0]?.id;
+  const { config, setConfig, save, activeDivisionId } = useDivisionAppSetting('geotab_config', { label: 'Geotab GPS Sync Configuration', defaultValue: DEFAULT_CONFIG });
   const connected = !!(config.username && config.password && config.database);
 
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
-    try {
-      const payload = { key: 'geotab_config', label: 'Geotab GPS Sync Configuration', value: config };
-      if (configId) await base44.entities.AppSetting.update(configId, payload);
-      else await base44.entities.AppSetting.create(payload);
-      queryClient.invalidateQueries({ queryKey: ['geotab-config'] });
+    const ok = await save();
+    if (ok) {
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch (e) {
-      toast({ title: 'Save failed', description: e.message || 'Please try again.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Save failed', description: 'Please try again.', variant: 'destructive' });
     }
     setSaving(false);
   };
@@ -69,7 +57,7 @@ export default function GeotabSettings() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await base44.functions.invoke('syncGeotabFleet', { action: 'test' });
+      const res = await base44.functions.invoke('syncGeotabFleet', { action: 'test', division_id: activeDivisionId });
       const d = res.data || res;
       setTestResult({ ok: !!d.ok, msg: d.message || d.error || 'Unknown response' });
     } catch (e) {
@@ -82,7 +70,7 @@ export default function GeotabSettings() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await base44.functions.invoke('syncGeotabFleet', { action: 'sync' });
+      const res = await base44.functions.invoke('syncGeotabFleet', { action: 'sync', division_id: activeDivisionId });
       const d = res.data || res;
       setSyncResult({
         ok: !!d.ok,
@@ -93,7 +81,7 @@ export default function GeotabSettings() {
         created: d.vehicles_created || 0,
         updated: d.vehicles_updated || 0,
       });
-      queryClient.invalidateQueries({ queryKey: ['geotab-config'] });
+      queryClient.invalidateQueries({ queryKey: ['app-setting', 'geotab_config'] });
       queryClient.invalidateQueries({ queryKey: ['vehicle-location-logs'] });
     } catch (e) {
       setSyncResult({ ok: false, msg: e.message || 'Sync failed' });
@@ -105,7 +93,7 @@ export default function GeotabSettings() {
     setTsSyncing(true);
     setTsResult(null);
     try {
-      const res = await base44.functions.invoke('syncGeotabTimesheets', { date: tsDate });
+      const res = await base44.functions.invoke('syncGeotabTimesheets', { date: tsDate, division_id: activeDivisionId });
       const d = res.data || res;
       setTsResult({
         ok: !!d.ok,

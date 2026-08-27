@@ -16,8 +16,15 @@ export default async function (req: Request): Promise<Response> {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
-    const configs = await base44.asServiceRole.entities.AssetPandaConfig.filter({ key: 'global' });
-    const config = configs && configs[0];
+    const body = await req.json().catch(() => ({}));
+    const divisionId = body.division_id || null;
+    const configFilter = divisionId ? { key: 'global', division_id: divisionId } : { key: 'global', division_id: null };
+    let configs = await base44.asServiceRole.entities.AssetPandaConfig.filter(configFilter);
+    let config = configs && configs[0];
+    if (!config && divisionId) {
+      configs = await base44.asServiceRole.entities.AssetPandaConfig.filter({ key: 'global' });
+      config = configs && configs[0];
+    }
     if (!config) {
       return Response.json({ ok: false, status: 0, message: 'No Asset Panda configuration found. Save your token first.' });
     }

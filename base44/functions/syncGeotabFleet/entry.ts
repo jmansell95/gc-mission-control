@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { decodeVin } from '../../shared/vinDecoder.ts';
 import { checkGeofencePresence, loadGeofenceConfig } from '../../shared/geofence.ts';
+import { getAppSetting } from '../../shared/appSettings.ts';
 
 // ============================================================
 // syncGeotabFleet — pulls live vehicle locations AND full
@@ -57,10 +58,12 @@ export default async function(req: Request): Promise<Response> {
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || 'sync';
+    const divisionId = body.division_id || null;
 
-    // Load config
-    const settings = await base44.asServiceRole.entities.AppSetting.filter({ key: 'geotab_config' });
-    const cfg = settings[0]?.value || {};
+    // Load config — division-scoped when a division_id is passed (manual sync
+    // from the settings page), global fallback for scheduled automations.
+    const configRec = await getAppSetting(base44, 'geotab_config', divisionId);
+    const cfg = configRec?.value || {};
 
     if (action === 'scheduled' && cfg.auto_sync_enabled === false) {
       return Response.json({ ok: true, skipped: true, reason: 'geotab auto-sync disabled' });
@@ -127,9 +130,9 @@ export default async function(req: Request): Promise<Response> {
     if (!authResult.creds && authResult.redirectServer && authResult.redirectServer !== serverHint) {
       authResult = await authenticate(authResult.redirectServer);
       // If the redirect worked, persist the correct server so future syncs skip the redirect
-      if (authResult.creds && settings[0]) {
+      if (authResult.creds && configRec) {
         try {
-          await base44.asServiceRole.entities.AppSetting.update(settings[0].id, {
+          await base44.asServiceRole.entities.AppSetting.update(configRec.id, {
             value: { ...cfg, server: authResult.redirectServer },
           });
         } catch (_) {}
@@ -263,9 +266,9 @@ export default async function(req: Request): Promise<Response> {
       drillingGroupId = drillingGroup.id;
       drillingGroupName = drillingGroup.name;
       // Persist the detected group so future syncs use it directly
-      if (settings[0]) {
+      if (configRec) {
         try {
-          await base44.asServiceRole.entities.AppSetting.update(settings[0].id, {
+          await base44.asServiceRole.entities.AppSetting.update(configRec.id, {
             value: { ...cfg, group_filter_id: drillingGroupId, group_filter_ids: [drillingGroupId], drilling_group_name: drillingGroupName },
           });
         } catch (_) {}
@@ -740,9 +743,9 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // Update sync metadata
-    if (settings[0]) {
+    if (configRec) {
       try {
-        await base44.asServiceRole.entities.AppSetting.update(settings[0].id, {
+        await base44.asServiceRole.entities.AppSetting.update(configRec.id, {
           value: {
             ...cfg,
             last_sync_at: now,
