@@ -23,11 +23,15 @@
     },
     "provider": {
       "type": "string",
-      "description": "Training provider/company name"
+      "description": "Training provider/company name (legacy free-text field). Prefer the linked provider_id for a structured link to the Supplier record."
+    },
+    "provider_id": {
+      "type": "string",
+      "description": "Linked Supplier record (flagged is_training_provider) delivering this course. Used to show provider contact details on course cards and to filter courses by provider in the Assign Training modal."
     },
     "provider_phone": {
       "type": "string",
-      "description": "Training provider contact phone"
+      "description": "Training provider contact phone (legacy free-text; superseded by the linked Supplier's contacts)."
     },
     "venue": {
       "type": "string",

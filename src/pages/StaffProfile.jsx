@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   HardHat, Sparkles, LayoutDashboard, ClipboardCheck, CalendarPlus, X, Clock,
   Wrench, ShieldCheck, Users, UserCog, UserCircle, TrendingUp, Trophy, ClipboardList,
@@ -50,6 +50,7 @@ const TABS = [
 
 export default function StaffProfile() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { openChat } = useStaffAssistant();
   const { user } = useAuth();
@@ -60,27 +61,69 @@ export default function StaffProfile() {
   const [showApprovals, setShowApprovals] = useState(false);
   const [showAbsenceForm, setShowAbsenceForm] = useState(false);
   const [showEditDrawer, setShowEditDrawer] = useState(false);
-  const [activeTab, setActiveTab] = useState('performance');
+  const [activeTab, setActiveTab] = useState('compliance');
   const [absenceForm, setAbsenceForm] = useState({ start_date: format(new Date(), 'yyyy-MM-dd'), end_date: format(new Date(), 'yyyy-MM-dd'), reason: 'holiday', notes: '' });
   const [savingAbsence, setSavingAbsence] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
 
+  // When opened with location.state.staffId (from the Training Matrix or
+  // another manager view), load THAT crew member's profile instead of the
+  // logged-in user's own profile. Falls back to getMyStaffProfile when no
+  // staffId is passed (self-view).
+  const targetStaffId = location.state?.staffId || null;
+  const viewingOther = !!targetStaffId;
+
   useEffect(() => {
+    let cancelled = false;
     (async () => {
-      try {
-        const res = await base44.functions.invoke('getMyStaffProfile');
-        if (res.data?.id || res.data?.is_admin) {
-          setStaff(res.data);
-        } else if (isPlatformAdmin) {
-          setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true });
-        }
-      } catch (e) {
-        if (isPlatformAdmin) {
-          setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true });
-        }
-      } finally { setLoading(false); }
+      if (targetStaffId) {
+        try {
+          const list = await base44.entities.Staff.filter({ id: targetStaffId });
+          const s = list[0];
+          if (cancelled) return;
+          if (s) {
+            let team = null;
+            if (s.team_id) {
+              try { const teams = await base44.entities.Team.filter({ id: s.team_id }); team = teams[0] || null; } catch (_) {}
+            }
+            setStaff({
+              id: s.id,
+              name: s.name,
+              email: s.email || '',
+              avatar_url: s.avatar_url || null,
+              team_id: s.team_id || null,
+              team: team ? { id: team.id, name: team.name, job_type: team.job_type || null, category: team.category || null } : null,
+              is_admin: false,
+              permission_group: null,
+              system_role: s.system_role || 'field',
+              no_staff_profile: false,
+              is_other: true,
+            });
+          } else {
+            setStaff(null);
+          }
+        } catch (e) {
+          if (!cancelled) setStaff(null);
+        } finally { if (!cancelled) setLoading(false); }
+      } else {
+        try {
+          const res = await base44.functions.invoke('getMyStaffProfile');
+          if (cancelled) return;
+          if (res.data?.id || res.data?.is_admin) {
+            setStaff(res.data);
+          } else if (isPlatformAdmin) {
+            setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true });
+          }
+        } catch (e) {
+          if (cancelled) return;
+          if (isPlatformAdmin) {
+            setStaff({ id: null, name: user?.full_name || user?.email, email: user?.email, is_admin: true, system_role: 'admin', team: null, no_staff_profile: true });
+          }
+        } finally { if (!cancelled) setLoading(false); }
+      }
     })();
-  }, []);
+    return () => { cancelled = true; };
+  }, [targetStaffId]);
 
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: mgrTimesheets = [] } = useQuery({ queryKey: ['all-timesheets-mgr'], queryFn: () => base44.entities.Timesheet.list('-created_date', 500) });
@@ -190,6 +233,7 @@ export default function StaffProfile() {
                   <LayoutDashboard className="w-4 h-4" /> Admin
                 </button>
               )}
+              {!viewingOther && (<>
               <button onClick={() => setShowAbsenceForm(true)} type="button"
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                 <CalendarPlus className="w-4 h-4" /> Time Off
@@ -205,6 +249,7 @@ export default function StaffProfile() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                 <Sparkles className="w-4 h-4" /> Assistant
               </button>
+              </>)}
             </div>
           </div>
         </div>
@@ -295,7 +340,7 @@ export default function StaffProfile() {
           ) : <NoCrewProfileState tab="timesheets" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'compliance' && (staff.id
             ? <div className="space-y-5">
-                <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin} />
+                <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin || isPlatformAdmin} />
                 <ComplianceWallet staffId={staff.id} staffName={staff.name} />
               </div>
             : <NoCrewProfileState tab="compliance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}

@@ -12,8 +12,11 @@ import TrainingManager from '@/components/TrainingManager';
 import TrainingStaffCardGrid from '@/components/training/TrainingStaffCardGrid';
 import TrainingCalendar from '@/components/training/TrainingCalendar';
 import AssignTrainingModal from '@/components/staff/AssignTrainingModal';
+import TrainingProvidersTab from '@/components/staff/TrainingProvidersTab';
+import BulkTrainingImportModal from '@/components/staff/BulkTrainingImportModal';
 import { CardGridSkeleton } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';
+import { Building2, Sparkles } from 'lucide-react';
 
 const ICON_MAP = { IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap };
 
@@ -30,38 +33,54 @@ const DEFAULT_CATEGORIES = [
 export default function TrainingMatrixHub() {
   const [view, setView] = useState('cards');
   const [showManage, setShowManage] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const { data: requirements = [] } = useQuery({ queryKey: ['training-requirements'], queryFn: () => base44.entities.TrainingRequirement.list('sort_order', 100) });
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 w-fit">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 w-fit overflow-x-auto no-scrollbar">
           <button onClick={() => setView('cards')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' +
+            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
               (view === 'cards' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
             <Users className="w-3.5 h-3.5" /> Staff Cards
           </button>
           <button onClick={() => setView('calendar')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' +
+            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
               (view === 'calendar' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
             <Calendar className="w-3.5 h-3.5" /> Calendar
           </button>
           <button onClick={() => setView('courses')}
-            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' +
+            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
               (view === 'courses' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
             <BookOpen className="w-3.5 h-3.5" /> Courses
           </button>
+          <button onClick={() => setView('providers')}
+            className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ' +
+              (view === 'providers' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+            <Building2 className="w-3.5 h-3.5" /> Providers
+          </button>
         </div>
-        <button onClick={() => setShowManage(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition bg-white">
-          <Settings className="w-4 h-4" /> Manage Categories
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowBulkImport(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold hover:brightness-110 transition shadow-sm">
+            <Sparkles className="w-4 h-4" /> Bulk Import
+          </button>
+          <button onClick={() => setShowManage(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition bg-white">
+            <Settings className="w-4 h-4" /> Categories
+          </button>
+        </div>
       </div>
       {view === 'cards' && <CardsView />}
       {view === 'calendar' && <CalendarView />}
       {view === 'courses' && <TrainingManager />}
+      {view === 'providers' && <TrainingProvidersTab />}
       {showManage && (
         <ManageCategoriesModal requirements={requirements} onClose={() => setShowManage(false)} />
+      )}
+      {showBulkImport && (
+        <BulkTrainingImportModal onClose={() => setShowBulkImport(false)} />
       )}
     </div>
   );

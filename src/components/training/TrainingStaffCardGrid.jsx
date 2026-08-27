@@ -4,12 +4,13 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
   Search, CheckCircle2, AlertTriangle, Clock, Calendar, GraduationCap,
-  UserPlus, ArrowRight, Sparkles, Users,
+  UserPlus, ArrowRight, Sparkles, Users, Plus,
 } from 'lucide-react';
 import { format, isFuture } from 'date-fns';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 import AssignTrainingModal from '@/components/staff/AssignTrainingModal';
 import AutoBookerModal from '@/components/staff/AutoBookerModal';
+import AddCompletedTrainingModal from '@/components/staff/AddCompletedTrainingModal';
 import { useToast } from '@/components/ui/use-toast';
 
 const STATUS_META = {
@@ -36,6 +37,7 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
   const [showAssign, setShowAssign] = useState(false);
   const [assignPreselect, setAssignPreselect] = useState({ ids: [], category: null });
   const [showAutoBooker, setShowAutoBooker] = useState(false);
+  const [showAddCompleted, setShowAddCompleted] = useState(null); // staff object
 
   const categories = useMemo(() => {
     const seen = new Set();
@@ -200,6 +202,7 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
           onClose={() => setSelectedStaff(null)}
           onBookTraining={(ids, cat) => { setSelectedStaff(null); openAssign(ids, cat); }}
           onOpenProfile={() => { navigate('/staff-profile', { state: { staffId: selectedStaff.id } }); setSelectedStaff(null); }}
+          onAddCompleted={() => { setShowAddCompleted(selectedStaff); }}
         />
       )}
 
@@ -225,6 +228,13 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
           onClose={() => setShowAutoBooker(false)}
         />
       )}
+      {showAddCompleted && (
+        <AddCompletedTrainingModal
+          staffId={showAddCompleted.id}
+          staffName={showAddCompleted.name}
+          onClose={() => setShowAddCompleted(null)}
+        />
+      )}
     </div>
   );
 }
@@ -234,7 +244,7 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
  * qualification list, booked courses, and training gaps with Book
  * Training actions and a link to their full staff profile.
  */
-function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, courses, getQualStatus, onClose, onBookTraining, onOpenProfile }) {
+function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, courses, getQualStatus, onClose, onBookTraining, onOpenProfile, onAddCompleted }) {
   const teamName = (id) => {
     const t = teams.find(t => t.id === id);
     return t ? t.name : '—';
@@ -267,11 +277,17 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
         </div>
 
         <div className="p-4 space-y-4">
-          {/* Link to full profile */}
-          <button onClick={onOpenProfile}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition">
-            <GraduationCap className="w-4 h-4" /> Open Full Staff Profile
-          </button>
+          {/* Actions */}
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={onOpenProfile}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition">
+              <GraduationCap className="w-4 h-4" /> Full Profile
+            </button>
+            <button onClick={onAddCompleted}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-semibold hover:bg-violet-700 transition">
+              <Plus className="w-4 h-4" /> Add Training
+            </button>
+          </div>
 
           {/* Qualifications */}
           <div>

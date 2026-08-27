@@ -4,12 +4,13 @@ import { base44 } from '@/api/base44Client';
 import {
   GraduationCap, CheckCircle2, AlertTriangle, Clock, Calendar, MapPin,
   Users, Award, IdCard, Car, ShieldCheck, FileText, CreditCard, ChevronDown,
-  ChevronRight, BookOpen, UserPlus, ExternalLink, Sparkles,
+  ChevronRight, BookOpen, UserPlus, ExternalLink, Sparkles, Plus,
 } from 'lucide-react';
 import { format, isFuture, isToday } from 'date-fns';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import RequestTrainingModal from './RequestTrainingModal';
+import AddCompletedTrainingModal from './AddCompletedTrainingModal';
 
 const ICON_MAP = { IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap };
 
@@ -33,6 +34,7 @@ const BOOKING_STATUS = {
 export default function TrainingTab({ staffId, staffName, teamId, canManageTeam }) {
   const [showHistory, setShowHistory] = useState(false);
   const [showRequest, setShowRequest] = useState(false);
+  const [showAddCompleted, setShowAddCompleted] = useState(false);
 
   const { data: compliance = [], isLoading: compLoading } = useQuery({
     queryKey: ['my-compliance', staffId],
@@ -143,10 +145,18 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
             <h3 className="text-sm font-extrabold text-slate-900">My Qualifications</h3>
             <p className="text-[11px] text-slate-500">{categories.length} categories · {requiredQuals.length} required for your crew</p>
           </div>
-          <button onClick={() => setShowRequest(true)} type="button"
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg text-xs font-bold hover:bg-violet-700 active:scale-95 transition touch-manipulation shadow-sm flex-shrink-0">
-            <UserPlus className="w-3.5 h-3.5" /> Request
-          </button>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {canManageTeam && (
+              <button onClick={() => setShowAddCompleted(true)} type="button"
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation shadow-sm">
+                <Plus className="w-3.5 h-3.5" /> Add Completed
+              </button>
+            )}
+            <button onClick={() => setShowRequest(true)} type="button"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg text-xs font-bold hover:bg-violet-700 active:scale-95 transition touch-manipulation shadow-sm">
+              <UserPlus className="w-3.5 h-3.5" /> Request
+            </button>
+          </div>
         </div>
         {categories.length === 0 ? (
           <p className="text-xs text-slate-400 text-center py-3">No qualification categories configured.</p>
@@ -296,6 +306,9 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
 
       {showRequest && (
         <RequestTrainingModal staffId={staffId} staffName={staffName} onClose={() => setShowRequest(false)} />
+      )}
+      {showAddCompleted && (
+        <AddCompletedTrainingModal staffId={staffId} staffName={staffName} onClose={() => setShowAddCompleted(false)} />
       )}
     </div>
   );

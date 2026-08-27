@@ -116,6 +116,61 @@
       "type": "string",
       "description": "Account number or reference with this supplier (e.g. Holman fleet account number). Shown on the provider card for quick reference when calling."
     },
+    "is_training_provider": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this supplier is a training provider (delivers courses, certifications, cards). Flags them to appear in the Training Matrix Providers tab and the course/assignment provider picker."
+    },
+    "training_services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cscs_card",
+          "cpcs_card",
+          "npors_card",
+          "first_aid_cert",
+          "driver_license",
+          "dbs_certificate",
+          "forklift",
+          "confined_space",
+          "asbestos_awareness",
+          "manual_handling",
+          "working_at_height",
+          "sts_triple",
+          "nvq",
+          "ipaf",
+          "pasma",
+          "traffic_management",
+          "plant_training",
+          "other"
+        ]
+      },
+      "default": [],
+      "description": "Training categories / qualifications this provider delivers (e.g. CSCS cards, NVQs, first aid, IPAF, confined space). Used to match courses to the right provider and filter the provider directory by what's needed."
+    },
+    "accreditations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "chas",
+          "constructionline",
+          "smas",
+          "safecontractor",
+          "iso9001",
+          "iso14001",
+          "iso45001",
+          "achilles",
+          "citb",
+          "npors_approved",
+          "cscs_approved",
+          "other"
+        ]
+      },
+      "default": [],
+      "description": "Accreditations / approvals this training provider holds (CITB, NPORS approved, CSCS approved, ISO, etc.). Shown on the provider card so managers can verify quality."
+    },
     "lat": {
       "type": "number",
       "description": "Supplier yard/depot latitude. Set via the geocode button on the supplier form. Used for geofence detection \u2014 when a vehicle enters the radius around this location, an arrival event is triggered."
