@@ -79,7 +79,7 @@ export default function Onboarding() {
     }
     setSaving(true);
     try {
-      await base44.entities.Staff.update(profile.id, {
+      await base44.functions.invoke('updateMyOnboarding', {
         phone,
         avatar_url: skipPhoto ? (profile.avatar_url || '') : avatarUrl,
         onboarding_complete: true,

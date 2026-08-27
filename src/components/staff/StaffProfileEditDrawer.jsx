@@ -39,7 +39,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
     }
     setSaving(true);
     try {
-      await base44.entities.Staff.update(staff.id, {
+      await base44.functions.invoke('updateMyOnboarding', {
         phone: form.phone,
         email_notifications_enabled: form.email_notifications_enabled,
         delivery_dashboard_enabled: form.delivery_dashboard_enabled,
