@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { X, Upload, FileSpreadsheet, Loader2, CheckCircle2, AlertCircle, FileText, Layers } from 'lucide-react';
+import { X, Upload, FileSpreadsheet, Loader2, CheckCircle2, AlertCircle, FileText, Layers, Info } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
@@ -124,6 +124,21 @@ export default function AFPUploadModal({ job, onClose }) {
                 <CheckCircle2 className="w-4 h-4" />
                 <p className="text-sm font-semibold">Parsed successfully — review below</p>
               </div>
+
+              {(() => {
+                const jobName = (job?.name || '').toLowerCase();
+                const isEWR = jobName.includes('ewr') || jobName.includes('east west rail');
+                if (!isEWR) return null;
+                return (
+                  <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                    <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-800">EWR job detected</p>
+                      <p className="text-xs text-blue-700 mt-0.5">AFP will be built from the EWR template, not the uploaded file. The uploaded file is stored for reference only.</p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-2.5">
                 <PreviewTile label="Contract Value" value={fmt(preview.contract_details?.contract_award_value)} />

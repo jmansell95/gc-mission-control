@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { toNum, toDateStr, logFinancialAudit } from '../../shared/cvrHelpers.ts';
+import { bulkPopulateAFP } from '../../shared/afpPopulation.ts';
 
 // Inline AFP date helpers (mirrors src/utils/afpDates.js for backend use)
 function addDays(dateStr: string, days: number): string {
@@ -81,6 +82,101 @@ export default async function(req: Request): Promise<Response> {
 
     const userName = user.full_name || user.email || '';
     const now = new Date().toISOString();
+
+    // ── EWR template override ──
+    // EWR jobs use a dedicated AFP template instead of the uploaded file's data.
+    // The uploaded file is stored as source_file_url for reference only.
+    const jobNameLower = (job.name || '').toLowerCase();
+    const isEWR = jobNameLower.includes('ewr') || jobNameLower.includes('east west rail');
+
+    if (isEWR) {
+      // Find the active EWR template (name contains 'EWR', most recently created)
+      const templates = await base44.entities.AFPTemplate.filter({ is_active: true }, '-created_date', 50);
+      const ewrTemplate = templates.find((t: any) => (t.name || '').toLowerCase().includes('ewr'));
+
+      if (ewrTemplate) {
+        // Template-based commit: ignore uploaded data, build from template + field data
+        const periodStart = job.start_date || new Date().toISOString().slice(0, 10);
+        const periodEnd = toDateStr(cd.date) || cd.payment_due_date || '';
+
+        const existingAfps = await base44.entities.AFP.filter({ job_id }, 'afp_number', 50);
+        const nextNumber = existingAfps.length + 1;
+
+        const afp = await base44.entities.AFP.create({
+          job_id,
+          job_name: job.name,
+          job_reference: job.job_reference || '',
+          division_id: job.division_id || '',
+          afp_number: nextNumber,
+          period_start_date: periodStart,
+          period_end_date: periodEnd,
+          certification_due_date: periodEnd ? defaultCertificationDue(periodEnd) : '',
+          final_payment_notice_date: periodEnd ? defaultFinalPaymentNotice(periodEnd) : '',
+          client_po: cd.client_purchase_order || '',
+          gc_job_number: cd.gc_job_number || job.job_reference || '',
+          client_name: cd.client || '',
+          contract_value: toNum(cd.contract_award_value) || toNum(job.budget_amount) || 0,
+          status: 'draft',
+          source_file_url: source_file_url || '',
+          source_file_name: source_file_name || '',
+          last_updated_at: now,
+          last_updated_by: userName,
+        });
+
+        // Seed skeleton line items from the template (qty/amount zero — filled by field data)
+        const templateItems: any[] = (ewrTemplate.line_items || []).map((item: any, i: number) => ({
+          afp_id: afp.id,
+          job_id,
+          sheet_name: item.sheet_name || 'measured_works',
+          category: item.category || 'other',
+          item: item.description || '',
+          unit: item.unit || '',
+          qty: 0,
+          rate: toNum(item.unit_price),
+          amount: 0,
+          unit_price: toNum(item.unit_price),
+          source: 'template',
+          source_date: periodStart,
+          is_manual: false,
+          dispute_status: 'none',
+          original_amount: 0,
+          agreed_amount: 0,
+          sort_order: item.sort_order || i,
+        }));
+
+        if (templateItems.length > 0) {
+          await base44.entities.AFPLineItem.bulkCreate(templateItems);
+        }
+
+        // Auto-populate from live field data (fills quantities from driller logs, timesheets, etc.)
+        let populateResult: any = null;
+        try {
+          populateResult = await bulkPopulateAFP(base44, afp.id, userName);
+        } catch (e) {
+          // Population failure shouldn't block the AFP creation
+        }
+
+        await logFinancialAudit(base44, {
+          entity_name: 'AFP',
+          entity_id: afp.id,
+          action: 'create',
+          record_summary: `EWR template-based AFP for ${job.name}: ${templateItems.length} template lines seeded, auto-populated from field data`,
+          actor_user_id: user.id,
+          actor_name: userName,
+        });
+
+        return Response.json({
+          afps_created: 1,
+          afp_ids: [afp.id],
+          total_line_items: templateItems.length,
+          total_claimed: 0,
+          variation_count: 0,
+          ewr_template_used: true,
+          template_name: ewrTemplate.name,
+        });
+      }
+      // No EWR template found — fall through to standard flow
+    }
 
     // ── Multi-AFP split mode ──
     if (afpSplit.length > 0) {
