@@ -48,6 +48,10 @@
       "type": "string",
       "description": "The company this external worker is from (subcontractor firm or agency name). Captured during the minimal Market Dojo onboarding in the Staff Hub Contacts tab. Blank for direct employees."
     },
+    "crew_parent_id": {
+      "type": "string",
+      "description": "For individual subcontractor drillers (Lead Driller / Second Man): the Staff ID of the parent subcontractor company record this person belongs to. When set, this Staff record is an individual crew member \u2014 it is hidden from the Contacts tab list (which shows only parent company records) and appears instead as a crew pairing on the parent's card and the rota sub-line. Blank for parent company records, direct employees, and agency workers."
+    },
     "job_title": {
       "type": "string",
       "description": "Staff member's job title / role (e.g. 'Cable Percussion Driller', 'Groundworker'). Derived from the crew section during spreadsheet import."

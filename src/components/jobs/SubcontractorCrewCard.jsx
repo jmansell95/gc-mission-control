@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { HardHat, Briefcase, ArrowRightLeft } from 'lucide-react';
@@ -21,6 +21,21 @@ export default function SubcontractorCrewCard({ job }) {
     queryFn: () => base44.entities.Contractor.list('-created_date', 500),
     enabled: subconLogs.length > 0,
   });
+  // Fetch DrillingCrew groupings for subcontractor crew pairings (Lead + Second Man)
+  const { data: drillingCrews = [] } = useQuery({
+    queryKey: ['subcon-crew-drilling-crews'],
+    queryFn: () => base44.entities.DrillingCrew.list('name', 500),
+    enabled: subconLogs.length > 0 || crewStaffIds.length > 0,
+  });
+  const crewsByParent = useMemo(() => {
+    const map = {};
+    for (const c of drillingCrews) {
+      if (!c.parent_staff_id) continue;
+      if (!map[c.parent_staff_id]) map[c.parent_staff_id] = [];
+      map[c.parent_staff_id].push(c);
+    }
+    return map;
+  }, [drillingCrews]);
 
   // Also pull Staff records (subcontractor/agency) assigned to the job via rota,
   // so we can show their lead/second man names alongside the SubcontractorLog entries.
@@ -68,9 +83,11 @@ export default function SubcontractorCrewCard({ job }) {
   }
 
   // Merge in Staff records (subcontractor/agency) assigned via rota that aren't
-  // already captured by SubcontractorLog entries, so their lead/second man names show.
+  // already captured by SubcontractorLog entries. For subcontractors, resolve
+  // crew pairings (Lead + Second Man) from DrillingCrew groupings.
   for (const s of subconStaff) {
     const key = s.id;
+    const crews = crewsByParent[s.id] || [];
     if (!bySub.has(key)) {
       bySub.set(key, {
         name: s.name || s.company || 'Unknown',
@@ -79,17 +96,11 @@ export default function SubcontractorCrewCard({ job }) {
         dates: new Set(crewRotas.filter(r => r.staff_id === s.id).map(r => r.assigned_date).filter(Boolean)),
         total_sell: 0,
         crew_names: [],
-        lead_driller_name: s.lead_driller_name || '',
-        lead_driller_phone: s.lead_driller_phone || '',
-        second_man_name: s.second_man_name || '',
-        second_man_phone: s.second_man_phone || '',
+        crews,
       });
     } else {
       const entry = bySub.get(key);
-      entry.lead_driller_name = s.lead_driller_name || entry.lead_driller_name;
-      entry.lead_driller_phone = s.lead_driller_phone || entry.lead_driller_phone;
-      entry.second_man_name = s.second_man_name || entry.second_man_name;
-      entry.second_man_phone = s.second_man_phone || entry.second_man_phone;
+      if (crews.length > 0) entry.crews = crews;
     }
   }
   const subs = [...bySub.values()];
@@ -183,13 +194,20 @@ export default function SubcontractorCrewCard({ job }) {
                   {s.crew_names.join(' · ')}
                 </p>
               )}
-              {(s.lead_driller_name || s.second_man_name) && (
-                <p className="text-[10px] text-blue-600 font-medium truncate">
-                  {[
-                    s.lead_driller_name && `Lead: ${s.lead_driller_name}${s.lead_driller_phone ? ` (${s.lead_driller_phone})` : ''}`,
-                    s.second_man_name && `Second: ${s.second_man_name}${s.second_man_phone ? ` (${s.second_man_phone})` : ''}`,
-                  ].filter(Boolean).join(' · ')}
-                </p>
+              {s.crews && s.crews.length > 0 && (
+                <div className="space-y-0.5">
+                  {s.crews.map((c, ci) => {
+                    const parts = [];
+                    if (c.lead_driller_name) parts.push(`Lead: ${c.lead_driller_name}${c.lead_driller_phone ? ` (${c.lead_driller_phone})` : ''}`);
+                    if (c.second_man_name) parts.push(`Second: ${c.second_man_name}${c.second_man_phone ? ` (${c.second_man_phone})` : ''}`);
+                    if (parts.length === 0) return null;
+                    return (
+                      <p key={ci} className="text-[10px] text-blue-600 font-medium truncate">
+                        {parts.join(' · ')}
+                      </p>
+                    );
+                  })}
+                </div>
               )}
               <p className="text-[10px] text-slate-400 truncate">
                 {[...s.work_types].map(w => w.replace(/_/g, ' ')).join(', ') || 'Work'}

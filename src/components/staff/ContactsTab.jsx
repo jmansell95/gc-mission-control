@@ -5,21 +5,21 @@ import { useDivision } from '@/contexts/DivisionContext';
 import { useToast } from '@/components/ui/use-toast';
 import MarketDojoPill from './MarketDojoPill';
 import AddressBookModal from './AddressBookModal';
+import CrewEditorModal from './CrewEditorModal';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase,
-  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone,
+  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat,
 } from 'lucide-react';
 
 const SUB_TO_TYPE = {
   clients: { key: 'client', label: 'Clients', singular: 'Client', icon: Building2, color: '#059669', isStaff: false },
-  contractors: { key: 'subcontractor', label: 'Subcontractors', singular: 'Subcontractor', icon: Wrench, color: '#2563eb', isStaff: true },
+  contractors: { key: 'subcontractor', label: 'Subcontractors', singular: 'Subcontractor', icon: Wrench, color: '#2563eb', isStaff: true, showCrews: true },
   suppliers: { key: 'supplier', label: 'Suppliers', singular: 'Supplier', icon: Briefcase, color: '#d97706', isStaff: false },
   agency: { key: 'agency', label: 'Agency Workers', singular: 'Agency Worker', icon: UserCog, color: '#7c3aed', isStaff: true },
 };
 
 const emptyForm = {
   full_name: '', job_title: '', company: '', market_dojo_onboarded: false,
-  lead_driller_name: '', lead_driller_phone: '', second_man_name: '', second_man_phone: '',
 };
 
 export default function ContactsTab({ activeSub }) {
@@ -33,6 +33,7 @@ export default function ContactsTab({ activeSub }) {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [addressBook, setAddressBook] = useState(null);
+  const [crewEditor, setCrewEditor] = useState(null);
   const { activeDivisionId } = useDivision();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -41,6 +42,12 @@ export default function ContactsTab({ activeSub }) {
     queryKey: ['contacts-staff', meta.key],
     queryFn: () => base44.entities.Staff.filter({ worker_type: meta.key }, 'name', 500),
     enabled: isStaffType,
+  });
+  // Fetch all drilling crews (for crew counts on subcontractor cards)
+  const { data: allCrews = [] } = useQuery({
+    queryKey: ['drilling-crews-all'],
+    queryFn: () => base44.entities.DrillingCrew.list('name', 500),
+    enabled: meta.key === 'subcontractor',
   });
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['contacts-clients'],
@@ -59,16 +66,16 @@ export default function ContactsTab({ activeSub }) {
     const q = search.toLowerCase().trim();
     let list = [];
     if (isStaffType) {
-      list = staff.map(s => ({
+      // Filter out individual driller Staff records (crew_parent_id set) —
+      // these are crew members managed via the CrewEditorModal, not standalone
+      // contact entries. Only parent company records appear in the list.
+      list = staff.filter(s => !s.crew_parent_id).map(s => ({
         id: s.id,
         full_name: s.name || '',
         job_title: s.job_title || '',
         company: s.company || '',
         onboarded: !!s.market_dojo_onboarded,
-        lead_driller_name: s.lead_driller_name || '',
-        lead_driller_phone: s.lead_driller_phone || '',
-        second_man_name: s.second_man_name || '',
-        second_man_phone: s.second_man_phone || '',
+        crew_count: allCrews.filter(c => c.parent_staff_id === s.id).length,
         contacts: s.contacts || [],
         raw: s,
       }));
@@ -129,10 +136,6 @@ export default function ContactsTab({ activeSub }) {
           is_active: true,
           market_dojo_onboarded: !!addForm.market_dojo_onboarded,
           market_dojo_onboarded_at: addForm.market_dojo_onboarded ? new Date().toISOString() : null,
-          lead_driller_name: addForm.lead_driller_name.trim() || null,
-          lead_driller_phone: addForm.lead_driller_phone.trim() || null,
-          second_man_name: addForm.second_man_name.trim() || null,
-          second_man_phone: addForm.second_man_phone.trim() || null,
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-staff', meta.key] });
         queryClient.invalidateQueries({ queryKey: ['staff'] });
@@ -171,10 +174,6 @@ export default function ContactsTab({ activeSub }) {
       job_title: rec.job_title,
       company: rec.company,
       market_dojo_onboarded: rec.onboarded,
-      lead_driller_name: rec.lead_driller_name || '',
-      lead_driller_phone: rec.lead_driller_phone || '',
-      second_man_name: rec.second_man_name || '',
-      second_man_phone: rec.second_man_phone || '',
     });
     setEditing(rec);
   };
@@ -191,10 +190,6 @@ export default function ContactsTab({ activeSub }) {
           job_title: editForm.job_title.trim(),
           company: editForm.company.trim(),
           market_dojo_onboarded: nowOnboarded,
-          lead_driller_name: editForm.lead_driller_name.trim() || null,
-          lead_driller_phone: editForm.lead_driller_phone.trim() || null,
-          second_man_name: editForm.second_man_name.trim() || null,
-          second_man_phone: editForm.second_man_phone.trim() || null,
         };
         if (nowOnboarded && !wasOnboarded) payload.market_dojo_onboarded_at = new Date().toISOString();
         if (!nowOnboarded) payload.market_dojo_onboarded_at = null;
@@ -250,36 +245,17 @@ export default function ContactsTab({ activeSub }) {
 
   const Icon = meta.icon;
 
-  const leadSecondLine = (rec) => {
-    const parts = [];
-    if (rec.lead_driller_name) parts.push(`Lead: ${rec.lead_driller_name}`);
-    if (rec.second_man_name) parts.push(`Second: ${rec.second_man_name}`);
-    return parts.length > 0 ? parts.join(' · ') : null;
+  const crewBadge = (rec) => {
+    if (meta.key !== 'subcontractor') return null;
+    if (rec.crew_count > 0) {
+      return (
+        <span className="text-[10px] text-blue-700 font-medium truncate mt-0.5 inline-flex items-center gap-0.5">
+          <HardHat className="w-3 h-3" /> {rec.crew_count} crew{rec.crew_count !== 1 ? 's' : ''}
+        </span>
+      );
+    }
+    return <span className="text-[10px] text-slate-400 truncate mt-0.5">No crews yet</span>;
   };
-
-  const LeadSecondFields = ({ form, setForm }) => (
-    <div className="rounded-lg border border-blue-100 bg-blue-50/40 p-3 space-y-2">
-      <p className="text-xs font-bold text-blue-800 uppercase tracking-wide">Drilling Crew</p>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Name</label>
-          <input type="text" value={form.lead_driller_name || ''} onChange={e => setForm({ ...form, lead_driller_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-        </div>
-        <div>
-          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Phone</label>
-          <input type="text" value={form.lead_driller_phone || ''} onChange={e => setForm({ ...form, lead_driller_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-        </div>
-        <div>
-          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Name</label>
-          <input type="text" value={form.second_man_name || ''} onChange={e => setForm({ ...form, second_man_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-        </div>
-        <div>
-          <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Phone</label>
-          <input type="text" value={form.second_man_phone || ''} onChange={e => setForm({ ...form, second_man_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-4">
@@ -354,9 +330,7 @@ export default function ContactsTab({ activeSub }) {
                   <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
                     <Building2 className="w-3 h-3 flex-shrink-0" /> {rec.company || 'No company'}
                   </p>
-                  {isStaffType && leadSecondLine(rec) && (
-                    <p className="text-[10px] text-blue-600 font-medium truncate mt-0.5">{leadSecondLine(rec)}</p>
-                  )}
+                  {isStaffType && crewBadge(rec)}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-50">
@@ -373,6 +347,15 @@ export default function ContactsTab({ activeSub }) {
                 >
                   <BookUser className="w-3 h-3" /> Contacts
                 </button>
+                {meta.key === 'subcontractor' && (
+                  <button
+                    onClick={() => setCrewEditor({ staff: rec.raw, divisionId: rec.raw.division_id })}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 transition text-xs font-medium"
+                    title="Manage 2-man drilling crews"
+                  >
+                    <HardHat className="w-3 h-3" /> Crews
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(rec)}
                   disabled={deletingId === rec.id}
@@ -413,7 +396,6 @@ export default function ContactsTab({ activeSub }) {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company *</label>
                 <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
-              {isStaffType && <LeadSecondFields form={addForm} setForm={setAddForm} />}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
                   <input type="checkbox" checked={!!addForm.market_dojo_onboarded} onChange={e => setAddForm({ ...addForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
@@ -465,7 +447,6 @@ export default function ContactsTab({ activeSub }) {
                 <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
                 <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
               </div>
-              {isStaffType && <LeadSecondFields form={editForm} setForm={setEditForm} />}
               {isStaffType && (
                 <label className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition">
                   <input type="checkbox" checked={!!editForm.market_dojo_onboarded} onChange={e => setEditForm({ ...editForm, market_dojo_onboarded: e.target.checked })} className="w-4 h-4 mt-0.5 accent-emerald-600 flex-shrink-0" />
@@ -495,6 +476,16 @@ export default function ContactsTab({ activeSub }) {
           recordId={addressBook.id}
           recordName={addressBook.name}
           initialContacts={addressBook.contacts}
+        />
+      )}
+
+      {/* Crew Editor modal — subcontractor 2-man crews */}
+      {crewEditor && (
+        <CrewEditorModal
+          open={!!crewEditor}
+          onClose={() => setCrewEditor(null)}
+          parentStaff={crewEditor.staff}
+          parentDivisionId={crewEditor.divisionId}
         />
       )}
     </div>

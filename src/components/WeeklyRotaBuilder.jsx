@@ -40,15 +40,23 @@ const statusConfig = {
   completed: { label: 'Done', icon: CheckCircle2, dot: 'bg-emerald-500', text: 'text-emerald-600' }
 };
 
-// Lead/Second Man sub-line for subcontractor and agency workers.
-// Shows 'Lead: X · Second: Y' beneath the staff name on the rota grid.
-const crewSubLine = (member) => {
+// Crew sub-line for subcontractor workers.
+// Resolves 2-man crew pairings (Lead Driller + Second Man) from DrillingCrew
+// groupings linked to the parent subcontractor. Shows one line per crew:
+// 'Lead: X · Second: Y' (or 'Lead: X' if no second man). Agency workers are
+// individuals — no sub-line is shown.
+const crewSubLine = (member, crewsByParent) => {
   if (!member) return null;
-  if (member.worker_type !== 'subcontractor' && member.worker_type !== 'agency') return null;
-  const parts = [];
-  if (member.lead_driller_name) parts.push(`Lead: ${member.lead_driller_name}`);
-  if (member.second_man_name) parts.push(`Second: ${member.second_man_name}`);
-  return parts.length > 0 ? parts.join(' · ') : null;
+  if (member.worker_type !== 'subcontractor') return null;
+  const crews = crewsByParent?.[member.id];
+  if (!crews || crews.length === 0) return null;
+  const lines = crews.map(c => {
+    const parts = [];
+    if (c.lead_driller_name) parts.push(`Lead: ${c.lead_driller_name}`);
+    if (c.second_man_name) parts.push(`Second: ${c.second_man_name}`);
+    return parts.join(' · ');
+  }).filter(Boolean);
+  return lines.length > 0 ? lines.join('  |  ') : null;
 };
 
 export default function WeeklyRotaBuilder() {
@@ -88,7 +96,18 @@ export default function WeeklyRotaBuilder() {
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
   const { data: recurringDepot = [] } = useQuery({ queryKey: ['recurring-depot-duty'], queryFn: () => base44.entities.RecurringDepotDuty.filter({ is_active: true }) });
   const { data: deliveries = [] } = useQuery({ queryKey: ['deliveries-for-drivers'], queryFn: () => base44.entities.DeliveryLog.list() });
+  const { data: drillingCrews = [] } = useQuery({ queryKey: ['drilling-crews-rota'], queryFn: () => base44.entities.DrillingCrew.list('name', 500) });
   const driverStaffIds = useMemo(() => buildDriverStaffIds(deliveries), [deliveries]);
+  // Map of parent_staff_id → array of DrillingCrew groupings, for rota sub-lines
+  const crewsByParent = useMemo(() => {
+    const map = {};
+    for (const c of drillingCrews) {
+      if (!c.parent_staff_id) continue;
+      if (!map[c.parent_staff_id]) map[c.parent_staff_id] = [];
+      map[c.parent_staff_id].push(c);
+    }
+    return map;
+  }, [drillingCrews]);
 
   const { data: rotas = [] } = useQuery({
     queryKey: ['rotas', weekStartStr, activeDivisionId || 'overview'],
@@ -990,8 +1009,8 @@ export default function WeeklyRotaBuilder() {
                         )}
                         <div className="min-w-0">
                           <p className="text-xs text-slate-400 truncate">{getDynamicTeamInfo(member).displayName}</p>
-                          {crewSubLine(member) && (
-                            <p className="text-[10px] text-blue-600 font-medium truncate">{crewSubLine(member)}</p>
+                          {crewSubLine(member, crewsByParent) && (
+                            <p className="text-[10px] text-blue-600 font-medium truncate">{crewSubLine(member, crewsByParent)}</p>
                           )}
                           <button
                             onClick={() => setRotaManagerStaff(member)}
