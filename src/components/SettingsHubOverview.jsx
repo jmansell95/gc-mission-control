@@ -2,15 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Users, Briefcase, Truck, Building2, Receipt, Package, HardHat, Boxes, Mail,
+  Users, Briefcase, Truck, Building2, Receipt, Package, HardHat, Mail,
   Palette, Zap, Timer, Banknote, ListChecks, ShieldCheck, FileText,
   Scale, ArrowRight, Activity, BookOpen,
   Sparkles, QrCode, ArrowUpDown, TrendingUp, FileSpreadsheet, ScrollText,
-  History, Gauge, Link2, Search, ChevronRight, GitBranch, Lock, AlertTriangle,
-  Database, Webhook, Bell, Settings2, Coins, Wrench, FileUp, Layers,
+  History, Gauge, Link2, Search, GitBranch, Lock,
+  Database, Webhook, Layers,
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
-  Gift,
+  Gift, KeyRound, FileUp,
 } from 'lucide-react';
+import SetupChecklistWidget from '@/components/settings/SetupChecklistWidget';
+import IntegrationHealthWidget from '@/components/settings/IntegrationHealthWidget';
+import RecentlyChangedWidget from '@/components/settings/RecentlyChangedWidget';
 
 const INTEGRATION_SETTING_KEYS = [
   'geotab_config', 'holman_config', 'asset_panda_config', 'bob_hr_config',
@@ -25,12 +28,27 @@ const INTEGRATION_CONNECTED_FIELDS = {
   met_office_config: 'api_key', google_maps_config: 'api_key', whatsapp_config: 'api_token',
   accounting_config: 'provider', stripe_config: 'secret_key',
 };
-
-// All settings items are active — no "Coming Soon" grey-outs.
+const INTEGRATION_META = {
+  geotab_config: { id: 'geotab-sync', label: 'Geotab' },
+  holman_config: { id: 'holman-sync', label: 'Holman' },
+  asset_panda_config: { id: 'asset-panda', label: 'Asset Panda' },
+  bob_hr_config: { id: 'bob-hr', label: 'Bob HR' },
+  concur_config: { id: 'concur-sync', label: 'Concur' },
+  safety_culture_config: { id: 'safety-culture', label: 'SafetyCulture' },
+  keylogbook_config: { id: 'ags-import', label: 'KeyLogBook' },
+  cis_config: { id: 'cis-verification', label: 'CIS' },
+  payroll_config: { id: 'payroll-export', label: 'Payroll' },
+  met_office_config: { id: 'met-office', label: 'Met Office' },
+  google_maps_config: { id: 'google-maps', label: 'Google Maps' },
+  whatsapp_config: { id: 'whatsapp', label: 'WhatsApp' },
+  accounting_config: { id: 'accounting-sync', label: 'Accounting' },
+  stripe_config: { id: 'payment-gateway', label: 'Payments' },
+};
 
 /**
- * Settings Command Hub — bold, in-your-face overview of everything configurable.
- * Big hero, prominent alerts, large visual cards grouped by domain.
+ * Settings Command Hub — Bento overview of everything configurable.
+ * Top: setup & health checklist, live integration health, recently changed.
+ * Below: grouped domain cards for every settings area.
  */
 export default function SettingsHubOverview({ onNavigate }) {
   const [search, setSearch] = useState('');
@@ -42,34 +60,50 @@ export default function SettingsHubOverview({ onNavigate }) {
   const { data: contractors = [] } = useQuery({ queryKey: ['contractors'], queryFn: () => base44.entities.Contractor.list() });
   const { data: suppliers = [] } = useQuery({ queryKey: ['suppliers'], queryFn: () => base44.entities.Supplier.list() });
   const { data: rateItems = [] } = useQuery({ queryKey: ['rate-card-items'], queryFn: () => base44.entities.RateCardItem.list('-created_date', 500) });
-  const { data: costPresets = [] } = useQuery({ queryKey: ['cost-presets-hub'], queryFn: () => base44.entities.CostPreset.list('-created_date', 500) });
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
   const { data: billingRules = [] } = useQuery({ queryKey: ['billing-rules'], queryFn: () => base44.entities.BillingRule.list() });
   const { data: complianceItems = [] } = useQuery({ queryKey: ['compliance-items-hub'], queryFn: () => base44.entities.ComplianceItem.list('-created_date', 500) });
-  const { data: invLogs = [] } = useQuery({ queryKey: ['inv-logs-hub'], queryFn: () => base44.entities.InvestigationLog.list('-created_date', 200) });
-  const { data: timesheets = [] } = useQuery({ queryKey: ['timesheets-hub'], queryFn: () => base44.entities.Timesheet.list('-created_date', 200) });
+  const { data: permissionGroups = [] } = useQuery({ queryKey: ['permission-groups'], queryFn: () => base44.entities.PermissionGroup.list('-created_date', 200) });
   const { data: allSettings = [] } = useQuery({
     queryKey: ['all-integration-configs'],
     queryFn: () => base44.entities.AppSetting.filter({ key: { $in: INTEGRATION_SETTING_KEYS } }, '-created_date', 50),
   });
 
-  const ourRateItems = rateItems.filter(r => r.rate_card_source !== 'supplier').length;
-  const pendingReviewLogs = invLogs.filter(l => l.manager_review_status === 'pending').length;
-  const pendingTimesheets = timesheets.filter(t => t.status === 'submitted').length;
+  const cfgMap = useMemo(() => {
+    const m = {};
+    for (const s of allSettings) m[s.key] = s.value || {};
+    return m;
+  }, [allSettings]);
+
+  const integrationList = useMemo(() => INTEGRATION_SETTING_KEYS.map(k => {
+    const meta = INTEGRATION_META[k];
+    const field = INTEGRATION_CONNECTED_FIELDS[k];
+    return { id: meta.id, label: meta.label, connected: !!(cfgMap[k] && cfgMap[k][field]) };
+  }), [cfgMap]);
+
+  const integrationConnectedCount = integrationList.filter(i => i.connected).length;
+
   const activeStaff = staff.filter(s => s.is_active !== false).length;
   const activeJobs = jobs.filter(j => (j.status || 'planning') === 'in_progress').length;
   const planningJobs = jobs.filter(j => (j.status || 'planning') === 'planning').length;
 
-  const integrationConnectedCount = useMemo(() => {
-    const cfgMap = {};
-    for (const s of allSettings) cfgMap[s.key] = s.value || {};
-    return INTEGRATION_SETTING_KEYS.filter(k => {
-      const field = INTEGRATION_CONNECTED_FIELDS[k];
-      return cfgMap[k] && cfgMap[k][field];
-    }).length;
-  }, [allSettings]);
+  // Setup & health checklist — computed from live data
+  const checks = [
+    { id: 'staff', label: 'Add staff & crews', icon: Users, done: staff.length > 0 },
+    { id: 'teams', label: 'Configure crew types', icon: Users, done: teams.length > 0 },
+    { id: 'access-levels', label: 'Set up access groups', icon: KeyRound, done: permissionGroups.length > 0 },
+    { id: 'clients', label: 'Add clients', icon: Building2, done: clients.length > 0 },
+    { id: 'vehicles', label: 'Add vehicles', icon: Truck, done: vehicles.length > 0 },
+    { id: 'rate-card', label: 'Upload price list', icon: Receipt, done: rateItems.length > 0 },
+    { id: 'billing', label: 'Configure billing rules', icon: Banknote, done: billingRules.length > 0 },
+    { id: 'compliance', label: 'Track compliance items', icon: ShieldCheck, done: complianceItems.length > 0 },
+    { id: 'integrations', label: 'Connect integrations', icon: Link2, done: integrationConnectedCount > 0 },
+  ];
 
   const groups = [
+    { group: 'Security & Access', icon: KeyRound, accent: 'from-emerald-600 to-teal-700', items: [
+      { id: 'access-levels', icon: KeyRound, label: 'Access Levels', value: permissionGroups.length, sub: 'Permission groups & lockdowns per stream', color: 'emerald' },
+    ]},
     { group: 'System Configuration', icon: Sparkles, accent: 'from-slate-500 to-slate-700', items: [
       { id: 'dropdowns', icon: ListChecks, label: 'Dropdown Manager', value: '—', sub: 'Edit every dropdown', color: 'violet' },
       { id: 'global-branding', icon: Palette, label: 'Global Branding', value: '—', sub: 'Email colours & banners', color: 'violet' },
@@ -100,11 +134,6 @@ export default function SettingsHubOverview({ onNavigate }) {
     indigo: { stripe: 'from-indigo-400 to-blue-600', tile: 'bg-gradient-to-br from-indigo-400 to-blue-600', glow: 'shadow-indigo-200' },
   };
 
-  // Needs-attention alerts — only for items that remain in Settings.
-  // Operational alerts (log-qc, timesheets, compliance) are now on their
-  // own dedicated pages and surfaced by the dashboard's Exception Monitor.
-  const alerts = [];
-
   const heroStats = [
     { label: 'Crew', value: activeStaff, icon: Users, gradient: 'from-emerald-400 to-teal-500' },
     { label: 'Active Jobs', value: activeJobs, icon: Briefcase, gradient: 'from-blue-400 to-cyan-500' },
@@ -120,7 +149,7 @@ export default function SettingsHubOverview({ onNavigate }) {
 
   return (
     <div className="space-y-5">
-      {/* ── Hero — big, bold, in-your-face ── */}
+      {/* ── Hero ── */}
       <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200/80 shadow-sm">
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#2E5A1A] to-[#8DC63F]" />
         <div className="relative z-10 px-5 py-5 md:px-7 md:py-6 pl-7">
@@ -133,7 +162,6 @@ export default function SettingsHubOverview({ onNavigate }) {
               <p className="text-slate-500 text-sm font-medium">Full control of your site — manage everything from one place.</p>
             </div>
           </div>
-          {/* Big stat tiles */}
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
             {heroStats.map(s => {
               const Icon = s.icon;
@@ -151,7 +179,7 @@ export default function SettingsHubOverview({ onNavigate }) {
         </div>
       </div>
 
-      {/* ── Search — prominent ── */}
+      {/* ── Search ── */}
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input
@@ -162,8 +190,16 @@ export default function SettingsHubOverview({ onNavigate }) {
         />
       </div>
 
-      {/* ── Enterprise Settings redirect — Divisions, Integrations, Backup & Restore
-           are now managed centrally from the Enterprise Dashboard ── */}
+      {/* ── Bento widgets — only when not searching ── */}
+      {!q && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+          <SetupChecklistWidget checks={checks} onNavigate={onNavigate} />
+          <IntegrationHealthWidget integrations={integrationList} onNavigate={onNavigate} />
+          <RecentlyChangedWidget />
+        </div>
+      )}
+
+      {/* ── Enterprise Settings redirect ── */}
       {!q && (
         <div className="insight-card relative rounded-3xl p-5 overflow-hidden">
           <div className="flex items-start gap-4">
@@ -173,9 +209,8 @@ export default function SettingsHubOverview({ onNavigate }) {
             <div className="flex-1 min-w-0">
               <h3 className="text-base font-extrabold text-slate-900">Enterprise-Level Settings</h3>
               <p className="text-sm text-slate-500 mt-1 leading-relaxed">
-                Business Streams, Integrations, Backup &amp; Restore, and Access Levels are now managed centrally from
+                Business Streams, Integrations, Backup &amp; Restore are managed centrally from
                 the <span className="font-semibold text-[#2E5A1A]">Enterprise Dashboard → Settings</span>.
-                This ensures every business stream shares the same configuration.
               </p>
               <a
                 href="/enterprise/settings"
@@ -189,33 +224,6 @@ export default function SettingsHubOverview({ onNavigate }) {
         </div>
       )}
 
-      {/* ── Needs Attention — big, bold, colorful ── */}
-      {!q && alerts.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-3 px-1">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-md">
-              <AlertTriangle className="w-4 h-4 text-white" />
-            </div>
-            <h3 className="text-base font-extrabold text-slate-800 uppercase tracking-wide">Needs Attention</h3>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {alerts.map(a => {
-              const Icon = a.icon;
-              return (
-                <button key={a.id} onClick={() => onNavigate(a.id)}
-                  className={`text-left rounded-2xl p-4 transition flex items-center gap-4 group bg-gradient-to-br ${a.bg} text-white shadow-lg hover:shadow-xl hover:scale-[1.02]`}>
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-sm font-bold flex-1">{a.label}</p>
-                  <ArrowRight className="w-5 h-5 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition flex-shrink-0" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* No results */}
       {q && filteredGroups.length === 0 && (
         <div className="text-center py-12">
@@ -223,7 +231,7 @@ export default function SettingsHubOverview({ onNavigate }) {
         </div>
       )}
 
-      {/* ── Grouped cards — big, bold, colorful ── */}
+      {/* ── Grouped domain cards ── */}
       {filteredGroups.map(group => {
         const GroupIcon = group.icon;
         return (

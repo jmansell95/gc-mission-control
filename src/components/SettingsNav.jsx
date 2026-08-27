@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks, ShieldCheck, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift } from 'lucide-react';
+import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift } from 'lucide-react';
 import { normalizePermissions } from '@/utils/permissions';
 
 // Items that have migrated to operational hubs (Financial Control, Compliance,
@@ -16,7 +16,7 @@ export const HUB_MIGRATED_ITEMS = new Set([
   // → Assets Hub
   'asset-manifests', 'equipment-library', 'asset-lifecycle', 'depreciation-profiles',
   // → Staff Hub
-  'access-levels', 'absences', 'holiday-accrual', 'staff-reviews',
+  'absences', 'holiday-accrual', 'staff-reviews',
   'timesheet-delegation',
 ]);
 
@@ -30,6 +30,12 @@ export const settingsGroups = [
   // Enterprise-level items (Divisions, Integrations, Readiness, Backup & Restore) have
   // been moved to Enterprise Settings (/enterprise/settings). They are no longer shown
   // in the division-level settings sidebar to avoid split-brain configuration.
+  {
+    label: 'Security & Access',
+    items: [
+      { id: 'access-levels', label: 'Access Levels', icon: KeyRound, desc: 'Permission groups & lockdowns for this business stream — create groups, assign crews, and override access per division', roles: ['admin'] },
+    ],
+  },
   {
     label: 'Geotechnical',
     items: [
@@ -85,7 +91,6 @@ export const settingsGroups = [
       { id: 'equipment-library', label: 'Equipment Sets', icon: Package, desc: 'Pre-built equipment sets (presets) — individual items now sync from Asset Panda' },
       { id: 'asset-lifecycle', label: 'Asset Lifecycle', icon: Wrench, desc: 'Track assets from acquisition to disposal — depreciation, book value & replacement planning', roles: ['admin'] },
       { id: 'depreciation-profiles', label: 'Depreciation Profiles', icon: TrendingDown, desc: 'Configure default depreciation methods & rules per asset type — straight-line, reducing balance, units of production', roles: ['admin'] },
-      { id: 'access-levels', label: 'Permission Groups', icon: ShieldCheck, desc: 'Create permission groups and assign them to each crew member from Staff Command', roles: ['super_admin'] },
       { id: 'absences', label: 'Absences', icon: CalendarX, desc: 'Manage staff absences and leave' },
       { id: 'holiday-accrual', label: 'Holiday Accrual', icon: CalendarDays, desc: 'Track holiday pay accruals for staff' },
       { id: 'staff-reviews', label: 'Performance Reviews', icon: Star, desc: 'Manage staff performance reviews' },
