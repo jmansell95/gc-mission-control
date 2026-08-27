@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useAuth } from '@/lib/AuthContext';
 import {
-  Building2, Users, Briefcase, Truck, ClipboardCheck, ShieldCheck, PoundSterling,
+  Building2, Users, Briefcase, Truck, ClipboardCheck, PoundSterling,
   ArrowRight, Layers, Settings, Sparkles, AlertTriangle, CheckCircle2,
   LayoutGrid, X, Activity, Wrench, TrendingUp, Clock,
   User, HelpCircle, LogOut,
@@ -123,11 +123,9 @@ export default function EnterpriseDashboard() {
 
   const quickActions = isSuperAdmin ? [
     { label: 'Settings', icon: Settings, action: () => goToSettings(), gradient: 'from-slate-600 to-slate-800' },
-    { label: 'Access', icon: ShieldCheck, action: () => goToSettings('access'), gradient: 'from-amber-500 to-orange-600' },
     { label: 'Help', icon: HelpCircle, action: () => navigate('/enterprise/help'), gradient: 'from-rose-500 to-pink-600' },
   ] : [
     { label: 'Settings', icon: Settings, action: () => goToSettings(), gradient: 'from-slate-600 to-slate-800' },
-    { label: 'Access', icon: ShieldCheck, action: () => goToSettings('access'), gradient: 'from-amber-500 to-orange-600' },
     { label: 'Profile', icon: User, action: () => navigate('/enterprise-profile'), gradient: 'from-blue-600 to-indigo-700' },
     { label: 'Help', icon: HelpCircle, action: () => navigate('/enterprise/help'), gradient: 'from-rose-500 to-pink-600' },
   ];
@@ -226,7 +224,7 @@ export default function EnterpriseDashboard() {
       <div className="px-4 lg:px-6 pb-8 lg:pb-6 space-y-4 max-w-7xl mx-auto">
 
         {/* Quick Access */}
-        <div className={'grid gap-2 sm:gap-3 mt-5 sm:mt-8 relative z-10 ' + (quickActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
+        <div className={'grid gap-2 sm:gap-3 mt-5 sm:mt-8 relative z-10 ' + (quickActions.length === 2 ? 'grid-cols-2' : quickActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
           {quickActions.map(a => {
             const Icon = a.icon;
             return (
