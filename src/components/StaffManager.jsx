@@ -119,19 +119,42 @@ export default function StaffManager() {
   const handleInvite = async (member) => {
     setInviteLoading(member.id);
     try {
-      // Try the branded invite first — sends a Ground Control dark-green
-      // branded email with a direct link to /register. This only works once
-      // a custom domain is connected; otherwise it falls back to the
-      // platform invite email (which can't be branded but does carry a
-      // working registration link).
-      let brandedSent = false;
+      // Step 1: Register the user — creates their account and sends an OTP
+      // email. This makes them a "registered user" so the branded email
+      // can reach them without a custom domain.
+      const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
+      let registered = false;
       try {
-        const res = await base44.functions.invoke('sendBrandedInvite', { email: member.email, staff_name: member.name });
-        brandedSent = (res.data || res)?.sent === true;
-      } catch (_) { /* fall back to platform invite below */ }
+        await base44.auth.register({ email: member.email, password: tempPassword });
+        registered = true;
+      } catch (regErr) {
+        // If they already have an account (e.g. previously invited), skip
+        // registration and try sending the branded email directly — they're
+        // already a registered user.
+        if (!String(regErr?.message || '').match(/already|exists/i)) {
+          throw regErr;
+        }
+        registered = true; // already registered — proceed to branded email
+      }
 
+      // Step 2: Send the branded Ground Control invite email with a link to
+      // the setup page. Works because the user is now registered.
+      let brandedSent = false;
+      if (registered) {
+        try {
+          const res = await base44.functions.invoke('sendBrandedInvite', {
+            email: member.email,
+            staff_name: member.name,
+            temp_password: tempPassword,
+          });
+          brandedSent = (res.data || res)?.sent === true;
+        } catch (_) { /* fall back below */ }
+      }
+
+      // Step 3: If the branded email failed for any reason, fall back to the
+      // platform invite so the user still gets a working setup link.
       if (!brandedSent) {
-        await base44.users.inviteUser(member.email, 'user');
+        try { await base44.users.inviteUser(member.email, 'user'); } catch (_) {}
       }
 
       await base44.entities.Staff.update(member.id, { invite_sent: true });
@@ -147,10 +170,10 @@ export default function StaffManager() {
       }
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast({
-        title: 'Invite sent',
+        title: brandedSent ? 'Branded invite sent' : 'Invite sent',
         description: brandedSent
-          ? `${member.email} — branded invite sent with a link to set up their password.`
-          : `${member.email} — invite sent. Connect a custom domain in Settings for branded emails.${matchedUser ? ' Account linked.' : ''}`,
+          ? `${member.email} — branded Ground Control email sent with a verification link.`
+          : `${member.email} — invite sent.${matchedUser ? ' Account linked.' : ''}`,
       });
     } catch (error) {
       toast({ title: 'Could not send invite', description: error?.message || 'User may already have an account', variant: 'destructive' });

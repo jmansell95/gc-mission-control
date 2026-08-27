@@ -29,14 +29,25 @@ export default function BulkInviteModal({ onClose }) {
     const failed = [];
     for (const email of emailList) {
       try {
-        // Try branded invite first (Ground Control dark-green email with a
-        // direct /register link). Falls back to the platform invite if no
-        // custom domain is connected.
-        let brandedSent = false;
+        // Step 1: Register the user — creates their account and sends OTP.
+        const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
+        let registered = false;
         try {
-          const res = await base44.functions.invoke('sendBrandedInvite', { email, staff_name: email.split('@')[0] });
-          brandedSent = (res.data || res)?.sent === true;
-        } catch (_) { /* fall back below */ }
+          await base44.auth.register({ email, password: tempPassword });
+          registered = true;
+        } catch (regErr) {
+          if (!String(regErr?.message || '').match(/already|exists/i)) throw regErr;
+          registered = true;
+        }
+        // Step 2: Send the branded email (works because user is now registered).
+        let brandedSent = false;
+        if (registered) {
+          try {
+            const res = await base44.functions.invoke('sendBrandedInvite', { email, staff_name: email.split('@')[0], temp_password: tempPassword });
+            brandedSent = (res.data || res)?.sent === true;
+          } catch (_) { /* fall back below */ }
+        }
+        // Step 3: Fall back to platform invite if branded failed.
         if (!brandedSent) {
           await base44.users.inviteUser(email, role);
         }

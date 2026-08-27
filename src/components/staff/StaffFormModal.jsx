@@ -86,12 +86,30 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
         const created = await base44.entities.Staff.create(payload);
         if (inviteOnCreate && form.email) {
           try {
-            await base44.users.inviteUser(form.email, 'user');
-            await base44.entities.Staff.update(created.id, { invite_sent: true });
+            // Register the user (creates account + sends OTP), then send the
+            // branded Ground Control invite email — works without a custom
+            // domain because the user is now a registered user.
+            const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
+            let registered = false;
             try {
-              await base44.functions.invoke('manageEmailAlerts', { action: 'send_invitation', email: form.email, staff_name: form.name });
-            } catch (e) { /* branded invite is non-fatal */ }
-            toast({ title: 'Crew member added', description: `Invite sent to ${form.email}` });
+              await base44.auth.register({ email: form.email, password: tempPassword });
+              registered = true;
+            } catch (regErr) {
+              if (!String(regErr?.message || '').match(/already|exists/i)) throw regErr;
+              registered = true;
+            }
+            let brandedSent = false;
+            if (registered) {
+              try {
+                const res = await base44.functions.invoke('sendBrandedInvite', { email: form.email, staff_name: form.name, temp_password: tempPassword });
+                brandedSent = (res.data || res)?.sent === true;
+              } catch (_) { /* fall back below */ }
+            }
+            if (!brandedSent) {
+              await base44.users.inviteUser(form.email, 'user');
+            }
+            await base44.entities.Staff.update(created.id, { invite_sent: true });
+            toast({ title: 'Crew member added', description: brandedSent ? `Branded invite sent to ${form.email}` : `Invite sent to ${form.email}` });
           } catch (err) {
             toast({ title: 'Crew member added', description: 'App invite could not be sent — use the invite button on the card.', variant: 'destructive' });
           }

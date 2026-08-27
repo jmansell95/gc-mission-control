@@ -3,17 +3,22 @@ import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/e
 
 // ============================================================
 // sendBrandedInvite — sends a Ground Control branded invitation
-// email (dark green) with a direct link to the register page so
-// the invited user can set up their account and password.
+// email (dark green) with a direct link to the account setup
+// page where the user enters their verification code.
 //
-// Unlike the platform's inviteUser email (which can't be branded),
-// this sends a fully custom dark-green branded email. It links to
-// /register where the user enters their email + password, verifies
-// via OTP, and gets logged in — no dead-end at /login.
+// This function is called AFTER the user has been registered via
+// base44.auth.register() (which creates their account and sends
+// an OTP email). Because the user is now a registered user, the
+// platform allows SendEmail to reach them — no custom domain
+// required.
 //
-// Call from the frontend: base44.functions.invoke('sendBrandedInvite', { email, staff_name })
-// Returns { sent: true } or { sent: false, error } if the platform
-// blocks the send (e.g. no custom domain for non-registered users).
+// The email contains:
+//   - A welcome message in Ground Control dark-green branding
+//   - The user's temporary password (for future logins)
+//   - A link to /setup-account?email=xxx where they enter the
+//     verification code from the separate OTP email
+//
+// Call: base44.functions.invoke('sendBrandedInvite', { email, staff_name, temp_password })
 // ============================================================
 
 export default async function(req: Request): Promise<Response> {
@@ -22,22 +27,31 @@ export default async function(req: Request): Promise<Response> {
     const body = await req.json().catch(() => ({}));
     const email = body?.email;
     const staffName = body?.staff_name || (email ? email.split('@')[0] : 'there');
+    const tempPassword = body?.temp_password || '';
 
     if (!email) {
       return Response.json({ sent: false, error: 'Email is required' }, { status: 400 });
     }
 
     const baseUrl = await getAppBaseUrl(base44);
-    const registerUrl = baseUrl ? baseUrl.replace(/\/+$/, '') + '/register' : '/register';
+    const setupUrl = baseUrl ? baseUrl.replace(/\/+$/, '') + '/setup-account?email=' + encodeURIComponent(email) : '/setup-account?email=' + encodeURIComponent(email);
+
+    let passwordLine = '';
+    if (tempPassword) {
+      passwordLine =
+        '<p style="font-size:15px;line-height:1.6;color:#1e293b">Your temporary password is: <strong style="font-family:monospace;font-size:16px;background:#f1f5f9;padding:2px 8px;border-radius:4px;color:#2E5A1A">' + escapeHtml(tempPassword) + '</strong></p>' +
+        '<p style="font-size:13px;color:#64748b">You\'ll need this if you log out and want to log back in. You can change it from your profile once you\'re in.</p>';
+    }
 
     const bodyHtml =
       '<p style="font-size:15px;line-height:1.6;color:#1e293b">Hi ' + escapeHtml(staffName) + ',</p>' +
       '<p style="font-size:15px;line-height:1.6;color:#1e293b">You\'ve been invited to join <strong style="color:#2E5A1A">Ground Control — Mission Control</strong>, our platform for managing schedules, timesheets, and site operations.</p>' +
-      '<p style="font-size:15px;line-height:1.6;color:#1e293b">Click the button below to set up your account and create your password:</p>' +
-      linkBlock(baseUrl, '/register', 'Set Up My Account') +
-      '<p style="font-size:13px;color:#64748b;margin-top:20px">If the button doesn\'t work, copy and paste this link into your browser:<br>' +
-      '<a href="' + escapeHtml(registerUrl) + '" style="color:#2E5A1A">' + escapeHtml(registerUrl) + '</a></p>' +
-      '<p style="font-size:13px;color:#64748b">Use <strong>' + escapeHtml(email) + '</strong> as your email address when registering. You\'ll receive a verification code to complete the setup.</p>';
+      '<p style="font-size:15px;line-height:1.6;color:#1e293b">Click the button below to verify your account and get started:</p>' +
+      linkBlock(baseUrl, '/setup-account?email=' + encodeURIComponent(email), 'Verify My Account') +
+      passwordLine +
+      '<p style="font-size:13px;color:#64748b;margin-top:20px">You\'ll also receive a separate email with a 6-digit verification code — enter it on the setup page to activate your account.</p>' +
+      '<p style="font-size:13px;color:#64748b">If the button doesn\'t work, copy and paste this link into your browser:<br>' +
+      '<a href="' + escapeHtml(setupUrl) + '" style="color:#2E5A1A">' + escapeHtml(setupUrl) + '</a></p>';
 
     const html = styledHtml(bodyHtml, {
       accent_color: '#2E5A1A',

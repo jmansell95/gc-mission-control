@@ -47,6 +47,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SetupAccount from './pages/SetupAccount';
 import OAuthConsent from './pages/OAuthConsent';
 import SubcontractorOnboarding from './pages/SubcontractorOnboarding';
 import { StaffAssistantProvider } from '@/components/StaffAssistantChat';
@@ -97,6 +98,7 @@ const AuthenticatedApp = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/setup-account" element={<SetupAccount />} />
         <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
