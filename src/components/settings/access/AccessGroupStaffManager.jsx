@@ -64,6 +64,8 @@ export default function AccessGroupStaffManager({ group, groups }) {
     onError: (e) => toast({ title: 'Update failed', description: e.message, variant: 'destructive' }),
   });
 
+  const [selectedToAdd, setSelectedToAdd] = useState([]);
+
   const bulkAddMutation = useMutation({
     mutationFn: async (staffIds) => {
       const updates = staffIds.map(id => ({ id, permission_group_id: group.id }));
@@ -79,16 +81,9 @@ export default function AccessGroupStaffManager({ group, groups }) {
     onError: (e) => toast({ title: 'Failed to add staff', description: e.message, variant: 'destructive' }),
   });
 
-  const [selectedToAdd, setSelectedToAdd] = useState([]);
-
   const handleGroupChange = (staffId, newGroupId) => {
     updateMutation.mutate({ staffId, fields: { permission_group_id: newGroupId || null } });
     toast({ title: 'Access level updated' });
-  };
-
-  const handleDivisionChange = (staffId, newDivisionId) => {
-    updateMutation.mutate({ staffId, fields: { division_id: newDivisionId || null } });
-    toast({ title: 'Business Stream updated' });
   };
 
   const toggleAddSelect = (id) => {
@@ -205,22 +200,15 @@ export default function AccessGroupStaffManager({ group, groups }) {
                   <p className="text-xs font-semibold text-slate-800 truncate">{s.name}</p>
                   <p className="text-[10px] text-slate-400 truncate">{s.job_title || s.email || 'No title'}</p>
                 </div>
-                {/* Division selector */}
-                <AccessSelect
-                  value={s.division_id || ''}
-                  onChange={(newId) => handleDivisionChange(s.id, newId)}
-                  placeholder="No division"
-                >
-                  <SelectItem value="__none">Unassigned</SelectItem>
-                  {divisions.map(d => (
-                    <SelectItem key={d.id} value={d.id}>
-                      <span className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.color || '#2E5A1A' }} />
-                        {d.name}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </AccessSelect>
+                {/* Stream — read-only (inherited from the crew member's team) */}
+                {div ? (
+                  <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 text-[10px] font-bold text-slate-600 flex-shrink-0" title="Inherited from the crew member's team — change the team to change the stream">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: div.color || '#2E5A1A' }} />
+                    {div.name}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold text-slate-400 flex-shrink-0">No stream</span>
+                )}
                 {/* Group selector */}
                 <AccessSelect
                   value={s.permission_group_id || ''}

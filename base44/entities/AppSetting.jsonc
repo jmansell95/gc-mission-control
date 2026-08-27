@@ -4,7 +4,11 @@
   "properties": {
     "key": {
       "type": "string",
-      "description": "Setting key (e.g. 'global', 'gl_code_mapping', 'concur_config')"
+      "description": "Setting key (e.g. 'global', 'gl_code_mapping', 'concur_config'). For integration configs, multiple records may share the same key \u2014 one per business stream, distinguished by division_id."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The business stream this config record belongs to. When set, this record holds the per-stream integration credentials (so each stream can connect its own Geotab/Holman/Asset Panda accounts). Blank/null = global/shared config (used when no division is active, and as the backend fallback). Most existing records have this blank."
     },
     "app_base_url": {
       "type": "string",

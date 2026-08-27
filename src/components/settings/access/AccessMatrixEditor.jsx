@@ -15,6 +15,7 @@ const MODULE_CATEGORIES = [
   { label: 'Operations', keys: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics'] },
   { label: 'People & Compliance', keys: ['staff', 'teams', 'compliance', 'safety', 'timesheets'] },
   { label: 'Financial', keys: ['billing'] },
+  { label: 'Assets & Fleet', keys: ['assets'] },
   { label: 'Technical & Audit', keys: ['ags_import', 'log-qc', 'audit-trail'] },
   { label: 'System', keys: ['settings'] },
 ];
@@ -259,9 +260,9 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
 
               {/* Stat bar */}
               <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 mb-4">
-                <div className="bg-[#2E5A1A]" style={{ width: `${(stats.write / stats.total) * 100}%` }} />
-                <div className="bg-amber-400" style={{ width: `${(stats.read / stats.total) * 100}%` }} />
-                <div className="bg-slate-300" style={{ width: `${(stats.none / stats.total) * 100}%` }} />
+                <div className="bg-[#2E5A1A]" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
+                <div className="bg-amber-400" style={{ width: `${stats.total ? (stats.read / stats.total) * 100 : 0}%` }} />
+                <div className="bg-slate-300" style={{ width: `${stats.total ? (stats.none / stats.total) * 100 : 0}%` }} />
               </div>
 
               {/* Module categories */}
@@ -541,9 +542,9 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
               </div>
 
               <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 mb-4">
-                <div className="bg-[#2E5A1A]" style={{ width: `${(stats.write / stats.total) * 100}%` }} />
-                <div className="bg-amber-400" style={{ width: `${(stats.read / stats.total) * 100}%` }} />
-                <div className="bg-slate-300" style={{ width: `${(stats.none / stats.total) * 100}%` }} />
+                <div className="bg-[#2E5A1A]" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
+                <div className="bg-amber-400" style={{ width: `${stats.total ? (stats.read / stats.total) * 100 : 0}%` }} />
+                <div className="bg-slate-300" style={{ width: `${stats.total ? (stats.none / stats.total) * 100 : 0}%` }} />
               </div>
 
               <div className="space-y-3">

@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDivision } from '@/contexts/DivisionContext';
 import {
-  ArrowLeft, Building2, Link2, Settings, Database, Layers,
+  ArrowLeft, Building2, Settings, Database, Layers,
 } from 'lucide-react';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import DivisionManager from '@/components/settings/DivisionManager';
 import BusinessUnitManager from '@/components/settings/BusinessUnitManager';
-import IntegrationsHub from '@/components/settings/IntegrationsHub';
 import BackupRestoreHub from '@/components/settings/BackupRestoreHub';
-import IntegrationConfigDrawer from '@/components/settings/IntegrationConfigDrawer';
 
 const TABS = [
   { id: 'business-units', label: 'Business Units', icon: Layers, gradient: 'from-emerald-600 to-teal-700' },
   { id: 'divisions', label: 'Business Streams', icon: Building2, gradient: 'from-blue-600 to-cyan-700' },
   { id: 'backup', label: 'Backup & Restore', icon: Database, gradient: 'from-indigo-600 to-blue-700' },
-  { id: 'integrations', label: 'Integrations', icon: Link2, gradient: 'from-blue-600 to-indigo-700' },
 ];
 
 export default function EnterpriseSettings() {
@@ -23,7 +20,6 @@ export default function EnterpriseSettings() {
   const location = useLocation();
   const { setActiveDivision } = useDivision();
   const [activeTab, setActiveTab] = useState(location.state?.tab || 'business-units');
-  const [selectedIntegration, setSelectedIntegration] = useState(null);
 
   // Clear division context — this is an enterprise-level page.
   useEffect(() => { setActiveDivision(null); }, [setActiveDivision]);
@@ -33,7 +29,6 @@ export default function EnterpriseSettings() {
       case 'business-units': return <BusinessUnitManager />;
       case 'divisions': return <DivisionManager />;
       case 'backup': return <BackupRestoreHub />;
-      case 'integrations': return <IntegrationsHub onNavigate={setSelectedIntegration} />;
       default: return null;
     }
   };
@@ -88,14 +83,6 @@ export default function EnterpriseSettings() {
           {renderTab()}
         </div>
       </div>
-
-      {/* Integration config drawer — enterprise-level, admin-only */}
-      {selectedIntegration && (
-        <IntegrationConfigDrawer
-          integrationId={selectedIntegration}
-          onClose={() => setSelectedIntegration(null)}
-        />
-      )}
     </div>
   );
 }

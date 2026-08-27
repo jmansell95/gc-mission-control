@@ -7,6 +7,7 @@ const MODULE_CATEGORIES = [
   { label: 'Operations', keys: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics'] },
   { label: 'People & Compliance', keys: ['staff', 'teams', 'compliance', 'safety', 'timesheets'] },
   { label: 'Financial', keys: ['billing'] },
+  { label: 'Assets & Fleet', keys: ['assets'] },
   { label: 'Technical & Audit', keys: ['ags_import', 'log-qc', 'audit-trail'] },
   { label: 'System', keys: ['settings'] },
 ];

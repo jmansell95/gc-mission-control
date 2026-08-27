@@ -37,10 +37,30 @@ export const settingsGroups = [
     ],
   },
   {
-    label: 'Geotechnical',
+    label: 'Ground Investigation',
     items: [
-      { id: 'ags-import', label: 'KeyLogBook', icon: FileUp, desc: 'KeyLogBook AGS & borehole data sync — webhook config, manual AGS upload, and pull sync settings' },
-      { id: 'openground-sync', label: 'OpenGround', icon: Database, desc: 'Push approved borehole logs to Bentley OpenGround cloud database' },
+      { id: 'ags-import', label: 'KeyLogBook', icon: FileUp, desc: 'AGS & borehole data sync — webhook config, manual AGS upload, and pull sync settings for this business stream' },
+      { id: 'openground-sync', label: 'OpenGround', icon: Database, desc: 'Push approved borehole logs from this stream to Bentley OpenGround cloud database' },
+    ],
+  },
+  {
+    label: 'Integrations',
+    items: [
+      { id: 'geotab-sync', label: 'Geotab GPS', icon: Satellite, desc: 'Live vehicle locations + specs via Geotab API — connect this stream\'s own Geotab account' },
+      { id: 'holman-sync', label: 'Holman Fleet', icon: Radio, desc: 'MOT, service dates & mileage from Holman fleet management — this stream\'s account' },
+      { id: 'asset-panda', label: 'Asset Panda', icon: Database, desc: 'Live stock levels, warehouse locations & asset matching for this stream' },
+      { id: 'bob-hr', label: 'Bob HR (Hibob)', icon: Users, desc: 'Bidirectional time-off sync with Bob HR for this stream\'s staff' },
+      { id: 'concur-sync', label: 'SAP Concur', icon: Landmark, desc: 'Push approved expenses & timesheets, pull GL codes — this stream\'s Concur' },
+      { id: 'safety-culture', label: 'Mitti', icon: ShieldAlert, desc: 'Sync site safety audits & inspection forms from Mitti for this stream' },
+      { id: 'cis-verification', label: 'HMRC CIS', icon: ShieldCheck, desc: 'Verify this stream\'s subcontractors against the HMRC CIS register' },
+      { id: 'payroll-export', label: 'Payroll Export', icon: FileSpreadsheet, desc: 'Export this stream\'s approved weekly timesheets to Sage / Xero / CSV' },
+      { id: 'met-office', label: 'Open-Meteo Weather', icon: Cloud, desc: 'Free daily weather forecasts for this stream\'s active sites' },
+      { id: 'google-maps', label: 'Google Maps', icon: MapPin, desc: 'Geocoding for job sites + travel route optimisation — this stream\'s API key' },
+      { id: 'whatsapp', label: 'WhatsApp Business', icon: MessageCircle, desc: 'Push critical alerts to this stream\'s crew via WhatsApp Business API' },
+      { id: 'accounting-sync', label: 'Xero / Sage', icon: FileSpreadsheet, desc: 'Push this stream\'s invoices & purchase costs to Xero or Sage accounting' },
+      { id: 'payment-gateway', label: 'Stripe Payments', icon: CreditCard, desc: 'Accept client invoice payments via Stripe for this stream' },
+      { id: 'microsoft-365', label: 'Microsoft 365', icon: CalendarDays, desc: 'Unified SSO for Outlook Calendar, SharePoint, Teams & OneDrive for this stream' },
+      { id: 'zapier-webhooks', label: 'Zapier / Make', icon: Webhook, desc: 'Register outbound webhook URLs to receive this stream\'s system events' },
     ],
   },
   {
