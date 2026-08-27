@@ -264,7 +264,7 @@ export default function EnterpriseAccessManager({ profile }) {
         </div>
 
         {/* ─── RIGHT: Group Detail ─── */}
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 lg:max-h-[calc(100dvh-14rem)] lg:overflow-y-auto">
           {selectedGroup ? (
             <AccessGroupDetail
               group={selectedGroup}

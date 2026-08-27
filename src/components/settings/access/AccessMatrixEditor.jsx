@@ -196,7 +196,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false }) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Matrix Editor */}
-        <div className="lg:col-span-7 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
+        <div className="lg:col-span-7 insight-card rounded-2xl p-4">
           {selectedGroup && selectedDivision ? (
             <>
               {/* Division tabs */}
@@ -331,7 +331,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false }) {
         </div>
 
         {/* Live Preview */}
-        <div className="lg:col-span-5 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
+        <div className="lg:col-span-5 insight-card rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <Eye className="w-4 h-4 text-blue-500" />
             <h3 className="text-sm font-bold text-slate-900">Live Preview</h3>

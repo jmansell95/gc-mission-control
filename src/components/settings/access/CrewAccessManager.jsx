@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Users, Search, ShieldCheck, ChevronDown, Check, Loader2, Layers,
+  Users, Search, ShieldCheck, Layers,
   Building2, Crown, Briefcase, UserCheck, AlertCircle, RefreshCw,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { useDivision } from '@/contexts/DivisionContext';
+import AccessSelect from './AccessSelect';
+import { SelectItem, SelectLabel, SelectSeparator } from '@/components/ui/select';
 
 const CATEGORY_LABELS = {
   field_ops: 'Field Operations',
@@ -194,19 +196,10 @@ export default function CrewAccessManager() {
 }
 
 function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup, onGroupChange, saving }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const ref = React.useRef(null);
-  useEffect(() => {
-    if (!dropdownOpen) return;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setDropdownOpen(false); };
-    window.addEventListener('click', h);
-    return () => window.removeEventListener('click', h);
-  }, [dropdownOpen]);
-
   const categoryLabel = CATEGORY_LABELS[team.category] || team.category || 'General';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
       {/* ─── Crew Header ─── */}
       <div className="insight-card rounded-2xl p-4">
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -274,66 +267,34 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
           </p>
         </div>
 
-        <div className="relative" ref={ref}>
+        <div>
           <label className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5 block">Permission Group</label>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }}
+          <AccessSelect
+            value={currentGroup?.id || ''}
+            onChange={onGroupChange}
+            placeholder="Select a permission group…"
             disabled={saving}
-            className="w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-60"
+            triggerClassName="h-10 w-full rounded-xl text-sm"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              {currentGroup ? (
-                <>
-                  {currentGroup.is_system && <Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
-                  <span className="truncate">{currentGroup.name}</span>
-                </>
-              ) : (
-                <span className="text-slate-400">Select a permission group…</span>
-              )}
-            </div>
-            {saving ? <Loader2 className="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
-          </button>
-          {dropdownOpen && (
-            <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 py-1 max-h-72 overflow-y-auto" onClick={e => e.stopPropagation()}>
-              <button
-                onClick={() => { onGroupChange(''); setDropdownOpen(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-50 text-left"
-              >
-                <span className="w-4 h-4 rounded-full bg-slate-200" /> No group (clear access)
-              </button>
-              <div className="px-3 py-1 text-[9px] font-bold uppercase tracking-wide text-slate-300">System Groups</div>
-              {groups.filter(g => g.is_system).map(g => (
-                <button
-                  key={g.id}
-                  onClick={() => { onGroupChange(g.id); setDropdownOpen(false); }}
-                  className={'w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition ' +
-                    (currentGroup?.id === g.id ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50')}
-                >
-                  <Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                  <span className="flex-1 truncate">{g.name}</span>
-                  {currentGroup?.id === g.id && <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />}
-                </button>
-              ))}
-              {groups.filter(g => !g.is_system).length > 0 && (
-                <>
-                  <div className="px-3 py-1 text-[9px] font-bold uppercase tracking-wide text-slate-300">Custom Groups</div>
-                  {groups.filter(g => !g.is_system).map(g => (
-                    <button
-                      key={g.id}
-                      onClick={() => { onGroupChange(g.id); setDropdownOpen(false); }}
-                      className={'w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-left transition ' +
-                        (currentGroup?.id === g.id ? 'bg-emerald-50 text-emerald-700' : 'text-slate-700 hover:bg-slate-50')}
-                    >
-                      <span className="w-3.5 h-3.5 rounded-full bg-slate-300 flex-shrink-0" />
-                      <span className="flex-1 truncate">{g.name}</span>
-                      {currentGroup?.id === g.id && <Check className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />}
-                    </button>
-                  ))}
-                </>
-              )}
-            </div>
-          )}
+            <SelectItem value="__none">
+              <span className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-slate-200 flex-shrink-0" /> No group (clear access)</span>
+            </SelectItem>
+            <SelectLabel>System Groups</SelectLabel>
+            {groups.filter(g => g.is_system).map(g => (
+              <SelectItem key={g.id} value={g.id}>
+                <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> {g.name}</span>
+              </SelectItem>
+            ))}
+            {groups.filter(g => !g.is_system).length > 0 && (
+              <>
+                <SelectSeparator />
+                <SelectLabel>Custom Groups</SelectLabel>
+                {groups.filter(g => !g.is_system).map(g => (
+                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                ))}
+              </>
+            )}
+          </AccessSelect>
         </div>
 
         {currentGroup?.description && (
@@ -355,7 +316,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
             <p className="text-[10px] text-slate-400 mt-0.5">Assign staff to this team via the Staff Hub</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-72 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
             {staff.map(s => {
               const div = allDivisions.find(d => d.id === s.division_id);
               const sGroup = groups.find(g => g.id === s.permission_group_id);
