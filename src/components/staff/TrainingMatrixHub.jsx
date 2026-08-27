@@ -35,9 +35,9 @@ export default function TrainingMatrixHub() {
   const [showBulkImport, setShowBulkImport] = useState(false);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4">
+    <div className="space-y-4">
       <TrainingHubRail view={view} setView={setView} />
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0">
         {view === 'cards' && <CardsView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
         {view === 'calendar' && <CalendarView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
         {view === 'courses' && <TrainingManager onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
