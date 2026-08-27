@@ -1,5 +1,6 @@
 import React from 'react';
 import Modal from '@/components/ui/modal';
+import { useToast } from '@/components/ui/use-toast';
 
 /**
  * FormModal — shared wrapper for standardised edit/create popups across the site.
@@ -26,7 +27,7 @@ export default function FormModal({
   icon: Icon,
   title,
   description,
-  size = 'xl',
+  size = '2xl',
   saveLabel = 'Save',
   onSave,
   saving = false,
@@ -35,6 +36,25 @@ export default function FormModal({
   footer,
   ...rest
 }) {
+  const { toast } = useToast();
+
+  const handleSave = async () => {
+    try {
+      await onSave?.();
+      toast({
+        variant: 'success',
+        title: saveLabel === 'Save' ? 'Saved' : saveLabel,
+        description: 'Your changes have been saved.',
+      });
+    } catch (e) {
+      toast({
+        variant: 'destructive',
+        title: 'Save failed',
+        description: e?.message || 'Something went wrong. Please try again.',
+      });
+    }
+  };
+
   const defaultFooter = (
     <div className="flex items-center justify-end gap-2">
       <button
@@ -45,7 +65,7 @@ export default function FormModal({
         Cancel
       </button>
       <button
-        onClick={onSave}
+        onClick={handleSave}
         disabled={saving || !canSave}
         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-xl text-sm font-bold transition active:scale-95 shadow-sm disabled:opacity-50"
       >

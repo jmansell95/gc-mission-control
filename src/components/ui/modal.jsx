@@ -32,12 +32,12 @@ import useBackIntercept from '@/hooks/useBackIntercept';
  *   children: modal content
  */
 const SIZES = {
-  sm: 'sm:max-w-md',
-  md: 'sm:max-w-lg',
-  lg: 'sm:max-w-2xl',
-  xl: 'sm:max-w-3xl',
-  '2xl': 'sm:max-w-4xl',
-  '3xl': 'sm:max-w-5xl',
+  sm: 'sm:max-w-xl',
+  md: 'sm:max-w-2xl',
+  lg: 'sm:max-w-3xl',
+  xl: 'sm:max-w-4xl',
+  '2xl': 'sm:max-w-5xl',
+  '3xl': 'sm:max-w-6xl',
   full: 'sm:max-w-[calc(100vw-2rem)]',
 };
 
@@ -46,7 +46,7 @@ export default function Modal({
   onClose,
   title,
   description,
-  size = 'lg',
+  size = 'xl',
   nested = false,
   closeOnBackdrop = true,
   hideCloseButton = false,

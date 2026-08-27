@@ -480,6 +480,15 @@
   overflow-y: auto;
 }
 
+/* Widen bespoke custom modal panels (bg-white popups inside dark backdrops)
+   so content fits without horizontal cramping. Shared primitives use
+   bg-background and are sized via their own classes, so this only catches
+   one-off bespoke popups that hardcode a small max-width. */
+.fixed.inset-0[class*="bg-slate-950"] > div[class*="max-w-"][class*="bg-white"],
+.fixed.inset-0[class*="bg-blue-950"] > div[class*="max-w-"][class*="bg-white"] {
+  min-width: min(92vw, 672px);
+}
+
 /* === Global Scroll Lock ===
    Prevents the page behind from scrolling whenever any modal/drawer/popup
    is open. Works for both shared UI components (Sheet, Dialog, Modal, Drawer,
