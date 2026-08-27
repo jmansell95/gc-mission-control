@@ -124,6 +124,12 @@ export default function StaffManager() {
       try {
         await base44.functions.invoke('manageEmailAlerts', { action: 'send_invitation', email: member.email, staff_name: member.name });
       } catch (e) { /* branded invite email is non-fatal */ }
+      // Send a password-setup email so the invited user gets a direct link
+      // to set their password (the platform invite email only links to the
+      // app root, which dead-ends at /login for a user with no password).
+      try {
+        await base44.auth.resetPasswordRequest(member.email);
+      } catch (e) { /* password setup email is non-fatal */ }
       // Link the Staff record to the newly created User account and sync role
       await queryClient.refetchQueries({ queryKey: ['users-list'] });
       const freshUsers = queryClient.getQueryData(['users-list']) || [];

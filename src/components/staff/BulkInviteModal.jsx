@@ -30,6 +30,9 @@ export default function BulkInviteModal({ onClose }) {
     for (const email of emailList) {
       try {
         await base44.users.inviteUser(email, role);
+        // Send a password-setup email so the invited user gets a direct link
+        // to set their password (the platform invite email dead-ends at /login).
+        try { await base44.auth.resetPasswordRequest(email); } catch (e) { /* non-fatal */ }
         succeeded.push(email);
       } catch (e) {
         failed.push({ email, error: e.message || 'Failed' });

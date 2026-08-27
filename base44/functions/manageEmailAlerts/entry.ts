@@ -62,7 +62,7 @@ function linkForAlert(alert_key) {
     return { path: '/staff-schedule', label: 'View your schedule' };
   }
   if (alert_key === 'staff_invitation') {
-    return { path: '', label: 'Open the app' };
+    return { path: '/forgot-password', label: 'Set your password' };
   }
   if (alert_key === 'maintenance_booking' || alert_key === 'training_booking' || alert_key === 'daily_reminder') {
     return { path: '/staff-schedule', label: 'View your schedule' };
@@ -453,7 +453,7 @@ Deno.serve(async (req) => {
         : 'You are invited to GC Mission Control';
       const text = template.replace(/\{staff_name\}/g, name).replace(/\{email\}/g, email);
       const baseUrl = await getAppBaseUrl(base44);
-      const bodyHtml = textToHtml(text) + linkBlock(baseUrl, '', 'Open the app');
+      const bodyHtml = textToHtml(text) + linkBlock(baseUrl, '/forgot-password', 'Set your password');
       const html = styledHtml(bodyHtml, cfg);
       await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body: html });
       return Response.json({ sent: true });
