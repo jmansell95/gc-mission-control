@@ -24,7 +24,7 @@ function getTier(group, p) {
  * Shows the selected group's header (name, tier, staff count, edit/delete)
  * and embeds the inline AccessMatrixEditor (division tabs + matrix + preview).
  */
-export default function AccessGroupDetail({ group, groups, staffCount, divisions, overrideCount, onEdit, onDelete }) {
+export default function AccessGroupDetail({ group, groups, staffCount, divisions, overrideCount, onEdit, onDelete, lockedDivisionId = null }) {
   const p = normalizePermissions(group.permissions);
   const tier = getTier(group, p);
   const badge = TIER_BADGES[tier];
@@ -124,7 +124,7 @@ export default function AccessGroupDetail({ group, groups, staffCount, divisions
       <AccessGroupStaffManager group={group} groups={groups} />
 
       {/* ─── Inline Matrix Editor (division tabs + matrix + preview) ─── */}
-      <AccessMatrixEditor fixedGroup={group} inline />
+      <AccessMatrixEditor fixedGroup={group} inline lockedDivisionId={lockedDivisionId} />
     </div>
   );
 }

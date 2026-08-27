@@ -6,7 +6,8 @@ import { useConfigLists } from '@/hooks/useConfigLists';
 import { useAuth } from '@/lib/AuthContext';
 import { useDivision } from '@/contexts/DivisionContext';
 import FormModal from '@/components/ui/FormModal';
-import { Mail, Bell, Truck, ShieldCheck, MapPin, KeyRound, LogIn } from 'lucide-react';
+import { Mail, Bell, Truck, ShieldCheck, MapPin, KeyRound, LogIn, Compass, Monitor, HardHat } from 'lucide-react';
+import { resolveRoleLandingPage } from '@/utils/access';
 
 /**
  * StaffFormModal — standardised popup for creating/editing a crew member.
@@ -250,6 +251,24 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               </select>
             </div>
           </div>
+          {/* Live landing-page preview */}
+          {(() => {
+            const grp = permissionGroups.find(g => g.id === form.permission_group_id) || null;
+            const route = resolveRoleLandingPage({ default_landing_page: form.default_landing_page || '', permission_group: grp, worker_type: form.worker_type, system_role: 'field' }, false);
+            const isOffice = route === '/admin';
+            const labels = { '/admin': 'Admin Dashboard', '/staff-schedule': 'My Schedule', '/staff-profile': 'My Profile', '/deliveries': 'Delivery Dashboard', '/scanner': 'Asset Scanner', '/subcontractor': 'Subcontractor Portal' };
+            return (
+              <div className="mt-2.5 flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                <div className={'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ' + (isOffice ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-amber-500 to-orange-600')}>
+                  {isOffice ? <Monitor className="w-4.5 h-4.5 text-white" /> : <HardHat className="w-4.5 h-4.5 text-white" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5"><Compass className="w-3.5 h-3.5 text-[#2E5A1A]" /> Lands on: {labels[route] || route}</p>
+                  <p className="text-[11px] text-slate-400">{form.default_landing_page ? 'Set by the explicit override above' : grp?.landing_page && grp.landing_page !== 'auto' ? `Set by the "${grp.name}" group` : grp?.staff_type === 'office' ? 'Office groups land on the admin dashboard' : grp?.staff_type === 'field' ? 'Field groups land on their schedule' : 'Derived from their role'}</p>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Notifications */}

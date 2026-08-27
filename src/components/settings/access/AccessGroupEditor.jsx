@@ -9,6 +9,8 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
     name: group.name || '',
     description: group.description || '',
     is_read_only: group.is_read_only || false,
+    staff_type: group.staff_type || 'flexible',
+    landing_page: group.landing_page || 'auto',
     permissions: normalizePermissions(group.permissions),
   }));
 
@@ -74,6 +76,48 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
                 <p className="text-xs text-slate-500 mt-0.5">Force every module to read-only — members can view but never create, edit, or delete anything.</p>
               </div>
             </label>
+          </div>
+
+          {/* Office / Field classification + landing page */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-semibold text-slate-700">Staff Type</label>
+              <p className="text-[11px] text-slate-400 mb-1.5">Classifies this group for filtering and the default landing page.</p>
+              <div className="flex gap-1.5">
+                {[
+                  { v: 'office', label: 'Office' },
+                  { v: 'field', label: 'Field' },
+                  { v: 'flexible', label: 'Flexible' },
+                ].map(opt => (
+                  <button
+                    key={opt.v}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, staff_type: opt.v }))}
+                    className={'flex-1 px-3 py-2 rounded-lg text-xs font-bold border transition ' +
+                      (form.staff_type === opt.v ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate-700">Landing Page</label>
+              <p className="text-[11px] text-slate-400 mb-1.5">Where members land after login. 'auto' derives from staff type.</p>
+              <select
+                value={form.landing_page || 'auto'}
+                onChange={e => setForm(f => ({ ...f, landing_page: e.target.value }))}
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+              >
+                <option value="auto">Auto (from staff type)</option>
+                <option value="/admin">Admin Dashboard (Office)</option>
+                <option value="/staff-schedule">My Schedule (Field)</option>
+                <option value="/staff-profile">My Profile</option>
+                <option value="/deliveries">Delivery Dashboard</option>
+                <option value="/scanner">Asset Scanner</option>
+                <option value="/subcontractor">Subcontractor Portal</option>
+              </select>
+            </div>
           </div>
 
           {/* Module permissions */}

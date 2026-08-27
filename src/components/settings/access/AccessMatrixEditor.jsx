@@ -38,11 +38,12 @@ const PREVIEW_NAV_ITEMS = [
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
-export default function AccessMatrixEditor({ fixedGroup, inline = false }) {
+export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedDivisionId = null }) {
   const qc = useQueryClient();
   const { toast } = useToast();
-  const { divisions, permittedDivisions } = useDivision();
-  const [selectedDivisionId, setSelectedDivisionId] = useState(null);
+  const { divisions, permittedDivisions: allPermitted } = useDivision();
+  const permittedDivisions = lockedDivisionId ? allPermitted.filter(d => d.id === lockedDivisionId) : allPermitted;
+  const [selectedDivisionId, setSelectedDivisionId] = useState(lockedDivisionId || null);
   const [selectedGroupId, setSelectedGroupId] = useState(fixedGroup?.id || null);
   const [search, setSearch] = useState('');
   const [dirty, setDirty] = useState(false);
@@ -80,10 +81,11 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false }) {
   });
 
   useEffect(() => {
+    if (lockedDivisionId) { setSelectedDivisionId(lockedDivisionId); return; }
     if (!selectedDivisionId && permittedDivisions.length > 0) {
       setSelectedDivisionId(permittedDivisions[0].id);
     }
-  }, [permittedDivisions]);
+  }, [permittedDivisions, lockedDivisionId]);
 
   useEffect(() => {
     if (!fixedGroup && !selectedGroupId && groups.length > 0) {
@@ -199,25 +201,33 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false }) {
         <div className="lg:col-span-7 insight-card rounded-2xl p-4">
           {selectedGroup && selectedDivision ? (
             <>
-              {/* Division tabs */}
-              <div className="flex items-center gap-1.5 mb-3 pb-3 border-b border-slate-100 overflow-x-auto no-scrollbar">
-                {permittedDivisions.map(d => {
-                  const active = selectedDivisionId === d.id;
-                  const hasOverride = manifests.filter(m => m.division_id === d.id && m.permission_group_id === selectedGroupId).length > 0;
-                  return (
-                    <button
-                      key={d.id}
-                      onClick={() => setSelectedDivisionId(d.id)}
-                      className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ' +
-                        (active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
-                    >
-                      <span className="w-2 h-2 rounded-full" style={{ background: active ? 'rgba(255,255,255,0.5)' : (d.color || '#2E5A1A') }} />
-                      {d.name}
-                      {hasOverride && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Has lockdown overrides" />}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* Division context */}
+              {lockedDivisionId && selectedDivision ? (
+                <div className="flex items-center gap-2 mb-3 pb-3 border-b border-slate-100">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: selectedDivision.color || '#2E5A1A' }} />
+                  <span className="text-xs font-bold text-slate-700">{selectedDivision.name}</span>
+                  <span className="text-[10px] text-slate-400">· lockdown overrides for this business stream</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 mb-3 pb-3 border-b border-slate-100 overflow-x-auto no-scrollbar">
+                  {permittedDivisions.map(d => {
+                    const active = selectedDivisionId === d.id;
+                    const hasOverride = manifests.filter(m => m.division_id === d.id && m.permission_group_id === selectedGroupId).length > 0;
+                    return (
+                      <button
+                        key={d.id}
+                        onClick={() => setSelectedDivisionId(d.id)}
+                        className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ' +
+                          (active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
+                      >
+                        <span className="w-2 h-2 rounded-full" style={{ background: active ? 'rgba(255,255,255,0.5)' : (d.color || '#2E5A1A') }} />
+                        {d.name}
+                        {hasOverride && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="Has lockdown overrides" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Override / dirty banners */}
               {existingManifest && !dirty && (

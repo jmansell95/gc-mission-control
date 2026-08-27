@@ -187,6 +187,12 @@ export function resolveRoleLandingPage(profile, isPlatformAdmin) {
   // Subcontractors get the minimalist logging portal
   if (profile?.worker_type === 'subcontractor') return '/subcontractor';
 
+  // Permission group landing page (office vs field classification).
+  // A concrete (non-auto) group landing page routes the user after onboarding.
+  // Checked after scanner/driver/subcontractor so those special cases still win.
+  const groupLanding = profile?.permission_group?.landing_page;
+  if (groupLanding && groupLanding !== 'auto') return groupLanding;
+
   // Field staff — schedule or profile
   if (role === 'field') {
     const teamLanding = profile?.team?.default_landing_page;

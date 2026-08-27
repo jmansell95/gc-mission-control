@@ -17,6 +17,7 @@ const ROUTE_SECTION_MAP = {
   '/admin/logistics': 'logistics',
   '/pat-testing': 'assets',
   '/fleet': 'fleet',
+  '/access-levels': 'access-levels',
   '/safety': 'compliance',
   '/help': 'overview',
   '/presentation-pack': 'overview',

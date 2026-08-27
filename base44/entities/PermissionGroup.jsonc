@@ -20,6 +20,30 @@
       "default": false,
       "description": "Master read-only toggle. When true, every module is forced to read-only access regardless of the per-module level below \u2014 used for the strict 'Read Only' lockdown."
     },
+    "staff_type": {
+      "type": "string",
+      "enum": [
+        "office",
+        "field",
+        "flexible"
+      ],
+      "default": "flexible",
+      "description": "Classifies this group as office staff or field team staff. Drives the default landing page after onboarding (office \u2192 Admin Dashboard, field \u2192 My Schedule) and filters which groups are offered when creating staff in a business stream. 'flexible' = no classification (landing page falls back to the role-based default)."
+    },
+    "landing_page": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "/admin",
+        "/staff-schedule",
+        "/staff-profile",
+        "/deliveries",
+        "/scanner",
+        "/subcontractor"
+      ],
+      "default": "auto",
+      "description": "Where members of this group land after login / onboarding. 'auto' = derive from staff_type (office \u2192 /admin, field \u2192 /staff-schedule) or the role-based fallback. Set to a concrete route to force a specific landing page for everyone in this group. A staff member's own default_landing_page still overrides this when set."
+    },
     "permissions": {
       "type": "object",
       "description": "Per-module access level: 'none' (hidden), 'read' (view only, no edits), or 'write' (full create/update/delete). Teams assigned this group inherit these levels for every admin section.",

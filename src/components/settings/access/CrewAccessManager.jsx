@@ -23,7 +23,7 @@ const CATEGORY_LABELS = {
  * Changing the crew's group syncs the same group to every staff member
  * in that crew, so permissions are applied at the crew level.
  */
-export default function CrewAccessManager() {
+export default function CrewAccessManager({ scopedDivisionId = null }) {
   const qc = useQueryClient();
   const { toast } = useToast();
   const { divisions = [] } = useDivision();
@@ -67,9 +67,11 @@ export default function CrewAccessManager() {
 
   const filteredTeams = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return teams;
-    return teams.filter(t => (t.name || '').toLowerCase().includes(q));
-  }, [teams, search]);
+    let list = teams;
+    if (scopedDivisionId) list = list.filter(t => t.division_id === scopedDivisionId);
+    if (q) list = list.filter(t => (t.name || '').toLowerCase().includes(q));
+    return list;
+  }, [teams, search, scopedDivisionId]);
 
   useEffect(() => {
     if (!selectedTeamId && filteredTeams.length > 0) setSelectedTeamId(filteredTeams[0].id);

@@ -12,6 +12,7 @@ import PrintReportButton from '@/components/PrintReportButton';
 import { CardGridSkeleton } from '@/components/StateViews';
 import StaffShiftEditor from '@/components/StaffShiftEditor';
 import StaffFormModal from '@/components/staff/StaffFormModal';
+import StaffOnboardingWizard from '@/components/staff/StaffOnboardingWizard';
 import AvailabilityCalendar from '@/components/staff/AvailabilityCalendar';
 import StaffIDCard from '@/components/staff/StaffIDCard';
 import ICalFeedButton from '@/components/staff/ICalFeedButton';
@@ -41,6 +42,7 @@ const roleLabel = Object.fromEntries(SYSTEM_ROLES.map(r => [r.value, r.label]));
 export default function StaffManager() {
   const { toast } = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [inviteLoading, setInviteLoading] = useState(null);
   const [shiftOpenId, setShiftOpenId] = useState(null);
@@ -223,7 +225,7 @@ export default function StaffManager() {
 
   const resetForm = () => {
     setEditingId(null);
-    setShowForm(true);
+    setShowWizard(true);
   };
 
   const activeCount = staff.filter(s => getUserForStaff(s)).length;
@@ -456,7 +458,16 @@ export default function StaffManager() {
         </div>
       )}
 
-      {/* Edit / Add Crew Member — standardised FormModal popup */}
+      {/* Add Crew Member — guided per-business-stream onboarding wizard */}
+      <StaffOnboardingWizard
+        open={showWizard}
+        onClose={() => setShowWizard(false)}
+        teams={teams}
+        vehicles={vehicles}
+        staffList={staff}
+      />
+
+      {/* Edit existing Crew Member — standardised FormModal popup */}
       <StaffFormModal
         open={showForm}
         onClose={() => { setShowForm(false); setEditingId(null); }}

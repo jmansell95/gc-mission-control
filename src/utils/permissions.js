@@ -63,6 +63,7 @@ export const SECTION_TO_MODULE = {
   reports: 'billing',
   import: 'settings',
   audit: 'audit-trail',
+  'access-levels': 'settings',
 };
 
 // Build a default permissions object (all modules = 'none').
@@ -93,6 +94,8 @@ export const SYSTEM_GROUPS = [
     description: 'Unrestricted access to every module. Use for trusted leadership only.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'office',
+    landing_page: '/admin',
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'write'])),
   },
   {
@@ -100,6 +103,8 @@ export const SYSTEM_GROUPS = [
     description: 'Full dashboard access including settings and crew types.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'office',
+    landing_page: '/admin',
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'write'])),
   },
   {
@@ -107,6 +112,8 @@ export const SYSTEM_GROUPS = [
     description: 'Operations access — jobs, rotas, timesheets, compliance. No settings or crew types.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'office',
+    landing_page: '/admin',
     permissions: Object.fromEntries(
       PERMISSION_MODULES.map(m => [m.key, ['settings', 'teams'].includes(m.key) ? 'none' : 'write'])
     ),
@@ -116,6 +123,8 @@ export const SYSTEM_GROUPS = [
     description: 'Basic office access — read-only view of dashboards, jobs and calendar.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'office',
+    landing_page: '/admin',
     permissions: Object.fromEntries(
       PERMISSION_MODULES.map(m => [m.key, ['overview', 'jobs', 'calendar', 'audit-trail'].includes(m.key) ? 'read' : 'none'])
     ),
@@ -125,6 +134,8 @@ export const SYSTEM_GROUPS = [
     description: 'Field crew — schedule and personal profile only. No admin dashboard access. Assign to all on-site workers.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'field',
+    landing_page: '/staff-schedule',
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'none'])),
   },
   {
@@ -132,6 +143,8 @@ export const SYSTEM_GROUPS = [
     description: 'Strict read-only lockdown — can view dashboards but cannot create, edit, upload or delete anything.',
     is_system: true,
     is_read_only: true,
+    staff_type: 'office',
+    landing_page: '/admin',
     permissions: Object.fromEntries(
       PERMISSION_MODULES.map(m => [m.key, m.sensitive ? 'none' : 'read'])
     ),
@@ -141,6 +154,8 @@ export const SYSTEM_GROUPS = [
     description: 'Logistics scanner only — can access the Asset Scanner / Goods In page and nothing else. Use for warehouse staff and depot hands who only need to scan items in and out. No admin dashboard, no schedule, no settings.',
     is_system: true,
     is_read_only: false,
+    staff_type: 'field',
+    landing_page: '/scanner',
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'none'])),
   },
 ];
