@@ -83,99 +83,215 @@ export default async function(req: Request): Promise<Response> {
     const userName = user.full_name || user.email || '';
     const now = new Date().toISOString();
 
-    // ── EWR template override ──
-    // EWR jobs use a dedicated AFP template instead of the uploaded file's data.
-    // The uploaded file is stored as source_file_url for reference only.
-    const jobNameLower = (job.name || '').toLowerCase();
-    const isEWR = jobNameLower.includes('ewr') || jobNameLower.includes('east west rail');
+    // ── EWR direct-parse override ──
+    // EWR jobs are parsed directly from the EWR-specific Excel format.
+    // The uploaded file IS the AFP — no template or field-data population is used.
+    if (preview.is_ewr) {
+      const ewrSheets = preview.ewr_sheets || {};
+      const afpPeriods = preview.afp_periods || [];
 
-    if (isEWR) {
-      // Find the active EWR template (name contains 'EWR', most recently created)
-      const templates = await base44.entities.AFPTemplate.filter({ is_active: true }, '-created_date', 50);
-      const ewrTemplate = templates.find((t: any) => (t.name || '').toLowerCase().includes('ewr'));
+      const existingAfps = await base44.entities.AFP.filter({ job_id }, 'afp_number', 50);
+      const createdAfpIds: string[] = [];
+      let totalLineItems = 0;
+      let totalClaimed = 0;
 
-      if (ewrTemplate) {
-        // Template-based commit: ignore uploaded data, build from template + field data
-        const periodStart = job.start_date || new Date().toISOString().slice(0, 10);
-        const periodEnd = toDateStr(cd.date) || cd.payment_due_date || '';
+      for (const period of afpPeriods) {
+        const afpNumber = period.afp_number;
+        const existing = existingAfps.find(a => a.afp_number === afpNumber);
+        if (existing && existing.status !== 'draft') continue;
 
-        const existingAfps = await base44.entities.AFP.filter({ job_id }, 'afp_number', 50);
-        const nextNumber = existingAfps.length + 1;
-
-        const afp = await base44.entities.AFP.create({
-          job_id,
-          job_name: job.name,
-          job_reference: job.job_reference || '',
-          division_id: job.division_id || '',
-          afp_number: nextNumber,
-          period_start_date: periodStart,
-          period_end_date: periodEnd,
+        const periodStart = period.period_start || '';
+        const periodEnd = period.period_end || '';
+        const afpData: any = {
+          job_id, job_name: job.name, job_reference: job.job_reference || '',
+          division_id: job.division_id || '', afp_number: afpNumber,
+          period_start_date: periodStart, period_end_date: periodEnd,
           certification_due_date: periodEnd ? defaultCertificationDue(periodEnd) : '',
           final_payment_notice_date: periodEnd ? defaultFinalPaymentNotice(periodEnd) : '',
           client_po: cd.client_purchase_order || '',
           gc_job_number: cd.gc_job_number || job.job_reference || '',
           client_name: cd.client || '',
-          contract_value: toNum(cd.contract_award_value) || toNum(job.budget_amount) || 0,
+          contract_value: toNum(cd.contract_award_value) || 0,
           status: 'draft',
           source_file_url: source_file_url || '',
           source_file_name: source_file_name || '',
-          last_updated_at: now,
-          last_updated_by: userName,
-        });
+          last_updated_at: now, last_updated_by: userName,
+        };
 
-        // Seed skeleton line items from the template (qty/amount zero — filled by field data)
-        const templateItems: any[] = (ewrTemplate.line_items || []).map((item: any, i: number) => ({
-          afp_id: afp.id,
-          job_id,
-          sheet_name: item.sheet_name || 'measured_works',
-          category: item.category || 'other',
-          item: item.description || '',
-          unit: item.unit || '',
-          qty: 0,
-          rate: toNum(item.unit_price),
-          amount: 0,
-          unit_price: toNum(item.unit_price),
-          source: 'template',
-          source_date: periodStart,
-          is_manual: false,
-          dispute_status: 'none',
-          original_amount: 0,
-          agreed_amount: 0,
-          sort_order: item.sort_order || i,
-        }));
+        let afpId: string;
+        if (existing) {
+          await base44.entities.AFPLineItem.deleteMany({ afp_id: existing.id });
+          await base44.entities.AFP.update(existing.id, afpData);
+          afpId = existing.id;
+        } else {
+          const afp = await base44.entities.AFP.create(afpData);
+          afpId = afp.id;
+        }
+        createdAfpIds.push(afpId);
 
-        if (templateItems.length > 0) {
-          await base44.entities.AFPLineItem.bulkCreate(templateItems);
+        const lineItems: any[] = [];
+        let sortOrder = 0;
+
+        // Drilling lines (Rotary + CP) — one line item per drilling row per AFP period
+        const drillingSheets: [string, string][] = [
+          ['rotary_drilling', 'ewr_rotary_drilling'],
+          ['cp_drilling', 'ewr_cp_drilling'],
+        ];
+        for (const [sheetKey, sheetName] of drillingSheets) {
+          for (const item of (ewrSheets[sheetKey] || [])) {
+            const periodData = item.per_period?.[afpNumber];
+            if (!periodData || periodData.period_qty === 0) continue;
+            lineItems.push({
+              afp_id: afpId, job_id, sheet_name: sheetName, category: 'drilling',
+              item: item.description, unit: item.unit || '',
+              qty: periodData.period_qty, rate: item.rate,
+              amount: periodData.period_amount, unit_price: item.rate,
+              applied_in_period: periodData.period_amount,
+              week_breakdown: periodData.boreholes.map((b: any) => ({ week_date: b.ref, qty: b.qty })),
+              source: 'afp_upload', source_date: periodStart,
+              is_manual: false, dispute_status: 'none',
+              original_amount: periodData.period_amount, agreed_amount: periodData.period_amount,
+              sort_order: sortOrder++,
+            });
+          }
         }
 
-        // Auto-populate from live field data (fills quantities from driller logs, timesheets, etc.)
-        let populateResult: any = null;
-        try {
-          populateResult = await bulkPopulateAFP(base44, afp.id, userName);
-        } catch (e) {
-          // Population failure shouldn't block the AFP creation
+        // Dayworks lines (Rotary + CP)
+        const dayworksSheets: [string, string][] = [
+          ['rotary_dayworks', 'ewr_rotary_dayworks'],
+          ['cp_dayworks', 'ewr_cp_dayworks'],
+        ];
+        for (const [sheetKey, sheetName] of dayworksSheets) {
+          for (const entry of (ewrSheets[sheetKey] || [])) {
+            if (entry.afp_number !== afpNumber) continue;
+            const ctx = [entry.crew, entry.bh_location, entry.start_time, entry.end_time].filter(Boolean).join(' · ');
+            lineItems.push({
+              afp_id: afpId, job_id, sheet_name: sheetName, category: 'labour',
+              item: ctx ? `${entry.description} — ${ctx}` : entry.description,
+              unit: 'hour', qty: entry.qty, rate: entry.rate,
+              amount: entry.net_total, unit_price: entry.rate,
+              applied_in_period: entry.net_total,
+              assessed_in_period: entry.assessed_total || 0,
+              source: 'afp_upload', source_date: entry.date || periodStart,
+              is_manual: false, dispute_status: 'none',
+              original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+              sort_order: sortOrder++,
+            });
+          }
         }
 
-        await logFinancialAudit(base44, {
-          entity_name: 'AFP',
-          entity_id: afp.id,
-          action: 'create',
-          record_summary: `EWR template-based AFP for ${job.name}: ${templateItems.length} template lines seeded, auto-populated from field data`,
-          actor_user_id: user.id,
-          actor_name: userName,
-        });
+        // Enabling crew
+        for (const entry of (ewrSheets.enabling_crew || [])) {
+          if (entry.afp_number !== afpNumber) continue;
+          lineItems.push({
+            afp_id: afpId, job_id, sheet_name: 'ewr_enabling_crew', category: 'labour',
+            item: entry.resource_name, unit: 'Day', qty: entry.qty,
+            rate: entry.rate, amount: entry.net_total, unit_price: entry.rate,
+            applied_in_period: entry.net_total, assessed_in_period: entry.assessed_total || 0,
+            source: 'afp_upload', source_date: entry.start_date || periodStart,
+            is_manual: false, dispute_status: 'none',
+            original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+            sort_order: sortOrder++,
+          });
+        }
 
-        return Response.json({
-          afps_created: 1,
-          afp_ids: [afp.id],
-          total_line_items: templateItems.length,
-          total_claimed: 0,
-          variation_count: 0,
-          ewr_template_used: true,
-          template_name: ewrTemplate.name,
+        // Accommodation
+        for (const entry of (ewrSheets.accommodation || [])) {
+          if (entry.afp_number !== afpNumber) continue;
+          lineItems.push({
+            afp_id: afpId, job_id, sheet_name: 'ewr_accommodation', category: 'other',
+            item: `Accommodation — ${entry.resource_name}`, unit: 'night', qty: entry.nights,
+            rate: entry.rate, amount: entry.net_total, unit_price: entry.rate,
+            applied_in_period: entry.net_total, assessed_in_period: entry.assessed_total || 0,
+            source: 'afp_upload', source_date: entry.start_date || periodStart,
+            is_manual: false, dispute_status: 'none',
+            original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+            sort_order: sortOrder++,
+          });
+        }
+
+        // Misc
+        for (const entry of (ewrSheets.misc || [])) {
+          if (entry.afp_number !== afpNumber) continue;
+          lineItems.push({
+            afp_id: afpId, job_id, sheet_name: 'ewr_misc', category: 'other',
+            item: entry.resource_name, unit: entry.unit || '', qty: entry.qty,
+            rate: entry.rate, amount: entry.net_total, unit_price: entry.rate,
+            applied_in_period: entry.net_total, assessed_in_period: entry.assessed_total || 0,
+            source: 'afp_upload', source_date: entry.date || periodStart,
+            is_manual: false, dispute_status: 'none',
+            original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+            sort_order: sortOrder++,
+          });
+        }
+
+        // Hires
+        for (const entry of (ewrSheets.hires || [])) {
+          if (entry.afp_number !== afpNumber) continue;
+          lineItems.push({
+            afp_id: afpId, job_id, sheet_name: 'ewr_hires', category: 'plant_hire',
+            item: entry.resource_name, unit: entry.unit || '', qty: entry.qty,
+            rate: entry.rate, amount: entry.net_total, unit_price: entry.rate,
+            applied_in_period: entry.net_total, assessed_in_period: entry.assessed_total || 0,
+            source: 'afp_upload', source_date: entry.date || periodStart,
+            is_manual: false, dispute_status: 'none',
+            original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+            sort_order: sortOrder++,
+          });
+        }
+
+        // Mileage — assign all to the first AFP
+        if (afpNumber === 1) {
+          for (const entry of (ewrSheets.mileage || [])) {
+            lineItems.push({
+              afp_id: afpId, job_id, sheet_name: 'ewr_mileage', category: 'delivery',
+              item: `Mileage — ${entry.vehicle_driver || ''}`, unit: 'mile',
+              qty: entry.chargeable || entry.total || 0,
+              rate: entry.rate, amount: entry.net_total, unit_price: entry.rate,
+              applied_in_period: entry.net_total, assessed_in_period: entry.assessed_total || 0,
+              source: 'afp_upload', source_date: entry.date || periodStart,
+              is_manual: false, dispute_status: 'none',
+              original_amount: entry.net_total, agreed_amount: entry.assessed_total || entry.net_total,
+              sort_order: sortOrder++,
+            });
+          }
+        }
+
+        // Bulk create with verification
+        if (lineItems.length > 0) {
+          await base44.entities.AFPLineItem.bulkCreate(lineItems);
+          const verify = await base44.entities.AFPLineItem.filter({ afp_id: afpId }, undefined, 1);
+          if (verify.length === 0) {
+            for (const li of lineItems) await base44.entities.AFPLineItem.create(li);
+          }
+          totalLineItems += lineItems.length;
+        }
+
+        const periodClaimed = lineItems.reduce((s, li) => s + toNum(li.applied_in_period), 0);
+        totalClaimed += periodClaimed;
+        await base44.entities.AFP.update(afpId, {
+          total_claimed: Math.round(periodClaimed * 100) / 100,
+          original_total: Math.round(periodClaimed * 100) / 100,
+          agreed_total: Math.round(periodClaimed * 100) / 100,
         });
       }
-      // No EWR template found — fall through to standard flow
+
+      // Chain AFPs via next_afp_id
+      for (let i = 0; i < createdAfpIds.length - 1; i++) {
+        await base44.entities.AFP.update(createdAfpIds[i], { next_afp_id: createdAfpIds[i + 1] });
+      }
+
+      await logFinancialAudit(base44, {
+        entity_name: 'AFP', entity_id: createdAfpIds[0], action: 'create',
+        record_summary: `EWR direct-parse AFP import for ${job.name}: ${createdAfpIds.length} AFPs, ${totalLineItems} line items, £${Math.round(totalClaimed).toLocaleString()} total`,
+        actor_user_id: user.id, actor_name: userName,
+      });
+
+      return Response.json({
+        afps_created: createdAfpIds.length, afp_ids: createdAfpIds,
+        total_line_items: totalLineItems, total_claimed: Math.round(totalClaimed * 100) / 100,
+        variation_count: 0, ewr_direct_parse: true,
+      });
     }
 
     // ── Multi-AFP split mode ──

@@ -19,10 +19,19 @@
         "measured_works",
         "variations",
         "materials",
-        "compensation_item"
+        "compensation_item",
+        "ewr_rotary_drilling",
+        "ewr_cp_drilling",
+        "ewr_rotary_dayworks",
+        "ewr_cp_dayworks",
+        "ewr_enabling_crew",
+        "ewr_accommodation",
+        "ewr_misc",
+        "ewr_hires",
+        "ewr_mileage"
       ],
       "default": "measured_works",
-      "description": "Which AFP sheet this line item belongs to. Lump Sum format: 'measured_works' = Measured Works sheet (main line items), 'variations' = Variation Summary sheet, 'materials' = Materials On site sheet, 'compensation_item' = CI01-03 compensation item sheets. Legacy format (kept for backward compat): 'drilling', 'plant_hire', 'rates'."
+      "description": "Which AFP sheet this line item belongs to. Lump Sum format: 'measured_works' = Measured Works sheet (main line items), 'variations' = Variation Summary sheet, 'materials' = Materials On site sheet, 'compensation_item' = CI01-03 compensation item sheets. EWR format: 'ewr_rotary_drilling'/'ewr_cp_drilling' = Rotary/CP Drilling sheets (per-borehole meterage), 'ewr_rotary_dayworks'/'ewr_cp_dayworks' = Rotary/CP Dayworks-Standing Time sheets (time-based entries), 'ewr_enabling_crew' = Enabling Crew sheet, 'ewr_accommodation' = Accommodation sheet, 'ewr_misc' = Misc sheet, 'ewr_hires' = Hires sheet, 'ewr_mileage' = Mileage sheet. Legacy format (kept for backward compat): 'drilling', 'plant_hire', 'rates'."
     },
     "category": {
       "type": "string",
@@ -81,7 +90,7 @@
     },
     "applied_in_period": {
       "type": "number",
-      "description": "Our claim side \u2014 the amount being claimed in THIS AFP period. Auto-calculated as gross_applied - previous_applied, or summed from the Field Sheet's daily quantities for this period. This is the value that rolls up into the AFP's total_claimed."
+      "description": "Our claim side \u2014 the amount being claimed in THIS AFP period. Auto-calculated as gross_applied - previous_applied, or summed from the Field Sheet's daily quantity for this period. This is the value that rolls up into the AFP's total_claimed."
     },
     "assessed_qty": {
       "type": "number",
@@ -248,11 +257,11 @@
         "properties": {
           "week_date": {
             "type": "string",
-            "description": "Week commencing date (ISO date string)."
+            "description": "Week commencing date (ISO date string). For EWR drilling lines, this stores the borehole reference (e.g. 'BH746') instead of a date."
           },
           "qty": {
             "type": "number",
-            "description": "Quantity for this specific week."
+            "description": "Quantity for this specific week. For EWR drilling lines, this is the per-borehole quantity."
           }
         },
         "required": [
@@ -260,7 +269,7 @@
         ]
       },
       "default": [],
-      "description": "Week-by-week breakdown for drilling line items. Each entry maps a week-commencing date to the quantity drilled that week."
+      "description": "Week-by-week breakdown for drilling line items. Each entry maps a week-commencing date to the quantity drilled that week. For EWR drilling lines, this stores per-borehole quantities (week_date = borehole ref, qty = borehole qty)."
     },
     "sort_order": {
       "type": "number",

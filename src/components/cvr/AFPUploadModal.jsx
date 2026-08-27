@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { X, Upload, FileSpreadsheet, Loader2, CheckCircle2, AlertCircle, FileText, Layers, Info } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import EWRPreview from './EWRPreview';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
 
@@ -35,7 +36,9 @@ export default function AFPUploadModal({ job, onClose }) {
       const url = res.file_url;
       setFileUrl(url);
       setStage('parsing');
-      const parseRes = await base44.functions.invoke('parseAFPUpload', { file_url: url });
+      const jobName = (job?.name || '').toLowerCase();
+      const isEWR = jobName.includes('ewr') || jobName.includes('east west rail');
+      const parseRes = await base44.functions.invoke(isEWR ? 'parseEWRAFPUpload' : 'parseAFPUpload', { file_url: url });
       setPreview(parseRes.data?.preview || parseRes.preview);
       setStage('preview');
     } catch (e) {
@@ -125,35 +128,35 @@ export default function AFPUploadModal({ job, onClose }) {
                 <p className="text-sm font-semibold">Parsed successfully — review below</p>
               </div>
 
-              {(() => {
-                const jobName = (job?.name || '').toLowerCase();
-                const isEWR = jobName.includes('ewr') || jobName.includes('east west rail');
-                if (!isEWR) return null;
-                return (
-                  <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-                    <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-blue-800">EWR job detected</p>
-                      <p className="text-xs text-blue-700 mt-0.5">AFP will be built from the EWR template, not the uploaded file. The uploaded file is stored for reference only.</p>
-                    </div>
+              {preview.is_ewr && (
+                <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                  <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800">EWR job detected</p>
+                    <p className="text-xs text-blue-700 mt-0.5">AFP will be created directly from the uploaded file's data.</p>
                   </div>
-                );
-              })()}
+                </div>
+              )}
+              {preview.is_ewr && <EWRPreview preview={preview} />}
 
+              {!preview.is_ewr && (
               <div className="grid grid-cols-2 gap-2.5">
                 <PreviewTile label="Contract Value" value={fmt(preview.contract_details?.contract_award_value)} />
                 <PreviewTile label="Client PO" value={preview.contract_details?.client_purchase_order || '—'} />
                 <PreviewTile label="Client" value={preview.contract_details?.client || '—'} />
                 <PreviewTile label="GC Job Number" value={preview.contract_details?.gc_job_number || '—'} />
               </div>
+              )}
 
+              {!preview.is_ewr && (
               <div className="grid grid-cols-3 gap-2.5">
                 <CountTile label="Measured Works" count={preview.measured_works?.length || 0} />
                 <CountTile label="Variations" count={preview.variations?.length || 0} />
                 <CountTile label="Materials" count={preview.materials?.length || 0} />
               </div>
+              )}
 
-              {(preview.compensation_items?.length || 0) > 0 && (
+              {!preview.is_ewr && (preview.compensation_items?.length || 0) > 0 && (
                 <div className="grid grid-cols-2 gap-2.5">
                   <CountTile label="Compensation Items" count={preview.compensation_items?.length || 0} />
                   <CountTile label="Field Activities" count={preview.field_sheet_activities?.length || 0} />
@@ -161,7 +164,7 @@ export default function AFPUploadModal({ job, onClose }) {
               )}
 
               {/* Multi-AFP split preview */}
-              {preview.afp_split?.length > 0 && (
+              {!preview.is_ewr && preview.afp_split?.length > 0 && (
                 <div className="rounded-xl border border-blue-200 bg-blue-50/50 overflow-hidden">
                   <div className="px-4 py-2 bg-blue-100/60 border-b border-blue-200 flex items-center gap-2">
                     <Layers className="w-3.5 h-3.5 text-blue-600" />
@@ -187,7 +190,7 @@ export default function AFPUploadModal({ job, onClose }) {
                 </div>
               )}
 
-              {preview.measured_works?.length > 0 && (
+              {!preview.is_ewr && preview.measured_works?.length > 0 && (
                 <div className="rounded-xl border border-slate-200 overflow-hidden">
                   <div className="px-4 py-2 bg-slate-50 border-b border-slate-200">
                     <p className="text-xs font-semibold text-slate-700">Measured Works Preview (first 5)</p>
