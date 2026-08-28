@@ -220,7 +220,7 @@ export default function PeopleDirectory() {
         <div className="insight-card rounded-2xl p-4 border-l-4 border-amber-400 bg-amber-50/40">
           <div className="flex items-start gap-3 mb-3">
             <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-4.5 h-4.5 text-amber-600" />
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-extrabold text-amber-900">
@@ -237,7 +237,7 @@ export default function PeopleDirectory() {
               return (
                 <div key={u.id} className="bg-white/70 rounded-xl p-3 flex items-center gap-3 border border-amber-100">
                   <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                    <UserCircle className="w-4.5 h-4.5 text-amber-600" />
+                    <UserCircle className="w-4 h-4 text-amber-600" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-slate-900 truncate">{u.full_name || u.email}</p>

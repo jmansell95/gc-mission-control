@@ -53,7 +53,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
         <div className="flex items-center justify-between gap-3 px-5 py-3.5 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
-              <ClipboardList className="w-4.5 h-4.5 text-white" />
+              <ClipboardList className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0">
               <h3 className="font-bold truncate leading-tight">Warehouse Pick List</h3>

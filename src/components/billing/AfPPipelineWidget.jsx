@@ -70,7 +70,7 @@ export default function AfPPipelineWidget({ onSelectJob }) {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <FileBarChart className="w-4.5 h-4.5 text-white" />
+              <FileBarChart className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-slate-900">Application for Payment Pipeline</h3>

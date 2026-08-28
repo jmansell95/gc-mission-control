@@ -234,7 +234,7 @@ export default function BackupRestoreHub() {
       <div className="grid grid-cols-3 gap-2.5">
         <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <History className="w-4.5 h-4.5 text-blue-600" />
+            <History className="w-4 h-4 text-blue-600" />
           </div>
           <div className="min-w-0">
             <p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{stats.count}</p>
@@ -243,7 +243,7 @@ export default function BackupRestoreHub() {
         </div>
         <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-            <FileJson className="w-4.5 h-4.5 text-emerald-600" />
+            <FileJson className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="min-w-0">
             <p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{stats.totalRecords.toLocaleString()}</p>
@@ -252,7 +252,7 @@ export default function BackupRestoreHub() {
         </div>
         <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-            <Database className="w-4.5 h-4.5 text-indigo-600" />
+            <Database className="w-4 h-4 text-indigo-600" />
           </div>
           <div className="min-w-0">
             <p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{formatBytes(stats.totalSize)}</p>
@@ -285,7 +285,7 @@ export default function BackupRestoreHub() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-              <CalendarClock className="w-4.5 h-4.5 text-white" />
+              <CalendarClock className="w-4 h-4 text-white" />
             </div>
             <div>
               <h3 className="text-sm font-extrabold text-slate-900">Scheduled Backups</h3>

@@ -94,7 +94,7 @@ export default function AFPVariationLifecycleTab({ job }) {
       <div className="insight-card rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-9 h-9 rounded-lg stat-gradient-violet flex items-center justify-center">
-            <GitBranch className="w-4.5 h-4.5 text-white" />
+            <GitBranch className="w-4 h-4 text-white" />
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800">Variation Lifecycle</p>

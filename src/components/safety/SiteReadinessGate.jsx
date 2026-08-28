@@ -83,7 +83,7 @@ export default function SiteReadinessGate({ jobId, rotaAssignmentId }) {
           return (
             <div key={gate.key} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${cfg.bg} ${cfg.ring}`}>
               <div className="w-9 h-9 rounded-lg bg-white/70 flex items-center justify-center flex-shrink-0">
-                <GateIcon className={`w-4.5 h-4.5 ${cfg.iconColor}`} />
+                <GateIcon className={`w-4 h-4 ${cfg.iconColor}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-slate-800">{gate.label}</p>

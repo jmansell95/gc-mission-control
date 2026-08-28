@@ -197,7 +197,7 @@ export default function GoodsInScanner({ onBack }) {
           {/* Selected item detail + form */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <ClipboardList className="w-4.5 h-4.5 text-amber-600" />
+              <ClipboardList className="w-4 h-4 text-amber-600" />
               <p className="text-sm font-bold text-slate-900">Receipt Details</p>
             </div>
 

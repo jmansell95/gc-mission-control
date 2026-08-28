@@ -63,7 +63,7 @@ export default function FieldPrioritiesWidget({ onNavigate }) {
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   p.variant === 'danger' ? 'bg-rose-50' : p.variant === 'warning' ? 'bg-amber-50' : p.variant === 'info' ? 'bg-blue-50' : 'bg-emerald-50'
                 }`}>
-                  <Icon className={`w-4.5 h-4.5 ${
+                  <Icon className={`w-4 h-4 ${
                     p.variant === 'danger' ? 'text-rose-600' : p.variant === 'warning' ? 'text-amber-600' : p.variant === 'info' ? 'text-blue-600' : 'text-emerald-600'
                   }`} />
                 </div>

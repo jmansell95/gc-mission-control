@@ -67,7 +67,7 @@ export default function IncidentReporter() {
       {/* SafetyCulture not synced banner */}
       <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3 bg-amber-50/60 border-amber-200">
         <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <ShieldAlert className="w-4.5 h-4.5 text-amber-600" />
+          <ShieldAlert className="w-4 h-4 text-amber-600" />
         </div>
         <p className="text-xs text-slate-600 flex-1 min-w-0">
           <strong className="text-slate-800">SafetyCulture not connected.</strong> Incidents can still be reported manually below —
@@ -290,7 +290,7 @@ function IncidentForm({ jobs, staff, onClose, onSaved }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center">
-              <ShieldAlert className="w-4.5 h-4.5 text-rose-600" />
+              <ShieldAlert className="w-4 h-4 text-rose-600" />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">Report Incident</h2>

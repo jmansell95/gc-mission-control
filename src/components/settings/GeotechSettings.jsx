@@ -152,7 +152,7 @@ export default function GeotechSettings() {
             <div className={`rounded-xl border p-3.5 ${ogConnected ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${ogConnected ? 'bg-emerald-100' : 'bg-slate-200'}`}>
-                  {ogConnected ? <Link2 className="w-4.5 h-4.5 text-emerald-600" /> : <Link2Off className="w-4.5 h-4.5 text-slate-400" />}
+                  {ogConnected ? <Link2 className="w-4 h-4 text-emerald-600" /> : <Link2Off className="w-4 h-4 text-slate-400" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-slate-800">{ogConnected ? 'Configured' : 'Not Connected'}</p>

@@ -50,7 +50,7 @@ export default function ComplianceAttentionPanel({ assets }) {
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center shadow-md icon-tile-glow flex-shrink-0">
-            <ShieldX className="w-4.5 h-4.5 text-white" />
+            <ShieldX className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">Needs Attention — Not Compliant</h3>

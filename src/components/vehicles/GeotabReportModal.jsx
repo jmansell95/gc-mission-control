@@ -53,7 +53,7 @@ export default function GeotabReportModal({ onClose }) {
         <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3 rounded-t-2xl z-10">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
-              <FileBarChart className="w-4.5 h-4.5 text-white" />
+              <FileBarChart className="w-4 h-4 text-white" />
             </div>
             <div>
               <h3 className="font-bold text-slate-900">Fleet Location Report</h3>

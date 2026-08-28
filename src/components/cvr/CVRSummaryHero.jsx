@@ -111,7 +111,7 @@ function StatTile({ icon: Icon, label, value, subValue, gradient }) {
     <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
       <div className="flex items-start justify-between mb-1.5">
         <div className={`w-9 h-9 rounded-lg ${gradient} flex items-center justify-center flex-shrink-0`}>
-          <Icon className="w-4.5 h-4.5 text-white" />
+          <Icon className="w-4 h-4 text-white" />
         </div>
       </div>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>

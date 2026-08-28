@@ -498,7 +498,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md" style={{ background: selectedDivision.color || '#2E5A1A' }}>
-                    <Building2 className="w-4.5 h-4.5 text-white" />
+                    <Building2 className="w-4 h-4 text-white" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-sm font-bold text-slate-900 truncate">{selectedDivision.name}</h3>

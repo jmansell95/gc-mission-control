@@ -102,7 +102,7 @@ export default function ConsumableInventoryManager() {
       {/* Low stock banner */}
       {lowStock.length > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex items-center gap-2">
-          <TrendingDown className="w-4.5 h-4.5 text-orange-600 flex-shrink-0" />
+          <TrendingDown className="w-4 h-4 text-orange-600 flex-shrink-0" />
           <p className="text-sm font-medium text-orange-800">
             {lowStock.length} item{lowStock.length !== 1 ? 's' : ''} at or below minimum stock — reorder needed.
           </p>

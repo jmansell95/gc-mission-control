@@ -120,7 +120,7 @@ export default function AchievementHistory({ staffId }) {
                   <div key={badge.key} className={`rounded-xl border p-3 ${earned ? 'border-amber-200 bg-amber-50/40' : 'border-slate-200 bg-slate-50/50'}`}>
                     <div className="flex items-center gap-2.5 mb-2">
                       <div className={`w-9 h-9 rounded-lg ${tier.bg} border-2 ${tier.border} flex items-center justify-center flex-shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
-                        <BadgeIcon name={badge.icon} className={`w-4.5 h-4.5 ${tier.text}`} />
+                        <BadgeIcon name={badge.icon} className={`w-4 h-4 ${tier.text}`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

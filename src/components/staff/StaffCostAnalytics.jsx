@@ -85,7 +85,7 @@ export default function StaffCostAnalytics() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-            <TrendingUp className="w-4.5 h-4.5 text-violet-600" />
+            <TrendingUp className="w-4 h-4 text-violet-600" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">Labour Cost Analytics</h3>

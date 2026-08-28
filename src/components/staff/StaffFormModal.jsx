@@ -260,7 +260,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
             return (
               <div className="mt-2.5 flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                 <div className={'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ' + (isOffice ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-amber-500 to-orange-600')}>
-                  {isOffice ? <Monitor className="w-4.5 h-4.5 text-white" /> : <HardHat className="w-4.5 h-4.5 text-white" />}
+                  {isOffice ? <Monitor className="w-4 h-4 text-white" /> : <HardHat className="w-4 h-4 text-white" />}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5"><Compass className="w-3.5 h-3.5 text-[#2E5A1A]" /> Lands on: {labels[route] || route}</p>

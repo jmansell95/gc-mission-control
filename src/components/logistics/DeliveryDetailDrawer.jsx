@@ -143,7 +143,7 @@ export default function DeliveryDetailDrawer({ delivery, jobs, staff, onClose })
         <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-2.5">
             <div className={`w-9 h-9 rounded-xl ${type.accent} flex items-center justify-center`}>
-              <TypeIcon className="w-4.5 h-4.5 text-white" />
+              <TypeIcon className="w-4 h-4 text-white" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">Delivery Details</h2>

@@ -202,7 +202,7 @@ export default function ReadinessManager() {
                     <div className="w-4 flex-shrink-0" />
                   )}
                   <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
-                    <HubIcon className="w-4.5 h-4.5 text-slate-600" />
+                    <HubIcon className="w-4 h-4 text-slate-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-slate-900 truncate">{hub.label}</p>
@@ -329,7 +329,7 @@ function NeedsAttentionCard({ states, integrationStatus }) {
     <div className="mb-4 insight-card rounded-2xl p-4">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <AlertCircle className="w-4.5 h-4.5 text-amber-600" />
+          <AlertCircle className="w-4 h-4 text-amber-600" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-slate-900">Needs Attention</h3>

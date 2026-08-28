@@ -418,7 +418,7 @@ export default function AssetScannerPage() {
             </button>
           )}
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm flex-shrink-0">
-            <ScanLine className="w-4.5 h-4.5 text-white" />
+            <ScanLine className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
             <h1 className="text-base font-bold text-slate-900 leading-tight">Asset Scanner</h1>

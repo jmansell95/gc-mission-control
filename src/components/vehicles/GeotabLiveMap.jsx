@@ -122,7 +122,7 @@ export default function GeotabLiveMap() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-[200px]">
           <div className="w-9 h-9 rounded-lg stat-gradient-cyan flex items-center justify-center">
-            <Satellite className="w-4.5 h-4.5 text-white" />
+            <Satellite className="w-4 h-4 text-white" />
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800">Live Fleet Map</p>
@@ -233,7 +233,7 @@ export default function GeotabLiveMap() {
             <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3 rounded-t-2xl z-10">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-lg stat-gradient-cyan flex items-center justify-center">
-                  <Car className="w-4.5 h-4.5 text-white" />
+                  <Car className="w-4 h-4 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 font-mono">{selectedVehicle.registration_number}</h3>

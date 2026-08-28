@@ -83,7 +83,7 @@ export default function AssetUtilizationTrends() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-            <Activity className="w-4.5 h-4.5 text-cyan-600" />
+            <Activity className="w-4 h-4 text-cyan-600" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">Utilization Trends (30 Days)</h3>

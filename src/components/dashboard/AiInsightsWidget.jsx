@@ -149,7 +149,7 @@ export default function AiInsightsWidget() {
               <div className="rounded-xl p-4 mb-4 bg-emerald-50/70 border border-emerald-100">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <Lightbulb className="w-4.5 h-4.5 text-white" />
+                    <Lightbulb className="w-4 h-4 text-white" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">This Week's Summary</p>

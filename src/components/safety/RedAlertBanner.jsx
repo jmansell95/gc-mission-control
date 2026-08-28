@@ -63,7 +63,7 @@ export default function RedAlertBanner() {
           <div className="relative flex-shrink-0">
             <div className="absolute inset-0 bg-white/30 rounded-full animate-ping" />
             <div className="relative w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <ShieldAlert className="w-4.5 h-4.5 text-white" />
+              <ShieldAlert className="w-4 h-4 text-white" />
             </div>
           </div>
 

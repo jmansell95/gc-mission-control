@@ -139,7 +139,7 @@ export default function SettingsLockdownManager({ profile }) {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5 min-w-0 flex-1">
                       <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isLocked ? 'bg-amber-100' : 'bg-slate-100'}`}>
-                        <Icon className={`w-4.5 h-4.5 ${isLocked ? 'text-amber-600' : 'text-slate-400'}`} />
+                        <Icon className={`w-4 h-4 ${isLocked ? 'text-amber-600' : 'text-slate-400'}`} />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">

@@ -13,7 +13,7 @@ import TrainingProvidersTab from '@/components/staff/TrainingProvidersTab';
 import BulkTrainingImportModal from '@/components/staff/BulkTrainingImportModal';
 import TrainingManager from '@/components/TrainingManager';
 import AutoBookerModal from '@/components/staff/AutoBookerModal';
-import TrainingHubRail, { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
+import { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
 import SubPills from '@/components/SubPills';
 import { CardGridSkeleton } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';

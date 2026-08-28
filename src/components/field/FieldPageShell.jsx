@@ -42,7 +42,7 @@ export default function FieldPageShell({
             )}
             {Icon && (
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md shadow-[#2E5A1A]/20 flex-shrink-0">
-                <Icon className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+                <Icon className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
             )}
             <div className="min-w-0">

@@ -137,7 +137,7 @@ export default function RAMSManager({ onSelectJob }) {
             <div key={d.id} className={`flex items-center gap-3 p-3 rounded-xl border ${d.isExpired ? 'bg-rose-50/60 border-rose-200' : d.isExpiring ? 'bg-amber-50/60 border-amber-200' : 'bg-white border-slate-200'}`}>
               {/* Category icon */}
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${d.isSigned ? 'bg-emerald-100' : 'bg-amber-100'}`}>
-                {d.isSigned ? <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" /> : <Clock className="w-4.5 h-4.5 text-amber-600" />}
+                {d.isSigned ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Clock className="w-4 h-4 text-amber-600" />}
               </div>
 
               {/* Info */}

@@ -59,7 +59,7 @@ export default function ReadinessGate({
     return (
       <div className="insight-card rounded-xl p-4 flex items-center gap-3 bg-amber-50/60 border-amber-200">
         <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-          <Clock className="w-4.5 h-4.5 text-amber-600" />
+          <Clock className="w-4 h-4 text-amber-600" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-900">{feature?.label || 'This feature'} — Coming Soon</p>

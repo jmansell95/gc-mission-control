@@ -69,7 +69,7 @@ export default function AgentChatPanel({
                 </div>
               </div>
               <button onClick={onClose} className="relative p-2 text-white/80 hover:bg-white/15 hover:text-white rounded-xl transition flex-shrink-0 active:scale-90">
-                <X className="w-4.5 h-4.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -112,7 +112,7 @@ export default function AgentChatPanel({
                 disabled={!input.trim() || sending}
                 className={`p-3 ${brandClass} text-white rounded-2xl hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition flex-shrink-0 active:scale-90 shadow-sm`}
               >
-                <Send className="w-4.5 h-4.5" />
+                <Send className="w-4 h-4" />
               </button>
             </form>
           </motion.div>

@@ -164,7 +164,7 @@ export default function MaintenanceBookingModal({ open, onClose, preselectVehicl
         <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <Wrench className="w-4.5 h-4.5 text-emerald-600" />
+              <Wrench className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">{editingBooking ? 'Edit Booking' : 'New Maintenance Booking'}</h2>

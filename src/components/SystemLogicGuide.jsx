@@ -286,7 +286,7 @@ export default function SystemLogicGuide() {
           <div key={section.id} className="insight-card rounded-2xl p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm">
-                <Icon className="w-4.5 h-4.5 text-white" />
+                <Icon className="w-4 h-4 text-white" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900">{section.title}</h3>

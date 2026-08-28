@@ -82,7 +82,7 @@ export default function RIDDORStatsPanel() {
       {/* SafetyCulture link */}
       <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-          <ShieldAlert className="w-4.5 h-4.5 text-white" />
+          <ShieldAlert className="w-4 h-4 text-white" />
         </div>
         <p className="text-xs text-slate-500 flex-1 min-w-0">
           All stats are pulled from <strong className="text-slate-700">SafetyCulture</strong> audits & incident reports.

@@ -86,7 +86,7 @@ function PreviewItem({ icon: Icon, title, desc }) {
   return (
     <div className="flex items-start gap-3 bg-slate-50 rounded-xl p-3.5 border border-slate-100">
       <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-        <Icon className="w-4.5 h-4.5 text-emerald-700" />
+        <Icon className="w-4 h-4 text-emerald-700" />
       </div>
       <div className="min-w-0">
         <p className="font-semibold text-slate-900 text-sm">{title}</p>

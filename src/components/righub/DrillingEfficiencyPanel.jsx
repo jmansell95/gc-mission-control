@@ -181,7 +181,7 @@ export default function DrillingEfficiencyPanel({ assets }) {
             <div className="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3 rounded-t-2xl z-10">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
-                  <Drill className="w-4.5 h-4.5 text-white" />
+                  <Drill className="w-4 h-4 text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900">{selectedRig.rig_name}</h3>

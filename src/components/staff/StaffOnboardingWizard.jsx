@@ -166,7 +166,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
         <div className="flex-shrink-0 bg-white/95 backdrop-blur-md px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">
-              <ShieldCheck className="w-4.5 h-4.5 text-white" />
+              <ShieldCheck className="w-4 h-4 text-white" />
             </div>
             <div>
               <h2 className="text-base font-extrabold text-slate-900">Add Crew Member</h2>

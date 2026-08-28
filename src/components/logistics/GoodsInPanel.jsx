@@ -143,7 +143,7 @@ export default function GoodsInPanel() {
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Store className="w-4.5 h-4.5 text-amber-600" />
+            <Store className="w-4 h-4 text-amber-600" />
             <h3 className="font-bold text-slate-900">Pending Goods In</h3>
             <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">{pending.length}</span>
           </div>
@@ -171,7 +171,7 @@ export default function GoodsInPanel() {
               return (
                 <div key={r.id} className="px-4 py-3 flex items-center gap-3 hover:bg-slate-50/50 transition">
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center border flex-shrink-0 ${cat.tint}`}>
-                    <Package className="w-4.5 h-4.5" />
+                    <Package className="w-4 h-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-slate-900 truncate">{r.item_name}</p>
@@ -214,7 +214,7 @@ export default function GoodsInPanel() {
           className="w-full px-4 py-3 flex items-center gap-2 text-left hover:bg-slate-50/50 transition"
         >
           {showVerified ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-          <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           <h3 className="font-bold text-slate-900">Verified History</h3>
           <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{verified.length}</span>
         </button>
@@ -251,7 +251,7 @@ export default function GoodsInPanel() {
 function StatTile({ icon: Icon, label, value, tint }) {
   return (
     <div className={`rounded-xl border p-3 flex items-center gap-2.5 ${tint}`}>
-      <Icon className="w-4.5 h-4.5 flex-shrink-0" />
+      <Icon className="w-4 h-4 flex-shrink-0" />
       <div>
         <p className="text-lg font-bold leading-tight">{value}</p>
         <p className="text-[10px] uppercase font-semibold tracking-wide opacity-80">{label}</p>

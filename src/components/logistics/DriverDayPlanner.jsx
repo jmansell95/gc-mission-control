@@ -182,7 +182,7 @@ export default function DriverDayPlanner() {
       <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl stat-gradient-emerald flex items-center justify-center">
-            <Navigation className="w-4.5 h-4.5 text-white" />
+            <Navigation className="w-4 h-4 text-white" />
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900">Driver Day Planner</h2>

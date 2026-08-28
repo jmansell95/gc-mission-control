@@ -223,7 +223,7 @@ function KPICard({ icon: Icon, label, value, subValue, gradient }) {
   return (
     <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2`}>
-        <Icon className="w-4.5 h-4.5 text-white" />
+        <Icon className="w-4 h-4 text-white" />
       </div>
       <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
       <p className="text-xl font-bold text-slate-900 tabular-nums leading-tight mt-0.5">{value}</p>

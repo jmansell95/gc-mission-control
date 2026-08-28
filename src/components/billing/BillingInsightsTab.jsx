@@ -30,7 +30,7 @@ export default function BillingInsightsTab() {
 
   const { data: invoices = [] } = useQuery({
     queryKey: ['billing-insights-invoices'],
-    queryFn: () => base44.entities.Invoice.filter({ status: { $in: ['sent', 'overdue', 'partially_paid'] } }, '-created_date', 200),
+    queryFn: () => base44.entities.Invoice.filter({ status: { $in: ['sent', 'overdue'] } }, '-created_date', 200),
   });
 
   const kpis = useMemo(() => {

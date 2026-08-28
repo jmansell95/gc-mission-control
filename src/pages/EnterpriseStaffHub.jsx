@@ -124,7 +124,7 @@ export default function EnterpriseStaffHub() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div className="stat-gradient-brand rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4.5 h-4.5 text-white" />
+                  <Users className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Total Staff</p>
@@ -133,7 +133,7 @@ export default function EnterpriseStaffHub() {
               </div>
               <div className="stat-gradient-blue rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-4.5 h-4.5 text-white" />
+                  <Building2 className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Business Streams</p>
@@ -142,7 +142,7 @@ export default function EnterpriseStaffHub() {
               </div>
               <div className="stat-gradient-emerald rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <UserCheck className="w-4.5 h-4.5 text-white" />
+                  <UserCheck className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Active</p>
@@ -151,7 +151,7 @@ export default function EnterpriseStaffHub() {
               </div>
               <div className="stat-gradient-violet rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Wrench className="w-4.5 h-4.5 text-white" />
+                  <Wrench className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Subcontractors</p>

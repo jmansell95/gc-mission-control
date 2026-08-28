@@ -174,7 +174,7 @@ export default function EnterpriseFleetHub() {
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
               <div className="stat-gradient-teal rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Truck className="w-4.5 h-4.5 text-white" />
+                  <Truck className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Total Vehicles</p>
@@ -183,7 +183,7 @@ export default function EnterpriseFleetHub() {
               </div>
               <div className="stat-gradient-emerald rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Car className="w-4.5 h-4.5 text-white" />
+                  <Car className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Compliant</p>
@@ -192,7 +192,7 @@ export default function EnterpriseFleetHub() {
               </div>
               <div className="stat-gradient-amber rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Wrench className="w-4.5 h-4.5 text-white" />
+                  <Wrench className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Attention</p>
@@ -201,7 +201,7 @@ export default function EnterpriseFleetHub() {
               </div>
               <div className="stat-gradient-rose rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="w-4.5 h-4.5 text-white" />
+                  <AlertCircle className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Critical</p>
@@ -210,7 +210,7 @@ export default function EnterpriseFleetHub() {
               </div>
               <div className="stat-gradient-blue rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Navigation className="w-4.5 h-4.5 text-white" />
+                  <Navigation className="w-4 h-4 text-white" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Driving Now</p>

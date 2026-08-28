@@ -27,7 +27,7 @@ export default function RecentlyChangedWidget() {
     <div className="insight-card rounded-2xl p-4 sm:p-5">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
-          <History className="w-4.5 h-4.5 text-white" />
+          <History className="w-4 h-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-extrabold text-slate-900">Recently Changed</h3>
