@@ -11,9 +11,12 @@ export default async function(req: Request): Promise<Response> {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Get all active staff
+    // Get all active staff — only direct employees accrue holiday pay.
+    // Subcontractor firms, agency-supplied labour, and other non-payroll staff
+    // are excluded. Existing accrual records for non-direct staff are left
+    // untouched (preserving history) but the UI filters them out.
     const allStaff = await base44.asServiceRole.entities.Staff.list();
-    const activeStaff = allStaff.filter(s => s.is_active !== false);
+    const activeStaff = allStaff.filter(s => s.is_active !== false && s.worker_type === 'direct_employee');
 
     // Get all approved holiday absences
     const absences = await base44.asServiceRole.entities.Absence.filter({ status: 'approved' });

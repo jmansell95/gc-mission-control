@@ -37,7 +37,10 @@ export default function AbsenceManager() {
   const queryClient = useQueryClient();
 
   const { data: absences = [] } = useQuery({ queryKey: ['absences'], queryFn: () => base44.entities.Absence.list('-created_date', 100) });
-  const { data: staff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
+  const { data: allStaffRaw = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
+  // Only direct employees accrue holiday pay and appear in absence management —
+  // subcontractor firms, agency-supplied labour, and other non-payroll staff are excluded.
+  const staff = allStaffRaw.filter(s => s.worker_type === 'direct_employee');
   const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
 
   const handleSubmit = async (e) => {

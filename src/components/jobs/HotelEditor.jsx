@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import {
-  Hotel, Home, Plus, MapPin, Phone, Check, Loader2, Users,
+  Hotel, Home, Plus, MapPin, Phone, Check, Loader2, Users, Search,
   BedDouble, PoundSterling, Calendar, X,
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -43,6 +43,7 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
   const { toast } = useToast();
   const [form, setForm] = useState(booking || {});
   const [selectedStaffIds, setSelectedStaffIds] = useState([]);
+  const [crewQuery, setCrewQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -54,7 +55,17 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
       cost_per_night: '', room_count: 1, total_cost: '',
     });
     setSelectedStaffIds(booking?.assigned_staff_ids || (preselectStaffId ? [preselectStaffId] : []));
+    setCrewQuery('');
   }, [booking, job, open, preselectStaffId]);
+
+  const filteredStaff = (() => {
+    const q = crewQuery.trim().toLowerCase();
+    if (!q) return allStaff;
+    return allStaff.filter(m =>
+      (m.name || '').toLowerCase().includes(q) ||
+      (m.job_title || '').toLowerCase().includes(q)
+    );
+  })();
 
   const type = bookingType(form);
   const toggleStaff = (id) => setSelectedStaffIds(prev =>
@@ -227,8 +238,18 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
             {allStaff.length === 0 ? (
               <p className="text-xs text-slate-400">No crew members available.</p>
             ) : (
-              <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto">
-                {allStaff.map((member) => {
+              <>
+                <div className="relative mb-2">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input type="text" value={crewQuery} onChange={e => setCrewQuery(e.target.value)}
+                    placeholder="Search crew by name or role…"
+                    className={inputCls + ' pl-8'} />
+                </div>
+                {filteredStaff.length === 0 ? (
+                  <p className="text-xs text-slate-400 py-3 text-center">No crew match “{crewQuery}”.</p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto">
+                    {filteredStaff.map((member) => {
                   const selected = selectedStaffIds.includes(member.id);
                   const onJob = assignedStaff.some(s => s.id === member.id);
                   return (
@@ -242,7 +263,9 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
                     </button>
                   );
                 })}
-              </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
