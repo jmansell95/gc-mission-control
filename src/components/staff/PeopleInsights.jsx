@@ -170,7 +170,7 @@ export default function PeopleInsights() {
               <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full ${colorMap[kpi.color]} opacity-10`} />
               <div className="relative">
                 <div className={`w-9 h-9 rounded-xl ${colorMap[kpi.color]} flex items-center justify-center mb-2.5`}>
-                  <Icon className="w-4.5 h-4.5 text-white" />
+                  <Icon className="w-4 h-4 text-white" />
                 </div>
                 <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{kpi.value}</p>
                 <p className="text-xs font-semibold text-slate-500 mt-1">{kpi.label}</p>

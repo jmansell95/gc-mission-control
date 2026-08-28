@@ -5,7 +5,7 @@ import {
   Calendar, Coffee, Stethoscope, Users, Warehouse, Loader2, ChevronLeft, ChevronRight, Filter, Briefcase,
 } from 'lucide-react';
 import { format, startOfWeek, addDays, parseISO, isWeekend } from 'date-fns';
-import { useDivision } from '@/contexts/DivisionContext';
+import { useScopedEntity } from '@/hooks/useScopedEntity';
 
 /**
  * AvailabilityHeatmap — redesigned modern calendar-grid view.
@@ -33,7 +33,6 @@ const STATUS_ORDER = ['job', 'annual_leave', 'sick', 'training', 'yard_depot', '
 export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
   const [weekStart, setWeekStart] = useState(propWeekStart || format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'));
   const [teamFilter, setTeamFilter] = useState('all');
-  const { activeDivisionId } = useDivision();
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['heatmap-staff'],
@@ -45,12 +44,11 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
     queryFn: () => base44.entities.Team.list(),
   });
 
-  const { data: assignments = [] } = useQuery({
-    queryKey: ['heatmap-assignments', weekStart, activeDivisionId || 'overview'],
-    queryFn: async () => {
-      const res = await base44.functions.invoke('getDivisionScopedData', { entity: 'RotaAssignment', division_id: activeDivisionId, filter: { week_start: weekStart }, sort: 'assigned_date', limit: 500 });
-      return res.data?.data || [];
-    },
+  const { data: assignments = [] } = useScopedEntity('RotaAssignment', {
+    queryKey: ['heatmap-assignments', weekStart],
+    filter: { week_start: weekStart },
+    sort: 'assigned_date',
+    limit: 500,
   });
 
   const { data: absences = [] } = useQuery({
@@ -85,7 +83,11 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
       const d = parseISO(dateStr);
       return d >= start && d <= end;
     });
-    if (absence) return { type: absence.absence_type || 'annual_leave', label: absence.absence_type === 'sick' ? 'Sick' : 'AL' };
+    if (absence) {
+      const reason = absence.reason || 'holiday';
+      const type = reason === 'sick' ? 'sick' : reason === 'training' ? 'training' : 'annual_leave';
+      return { type, label: type === 'sick' ? 'Sick' : type === 'training' ? 'Train' : 'AL' };
+    }
 
     const hasJob = dayAssignments.some((a) => a.assignment_type === 'job');
     if (hasJob) return { type: 'job', label: 'Job' };
@@ -132,7 +134,7 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
       <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl stat-gradient-brand flex items-center justify-center">
-            <Calendar className="w-4.5 h-4.5 text-white" />
+            <Calendar className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">Availability Heatmap</h3>

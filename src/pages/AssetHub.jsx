@@ -223,13 +223,23 @@ export default function AssetHub() {
         <ErrorBoundary><ConsumablesView /></ErrorBoundary>
       ) : (
         <>
-          {/* Fleet health strip — slim, borderless, sits flush under the tab bar */}
-          <div className="flex items-center justify-between gap-3 flex-wrap py-1">
-            <FleetSyncPanel />
+          {/* Fleet health strip — refined brand card with sync + health visuals */}
+          <div className="insight-card rounded-2xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex w-9 h-9 rounded-xl stat-gradient-brand items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900 uppercase tracking-wide">Fleet Health</p>
+                <p className="text-[11px] text-slate-400">Compliance & sync status</p>
+              </div>
+              <div className="hidden sm:block h-8 w-px bg-slate-200" />
+              <FleetSyncPanel />
+            </div>
             <div className="flex items-center gap-4 sm:gap-5 flex-shrink-0">
-              <FleetHealthGauge percent={fleetHealthPct} size={96} />
+              <FleetHealthGauge percent={fleetHealthPct} size={88} />
               <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-              <FleetComplianceDonut counts={fleetCounts} size={96} onSegmentClick={(k) => { setCompFilter(k); setView('inventory'); }} />
+              <FleetComplianceDonut counts={fleetCounts} size={88} onSegmentClick={(k) => { setCompFilter(k); setView('inventory'); }} />
             </div>
           </div>
 
