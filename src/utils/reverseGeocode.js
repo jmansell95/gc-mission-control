@@ -3,10 +3,52 @@
 // coverage (road names, postcodes) but is rate-limited to 1 req/sec. BigDataCloud
 // is faster (no rate limit) but its free tier doesn't include street-level data
 // and returns `postCode` (camelCase), not `postcode`.
-// Cached per-coordinate to avoid duplicate calls.
+// Cached per-coordinate (in-memory + localStorage) to avoid duplicate calls and
+// resolve instantly across page reloads / sessions.
 
+const LS_KEY = 'rg_cache_v1';
 const cache = new Map();        // key → formatted label
 const structuredCache = new Map(); // key → structured parts
+
+// ── Persistent cache (localStorage) ──
+// Load on module init so previously-resolved coordinates return instantly with
+// no network call. Survives reloads and reopens.
+function loadPersistent() {
+  try {
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(LS_KEY) : null;
+    if (!raw) return;
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj === 'object') {
+      for (const [k, v] of Object.entries(obj)) {
+        if (v?.label) cache.set(k, v.label);
+        if (v?.parts) structuredCache.set(k, v.parts);
+      }
+    }
+  } catch (_) {}
+}
+function savePersistent() {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    const obj = {};
+    for (const [k, parts] of structuredCache.entries()) {
+      obj[k] = { label: cache.get(k) || null, parts };
+    }
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  } catch (_) {}
+}
+loadPersistent();
+
+// Synchronous getters — return cached data instantly (no network). Used by
+// trip history so the first render shows place names (or coordinates) instead
+// of "Unknown location".
+export function getCachedLabelSync(lat, lng) {
+  if (lat == null || lng == null) return null;
+  return cache.get(`${Number(lat).toFixed(4)},${Number(lng).toFixed(4)}`) || null;
+}
+export function getCachedPartsSync(lat, lng) {
+  if (lat == null || lng == null) return null;
+  return structuredCache.get(`${Number(lat).toFixed(4)},${Number(lng).toFixed(4)}`) || null;
+}
 
 // Nominatim rate limiter — max 1 request per second (their usage policy)
 let lastNominatimCall = 0;
@@ -119,6 +161,7 @@ export async function reverseGeocodeFast(lat, lng) {
         structuredCache.set(key, parts);
         const label = buildLabelFromParts(parts);
         if (label) cache.set(key, label);
+        savePersistent();
         return parts;
       }
     }
@@ -138,6 +181,7 @@ export async function reverseGeocodeFast(lat, lng) {
         structuredCache.set(key, parts);
         const label = buildLabelFromParts(parts);
         if (label) cache.set(key, label);
+        savePersistent();
         return parts;
       }
     }
@@ -170,6 +214,7 @@ export async function reverseGeocodeUpgrade(lat, lng) {
         structuredCache.set(key, parts);
         const label = buildLabelFromParts(parts);
         if (label) cache.set(key, label);
+        savePersistent();
         return parts;
       }
     }
@@ -220,6 +265,7 @@ export async function reverseGeocode(lat, lng) {
     if (label) {
       cache.set(key, label);
       structuredCache.set(key, parts);
+      savePersistent();
       return label;
     }
   }

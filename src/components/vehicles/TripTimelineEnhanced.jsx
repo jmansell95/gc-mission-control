@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Route, Loader2, Calendar, Clock, Gauge, MapPin, ChevronDown, ChevronRight,
   Navigation, Zap, TrendingDown, RefreshCw, AlertCircle, Circle, Flag,
-  Square, Activity, Timer, ExternalLink,
+  Square, Activity, Timer, ExternalLink, User,
 } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, Popup } from 'react-leaflet';
-import { reverseGeocodeFast, reverseGeocodeUpgrade, buildLabelFromParts } from '@/utils/reverseGeocode';
+import {
+  reverseGeocodeFast, reverseGeocodeUpgrade, buildLabelFromParts,
+  getCachedLabelSync, getCachedPartsSync,
+} from '@/utils/reverseGeocode';
 
 const KM_TO_MI = 0.621371;
 function kmToMi(km) { return (Number(km) || 0) * KM_TO_MI; }
@@ -26,6 +29,16 @@ function formatDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 }
+// Coordinate fallback — never show "Unknown". Used before geocoding resolves.
+function coordLabel(lat, lng) {
+  if (lat == null || lng == null) return '—';
+  return `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}`;
+}
+// Synchronous label: persistent cache → coordinate string. Never "Unknown".
+function syncLabel(lat, lng) {
+  if (lat == null || lng == null) return '—';
+  return getCachedLabelSync(lat, lng) || coordLabel(lat, lng);
+}
 
 // Trip route map with start/end markers and stop points
 function TripRouteMap({ breadcrumbs, trip }) {
@@ -43,21 +56,21 @@ function TripRouteMap({ breadcrumbs, trip }) {
       <MapContainer center={center} zoom={12} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false} zoomControl={false}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {path.length >= 2 && (
-          <Polyline positions={path} pathOptions={{ color: '#06b6d4', weight: 4, opacity: 0.8 }} />
+          <Polyline positions={path} pathOptions={{ color: '#2E5A1A', weight: 4, opacity: 0.85 }} />
         )}
         {startCoord && (
           <CircleMarker center={startCoord} pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 1 }} radius={6}>
-            <Popup>Start: {trip.start_location || 'Unknown'}</Popup>
+            <Popup>Start: {trip.start_location || coordLabel(trip.start_lat, trip.start_lng)}</Popup>
           </CircleMarker>
         )}
         {endCoord && (
           <CircleMarker center={endCoord} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 1 }} radius={6}>
-            <Popup>End: {trip.end_location || 'Unknown'}</Popup>
+            <Popup>End: {trip.end_location || coordLabel(trip.end_lat, trip.end_lng)}</Popup>
           </CircleMarker>
         )}
         {(trip.stops || []).filter(s => s.lat != null).map((stop, i) => (
           <CircleMarker key={i} center={[stop.lat, stop.lng]} pathOptions={{ color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.8 }} radius={4}>
-            <Popup>Stop {i + 1}: {stop.location || 'Unknown'} ({formatDuration(stop.duration_minutes)})</Popup>
+            <Popup>Stop {i + 1}: {stop.location || coordLabel(stop.lat, stop.lng)} ({formatDuration(stop.duration_minutes)})</Popup>
           </CircleMarker>
         ))}
       </MapContainer>
@@ -67,6 +80,7 @@ function TripRouteMap({ breadcrumbs, trip }) {
 
 // Stop event card within a trip
 function StopCard({ stop, index }) {
+  const loc = stop.location || coordLabel(stop.lat, stop.lng);
   return (
     <div className="flex items-start gap-2.5 pl-4 py-1.5 relative">
       <div className="absolute left-[7px] top-0 bottom-0 w-px bg-amber-200" />
@@ -79,7 +93,7 @@ function StopCard({ stop, index }) {
           <span className="text-[10px] font-semibold text-slate-500">{formatDuration(stop.duration_minutes)}</span>
         </div>
         <div className="flex items-center gap-1 mt-0.5">
-          <p className="text-xs text-slate-600 truncate flex-1">{stop.location || 'Unknown location'}</p>
+          <p className="text-xs text-slate-600 truncate flex-1">{loc}</p>
           {stop.lat != null && (
             <a href={`https://www.google.com/maps?q=${stop.lat},${stop.lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
               className="text-blue-500 hover:text-blue-700 flex-shrink-0">
@@ -108,9 +122,11 @@ function TripCard({ trip, breadcrumbs, isExpanded, onToggle }) {
 
   const distanceMi = kmToMi(trip.distance_km).toFixed(1);
   const isOvernight = new Date(trip.start_time).getHours() < 6;
+  const startLoc = trip.start_location || coordLabel(trip.start_lat, trip.start_lng);
+  const endLoc = trip.end_location || coordLabel(trip.end_lat, trip.end_lng);
 
   return (
-    <div className={`bg-white border rounded-xl overflow-hidden transition ${isExpanded ? 'border-cyan-300 shadow-md' : 'border-slate-200 hover:border-slate-300'}`}>
+    <div className={`bg-white border rounded-xl overflow-hidden transition ${isExpanded ? 'border-emerald-300 shadow-md' : 'border-slate-200 hover:border-slate-300'}`}>
       {/* Trip header — always visible */}
       <button onClick={onToggle} className="w-full flex items-center gap-3 px-3 py-3 hover:bg-slate-50 transition text-left">
         {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
@@ -129,16 +145,16 @@ function TripCard({ trip, breadcrumbs, isExpanded, onToggle }) {
             <MapPin className="w-3 h-3 text-emerald-500 flex-shrink-0" />
             {trip.start_lat != null ? (
               <a href={`https://www.google.com/maps?q=${trip.start_lat},${trip.start_lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                className="truncate hover:text-blue-600 hover:underline">{trip.start_location || 'Unknown'}</a>
+                className="truncate hover:text-blue-600 hover:underline">{startLoc}</a>
             ) : (
-              <span className="truncate">{trip.start_location || 'Unknown'}</span>
+              <span className="truncate">{startLoc}</span>
             )}
             <Navigation className="w-2.5 h-2.5 text-slate-300 flex-shrink-0" />
             {trip.end_lat != null ? (
               <a href={`https://www.google.com/maps?q=${trip.end_lat},${trip.end_lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                className="truncate hover:text-blue-600 hover:underline">{trip.end_location || 'Unknown'}</a>
+                className="truncate hover:text-blue-600 hover:underline">{endLoc}</a>
             ) : (
-              <span className="truncate">{trip.end_location || 'Unknown'}</span>
+              <span className="truncate">{endLoc}</span>
             )}
           </div>
         </div>
@@ -194,7 +210,7 @@ function TripCard({ trip, breadcrumbs, isExpanded, onToggle }) {
                   <span className="text-xs font-bold text-emerald-700">Start</span>
                 </div>
                 <div className="flex items-center gap-1 mt-0.5">
-                  <p className="text-xs text-slate-600 truncate flex-1">{trip.start_location || 'Unknown location'}</p>
+                  <p className="text-xs text-slate-600 truncate flex-1">{startLoc}</p>
                   {trip.start_lat != null && (
                     <a href={`https://www.google.com/maps?q=${trip.start_lat},${trip.start_lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                       className="text-blue-500 hover:text-blue-700 flex-shrink-0">
@@ -220,7 +236,7 @@ function TripCard({ trip, breadcrumbs, isExpanded, onToggle }) {
                   <span className="text-xs font-bold text-rose-700">End</span>
                 </div>
                 <div className="flex items-center gap-1 mt-0.5">
-                  <p className="text-xs text-slate-600 truncate flex-1">{trip.end_location || 'Unknown location'}</p>
+                  <p className="text-xs text-slate-600 truncate flex-1">{endLoc}</p>
                   {trip.end_lat != null && (
                     <a href={`https://www.google.com/maps?q=${trip.end_lat},${trip.end_lng}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                       className="text-blue-500 hover:text-blue-700 flex-shrink-0">
@@ -344,7 +360,6 @@ function DayGroup({ dayGroup, breadcrumbs, geocodedTrips, expanded, setExpanded,
 export default function TripTimelineEnhanced({ vehicle }) {
   const [expanded, setExpanded] = useState(null);
   const [days, setDays] = useState(7);
-  const [geocodedTrips, setGeocodedTrips] = useState({});
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['geotab-trip-history-enhanced', vehicle?.id, days],
@@ -361,76 +376,100 @@ export default function TripTimelineEnhanced({ vehicle }) {
     enabled: !!vehicle?.id && !!vehicle?.geotab_device_id,
   });
 
-  // Two-phase frontend geocoding: BigDataCloud first (instant, parallel) then
-  // Nominatim upgrade (sequential, rate-limited). This makes trip locations
-  // appear instantly instead of showing coordinates for 10+ seconds.
   const trips = data?.trips || [];
+
+  // ── Instant initial labels (synchronous, from persistent cache) ──
+  // Built before any network call so the first render shows place names for
+  // previously-seen coordinates and coordinate strings for new ones — never
+  // "Unknown location". Recomputes when trips change.
+  const initialGeocoded = useMemo(() => {
+    const out = {};
+    for (const t of trips) {
+      out[t.trip_id] = {
+        start_location: syncLabel(t.start_lat, t.start_lng),
+        end_location: syncLabel(t.end_lat, t.end_lng),
+        stops: (t.stops || []).map(s => ({ ...s, location: s.location || syncLabel(s.lat, s.lng) })),
+      };
+    }
+    return out;
+  }, [trips]);
+
+  const [geocodedTrips, setGeocodedTrips] = useState(initialGeocoded);
+  // Keep state in sync when trips change (new date range / refresh).
+  useEffect(() => { setGeocodedTrips(initialGeocoded); }, [initialGeocoded]);
+
+  // ── Progressive geocoding ──
+  // Phase 1: reverseGeocodeFast (Photon → BigDataCloud) for every uncached
+  //   coordinate, in parallel. State updates as each resolves so labels appear
+  //   progressively rather than waiting for all coords to finish.
+  // Phase 2: Nominatim upgrade (sequential, rate-limited) for coords that
+  //   came back without road-level data, updating state after each upgrade.
   useEffect(() => {
     if (trips.length === 0) return;
     let cancelled = false;
 
-    (async () => {
-      const coords = [];
-      for (const t of trips) {
-        if (t.start_lat != null) coords.push({ lat: t.start_lat, lng: t.start_lng, tripId: t.trip_id, type: 'start' });
-        if (t.end_lat != null) coords.push({ lat: t.end_lat, lng: t.end_lng, tripId: t.trip_id, type: 'end' });
-        for (const s of (t.stops || [])) {
-          if (s.lat != null) coords.push({ lat: s.lat, lng: s.lng, tripId: t.trip_id, type: 'stop', stopIndex: t.stops.indexOf(s) });
-        }
+    // Collect every unique coordinate that isn't already road-level cached.
+    const needs = new Map(); // key → { lat, lng }
+    for (const t of trips) {
+      for (const c of [{ lat: t.start_lat, lng: t.start_lng }, { lat: t.end_lat, lng: t.end_lng }]) {
+        if (c.lat == null) continue;
+        const key = `${Number(c.lat).toFixed(4)},${Number(c.lng).toFixed(4)}`;
+        if (!getCachedPartsSync(c.lat, c.lng)?.road) needs.set(key, c);
       }
-      if (coords.length === 0) return;
+      for (const s of (t.stops || [])) {
+        if (s.lat == null) continue;
+        const key = `${Number(s.lat).toFixed(4)},${Number(s.lng).toFixed(4)}`;
+        if (!getCachedPartsSync(s.lat, s.lng)?.road) needs.set(key, { lat: s.lat, lng: s.lng });
+      }
+    }
+    if (needs.size === 0) return;
 
-      // Phase 1: Fast BigDataCloud — all in parallel, instant
-      const fastParts = {};
-      await Promise.all(coords.map(async (c) => {
+    // Rebuild the geocoded trips map from the latest cache + provided parts.
+    const rebuild = (partsMap) => {
+      const out = {};
+      for (const t of trips) {
+        const sKey = t.start_lat != null ? `${Number(t.start_lat).toFixed(4)},${Number(t.start_lng).toFixed(4)}` : null;
+        const eKey = t.end_lat != null ? `${Number(t.end_lat).toFixed(4)},${Number(t.end_lng).toFixed(4)}` : null;
+        out[t.trip_id] = {
+          start_location: sKey && partsMap[sKey] ? (buildLabelFromParts(partsMap[sKey]) || coordLabel(t.start_lat, t.start_lng)) : syncLabel(t.start_lat, t.start_lng),
+          end_location: eKey && partsMap[eKey] ? (buildLabelFromParts(partsMap[eKey]) || coordLabel(t.end_lat, t.end_lng)) : syncLabel(t.end_lat, t.end_lng),
+          stops: (t.stops || []).map(s => {
+            const key = s.lat != null ? `${Number(s.lat).toFixed(4)},${Number(s.lng).toFixed(4)}` : null;
+            return { ...s, location: key && partsMap[key] ? (buildLabelFromParts(partsMap[key]) || coordLabel(s.lat, s.lng)) : (s.location || syncLabel(s.lat, s.lng)) };
+          }),
+        };
+      }
+      return out;
+    };
+
+    (async () => {
+      const partsMap = {};
+      // Phase 1: parallel fast geocode. Update state after each resolves so
+      // labels appear progressively (instant for cached, fast for new).
+      await Promise.all([...needs.values()].map(async (c) => {
         if (cancelled) return;
         try {
-          fastParts[`${c.lat.toFixed(4)},${c.lng.toFixed(4)}`] = await reverseGeocodeFast(c.lat, c.lng);
+          const parts = await reverseGeocodeFast(c.lat, c.lng);
+          if (parts) {
+            partsMap[`${Number(c.lat).toFixed(4)},${Number(c.lng).toFixed(4)}`] = parts;
+            if (!cancelled) setGeocodedTrips(rebuild(partsMap));
+          }
         } catch (_) {}
       }));
       if (cancelled) return;
 
-      const buildLoc = (lat, lng, fallback) => {
-        const key = `${Number(lat).toFixed(4)},${Number(lng).toFixed(4)}`;
-        const parts = fastParts[key];
-        const label = buildLabelFromParts(parts);
-        return label || (lat != null ? `${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}` : fallback);
-      };
-
-      const updated = {};
-      for (const t of trips) {
-        const startLoc = t.start_lat != null ? buildLoc(t.start_lat, t.start_lng, t.start_location) : t.start_location;
-        const endLoc = t.end_lat != null ? buildLoc(t.end_lat, t.end_lng, t.end_location) : t.end_location;
-        const stopLocs = (t.stops || []).map(s => {
-          const loc = s.lat != null ? buildLoc(s.lat, s.lng, s.location || '—') : (s.location || '—');
-          return { ...s, location: loc };
-        });
-        updated[t.trip_id] = { start_location: startLoc, end_location: endLoc, stops: stopLocs };
-      }
-      if (!cancelled) setGeocodedTrips(updated);
-
-      // Phase 2: Nominatim upgrade — sequential (rate-limited)
-      for (const c of coords) {
+      // Phase 2: Nominatim upgrade — sequential (rate-limited). Skip coords
+      // that already have road-level data from phase 1.
+      for (const c of needs.values()) {
         if (cancelled) return;
         const key = `${Number(c.lat).toFixed(4)},${Number(c.lng).toFixed(4)}`;
-        const existing = fastParts[key];
-        if (existing?.road) continue; // already have street data
+        if (partsMap[key]?.road) continue;
         try {
           const upgraded = await reverseGeocodeUpgrade(c.lat, c.lng);
-          if (cancelled || !upgraded) continue;
-          fastParts[key] = upgraded;
-          // Rebuild the geocoded trips map with upgraded data
-          const rebuilt = {};
-          for (const t of trips) {
-            const startLoc = t.start_lat != null ? buildLoc(t.start_lat, t.start_lng, t.start_location) : t.start_location;
-            const endLoc = t.end_lat != null ? buildLoc(t.end_lat, t.end_lng, t.end_location) : t.end_location;
-            const stopLocs = (t.stops || []).map(s => {
-              const loc = s.lat != null ? buildLoc(s.lat, s.lng, s.location || '—') : (s.location || '—');
-              return { ...s, location: loc };
-            });
-            rebuilt[t.trip_id] = { start_location: startLoc, end_location: endLoc, stops: stopLocs };
+          if (upgraded) {
+            partsMap[key] = upgraded;
+            if (!cancelled) setGeocodedTrips(rebuild(partsMap));
           }
-          if (!cancelled) setGeocodedTrips(rebuilt);
         } catch (_) {}
       }
     })();
@@ -451,19 +490,21 @@ export default function TripTimelineEnhanced({ vehicle }) {
   const totalDistance = data?.total_distance_km || 0;
   const totalIdle = trips.reduce((sum, t) => sum + (t.idle_minutes || 0), 0);
   const totalStops = trips.reduce((sum, t) => sum + (t.stop_count || 0), 0);
+  const totalDrive = trips.reduce((sum, t) => sum + (t.duration_minutes || 0), 0);
+  const driverName = vehicle?.geotab_driver_name || vehicle?.geotab_keeper_name || '';
 
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
-          <Route className="w-4 h-4 text-cyan-600" />
+          <Route className="w-4 h-4 text-emerald-700" />
           <h3 className="text-sm font-bold text-slate-800">Trip Timeline</h3>
           <span className="text-[10px] text-slate-400">Geotab · {vehicle.registration_number}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <select value={days} onChange={e => setDays(Number(e.target.value))}
-            className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-cyan-400">
+            className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-emerald-400">
             <option value={1}>24h</option>
             <option value={3}>3 days</option>
             <option value={7}>7 days</option>
@@ -477,9 +518,17 @@ export default function TripTimelineEnhanced({ vehicle }) {
         </div>
       </div>
 
+      {/* Driver attribution */}
+      {driverName && (
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+          <User className="w-3.5 h-3.5 text-slate-400" />
+          Driver: <span className="font-semibold text-slate-700">{driverName}</span>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-cyan-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-emerald-700 animate-spin" />
           <span className="ml-2 text-xs text-slate-500">Fetching trips & locations from Geotab...</span>
         </div>
       ) : error ? (
@@ -503,13 +552,13 @@ export default function TripTimelineEnhanced({ vehicle }) {
               <p className="text-[10px] uppercase text-emerald-600 font-semibold flex items-center gap-1"><TrendingDown className="w-3 h-3" /> Miles</p>
               <p className="text-lg font-bold text-emerald-700 tabular-nums mt-0.5">{kmToMi(totalDistance).toFixed(0)}</p>
             </div>
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2.5 border border-blue-200">
+              <p className="text-[10px] uppercase text-blue-600 font-semibold flex items-center gap-1"><Clock className="w-3 h-3" /> Drive</p>
+              <p className="text-lg font-bold text-blue-700 tabular-nums mt-0.5">{formatDuration(totalDrive)}</p>
+            </div>
             <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-2.5 border border-amber-200">
               <p className="text-[10px] uppercase text-amber-600 font-semibold flex items-center gap-1"><Timer className="w-3 h-3" /> Idle</p>
               <p className="text-lg font-bold text-amber-700 tabular-nums mt-0.5">{formatDuration(totalIdle)}</p>
-            </div>
-            <div className="bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg p-2.5 border border-violet-200">
-              <p className="text-[10px] uppercase text-violet-600 font-semibold flex items-center gap-1"><MapPin className="w-3 h-3" /> Stops</p>
-              <p className="text-lg font-bold text-violet-700 tabular-nums mt-0.5">{totalStops}</p>
             </div>
           </div>
 

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const reasonConfig = {
   holiday: { label: 'Holiday', badge: 'bg-blue-100 text-blue-700' },
@@ -208,46 +209,51 @@ export default function AbsenceManager() {
             </button>
           </div>
 
-          {showForm && (
-            <form onSubmit={handleSubmit} className="insight-card rounded-2xl p-5 mb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
-                  <select value={formData.staff_id} onChange={e => setFormData({ ...formData, staff_id: e.target.value })} required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                    <option value="">Select Staff</option>
-                    {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
+          <Dialog open={showForm} onOpenChange={(open) => { setShowForm(open); if (!open) setFormData({ staff_id: '', start_date: '', end_date: '', reason: 'holiday', notes: '' }); }}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Log Absence</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
+                    <select value={formData.staff_id} onChange={e => setFormData({ ...formData, staff_id: e.target.value })} required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
+                      <option value="">Select Staff</option>
+                      {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Reason</label>
+                    <select value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
+                      {Object.entries(reasonConfig).filter(([k]) => k !== 'weekend').map(([key, cfg]) => <option key={key} value={key}>{cfg.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Start Date *</label>
+                    <input type="date" value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">End Date *</label>
+                    <input type="date" value={formData.end_date} onChange={e => setFormData({ ...formData, end_date: e.target.value })} required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Notes (optional)</label>
+                    <input type="text" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Reason</label>
-                  <select value={formData.reason} onChange={e => setFormData({ ...formData, reason: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                    {Object.entries(reasonConfig).filter(([k]) => k !== 'weekend').map(([key, cfg]) => <option key={key} value={key}>{cfg.label}</option>)}
-                  </select>
+                <div className="flex gap-2 pt-1">
+                  <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">Submit Request</button>
+                  <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Start Date *</label>
-                  <input type="date" value={formData.start_date} onChange={e => setFormData({ ...formData, start_date: e.target.value })} required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">End Date *</label>
-                  <input type="date" value={formData.end_date} onChange={e => setFormData({ ...formData, end_date: e.target.value })} required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Notes (optional)</label>
-                  <input type="text" value={formData.notes} onChange={e => setFormData({ ...formData, notes: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
-                </div>
-              </div>
-              <div className="flex gap-2 mt-4">
-                <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">Submit Request</button>
-                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
-              </div>
-            </form>
-          )}
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {requestsByStaff.length === 0 ? (
             <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">
@@ -347,42 +353,47 @@ export default function AbsenceManager() {
             </button>
           </div>
 
-          {showRecurringForm && (
-            <form onSubmit={handleRecurringSubmit} className="insight-card rounded-2xl p-5 mb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
-                  <select value={recurringForm.staff_id} onChange={e => setRecurringForm({ ...recurringForm, staff_id: e.target.value })} required
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                    <option value="">Select Staff</option>
-                    {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          <Dialog open={showRecurringForm} onOpenChange={(open) => { setShowRecurringForm(open); if (!open) setRecurringForm({ staff_id: '', days_of_week: [], label: 'Weekends', reason: 'weekend' }); }}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Add Recurring Day Off</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleRecurringSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
+                    <select value={recurringForm.staff_id} onChange={e => setRecurringForm({ ...recurringForm, staff_id: e.target.value })} required
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
+                      <option value="">Select Staff</option>
+                      {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
+                    <input type="text" value={recurringForm.label} onChange={e => setRecurringForm({ ...recurringForm, label: e.target.value })}
+                      placeholder="e.g. Weekends, Regular Day Off"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
-                  <input type="text" value={recurringForm.label} onChange={e => setRecurringForm({ ...recurringForm, label: e.target.value })}
-                    placeholder="e.g. Weekends, Regular Day Off"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                  <label className="block text-xs font-medium text-slate-600 mb-2">Days Off (repeats every week) *</label>
+                  <div className="flex flex-wrap gap-2">
+                    {DAY_LABELS.map((label, d) => (
+                      <button type="button" key={d} onClick={() => toggleDay(d)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#5A8C1E]'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-4">
-                <label className="block text-xs font-medium text-slate-600 mb-2">Days Off (repeats every week) *</label>
-                <div className="flex flex-wrap gap-2">
-                  {DAY_LABELS.map((label, d) => (
-                    <button type="button" key={d} onClick={() => toggleDay(d)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#5A8C1E]'}`}>
-                      {label}
-                    </button>
-                  ))}
+                <div className="flex gap-2 pt-1">
+                  <button type="submit" disabled={!recurringForm.staff_id || recurringForm.days_of_week.length === 0}
+                    className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm disabled:opacity-50">Save</button>
+                  <button type="button" onClick={() => setShowRecurringForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
                 </div>
-              </div>
-              <div className="flex gap-2 mt-5">
-                <button type="submit" disabled={!recurringForm.staff_id || recurringForm.days_of_week.length === 0}
-                  className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm disabled:opacity-50">Save</button>
-                <button type="button" onClick={() => setShowRecurringForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
-              </div>
-            </form>
-          )}
+              </form>
+            </DialogContent>
+          </Dialog>
 
           {recurringByStaff.length === 0 ? (
             <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">

@@ -508,12 +508,14 @@ html:has(.fixed.inset-0) {
 .absolute.inset-0[class*="bg-black"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
 .absolute.inset-0[class*="bg-slate-9"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
 .absolute.inset-0[class*="bg-gray-9"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-blue-950"]:not([class*="bg-white"]):not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-black"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-slate-9"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-gray-9"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-slate-950"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-blue-950"]:not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-black\/"]:not([class*="bg-background"]) {
-  background-color: rgba(8, 23, 48, 0.6) !important;
+  background-color: rgba(8, 23, 48, 0.85) !important;
   backdrop-filter: blur(8px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
 }
