@@ -15,30 +15,39 @@
       "items": {
         "type": "string"
       },
-      "description": "Staff member IDs assigned to this hotel booking for the job"
+      "description": "Staff member IDs assigned to this booking for the job. A crew member can appear in multiple bookings on the same job (e.g. Hotel A for week 1, Air B&B for week 2)."
     },
     "assigned_staff_names": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Staff member names (for display)"
+      "description": "Staff member names (for display), parallel to assigned_staff_ids."
     },
     "job_id": {
       "type": "string",
-      "description": "Job this hotel booking is associated with"
+      "description": "Job this booking is associated with"
     },
     "job_name": {
       "type": "string",
       "description": "Job name (for display)"
     },
+    "booking_type": {
+      "type": "string",
+      "enum": [
+        "hotel",
+        "airbnb"
+      ],
+      "default": "hotel",
+      "description": "Type of accommodation. 'hotel' = cost is per-room-per-night (total = cost_per_night \u00d7 room_count \u00d7 nights). 'airbnb' = cost is a single total for the entire stay, split evenly across all assigned crew (per-person day rate = total_cost \u00f7 crew_count \u00f7 nights). Existing bookings without this field default to 'hotel'."
+    },
     "hotel_name": {
       "type": "string",
-      "description": "Name of the hotel"
+      "description": "Name of the hotel or Air B&B property"
     },
     "address": {
       "type": "string",
-      "description": "Hotel address"
+      "description": "Property address"
     },
     "check_in_date": {
       "type": "string",
@@ -56,24 +65,28 @@
     },
     "po_number": {
       "type": "string",
-      "description": "Purchase order (PO) number for this hotel booking"
+      "description": "DEPRECATED \u2014 kept for backward compatibility. No longer shown in the editor UI."
     },
     "room_type": {
       "type": "string",
-      "description": "Room type (e.g. Single, Twin, Double)"
+      "description": "DEPRECATED \u2014 kept for backward compatibility. No longer shown in the editor UI."
     },
     "room_count": {
       "type": "number",
       "default": 1,
-      "description": "Number of rooms booked. Total booking cost = cost_per_night \u00d7 room_count \u00d7 nights (check_out \u2212 check_in)."
+      "description": "Number of rooms booked (hotel only). Total hotel cost = cost_per_night \u00d7 room_count \u00d7 nights. Not used for Air B&B bookings."
     },
     "cost_per_night": {
       "type": "number",
-      "description": "Cost per room per night in GBP (net, excluding VAT). Used to auto-calculate the total accommodation cost for the job financials."
+      "description": "Cost per room per night in GBP (hotel only). Not used for Air B&B bookings."
+    },
+    "total_cost": {
+      "type": "number",
+      "description": "Total cost for the entire stay in GBP (Air B&B only). The per-person share = total_cost \u00f7 assigned_staff_count, and the per-person day rate = share \u00f7 nights. Not used for hotel bookings."
     },
     "contact_phone": {
       "type": "string",
-      "description": "Hotel contact phone number"
+      "description": "Property contact phone number"
     },
     "notes": {
       "type": "string",

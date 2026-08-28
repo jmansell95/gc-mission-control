@@ -531,11 +531,25 @@ export default async function(req: Request): Promise<Response> {
       .filter((c: any) => c.category === 'labour')
       .reduce((s: number, c: any) => s + itemNet(c), 0);
 
+    // Booking-type-aware hotel cost: Hotel = cost_per_night × room_count ×
+    // nights; Air B&B = total_cost (flat entire-stay total). Legacy records
+    // without a booking_type default to 'hotel' so historical data is unchanged.
     const hotelRows = hotelBookings.map((b: any) => {
       const nights = b.check_in_date && b.check_out_date
         ? Math.max(0, Math.round((new Date(b.check_out_date + 'T00:00:00').getTime() - new Date(b.check_in_date + 'T00:00:00').getTime()) / (1000 * 60 * 60 * 24)))
         : 0;
-      return { id: b.id, name: b.hotel_name, nights, rooms: Number(b.room_count) || 1, perNight: Number(b.cost_per_night) || 0, total: (Number(b.cost_per_night) || 0) * (Number(b.room_count) || 1) * nights };
+      const isAirbnb = b.booking_type === 'airbnb';
+      const total = isAirbnb
+        ? (Number(b.total_cost) || 0)
+        : (Number(b.cost_per_night) || 0) * (Number(b.room_count) || 1) * nights;
+      return {
+        id: b.id, name: b.hotel_name, nights,
+        rooms: isAirbnb ? 0 : (Number(b.room_count) || 1),
+        perNight: isAirbnb ? 0 : (Number(b.cost_per_night) || 0),
+        booking_type: isAirbnb ? 'airbnb' : 'hotel',
+        total_cost: isAirbnb ? (Number(b.total_cost) || 0) : 0,
+        total,
+      };
     });
     const hotelNet = hotelRows.reduce((s: number, h: any) => s + h.total, 0);
 
