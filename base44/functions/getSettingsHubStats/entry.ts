@@ -11,6 +11,7 @@ const INTEGRATION_SETTING_KEYS = [
   'concur_config', 'safety_culture_config', 'keylogbook_config', 'cis_config',
   'payroll_config', 'met_office_config', 'google_maps_config', 'whatsapp_config',
   'accounting_config', 'stripe_config',
+  'integration_coming_soon',
 ];
 const INTEGRATION_CONNECTED_FIELDS: Record<string, string> = {
   geotab_config: 'username', holman_config: 'api_key', asset_panda_config: 'api_token',
@@ -73,6 +74,14 @@ export default async function (req: Request): Promise<Response> {
     const planningJobs = (jobs || []).filter(j => (j.status || 'planning') === 'planning').length;
     const integrationConnectedCount = integrations.filter(i => i.connected).length;
 
+    const comingSoonRaw = cfgMap['integration_coming_soon'] || {};
+    const integrationComingSoon: Record<string, boolean> = {};
+    if (comingSoonRaw && typeof comingSoonRaw === 'object') {
+      for (const [id, val] of Object.entries(comingSoonRaw)) {
+        if (val) integrationComingSoon[id] = true;
+      }
+    }
+
     return Response.json({
       data: {
         staffCount: (staff || []).length,
@@ -89,6 +98,7 @@ export default async function (req: Request): Promise<Response> {
         permissionGroupsCount: (permissionGroups || []).length,
         integrations,
         integrationConnectedCount,
+        integrationComingSoon,
       },
     });
   } catch (error) {

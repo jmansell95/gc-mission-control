@@ -7,13 +7,11 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { useDivision } from '@/contexts/DivisionContext';
 import HubShell from '@/components/HubShell';
-import SubPills from '@/components/SubPills';
 import {
   SYSTEM_GROUPS, defaultPermissions, normalizePermissions,
 } from '@/utils/permissions';
 import AccessGroupEditor from '@/components/settings/access/AccessGroupEditor';
-import AccessGroupDetail from '@/components/settings/access/AccessGroupDetail';
-import CrewAccessManager from '@/components/settings/access/CrewAccessManager';
+import UnifiedCrewAccessList from '@/components/settings/access/UnifiedCrewAccessList';
 
 /**
  * Access Levels Hub — division-scoped access management.
@@ -30,7 +28,6 @@ export default function AccessLevelsHub() {
   const [search, setSearch] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [editing, setEditing] = useState(null);
-  const [view, setView] = useState('groups');
 
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ['permission-groups'],
@@ -167,11 +164,6 @@ export default function AccessLevelsHub() {
     );
   }
 
-  const pills = [
-    { id: 'groups', label: 'Access Groups', icon: KeyRound },
-    { id: 'crews', label: 'Crews', icon: Users },
-  ];
-
   return (
     <HubShell
       icon={KeyRound}
@@ -186,104 +178,11 @@ export default function AccessLevelsHub() {
         </button>
       }
     >
-      <SubPills pills={pills} active={view} onChange={setView} />
-
-      {view === 'crews' ? (
-        <CrewAccessManager scopedDivisionId={activeDivisionId} />
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* LEFT: Group Explorer */}
-          <div className="lg:col-span-4 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search groups..."
-                  className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
-                />
-              </div>
-            </div>
-
-            {isLoading && (
-              <div className="flex items-center justify-center py-8">
-                <div className="w-5 h-5 border-2 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin" />
-              </div>
-            )}
-
-            {filteredSystem.length > 0 && (
-              <div className="mb-3">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5 flex items-center gap-1">
-                  <Crown className="w-3 h-3 text-amber-500" /> System Groups
-                </p>
-                <div className="space-y-1">
-                  {filteredSystem.map(g => (
-                    <GroupListItem
-                      key={g.id}
-                      group={g}
-                      active={selectedGroupId === g.id}
-                      staffCount={staffByGroup[g.id] || 0}
-                      overrideCount={manifestCountByGroup[g.id] || 0}
-                      onClick={() => setSelectedGroupId(g.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {filteredCustom.length > 0 && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-1.5 flex items-center gap-1">
-                  <Building2 className="w-3 h-3 text-slate-400" /> Custom Groups
-                </p>
-                <div className="space-y-1">
-                  {filteredCustom.map(g => (
-                    <GroupListItem
-                      key={g.id}
-                      group={g}
-                      active={selectedGroupId === g.id}
-                      staffCount={staffByGroup[g.id] || 0}
-                      overrideCount={manifestCountByGroup[g.id] || 0}
-                      onClick={() => setSelectedGroupId(g.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!isLoading && customGroups.length === 0 && systemGroups.length > 0 && !q && (
-              <div className="mt-3 p-3 rounded-xl bg-slate-50 text-center">
-                <p className="text-xs font-semibold text-slate-500">No custom groups yet</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Click "New Group" to create one</p>
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT: Group Detail (division-locked) */}
-          <div className="lg:col-span-8 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
-            {selectedGroup ? (
-              <AccessGroupDetail
-                group={selectedGroup}
-                groups={groups}
-                staffCount={staffByGroup[selectedGroup.id] || 0}
-                divisions={[activeDivision]}
-                overrideCount={manifestCountByGroup[selectedGroup.id] || 0}
-                onEdit={() => setEditing(selectedGroup)}
-                onDelete={() => handleDelete(selectedGroup)}
-                lockedDivisionId={activeDivisionId}
-              />
-            ) : (
-              <div className="insight-card rounded-2xl p-12 text-center">
-                <KeyRound className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-sm font-semibold text-slate-600">Select a group to manage its access</p>
-                <p className="text-xs text-slate-400 mt-1">Choose a permission group from the list on the left</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <UnifiedCrewAccessList
+        scopedDivisionId={activeDivisionId}
+        onEditGroup={(g) => setEditing(g)}
+        onDeleteGroup={handleDelete}
+      />
 
       {editing && (
         <AccessGroupEditor

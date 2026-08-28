@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
@@ -7,6 +7,7 @@ import {
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
   Gift, KeyRound, FileUp, CalendarDays,
 } from 'lucide-react';
+import IntegrationsOverviewList from '@/components/settings/IntegrationsOverviewList';
 
 /**
  * Settings Command Hub — Clean Canvas overview.
@@ -15,6 +16,7 @@ import {
  * hover-highlighted list rows grouped by category.
  */
 export default function SettingsHubOverview({ onNavigate }) {
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
 
   // Single batched query — replaces ~10 individual entity list calls with one
@@ -23,6 +25,24 @@ export default function SettingsHubOverview({ onNavigate }) {
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
+  });
+
+  // Per-integration "Coming Soon" toggle — persisted to a single AppSetting
+  // record (key 'integration_coming_soon') so the state is shared across
+  // admins and survives reloads.
+  const toggleComingSoon = useMutation({
+    mutationFn: async ({ id, comingSoon }) => {
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      const map = (existing[0]?.value) || {};
+      const next = { ...map };
+      if (comingSoon) next[id] = true; else delete next[id];
+      if (existing[0]) {
+        await base44.entities.AppSetting.update(existing[0].id, { value: next });
+      } else {
+        await base44.entities.AppSetting.create({ key: 'integration_coming_soon', value: next });
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings-hub-stats'] }),
   });
 
   const staff = [];
@@ -92,18 +112,19 @@ export default function SettingsHubOverview({ onNavigate }) {
     ]},
   ];
 
-  const heroStats = [
-    { label: 'Crew', value: activeStaff },
-    { label: 'Active Jobs', value: activeJobs },
-    { label: 'Planning', value: planningJobs },
-    { label: 'Vehicles', value: stats?.vehiclesCount || 0 },
-    { label: 'Clients', value: stats?.clientsCount || 0 },
-  ];
-
   const q = search.toLowerCase().trim();
   const filteredGroups = q
     ? groups.map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q) || i.sub.toLowerCase().includes(q)) })).filter(g => g.items.length > 0)
     : groups;
+
+  // Integration status map: { [id]: { connected, comingSoon } }
+  const integrationStatusMap = {};
+  (stats?.integrations || []).forEach(i => {
+    integrationStatusMap[i.id] = {
+      connected: !!i.connected,
+      comingSoon: !!(stats?.integrationComingSoon || {})[i.id],
+    };
+  });
 
   return (
     <div className="min-h-full bg-[#FAFAF9]">
@@ -130,16 +151,6 @@ export default function SettingsHubOverview({ onNavigate }) {
           </kbd>
         </div>
 
-        {/* Metric row */}
-        <div className="grid grid-cols-5 gap-2 sm:gap-4 mb-8 pb-8 border-b border-slate-200/70">
-          {heroStats.map(s => (
-            <div key={s.label} className="text-center sm:text-left">
-              <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">{s.value}</p>
-              <p className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wide mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Slim status strip */}
         {!q && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-10 text-xs text-slate-500">
@@ -164,7 +175,21 @@ export default function SettingsHubOverview({ onNavigate }) {
         )}
 
         {/* Category sections as flat lists */}
-        {filteredGroups.map(group => (
+        {filteredGroups.map(group => {
+          if (group.group === 'Integrations') {
+            return (
+              <section key={group.group} className="mb-10">
+                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">{group.group}</h2>
+                <IntegrationsOverviewList
+                  items={group.items}
+                  statusMap={integrationStatusMap}
+                  onToggle={(id, comingSoon) => toggleComingSoon.mutate({ id, comingSoon })}
+                  onNavigate={onNavigate}
+                />
+              </section>
+            );
+          }
+          return (
           <section key={group.group} className="mb-10">
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">{group.group}</h2>
             <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
@@ -193,7 +218,8 @@ export default function SettingsHubOverview({ onNavigate }) {
               })}
             </div>
           </section>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
