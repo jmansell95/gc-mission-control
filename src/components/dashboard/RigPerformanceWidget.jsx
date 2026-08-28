@@ -32,6 +32,7 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
     queryFn: () => base44.entities.RotaAssignment.filter({ assigned_date: todayStr }),
   });
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-all'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
+  const { data: jobAssetAssignments = [] } = useQuery({ queryKey: ['job-asset-assignments-rig-perf'], queryFn: () => base44.entities.JobAssetAssignment.list('-created_date', 500) });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams-rig-perf'], queryFn: () => base44.entities.Team.list() });
@@ -63,67 +64,90 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
   }, [rigs, rateCards]);
 
   const rigStats = useMemo(() => {
-    const rigAssignments = assignments.filter(a => a.rig_asset_id);
     const byRig = {};
-    rigAssignments.forEach(a => {
-      if (!byRig[a.rig_asset_id]) byRig[a.rig_asset_id] = { assignments: [], totalMeterage: 0, totalRevenue: 0 };
-      byRig[a.rig_asset_id].assignments.push(a);
-      const job = jobs.find(j => j.id === a.job_id);
 
-      // Find the drilling discipline on this job (if any) for per-discipline rates
+    // Primary source: rigs assigned to jobs via JobAssetAssignment (the actual
+    // rig tracking). RotaAssignment.rig_asset_id is rarely populated, so relying
+    // on it alone makes the widget show "no rigs" even when rigs are on site.
+    jobAssetAssignments.forEach(jaa => {
+      const rig = rigs.find(r => r.id === jaa.asset_id || r.id === jaa.site_asset_id);
+      if (!rig) return;
+      if (jaa.status === 'returned') return;
+      const job = jobs.find(j => j.id === jaa.job_id);
+      if (job && (job.status === 'completed' || job.status === 'cancelled')) return;
+      if (!byRig[rig.id]) byRig[rig.id] = { assignments: [], job, totalMeterage: 0, totalRevenue: 0 };
+    });
+
+    // Supplementary: rota assignments that carry a rig_asset_id (merge in)
+    assignments.forEach(a => {
+      if (!a.rig_asset_id) return;
+      const job = jobs.find(j => j.id === a.job_id);
+      if (job && (job.status === 'completed' || job.status === 'cancelled')) return;
+      if (!byRig[a.rig_asset_id]) byRig[a.rig_asset_id] = { assignments: [], job, totalMeterage: 0, totalRevenue: 0 };
+      byRig[a.rig_asset_id].assignments.push(a);
+      if (!byRig[a.rig_asset_id].job) byRig[a.rig_asset_id].job = job;
+    });
+
+    // Revenue per rig (from the job's drilling discipline / meterage)
+    Object.entries(byRig).forEach(([rigId, data]) => {
+      const job = data.job;
       const disciplines = Array.isArray(job?.disciplines) ? job.disciplines : [];
       const drillDisc = disciplines.find(d => d.type === 'drilling') || {};
-
+      const rigMeterage = data.assignments.reduce((s, a) => s + (Number(a.meterage) || 0), 0);
       let rev = 0;
       if (job) {
         const meterageRate = drillDisc.meterage_rate || job.meterage_rate;
         const dayRate = drillDisc.unit_price || job.unit_price;
         const revMethod = drillDisc.revenue_method || job.revenue_method;
-
-        if (revMethod === 'meterage_rate' && meterageRate && a.meterage) {
-          rev = a.meterage * meterageRate;
+        if (revMethod === 'meterage_rate' && meterageRate && rigMeterage) {
+          rev = rigMeterage * meterageRate;
         } else if (revMethod === 'day_rate') {
-          rev = dayRate || rigDayRate[a.rig_asset_id] || 0;
+          rev = dayRate || rigDayRate[rigId] || 0;
         } else if (revMethod === 'flat_fee' && job.client_charge) {
           rev = job.client_charge;
-        } else if (meterageRate && a.meterage) {
-          rev = a.meterage * meterageRate;
+        } else if (meterageRate && rigMeterage) {
+          rev = rigMeterage * meterageRate;
         } else {
-          // Fallback: rig day rate so the widget always shows what the rig earns
-          rev = rigDayRate[a.rig_asset_id] || 0;
+          rev = rigDayRate[rigId] || 0;
         }
       }
-      byRig[a.rig_asset_id].totalRevenue += rev;
-      byRig[a.rig_asset_id].totalMeterage += Number(a.meterage) || 0;
+      data.totalRevenue = rev;
+      data.totalMeterage = rigMeterage;
     });
 
     return Object.entries(byRig).map(([rigId, data]) => {
       const rig = rigs.find(r => r.id === rigId);
-      const crew = data.assignments.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
-      const job = jobs.find(j => j.id === data.assignments[0]?.job_id);
+      // Crew = today's rota for this rig's job (falls back to rota with rig_asset_id)
+      const crew = data.job
+        ? assignments.filter(a => a.job_id === data.job.id).map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean)
+        : data.assignments.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
       return {
         rigId,
         rig,
         crew,
-        job,
+        job: data.job,
         meterage: data.totalMeterage,
         revenue: data.totalRevenue,
         assignmentCount: data.assignments.length,
       };
     }).sort((a, b) => b.revenue - a.revenue);
-  }, [assignments, jobs, rigs, allStaff, rigDayRate]);
+  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, rigDayRate]);
 
-  // Drilling crews out today — counts crew on drilling teams even without a rig linked
+  // Drilling crews out today — crew on drilling teams OR crew on jobs with rigs deployed
   const drillingCrewsOut = useMemo(() => {
+    const jobsWithRigs = new Set(
+      jobAssetAssignments.filter(jaa => jaa.status !== 'returned').map(jaa => jaa.job_id)
+    );
     const crewOut = new Set();
     assignments.forEach(a => {
       const staffMember = allStaff.find(s => s.id === a.staff_id);
-      if (staffMember && drillingTeamIds.has(staffMember.team_id)) {
+      if (!staffMember) return;
+      if (drillingTeamIds.has(staffMember.team_id) || jobsWithRigs.has(a.job_id)) {
         crewOut.add(a.staff_id);
       }
     });
     return crewOut.size;
-  }, [assignments, allStaff, drillingTeamIds]);
+  }, [assignments, allStaff, drillingTeamIds, jobAssetAssignments]);
 
   const totalRevenue = rigStats.reduce((sum, r) => sum + r.revenue, 0);
   const totalMeterage = rigStats.reduce((sum, r) => sum + r.meterage, 0);
