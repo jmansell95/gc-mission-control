@@ -541,3 +541,32 @@ html:has(.fixed.inset-0) {
 @media (max-width: 639px) {
   .dialog-fullscreen-mobile > button { display: none; }
 }
+
+/* === Print / PDF export — Azure Migration Plan ===
+   Produces a clean, paginated PDF when the user clicks "Download PDF"
+   (uses the browser's print-to-PDF). Hides interactive chrome, expands
+   all content, and uses the brand dark-green for headings. */
+@media print {
+  @page { margin: 14mm; size: A4; }
+  body { background: white !important; }
+  body:has(.print-area) { overflow: visible !important; }
+
+  /* Hide everything except the print area */
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; max-width: 100% !important; padding: 0 !important; }
+
+  /* Hide sticky header, buttons, progress bar */
+  .sticky { position: static !important; }
+  button, a[href] { display: none !important; }
+
+  /* Force all collapsible sections open */
+  .insight-card { box-shadow: none !important; border: 1px solid #e2e8f0 !important; page-break-inside: avoid; }
+  .prose pre { page-break-inside: avoid; }
+  .prose h2, .prose h3 { page-break-after: avoid; }
+
+  /* Brand-coloured headings on paper */
+  .prose h2, .prose h3 { color: #2E5A1A !important; }
+  .prose pre { background: #f8fafc !important; color: #1e293b !important; border: 1px solid #e2e8f0 !important; }
+  .prose code { color: #1e293b !important; }
+}

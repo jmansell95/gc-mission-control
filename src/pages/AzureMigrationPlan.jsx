@@ -3,9 +3,10 @@ import ReactMarkdown from 'react-markdown';
 import {
   Download, ArrowLeft, FileText, ChevronDown, ChevronRight,
   Check, Copy, ClipboardCheck, Cloud, Database, ShieldCheck,
-  Server, Rocket, Package, ListChecks,
+  Server, Rocket, Package, ListChecks, Printer, Presentation,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import MigrationRoadmap from '@/components/azure/MigrationRoadmap';
 
 const PHASE_ICONS = {
   0: Package,
@@ -116,6 +117,7 @@ export default function AzureMigrationPlan() {
   const [md, setMd] = useState('');
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState({});
+  const [view, setView] = useState('presentation');
 
   // Load progress from localStorage
   useEffect(() => {
@@ -196,14 +198,23 @@ export default function AzureMigrationPlan() {
               <p className="text-xs text-slate-400 truncate">GC Mission Control — off Base44, onto Azure</p>
             </div>
           </div>
-          <a
-            href="/Azure-Migration-Plan.md"
-            download="Azure-Migration-Plan.md"
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md whitespace-nowrap"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Download</span>
-          </a>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setView(v => v === 'presentation' ? 'runbook' : 'presentation')}
+              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition whitespace-nowrap"
+            >
+              <Presentation className="w-4 h-4" />
+              <span className="hidden sm:inline">{view === 'presentation' ? 'Runbook' : 'Presentation'}</span>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md whitespace-nowrap"
+            >
+              <Printer className="w-4 h-4" />
+              <span className="hidden sm:inline">Download PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </button>
+          </div>
         </div>
         {/* Progress bar */}
         {!loading && totalCount > 0 && (
@@ -224,7 +235,7 @@ export default function AzureMigrationPlan() {
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-4">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-4 print-area">
         {loading ? (
           <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
@@ -233,6 +244,12 @@ export default function AzureMigrationPlan() {
           </div>
         ) : (
           <>
+            {/* Presentation view — exec summary + roadmap */}
+            {view === 'presentation' && <MigrationRoadmap />}
+
+            {/* Runbook view — detailed phased checklist */}
+            {view === 'runbook' && (
+            <>
             {/* Intro */}
             {intro && (
               <div className="insight-card rounded-2xl p-5 sm:p-7">
@@ -270,6 +287,8 @@ export default function AzureMigrationPlan() {
                 the bar above tracks your overall migration. Take it one phase at a time.
               </p>
             </div>
+            </>
+            )}
           </>
         )}
       </div>
