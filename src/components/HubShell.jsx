@@ -1,11 +1,13 @@
 import React from 'react';
 import PageHeader from '@/components/PageHeader';
 import TabBar from '@/components/TabBar';
+import BackButton from '@/components/BackButton';
 
 /**
  * HubShell — shared hybrid layout for every enterprise hub.
  *
  * Standardises the "hybrid" structure across all hubs:
+ *   0. Universal BackButton (hidden when `showBack` is false — e.g. home/admin)
  *   1. PageHeader (icon + title + subtitle + optional actions)
  *   2. Dense KPI strip (passed as `kpiStrip` — usually a <HubStatsBar />)
  *   3. Optional TabBar (when `tabs` is provided)
@@ -24,9 +26,17 @@ export default function HubShell({
   activeTab,
   onTabChange,
   children,
+  backTo,
+  showBack = true,
 }) {
   return (
     <div className="space-y-3 sm:space-y-4">
+      {showBack && (
+        <div className="flex items-center">
+          <BackButton fallback={backTo || '/admin'} />
+        </div>
+      )}
+
       <PageHeader icon={icon} title={title} subtitle={subtitle} actions={actions} />
 
       {kpiStrip ? (

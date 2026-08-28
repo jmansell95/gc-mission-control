@@ -8,19 +8,21 @@ import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
 import MissingRatesBanner from '@/components/staff/MissingRatesBanner';
-import CrewProfilesTab from '@/components/staff/CrewProfilesTab';
-import StaffCostAnalytics from '@/components/staff/StaffCostAnalytics';
-import StaffUtilizationWidget from '@/components/dashboard/StaffUtilizationWidget';
+import PeopleDirectory from '@/components/staff/PeopleDirectory';
+import PeopleInsights from '@/components/staff/PeopleInsights';
 import TrainingMatrixHub from '@/components/staff/TrainingMatrixHub';
 import RunReportButton from '@/components/reports/RunReportButton';
 import ContactsTab from '@/components/staff/ContactsTab';
 
-// Map legacy tab IDs onto the new 4-tab structure so deep links don't break
+// Map legacy tab IDs onto the new structure so deep links don't break.
+// Crew Members / Crew Profiles / Crew Types are merged into 'directory'.
+// Reviews is removed entirely.
 const TAB_MAP = {
-  'staff': { tab: 'people', sub: 'staff' },
-  'staff-reviews': { tab: 'people', sub: 'staff-reviews' },
-  'teams': { tab: 'people', sub: 'teams' },
-  'directory': { tab: 'people', sub: 'staff' },
+  'staff': { tab: 'people', sub: 'directory' },
+  'crew-profiles': { tab: 'people', sub: 'directory' },
+  'teams': { tab: 'people', sub: 'directory' },
+  'staff-reviews': { tab: 'people', sub: 'directory' },
+  'directory': { tab: 'people', sub: 'directory' },
   'cost-analytics': { tab: 'people', sub: 'insights' },
   'utilization': { tab: 'people', sub: 'insights' },
   'timesheets': { tab: 'time-pay', sub: 'timesheets' },
@@ -31,17 +33,14 @@ const TAB_MAP = {
   'clients': { tab: 'contacts', sub: 'clients' },
   'contractors': { tab: 'contacts', sub: 'contractors' },
   'suppliers': { tab: 'contacts', sub: 'suppliers' },
-  'access-levels': { tab: 'people', sub: 'staff' },
+  'access-levels': { tab: 'people', sub: 'directory' },
 };
 
-// 4 consolidated tabs (down from 7 + standalone views)
+// 4 consolidated tabs. People tab now has 2 sub-pills: Directory (merged) + Insights.
 const TABS = [
   {
     id: 'people', label: 'People', icon: Users, sub: [
-      { id: 'crew-profiles', label: 'Crew Profiles' },
-      { id: 'staff', label: 'Crew Members' },
-      { id: 'teams', label: 'Crew Types' },
-      { id: 'staff-reviews', label: 'Reviews' },
+      { id: 'directory', label: 'Directory' },
       { id: 'insights', label: 'Insights' },
     ],
   },
@@ -68,7 +67,7 @@ export default function StaffPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const initial = location.state?.initialTab || 'staff';
-  const mapped = TAB_MAP[initial] || { tab: 'people', sub: 'staff' };
+  const mapped = TAB_MAP[initial] || { tab: 'people', sub: 'directory' };
   const [tab, setTab] = useState(mapped.tab);
   const [subTab, setSubTab] = useState(mapped.sub || null);
 
@@ -118,13 +117,10 @@ export default function StaffPage() {
 
       {tab === 'training' ? (
         <TrainingMatrixHub />
-      ) : tab === 'people' && renderTab === 'crew-profiles' ? (
-        <CrewProfilesTab />
+      ) : tab === 'people' && renderTab === 'directory' ? (
+        <PeopleDirectory />
       ) : tab === 'people' && renderTab === 'insights' ? (
-        <div className="space-y-4">
-          <StaffCostAnalytics />
-          <StaffUtilizationWidget onNavigate={(section) => navigate('/admin', { state: { section } })} />
-        </div>
+        <PeopleInsights />
       ) : tab === 'contacts' ? (
         <ContactsTab activeSub={renderTab} />
       ) : (

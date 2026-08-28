@@ -14,8 +14,16 @@ import BulkTrainingImportModal from '@/components/staff/BulkTrainingImportModal'
 import TrainingManager from '@/components/TrainingManager';
 import AutoBookerModal from '@/components/staff/AutoBookerModal';
 import TrainingHubRail, { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
+import SubPills from '@/components/SubPills';
 import { CardGridSkeleton } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';
+
+const TRAINING_VIEWS = [
+  { id: 'cards', label: 'Cards' },
+  { id: 'calendar', label: 'Calendar' },
+  { id: 'courses', label: 'Courses' },
+  { id: 'providers', label: 'Providers' },
+];
 
 const ICON_MAP = { IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap };
 
@@ -36,7 +44,7 @@ export default function TrainingMatrixHub() {
 
   return (
     <div className="space-y-4">
-      <TrainingHubRail view={view} setView={setView} />
+      <SubPills pills={TRAINING_VIEWS} active={view} onChange={setView} />
       <div className="min-w-0">
         {view === 'cards' && <CardsView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
         {view === 'calendar' && <CalendarView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
