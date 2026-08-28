@@ -11,6 +11,9 @@ import FleetLiveMap from './FleetLiveMap';
  * Shows KPI gauges (fleet size, compliant, driving now, avg risk),
  * summary tiles (engine hours, mileage, MOT due, service due),
  * and a prominent live fleet map.
+ *
+ * Uses insight-card surfaces and stat-gradient-* tiles to match the
+ * site-wide card system.
  */
 export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
   const stats = useMemo(() => {
@@ -19,7 +22,6 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
     const today = new Date();
 
     vehicles.forEach(v => {
-      // Compliance
       const motExpiry = (v.mot_expiry && v.mot_expiry !== 'null' && v.mot_expiry !== 'None') ? v.mot_expiry : null;
       if (motExpiry) {
         const d = differenceInDays(new Date(motExpiry + 'T00:00:00'), today);
@@ -33,15 +35,12 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
         if (d <= 30) serviceDue++;
       }
 
-      // Driving now
       const live = liveByVehicle[v.id];
       if (live && (live.is_driving_now || (live.ignition_on && (live.speed_kph || 0) > 0))) driving++;
 
-      // Engine hours + mileage
       if (v.engine_hours != null) totalEngineHours += Number(v.engine_hours) || 0;
       if (v.current_mileage != null) totalMileage += Number(v.current_mileage) || 0;
 
-      // Risk score
       if (v.driver_risk_score != null) riskScores.push(v.driver_risk_score);
     });
 
@@ -107,7 +106,7 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
         {/* Summary tiles — 2 columns */}
         <div className="lg:col-span-1 grid grid-cols-2 gap-3">
           {summaryTiles.map((tile, i) => (
-            <div key={i} className={`rounded-xl p-3.5 border ${summaryColorMap[tile.color]}`}>
+            <div key={i} className={`insight-card rounded-xl p-3.5 border ${summaryColorMap[tile.color]}`}>
               <div className="flex items-center gap-2 mb-1.5">
                 <tile.icon className="w-4 h-4 flex-shrink-0" />
                 <p className="text-[10px] font-bold uppercase tracking-wide opacity-70">{tile.label}</p>
@@ -120,8 +119,8 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
 
         {/* Live fleet map — 2 columns */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+          <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
               <Satellite className="w-4 h-4 text-cyan-600" />
               <h3 className="text-sm font-bold text-slate-800">Live Fleet Map</h3>
               <span className="ml-auto text-xs text-slate-400">{stats.driving} driving · {stats.total} total</span>

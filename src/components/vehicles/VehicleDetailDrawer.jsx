@@ -15,11 +15,11 @@ import MaintenanceTimeline from '@/components/vehicles/MaintenanceTimeline';
 import MOTHistoryTimeline from '@/components/vehicles/MOTHistoryTimeline';
 import SafetyEventsDrillDown from '@/components/vehicles/SafetyEventsDrillDown';
 import { generateVehicleReport } from '@/utils/vehiclePdfReport';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 function getVehicleStatus(v) {
   const today = new Date();
   const issues = [];
-  // Guard against "null" / "None" strings from old syncs; only trust Holman-synced data
   const holmanSynced = v.holman_sync_status === 'synced';
   const motExpiry = (v.mot_expiry && v.mot_expiry !== 'null' && v.mot_expiry !== 'None') ? v.mot_expiry : null;
   if (motExpiry) {
@@ -62,7 +62,6 @@ const COLOR_MAP = {
   slate: { bg: 'bg-slate-50', text: 'text-slate-500', border: 'border-slate-200' },
 };
 
-// Spec tile with data source indicator
 function SpecTile({ icon: Icon, label, value, source, color }) {
   const hasValue = value && value !== '—' && value !== 'Unknown';
   return (
@@ -86,7 +85,7 @@ function SpecTile({ icon: Icon, label, value, source, color }) {
 }
 
 export default function VehicleDetailDrawer({ vehicle, onClose }) {
-  const [activeTab, setActiveTab] = useState('live'); // 'live' | 'spec' | 'compliance' | 'reconciliation' | 'safety'
+  const [activeTab, setActiveTab] = useState('live');
   const [reportLoading, setReportLoading] = useState(false);
 
   const handleDownloadReport = async () => {
@@ -151,13 +150,11 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   const makeModel = [vehicle.make, vehicle.model].filter(Boolean).join(' ') || null;
   const geotabLive = vehicle.geotab_sync_status === 'synced';
 
-  // Determine data source for spec fields
   const specSource = (field) => {
     if (field) return geotabLive ? 'Geotab' : null;
     return null;
   };
 
-  // Spec confidence: count how many key spec fields are populated
   const specFields = [vehicle.make, vehicle.model, vehicle.year, vehicle.fuel_type, vehicle.color, vehicle.vehicle_type, vehicle.vin];
   const filledSpecs = specFields.filter(Boolean).length;
   const specConfidence = filledSpecs >= 6 ? 'verified' : filledSpecs >= 3 ? 'partial' : 'unknown';
@@ -168,18 +165,13 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   };
   const confidenceMeta = SPEC_CONFIDENCE[specConfidence];
 
-  // Live motion status
   const isMoving = latestLoc?.ignition_on && (latestLoc?.speed_kph || 0) > 0;
   const motionLabel = !geotabLive ? 'Offline' : !latestLoc ? 'No Signal' : isMoving ? 'Moving' : latestLoc.ignition_on ? 'Engine On' : 'Stopped';
   const motionColor = isMoving ? 'emerald' : latestLoc?.ignition_on ? 'amber' : 'slate';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-md" />
-      <div
-        className="relative w-full max-w-5xl max-h-[calc(100dvh-2rem)] bg-white rounded-2xl shadow-2xl overflow-y-auto animate-in zoom-in-95"
-        onClick={e => e.stopPropagation()}
-      >
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-5xl p-0 sm:p-0 overflow-hidden max-h-[calc(100dvh-2rem)] overflow-y-auto">
         {/* ── Header ── */}
         <div className="hero-gradient text-white px-5 py-4 sticky top-0 z-10">
           <div className="flex items-start justify-between gap-3">
@@ -198,16 +190,12 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
                 {reportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                 <span className="hidden sm:inline">PDF</span>
               </button>
-              <button onClick={onClose} className="p-2 hover:bg-white/15 rounded-lg transition">
-                <X className="w-5 h-5" />
-              </button>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${badge.cls}`}>
               <StatusIcon className="w-3.5 h-3.5" /> {badge.label}
             </span>
-            {/* Live motion badge */}
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${
               motionColor === 'emerald' ? 'bg-emerald-500 text-white' :
               motionColor === 'amber' ? 'bg-amber-500 text-white' :
@@ -286,7 +274,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
         {/* ═════════════ LIVE OPS TAB (Geotab) ═════════════ */}
         {activeTab === 'live' && (
           <div className="px-5 py-4 space-y-4">
-            {/* Quick stats strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2.5 border border-blue-200">
                 <p className="text-[10px] uppercase text-blue-600 font-semibold flex items-center gap-1"><Clock className="w-3 h-3" /> Engine Hours</p>
@@ -306,7 +293,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               </div>
             </div>
 
-            {/* Driver safety telemetry — from Geotab Exception events */}
             {vehicle.geotab_sync_status === 'synced' && vehicle.safety_event_count != null && (
               <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3">
                 <div className="flex items-center justify-between mb-2">
@@ -353,7 +339,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               </div>
             )}
 
-            {/* Live position */}
             {latestLoc ? (
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -378,7 +363,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               </div>
             )}
 
-            {/* Enhanced trip timeline with stops & locations */}
             <TripTimelineEnhanced vehicle={vehicle} />
           </div>
         )}
@@ -386,7 +370,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
         {/* ═════════════ SPEC TAB ═════════════ */}
         {activeTab === 'spec' && (
           <div className="px-5 py-4 space-y-4">
-            {/* Vehicle specification */}
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Car className="w-4 h-4 text-blue-600" />
@@ -411,7 +394,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               </div>
             </div>
 
-            {/* Data source info */}
             <div className="bg-slate-50 rounded-xl border border-slate-200 p-3">
               <div className="flex items-center gap-2 mb-2">
                 <Database className="w-3.5 h-3.5 text-slate-500" />
@@ -443,7 +425,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
         {/* ═════════════ MAINTENANCE TAB (Holman) ═════════════ */}
         {activeTab === 'compliance' && (
           <div className="px-5 py-4 space-y-4">
-            {/* Key dates */}
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <ShieldCheck className="w-4 h-4 text-blue-600" />
@@ -480,7 +461,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               </div>
             </div>
 
-            {/* MOT history timeline */}
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -490,7 +470,6 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
               <MOTHistoryTimeline vehicleId={vehicle.id} vehicle={vehicle} />
             </div>
 
-            {/* Maintenance timeline */}
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Wrench className="w-4 h-4 text-blue-600" />
@@ -515,7 +494,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
             <SafetyEventsDrillDown vehicle={vehicle} />
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

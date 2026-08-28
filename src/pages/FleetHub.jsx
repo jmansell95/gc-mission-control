@@ -1,23 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { Truck } from 'lucide-react';
+import { Truck, Satellite, Wrench } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import RunReportButton from '@/components/reports/RunReportButton';
 import FleetCommandHeader from '@/components/vehicles/FleetCommandHeader';
+import LiveTrackingTab from '@/components/vehicles/LiveTrackingTab';
 import Vehicles from '@/pages/Vehicles';
+import VehicleMaintenanceManager from '@/components/VehicleMaintenanceManager';
 
 /**
  * Fleet Hub — dedicated hub for all vehicles, live GPS tracking,
  * MOT/service schedules, and fleet maintenance.
- * Vehicles are synced from Geotab (Drilling group only) and Holman (MOT/mileage).
  *
- * The command header shows KPI gauges, a live fleet map, and engine-hours/mileage
- * summary tiles. Below that, the Vehicles component renders the card grid with
- * enhanced cards showing full vehicle details.
+ * Three top-level tabs: Live Tracking (default) · Fleet · Maintenance
  */
 export default function FleetHub() {
+  const [activeTab, setActiveTab] = useState('live');
+
   const { data: vehicles = [] } = useScopedEntity('Vehicle', { queryKey: ['vehicles-fleet-hub'], sort: '-created_date', limit: 500 });
 
   // Live Geotab data — fresh driving/ignition overlay (mode 'live_fast' for speed)
@@ -39,15 +40,26 @@ export default function FleetHub() {
     return map;
   }, [liveLocations]);
 
+  const tabs = [
+    { id: 'live', label: 'Live Tracking', icon: Satellite },
+    { id: 'fleet', label: 'Fleet', icon: Truck },
+    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+  ];
+
   return (
     <HubShell
       icon={Truck}
       title="Fleet Hub"
       subtitle="Drilling group vehicles — live GPS tracking, full specs, engine hours & mileage"
       actions={<RunReportButton hub="fleet" />}
+      kpiStrip={<FleetCommandHeader vehicles={vehicles} liveByVehicle={liveByVehicle} />}
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
     >
-      <FleetCommandHeader vehicles={vehicles} liveByVehicle={liveByVehicle} />
-      <Vehicles />
+      {activeTab === 'live' && <LiveTrackingTab />}
+      {activeTab === 'fleet' && <Vehicles />}
+      {activeTab === 'maintenance' && <VehicleMaintenanceManager />}
     </HubShell>
   );
 }
