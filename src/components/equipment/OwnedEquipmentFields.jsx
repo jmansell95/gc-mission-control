@@ -112,6 +112,7 @@ export default function OwnedEquipmentFields({ form, setForm, ownedAssets = [], 
         rate_card_item_id: rc?.id || '',
         is_poa: rc ? rc.price == null : false,
         supplier_id: '',
+        quantity: asset.asset_type === 'rig' ? '1' : (form.quantity || '1'),
         notes: asset.tooling_notes || asset.notes || form.notes,
       });
     }
@@ -119,6 +120,8 @@ export default function OwnedEquipmentFields({ form, setForm, ownedAssets = [], 
 
   const linkedAsset = form.site_asset_id ? (ownedAssets || []).find((a) => a.id === form.site_asset_id) : null;
   const compBadge = linkedAsset?.compliance_status ? complianceBadge[linkedAsset.compliance_status] : null;
+  // Rigs are unique serial-numbered assets — quantity is always 1 and locked.
+  const isRigAsset = linkedAsset?.asset_type === 'rig';
 
   const isHiredByDay = form.unit_label === 'day';
   const itemCount = Number(form.quantity) || 1;
@@ -233,8 +236,8 @@ export default function OwnedEquipmentFields({ form, setForm, ownedAssets = [], 
           </select>
         </div>
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">Quantity{isHiredByDay ? ' (items to deploy)' : ''}</label>
-          <input type="number" min="1" step="1" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} placeholder="1" className={inputCls} />
+          <label className="block text-xs font-medium text-slate-600 mb-1">Quantity{isHiredByDay ? ' (items to deploy)' : ''}{isRigAsset && ' (locked — 1 rig)'}</label>
+          <input type="number" min="1" step="1" value={isRigAsset ? '1' : form.quantity} onChange={(e) => !isRigAsset && setForm({ ...form, quantity: e.target.value })} disabled={isRigAsset} placeholder="1" className={`${inputCls} ${isRigAsset ? 'bg-slate-100 cursor-not-allowed' : ''}`} />
         </div>
       </div>
 

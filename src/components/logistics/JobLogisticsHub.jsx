@@ -111,7 +111,16 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const returnedItems = items.filter(c => c.hire_status === 'off_hired').filter(isLoadable);
   const visibleItems = hireFilter === 'active' ? activeItems : returnedItems;
   const loadableItems = items.filter(isLoadable);
-  const totalNet = loadableItems.reduce((s, c) => s + (Number(c.unit_cost) || 0) * (Number(c.quantity) || 1), 0);
+  // For day-rate items, the effective billing quantity = quantity × days on
+  // site (from start_date → end_date). Rigs have quantity 1, so their total
+  // comes entirely from day_rate × days. Non-day-rate items use quantity only.
+  const totalNet = loadableItems.reduce((s, c) => {
+    const qty = Number(c.quantity) || 1;
+    const days = c.unit_label === 'day' && c.start_date && c.end_date
+      ? Math.max(1, differenceInCalendarDays(new Date(c.end_date + 'T00:00:00'), new Date(c.start_date + 'T00:00:00')) + 1)
+      : 1;
+    return s + (Number(c.unit_cost) || 0) * qty * days;
+  }, 0);
 
   const rigItemLinks = {};
   const linkedItemIds = new Set();
@@ -216,6 +225,10 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           onSiteSignedBy = me?.full_name || me?.email || '';
         } catch (sigErr) { console.error('Signature upload failed:', sigErr); }
       }
+      // Rigs are unique serial-numbered assets — force quantity to 1 regardless
+      // of what the form holds (prevents stale quantity from pre-fix records).
+      const linkedAssetForQty = formData.site_asset_id ? (siteAssets || []).find(a => a.id === formData.site_asset_id) : null;
+      const isRigItem = linkedAssetForQty?.asset_type === 'rig';
       // Number (men) and date fields must be null — not "" — when unset, otherwise
       // schema validation rejects the record ("Could not save item").
       const payload = {
@@ -234,7 +247,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
         order_slip_name: formData.order_slip_name || '',
         start_date: formData.start_date || null, end_date: formData.end_date || null,
         unit_cost: (isContractorItem || isClientItem) ? 0 : (Number(formData.unit_cost) || 0),
-        quantity: Number(formData.quantity) || 1,
+        quantity: isRigItem ? 1 : (Number(formData.quantity) || 1),
         unit_label: (isContractorItem || isLabourItem) ? (isContractorItem ? 'each' : formData.unit_label) : formData.unit_label,
         men: (isContractorItem || isClientItem || !formData.men) ? null : Number(formData.men),
         vat_exempt: (isContractorItem || isClientItem) ? false : !!formData.vat_exempt,
@@ -314,6 +327,8 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   };
 
   const editItem = (c) => {
+    const editAsset = c.site_asset_id ? assetMap[c.site_asset_id] : null;
+    const isRigEdit = editAsset?.asset_type === 'rig';
     setEditingId(c.id);
     setForm({
       category: c.category, supplier_id: c.supplier_id || '', contractor_id: c.contractor_id || '', client_id: c.client_id || '',
@@ -321,7 +336,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
       reference_number: c.reference_number || '', responsible_person: c.responsible_person || '', site_asset_id: c.site_asset_id || '',
       po_number: c.po_number || '', order_slip_url: c.order_slip_url || '', order_slip_name: c.order_slip_name || '',
       rate_card_item_id: c.rate_card_item_id || '', start_date: c.start_date || '', end_date: c.end_date || '',
-      unit_cost: String(c.unit_cost ?? ''), quantity: String(c.quantity ?? '1'), men: c.men ? String(c.men) : '',
+      unit_cost: String(c.unit_cost ?? ''), quantity: isRigEdit ? '1' : String(c.quantity ?? '1'), men: c.men ? String(c.men) : '',
       unit_label: c.unit_label || 'each', vat_exempt: !!c.vat_exempt, notes: c.notes || '',
       delivery_notes: c.delivery_notes || '',
       already_on_site: c.current_location === 'site',
@@ -410,16 +425,13 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
       const rateCardItem = matchRigRateCard(rig);
       const rigDayRate = rateCardItem ? (Number(rateCardItem.price) || 0) : (Number(rig.daily_billing_rate) || 0);
       const rigUnit = rateCardItem?.unit || 'day';
-      // Calculate the rig quantity from the on-site date range so day-rate
-      // billing reflects the actual number of days on site (inclusive).
-      // Gear items keep quantity 1 — they're £0 (included in the rig rate).
+      // Rigs are unique serial-numbered assets — quantity is always 1.
+      // Day-rate billing is driven by the on-site date range (start_date →
+      // end_date), not the quantity field, so the financials engine calculates
+      // cost = day_rate × working days from the dates.
       const rigStartDate = dates.onSiteStart || job?.start_date || '';
       const rigEndDate = dates.onSiteEnd || job?.end_date || '';
-      let rigQuantity = 1;
-      if (rigUnit === 'day' && rigStartDate && rigEndDate) {
-        const d = differenceInCalendarDays(new Date(rigEndDate + 'T00:00:00'), new Date(rigStartDate + 'T00:00:00')) + 1;
-        if (d > 0) rigQuantity = d;
-      }
+      const rigQuantity = 1;
       const payload = [
         { job_id: jobId, category: 'internal_equipment', supplier_id: '', description: rig.name,
           reference_number: rig.serial_number || '', responsible_person: rig.responsible_person || '', site_asset_id: rig.id,
