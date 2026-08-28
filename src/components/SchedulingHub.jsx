@@ -4,14 +4,13 @@ import UnifiedRotaBuilder from '@/components/rota/UnifiedRotaBuilder';
 import CalendarView from '@/components/CalendarView';
 import AvailabilityHeatmap from '@/components/rota/AvailabilityHeatmap';
 import TemplateWeekCopy from '@/components/rota/TemplateWeekCopy';
-import { Calendar, CalendarDays, CalendarClock, Navigation2, Loader2, Grid3x3, Warehouse, Users, AlertTriangle, CheckCircle2, Coffee } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Navigation2, Loader2, Grid3x3, Users, AlertTriangle, CheckCircle2, Coffee } from 'lucide-react';
 import { useSchedulingAssistant } from '@/components/SchedulingAssistantChat';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useToast } from '@/components/ui/use-toast';
 import TabBar from '@/components/TabBar';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
-import YardControlWidget from '@/components/dashboard/YardControlWidget';
 
 // Unified scheduling hub — combines the weekly rota builder and the calendar
 // view behind a single sidebar entry. `initialTab` lets legacy "rota" /
@@ -58,7 +57,6 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
 
   const tabs = [
     { id: 'rota', label: 'Rota Builder', icon: Calendar },
-    { id: 'yard', label: 'Yard Control', icon: Warehouse },
     { id: 'heatmap', label: 'Availability Heatmap', icon: Grid3x3 },
     { id: 'calendar', label: 'Calendar', icon: CalendarDays },
   ];
@@ -94,7 +92,6 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
         </div>
       </div>
       {tab === 'rota' && <UnifiedRotaBuilder />}
-      {tab === 'yard' && <YardControlWidget />}
       {tab === 'heatmap' && <AvailabilityHeatmap />}
       {tab === 'calendar' && <CalendarView />}
     </div>

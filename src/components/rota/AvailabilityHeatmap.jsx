@@ -1,28 +1,48 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Calendar, Coffee, Stethoscope, Users, Warehouse, Loader2 } from 'lucide-react';
-import { format, startOfWeek, addDays, isSameDay, parseISO } from 'date-fns';
+import {
+  Calendar, Coffee, Stethoscope, Users, Warehouse, Loader2, ChevronLeft, ChevronRight, Filter, Briefcase,
+} from 'lucide-react';
+import { format, startOfWeek, addDays, parseISO, isWeekend } from 'date-fns';
 import { useDivision } from '@/contexts/DivisionContext';
 
-// Availability Heatmap — overlays absence, training, and yard/depot
-// status as colored background highlights on the rota grid so
-// managers see availability conflicts instantly before assigning.
+/**
+ * AvailabilityHeatmap — redesigned modern calendar-grid view.
+ *
+ * Responsive week heatmap of crew availability with:
+ *  - Color-coded cells (refined brand palette): on-job, leave, sick, training, depot, available
+ *  - Team / crew-type filter
+ *  - Per-person row summaries (status breakdown)
+ *  - Per-day column totals (headcount by status)
+ *  - Hover tooltips with detail
+ *  - Legend
+ */
 
-const TYPE_CONFIG = {
-  annual_leave: { color: 'bg-blue-200/60', border: 'border-blue-300', icon: Coffee, label: 'AL' },
-  sick: { color: 'bg-rose-200/60', border: 'border-rose-300', icon: Stethoscope, label: 'Sick' },
-  training: { color: 'bg-amber-200/60', border: 'border-amber-300', icon: Users, label: 'Train' },
-  yard_depot: { color: 'bg-slate-200/60', border: 'border-slate-300', icon: Warehouse, label: 'Yard' },
+const STATUS_CONFIG = {
+  job:          { bg: 'bg-emerald-500', text: 'text-white', label: 'On Job',     icon: Briefcase },
+  annual_leave: { bg: 'bg-blue-400',    text: 'text-white', label: 'Leave',      icon: Coffee },
+  sick:         { bg: 'bg-rose-400',    text: 'text-white', label: 'Sick',       icon: Stethoscope },
+  training:     { bg: 'bg-amber-400',   text: 'text-white', label: 'Training',   icon: Users },
+  yard_depot:   { bg: 'bg-slate-400',   text: 'text-white', label: 'Depot',      icon: Warehouse },
+  available:    { bg: 'bg-slate-100',   text: 'text-slate-400', label: 'Available', icon: null },
 };
+
+const STATUS_ORDER = ['job', 'annual_leave', 'sick', 'training', 'yard_depot', 'available'];
 
 export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
   const [weekStart, setWeekStart] = useState(propWeekStart || format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'));
+  const [teamFilter, setTeamFilter] = useState('all');
   const { activeDivisionId } = useDivision();
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['heatmap-staff'],
-    queryFn: async () => { const r = await base44.entities.Staff.filter({ is_active: true }, 'full_name', 100); return r.data || r || []; },
+    queryFn: async () => { const r = await base44.entities.Staff.filter({ is_active: true }, 'full_name', 200); return r.data || r || []; },
+  });
+
+  const { data: teams = [] } = useQuery({
+    queryKey: ['teams'],
+    queryFn: () => base44.entities.Team.list(),
   });
 
   const { data: assignments = [] } = useQuery({
@@ -38,111 +58,196 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
     queryFn: async () => { const r = await base44.entities.Absence.filter({ status: 'approved' }, 'start_date', 200); return r.data || r || []; },
   });
 
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }).map((_, i) => {
+  const teamMap = useMemo(() => {
+    const m = {};
+    teams.forEach((t) => { m[t.id] = t; });
+    return m;
+  }, [teams]);
+
+  const days = useMemo(() => (
+    Array.from({ length: 7 }).map((_, i) => {
       const date = addDays(new Date(weekStart), i);
-      return { date, dateStr: format(date, 'yyyy-MM-dd'), label: format(date, 'EEE dd') };
+      return { date, dateStr: format(date, 'yyyy-MM-dd'), label: format(date, 'EEE'), dayNum: format(date, 'dd') };
+    })
+  ), [weekStart]);
+
+  // Resolve the status for a staff member on a given date
+  const getDayStatus = (staffId, dateStr) => {
+    const dayAssignments = assignments.filter((a) => a.staff_id === staffId && a.assigned_date === dateStr);
+    const nonJob = dayAssignments.find((a) => a.assignment_type !== 'job');
+    if (nonJob) return { type: nonJob.assignment_type, label: nonJob.non_job_label || STATUS_CONFIG[nonJob.assignment_type]?.label || '' };
+
+    // Approved absences
+    const absence = absences.find((a) => {
+      if (a.staff_id !== staffId) return false;
+      const start = parseISO(a.start_date);
+      const end = a.end_date ? parseISO(a.end_date) : start;
+      const d = parseISO(dateStr);
+      return d >= start && d <= end;
     });
-  }, [weekStart]);
-
-  const getDayStatus = (staffId, date) => {
-    const dayAssignments = assignments.filter(a => a.staff_id === staffId && a.assigned_date === date);
-    const nonJob = dayAssignments.find(a => a.assignment_type !== 'job');
-    if (nonJob) return { type: nonJob.assignment_type, label: nonJob.non_job_label || TYPE_CONFIG[nonJob.assignment_type]?.label || '' };
-
-    // Check approved absences
-    const absence = absences.find(a => a.staff_id === staffId && {
-      start: parseISO(a.start_date), end: parseISO(a.end_date || a.start_date),
-    } && date >= parseISO(a.start_date) && date <= parseISO(a.end_date || a.start_date));
     if (absence) return { type: absence.absence_type || 'annual_leave', label: absence.absence_type === 'sick' ? 'Sick' : 'AL' };
 
-    const hasJob = dayAssignments.some(a => a.assignment_type === 'job');
+    const hasJob = dayAssignments.some((a) => a.assignment_type === 'job');
     if (hasJob) return { type: 'job', label: 'Job' };
-    return null;
+    return { type: 'available', label: '' };
   };
 
-  const isWeekend = (date) => {
-    const day = date.getDay();
-    return day === 0 || day === 6;
+  // Filter staff by team
+  const filteredStaff = useMemo(() => {
+    if (teamFilter === 'all') return staff;
+    return staff.filter((s) => s.team_id === teamFilter);
+  }, [staff, teamFilter]);
+
+  // Per-person row summary: count of each status across the week
+  const rowSummary = (staffId) => {
+    const counts = { job: 0, annual_leave: 0, sick: 0, training: 0, yard_depot: 0, available: 0 };
+    days.forEach((d) => {
+      const st = getDayStatus(staffId, d.dateStr);
+      counts[st.type] = (counts[st.type] || 0) + 1;
+    });
+    return counts;
   };
+
+  // Per-day column totals: headcount on job / unavailable / available
+  const dayTotals = useMemo(() => {
+    return days.map((d) => {
+      const counts = { job: 0, annual_leave: 0, sick: 0, training: 0, yard_depot: 0, available: 0 };
+      filteredStaff.forEach((s) => {
+        const st = getDayStatus(s.id, d.dateStr);
+        counts[st.type] = (counts[st.type] || 0) + 1;
+      });
+      return { ...d, counts };
+    });
+  }, [days, filteredStaff, assignments, absences]);
+
+  const prevWeek = () => setWeekStart(format(addDays(new Date(weekStart), -7), 'yyyy-MM-dd'));
+  const nextWeek = () => setWeekStart(format(addDays(new Date(weekStart), 7), 'yyyy-MM-dd'));
+  const thisWeek = () => setWeekStart(format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'));
+
+  const weekLabel = `${format(new Date(weekStart), 'd MMM')} – ${format(addDays(new Date(weekStart), 6), 'd MMM yyyy')}`;
 
   return (
-    <div className="insight-card rounded-2xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#2E5A1A]" />
-          <h3 className="font-bold text-slate-800">Availability Heatmap</h3>
+    <div className="insight-card rounded-2xl p-4 md:p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl stat-gradient-brand flex items-center justify-center">
+            <Calendar className="w-4.5 h-4.5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">Availability Heatmap</h3>
+            <p className="text-xs text-slate-400">{weekLabel}</p>
+          </div>
         </div>
-        <div className="flex gap-1">
-          <button onClick={() => setWeekStart(format(addDays(new Date(weekStart), -7), 'yyyy-MM-dd'))}
-            className="px-2 py-1 text-xs rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">← Prev</button>
-          <button onClick={() => setWeekStart(format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'))}
-            className="px-3 py-1 text-xs rounded-lg bg-emerald-100 text-emerald-700 font-medium">Today</button>
-          <button onClick={() => setWeekStart(format(addDays(new Date(weekStart), 7), 'yyyy-MM-dd'))}
-            className="px-2 py-1 text-xs rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">Next →</button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Team filter */}
+          <div className="relative">
+            <Filter className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <select
+              value={teamFilter}
+              onChange={(e) => setTeamFilter(e.target.value)}
+              className="pl-8 pr-3 py-1.5 text-xs font-semibold border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#2E5A1A] transition"
+            >
+              <option value="all">All Crews</option>
+              {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+          {/* Week nav */}
+          <div className="flex items-center gap-1 bg-white rounded-lg border border-slate-200 p-0.5">
+            <button onClick={prevWeek} className="p-1.5 rounded-md hover:bg-slate-100 transition"><ChevronLeft className="w-4 h-4 text-slate-500" /></button>
+            <button onClick={thisWeek} className="px-2.5 py-1 text-xs font-semibold rounded-md bg-[#2E5A1A]/10 text-[#2E5A1A] hover:bg-[#2E5A1A]/15 transition">Today</button>
+            <button onClick={nextWeek} className="p-1.5 rounded-md hover:bg-slate-100 transition"><ChevronRight className="w-4 h-4 text-slate-500" /></button>
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        <LegendItem color="bg-emerald-200/60" label="On Job" />
-        <LegendItem color="bg-blue-200/60" label="Annual Leave" />
-        <LegendItem color="bg-rose-200/60" label="Sick" />
-        <LegendItem color="bg-amber-200/60" label="Training" />
-        <LegendItem color="bg-slate-200/60" label="Yard/Depot" />
-        <LegendItem color="bg-white border border-slate-200" label="Available" />
+      <div className="flex flex-wrap gap-3 mb-4 pb-3 border-b border-slate-100">
+        {STATUS_ORDER.map((key) => {
+          const cfg = STATUS_CONFIG[key];
+          return (
+            <div key={key} className="flex items-center gap-1.5">
+              <div className={`w-3.5 h-3.5 rounded ${cfg.bg}`} />
+              <span className="text-xs font-medium text-slate-600">{cfg.label}</span>
+            </div>
+          );
+        })}
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" /></div>
+        <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" /></div>
+      ) : filteredStaff.length === 0 ? (
+        <div className="text-center py-12 text-slate-400">
+          <Users className="w-8 h-8 mx-auto mb-2" />
+          <p className="text-sm">No active staff in this crew type.</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
-          <div className="grid gap-1" style={{ gridTemplateColumns: `140px repeat(7, minmax(80px, 1fr))` }}>
-            <div></div>
-            {days.map(d => (
-              <div key={d.dateStr} className={`text-center text-xs font-semibold py-1.5 rounded-lg ${isWeekend(d.date) ? 'bg-slate-100 text-slate-400' : 'bg-slate-50 text-slate-600'}`}>
-                {d.label}
-              </div>
-            ))}
-            {staff.slice(0, 20).map(s => (
-              <React.Fragment key={s.id}>
-                <div className="flex items-center px-2 py-1">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-500 to-green-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {(s.full_name || s.name || '?').charAt(0)}
-                  </div>
-                  <span className="ml-2 text-xs font-medium text-slate-700 truncate">{s.full_name || s.name}</span>
-                </div>
-                {days.map(d => {
-                  const status = getDayStatus(s.id, d.dateStr);
-                  const isAvail = !status;
-                  const cfg = status ? TYPE_CONFIG[status.type] : null;
-                  return (
-                    <div key={d.dateStr} className={`min-h-[36px] rounded-lg border flex items-center justify-center text-xs font-medium transition ${
-                      isWeekend(d.date) ? 'opacity-50' : ''
-                    } ${
-                      status?.type === 'job' ? 'bg-emerald-200/60 border-emerald-300 text-emerald-700' :
-                      cfg ? `${cfg.color} ${cfg.border} text-slate-600` :
-                      'bg-white border-slate-100 text-slate-300'
-                    }`}>
-                      {status?.type === 'job' ? 'Job' :
-                       status?.label || (isAvail ? '—' : '')}
+          <div className="min-w-[640px]">
+            {/* Day headers + column totals */}
+            <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `180px repeat(7, minmax(70px, 1fr))` }}>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-end pb-1">Crew Member</div>
+              {dayTotals.map((d) => {
+                const weekend = isWeekend(d.date);
+                const onJob = d.counts.job;
+                const off = d.counts.annual_leave + d.counts.sick + d.counts.training + d.counts.yard_depot;
+                return (
+                  <div key={d.dateStr} className={`text-center rounded-lg py-1.5 ${weekend ? 'bg-slate-50' : ''}`}>
+                    <p className={`text-xs font-bold ${weekend ? 'text-slate-400' : 'text-slate-700'}`}>{d.label}</p>
+                    <p className="text-[10px] text-slate-400 tabular-nums">{d.dayNum}</p>
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      <span className="text-[9px] font-bold text-emerald-600 tabular-nums">{onJob}</span>
+                      {off > 0 && <span className="text-[9px] font-bold text-slate-400 tabular-nums">·{off}</span>}
                     </div>
-                  );
-                })}
-              </React.Fragment>
-            ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Rows */}
+            <div className="space-y-1.5">
+              {filteredStaff.slice(0, 30).map((s) => {
+                const summary = rowSummary(s.id);
+                const team = teamMap[s.team_id];
+                const initials = (s.full_name || s.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+                return (
+                  <div key={s.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: `180px repeat(7, minmax(70px, 1fr))` }}>
+                    {/* Name + summary */}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                        {initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-800 truncate">{s.full_name || s.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{team?.name || 'Unassigned'}</p>
+                      </div>
+                    </div>
+                    {/* Day cells */}
+                    {days.map((d) => {
+                      const status = getDayStatus(s.id, d.dateStr);
+                      const cfg = STATUS_CONFIG[status.type] || STATUS_CONFIG.available;
+                      const weekend = isWeekend(d.date);
+                      return (
+                        <div
+                          key={d.dateStr}
+                          title={`${s.full_name || s.name} · ${format(d.date, 'EEE dd')} · ${cfg.label}${status.label ? ` (${status.label})` : ''}`}
+                          className={`h-9 rounded-lg flex items-center justify-center text-[10px] font-bold ${cfg.bg} ${cfg.text} ${weekend ? 'opacity-60' : ''} transition hover:scale-[1.08] hover:shadow-md cursor-default`}
+                        >
+                          {status.type === 'job' ? 'J' : status.type === 'available' ? '' : (status.label || cfg.label.slice(0, 3))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+
+            {filteredStaff.length > 30 && (
+              <p className="text-center text-xs text-slate-400 mt-3">Showing first 30 of {filteredStaff.length} staff</p>
+            )}
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function LegendItem({ color, label }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className={`w-4 h-4 rounded ${color}`} />
-      <span className="text-xs text-slate-600">{label}</span>
     </div>
   );
 }
