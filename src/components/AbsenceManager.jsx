@@ -123,22 +123,46 @@ export default function AbsenceManager() {
       <SettingsSectionHeader icon={CalendarX} title="Absence Management" description="Approve leave requests and recurring days off" />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">Pending Requests</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{pendingCount}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-amber opacity-10" />
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl stat-gradient-amber flex items-center justify-center mb-2.5">
+              <Clock className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{pendingCount}</p>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Pending Requests</p>
+          </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">On Leave Today</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{onLeaveToday.length}</p>
+        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-blue opacity-10" />
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl stat-gradient-blue flex items-center justify-center mb-2.5">
+              <Users className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{onLeaveToday.length}</p>
+            <p className="text-xs font-semibold text-slate-500 mt-1">On Leave Today</p>
+          </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">Recurring Days Off</p>
-          <p className="text-2xl font-bold text-slate-700 mt-1">{activeRecurring.length}</p>
+        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-violet opacity-10" />
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl stat-gradient-violet flex items-center justify-center mb-2.5">
+              <Repeat className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{activeRecurring.length}</p>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Recurring Days Off</p>
+          </div>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">Total Requests</p>
-          <p className="text-2xl font-bold text-slate-900 mt-1">{validAbsences.length}</p>
+        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-brand opacity-10" />
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl stat-gradient-brand flex items-center justify-center mb-2.5">
+              <CalendarX className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{validAbsences.length}</p>
+            <p className="text-xs font-semibold text-slate-500 mt-1">Total Requests</p>
+          </div>
         </div>
       </div>
 
@@ -161,18 +185,18 @@ export default function AbsenceManager() {
             <div className="flex gap-1.5 flex-wrap">
               {['all', 'pending', 'approved', 'rejected'].map(f => (
                 <button key={f} onClick={() => setStatusFilter(f)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition capitalize ${statusFilter === f ? 'bg-emerald-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition capitalize ${statusFilter === f ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                   {f}
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-sm font-medium">
+            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
               <Plus className="w-4 h-4" /> Log Absence
             </button>
           </div>
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">
+            <form onSubmit={handleSubmit} className="insight-card rounded-2xl p-5 mb-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
@@ -206,14 +230,14 @@ export default function AbsenceManager() {
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
-                <button type="submit" className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm">Submit Request</button>
+                <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">Submit Request</button>
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
               </div>
             </form>
           )}
 
           {requestsByStaff.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-10 text-center text-slate-400 text-sm">
+            <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">
               No absence requests{statusFilter !== 'all' ? ` with status "${statusFilter}"` : ''}.
             </div>
           ) : (
@@ -225,7 +249,7 @@ export default function AbsenceManager() {
                   .filter(a => a.status === 'pending' || (a.status === 'approved' && a.end_date >= today))
                   .sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
                 return (
-                  <div key={s.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div key={s.id} className="insight-card rounded-2xl overflow-hidden">
                     <button onClick={() => toggleStaffExpand(s.id)}
                       className="w-full px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition text-left">
                       <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -305,13 +329,13 @@ export default function AbsenceManager() {
                 <Sparkles className="w-4 h-4" /> {bulkLoading ? 'Adding…' : 'Add Weekends for All Staff'}
               </button>
             </div>
-            <button onClick={() => setShowRecurringForm(!showRecurringForm)} className="flex items-center gap-2 px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-sm font-medium">
+            <button onClick={() => setShowRecurringForm(!showRecurringForm)} className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
               <Plus className="w-4 h-4" /> Add Recurring Day Off
             </button>
           </div>
 
           {showRecurringForm && (
-            <form onSubmit={handleRecurringSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">
+            <form onSubmit={handleRecurringSubmit} className="insight-card rounded-2xl p-5 mb-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
@@ -333,7 +357,7 @@ export default function AbsenceManager() {
                 <div className="flex flex-wrap gap-2">
                   {DAY_LABELS.map((label, d) => (
                     <button type="button" key={d} onClick={() => toggleDay(d)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-400'}`}>
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#5A8C1E]'}`}>
                       {label}
                     </button>
                   ))}
@@ -341,20 +365,20 @@ export default function AbsenceManager() {
               </div>
               <div className="flex gap-2 mt-5">
                 <button type="submit" disabled={!recurringForm.staff_id || recurringForm.days_of_week.length === 0}
-                  className="px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm disabled:opacity-50">Save</button>
+                  className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm disabled:opacity-50">Save</button>
                 <button type="button" onClick={() => setShowRecurringForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
               </div>
             </form>
           )}
 
           {recurringByStaff.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-10 text-center text-slate-400 text-sm">
+            <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">
               No recurring days off set up yet. Use “Add Weekends for All Staff” to set everyone up in one click, or add a custom pattern per staff member.
             </div>
           ) : (
             <div className="space-y-3">
               {recurringByStaff.map(({ staff: s, items }) => (
-                <div key={s.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div key={s.id} className="insight-card rounded-2xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                       <span className="text-emerald-700 font-bold text-xs">{s.name.charAt(0)}</span>

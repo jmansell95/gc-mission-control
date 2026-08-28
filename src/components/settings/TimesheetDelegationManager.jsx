@@ -107,7 +107,7 @@ export default function TimesheetDelegationManager() {
         title="Timesheet Approval Delegation"
         description="Delegate timesheet approval authority to another person during absences — annual leave, conferences, sick cover."
         actions={
-          <Button onClick={() => setShowForm(!showForm)} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+          <Button onClick={() => setShowForm(!showForm)} className="bg-[#2E5A1A] hover:bg-[#1c4a12] text-white">
             {showForm ? <X className="w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
             {showForm ? 'Cancel' : 'New Delegation'}
           </Button>
@@ -175,7 +175,7 @@ export default function TimesheetDelegationManager() {
               placeholder="e.g. Annual leave, Conference, Sick cover"
               className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white" />
           </div>
-          <Button type="submit" disabled={createMutation.isPending} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+          <Button type="submit" disabled={createMutation.isPending} className="bg-[#2E5A1A] hover:bg-[#1c4a12] text-white">
             {createMutation.isPending ? 'Creating…' : 'Create Delegation'}
           </Button>
         </form>

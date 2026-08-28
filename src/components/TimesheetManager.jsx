@@ -19,13 +19,16 @@ const meterageOf = (t) => Number(t?.meterage) || 0;
 
 function StatBox({ icon: Icon, label, value, gradient = 'stat-gradient-slate', sub }) {
   return (
-    <div className={`${gradient} rounded-xl shadow-md p-4 text-white relative overflow-hidden`}>
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0"><Icon className="w-4 h-4 text-white" /></div>
-        <p className="text-xs text-white/80 font-medium">{label}</p>
+    <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+      <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full ${gradient} opacity-10`} />
+      <div className="relative">
+        <div className={`w-9 h-9 rounded-xl ${gradient} flex items-center justify-center mb-2.5`}>
+          <Icon className="w-4 h-4 text-white" />
+        </div>
+        <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{value}</p>
+        <p className="text-xs font-semibold text-slate-500 mt-1">{label}</p>
+        {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
       </div>
-      <p className="text-2xl font-bold text-white mt-2">{value}</p>
-      {sub && <p className="text-xs text-white/70 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -257,7 +260,7 @@ export default function TimesheetManager() {
       <SettingsSectionHeader icon={Clock} title="Timesheets" description="Review daily entries, approve the week, then merge & download for payroll" />
 
       {/* Stat boxes */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
         <StatBox icon={Clock} label="Pending Approval" value={pendingCount} gradient="stat-gradient-amber" />
         <StatBox icon={CheckCircle2} label="Total Hours" value={fmtDur(rangeMins)} gradient="stat-gradient-emerald" sub="in range" />
         <StatBox icon={TrendingUp} label="Overtime" value={fmtDur(rangeOtMins)} gradient="stat-gradient-rose" sub="across all crew" />
@@ -360,7 +363,7 @@ export default function TimesheetManager() {
       {/* Bulk approve (non-week modes) */}
       {rangeMode !== 'week' && pendingCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <button onClick={handleBulkApprove} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition">
+          <button onClick={handleBulkApprove} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition">
             <CheckCircle2 className="w-3.5 h-3.5" /> Approve all submitted ({pendingCount})
           </button>
           <span className="text-[11px] text-slate-400">Approves every submitted day across all crew for the selected range.</span>
@@ -369,11 +372,11 @@ export default function TimesheetManager() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="insight-card rounded-2xl overflow-hidden">
           <TableSkeleton rows={4} cols={6} />
         </div>
       ) : isError ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="insight-card rounded-2xl overflow-hidden">
           <ErrorState message="Couldn't load timesheets" onRetry={refetch} />
         </div>
       ) : rangeMode === 'week' ? (
@@ -403,7 +406,7 @@ export default function TimesheetManager() {
 
           {/* 3. Per-staff Weekly Cards */}
           {weeklyGroups.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="insight-card rounded-2xl overflow-hidden">
               <EmptyState icon={Users} title="No timesheets this week" message="No submitted or approved timesheets for the selected week and filters. Use the arrows to check other weeks." />
             </div>
           ) : (
@@ -427,7 +430,7 @@ export default function TimesheetManager() {
         </div>
       ) : (
         byDateGroups.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="insight-card rounded-2xl overflow-hidden">
             <EmptyState icon={Users} title="No timesheets in this range" message="No timesheets found for the selected date range and filters. Try a different range or clear your filters." />
           </div>
         ) : (

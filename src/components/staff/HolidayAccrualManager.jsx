@@ -43,7 +43,7 @@ export default function HolidayAccrualManager() {
         title="Holiday Pay Accrual"
         description="Track holiday entitlement, days taken, and accrued balances per staff member."
         actions={
-          <Button onClick={handleRecalculate} disabled={calculating} className="bg-emerald-700 hover:bg-emerald-800 text-white">
+          <Button onClick={handleRecalculate} disabled={calculating} className="bg-[#2E5A1A] hover:bg-[#1c4a12] text-white">
             {calculating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <RefreshCw className="w-4 h-4 mr-1" />}
             Recalculate All
           </Button>
