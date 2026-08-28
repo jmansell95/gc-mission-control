@@ -35,7 +35,7 @@ function MapBoundsFitter({ points }) {
 function VehicleMarker({ vehicle, onClick }) {
   const pos = [vehicle.lat, vehicle.lng];
   if (vehicle.lat == null || vehicle.lng == null) return null;
-  const colour = vehicle.ignition_on ? '#06b6d4' : '#94a3b8';
+  const colour = vehicle.ignition_on ? '#2E5A1A' : '#94a3b8';
   const heading = vehicle.heading || 0;
   const arrowSvg = vehicle.ignition_on
     ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="transform:rotate(${heading}deg);transition:transform 0.3s"><path d="M12 2L4 22l8-6 8 6z"/></svg>`
@@ -44,7 +44,7 @@ function VehicleMarker({ vehicle, onClick }) {
     html: `<div style="position:relative">
       <div style="background:${colour};width:32px;height:32px;border-radius:50%;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">${arrowSvg}</div>
       ${vehicle.ignition_on ? '<div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ' + colour + ';opacity:0.35;animation:pulse 2s infinite"></div>' : ''}
-      <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:${vehicle.ignition_on ? '#06b6d4' : '#64748b'};color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;font-family:monospace">${vehicle.registration_number || ''}</div>
+      <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:${vehicle.ignition_on ? '#2E5A1A' : '#64748b'};color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;font-family:monospace">${vehicle.registration_number || ''}</div>
     </div>`,
     className: 'hazard-map-marker',
     iconSize: [32, 32],
@@ -91,14 +91,14 @@ export default function LiveTrackingTab() {
   const [syncMsg, setSyncMsg] = useState(null);
 
   // ── Live locations ──
-  const { data: liveData, isLoading: liveLoading, refetch: refetchLive } = useQuery({
+  const { data: liveData, isLoading: liveLoading, refetch: refetchLive, dataUpdatedAt, isFetching } = useQuery({
     queryKey: ['geotab-live-locations'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getVehicleLocationHistory', { mode: 'live_fast', limit: 500 });
       return res?.data ?? res;
     },
-    refetchInterval: 60000,
-    staleTime: 30000,
+    refetchInterval: 20000,
+    staleTime: 10000,
   });
 
   const allVehicles = liveData?.vehicles || [];
@@ -249,13 +249,19 @@ export default function LiveTrackingTab() {
     <div className="space-y-3">
       {/* ── Controls bar ── */}
       <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 flex-1 min-w-[180px]">
-          <div className="w-9 h-9 rounded-lg stat-gradient-cyan flex items-center justify-center">
-            <Satellite className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
+          <div className="w-10 h-10 rounded-xl stat-gradient-brand flex items-center justify-center icon-tile-glow">
+            <Satellite className="w-5 h-5 text-white" />
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800">Live Tracking</p>
             <p className="text-[11px] text-slate-500">{trackedCount} tracked · {movingCount} moving · {stoppedCount} stopped</p>
+            <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${isFetching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
+              {isFetching ? 'Syncing…' : `Synced ${dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}`}
+              <span className="text-slate-300">·</span>
+              <span className="text-[#2E5A1A] font-semibold">Auto 20s</span>
+            </p>
           </div>
         </div>
 
@@ -268,11 +274,11 @@ export default function LiveTrackingTab() {
               { val: 'stopped', label: 'Stopped', count: stoppedCount },
             ].map(opt => (
               <button key={opt.val} onClick={() => setFilterMoving(opt.val)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterMoving === opt.val ? 'bg-white text-cyan-700 shadow-sm' : 'text-slate-500'}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterMoving === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
                 {opt.val === 'moving' && <Zap className="w-3 h-3" />}
                 {opt.val === 'stopped' && <Clock className="w-3 h-3" />}
                 {opt.label}
-                <span className={`text-[10px] tabular-nums ${filterMoving === opt.val ? 'text-cyan-500' : 'text-slate-400'}`}>{opt.count}</span>
+                <span className={`text-[10px] tabular-nums ${filterMoving === opt.val ? 'text-[#8DC63F]' : 'text-slate-400'}`}>{opt.count}</span>
               </button>
             ))}
           </div>
@@ -343,7 +349,7 @@ export default function LiveTrackingTab() {
         <div className="lg:col-span-2 insight-card rounded-2xl overflow-hidden">
           {liveLoading && isLiveMode ? (
             <div className="flex flex-col items-center justify-center" style={{ height: 600 }}>
-              <Loader2 className="w-8 h-8 text-cyan-600 animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
               <p className="text-sm text-slate-500">Loading live vehicle locations…</p>
             </div>
           ) : trackedCount === 0 && isLiveMode ? (
@@ -355,7 +361,7 @@ export default function LiveTrackingTab() {
           ) : (
             <>
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
-                <Satellite className="w-4 h-4 text-cyan-600" />
+                <Satellite className="w-4 h-4 text-[#2E5A1A]" />
                 <h3 className="text-sm font-bold text-slate-800">
                   {isLiveMode ? 'Live Fleet Map' : `Route: ${selectedVehicle?.registration_number || ''}`}
                 </h3>
@@ -420,7 +426,7 @@ export default function LiveTrackingTab() {
             /* Vehicle list (live mode) */
             <div className="insight-card rounded-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Car className="w-4 h-4 text-cyan-600" /> Vehicles ({liveVehicles.length})</p>
+                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Car className="w-4 h-4 text-[#2E5A1A]" /> Vehicles ({liveVehicles.length})</p>
                 <span className="text-[10px] text-slate-400 flex items-center gap-1"><Filter className="w-3 h-3" /> {filterMoving}</span>
               </div>
               <div className="max-h-[540px] overflow-y-auto divide-y divide-slate-50">
@@ -433,7 +439,7 @@ export default function LiveTrackingTab() {
                         <p className="font-mono font-bold text-sm text-slate-900 truncate">{v.registration_number}</p>
                         <p className="text-[11px] text-slate-500 truncate">{v.vehicle_name}</p>
                       </div>
-                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${v.ignition_on ? 'bg-cyan-500 pulse-ring' : 'bg-slate-300'}`} />
+                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${v.ignition_on ? 'bg-[#8DC63F] pulse-ring' : 'bg-slate-300'}`} />
                     </div>
                     <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400">
                       <span className="flex items-center gap-0.5"><Gauge className="w-3 h-3" /> {v.speed_kph} km/h</span>
@@ -449,7 +455,7 @@ export default function LiveTrackingTab() {
               {/* Trip list + playback (history mode) */}
               {historyLoading ? (
                 <div className="insight-card rounded-2xl p-8 flex flex-col items-center">
-                  <Loader2 className="w-6 h-6 text-cyan-600 animate-spin mb-2" />
+                  <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin mb-2" />
                   <p className="text-xs text-slate-500">Loading trip history…</p>
                 </div>
               ) : trips.length === 0 ? (

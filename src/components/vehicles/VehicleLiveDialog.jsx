@@ -19,7 +19,7 @@ export default function VehicleLiveDialog({ vehicle, onClose, onSelectRoute, onS
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg stat-gradient-cyan flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl stat-gradient-brand flex items-center justify-center icon-tile-glow">
               <Navigation className="w-4 h-4 text-white" />
             </div>
             <span className="font-mono">{vehicle.registration_number || 'Vehicle'}</span>
@@ -29,11 +29,11 @@ export default function VehicleLiveDialog({ vehicle, onClose, onSelectRoute, onS
         <div className="space-y-3">
           {/* Status + speed tiles */}
           <div className="grid grid-cols-2 gap-2.5">
-            <div className={`rounded-xl p-3 border ${vehicle.ignition_on ? 'bg-cyan-50 border-cyan-200' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`rounded-xl p-3 border ${vehicle.ignition_on ? 'bg-[#2E5A1A]/5 border-[#2E5A1A]/20' : 'bg-slate-50 border-slate-200'}`}>
               <p className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1"><Zap className="w-3 h-3" /> Status</p>
               <p className="text-sm font-bold mt-1 flex items-center gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${vehicle.ignition_on ? 'bg-cyan-500 animate-pulse' : 'bg-slate-300'}`} />
-                <span className={vehicle.ignition_on ? 'text-cyan-700' : 'text-slate-500'}>{vehicle.ignition_on ? 'Engine On' : 'Engine Off'}</span>
+                <span className={`w-2 h-2 rounded-full ${vehicle.ignition_on ? 'bg-[#8DC63F] animate-pulse' : 'bg-slate-300'}`} />
+                <span className={vehicle.ignition_on ? 'text-[#2E5A1A]' : 'text-slate-500'}>{vehicle.ignition_on ? 'Engine On' : 'Engine Off'}</span>
               </p>
             </div>
             <div className="rounded-xl p-3 border bg-slate-50 border-slate-200">
@@ -56,13 +56,13 @@ export default function VehicleLiveDialog({ vehicle, onClose, onSelectRoute, onS
 
           {/* Driver */}
           {vehicle.driver_name && (
-            <div className="rounded-xl p-3 border bg-blue-50 border-blue-100 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-blue-700">{vehicle.driver_name.charAt(0)}</span>
+            <div className="rounded-xl p-3 border bg-[#2E5A1A]/5 border-[#2E5A1A]/15 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#2E5A1A]/10 flex items-center justify-center">
+                <span className="text-xs font-bold text-[#2E5A1A]">{vehicle.driver_name.charAt(0)}</span>
               </div>
               <div>
-                <p className="text-[10px] uppercase text-blue-400 font-semibold flex items-center gap-1"><User className="w-3 h-3" /> Driver</p>
-                <p className="text-sm font-medium text-blue-700">{vehicle.driver_name}</p>
+                <p className="text-[10px] uppercase text-[#2E5A1A]/60 font-semibold flex items-center gap-1"><User className="w-3 h-3" /> Driver</p>
+                <p className="text-sm font-medium text-[#2E5A1A]">{vehicle.driver_name}</p>
               </div>
             </div>
           )}
