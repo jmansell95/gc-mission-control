@@ -48,7 +48,7 @@ export default async function (req: Request): Promise<Response> {
 
     const sr = base44.asServiceRole.entities;
 
-    const [staff, jobs, vehicles, clients, rateItems, teams, billingRules, complianceItems, permissionGroups, allSettings] = await Promise.all([
+    const [staff, jobs, vehicles, clients, rateItems, teams, billingRules, complianceItems, permissionGroups, allSettings, assetPandaConfigs, mittiConfigs, klbConfigs] = await Promise.all([
       sr.Staff.list('-created_date', 500),
       sr.Job.list('-created_date', 500),
       sr.Vehicle.list(),
@@ -59,14 +59,37 @@ export default async function (req: Request): Promise<Response> {
       sr.ComplianceItem.list('-created_date', 500),
       sr.PermissionGroup.list('-created_date', 200),
       sr.AppSetting.filter({ key: { $in: INTEGRATION_SETTING_KEYS } }, '-created_date', 50),
+      sr.AssetPandaConfig.list('-created_date', 50),
+      sr.MittiConfig.list('-created_date', 50),
+      sr.KeyLogBookConfig.list('-created_date', 50),
     ]);
 
-    const cfgMap: Record<string, any> = {};
-    for (const s of allSettings || []) cfgMap[s.key] = s.value || {};
-    const integrations = INTEGRATION_SETTING_KEYS.map(k => {
-      const meta = INTEGRATION_META[k];
+    // Aggregate AppSetting configs across all divisions — a key is "connected"
+    // if ANY record with that key (any division) has the connected field set.
+    const settingsByKey: Record<string, any[]> = {};
+    for (const s of allSettings || []) {
+      const k = s.key;
+      if (!settingsByKey[k]) settingsByKey[k] = [];
+      settingsByKey[k].push(s.value || {});
+    }
+    const isAppSettingConnected = (k: string) => {
       const field = INTEGRATION_CONNECTED_FIELDS[k];
-      return { id: meta.id, label: meta.label, connected: !!(cfgMap[k] && cfgMap[k][field]) };
+      if (!field) return false;
+      return (settingsByKey[k] || []).some(v => !!(v && v[field]));
+    };
+    // Dedicated config entities (not stored in AppSetting) — read directly.
+    const assetPandaConnected = (assetPandaConfigs || []).some(c => !!(c.email || c.api_token));
+    const mittiConnected = (mittiConfigs || []).some(c => !!(c.enabled || c.webhook_secret || c.api_token));
+    const klbConnected = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
+
+    const integrations = INTEGRATION_SETTING_KEYS.filter(k => k !== 'integration_coming_soon').map(k => {
+      const meta = INTEGRATION_META[k];
+      let connected = false;
+      if (k === 'asset_panda_config') connected = assetPandaConnected;
+      else if (k === 'safety_culture_config') connected = mittiConnected;
+      else if (k === 'keylogbook_config') connected = klbConnected;
+      else connected = isAppSettingConnected(k);
+      return { id: meta.id, label: meta.label, connected };
     });
 
     const activeStaff = (staff || []).filter(s => s.is_active !== false).length;
@@ -74,7 +97,7 @@ export default async function (req: Request): Promise<Response> {
     const planningJobs = (jobs || []).filter(j => (j.status || 'planning') === 'planning').length;
     const integrationConnectedCount = integrations.filter(i => i.connected).length;
 
-    const comingSoonRaw = cfgMap['integration_coming_soon'] || {};
+    const comingSoonRaw = (settingsByKey['integration_coming_soon'] || [{}])[0] || {};
     const integrationComingSoon: Record<string, boolean> = {};
     if (comingSoonRaw && typeof comingSoonRaw === 'object') {
       for (const [id, val] of Object.entries(comingSoonRaw)) {

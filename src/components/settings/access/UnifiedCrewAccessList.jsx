@@ -7,7 +7,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { normalizePermissions } from '@/utils/permissions';
 import AccessSelect from './AccessSelect';
-import { SelectItem, SelectLabel, SelectSeparator } from '@/components/ui/select';
+import { SelectItem, SelectLabel, SelectSeparator, SelectGroup } from '@/components/ui/select';
 
 const CATEGORY_LABELS = {
   field_ops: 'Field Operations',
@@ -199,19 +199,23 @@ function CrewRow({ team, groups, members, groupStaffCount, expanded, onToggleExp
             <SelectItem value="__none">
               <span className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-slate-200 flex-shrink-0" /> No group</span>
             </SelectItem>
-            <SelectLabel>System Groups</SelectLabel>
-            {groups.filter(g => g.is_system).map(g => (
-              <SelectItem key={g.id} value={g.id}>
-                <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> {g.name}</span>
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectLabel>System Groups</SelectLabel>
+              {groups.filter(g => g.is_system).map(g => (
+                <SelectItem key={g.id} value={g.id}>
+                  <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> {g.name}</span>
+                </SelectItem>
+              ))}
+            </SelectGroup>
             {groups.filter(g => !g.is_system).length > 0 && (
               <>
                 <SelectSeparator />
-                <SelectLabel>Custom Groups</SelectLabel>
-                {groups.filter(g => !g.is_system).map(g => (
-                  <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                ))}
+                <SelectGroup>
+                  <SelectLabel>Custom Groups</SelectLabel>
+                  {groups.filter(g => !g.is_system).map(g => (
+                    <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                  ))}
+                </SelectGroup>
               </>
             )}
           </AccessSelect>

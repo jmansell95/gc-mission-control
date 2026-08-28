@@ -59,19 +59,6 @@ export default function SettingsHubOverview({ onNavigate }) {
   const activeJobs = stats?.activeJobs || 0;
   const planningJobs = stats?.planningJobs || 0;
 
-  const checks = [
-    { id: 'staff', label: 'Add staff & crews', done: (stats?.staffCount || 0) > 0 },
-    { id: 'teams', label: 'Configure crew types', done: (stats?.teamsCount || 0) > 0 },
-    { id: 'access-levels', label: 'Set up access groups', done: (stats?.permissionGroupsCount || 0) > 0 },
-    { id: 'clients', label: 'Add clients', done: (stats?.clientsCount || 0) > 0 },
-    { id: 'vehicles', label: 'Add vehicles', done: (stats?.vehiclesCount || 0) > 0 },
-    { id: 'rate-card', label: 'Upload price list', done: (stats?.rateItemsCount || 0) > 0 },
-    { id: 'billing', label: 'Configure billing rules', done: (stats?.billingRulesCount || 0) > 0 },
-    { id: 'compliance', label: 'Track compliance items', done: (stats?.complianceItemsCount || 0) > 0 },
-    { id: 'integrations', label: 'Connect integrations', done: integrationConnectedCount > 0 },
-  ];
-  const doneCount = checks.filter(c => c.done).length;
-
   const groups = [
     { group: 'Security & Access', items: [
       { id: 'access-levels', icon: KeyRound, label: 'Access Levels', value: stats?.permissionGroupsCount || 0, sub: 'Permission groups & lockdowns per stream' },
@@ -154,11 +141,6 @@ export default function SettingsHubOverview({ onNavigate }) {
         {/* Slim status strip */}
         {!q && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-10 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5">
-              <span className="font-semibold text-slate-700">{doneCount}/{checks.length}</span>
-              <span>setup complete</span>
-            </span>
-            <span className="hidden sm:inline text-slate-300">·</span>
             <span className="flex items-center gap-1.5">
               <span className={`w-1.5 h-1.5 rounded-full ${integrationConnectedCount > 0 ? 'bg-emerald-500' : 'bg-slate-300'}`} />
               <span className="font-semibold text-slate-700">{integrationConnectedCount}/{integrationList.length}</span>
