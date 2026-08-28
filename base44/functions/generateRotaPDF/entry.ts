@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     const allStaffIds = [...new Set(filteredRotas.map(r => r.staff_id))];
     const allStaff = await Promise.all(allStaffIds.map(id => base44.entities.Staff.get(id).catch(() => null)));
 
+    const esc = (s) => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     const fmtDate = (d) => {
       const date = new Date(d + 'T00:00:00');
       const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -42,14 +43,14 @@ Deno.serve(async (req) => {
         const vehicle = vehicles.find(v => v?.id === rota.vehicle_id);
         if (!job) return '';
         const times = (rota.start_time || rota.end_time) ? (rota.start_time || '—') + '–' + (rota.end_time || '—') : '—';
-        return `<tr><td>${fmtDate(rota.assigned_date)}</td><td class="job-name">${job.name}</td><td>${job.location}</td><td>${formatJobType(job.job_type)}</td><td>${times}</td><td>${vehicle ? vehicle.registration_number : '—'}</td></tr>`;
+        return `<tr><td>${fmtDate(rota.assigned_date)}</td><td class="job-name">${esc(job.name)}</td><td>${esc(job.location)}</td><td>${esc(formatJobType(job.job_type))}</td><td>${times}</td><td>${vehicle ? esc(vehicle.registration_number) : '—'}</td></tr>`;
       }).join('');
 
       bodyContent = `
         <div class="header">
           <div class="header-left">
             <h1>Weekly Schedule</h1>
-            <p>${staff.name} · ${formatJobRole(staff.job_role)} · ${staff.worker_type.replace(/_/g,' ')}</p>
+            <p>${esc(staff.name)} · ${esc(formatJobRole(staff.job_role))} · ${esc(staff.worker_type.replace(/_/g,' '))}</p>
           </div>
           <div class="header-right">
             <p class="week-label">Week of</p>
@@ -70,7 +71,7 @@ Deno.serve(async (req) => {
         const member = allStaff.find(s => s?.id === rota.staff_id);
         if (!job) return '';
         const times = (rota.start_time || rota.end_time) ? (rota.start_time || '—') + '–' + (rota.end_time || '—') : '—';
-        return `<tr><td class="job-name">${member?.name || 'Unknown'}</td><td>${formatJobRole(member?.job_role) || '—'}</td><td>${fmtDate(rota.assigned_date)}</td><td class="job-name">${job.name}</td><td>${job.location}</td><td>${times}</td><td>${vehicle ? vehicle.registration_number : '—'}</td></tr>`;
+        return `<tr><td class="job-name">${esc(member?.name || 'Unknown')}</td><td>${esc(formatJobRole(member?.job_role) || '—')}</td><td>${fmtDate(rota.assigned_date)}</td><td class="job-name">${esc(job.name)}</td><td>${esc(job.location)}</td><td>${times}</td><td>${vehicle ? esc(vehicle.registration_number) : '—'}</td></tr>`;
       }).join('');
 
       bodyContent = `

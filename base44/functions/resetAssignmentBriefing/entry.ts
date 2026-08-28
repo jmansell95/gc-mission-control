@@ -5,19 +5,16 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
-    // Entity automation calls include `event`; manual calls include `assignment_id`
-    const isAutomation = !!body.event;
     const assignmentId = body.event?.entity_id || body.assignment_id;
 
     if (!assignmentId) {
       return Response.json({ error: 'Missing assignment_id' }, { status: 400 });
     }
 
-    // For manual (non-automation) calls, verify the user is authenticated
-    if (!isAutomation) {
-      const user = await base44.auth.me();
-      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Always require an authenticated user — never trust a client-supplied
+    // `event` flag to determine the call origin (it can be forged).
+    const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     // Fetch the current assignment to check status
     const assignment = await base44.asServiceRole.entities.RotaAssignment.get(assignmentId);

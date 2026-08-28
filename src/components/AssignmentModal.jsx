@@ -381,6 +381,23 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
           actual_start_date: formData.start_delayed ? (formData.actual_start_date || null) : null
         };
         if (formData.start_delayed && formData.actual_start_date) payload.assigned_date = formData.actual_start_date;
+        // If the job, staff, or date changed, reset the briefing so the crew
+        // re-briefs with the correct context (previously handled by a server
+        // automation that was removed for security — the reset now happens
+        // inline in this authenticated update call).
+        const contextChanged = (assignment.job_id || '') !== jobId
+          || (assignment.staff_id || '') !== formData.staff_id
+          || (assignment.assigned_date || '') !== (payload.assigned_date || formData.assigned_date || '');
+        if (contextChanged) {
+          payload.briefing_signed = false;
+          payload.briefing_signed_at = null;
+          payload.briefing_start_at = null;
+          payload.shift_status = 'pending';
+          if (assignment.status === 'started') {
+            payload.status = 'assigned';
+            payload.started_at = null;
+          }
+        }
         await base44.entities.RotaAssignment.update(assignment.id, payload);
       } else if (isMultiDay) {
         const allDays = buildDateRange(effectiveStart, rangeEnd, formData.work_weekends);

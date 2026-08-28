@@ -174,10 +174,14 @@ function formatGBP(n: number): string {
   return '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
+function escapeHtml(s: any): string {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function buildAlertEmail(alerts: any[]): string {
   const rows = alerts.map(a => {
-    const alertLines = a.alerts.map((al: any) => `    • [${al.severity.toUpperCase()}] ${al.message}`).join('\n');
-    return `  ${a.job_name} (${a.job_status})\n    Budget: ${formatGBP(a.budget)} | Cost: ${formatGBP(a.cost_net)} | Revenue: ${formatGBP(a.revenue_net)} | Profit: ${formatGBP(a.profit)} | Margin: ${a.margin_pct}%\n${alertLines}`;
+    const alertLines = a.alerts.map((al: any) => `    • [${escapeHtml(al.severity.toUpperCase())}] ${escapeHtml(al.message)}`).join('\n');
+    return `  ${escapeHtml(a.job_name)} (${escapeHtml(a.job_status)})\n    Budget: ${formatGBP(a.budget)} | Cost: ${formatGBP(a.cost_net)} | Revenue: ${formatGBP(a.revenue_net)} | Profit: ${formatGBP(a.profit)} | Margin: ${a.margin_pct}%\n${alertLines}`;
   }).join('\n\n');
 
   return `<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px;">

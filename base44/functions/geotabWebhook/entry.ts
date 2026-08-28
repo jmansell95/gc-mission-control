@@ -33,7 +33,12 @@ export default async function(req: Request): Promise<Response> {
     const cfg = settings[0]?.value || {};
     const expectedSecret = cfg.webhook_secret;
 
-    if (expectedSecret && providedSecret !== expectedSecret) {
+    // Reject all requests when the webhook secret is unconfigured — an empty
+    // secret must never be treated as "no auth required" (open door).
+    if (!expectedSecret) {
+      return Response.json({ error: 'Webhook secret not configured — set geotab_config.webhook_secret before accepting events' }, { status: 503 });
+    }
+    if (providedSecret !== expectedSecret) {
       return Response.json({ error: 'Invalid webhook secret' }, { status: 401 });
     }
 

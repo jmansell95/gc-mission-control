@@ -42,6 +42,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: "You can't approve your own delay log" }, { status: 403 });
     }
 
+    // Only admins/managers may approve or reject delay logs — the approve
+    // action shifts future rota assignments and extends job end dates, which
+    // must not be available to regular staff.
+    const isAdmin = user.role === 'admin';
+    let isManager = isAdmin;
+    if (!isManager) {
+      try {
+        const staffRec = await base44.entities.Staff.filter({ user_id: user.id });
+        const s = staffRec[0];
+        isManager = !!s && (s.system_role === 'admin' || s.system_role === 'management' || s.system_role === 'super_admin');
+      } catch (_) { /* fall through to deny */ }
+    }
+    if (!isManager) {
+      return Response.json({ error: 'Only managers can approve or reject delay logs' }, { status: 403 });
+    }
+
     const reviewer = user.full_name || user.email || '';
 
     if (action === 'reject') {
