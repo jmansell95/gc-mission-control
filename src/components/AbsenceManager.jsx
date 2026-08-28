@@ -8,6 +8,8 @@ import {
 import { format } from 'date-fns';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import SearchableStaffSelect from '@/components/SearchableStaffSelect';
+import CompanyHolidaysSettings from '@/components/settings/CompanyHolidaysSettings';
 
 const reasonConfig = {
   holiday: { label: 'Holiday', badge: 'bg-blue-100 text-blue-700' },
@@ -190,6 +192,10 @@ export default function AbsenceManager() {
           className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${tab === 'recurring' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
           <Repeat className="w-4 h-4" /> Recurring Days Off
         </button>
+        <button onClick={() => setTab('holidays')}
+          className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition ${tab === 'holidays' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+          <CalendarDays className="w-4 h-4" /> Company Holidays
+        </button>
       </div>
 
       {/* REQUESTS TAB */}
@@ -218,11 +224,7 @@ export default function AbsenceManager() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
-                    <select value={formData.staff_id} onChange={e => setFormData({ ...formData, staff_id: e.target.value })} required
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                      <option value="">Select Staff</option>
-                      {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    </select>
+                    <SearchableStaffSelect staff={staff} value={formData.staff_id} onChange={(id) => setFormData({ ...formData, staff_id: id })} />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Reason</label>
@@ -362,11 +364,7 @@ export default function AbsenceManager() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Staff Member *</label>
-                    <select value={recurringForm.staff_id} onChange={e => setRecurringForm({ ...recurringForm, staff_id: e.target.value })} required
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm">
-                      <option value="">Select Staff</option>
-                      {staff.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                  </select>
+                    <SearchableStaffSelect staff={staff} value={recurringForm.staff_id} onChange={(id) => setRecurringForm({ ...recurringForm, staff_id: id })} />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Label</label>
@@ -435,9 +433,14 @@ export default function AbsenceManager() {
                 </div>
               ))}
             </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+            )}
+            </div>
+            )}
+
+            {/* COMPANY HOLIDAYS TAB */}
+            {tab === 'holidays' && (
+            <CompanyHolidaysSettings />
+            )}
+            </div>
+            );
+            }

@@ -105,6 +105,8 @@ export default function WeeklyRotaBuilder() {
   const { data: deliveries = [] } = useQuery({ queryKey: ['deliveries-for-drivers'], queryFn: () => base44.entities.DeliveryLog.list() });
   const { data: drillingCrews = [] } = useQuery({ queryKey: ['drilling-crews-rota'], queryFn: () => base44.entities.DrillingCrew.list('name', 500) });
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-active-rota'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
+  const { data: bankHolidays = [] } = useQuery({ queryKey: ['bank-holidays'], queryFn: () => base44.entities.BankHoliday.list() });
+  const { data: shutdownPeriods = [] } = useQuery({ queryKey: ['shutdown-periods'], queryFn: () => base44.entities.ShutdownPeriod.filter({ is_active: true }) });
   const driverStaffIds = useMemo(() => buildDriverStaffIds(deliveries), [deliveries]);
   // Map of parent_staff_id → array of DrillingCrew groupings, for rota sub-lines
   const crewsByParent = useMemo(() => {
@@ -188,9 +190,6 @@ export default function WeeklyRotaBuilder() {
   });
 
   const leaveState = (staffId, dateStr) => {
-    const dow = new Date(dateStr + 'T00:00:00').getDay();
-    const rec = recurring.find(r => r.staff_id === staffId && r.is_active !== false && Array.isArray(r.days_of_week) && r.days_of_week.includes(dow));
-    if (rec) return { recurring: true, label: rec.label || 'Day Off' };
     // Check for non-job rota assignments (annual_leave, sick, training) — these
     // are imported from the planner and give us a specific type + label.
     const nonJobRota = rotas.find(r => r.staff_id === staffId && r.assigned_date === dateStr && r.assignment_type && r.assignment_type !== 'job');
@@ -202,6 +201,18 @@ export default function WeeklyRotaBuilder() {
     }
     const leave = absences.some(a => a.staff_id === staffId && a.status === 'approved' && a.start_date <= dateStr && a.end_date >= dateStr);
     if (leave) return { recurring: false, label: 'On Leave', type: 'annual_leave' };
+    // Bank holiday — applies to ALL staff types
+    const bh = bankHolidays.find(b => b.holiday_date === dateStr);
+    if (bh) return { recurring: false, label: bh.name || 'Bank Holiday', type: 'bank_holiday' };
+    // Shutdown period — direct employees only (unless applies_to is 'all')
+    const member = staff.find(s => s.id === staffId);
+    if (member) {
+      const shutdown = shutdownPeriods.find(s => s.is_active !== false && s.start_date <= dateStr && s.end_date >= dateStr && (s.applies_to === 'all' || member.worker_type === 'direct_employee'));
+      if (shutdown) return { recurring: false, label: shutdown.label || shutdown.name || 'Shutdown', type: 'shutdown' };
+    }
+    const dow = new Date(dateStr + 'T00:00:00').getDay();
+    const rec = recurring.find(r => r.staff_id === staffId && r.is_active !== false && Array.isArray(r.days_of_week) && r.days_of_week.includes(dow));
+    if (rec) return { recurring: true, label: rec.label || 'Day Off' };
     return null;
   };
 
@@ -1050,7 +1061,7 @@ export default function WeeklyRotaBuilder() {
                     const isToday = dayStr === todayStr;
                     const ls = leaveState(member.id, dayStr);
                     return (
-                      <td key={`${member.id}-${dayIdx}`} className={`px-2 py-2 align-top ${isToday ? 'bg-emerald-50/40' : ''} ${ls ? (ls.recurring ? 'bg-slate-100/70' : ls.type === 'yard_depot' ? 'bg-amber-50/60' : 'bg-red-50/60') : ''} group/cell`}>
+                      <td key={`${member.id}-${dayIdx}`} className={`px-2 py-2 align-top ${isToday ? 'bg-emerald-50/40' : ''} ${ls ? (ls.recurring ? 'bg-slate-100/70' : ls.type === 'yard_depot' ? 'bg-amber-50/60' : ls.type === 'bank_holiday' ? 'bg-blue-50/60' : ls.type === 'shutdown' ? 'bg-purple-50/60' : 'bg-red-50/60') : ''} group/cell`}>
                         <Droppable droppableId={`${member.id}|${dayStr}`}>
                           {(provided, snapshot) => (
                             <div ref={provided.innerRef} {...provided.droppableProps}
@@ -1061,6 +1072,8 @@ export default function WeeklyRotaBuilder() {
                                   ls.type === 'sick' ? 'bg-rose-100 text-rose-600' :
                                   ls.type === 'training' ? 'bg-violet-100 text-violet-600' :
                                   ls.type === 'yard_depot' ? 'bg-amber-100 text-amber-700' :
+                                  ls.type === 'bank_holiday' ? 'bg-blue-100 text-blue-700' :
+                                  ls.type === 'shutdown' ? 'bg-purple-100 text-purple-700' :
                                   'bg-red-100 text-red-600'
                                 }`}>
                                   {(ls.label || 'ON LEAVE').toUpperCase()}
@@ -1076,7 +1089,7 @@ export default function WeeklyRotaBuilder() {
                                 <Draggable draggableId={assignment.id} index={aIdx} key={assignment.id}>
                                   {(p) => (
                                     <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
-                                      className={`active:cursor-grabbing ${isMulti && aIdx > 0 ? 'border-l-2 border-l-[#2E5A1A]/30' : ''}`}>
+                                      className={`active:cursor-grabbing ${isMulti && aIdx > 0 ? 'border-l-2 border-l-[#2E5A1A]/30' : ''} ${ls ? 'opacity-40' : ''}`}>
                                       {renderAssignmentCard(assignment, { isMulti, jobIndex: aIdx + 1 })}
                                     </div>
                                   )}
@@ -1158,6 +1171,7 @@ export default function WeeklyRotaBuilder() {
                   {Object.entries(byStaff).map(([staffId, staffAssignments]) => {
                     const member = staff.find(s => s.id === staffId);
                     const isMulti = staffAssignments.length >= 2;
+                    const ls = leaveState(staffId, dayStr);
                     return (
                       <div key={staffId} className="px-4 py-3">
                         {/* Staff header row with multi-job badge */}
@@ -1189,7 +1203,7 @@ export default function WeeklyRotaBuilder() {
                         {(() => {
                           const depotRule = getDepotRuleForStaff(staffId);
                           const hasRealDepot = staffAssignments.some(a => a.assignment_type === 'yard_depot');
-                          if (depotRule && isDepotDutyDate(depotRule, dayStr) && !hasRealDepot) {
+                          if (depotRule && isDepotDutyDate(depotRule, dayStr) && !hasRealDepot && !ls) {
                             return (
                               <div className="mb-1.5">
                                 <VirtualDepotCard rule={depotRule} dayStr={dayStr} onStop={handleStopDepotDuty} />
@@ -1198,8 +1212,20 @@ export default function WeeklyRotaBuilder() {
                           }
                           return null;
                         })()}
+                        {ls && ls.type !== 'yard_depot' && (
+                          <div className={`mb-2 px-3 py-1.5 rounded-lg text-xs font-bold text-center ${
+                            ls.recurring ? 'bg-slate-200 text-slate-600' :
+                            ls.type === 'sick' ? 'bg-rose-100 text-rose-600' :
+                            ls.type === 'training' ? 'bg-violet-100 text-violet-600' :
+                            ls.type === 'bank_holiday' ? 'bg-blue-100 text-blue-700' :
+                            ls.type === 'shutdown' ? 'bg-purple-100 text-purple-700' :
+                            'bg-red-100 text-red-600'
+                          }`}>
+                            {(ls.label || 'ON LEAVE').toUpperCase()}
+                          </div>
+                        )}
                         {/* Stacked job cards */}
-                        <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
+                        <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''} ${ls ? 'opacity-40' : ''}`}>
                           {staffAssignments.map((assignment, idx) => {
                             const job = jobs.find(j => j.id === assignment.job_id);
                             const vehicle = vehicles.find(v => v.id === assignment.vehicle_id);

@@ -1,0 +1,61 @@
+{
+  "name": "ShutdownPeriod",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Internal name of the shutdown period (e.g. 'Christmas Shutdown 2026')."
+    },
+    "label": {
+      "type": "string",
+      "description": "Label shown on the rota for all affected staff (e.g. 'Christmas Break'). When blank, the name is used."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "First day of the shutdown period (inclusive)."
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last day of the shutdown period (inclusive)."
+    },
+    "applies_to": {
+      "type": "string",
+      "enum": [
+        "direct_employee",
+        "all"
+      ],
+      "default": "direct_employee",
+      "description": "Which staff types this shutdown applies to. 'direct_employee' = only direct employees show the shutdown on their rota (subcontractors and agency workers are unaffected). 'all' = everyone."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this shutdown period is currently active. Inactive periods are not shown on the rota."
+    }
+  },
+  "required": [
+    "name",
+    "start_date",
+    "end_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": null,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
