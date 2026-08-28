@@ -1,19 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Download, ArrowLeft, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import md from '../../public/Azure-Migration-Plan.md?raw';
 
 export default function AzureMigrationPlan() {
   const navigate = useNavigate();
-  const [md, setMd] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/Azure-Migration-Plan.md')
-      .then(r => r.text())
-      .then(setMd)
-      .finally(() => setLoading(false));
-  }, []);
 
   return (
     <div className="min-h-full bg-[#FAFAF9]">
@@ -50,19 +42,11 @@ export default function AzureMigrationPlan() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-4 rounded-md bg-slate-200/70 animate-pulse" style={{ width: `${60 + (i % 4) * 12}%` }} />
-            ))}
+        <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-6 sm:p-10">
+          <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-2xl prose-h1:border-b prose-h1:pb-3 prose-h1:border-slate-200 prose-h2:text-xl prose-h2:mt-10 prose-h2:text-[#2E5A1A] prose-h3:text-base prose-h3:mt-6 prose-a:text-[#2E5A1A] prose-strong:text-slate-900 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-code:before:content-none prose-code:after:content-none prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-blockquote:border-l-[#2E5A1A]">
+            <ReactMarkdown>{md}</ReactMarkdown>
           </div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-6 sm:p-10">
-            <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-2xl prose-h1:border-b prose-h1:pb-3 prose-h1:border-slate-200 prose-h2:text-xl prose-h2:mt-10 prose-h2:text-[#2E5A1A] prose-h3:text-base prose-h3:mt-6 prose-a:text-[#2E5A1A] prose-strong:text-slate-900 prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-[13px] prose-code:before:content-none prose-code:after:content-none prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-blockquote:border-l-[#2E5A1A]">
-              <ReactMarkdown>{md}</ReactMarkdown>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
