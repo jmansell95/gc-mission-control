@@ -96,6 +96,9 @@ export default function UnifiedCrewAccessList({ scopedDivisionId, onEditGroup, o
       if (staffIds.length > 0) {
         const updates = staffIds.map(id => ({ id, permission_group_id: newGroupId || null }));
         await base44.entities.Staff.bulkUpdate(updates);
+        // Sync each crew member's platform User.role to match the new permission
+        // group (admin-level groups → platform 'admin' so RLS grants full access).
+        try { await base44.functions.invoke('syncStaffUserRoles', { staff_ids: staffIds }); } catch (_) {}
       }
     },
     onSuccess: (_data, vars) => {

@@ -85,22 +85,11 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
         }
         await base44.entities.Staff.update(editing, payload);
 
-        // Sync linked User platform role
-        const updatedMember = { ...original, ...payload, id: editing };
-        const linkedUser = updatedMember.user_id
-          ? (isAdmin ? (await base44.entities.User.list().catch(() => [])).find(u => u.id === updatedMember.user_id) : null)
-          : null;
-        if (linkedUser) {
-          const wantsAdmin = form.system_role === 'admin' || form.system_role === 'super_admin';
-          const targetRole = wantsAdmin ? 'admin' : 'user';
-          if (linkedUser.role !== targetRole) {
-            try { await base44.entities.User.update(linkedUser.id, { role: targetRole }); } catch (_) {}
-          }
-          // Sync division_id from the team so RLS rules resolve correctly
-          if (selectedTeam?.division_id && linkedUser.division_id !== selectedTeam.division_id) {
-            try { await base44.entities.User.update(linkedUser.id, { division_id: selectedTeam.division_id }); } catch (_) {}
-          }
-        }
+        // Sync linked User platform role + division from the assigned permission
+        // group (admin-level groups promote to platform 'admin', which RLS checks
+        // for the cross-division bypass). Runs server-side so it works regardless
+        // of the current admin's own role.
+        try { await base44.functions.invoke('syncStaffUserRoles', { staff_ids: [editing] }); } catch (_) {}
         toast({ title: 'Crew member updated' });
       } else {
         const created = await base44.entities.Staff.create(payload);
