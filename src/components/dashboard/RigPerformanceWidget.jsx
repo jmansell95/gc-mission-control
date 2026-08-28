@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 
 const fmtGBP = (v) => {
   if (v == null || isNaN(v)) return '£0';
@@ -37,8 +38,9 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams-rig-perf'], queryFn: () => base44.entities.Team.list() });
   const { data: rateCards = [] } = useQuery({
-    queryKey: ['rate-cards-rig-day'],
-    queryFn: () => base44.entities.RateCardItem.filter({ category: 'plant' }),
+    queryKey: ['rate-card-items-rig-perf'],
+    queryFn: () => base44.entities.RateCardItem.list(),
+    staleTime: 60000,
   });
 
   const drillingTeamIds = useMemo(() => {
@@ -49,16 +51,14 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
     return ids;
   }, [teams]);
 
-  // Resolve the day rate for a rig from the rate card (best-effort name match)
+  // Resolve the day rate for a rig via the shared rig-rate matcher (same logic
+  // as RigProfitabilityWidget) — the old name-contains match returned £0 for
+  // most rigs because rate card descriptions don't contain the rig's name.
   const rigDayRate = useMemo(() => {
     const map = {};
     rigs.forEach(rig => {
-      const name = (rig.name || '').toLowerCase();
-      const match = rateCards.find(rc => {
-        const rcName = (rc.item_name || rc.description || '').toLowerCase();
-        return rcName.includes(name) || name.includes(rcName);
-      });
-      if (match) map[rig.id] = Number(match.unit_price || match.rate || 0) || 0;
+      const match = findRigRateCardItem(rig, rateCards);
+      if (match) map[rig.id] = Number(match.price || match.unit_price || match.rate || 0) || 0;
     });
     return map;
   }, [rigs, rateCards]);
@@ -117,14 +117,25 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
 
     return Object.entries(byRig).map(([rigId, data]) => {
       const rig = rigs.find(r => r.id === rigId);
-      // Crew = today's rota for this rig's job (falls back to rota with rig_asset_id)
-      const crew = data.job
-        ? assignments.filter(a => a.job_id === data.job.id).map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean)
-        : data.assignments.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
+      // Today's rota for this rig — prefer assignments stamped with this rig_asset_id
+      // (the Crew-Rig flow), falling back to all rota for the rig's job.
+      const rigAssignments = assignments.filter(a => a.rig_asset_id === rigId);
+      const jobAssignments = data.job
+        ? assignments.filter(a => a.job_id === data.job.id)
+        : data.assignments;
+      const crewSource = rigAssignments.length > 0 ? rigAssignments : jobAssignments;
+      const crew = crewSource.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
+      // Resolve Lead Driller + Second Man from crew_role (Crew-Rig pairing)
+      const lead = crewSource.find(a => a.crew_role === 'lead_driller');
+      const second = crewSource.find(a => a.crew_role === 'second_man');
+      const leadDriller = lead ? allStaff.find(s => s.id === lead.staff_id) : null;
+      const secondMan = second ? allStaff.find(s => s.id === second.staff_id) : null;
       return {
         rigId,
         rig,
         crew,
+        leadDriller,
+        secondMan,
         job: data.job,
         meterage: data.totalMeterage,
         revenue: data.totalRevenue,
@@ -235,7 +246,15 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-slate-900 truncate">{stat.rig?.name || 'Unknown Rig'}</p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                {stat.crew.length > 0 ? (
+                {stat.leadDriller || stat.secondMan ? (
+                  <>
+                    <HardHat className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                    <span className="text-xs text-slate-600 truncate">
+                      {stat.leadDriller ? <span className="font-medium text-slate-700">Lead: {stat.leadDriller.name}</span> : null}
+                      {stat.secondMan ? <span className="text-slate-400"> · Second: {stat.secondMan.name}</span> : null}
+                    </span>
+                  </>
+                ) : stat.crew.length > 0 ? (
                   <>
                     <HardHat className="w-3 h-3 text-slate-400" />
                     <span className="text-xs text-slate-500 truncate">{stat.crew.map(c => c.name).join(', ')}</span>

@@ -27,6 +27,18 @@
       "type": "string",
       "description": "Drilling rig (SiteAsset) assigned to this shift. For drilling jobs, the crew is formed dynamically by the rig \u2014 not by a static crew number. The Lead Driller and Second Man assigned to the same rig on the same date form the drilling crew. This links the rota assignment to the specific rig for utilisation and cost tracking."
     },
+    "crew_pairing_id": {
+      "type": "string",
+      "description": "Links a 2-man drilling crew (Lead Driller + Second Man) assigned together to the same rig on the same job. Set by the Crew-Rig assignment flow \u2014 both crew members' RotaAssignment entries share the same crew_pairing_id so they move as a unit when the rig is swapped. Blank for non-drilling assignments and legacy single-staff assignments."
+    },
+    "crew_role": {
+      "type": "string",
+      "enum": [
+        "lead_driller",
+        "second_man"
+      ],
+      "description": "This crew member's role within the crew_pairing. 'lead_driller' = the Lead Driller operating the rig; 'second_man' = the Second Man driller on the same rig. Blank for non-drilling assignments and legacy assignments. Used by the Rig Performance widget to show 'Lead: X \u00b7 Second: Y' per rig."
+    },
     "week_start": {
       "type": "string",
       "format": "date",

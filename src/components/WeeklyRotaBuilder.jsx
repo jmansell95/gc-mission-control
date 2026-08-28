@@ -12,6 +12,7 @@ import AssignmentModal from '@/components/AssignmentModal';
 import ComplianceBlockModal from '@/components/ComplianceBlockModal';
 import StaffSwapModal from '@/components/StaffSwapModal';
 import StaffRotaManager from '@/components/rota/StaffRotaManager';
+import CrewRigAssignmentModal from '@/components/rota/CrewRigAssignmentModal';
 import { EmptyState, ErrorState, RotaSkeleton, Skeleton, SkeletonText } from '@/components/StateViews';
 import { formatJobType } from '@/utils/format';
 import { getJobPrimaryType } from '@/utils/jobTeams';
@@ -68,8 +69,13 @@ export default function WeeklyRotaBuilder() {
   // Opens the smart AssignmentModal with empty defaults (no pre-selected staff/date).
   useEffect(() => {
     const handler = () => setModal({ isOpen: true, assignment: null, defaultStaffId: '', defaultDate: '' });
+    const crewRigHandler = () => setCrewRigOpen(true);
     window.addEventListener('gc-open-add-shift', handler);
-    return () => window.removeEventListener('gc-open-add-shift', handler);
+    window.addEventListener('gc-open-crew-rig', crewRigHandler);
+    return () => {
+      window.removeEventListener('gc-open-add-shift', handler);
+      window.removeEventListener('gc-open-crew-rig', crewRigHandler);
+    };
   }, []);
   const [teamFilter, setTeamFilter] = useState('');
   const [staffSearch, setStaffSearch] = useState('');
@@ -81,6 +87,7 @@ export default function WeeklyRotaBuilder() {
   const [swapAssignment, setSwapAssignment] = useState(null);
   const [todayCrewExpanded, setTodayCrewExpanded] = useState(false);
   const [rotaManagerStaff, setRotaManagerStaff] = useState(null);
+  const [crewRigOpen, setCrewRigOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { activeDivisionId } = useDivision();
@@ -97,6 +104,7 @@ export default function WeeklyRotaBuilder() {
   const { data: recurringDepot = [] } = useQuery({ queryKey: ['recurring-depot-duty'], queryFn: () => base44.entities.RecurringDepotDuty.filter({ is_active: true }) });
   const { data: deliveries = [] } = useQuery({ queryKey: ['deliveries-for-drivers'], queryFn: () => base44.entities.DeliveryLog.list() });
   const { data: drillingCrews = [] } = useQuery({ queryKey: ['drilling-crews-rota'], queryFn: () => base44.entities.DrillingCrew.list('name', 500) });
+  const { data: rigs = [] } = useQuery({ queryKey: ['rigs-active-rota'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
   const driverStaffIds = useMemo(() => buildDriverStaffIds(deliveries), [deliveries]);
   // Map of parent_staff_id → array of DrillingCrew groupings, for rota sub-lines
   const crewsByParent = useMemo(() => {
@@ -917,6 +925,16 @@ export default function WeeklyRotaBuilder() {
         absences={absences}
         recurring={recurring}
         driverStaffIds={driverStaffIds}
+      />
+      {/* Crew → Rig Assignment Modal (Lead Driller + Second Man → rig, with swap) */}
+      <CrewRigAssignmentModal
+        isOpen={crewRigOpen}
+        onClose={() => setCrewRigOpen(false)}
+        staff={staff}
+        jobs={jobs}
+        rigs={rigs}
+        existingRotas={rotas}
+        teams={teams}
       />
 
       <ComplianceBlockModal
