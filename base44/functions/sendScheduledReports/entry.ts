@@ -8,6 +8,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // it works without a user session.
 // ============================================================
 
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function tally(rows, field) {
   const m = {};
   for (const r of rows) {
@@ -24,7 +28,7 @@ function sumField(rows, field) {
 function buildHtmlTable(title, rows, maxRows = 15) {
   if (!rows.length) return `<p style="color:#64748b;font-size:12px;">No data for ${title}.</p>`;
   const keys = Object.keys(rows[0]).slice(0, 6);
-  const header = keys.map(k => `<th style="background:#2E5A1A;color:#fff;padding:6px 8px;text-align:left;font-size:11px;">${k.replace(/_/g, ' ')}</th>`).join('');
+  const header = keys.map(k => `<th style="background:#2E5A1A;color:#fff;padding:6px 8px;text-align:left;font-size:11px;">${escapeHtml(k.replace(/_/g, ' '))}</th>`).join('');
   const bodyRows = rows.slice(0, maxRows).map(r =>
     `<tr>${keys.map(k => {
       const v = r[k];
@@ -33,7 +37,7 @@ function buildHtmlTable(title, rows, maxRows = 15) {
       else if (Array.isArray(v)) display = v.join('; ');
       else if (typeof v === 'object') display = JSON.stringify(v).substring(0, 40);
       else display = String(v).substring(0, 60);
-      return `<td style="padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;">${display}</td>`;
+      return `<td style="padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;">${escapeHtml(display)}</td>`;
     }).join('')}</tr>`
   ).join('');
   const more = rows.length > maxRows ? `<tr><td colspan="${keys.length}" style="padding:6px 8px;font-size:10px;color:#94a3b8;">…and ${rows.length - maxRows} more rows</td></tr>` : '';
@@ -44,9 +48,9 @@ function buildChartSummary(title, data) {
   if (!data.length) return '';
   const bars = data.map(d => {
     const pct = Math.min(100, (d.value / Math.max(...data.map(x => x.value))) * 100);
-    return `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span>${d.name}</span><strong>${d.value}</strong></div><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:#2E5A1A;border-radius:3px;"></div></div></div>`;
+    return `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span>${escapeHtml(d.name)}</span><strong>${escapeHtml(String(d.value))}</strong></div><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:#2E5A1A;border-radius:3px;"></div></div></div>`;
   }).join('');
-  return `<div style="margin-top:12px;"><p style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;">${title}</p>${bars}</div>`;
+  return `<div style="margin-top:12px;"><p style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;">${escapeHtml(title)}</p>${bars}</div>`;
 }
 
 async function fetchTemplateData(base44, tpl) {

@@ -23,6 +23,9 @@ export default async function(req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me().catch(() => null);
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (user.role !== 'admin' && user.role !== 'director') {
+      return Response.json({ error: 'Forbidden — admin or manager only' }, { status: 403 });
+    }
 
     const body = await req.json().catch(() => ({}));
     const { assignments, week_start, batch_size, batch_index } = body;

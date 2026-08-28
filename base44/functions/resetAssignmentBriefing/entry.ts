@@ -22,6 +22,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Assignment not found' }, { status: 404 });
     }
 
+    // Authorization: only the assignment owner or an admin/manager may reset.
+    // Prevents IDOR — any authenticated user could otherwise reset another
+    // employee's briefing by supplying their assignment_id.
+    const isAdmin = user.role === 'admin' || user.role === 'director';
+    if (!isAdmin) {
+      const myStaff = await base44.asServiceRole.entities.Staff.filter({
+        $or: [{ user_id: user.id }, { email: user.email }]
+      }).catch(() => []);
+      const myStaffId = myStaff[0]?.id;
+      if (!myStaffId || assignment.staff_id !== myStaffId) {
+        return Response.json({ error: 'Forbidden — you can only reset your own assignments' }, { status: 403 });
+      }
+    }
+
     // Reset briefing fields and shift confirmation (assignment context changed)
     const resetData = {
       briefing_signed: false,

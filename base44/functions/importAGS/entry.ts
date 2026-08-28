@@ -12,6 +12,24 @@ async function hmacSha256(secret: string, message: string): Promise<string> {
   return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Validate a user-supplied file URL to prevent SSRF — only http/https
+// schemes and block private/internal IPs and cloud metadata endpoints.
+function isSafeFileUrl(urlStr: string): boolean {
+  try {
+    const u = new URL(urlStr);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+    const host = u.hostname.toLowerCase();
+    if (host === 'localhost' || host === '0.0.0.0' || host === '::1') return false;
+    if (host.startsWith('127.') || host.startsWith('10.')) return false;
+    if (host.startsWith('192.168.') || host.startsWith('169.254.')) return false;
+    if (host.startsWith('172.')) {
+      const second = parseInt(host.split('.')[1], 10);
+      if (second >= 16 && second <= 31) return false;
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
 // ============================================================
 // AGS v3/v4 parser with suffix-based field matching
 // ============================================================
@@ -769,6 +787,11 @@ Deno.serve(async (req) => {
       if (!filePart) return Response.json({ error: 'An AGS file is required.' }, { status: 400 });
       text = await (filePart as File).text();
     } else if (klbBody) {
+      // Legacy JSON body path (file_content or file_url) — not a KLB webhook.
+      // Require an authenticated app user to prevent unauthenticated SSRF.
+      if (!isExternalPush && (!user || !user.id)) {
+        return Response.json({ error: 'Unauthorized — authentication required for AGS file import.' }, { status: 401 });
+      }
       const fileContent = klbBody.file_content;
       const fileUrl = klbBody.file_url;
       jobId = klbBody.job_id || null;
@@ -777,6 +800,7 @@ Deno.serve(async (req) => {
       if (fileContent) {
         text = String(fileContent);
       } else {
+        if (!isSafeFileUrl(fileUrl)) return Response.json({ error: 'Invalid or blocked file URL.' }, { status: 400 });
         const fileRes = await fetch(fileUrl);
         if (!fileRes.ok) return Response.json({ error: 'Could not download AGS file' }, { status: 422 });
         text = await fileRes.text();
