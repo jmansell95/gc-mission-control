@@ -122,13 +122,20 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
     return s + (Number(c.unit_cost) || 0) * qty * days;
   }, 0);
 
+  // Every rig (SiteAsset with asset_type === 'rig') gets a RigAssemblyGroup card,
+  // even when it has zero linked gear — so rigs never fall through to the
+  // person-group Internal Equipment list.
   const rigItemLinks = {};
   const linkedItemIds = new Set();
   for (const c of visibleItems) {
     const asset = c.site_asset_id ? assetMap[c.site_asset_id] : null;
-    if (asset && asset.asset_type === 'rig' && asset.linked_equipment_ids?.length) {
-      const linked = visibleItems.filter(other => other.id !== c.id && other.site_asset_id && asset.linked_equipment_ids.includes(other.site_asset_id));
-      if (linked.length > 0) { rigItemLinks[c.id] = linked; linked.forEach(li => linkedItemIds.add(li.id)); }
+    if (asset && asset.asset_type === 'rig') {
+      const linkedIds = asset.linked_equipment_ids || [];
+      const linked = linkedIds.length > 0
+        ? visibleItems.filter(other => other.id !== c.id && other.site_asset_id && linkedIds.includes(other.site_asset_id))
+        : [];
+      rigItemLinks[c.id] = linked;
+      linked.forEach(li => linkedItemIds.add(li.id));
     }
   }
 

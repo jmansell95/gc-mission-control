@@ -53,8 +53,15 @@ export default function EquipmentForm({ form, setForm, onSubmit, onCancel, savin
     if (isPurchased) {
       payload = { ...payload, start_date: '', end_date: '' };
     }
-    // For day-rate hired/owned/labour items, store effective quantity = items × days
-    if ((isHired || isInternal || isLabour) && form.unit_label === 'day' && form.start_date && form.end_date) {
+    // For day-rate hired/owned/labour items, store effective quantity = items × days.
+    // Rigs are excluded — they are unique serial-numbered assets with quantity
+    // always 1; their billing is driven by the on-site date range downstream
+    // (day_rate × working days), not by a multiplied quantity field. Without
+    // this guard, every edit re-multiplies the quantity by the day count,
+    // compounding exponentially (1 → 204 → 41616 → ...).
+    const linkedAsset = form.site_asset_id ? (ownedAssets || []).find(a => a.id === form.site_asset_id) : null;
+    const isRigAsset = linkedAsset?.asset_type === 'rig';
+    if (!isRigAsset && (isHired || isInternal || isLabour) && form.unit_label === 'day' && form.start_date && form.end_date) {
       const d = differenceInCalendarDays(new Date(form.end_date + 'T00:00:00'), new Date(form.start_date + 'T00:00:00')) + 1;
       if (d > 0) {
         payload.quantity = String((Number(form.quantity) || 1) * d);
