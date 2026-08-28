@@ -7,6 +7,7 @@ import SearchFilterBar from '@/components/SearchFilterBar';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const inputCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm';
 const blank = { name: '', parent_client_id: '', is_holding: false, contact_name: '', contact_email: '', contact_phone: '', contacts: [], yard_address: '', lat: '', lng: '', geofence_radius_override: '', is_partner: false, partner_color: '' };
@@ -68,9 +69,10 @@ export default function ClientManager() {
         }
       />
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">
-          <h3 className="font-semibold text-slate-900 mb-4">{editingId ? 'Edit Client' : 'New Client'}</h3>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditingId(null); setFormData(blank); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit Client' : 'New Client'}</DialogTitle></DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
@@ -194,7 +196,8 @@ export default function ClientManager() {
             </button>
           </div>
         </form>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {clients.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-10 text-center text-slate-400 text-sm">No clients yet. Add your first client above.</div>

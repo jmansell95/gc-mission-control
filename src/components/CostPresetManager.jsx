@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Boxes, Plus, X, Trash2, Edit2, ChevronDown, ChevronUp, Truck, ShoppingCart, Wrench, ShieldCheck, Receipt, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
@@ -201,9 +202,10 @@ export default function CostPresetManager() {
       <p className="text-sm text-slate-500 -mt-2">Create standard equipment lists (like a drilling rig setup) to add to any job in one click.</p>
 
       {/* Preset create/edit form */}
-      {showPresetForm && (
-        <form onSubmit={savePreset} className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3">
-          <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">{editingPresetId ? 'Edit preset' : 'New preset'}</p>
+      <Dialog open={showPresetForm} onOpenChange={(open) => { if (!open) { setShowPresetForm(false); setEditingPresetId(null); setPresetForm({ name: '', description: '', category: '' }); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editingPresetId ? 'Edit Preset' : 'New Preset'}</DialogTitle></DialogHeader>
+          <form onSubmit={savePreset} className="space-y-3">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Preset Name *</label>
@@ -226,7 +228,8 @@ export default function CostPresetManager() {
             {savingPreset ? 'Saving…' : editingPresetId ? 'Update Preset' : 'Create Preset'}
           </button>
         </form>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Preset list */}
       {isLoading ? (

@@ -8,6 +8,7 @@ import CISBatchVerifyWidget from '@/components/contractors/CISBatchVerifyWidget'
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ACCENT = '#2E5A1A';
 
@@ -232,9 +233,10 @@ export default function ContractorManager() {
         })}
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">
-          <h3 className="font-semibold text-slate-900 mb-4">{editingId ? 'Edit Subcontractor' : 'New Subcontractor'}</h3>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditingId(null); setFormData(emptyForm); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit Subcontractor' : 'New Subcontractor'}</DialogTitle></DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
@@ -360,7 +362,8 @@ export default function ContractorManager() {
             </button>
           </div>
         </form>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>

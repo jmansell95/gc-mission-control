@@ -6,6 +6,7 @@ import { format, differenceInDays } from 'date-fns';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import SearchFilterBar from '@/components/SearchFilterBar';
 import { TableSkeleton } from '@/components/StateViews';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 /** Safely parse a date string that may be YYYY-MM-DD or a full ISO timestamp.
  *  Appending 'T00:00:00' to a value that already contains 'T' produces an
@@ -99,9 +100,10 @@ export default function VehicleManager() {
         Tip: Enter the VIN to auto-match this vehicle when syncing from Holman. Book maintenance and view live Holman telemetry on the dedicated <strong className="text-slate-700">Vehicles</strong> page.
       </p>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 border border-emerald-200 mb-6 shadow-sm">
-          <h3 className="font-semibold text-slate-900 mb-4">{editingId ? 'Edit Vehicle' : 'New Vehicle'}</h3>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) { setShowForm(false); setEditingId(null); setFormData(emptyForm); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit Vehicle' : 'New Vehicle'}</DialogTitle></DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Vehicle Description *</label>
@@ -169,7 +171,8 @@ export default function VehicleManager() {
             </button>
           </div>
         </form>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {vehiclesLoading ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

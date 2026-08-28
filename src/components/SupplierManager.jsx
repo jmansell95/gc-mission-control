@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
 
@@ -136,8 +137,10 @@ export default function SupplierManager() {
 
       <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv,.pdf" className="hidden" onChange={handleFilePicked} />
 
-      {adding && (
-        <form onSubmit={submit} className="bg-white rounded-xl border border-emerald-200 shadow-sm p-5 mb-4 space-y-4">
+      <Dialog open={adding} onOpenChange={(open) => { if (!open) { setAdding(false); setEditingId(null); setForm(blank); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editingId ? 'Edit Supplier' : 'New Supplier'}</DialogTitle></DialogHeader>
+          <form onSubmit={submit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Company Name *</label>
@@ -239,7 +242,8 @@ export default function SupplierManager() {
             <button type="button" onClick={() => { setAdding(false); setEditingId(null); }} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-300 transition">Cancel</button>
           </div>
         </form>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
