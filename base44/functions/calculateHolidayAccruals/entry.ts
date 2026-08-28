@@ -18,9 +18,15 @@ export default async function(req: Request): Promise<Response> {
     const allStaff = await base44.asServiceRole.entities.Staff.list();
     const activeStaff = allStaff.filter(s => s.is_active !== false && s.worker_type === 'direct_employee');
 
-    // Get all approved holiday absences
+    // Get all approved holiday absences. The Absence entity stores the category
+    // in `reason` (enum: holiday, sick, personal, training, other) — not
+    // `absence_type`/`type` — so we match on reason === 'holiday'. 'annual'
+    // is accepted too for legacy/external-synced records that may use it.
     const absences = await base44.asServiceRole.entities.Absence.filter({ status: 'approved' });
-    const holidayAbsences = absences.filter(a => (a.absence_type || a.type || '').toLowerCase().includes('holiday') || (a.absence_type || a.type || '').toLowerCase().includes('annual'));
+    const holidayAbsences = absences.filter(a => {
+      const r = (a.reason || a.absence_type || a.type || '').toLowerCase();
+      return r === 'holiday' || r === 'annual' || r === 'annual_leave';
+    });
 
     // Get existing accrual records
     const existing = await base44.asServiceRole.entities.HolidayPayAccrual.list();
@@ -44,13 +50,21 @@ export default async function(req: Request): Promise<Response> {
       // Default entitlement: 28 days (UK statutory for 5-day-week workers)
       const entitlement = 28;
 
-      // Count holiday days taken in this year window
+      // Count holiday days taken in this year window. Days are computed from
+      // the start_date → end_date range (inclusive), since the Absence entity
+      // has no `days` field. Falls back to 1 day for single-date records.
       const myHolidays = holidayAbsences.filter(a => {
         if (a.staff_id !== staff.id) return false;
         const aDate = (a.start_date || a.date || '').slice(0, 10);
         return aDate >= yearStartStr && aDate <= yearEndStr;
       });
-      const daysTaken = myHolidays.reduce((sum, a) => sum + (a.days || 1), 0);
+      const daysTaken = myHolidays.reduce((sum, a) => {
+        const s = (a.start_date || a.date || '').slice(0, 10);
+        const e = (a.end_date || s).slice(0, 10);
+        if (!s) return sum + 1;
+        const days = Math.max(1, Math.round((new Date(e + 'T00:00:00').getTime() - new Date(s + 'T00:00:00').getTime()) / 86400000) + 1);
+        return sum + days;
+      }, 0);
 
       // Calculate accrued to date
       const daysSinceStart = Math.floor((today.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24));

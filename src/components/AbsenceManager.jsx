@@ -43,17 +43,27 @@ export default function AbsenceManager() {
   const staff = allStaffRaw.filter(s => s.worker_type === 'direct_employee');
   const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
 
+  // Keep the Absence Accrual tab in sync — recalculate accruals whenever an
+  // absence is created, approved, rejected, or deleted so days_taken matches.
+  const recalcAccruals = async () => {
+    try {
+      await base44.functions.invoke('calculateHolidayAccruals', {});
+      queryClient.invalidateQueries({ queryKey: ['holiday-accruals'] });
+    } catch (e) { console.error('Accrual recalc failed:', e); }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     await base44.entities.Absence.create({ ...formData, status: 'pending' });
     setFormData({ staff_id: '', start_date: '', end_date: '', reason: 'holiday', notes: '' });
     setShowForm(false);
     queryClient.invalidateQueries({ queryKey: ['absences'] });
+    recalcAccruals();
   };
 
-  const handleApprove = async (id) => { await base44.entities.Absence.update(id, { status: 'approved' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); };
-  const handleReject = async (id) => { await base44.entities.Absence.update(id, { status: 'rejected' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); };
-  const handleDelete = async (id) => { await base44.entities.Absence.delete(id); queryClient.invalidateQueries({ queryKey: ['absences'] }); };
+  const handleApprove = async (id) => { await base44.entities.Absence.update(id, { status: 'approved' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
+  const handleReject = async (id) => { await base44.entities.Absence.update(id, { status: 'rejected' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
+  const handleDelete = async (id) => { await base44.entities.Absence.delete(id); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
 
   const toggleDay = (d) => {
     setRecurringForm(f => ({

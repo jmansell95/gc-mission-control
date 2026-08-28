@@ -103,7 +103,7 @@ export default function HolidayAccrualManager() {
     <div>
       <SettingsSectionHeader
         icon={Calendar}
-        title="Holiday Pay Accrual"
+        title="Absence Accrual"
         description="Track holiday entitlement, days taken, and accrued balances for direct employees."
         actions={
           <Button onClick={handleRecalculate} disabled={calculating} className="bg-[#2E5A1A] hover:bg-[#1c4a12] text-white">

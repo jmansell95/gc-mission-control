@@ -48,7 +48,7 @@ const TABS = [
     id: 'time-pay', label: 'Time & Pay', icon: Clock, sub: [
       { id: 'timesheets', label: 'Timesheets' },
       { id: 'timesheet-delegation', label: 'Delegation' },
-      { id: 'holiday-accrual', label: 'Holiday Accrual' },
+      { id: 'holiday-accrual', label: 'Absence Accrual' },
       { id: 'absences', label: 'Absences' },
     ],
   },

@@ -112,7 +112,7 @@ export const settingsGroups = [
       { id: 'asset-lifecycle', label: 'Asset Lifecycle', icon: Wrench, desc: 'Track assets from acquisition to disposal — depreciation, book value & replacement planning', roles: ['admin'] },
       { id: 'depreciation-profiles', label: 'Depreciation Profiles', icon: TrendingDown, desc: 'Configure default depreciation methods & rules per asset type — straight-line, reducing balance, units of production', roles: ['admin'] },
       { id: 'absences', label: 'Absences', icon: CalendarX, desc: 'Manage staff absences and leave' },
-      { id: 'holiday-accrual', label: 'Holiday Accrual', icon: CalendarDays, desc: 'Track holiday pay accruals for staff' },
+      { id: 'holiday-accrual', label: 'Absence Accrual', icon: CalendarDays, desc: 'Track holiday pay accruals for staff' },
       { id: 'staff-reviews', label: 'Performance Reviews', icon: Star, desc: 'Manage staff performance reviews' },
       { id: 'timesheet-delegation', label: 'Approval Delegation', icon: UserCheck, desc: 'Manage timesheet approval delegations' },
       { id: 'vehicles', label: 'Vehicles', icon: Truck, desc: 'Manage vehicle fleet' },

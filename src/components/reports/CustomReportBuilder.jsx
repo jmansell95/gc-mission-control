@@ -66,7 +66,7 @@ const DATA_SOURCES = [
   { id: 'hotel-bookings', label: 'Hotel Bookings', entity: 'HotelBooking', icon: 'Bed' },
   // ── HR & Training ──
   { id: 'staff-reviews', label: 'Staff Reviews', entity: 'StaffReview', icon: 'Star' },
-  { id: 'holiday-accruals', label: 'Holiday Pay Accruals', entity: 'HolidayPayAccrual', icon: 'CalendarDays' },
+  { id: 'holiday-accruals', label: 'Absence Accruals', entity: 'HolidayPayAccrual', icon: 'CalendarDays' },
   { id: 'training-courses', label: 'Training Courses', entity: 'TrainingCourse', icon: 'GraduationCap' },
   { id: 'training-bookings', label: 'Training Bookings', entity: 'TrainingBooking', icon: 'GraduationCap' },
   { id: 'incentive-scores', label: 'Incentive Scores', entity: 'IncentiveScore', icon: 'Trophy' },
