@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { X, Layers, Plus, Loader2, Check, Package, Cog, Search, CalendarClock, ChevronDown } from 'lucide-react';
+import { X, Layers, Plus, Loader2, Check, Package, Cog, Search, CalendarClock } from 'lucide-react';
 import { findRigRateCardItem, rigFallbackDayRate } from './rigRateMatcher';
-import CompliancePassportGate from '@/components/assethub/CompliancePassportGate';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -12,12 +11,11 @@ const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFracti
  * Day rate is pulled from Our Rate Card via findRigRateCardItem, falling back
  * to the rig's daily_billing_rate (synced from Asset Panda).
  */
-export default function RigGearPickerModal({ rigs = [], assets = [], rateCardItems = [], projectId = null, onAdd, onClose, adding = false }) {
+export default function RigGearPickerModal({ rigs = [], assets = [], rateCardItems = [], projectId = null, jobStartDate = '', jobEndDate = '', onAdd, onClose, adding = false }) {
   const [selectedRig, setSelectedRig] = useState(null);
-  const [onSiteStart, setOnSiteStart] = useState('');
-  const [onSiteEnd, setOnSiteEnd] = useState('');
+  const [onSiteStart, setOnSiteStart] = useState(jobStartDate || '');
+  const [onSiteEnd, setOnSiteEnd] = useState(jobEndDate || '');
   const [search, setSearch] = useState('');
-  const [showPeriodPopup, setShowPeriodPopup] = useState(false);
 
   const filteredRigs = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -84,7 +82,7 @@ export default function RigGearPickerModal({ rigs = [], assets = [], rateCardIte
             const dayCost = rateCardItem && rateCardItem.cost_price != null ? (Number(rateCardItem.cost_price) || 0) : null;
             const unit = rateCardItem?.unit || 'day';
             return (
-              <button key={rig.id} onClick={() => setSelectedRig(isSelected ? null : rig.id)}
+              <button key={rig.id} onClick={() => { setSelectedRig(isSelected ? null : rig.id); if (!isSelected) { setOnSiteStart(jobStartDate || ''); setOnSiteEnd(jobEndDate || ''); } }}
                 className={`w-full text-left p-3 rounded-xl border-2 transition ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <Layers className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-blue-700' : 'text-slate-400'}`} />
@@ -126,57 +124,21 @@ export default function RigGearPickerModal({ rigs = [], assets = [], rateCardIte
             );
           })}
           {selectedRig && (
-            <div className="space-y-2">
-              <CompliancePassportGate
-                assetId={selectedRig}
-                jobStartDate={onSiteStart || undefined}
-                jobEndDate={onSiteEnd || onSiteStart || undefined}
-                compact
-              />
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowPeriodPopup(p => !p)}
-                  className="w-full flex items-center gap-2.5 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100/60 transition text-left"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <CalendarClock className="w-4 h-4 text-blue-700" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-blue-800">On-site period</p>
-                    <p className="text-[11px] text-blue-600 truncate">
-                      {onSiteStart
-                        ? `${onSiteStart}${onSiteEnd ? ` → ${onSiteEnd}` : ' → ongoing'}`
-                        : 'Tap to set on-site dates'}
-                    </p>
-                  </div>
-                  <ChevronDown className={`w-4 h-4 text-blue-400 transition flex-shrink-0 ${showPeriodPopup ? 'rotate-180' : ''}`} />
-                </button>
-                {showPeriodPopup && (
-                  <>
-                    <div className="fixed inset-0 z-10" onClick={() => setShowPeriodPopup(false)} />
-                    <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-blue-200 rounded-xl shadow-xl p-3.5 space-y-2.5 animate-pop-in">
-                      <p className="text-[11px] text-blue-600">Choose the days you want this rig on site. Crew costs are calculated automatically: day rate × working days. Revenue comes from meterage × metres drilled.</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-[10px] font-medium text-slate-500 mb-0.5">On site from</label>
-                          <input type="date" value={onSiteStart} onChange={e => setOnSiteStart(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-blue-500" />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-medium text-slate-500 mb-0.5">On site to (blank = ongoing)</label>
-                          <input type="date" value={onSiteEnd} onChange={e => setOnSiteEnd(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-blue-500" />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setShowPeriodPopup(false)}
-                        className="w-full py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </>
-                )}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3.5 space-y-2.5 animate-pop-in">
+              <div className="flex items-center gap-2">
+                <CalendarClock className="w-4 h-4 text-blue-700" />
+                <p className="text-xs font-semibold text-blue-800">On-site period</p>
+              </div>
+              <p className="text-[11px] text-blue-600">Choose the days you want this rig on site. Crew costs are calculated automatically: day rate × working days. Revenue comes from meterage × metres drilled.</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-0.5">On site from</label>
+                  <input type="date" value={onSiteStart} onChange={e => setOnSiteStart(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-medium text-slate-500 mb-0.5">On site to (blank = ongoing)</label>
+                  <input type="date" value={onSiteEnd} onChange={e => setOnSiteEnd(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-md text-sm focus:outline-none focus:border-blue-500" />
+                </div>
               </div>
             </div>
           )}
