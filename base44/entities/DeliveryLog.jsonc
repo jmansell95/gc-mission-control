@@ -240,13 +240,24 @@
     "scheduled_date"
   ],
   "rls": {
-    "read": {},
     "create": {
       "user_condition": {
         "role": "admin"
       }
     },
-    "update": {},
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "delete": {
       "user_condition": {
         "role": "admin"

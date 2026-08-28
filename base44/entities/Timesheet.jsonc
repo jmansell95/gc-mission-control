@@ -230,56 +230,28 @@
     "date"
   ],
   "rls": {
-    "read": {
+    "create": {
       "$or": [
         {
-          "data.division_id": "{{user.data.division_id}}"
-        },
-        {
-          "data.division_id": {
-            "$in": "{{user.data.managed_division_ids}}"
-          }
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "is_enterprise_admin": true
           }
         }
       ]
     },
-    "create": {},
+    "read": null,
     "update": {
       "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
         {
           "user_condition": {
             "role": "admin"
           }
-        },
-        {
-          "$and": [
-            {
-              "user_condition": {
-                "role": "director"
-              }
-            },
-            {
-              "$or": [
-                {
-                  "data.division_id": "{{user.data.division_id}}"
-                },
-                {
-                  "data.division_id": {
-                    "$in": "{{user.data.managed_division_ids}}"
-                  }
-                }
-              ]
-            }
-          ]
         }
       ]
     },
@@ -292,27 +264,6 @@
           "user_condition": {
             "role": "admin"
           }
-        },
-        {
-          "$and": [
-            {
-              "user_condition": {
-                "role": "director"
-              }
-            },
-            {
-              "$or": [
-                {
-                  "data.division_id": "{{user.data.division_id}}"
-                },
-                {
-                  "data.division_id": {
-                    "$in": "{{user.data.managed_division_ids}}"
-                  }
-                }
-              ]
-            }
-          ]
         }
       ]
     }

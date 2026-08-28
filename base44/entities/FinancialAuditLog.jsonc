@@ -60,12 +60,16 @@
     "action"
   ],
   "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
     "read": {
       "user_condition": {
         "role": "admin"
       }
     },
-    "create": {},
     "update": {
       "user_condition": {
         "role": "admin"

@@ -280,8 +280,19 @@
     "purchase_cost_net"
   ],
   "rls": {
-    "read": {},
-    "create": {},
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": null,
     "update": {
       "$or": [
         {

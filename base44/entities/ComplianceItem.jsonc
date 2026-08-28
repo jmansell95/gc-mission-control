@@ -122,24 +122,39 @@
     "title"
   ],
   "rls": {
-    "read": {
+    "create": {
       "$or": [
         {
-          "data.division_id": "{{user.data.division_id}}"
-        },
-        {
-          "data.division_id": {
-            "$in": "{{user.data.managed_division_ids}}"
-          }
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
             "role": "admin"
           }
+        }
+      ]
+    },
+    "read": null,
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
         },
         {
           "user_condition": {
-            "is_enterprise_admin": true
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]

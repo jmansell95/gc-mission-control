@@ -213,12 +213,12 @@
     "name"
   ],
   "rls": {
-    "read": {},
     "create": {
       "user_condition": {
         "role": "admin"
       }
     },
+    "read": null,
     "update": {
       "user_condition": {
         "role": "admin"
