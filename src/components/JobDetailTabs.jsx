@@ -42,9 +42,9 @@ export default function JobDetailTabs({
   job, primaryType, assignedStaff, rotas, allStaff, vehicles, rotasByDate, sortedDates,
   client, contractor, suppliers, contractors, canSeeCosts, isDrillingJob, isGroundworksJob, totalCost,
   staffCosts, totalMeterage, hotelBookings, colors, statusBadge, statusLabels,
-  startDate, endDate, jobTypes = []
+  startDate, endDate, jobTypes = [], initialTab
 }) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview');
   const [summarySub, setSummarySub] = useState('overview');
   const [scheduleSub, setScheduleSub] = useState('daily');
   const [activitySub, setActivitySub] = useState('logs');

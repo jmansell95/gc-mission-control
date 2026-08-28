@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Drill, TrendingUp, Ruler, Users, Loader2, Wrench, ChevronRight,
-  PoundSterling, HardHat,
+  Drill, Ruler, Loader2, Wrench, ChevronRight,
+  PoundSterling, HardHat, Briefcase, Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -14,18 +14,18 @@ const fmtGBP = (v) => {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(v);
 };
 
+const fmtGBPm = (v) => {
+  if (v == null || isNaN(v)) return '£0';
+  return '£' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 }) + '/m';
+};
+
 /**
- * Rig Performance Widget — shows today's meterage and revenue per rig,
- * with the crew working on each rig. "This rig earnt £X today."
- *
- * Revenue calculation (per assignment's job):
- *  1. meterage_rate: assignment.meterage × rate (from disciplines or job.meterage_rate)
- *  2. day_rate: rate from disciplines, job.unit_price, or rig day rate from RateCardItem
- *  3. flat_fee: job.client_charge
- *  4. Fallback: rig day rate from RateCardItem (so a rig always shows its day rate
- *     even before meterage is entered at end of shift)
+ * RigPerformanceWidget — today's rigs as box cards in a 2-column grid.
+ * Each card shows the crew (Lead Driller + Second Man), a full earnings
+ * breakdown (meterage × rate, day rate, hours), and a "Job Breakdown"
+ * button that navigates to the job's financials tab.
  */
-export default function RigPerformanceWidget({ divisionId, onRigClick }) {
+export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const { data: assignments = [], isLoading } = useQuery({
@@ -51,9 +51,6 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
     return ids;
   }, [teams]);
 
-  // Resolve the day rate for a rig via the shared rig-rate matcher (same logic
-  // as RigProfitabilityWidget) — the old name-contains match returned £0 for
-  // most rigs because rate card descriptions don't contain the rig's name.
   const rigDayRate = useMemo(() => {
     const map = {};
     rigs.forEach(rig => {
@@ -66,9 +63,6 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
   const rigStats = useMemo(() => {
     const byRig = {};
 
-    // Primary source: rigs assigned to jobs via JobAssetAssignment (the actual
-    // rig tracking). RotaAssignment.rig_asset_id is rarely populated, so relying
-    // on it alone makes the widget show "no rigs" even when rigs are on site.
     jobAssetAssignments.forEach(jaa => {
       const rig = rigs.find(r => r.id === jaa.asset_id || r.id === jaa.site_asset_id);
       if (!rig) return;
@@ -78,7 +72,6 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
       if (!byRig[rig.id]) byRig[rig.id] = { assignments: [], job, totalMeterage: 0, totalRevenue: 0 };
     });
 
-    // Supplementary: rota assignments that carry a rig_asset_id (merge in)
     assignments.forEach(a => {
       if (!a.rig_asset_id) return;
       const job = jobs.find(j => j.id === a.job_id);
@@ -88,17 +81,19 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
       if (!byRig[a.rig_asset_id].job) byRig[a.rig_asset_id].job = job;
     });
 
-    // Revenue per rig (from the job's drilling discipline / meterage)
     Object.entries(byRig).forEach(([rigId, data]) => {
       const job = data.job;
       const disciplines = Array.isArray(job?.disciplines) ? job.disciplines : [];
       const drillDisc = disciplines.find(d => d.type === 'drilling') || {};
       const rigMeterage = data.assignments.reduce((s, a) => s + (Number(a.meterage) || 0), 0);
       let rev = 0;
+      let revMethod = 'day_rate';
+      let meterageRate = 0;
+      let dayRate = 0;
       if (job) {
-        const meterageRate = drillDisc.meterage_rate || job.meterage_rate;
-        const dayRate = drillDisc.unit_price || job.unit_price;
-        const revMethod = drillDisc.revenue_method || job.revenue_method;
+        meterageRate = drillDisc.meterage_rate || job.meterage_rate || 0;
+        dayRate = drillDisc.unit_price || job.unit_price || rigDayRate[rigId] || 0;
+        revMethod = drillDisc.revenue_method || job.revenue_method || 'day_rate';
         if (revMethod === 'meterage_rate' && meterageRate && rigMeterage) {
           rev = rigMeterage * meterageRate;
         } else if (revMethod === 'day_rate') {
@@ -107,29 +102,42 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
           rev = job.client_charge;
         } else if (meterageRate && rigMeterage) {
           rev = rigMeterage * meterageRate;
+          revMethod = 'meterage_rate';
         } else {
           rev = rigDayRate[rigId] || 0;
+          revMethod = 'day_rate';
         }
       }
       data.totalRevenue = rev;
       data.totalMeterage = rigMeterage;
+      data.revMethod = revMethod;
+      data.meterageRate = meterageRate;
+      data.dayRate = dayRate;
     });
 
     return Object.entries(byRig).map(([rigId, data]) => {
       const rig = rigs.find(r => r.id === rigId);
-      // Today's rota for this rig — prefer assignments stamped with this rig_asset_id
-      // (the Crew-Rig flow), falling back to all rota for the rig's job.
       const rigAssignments = assignments.filter(a => a.rig_asset_id === rigId);
       const jobAssignments = data.job
         ? assignments.filter(a => a.job_id === data.job.id)
         : data.assignments;
       const crewSource = rigAssignments.length > 0 ? rigAssignments : jobAssignments;
       const crew = crewSource.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
-      // Resolve Lead Driller + Second Man from crew_role (Crew-Rig pairing)
       const lead = crewSource.find(a => a.crew_role === 'lead_driller');
       const second = crewSource.find(a => a.crew_role === 'second_man');
       const leadDriller = lead ? allStaff.find(s => s.id === lead.staff_id) : null;
       const secondMan = second ? allStaff.find(s => s.id === second.staff_id) : null;
+
+      // Hours worked from the first assignment's start/end time
+      let hoursWorked = 0;
+      const firstA = crewSource[0];
+      if (firstA?.start_time && firstA?.end_time) {
+        const [sh, sm] = firstA.start_time.split(':').map(Number);
+        const [eh, em] = firstA.end_time.split(':').map(Number);
+        hoursWorked = (eh + em / 60) - (sh + sm / 60);
+        if (hoursWorked < 0) hoursWorked += 24;
+      }
+
       return {
         rigId,
         rig,
@@ -139,12 +147,15 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
         job: data.job,
         meterage: data.totalMeterage,
         revenue: data.totalRevenue,
+        revMethod: data.revMethod,
+        meterageRate: data.meterageRate,
+        dayRate: data.dayRate,
+        hoursWorked,
         assignmentCount: data.assignments.length,
       };
     }).sort((a, b) => b.revenue - a.revenue);
   }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, rigDayRate]);
 
-  // Drilling crews out today — crew on drilling teams OR crew on jobs with rigs deployed
   const drillingCrewsOut = useMemo(() => {
     const jobsWithRigs = new Set(
       jobAssetAssignments.filter(jaa => jaa.status !== 'returned').map(jaa => jaa.job_id)
@@ -181,7 +192,7 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
               <Drill className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-bold">Rig Performance Today</h3>
+              <h3 className="text-sm font-bold">Rigs on Site Today</h3>
               <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')}</p>
             </div>
           </div>
@@ -193,7 +204,7 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
           <p className="text-sm font-semibold text-slate-700">No rigs deployed today</p>
           {drillingCrewsOut > 0 ? (
             <p className="text-xs text-slate-500 mt-1">
-              {drillingCrewsOut} drilling crew{drillingCrewsOut !== 1 ? 's' : ''} out — assign a rig to track earnings.
+              {drillingCrewsOut} drilling crew{drillingCrewsOut !== 1 ? 's' : ''} out — assign a rig via the Rota Builder to track earnings.
             </p>
           ) : (
             <p className="text-xs text-slate-400 mt-1">No drilling crews are out today.</p>
@@ -213,7 +224,7 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
               <Drill className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-bold">Rig Performance Today</h3>
+              <h3 className="text-sm font-bold">Rigs on Site Today</h3>
               <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')} · {activeRigCount} rig{activeRigCount !== 1 ? 's' : ''} deployed</p>
             </div>
           </div>
@@ -225,66 +236,104 @@ export default function RigPerformanceWidget({ divisionId, onRigClick }) {
         </div>
       </div>
 
-      {/* Rig cards */}
-      <div className="divide-y divide-slate-100">
+      {/* Rig cards — 2-column grid */}
+      <div className="p-2.5 grid grid-cols-2 gap-2.5">
         {rigStats.map((stat, i) => (
-          <motion.button
+          <motion.div
             key={stat.rigId}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            onClick={() => onRigClick?.(stat.rigId)}
-            type="button"
-            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition active:scale-[0.99] text-left"
+            transition={{ delay: i * 0.04 }}
+            className="rounded-xl border border-slate-200/80 bg-white overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow"
           >
-            {/* Rig icon */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">
-              <Drill className="w-5 h-5 text-[#2E5A1A]" />
-            </div>
-
-            {/* Rig name + crew */}
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-slate-900 truncate">{stat.rig?.name || 'Unknown Rig'}</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                {stat.leadDriller || stat.secondMan ? (
-                  <>
-                    <HardHat className="w-3 h-3 text-emerald-600 flex-shrink-0" />
-                    <span className="text-xs text-slate-600 truncate">
-                      {stat.leadDriller ? <span className="font-medium text-slate-700">Lead: {stat.leadDriller.name}</span> : null}
-                      {stat.secondMan ? <span className="text-slate-400"> · Second: {stat.secondMan.name}</span> : null}
-                    </span>
-                  </>
-                ) : stat.crew.length > 0 ? (
-                  <>
-                    <HardHat className="w-3 h-3 text-slate-400" />
-                    <span className="text-xs text-slate-500 truncate">{stat.crew.map(c => c.name).join(', ')}</span>
-                  </>
-                ) : (
-                  <span className="text-xs text-slate-400">No crew assigned</span>
+            {/* Card header — rig name */}
+            <div className="px-3 py-2 bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 border-b border-slate-100">
+              <div className="flex items-center gap-1.5">
+                <div className="w-6 h-6 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
+                  <Drill className="w-3.5 h-3.5 text-[#2E5A1A]" />
+                </div>
+                <p className="text-xs font-bold text-slate-900 truncate flex-1">{stat.rig?.name || 'Unknown Rig'}</p>
+                {stat.rig?.rig_type && stat.rig.rig_type !== 'n/a' && (
+                  <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{stat.rig.rig_type}</span>
                 )}
               </div>
-              {stat.job && (
-                <p className="text-[11px] text-slate-400 truncate mt-0.5">{stat.job.name}</p>
+            </div>
+
+            {/* Crew */}
+            <div className="px-3 py-2 space-y-1 border-b border-slate-50">
+              <div className="flex items-center gap-1.5">
+                <HardHat className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                <p className="text-[10px] text-slate-500 truncate">
+                  <span className="font-bold text-slate-700">Lead:</span> {stat.leadDriller?.name || <span className="text-slate-400">—</span>}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <HardHat className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                <p className="text-[10px] text-slate-500 truncate">
+                  <span className="font-bold text-slate-700">Second:</span> {stat.secondMan?.name || (stat.crew.length > 0 ? <span className="text-slate-400">—</span> : <span className="text-slate-400">—</span>)}
+                </p>
+              </div>
+              {!stat.leadDriller && !stat.secondMan && stat.crew.length === 0 && (
+                <p className="text-[9px] text-amber-600 font-medium pl-4">No crew assigned</p>
               )}
             </div>
 
-            {/* Revenue + meterage */}
-            <div className="text-right flex-shrink-0">
-              <div className="flex items-center gap-1 justify-end">
+            {/* Earnings breakdown */}
+            <div className="px-3 py-2 bg-slate-50/40 flex-1">
+              <p className="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-0.5">Earned today</p>
+              <div className="flex items-center gap-1">
                 <PoundSterling className="w-3.5 h-3.5 text-emerald-600" />
-                <p className="text-sm font-bold text-emerald-700 tabular-nums">{fmtGBP(stat.revenue)}</p>
+                <p className="text-base font-bold text-emerald-700 tabular-nums leading-tight">{fmtGBP(stat.revenue)}</p>
               </div>
-              {stat.meterage > 0 ? (
-                <div className="flex items-center gap-1 justify-end mt-0.5">
-                  <Ruler className="w-3 h-3 text-amber-500" />
-                  <p className="text-xs font-semibold text-amber-600 tabular-nums">{stat.meterage.toFixed(1)}m</p>
-                </div>
-              ) : (
-                <p className="text-[10px] text-slate-400 mt-0.5">day rate</p>
-              )}
+              {/* Breakdown details */}
+              <div className="mt-1.5 space-y-0.5">
+                {stat.revMethod === 'meterage_rate' && stat.meterage > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <Ruler className="w-2.5 h-2.5 text-amber-500" />
+                    <span className="tabular-nums">{stat.meterage.toFixed(1)}m × {fmtGBPm(stat.meterageRate)}</span>
+                  </div>
+                )}
+                {stat.revMethod === 'day_rate' && (
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
+                    <span>Day rate: {fmtGBP(stat.dayRate)}</span>
+                  </div>
+                )}
+                {stat.revMethod === 'flat_fee' && (
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
+                    <span>Flat fee</span>
+                  </div>
+                )}
+                {stat.meterage > 0 && stat.revMethod !== 'meterage_rate' && (
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <Ruler className="w-2.5 h-2.5 text-amber-500" />
+                    <span className="tabular-nums">{stat.meterage.toFixed(1)}m drilled</span>
+                  </div>
+                )}
+                {stat.hoursWorked > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                    <Clock className="w-2.5 h-2.5 text-blue-500" />
+                    <span className="tabular-nums">{stat.hoursWorked.toFixed(1)}h shift</span>
+                  </div>
+                )}
+              </div>
             </div>
-            {onRigClick && <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />}
-          </motion.button>
+
+            {/* Job Breakdown button */}
+            <div className="p-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => onJobBreakdown?.(stat.job)}
+                disabled={!stat.job}
+                className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-[10px] font-bold hover:bg-[#1c4a12] transition disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Briefcase className="w-3 h-3" />
+                Job Breakdown
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>

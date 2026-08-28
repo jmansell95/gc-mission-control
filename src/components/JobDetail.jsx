@@ -37,7 +37,7 @@ const statusLabels = {
   completed: 'Completed', on_hold: 'On Hold', cancelled: 'Cancelled',
 };
 
-export default function JobDetail({ job: initialJob, onBack }) {
+export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const [job, setJob] = useState(initialJob);
   const queryClient = useQueryClient();
   const [showEditWizard, setShowEditWizard] = useState(false);
@@ -291,6 +291,7 @@ export default function JobDetail({ job: initialJob, onBack }) {
       {/* Unified tabbed command center — no more long scroll */}
       <JobDetailTabs
         job={job}
+        initialTab={initialTab}
         primaryType={primaryType}
         assignedStaff={assignedStaff}
         rotas={rotas}

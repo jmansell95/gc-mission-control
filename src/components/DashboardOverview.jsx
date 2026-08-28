@@ -257,7 +257,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
       {/* Rig Performance — today's meterage & revenue per rig with crew */}
       {isAllJobs && (
         <div className="mb-4">
-          <RigPerformanceWidget onRigClick={(rigId) => onNavigate?.('assets')} />
+          <RigPerformanceWidget onJobBreakdown={(job) => onSelectJob?.(job, 'financials')} />
         </div>
       )}
 

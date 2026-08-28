@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('overview');
   const [selectedJob, setSelectedJob] = useState(null);
+  const [jobInitialTab, setJobInitialTab] = useState(null);
   const [settingsTab, setSettingsTab] = useState('hub');
   const [schedulingTab, setSchedulingTab] = useState('rota');
   const [profile, setProfile] = useState(null);
@@ -168,13 +169,13 @@ export default function AdminDashboard() {
                 <JobFilterProvider>
                   <DashboardOverview
                     onNavigate={handleSetActiveSection}
-                    onSelectJob={(job) => { setSelectedJob(job); setActiveSection('job-detail'); }}
+                    onSelectJob={(job, tab) => { setSelectedJob(job); setJobInitialTab(tab || null); setActiveSection('job-detail'); }}
                   />
                 </JobFilterProvider>
               </ReadinessGate>
             )}
             {activeSection === 'job-detail' && selectedJob && (
-              <JobDetail job={selectedJob} onBack={() => setActiveSection('overview')} />
+              <JobDetail job={selectedJob} initialTab={jobInitialTab} onBack={() => setActiveSection('overview')} />
             )}
             {activeSection === 'jobs' && (
               <ReadinessGate featureId="jobs" onConfigure={goToSettings}>
