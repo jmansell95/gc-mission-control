@@ -41,6 +41,7 @@ import PATTestingConsole from './pages/PATTestingConsole';
 import ReportingHub from './pages/ReportingHub';
 import CompliancePage from './pages/CompliancePage';
 import BillingPage from './pages/BillingPage';
+import AzureMigrationPlan from './pages/AzureMigrationPlan';
 
 
 import StaffPage from './pages/StaffPage';
@@ -145,6 +146,7 @@ const AuthenticatedApp = () => {
             <Route path="/automations" element={<Navigate to="/admin" replace />} />
             <Route path="/keylogbook-docs" element={<RouteGuard><KeyLogBookDocs /></RouteGuard>} />
             <Route path="/roadmap" element={<RouteGuard><ImprovementRoadmap /></RouteGuard>} />
+            <Route path="/azure-migration-plan" element={<RouteGuard><AzureMigrationPlan /></RouteGuard>} />
             <Route path="/m365-setup-guide" element={<RouteGuard><Microsoft365SetupGuide /></RouteGuard>} />
             <Route path="/prehistoric-import" element={<RouteGuard><PrehistoricImportPage /></RouteGuard>} />
           </Route>
