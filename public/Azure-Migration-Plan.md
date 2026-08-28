@@ -1,357 +1,281 @@
 # GC Mission Control — Azure Migration Plan
 
-**Document version:** 1.0
-**Date:** 28 August 2026
-**Prepared for:** Ground Control leadership
-**Status:** For review & approval before execution
+> **Objective:** Migrate GC Mission Control off the Base44 BaaS platform onto a fully owned Microsoft Azure-native stack, achieving complete ecosystem independence while preserving 100% feature parity for end users.
+
+**Status:** Draft for review · **Owner:** GC Mission Control Platform Team · **Date:** August 2026
 
 ---
 
 ## 1. Executive Summary
 
-This document is the complete plan for migrating **GC Mission Control** off the Base44 platform onto **Microsoft Azure**, with full feature parity, shipped as a web-only installable PWA.
+GC Mission Control is currently built on the Base44 backend-as-a-service platform. While Base44 has enabled rapid development, the long-term strategy requires full ownership of the data layer, authentication, compute, and hosting to guarantee portability, cost control, and integration flexibility across the wider Microsoft ecosystem.
 
-The migration keeps the existing **React + Vite + Tailwind** frontend source almost entirely untouched — only the data-access and authentication layers change. The Base44 backend-as-a-service layer (database, auth, row-level security, SDK, integrations, automations, realtime, and hosting) is rebuilt on Azure so the application runs entirely inside the Microsoft ecosystem with **zero dependency on Base44**.
+This plan defines the target architecture (Azure Static Web Apps + Azure SQL + Azure Functions + Entra ID), the phased migration approach, the data and integration translation strategy, an eight-week timeline, risk register, indicative cost model, rollback plan, and a pre-execution checklist.
 
-### Target architecture at a glance
-
-| Layer | Today (Base44) | Tomorrow (Azure) |
-|---|---|---|
-| Frontend hosting | Base44 publish | Azure Static Web Apps |
-| Database | Base44 entities (MongoDB-style) | Azure SQL (SQL Server) |
-| Row-level security | Base44 RLS engine | SQL Server RLS (SESSION_CONTEXT predicates) |
-| Auth | Base44 Auth + Google | Microsoft Entra ID (MSAL.js) |
-| Backend logic | ~200 Base44 functions | Azure Functions Premium (Node 20) |
-| File storage | Base44 UploadFile | Azure Blob Storage (SAS URLs) |
-| Realtime | Base44 entity subscriptions | Azure SignalR Service |
-| Email | Base44 SendEmail | Azure Communication Services Email |
-| LLM / AI | Base44 InvokeLLM | Azure OpenAI |
-| Scheduled jobs | Base44 automations | Azure Functions timer triggers |
-| Webhooks | Base44 function endpoints | Azure Functions HTTP triggers |
-| Monitoring | — | Application Insights |
-| Mobile | iOS/Android native builds | Web-only PWA (no native builds) |
-
-### Why Azure (not Power Apps)
-
-Power Apps is a low-code canvas builder — it cannot host a custom React SPA, cannot run the AGS/AFP/EWR file-processing logic, and has no equivalent for Leaflet maps, recharts dashboards, three.js, or the custom rota grid. A "Power Apps rebuild" would mean discarding the entire application and rebuilding ~300 screens from scratch in a different paradigm, with large feature gaps. Azure preserves the existing application and lands it fully inside Microsoft.
+**Key principles:**
+- **No feature loss** — every user-facing capability is preserved.
+- **Frontend reuse** — the existing React + Vite + Tailwind SPA is retained; only the data/auth/compute layers are re-platformed.
+- **Azure-native first** — prefer managed Azure services over self-hosted or third-party SaaS where a viable equivalent exists.
+- **Security by default** — Entra ID identity, Azure SQL Row-Level Security, and Key Vault secrets throughout.
 
 ---
 
-## 2. Current State — What Base44 Provides Today
+## 2. Target Architecture
 
-Before migrating, it's important to inventory exactly what the platform gives us that we must replace:
+| Layer | Current (Base44) | Target (Azure) | Notes |
+|---|---|---|---|
+| **Frontend hosting** | Base44 managed hosting | Azure Static Web Apps | Same React/Vite/Tailwind build artefact; custom domain + CDN included. |
+| **API / compute** | Base44 backend functions (Deno) | Azure Functions Premium (Node.js) | HTTP-triggered functions replace each Base44 function; same request/response contract. |
+| **Database** | Base44 entity store (Mongo-style) | Azure SQL Database (SQL Server) | Relational schema with Row-Level Security via `SESSION_CONTEXT`. |
+| **Authentication** | Base44 Auth (email/password, Google OAuth, OTP) | Microsoft Entra ID (External Identities) | Email/password, OTP, Google, Microsoft, Apple; JWT issuance. |
+| **Secrets** | Base44 platform secrets | Azure Key Vault | Per-division credential isolation; referenced by Functions via app settings. |
+| **File storage** | Base44 file storage | Azure Blob Storage | Public + private containers; SAS URLs for private file access. |
+| **Realtime** | Base44 entity subscriptions | Azure SignalR Service | Live rota/job/asset updates pushed to the SPA. |
+| **Scheduled jobs** | Base44 automations (cron/interval) | Azure Functions Timer triggers + Logic Apps | One-to-one replacement of each scheduled automation. |
+| **Webhooks** | Base44 function endpoints | Azure Functions HTTP endpoints | Same public URL pattern; registered with each provider. |
+| **Email** | Base44 SendEmail integration | Azure Communication Services Email | Branded transactional email via custom domain. |
+| **AI / LLM** | Base44 InvokeLLM integration | Azure OpenAI Service | GPT-equivalent models for assistant features, document parsing, classification. |
+| **Analytics** | Base44 analytics | Application Insights | Custom event tracking + performance monitoring. |
 
-1. **Entity data store** — ~100 entities (Job, Staff, RotaAssignment, AFP, AFPLineItem, SiteAsset, Vehicle, Contractor, Client, ComplianceItem, etc.), each a JSON schema with built-in `id`, `created_date`, `updated_date`, `created_by_id`.
-2. **Row-Level Security (RLS)** — per-entity rules combining division match, managed-division match, platform admin, and enterprise-admin conditions; evaluated silently on every read/write.
-3. **Auth** — email/password, Google OAuth, OTP verification, password reset, session tokens; plus a `User` entity with `role` (admin/user) and custom user data (`division_id`, `managed_division_ids`, `is_enterprise_admin`).
-4. **SDK** (`@base44/sdk`) — `base44.entities.<Name>.{list,filter,get,create,update,delete,bulkCreate,bulkUpdate,updateMany,deleteMany,schema,subscribe}`, `base44.functions.invoke`, `base44.auth.{me,isAuthenticated,logout,updateMe,redirectToLogin}`, `base44.integrations.Core.{InvokeLLM,SendEmail,UploadFile,UploadPrivateFile,GenerateImage,GenerateVideo,GenerateSpeech,TranscribeAudio,ExtractDataFromUploadedFile,CreateFileSignedUrl}`, `base44.analytics.track`, `base44.users.inviteUser`, `base44.asServiceRole`.
-5. **Backend functions** — ~200 TypeScript HTTP handlers in `base44/functions/<name>/entry.ts`.
-6. **Automations** — scheduled (cron/interval), entity (create/update/delete triggers), connector (webhook-driven), and in-app-agent triggers.
-7. **Realtime** — entity `subscribe()` pushing create/update/delete events to the browser.
-8. **In-app AI agents** — `staff_assistant`, `drilling_intelligence`, `scheduling_assistant` (config files + conversation UI + tool permissions).
-9. **Hosting & publishing** — the app is published at `https://gc-mission-control.base44.app` and to iOS/Android.
-10. **Integrations** — InvokeLLM, SendEmail, UploadFile, GenerateImage/Video/Speech, TranscribeAudio, ExtractDataFromUploadedFile, plus connector webhooks (Geotab, Holman, Asset Panda, Mitti/SafetyCulture, KeyLogBook, Stripe, Bob HR, Concur, etc.).
-
-**Everything in this list must be reproduced on Azure.**
-
----
-
-## 3. Target Architecture
+### 2.1 Architecture Diagram (text)
 
 ```
-                         ┌───────────────────────────────┐
-                         │      Entra ID (tenant)        │
-                         │  App registration · App roles │
-                         │  Members + B2B guests         │
-                         └───────────────┬───────────────┘
-                                         │ JWT (MSAL.js)
-                         ┌───────────────▼───────────────┐
-                         │   Azure Static Web App (/web) │
-                         │   React + Vite + Tailwind PWA │
-                         │   MSAL auth · API client      │
-                         └───────────────┬───────────────┘
-                                         │ HTTPS (REST)
-                         ┌───────────────▼───────────────┐
-                         │   Azure Functions Premium      │
-                         │   Node 20 · ~200 functions     │
-                         │   HTTP / timer / webhook       │
-                         │   Entra JWT validation          │
-                         └───┬───────┬───────┬───────┬───┘
-                             │       │       │       │
-                ┌────────────▼──┐ ┌──▼───────▼──┐ ┌─▼──────────────┐
-                │  Azure SQL    │ │ Blob Storage│ │ SignalR Service │
-                │  (RLS via     │ │ (SAS URLs)  │ │ (realtime hubs) │
-                │  SESSION_CTX) │ │             │ │                 │
-                └───────────────┘ └─────────────┘ └─────────────────┘
-                             │
-                ┌────────────▼──────────────┐
-                │  Azure OpenAI · ACS Email   │
-                │  Doc Intelligence · App     │
-                │  Insights                  │
-                └────────────────────────────┘
-```
-
-### Repository structure (new repo)
-
-```
-gc-mission-control-azure/
-├── web/            # the existing React app, retargeted to the Azure API client
-├── api/            # Azure Functions TypeScript project (one function per Base44 function)
-│   ├── common/     # ported from base44/shared (db, auth, integrations helpers)
-│   └── functions/  # ~200 function folders
-├── db/             # SQL migration scripts + seed + RLS predicates + data import
-├── shared/         # ported base44/shared modules (rateResolver, afpPopulation, etc.)
-└── infra/          # Bicep templates (resource group, SQL, Functions, SWA, etc.)
+                    ┌──────────────────────────────┐
+                    │   Azure Static Web App (SPA)  │
+                    │   React + Vite + Tailwind     │
+                    └───────────────┬──────────────┘
+                                    │ HTTPS
+                    ┌───────────────┴──────────────┐
+                    │   Azure Functions Premium    │
+                    │   (Node.js HTTP + Timer)     │
+                    └──┬──────┬──────┬──────┬───────┘
+                       │      │      │      │
+              ┌────────┘      │      │      └────────────┐
+              ▼                ▼      ▼                   ▼
+        ┌──────────┐   ┌─────────┐ ┌──────────┐   ┌──────────────┐
+        │ Azure SQL│   │ Key Vault│ │ Blob     │   │ SignalR      │
+        │ Database │   │          │ │ Storage  │   │ Service      │
+        └──────────┘   └─────────┘ └──────────┘   └──────────────┘
+              │
+              ▼
+        ┌──────────────────┐
+        │  Entra ID (JWT)   │
+        │  External IDs     │
+        └──────────────────┘
 ```
 
 ---
 
-## 4. Migration Phases
+## 3. Migration Phases
 
-### Phase 0 — Foundation & access (Week 1)
-- Confirm Azure subscription, tenant, and naming conventions.
-- Create the resource group and a service principal for CI/CD.
-- Create the Entra ID app registration (single-page app + API), define app roles.
-- Scaffold the new repo with the `/web`, `/api`, `/db`, `/shared`, `/infra` layout.
-- **Exit criteria:** empty repo deploys a "hello world" Static Web App + Functions + SQL server via Bicep.
+### Phase 0 — Foundation (Week 1)
+- Provision Azure subscription, resource groups, and naming conventions.
+- Stand up Azure SQL Database (server + elastic pool), Key Vault, Storage Account, SignalR, Application Insights.
+- Configure Entra ID tenant: app registrations, custom domain, redirect URIs.
+- Establish CI/CD: GitHub Actions → Azure Static Web Apps + Azure Functions deploy.
+- Create dev/staging/prod environments with slot deployments.
 
-### Phase 1 — Data layer (Weeks 2–3)
-- Translate all ~100 entity JSON schemas into Azure SQL tables (one table per entity, one column per field, built-in columns `id UNIQUEIDENTIFIER`, `created_date`, `updated_date`, `created_by_id`).
-- Map JSON-array/object fields (`contacts`, `week_breakdown`, `action_items`, `permissions`, `groups`, `field_map`, `filters`) to `NVARCHAR(MAX)` JSON columns.
-- Implement the RLS security predicate function reading `SESSION_CONTEXT` for `user_id`, `division_id`, `managed_division_ids`, `role`, `is_enterprise_admin`; apply as FILTER + BLOCK predicates on every table, mirroring each entity's current RLS rules.
-- Write the one-time export job that pulls all live records from every Base44 entity and bulk-inserts them into Azure SQL (preserving IDs and relationships).
-- **Exit criteria:** all data exported, RLS verified with test users per division.
+### Phase 1 — Data Schema Translation (Week 2)
+- Translate every Base44 entity schema to a SQL Server table definition.
+- Map Base44 field types to SQL types (`string` → `NVARCHAR`, `date` → `DATE`, `number` → `DECIMAL/INT`, `boolean` → `BIT`, arrays/objects → `JSON` columns or link tables).
+- Implement built-in columns: `id` (UNIQUEIDENTIFIER), `created_date`, `updated_date`, `created_by_id`.
+- Translate Base44 Row-Level Security (RLS) rules to SQL Server security predicates using `SESSION_CONTEXT`.
+- Build the data migration tooling (Base44 export → SQL bulk insert).
 
-### Phase 2 — Auth (Week 3)
-- Finalise Entra ID app roles mapping to Base44 roles + permission groups.
-- Create all users as Entra members (office/admin/field) or B2B guests (subcontractors, client-portal users).
-- Integrate MSAL.js 3.x into the frontend; replace the Base44 auth context with an Entra-backed one.
-- Add Entra JWT validation middleware to the Functions API (EasyAuth or manual).
-- Rewire Login / Register / ForgotPassword / ResetPassword / Onboarding to Entra flows; preserve post-login landing-page routing and the onboarding gate.
-- **Exit criteria:** a user can sign in via Entra, hit the API with a valid token, and RLS scopes their data correctly.
+### Phase 2 — API Layer (Week 3–4)
+- Scaffold Azure Functions project (Node.js, TypeScript).
+- Generate one HTTP function per existing Base44 function (160+ functions).
+- Implement a thin SDK shim so the frontend `base44.entities.*` / `base44.functions.invoke` calls map to Functions HTTP calls with identical signatures.
+- Implement scheduled functions as Timer triggers (one per existing automation).
+- Wire Key Vault secrets; implement per-division credential resolution.
 
-### Phase 3 — Backend functions (Weeks 4–7)
-- Port all ~200 Base44 functions to Azure Functions, preserving exact input/output JSON contracts:
-  - **HTTP triggers** for invoke-style functions (e.g. `getSettingsHubStats`, `calculateJobFinancials`, `parseAFPUpload`).
-  - **HTTP triggers with secret/signature validation** for webhooks (`geotabWebhook`, `holmanWebhook`, `assetPandaWebhook`, `receiveMittiData`, `receiveKeyLogBookData`, `stripeWebhook`, `whatsappWebhook`, `bobWebhook`, `accountingWebhook`, `zapierWebhook`).
-  - **Timer triggers** (NCRONTAB) for scheduled jobs (`sendDailyReminders`, `checkComplianceExpiry`, `syncGeotabFleet`, `runScheduledBackups`, `checkOverdueInvoices`, etc.).
-- Replace `base44.integrations.Core` with Azure-native equivalents (see mapping table in §6).
-- Replace `base44.asServiceRole` with a service-principal SQL connection used by timer/webhook functions.
-- Move `base44/shared` modules into `/shared`, imported by the Functions project.
-- **Exit criteria:** every function callable from the new API client with identical response shape to Base44.
+### Phase 3 — Auth Migration (Week 4)
+- Implement Entra ID sign-up/sign-in/OTP/reset flows matching the existing UX.
+- Migrate user accounts: export Base44 users → Entra ID (invite flow).
+- Map Base44 user roles (`admin`, `user`, `director`, `enterprise_admin`) to Entra ID app roles.
+- Replace frontend auth SDK calls with MSAL.js; preserve `isAuthenticated`, `me()`, `logout` semantics.
 
-### Phase 4 — Frontend SDK replacement (Weeks 5–7, overlaps Phase 3)
-- Replace `@/api/base44Client` with a new typed API client:
-  - `base44.entities.<Name>.{list,filter,get,create,update,delete,bulkCreate,bulkUpdate,updateMany,deleteMany}` → REST calls to `/api/entities/<name>/...`.
-  - `base44.functions.invoke(name, payload)` → `POST /api/functions/<name>`.
-  - `base44.auth.*` → MSAL wrappers.
-  - `base44.integrations.Core.*` → direct provider calls or API endpoints.
-  - `base44.entities.<Name>.subscribe` → SignalR hub listeners.
-  - `base44.analytics.track` → Application Insights `trackEvent`.
-  - `base44.users.inviteUser` → Entra invite / Graph API.
-- Leave all React pages and components untouched except the data-access layer.
-- Add a web manifest + Workbox service worker for PWA installability and offline shell.
-- **Exit criteria:** the app builds and runs against the Azure API with no Base44 imports remaining.
+### Phase 4 — Integrations & Webhooks (Week 5)
+- Re-point every external webhook (Geotab, Holman, Asset Panda, Mitti/SafetyCulture, KeyLogBook, Stripe, WhatsApp, Bob HR, Concur, accounting) to the new Azure Functions endpoints.
+- Re-implement each integration sync function against the provider APIs (logic unchanged; only the host and secrets change).
+- Register new webhook URLs in each provider's dashboard.
+- Validate end-to-end with test payloads.
 
-### Phase 5 — Realtime, automations & agents (Week 7)
-- Stand up Azure SignalR; emit create/update/delete events from SQL change tracking.
-- Map Base44 scheduled automations → Functions timer triggers; entity automations → SQL triggers / change-tracking-driven Functions; connector automations → webhook endpoints.
-- Recreate the three in-app AI agents (`staff_assistant`, `drilling_intelligence`, `scheduling_assistant`) as Azure Functions backed by Azure OpenAI, with the same tool-permission set and the same conversation-UI components.
-- **Exit criteria:** realtime updates live; all scheduled jobs fire; agents respond in-app.
+### Phase 5 — Frontend Cutover (Week 6)
+- Replace the Base44 client SDK import with the new Azure API client shim.
+- Update environment variables / API base URL.
+- Run full regression against the test matrix.
+- Configure custom domain on Azure Static Web Apps; issue TLS certificate.
 
-### Phase 6 — Hosting, domain & cutover (Week 8)
-- Deploy the frontend to Azure Static Web Apps with a custom domain; link the Functions API.
-- Configure CORS and Entra redirect URIs for the production domain.
-- Run a final delta data export from Base44 into Azure SQL.
-- Switch DNS to the Azure domain.
-- Run both systems read-only in parallel for a validation window (data reconciliation, user acceptance testing).
-- Decommission the Base44 app once validated.
-- **Exit criteria:** production running on Azure, Base44 app decommissioned.
+### Phase 6 — Data Cutover & Go-Live (Week 7)
+- Final delta export from Base44 → SQL.
+- Switch DNS to the Azure Static Web App.
+- Enable Application Insights alerting.
+- Monitor for 72 hours; retain Base44 in read-only fallback mode.
+
+### Phase 7 — Decommission (Week 8)
+- Archive Base44 export artefacts to Blob Storage.
+- Cancel Base44 subscription.
+- Retire Base44-hosted webhooks.
+- Post-migration review and documentation handover.
 
 ---
 
-## 5. Data Layer Migration — Detail
+## 4. Data Layer Translation
 
-### Schema translation rules
-- Every Base44 entity → one SQL table named after the entity (e.g. `Staff`, `RotaAssignment`, `AFPLineItem`).
-- `id` → `UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY`.
-- `created_date`, `updated_date` → `DATETIME2`, set by the API.
-- `created_by_id` → `NVARCHAR(64)` (Entra object ID).
-- `string` → `NVARCHAR(n)` (size from max observed value, capped at `NVARCHAR(MAX)` for long text).
-- `number` → `DECIMAL(18,4)` or `FLOAT` depending on usage.
-- `boolean` → `BIT`.
-- `string` with `format: date` → `DATE`; `format: date-time` → `DATETIME2`.
-- `enum` → `NVARCHAR(64)` with a `CHECK` constraint listing allowed values.
-- `array` / nested `object` → `NVARCHAR(MAX)` JSON (e.g. `contacts`, `week_breakdown`, `action_items`, `permissions`, `groups`, `field_map`, `filters`).
-- `default` values reproduced as column defaults.
+### 4.1 Entity → Table Mapping Rules
 
-### Row-Level Security
-- A single schema-level security predicate function `rls.fn_security_predicate` reads `SESSION_CONTEXT` keys: `user_id`, `division_id`, `managed_division_ids` (JSON array), `role`, `is_enterprise_admin`.
-- For each table, `CREATE SECURITY POLICY` adds:
-  - `FILTER PREDICATE` on `SELECT/UPDATE/DELETE` (rows the caller may see).
-  - `BLOCK PREDICATE` on `INSERT/UPDATE/DELETE` (writes the caller may make).
-- The Functions API sets `SESSION_CONTEXT` on every pooled connection **before** executing the user's query, using the caller's Entra identity → mapped user profile (division, role, etc.).
-- Service-principal connections (timer/webhook functions) set `SESSION_CONTEXT` to a system role that bypasses RLS.
-- Each entity's RLS rules are translated from its `rls` JSON (the `$or` of division match, managed-division match, admin, enterprise admin) into the predicate logic.
-
-### Data export & import
-- A one-time Node script iterates every entity, calls `base44.entities.<Name>.list('-created_date', 1000)` with pagination, and bulk-inserts into the matching SQL table via `bcp` / `SqlBulkCopy`.
-- IDs are preserved so foreign-key relationships (e.g. `staff.team_id`, `rotaAssignment.staff_id`, `afpLineItem.afp_id`) survive.
-- A delta export runs at cutover to capture records changed during the build window.
-
----
-
-## 6. Integrations Mapping
-
-| Base44 integration | Azure replacement | Notes |
+| Base44 Type | SQL Server Type | Notes |
 |---|---|---|
-| `InvokeLLM` | Azure OpenAI | Same prompt + `response_json_schema` → structured outputs. `add_context_from_internet` → Azure AI Search grounding. |
-| `SendEmail` | Azure Communication Services Email | Custom domain required for non-registered recipients (same constraint as Base44). |
-| `UploadFile` / `UploadPrivateFile` | Azure Blob Storage | Public container for uploads; private container + `CreateFileSignedUrl` → SAS tokens. |
-| `GenerateImage` | Direct provider (DALL·E via Azure OpenAI or Azure AI Foundry) | |
-| `GenerateVideo` | Direct provider (Azure Sora / Veo) | |
-| `GenerateSpeech` | Azure AI Speech (neural TTS) | |
-| `TranscribeAudio` | Azure AI Speech (batch transcription) | |
-| `ExtractDataFromUploadedFile` | Azure Document Intelligence | Same `json_schema` → structured output. |
-| `base44.analytics.track` | Application Insights `trackEvent` | |
-| `base44.users.inviteUser` | Microsoft Graph invite / B2B | |
-| `base44.asServiceRole` | Service principal SQL connection | Used by timer + webhook functions. |
+| `string` | `NVARCHAR(n)` / `NVARCHAR(MAX)` | MAX for long text fields (descriptions, notes). |
+| `string` (format: date) | `DATE` | |
+| `string` (format: date-time) | `DATETIME2` | |
+| `number` | `DECIMAL(18,4)` / `INT` | INT for counts/quantities; DECIMAL for money/rates. |
+| `boolean` | `BIT` | |
+| `array` of objects | `JSON` column or link table | Link table when queried/joined; JSON when embedded. |
+| `object` | `JSON` column | |
 
-### Connector webhooks (point at the new Azure Functions URLs)
-Geotab, Holman, Asset Panda, Mitti/SafetyCulture, KeyLogBook, Stripe, Bob HR, Concur, WhatsApp, Zapier, accounting — each provider's webhook configuration in their dashboard must be updated to `https://<custom-domain>/api/functions/<webhookName>`.
+### 4.2 Row-Level Security Translation
 
----
+Base44 RLS rules are expressed as JSON query predicates. These translate to SQL Server security predicates:
 
-## 7. Auth Migration — Detail
+```sql
+-- Example: Staff entity RLS
+CREATE SECURITY POLICY Staff.RLS
+ADD FILTER PREDICATE
+  dbo.fn_staff_access(division_id) = 1
+ON dbo.Staff;
 
-- **Entra ID app registration** — SPA platform with redirect URIs for dev/staging/prod; expose an API scope; define app roles (`Admin`, `Management`, `User`, `Field`, `ReadOnly`) plus enterprise-admin.
-- **User provisioning** — office/admin/field staff as Entra **members**; subcontractors and client-portal guests as Entra **B2B guests**. All authentication flows through Entra (no local password store).
-- **Permission groups** — Base44's `PermissionGroup` system (per-module none/read/write) is preserved as a local `PermissionGroups` table; each Entra user is mapped to a permission group via a `Staff.permission_group_id` column. A sync function (mirroring `syncStaffUserRoles`) keeps Entra app roles and the local table aligned.
-- **Frontend** — MSAL.js 3.x (PublicClientApplication) with auth-code + PKCE; silent token acquisition; the existing `AuthContext` is replaced with an Entra-backed provider that exposes the same `me()`, `isAuthenticated()`, `logout()`, `updateMe()` surface so pages don't change.
-- **API** — Functions validate the Entra JWT on every request (EasyAuth or `@azure/functions` middleware using `@azure/msal-node` / `jwt-proxy`); the validated identity sets `SESSION_CONTEXT` for RLS.
-- **Existing auth pages** — Login, Register, ForgotPassword, ResetPassword are replaced with Entra redirect-to-login; Onboarding is preserved as a post-login gate (first sign-in → profile setup → landing page).
+CREATE FUNCTION dbo.fn_staff_access(@division_id UNIQUEIDENTIFIER)
+RETURNS INT
+WITH SCHEMABINDING
+AS
+BEGIN
+  DECLARE @user_division UNIQUEIDENTIFIER = CONVERT(UNIQUEIDENTIFIER, SESSION_CONTEXT(N'user_division_id'));
+  DECLARE @is_admin BIT = CONVERT(BIT, SESSION_CONTEXT(N'is_admin'));
+  IF @is_admin = 1 RETURN 1;
+  IF @division_id = @user_division RETURN 1;
+  RETURN 0;
+END;
+```
 
----
+The Azure Functions middleware sets `SESSION_CONTEXT` from the authenticated JWT claims on every connection open.
 
-## 8. Backend Functions Migration — Detail
+### 4.3 Built-in Columns
 
-- One Azure Function per Base44 `entry.ts`, named identically, same input/output contract.
-- HTTP-trigger functions accept the same JSON body and return the same JSON shape (so the frontend swap is mechanical).
-- Webhook functions validate an inbound secret/signature (HMAC or shared secret query param) exactly as the Base44 versions do.
-- Timer functions use NCRONTAB expressions matching the Base44 schedules (converted to UTC, same as Base44).
-- `base44/shared` modules (e.g. `rateResolver`, `afpPopulation`, `keylogbookRemarks`, `weatherClient`, `geofence`, `loadWeight`, `depreciation`, `predictMaintenance`, `bobHrHelpers`) are ported to `/shared` and imported — no logic changes.
-- The `base44.entities.<Name>` SDK calls inside functions are replaced with a thin data-access layer over Azure SQL (`mssql` / `tedious`) that honours RLS via `SESSION_CONTEXT`.
-- `base44.asServiceRole` (used by scheduled/webhook functions to bypass user context) becomes a service-principal connection that sets a system `SESSION_CONTEXT` role.
-
----
-
-## 9. Realtime Migration
-
-- Azure SignalR Service with a hub per entity group (or a single hub with entity-typed messages).
-- The Functions API, on every create/update/delete, publishes an event `{ id, type, entity_name, data }` to the hub — matching the Base44 `subscribe()` event shape so frontend listeners don't change.
-- SQL Server Change Tracking feeds a lightweight dispatcher function that detects changes and pushes them to SignalR (covering changes made outside the API, e.g. scheduled jobs).
+Every table includes:
+- `id` — `UNIQUEIDENTIFIER DEFAULT NEWID()` primary key.
+- `created_date` — `DATETIME2 DEFAULT SYSUTCDATETIME()`.
+- `updated_date` — `DATETIME2` updated via trigger or app layer.
+- `created_by_id` — `UNIQUEIDENTIFIER` from the JWT subject.
 
 ---
 
-## 10. Automations & Agents
+## 5. Integrations Mapping
 
-- **Scheduled automations** → Azure Functions timer triggers (NCRONTAB).
-- **Entity automations** (create/update/delete) → SQL AFTER triggers writing to a queue, or change-tracking-driven Functions, invoking the same logic as the Base44 entity automation.
-- **Connector automations** → the existing webhook endpoints (no change — the provider just points at the new URL).
-- **In-app agent automations** → a Functions endpoint triggered on conversation start, backed by Azure OpenAI with the same tool-permission set (entity read/write, backend-function invocation) and the same conversation-UI components.
+| Integration | Base44 Function | Azure Target | Webhook Required |
+|---|---|---|---|
+| Geotab GPS | `syncGeotabFleet`, `geotabWebhook` | Azure Function + Geotab API | Yes |
+| Holman Fleet | `syncHolmanFleet`, `holmanWebhook` | Azure Function + Holman API | Yes |
+| Asset Panda | `syncAssetPanda`, `assetPandaWebhook` | Azure Function + Asset Panda V3 | Yes |
+| Mitti / SafetyCulture | `receiveMittiData`, `syncMitti` | Azure Function HTTP endpoint | Yes |
+| KeyLogBook (AGS) | `receiveKeyLogBookData`, `syncKeyLogBook` | Azure Function HTTP endpoint | Yes |
+| Bob HR (Hibob) | `syncBobAbsences`, `bobWebhook`, `pushAbsenceToBob` | Azure Function + Bob API | Yes |
+| SAP Concur | `syncConcurExpenses` | Azure Function + Concur API | No |
+| HMRC CIS | `verifyCIS` | Azure Function + HMRC API | No |
+| Stripe | `createStripeCheckout`, `stripeWebhook` | Azure Function + Stripe SDK | Yes |
+| WhatsApp | `sendCrewWhatsApp`, `whatsappWebhook` | Azure Function + WhatsApp Cloud API | Yes |
+| Accounting (Xero/Sage) | `syncAccounting`, `accountingWebhook` | Azure Function + provider API | Yes |
+| Open-Meteo Weather | `syncMetOfficeWeather` | Azure Function + Open-Meteo API | No |
+| Google Maps | (geocoding) | Azure Function + Google Maps API | No |
+| OpenGround | `syncOpenGround` | Azure Function + OpenGround API | No |
+| Power BI | `syncPowerBI` | Azure Function + Power BI REST | No |
 
 ---
 
-## 11. Hosting, Domain & Cutover
+## 6. Timeline (8 Weeks)
 
-1. Deploy frontend to Azure Static Web Apps; attach the custom domain (TLS via managed certificate).
-2. Link the Functions API as the managed/linked API; configure CORS for the SWA domain.
-3. Update Entra redirect URIs to the production domain.
-4. Update all external webhook registrations (Geotab, Holman, Asset Panda, Mitti, KeyLogBook, Stripe, etc.) to the new `https://<custom-domain>/api/functions/<name>` URLs.
-5. Run the final delta data export from Base44 → Azure SQL.
-6. Switch DNS to the Azure domain.
-7. Run Base44 (read-only) and Azure side-by-side for a validation window; reconcile data and run user acceptance tests.
-8. Decommission the Base44 app once validated.
-
----
-
-## 12. Timeline (indicative)
-
-| Week | Phase | Key deliverable |
+| Week | Phase | Key Deliverables |
 |---|---|---|
-| 1 | 0 — Foundation | Azure provisioned, repo scaffolded, Entra app created |
-| 2–3 | 1 — Data layer | All entities in Azure SQL, RLS verified, data exported |
-| 3 | 2 — Auth | Entra sign-in working end-to-end |
-| 4–7 | 3 — Backend functions | ~200 functions ported, contracts verified |
-| 5–7 | 4 — Frontend SDK | App runs on Azure API, no Base44 imports |
-| 7 | 5 — Realtime/automations/agents | Live updates, scheduled jobs, agents |
-| 8 | 6 — Cutover | Custom domain, DNS switch, Base44 decommissioned |
-
-> This is an indicative 8-week plan for a single focused engineer/team. The ~200-function port is the long pole; parallelising across engineers can compress Phases 3–4.
+| 1 | Foundation | Azure resources provisioned; Entra ID configured; CI/CD pipelines. |
+| 2 | Schema | All entity schemas translated to SQL DDL; RLS predicates written. |
+| 3 | API (part 1) | Functions scaffold; CRUD endpoints for core entities. |
+| 4 | API (part 2) + Auth | All functions implemented; Entra ID auth live in staging. |
+| 5 | Integrations | All webhooks re-pointed; sync functions validated. |
+| 6 | Frontend | SPA pointed at Azure API; full regression in staging. |
+| 7 | Cutover | Data migration; DNS switch; go-live; 72h monitoring. |
+| 8 | Decommission | Base44 cancelled; archive; review. |
 
 ---
 
-## 13. Risks & Mitigations
+## 7. Risk Register
 
-| Risk | Impact | Mitigation |
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Data loss during cutover | Low | Critical | Rehearsed dry-runs; delta export at cutover; Base44 kept read-only for 7 days. |
+| RLS parity gaps | Medium | High | Automated RLS test suite comparing Base44 vs SQL access for every role. |
+| Webhook downtime during re-point | Medium | Medium | Dual-write to both endpoints during overlap window. |
+| Entra ID user migration friction | Medium | Medium | Invite flow with branded email; support window. |
+| Function cold-start latency | Medium | Medium | Premium plan with pre-warmed instances. |
+| Cost overrun | Low | Medium | Weekly cost monitoring; budget alerts at 80%. |
+| Integration API rate limits | Low | Medium | Retry/backoff policies; queue-based sync. |
+
+---
+
+## 8. Indicative Cost Model (Monthly, Production)
+
+| Resource | SKU | Est. Cost (GBP) |
 |---|---|---|
-| RLS predicate bugs lock users out of their own data | High | Test every entity with real per-division users before cutover; keep a service-principal bypass for admin recovery. |
-| Function contract drift breaks the frontend | High | Pin every function to its current input/output shape; add contract tests. |
-| Entra B2B guest friction for subcontractors/clients | Medium | Pre-provision guests; provide a clear sign-in link; offer a fallback invite flow. |
-| Webhook URL changes drop events during cutover | Medium | Run both systems in parallel; keep Base44 webhooks live until Azure is confirmed receiving. |
-| Large data export misses late-changing records | Medium | Delta export at cutover; freeze writes on Base44 during the final sync. |
-| AGS/AFP/EWR parsing differences on Azure | High | Port parsers verbatim from `base44/shared`; test against real uploaded files. |
-| Azure cost overrun | Medium | Right-size the Functions Premium plan and SQL tier; monitor via Application Insights; set budgets. |
-| Offline/PWA gaps on field devices | Low | Workbox offline shell + background sync for scans. |
+| Azure SQL Database | Business Critical S4 (200 DTU) | £420 |
+| Azure Functions Premium | EP2 (2 instances) | £310 |
+| Azure Static Web Apps | Standard | £7 |
+| Azure SignalR Service | Standard (1 unit) | £45 |
+| Azure Blob Storage | Hot + Cool (500 GB) | £12 |
+| Azure Key Vault | Standard | £0.03/10k ops |
+| Entra ID External Identities | MAU pricing (2,500 users) | £180 |
+| Azure Communication Services Email | ~10k emails | £20 |
+| Azure OpenAI Service | Pay-as-you-go | £120 |
+| Application Insights | 5 GB ingest | £15 |
+| Bandwidth / CDN | ~500 GB egress | £25 |
+| **Total (approx.)** | | **~£1,150 / month** |
+
+> Costs are indicative and depend on usage. A FinOps review is recommended after Phase 5.
 
 ---
 
-## 14. Cost Considerations (rough)
+## 9. Rollback Plan
 
-- **Azure SQL** — Business-critical or General Purpose tier; cost scales with DTU/vCore and storage.
-- **Azure Functions Premium** — EP1/EP2 plan; predictable for always-on + scheduled jobs.
-- **Azure Static Web Apps** — Standard tier for custom domain + managed identity.
-- **Azure SignalR Service** — Standard tier, unit-based (connections + messages).
-- **Azure Blob Storage** — negligible for typical upload volumes.
-- **Azure OpenAI** — pay-per-token for InvokeLLM + agents.
-- **Azure Communication Services Email** — per-email pricing; custom domain verification required.
-- **Entra ID** — P1 licences for app roles / B2B guests beyond the free tier.
-- **Application Insights** — first 5 GB/month free, then per-GB.
-
-A detailed cost model should be built against expected usage (user count, function invocations, data volume) before execution.
+- **T+0 to T+72h:** Base44 app remains fully functional in read-only fallback mode. DNS can be reverted to the Base44 hostname within 15 minutes.
+- **Data:** All SQL writes are mirrored back to Base44 via a reverse-sync function during the overlap window, so no data is lost if we roll back.
+- **Webhooks:** Each provider's webhook URL is recorded; reverting is a single config change per provider.
+- **Decision gate:** A go/no-go review at T+48h. If critical defects exceed threshold, execute rollback.
 
 ---
 
-## 15. Rollback Plan
+## 10. Pre-Execution Checklist
 
-- Until DNS is switched, Base44 remains the live system — zero risk.
-- After the Azure cutover, if a critical defect is found: switch DNS back to the Base44 domain (kept live during the parallel validation window), fix on Azure, re-export any delta, and re-cut over.
-- The Base44 app is only decommissioned after the validation window passes with no critical defects.
-
----
-
-## 16. Pre-Execution Checklist
-
-- [ ] Azure subscription + tenant confirmed
-- [ ] Custom domain decided and DNS control available
-- [ ] Entra ID admin access available for app registration + user provisioning
-- [ ] All external webhook providers' dashboards accessible (Geotab, Holman, Asset Panda, Mitti, KeyLogBook, Stripe, Bob HR, Concur, WhatsApp, Zapier)
-- [ ] API keys/secrets inventoried for every third-party integration (Asset Panda, Geotab, Holman, Mitti, Open-Meteo, Google Maps, Stripe, Azure OpenAI, etc.)
-- [ ] Backup of the full Base44 data export taken and stored
-- [ ] Stakeholder sign-off on the 8-week timeline and parallel-run window
-- [ ] Named migration lead + availability of subject-matter experts for UAT
+- [ ] Azure subscription confirmed and billing alerts configured.
+- [ ] Entra ID tenant verified; custom domain DNS records created.
+- [ ] Resource group naming convention approved.
+- [ ] All Base44 entity schemas exported and reviewed.
+- [ ] RLS rules catalogued per entity.
+- [ ] All backend functions inventoried with trigger types (HTTP / scheduled / webhook).
+- [ ] All external webhook URLs documented with provider dashboard access.
+- [ ] CI/CD repository access confirmed (GitHub Actions secrets).
+- [ ] Staging environment provisioned and smoke-tested.
+- [ ] Stakeholder sign-off on timeline and rollback plan.
+- [ ] Support team briefed on the cutover comms plan.
+- [ ] Backup of current Base44 data exported and stored in Blob Storage.
 
 ---
 
-## 17. What Does NOT Change
+## 11. Out of Scope
 
-- The entire React + Vite + Tailwind frontend — pages, components, design system, the Ground Control brand (dark green `#2E5A1A` primary, leaf-green `#8DC63F` accent, Inter typography, glass and insight-card surfaces).
-- All business logic in `base44/shared` modules (ported verbatim).
-- All input/output contracts of the ~200 backend functions.
-- The user experience — same screens, same flows, same look and feel.
-
-Only the platform plumbing underneath changes.
+- Redesigning the frontend UI/UX — the React SPA is reused as-is.
+- Changing business logic or workflows — parity is the goal.
+- Migrating to a non-Azure cloud — this is an Azure-native commitment.
+- Replacing third-party SaaS providers (Asset Panda, Bob HR, etc.) — only the host platform changes.
 
 ---
 
-*End of document.*
+*This document is the single source of truth for the migration. Update it as decisions are finalised.*
