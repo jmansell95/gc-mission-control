@@ -22,6 +22,9 @@ function round2(n: number): number {
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+
     const body = await req.json().catch(() => ({}));
     const { date_from, date_to, division_id } = body;
 

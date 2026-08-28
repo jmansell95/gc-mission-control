@@ -5,6 +5,8 @@ function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;'
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (user && user.role !== 'admin') return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
 
     // Get all in-progress jobs
     const jobs = await base44.asServiceRole.entities.Job.list();

@@ -75,6 +75,9 @@ function fuzzyScore(keyword: string, description: string): number {
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+
     const body = await req.json().catch(() => ({}));
     const { description, division_id, log_id, confirm_mapping } = body;
 

@@ -28,6 +28,8 @@ async function getAppBaseUrl(base44) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (user && user.role !== 'admin') return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
 
     const settings = await base44.asServiceRole.entities.EmailAlertSetting.filter({ alert_key: 'vehicle_maintenance' });
     const cfg = settings[0];

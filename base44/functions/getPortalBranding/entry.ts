@@ -42,8 +42,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ---- SAVE: upsert branding (admin only — RLS enforces) ----
+    // ---- SAVE: upsert branding (admin only) ----
     if (body.action === 'save') {
+      const user = await base44.auth.me().catch(() => null);
+      if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      if (user.role !== 'admin') return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
+
       const records = await base44.asServiceRole.entities.PortalBranding.filter({ portal_type: portalType });
       const patch = {
         portal_type: portalType,
