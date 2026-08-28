@@ -18,6 +18,7 @@ import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
+import { billingTotal } from '@/components/equipment/shared';
 import { useBillingLock } from '@/hooks/useBillingLock';
 import BillingLockBanner from '@/components/billing/BillingLockBanner';
 
@@ -114,13 +115,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   // For day-rate items, the effective billing quantity = quantity × days on
   // site (from start_date → end_date). Rigs have quantity 1, so their total
   // comes entirely from day_rate × days. Non-day-rate items use quantity only.
-  const totalNet = loadableItems.reduce((s, c) => {
-    const qty = Number(c.quantity) || 1;
-    const days = c.unit_label === 'day' && c.start_date && c.end_date
-      ? Math.max(1, differenceInCalendarDays(new Date(c.end_date + 'T00:00:00'), new Date(c.start_date + 'T00:00:00')) + 1)
-      : 1;
-    return s + (Number(c.unit_cost) || 0) * qty * days;
-  }, 0);
+  const totalNet = loadableItems.reduce((s, c) => s + billingTotal(c), 0);
 
   // Every rig (SiteAsset with asset_type === 'rig') gets a RigAssemblyGroup card,
   // even when it has zero linked gear — so rigs never fall through to the
@@ -624,7 +619,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
             ) : (
               <div className="space-y-2">
                 {returnedItems.map(c => {
-                  const net = (Number(c.unit_cost) || 0) * (Number(c.quantity) || 1);
+                  const net = billingTotal(c);
                   return (
                     <div key={c.id} className="border border-slate-200 bg-slate-50/70 rounded-lg p-3 flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0"><FileCheck className="w-4 h-4 text-slate-500" /></div>

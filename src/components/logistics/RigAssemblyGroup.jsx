@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Edit2, Trash2, ChevronDown, ChevronUp, Layers, ShieldCheck, ShieldAlert, ShieldX, Truck, MapPin, PackageCheck, Warehouse, Loader2, FileText, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import LogisticsItemRow from '@/components/logistics/LogisticsItemRow';
+import { fmt as fmtMoney, billingTotal } from '@/components/equipment/shared';
 
-const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = fmtMoney;
 
 const complianceBadge = {
   compliant: { label: 'Compliant', icon: ShieldCheck, cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
@@ -21,7 +22,7 @@ const gearLocConfig = {
 
 export default function RigAssemblyGroup({ rigItem, linkedItems, asset, suppliers, contractors, canSeeCosts, canEdit, selectedIds, onToggleSelect, onEdit, onDeleteItem, onDeleteAssembly, onOffHire, onLocationUpdate, updatingIds, assetMap, complianceByAssetId = {} }) {
   const [expanded, setExpanded] = useState(true);
-  const assemblyTotal = (Number(rigItem.unit_cost) || 0) * (Number(rigItem.quantity) || 1) + linkedItems.reduce((s, li) => s + (Number(li.unit_cost) || 0) * (Number(li.quantity) || 1), 0);
+  const assemblyTotal = billingTotal(rigItem) + linkedItems.reduce((s, li) => s + billingTotal(li), 0);
   const rigAsset = rigItem.site_asset_id ? assetMap[rigItem.site_asset_id] : null;
   const complianceStatus = rigAsset?.compliance_status || 'unknown';
   const cb = complianceBadge[complianceStatus] || complianceBadge.unknown;
@@ -91,7 +92,7 @@ export default function RigAssemblyGroup({ rigItem, linkedItems, asset, supplier
             {linkedItems.map(li => {
               const loc = li.current_location || 'yard';
               const locCfg = gearLocConfig[loc] || gearLocConfig.yard;
-              const net = (Number(li.unit_cost) || 0) * (Number(li.quantity) || 1);
+              const net = billingTotal(li);
               const isUpdating = updatingIds.has(li.id);
               return (
                 <div key={li.id} className="flex items-center gap-2 py-1.5 px-2.5 bg-white rounded-lg border border-slate-100">

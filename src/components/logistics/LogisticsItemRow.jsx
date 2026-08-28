@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Edit2, Trash2, FileCheck, Package, Truck, MapPin, PackageCheck, Warehouse, Loader2, ShieldCheck, ShieldAlert, ShieldX, Wrench, ShoppingCart, HardHat, ChevronDown, ChevronUp, FileText, ExternalLink, Users, PenLine } from 'lucide-react';
 import { format } from 'date-fns';
+import { fmt as fmtMoney, billingTotal } from '@/components/equipment/shared';
 
-const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = fmtMoney;
 
 const categoryConfig = {
   hired_equipment: { label: 'Hired', icon: Truck, bg: 'bg-amber-50', text: 'text-amber-600' },
@@ -38,7 +39,7 @@ export default function LogisticsItemRow({ item: c, isSelected, onToggleSelect, 
   const LocIcon = locCfg.icon;
   const cb = asset ? (complianceConfig[asset.compliance_status] || complianceConfig.unknown) : null;
   const ComplianceIcon = cb?.icon;
-  const net = (Number(c.unit_cost) || 0) * (Number(c.quantity) || 1);
+  const net = billingTotal(c);
   const hasLinked = linkedItems.length > 0;
   const cert = complianceItems.find(ci => ci.document_url);
 
@@ -130,7 +131,7 @@ export default function LogisticsItemRow({ item: c, isSelected, onToggleSelect, 
             const LIcon = lcfg.icon;
             const lloc = li.current_location || 'yard';
             const llocCfg = locationConfig[lloc] || locationConfig.yard;
-            const lnet = (Number(li.unit_cost) || 0) * (Number(li.quantity) || 1);
+            const lnet = billingTotal(li);
             return (
               <div key={li.id} className="flex items-center gap-2 py-0.5">
                 <LIcon className={`w-3 h-3 ${lcfg.text} flex-shrink-0`} />
