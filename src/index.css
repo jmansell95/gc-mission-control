@@ -503,14 +503,12 @@
    AlertDialog) and custom popups — any element with fixed inset-0 triggers
    the lock. The :has() selector is well-supported in modern browsers
    (Chrome 105+, Safari 15.4+, Firefox 121+). */
-body:has(.fixed.inset-0),
-html:has(.fixed.inset-0),
-body:has(.absolute.inset-0),
-html:has(.absolute.inset-0),
-body:has(.fixed.inset-y-0.left-0),
-html:has(.fixed.inset-y-0.left-0),
-body:has(.fixed.inset-y-0.right-0),
-html:has(.fixed.inset-y-0.right-0) {
+body:has(> .fixed.inset-0),
+html:has(> .fixed.inset-0),
+body:has(> .fixed.inset-y-0.left-0),
+html:has(> .fixed.inset-y-0.left-0),
+body:has(> .fixed.inset-y-0.right-0),
+html:has(> .fixed.inset-y-0.right-0) {
   overflow: hidden;
 }
 
