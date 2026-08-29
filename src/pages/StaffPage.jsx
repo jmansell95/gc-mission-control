@@ -9,6 +9,8 @@ import SettingsPage from '@/components/SettingsPage';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
 import MissingRatesBanner from '@/components/staff/MissingRatesBanner';
 import PeopleDirectory from '@/components/staff/PeopleDirectory';
+import StaffListTab from '@/components/staff/StaffListTab';
+import PermissionGroupsTab from '@/components/access/PermissionGroupsTab';
 import PeopleInsights from '@/components/staff/PeopleInsights';
 import TrainingMatrixHub from '@/components/staff/TrainingMatrixHub';
 import RunReportButton from '@/components/reports/RunReportButton';
@@ -18,11 +20,12 @@ import ContactsTab from '@/components/staff/ContactsTab';
 // Crew Members / Crew Profiles / Crew Types are merged into 'directory'.
 // Reviews is removed entirely.
 const TAB_MAP = {
-  'staff': { tab: 'people', sub: 'directory' },
-  'crew-profiles': { tab: 'people', sub: 'directory' },
-  'teams': { tab: 'people', sub: 'directory' },
-  'staff-reviews': { tab: 'people', sub: 'directory' },
-  'directory': { tab: 'people', sub: 'directory' },
+  'staff': { tab: 'people', sub: 'staff' },
+  'crew-profiles': { tab: 'people', sub: 'crews' },
+  'teams': { tab: 'people', sub: 'crews' },
+  'staff-reviews': { tab: 'people', sub: 'crews' },
+  'directory': { tab: 'people', sub: 'crews' },
+  'access-levels': { tab: 'people', sub: 'permission-groups' },
   'cost-analytics': { tab: 'people', sub: 'insights' },
   'utilization': { tab: 'people', sub: 'insights' },
   'timesheets': { tab: 'time-pay', sub: 'timesheets' },
@@ -33,14 +36,15 @@ const TAB_MAP = {
   'clients': { tab: 'contacts', sub: 'clients' },
   'contractors': { tab: 'contacts', sub: 'contractors' },
   'suppliers': { tab: 'contacts', sub: 'suppliers' },
-  'access-levels': { tab: 'people', sub: 'directory' },
 };
 
-// 4 consolidated tabs. People tab now has 2 sub-pills: Directory (merged) + Insights.
+// 4 consolidated tabs. People tab has 4 sub-pills: Staff, Crews, Permission Groups, Insights.
 const TABS = [
   {
     id: 'people', label: 'People', icon: Users, sub: [
-      { id: 'directory', label: 'Directory' },
+      { id: 'staff', label: 'Staff' },
+      { id: 'crews', label: 'Crews' },
+      { id: 'permission-groups', label: 'Permission Groups' },
       { id: 'insights', label: 'Insights' },
     ],
   },
@@ -67,7 +71,7 @@ export default function StaffPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const initial = location.state?.initialTab || 'staff';
-  const mapped = TAB_MAP[initial] || { tab: 'people', sub: 'directory' };
+  const mapped = TAB_MAP[initial] || { tab: 'people', sub: 'staff' };
   const [tab, setTab] = useState(mapped.tab);
   const [subTab, setSubTab] = useState(mapped.sub || null);
 
@@ -117,8 +121,12 @@ export default function StaffPage() {
 
       {tab === 'training' ? (
         <TrainingMatrixHub />
-      ) : tab === 'people' && renderTab === 'directory' ? (
+      ) : tab === 'people' && renderTab === 'staff' ? (
+        <StaffListTab />
+      ) : tab === 'people' && renderTab === 'crews' ? (
         <PeopleDirectory />
+      ) : tab === 'people' && renderTab === 'permission-groups' ? (
+        <PermissionGroupsTab />
       ) : tab === 'people' && renderTab === 'insights' ? (
         <PeopleInsights />
       ) : tab === 'contacts' ? (
