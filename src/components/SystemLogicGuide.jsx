@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Loader2, BookOpen, ShieldCheck, TrendingUp, Sparkles, HardHat, FileClock, Clock, Activity, Zap, FileText, Radar, Users, MessageSquare, Camera, Mic, MapPin, CalendarClock, Layers, Boxes } from 'lucide-react';
+import { Download, Loader2, BookOpen, ShieldCheck, TrendingUp, Sparkles, HardHat, FileClock, Clock, Activity, Zap, FileText, Radar, Users, MessageSquare, Camera, Mic, MapPin, CalendarClock, Layers, Boxes, Truck } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { EMBLEM_URL } from '@/components/Logo';
 
@@ -145,6 +145,22 @@ const SECTIONS = [
       { stat: 'Geofence Batch Check', meaning: 'Every 10 minutes. Reads the latest GPS position for every vehicle and checks it against all job, supplier and client geofences. Catches arrivals/departures the real-time Geotab webhook may have missed between pings.' },
       { stat: 'Idle Asset Transfer Sweep', meaning: 'Daily at 6 AM. The autoGenerateTransferLegs function matches assets sitting idle in the yard with upcoming job delivery requirements and auto-creates DeliveryLeg records so gear moves to where it is needed without manual planning.' },
       { stat: 'Portal Feedback Sync', meaning: 'Nightly at 11 PM. The syncPortalFeedbackToJobStatus function processes client portal feedback ratings. When a poor rating (1-2 stars) is received, the linked job is automatically put on hold with a status_reason so the project manager can investigate before continuing.' },
+    ],
+  },
+  {
+    id: 'logistics',
+    icon: Truck,
+    title: 'Logistics & Deliveries',
+    desc: 'How pick lists, route optimisation, goods-in and delivery billing work',
+    items: [
+      { stat: 'Depot Pick Lists', meaning: 'The Depot Pick Lists page (/depot-pick-lists) groups today\'s deliveries by vehicle, showing each drop as a card with its pick-list items, delivery address, and a 3-stage digital sign-off. Warehouse staff open a delivery, see the full item list to pick, and work through the stages in order. The page is accessible from the Logistics Hub Pick Lists tab and is mobile-first for warehouse floor use.' },
+      { stat: '3-Stage Per-Signature Sign-Off', meaning: 'Every pick list has three sign-off stages: Picked (warehouse confirms items picked from shelf), Loaded (loader confirms items on the vehicle), and Driver Check (driver confirms the load is correct before departure). Each stage requires the signer to draw their signature on a canvas — a finger or stylus drawn signature, not a tap. The signature PNG, signer name, and timestamp are saved to the DeliveryLog record, creating a legally defensible audit trail per stage.' },
+      { stat: 'Signature Storage', meaning: 'Each stage\'s drawn signature is stored as a base64 PNG data URL on the DeliveryLog record (picked_signature_data_url, loaded_signature_data_url, driver_check_signature_data_url). Completed stages display the signature thumbnail next to the signer\'s name and timestamp in the modal. The printed A4 pick sheet embeds the captured signature images so the paper trail matches the digital trail.' },
+      { stat: 'Printable A4 Pick Sheet', meaning: 'Every pick list can be printed as an A4 sheet for the notice board or driver handout. The sheet includes the job details, vehicle, item checklist with tick boxes for Picked and Loaded, driver instructions, and a sign-off block. When stages are already signed digitally, the captured signature images are embedded in the printed sheet; unsigned stages show blank lines for physical sign-off as a backup.' },
+      { stat: 'Route Optimisation', meaning: 'The optimizeDailyRoute function uses the Google Maps Directions API with waypoint optimisation to calculate the most efficient stop order for a driver\'s day. It sets optimized_sequence_index (recommended stop order), optimized_eta (estimated arrival time), leg_duration_minutes (traffic-aware travel time), and leg_distance_miles on each DeliveryLog. The pick list page sorts drops by sequence index so the warehouse picks in drive order.' },
+      { stat: 'Goods-In Gatekeeper', meaning: 'When a supplier delivery arrives at the depot, the Goods In panel (Logistics Hub → Procurement tab) verifies the shipment against the expected items and quantity. The receiver scans or manually confirms each line item, records the condition, and stamps the receipt. This creates a GoodsInReceipt record and updates ConsumableStockItem quantities so the warehouse inventory stays accurate.' },
+      { stat: 'Delivery Billing', meaning: 'Every delivery is chargeable by default. The calculateCharge function matches the delivery to a BillingRule (by delivery type and distance), applies the rate, and sets charge_amount and charge_breakdown on the DeliveryLog. Billing can be set to auto (rule-calculated), no_charge (goodwill visit), or custom_fee (manual override). Internal handovers (item_handover) default to not chargeable.' },
+      { stat: 'Vehicle Capacity Checks', meaning: 'When equipment is signed out onto a delivery vehicle, the system sums the weight_kg and volume_m3 of all items and compares against the vehicle\'s max_weight_kg and max_volume_m3. If the loaded weight exceeds the limit, the sign-out is blocked unless the dispatcher explicitly overrides (weight_override=true, logged to SystemAuditLog). The total_loaded_weight_kg and axle_guidance_note are denormalised onto the DeliveryLog for the driver hub safe-to-drive display.' },
     ],
   },
   {

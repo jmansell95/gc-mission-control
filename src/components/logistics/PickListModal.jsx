@@ -5,13 +5,18 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import {
   ClipboardList, Printer, X, MapPin, Truck, User, Package,
-  CheckCircle2, Circle, Clock, Navigation, FileText, AlertTriangle,
+  CheckCircle2, Circle, Clock, Navigation, FileText, AlertTriangle, PenLine,
 } from 'lucide-react';
 import { buildPickListHtml, printPickListHtml, parsePickItems } from './pickListHtml';
 import { useToast } from '@/components/ui/use-toast';
+import SignaturePad from '@/components/staff/SignaturePad';
 
 /**
- * Mobile-first full-screen Pick List modal with in-app digital sign-off.
+ * Mobile-first full-screen Pick List modal with per-stage drawn-signature sign-off.
+ *
+ * Each of the 3 stages (Picked, Loaded, Driver Check) requires the signer to
+ * draw their signature on a canvas before the stage is confirmed — creating a
+ * legally defensible audit trail per stage.
  *
  * Props:
  *   delivery   — the DeliveryLog record
@@ -26,6 +31,8 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState(null);
+  const [activeStage, setActiveStage] = useState(null); // which stage canvas is open
+  const [currentSig, setCurrentSig] = useState(null); // drawn signature data URL for the active stage
 
   const { data: fetchedJob } = useQuery({
     queryKey: ['picklist-job', delivery?.job_id],
@@ -57,7 +64,8 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
       done: !!delivery?.picked_at,
       by: delivery?.picked_by_name,
       at: delivery?.picked_at,
-      fields: { picked_by_name: myName, picked_at: new Date().toISOString() },
+      sig: delivery?.picked_signature_data_url,
+      fields: (sig) => ({ picked_by_name: myName, picked_at: new Date().toISOString(), picked_signature_data_url: sig }),
     },
     {
       key: 'loaded',
@@ -66,7 +74,8 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
       done: !!delivery?.loaded_at,
       by: delivery?.loaded_by_name,
       at: delivery?.loaded_at,
-      fields: { loaded_by_name: myName, loaded_at: new Date().toISOString() },
+      sig: delivery?.loaded_signature_data_url,
+      fields: (sig) => ({ loaded_by_name: myName, loaded_at: new Date().toISOString(), loaded_signature_data_url: sig }),
     },
     {
       key: 'driver_check',
@@ -75,25 +84,33 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
       done: !!delivery?.driver_checked_at,
       by: delivery?.driver_checked_by,
       at: delivery?.driver_checked_at,
-      fields: { driver_checked: true, driver_checked_by: myName, driver_checked_at: new Date().toISOString() },
+      sig: delivery?.driver_check_signature_data_url,
+      fields: (sig) => ({ driver_checked: true, driver_checked_by: myName, driver_checked_at: new Date().toISOString(), driver_check_signature_data_url: sig }),
     },
   ], [delivery, myName]);
 
   const allDone = signStages.every(s => s.done);
 
-  const stampStage = async (stage) => {
-    if (stage.done || busy) return;
+  const confirmStage = async (stage) => {
+    if (!currentSig || busy) return;
     setBusy(stage.key);
     try {
-      await base44.entities.DeliveryLog.update(delivery.id, stage.fields);
+      await base44.entities.DeliveryLog.update(delivery.id, stage.fields(currentSig));
       toast({ title: `${stage.label} confirmed`, description: `Signed off by ${myName}` });
       queryClient.invalidateQueries({ queryKey: ['depot-pick-lists'] });
       queryClient.invalidateQueries({ queryKey: ['driver-hub-deliveries'] });
+      setActiveStage(null);
+      setCurrentSig(null);
     } catch (e) {
       toast({ title: 'Sign-off failed', description: e.message, variant: 'destructive' });
     } finally {
       setBusy(null);
     }
+  };
+
+  const cancelStage = () => {
+    setActiveStage(null);
+    setCurrentSig(null);
   };
 
   if (!open || !delivery) return null;
@@ -187,10 +204,10 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
             </div>
           )}
 
-          {/* Digital sign-off */}
+          {/* Digital sign-off with per-stage drawn signatures */}
           <div className="insight-card rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <CheckCircle2 className="w-4 h-4 text-[#2E5A1A]" />
+              <PenLine className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Digital Sign-Off</h4>
               {allDone && (
                 <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">
@@ -198,40 +215,75 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                 </span>
               )}
             </div>
+            <p className="text-[11px] text-slate-400 px-1">Each stage requires a drawn signature to confirm.</p>
             <div className="space-y-2">
               {signStages.map(stage => {
                 const Icon = stage.icon;
                 const isBusy = busy === stage.key;
+                const isActive = activeStage === stage.key;
                 return (
-                  <button
-                    key={stage.key}
-                    onClick={() => stampStage(stage)}
-                    disabled={stage.done || busy}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition touch-manipulation min-h-[56px] text-left ${
-                      stage.done
-                        ? 'bg-emerald-50 border-emerald-200'
-                        : 'bg-white border-slate-200 hover:border-[#2E5A1A] active:scale-[0.99]'
-                    } ${busy && !isBusy ? 'opacity-50' : ''}`}
-                  >
-                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stage.done ? 'bg-emerald-600' : 'bg-slate-100'}`}>
-                      {stage.done ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-slate-500" />}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold ${stage.done ? 'text-emerald-800' : 'text-slate-800'}`}>{stage.label}</p>
-                      {stage.done ? (
-                        <p className="text-[11px] text-emerald-600 truncate">
-                          {stage.by} · {new Date(stage.at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
-                        </p>
+                  <div key={stage.key} className={`rounded-xl border transition overflow-hidden ${stage.done ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'}`}>
+                    {/* Stage header row */}
+                    <button
+                      onClick={() => !stage.done && !busy && setActiveStage(isActive ? null : stage.key)}
+                      disabled={stage.done || busy}
+                      className={`w-full flex items-center gap-3 p-3 text-left touch-manipulation min-h-[56px] ${stage.done ? 'cursor-default' : 'cursor-pointer hover:border-[#2E5A1A] active:scale-[0.99]'} ${isActive ? 'border-b-0' : ''}`}
+                    >
+                      <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stage.done ? 'bg-emerald-600' : 'bg-slate-100'}`}>
+                        {stage.done ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-slate-500" />}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-bold ${stage.done ? 'text-emerald-800' : 'text-slate-800'}`}>{stage.label}</p>
+                        {stage.done ? (
+                          <p className="text-[11px] text-emerald-600 truncate">
+                            {stage.by} · {new Date(stage.at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-slate-400">Tap to sign as {myName}</p>
+                        )}
+                      </div>
+                      {!stage.done && (isBusy ? (
+                        <div className="w-5 h-5 border-2 border-[#2E5A1A] border-t-transparent rounded-full animate-spin flex-shrink-0" />
                       ) : (
-                        <p className="text-[11px] text-slate-400">Tap to confirm as {myName}</p>
-                      )}
-                    </div>
-                    {!stage.done && (isBusy ? (
-                      <div className="w-5 h-5 border-2 border-[#2E5A1A] border-t-transparent rounded-full animate-spin flex-shrink-0" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-slate-300 flex-shrink-0" />
-                    ))}
-                  </button>
+                        <Circle className="w-5 h-5 text-slate-300 flex-shrink-0" />
+                      ))}
+                    </button>
+
+                    {/* Completed stage — show signature thumbnail */}
+                    {stage.done && stage.sig && (
+                      <div className="px-3 pb-3 flex items-center gap-3">
+                        <img src={stage.sig} alt={`${stage.label} signature`} className="h-10 max-w-[160px] object-contain rounded border border-emerald-200 bg-white" />
+                        <span className="text-[10px] text-emerald-600 font-semibold">Signed</span>
+                      </div>
+                    )}
+
+                    {/* Active unsigned stage — show signature canvas */}
+                    {isActive && !stage.done && (
+                      <div className="p-3 border-t border-slate-100 space-y-2">
+                        <SignaturePad onChange={setCurrentSig} />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => cancelStage()}
+                            disabled={busy}
+                            className="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition touch-manipulation min-h-[44px] disabled:opacity-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => confirmStage(stage)}
+                            disabled={!currentSig || busy}
+                            className="flex-[2] inline-flex items-center justify-center gap-2 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition touch-manipulation min-h-[44px] disabled:opacity-50"
+                          >
+                            {isBusy ? (
+                              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Confirming…</>
+                            ) : (
+                              <><PenLine className="w-4 h-4" /> Confirm & Sign</>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

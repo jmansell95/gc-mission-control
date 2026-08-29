@@ -244,6 +244,10 @@
       "type": "string",
       "description": "ISO timestamp when the items were marked as picked in the app."
     },
+    "picked_signature_data_url": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the drawn signature captured when the warehouse picker confirmed the Picked stage. Captured via the in-app SignaturePad so each pick stage has a legally defensible signature audit trail."
+    },
     "loaded_by_name": {
       "type": "string",
       "description": "Name of the staff member who loaded the items onto the delivery vehicle. Stamped by the in-app digital sign-off flow."
@@ -251,6 +255,10 @@
     "loaded_at": {
       "type": "string",
       "description": "ISO timestamp when the items were marked as loaded onto the vehicle in the app."
+    },
+    "loaded_signature_data_url": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the drawn signature captured when the loader confirmed the Loaded stage. Captured via the in-app SignaturePad so each load stage has a legally defensible signature audit trail."
     },
     "driver_checked": {
       "type": "boolean",
@@ -264,6 +272,10 @@
     "driver_checked_at": {
       "type": "string",
       "description": "ISO timestamp when the driver confirmed the load check."
+    },
+    "driver_check_signature_data_url": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the drawn signature captured when the driver confirmed the Driver Check stage. Captured via the in-app SignaturePad so the pre-departure load check has a legally defensible signature audit trail."
     }
   },
   "required": [

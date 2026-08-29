@@ -34,6 +34,24 @@ export function buildPickListHtml({ delivery, job, vehicle, driverName }) {
   const w3w = job?.what3words ? `what3words: ///${job.what3words}` : '';
   const vehicleHeight = vehicle?.height_m ? `${vehicle.height_m} m — check bridge clearance` : '';
 
+  // Embed captured digital signatures in the printed sheet when available.
+  // Each signature shows as an image above the sign-off line, with the signer
+  // name and timestamp — so the paper trail matches the digital trail.
+  const sigImg = (dataUrl, label, name, at) => {
+    if (!dataUrl) {
+      return `<div class="signoff-field"><div class="signoff-label">${label}</div><div class="signoff-line"></div></div>`;
+    }
+    const timeStr = at ? new Date(at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' }) : '';
+    return `<div class="signoff-field">
+        <div class="signoff-label">${label}${name ? ` — ${name}` : ''}${timeStr ? ` · ${timeStr}` : ''}</div>
+        <img src="${dataUrl}" style="max-height:50px;max-width:200px;border-bottom:1px solid #475569;padding-bottom:2px;" alt="signature" />
+      </div>`;
+  };
+
+  const pickedSig = sigImg(delivery?.picked_signature_data_url, 'Picked by (warehouse)', delivery?.picked_by_name, delivery?.picked_at);
+  const loadedSig = sigImg(delivery?.loaded_signature_data_url, 'Loaded by', delivery?.loaded_by_name, delivery?.loaded_at);
+  const driverSig = sigImg(delivery?.driver_check_signature_data_url, 'Checked by (driver)', delivery?.driver_checked_by, delivery?.driver_checked_at);
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Pick List — ${delivery?.job_name || 'Drop'}</title>
     <style>
       @page { margin: 1.2cm; }
@@ -111,20 +129,14 @@ export function buildPickListHtml({ delivery, job, vehicle, driverName }) {
       <div class="section-title">Sign-Off</div>
       <div class="signoff-block">
         <div class="signoff-row">
-          <div class="signoff-field">
-            <div class="signoff-label">Picked by (warehouse)</div>
-            <div class="signoff-line"></div>
-          </div>
+          ${pickedSig}
           <div class="signoff-field">
             <div class="signoff-label">Time picked</div>
             <div class="signoff-line"></div>
           </div>
         </div>
         <div class="signoff-row">
-          <div class="signoff-field">
-            <div class="signoff-label">Loaded by</div>
-            <div class="signoff-line"></div>
-          </div>
+          ${loadedSig}
           <div class="signoff-field">
             <div class="signoff-label">Time loaded</div>
             <div class="signoff-line"></div>
@@ -135,10 +147,7 @@ export function buildPickListHtml({ delivery, job, vehicle, driverName }) {
             <span class="check-box"></span>
             <span class="signoff-label">Driver checked load</span>
           </div>
-          <div class="signoff-field">
-            <div class="signoff-label">Checked by (driver name)</div>
-            <div class="signoff-line"></div>
-          </div>
+          ${driverSig}
         </div>
       </div>
       <div class="footer">Ground Control — Warehouse Pick List · Drop ${delivery?.optimized_sequence_index || ''} · Generated ${new Date().toLocaleString('en-GB')}</div>
