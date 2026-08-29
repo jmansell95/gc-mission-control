@@ -235,6 +235,35 @@
     "route_optimized_at": {
       "type": "string",
       "description": "ISO timestamp of when the route was last optimised for this delivery."
+    },
+    "picked_by_name": {
+      "type": "string",
+      "description": "Name of the warehouse/depot staff member who picked the items from the shelf. Stamped by the in-app digital sign-off flow."
+    },
+    "picked_at": {
+      "type": "string",
+      "description": "ISO timestamp when the items were marked as picked in the app."
+    },
+    "loaded_by_name": {
+      "type": "string",
+      "description": "Name of the staff member who loaded the items onto the delivery vehicle. Stamped by the in-app digital sign-off flow."
+    },
+    "loaded_at": {
+      "type": "string",
+      "description": "ISO timestamp when the items were marked as loaded onto the vehicle in the app."
+    },
+    "driver_checked": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the driver has confirmed the load is correct and complete before departure. Stamped by the in-app digital sign-off flow."
+    },
+    "driver_checked_by": {
+      "type": "string",
+      "description": "Name of the driver who checked and confirmed the load."
+    },
+    "driver_checked_at": {
+      "type": "string",
+      "description": "ISO timestamp when the driver confirmed the load check."
     }
   },
   "required": [

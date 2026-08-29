@@ -42,6 +42,7 @@ import ReportingHub from './pages/ReportingHub';
 import CompliancePage from './pages/CompliancePage';
 import BillingPage from './pages/BillingPage';
 import AzureMigrationPlan from './pages/AzureMigrationPlan';
+import DepotPickLists from './pages/DepotPickLists';
 
 
 import StaffPage from './pages/StaffPage';
@@ -131,6 +132,7 @@ const AuthenticatedApp = () => {
           <Route element={<AppLayout />}>
             <Route path="/subcontractor" element={<RouteGuard><SubcontractorDashboard /></RouteGuard>} />
             <Route path="/admin/logistics" element={<RouteGuard><HubReadinessGate featureId="logistics"><DriverHub /></HubReadinessGate></RouteGuard>} />
+            <Route path="/depot-pick-lists" element={<RouteGuard><HubReadinessGate featureId="logistics"><DepotPickLists /></HubReadinessGate></RouteGuard>} />
             <Route path="/presentation-pack" element={<PresentationPack />} />
 
             <Route path="/pat-testing" element={<RouteGuard><PATTestingConsole /></RouteGuard>} />

@@ -55,8 +55,16 @@ export function buildPickListHtml({ delivery, job, vehicle, driverName }) {
       .notes-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
       .notes-box .title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #92400e; font-weight: 700; margin-bottom: 4px; }
       .notes-box .text { font-size: 13px; color: #334155; white-space: pre-wrap; }
-      .sign-line { margin-top: 36px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
-      .sign-line .line { border-top: 1px solid #475569; padding-top: 4px; font-size: 11px; color: #64748b; }
+      .signoff-block { margin-top: 18px; border: 1.5px solid #2E5A1A; border-radius: 10px; padding: 14px 16px; background: #fafffe; }
+      .signoff-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 14px; }
+      .signoff-row:last-child { margin-bottom: 0; }
+      .signoff-field { display: flex; flex-direction: column; }
+      .signoff-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #2E5A1A; font-weight: 700; margin-bottom: 22px; }
+      .signoff-line { border-top: 1px solid #475569; height: 1px; }
+      .signoff-row.driver-row { align-items: center; padding-top: 10px; border-top: 1px dashed #cbd5e1; }
+      .checkbox-field { flex-direction: row; align-items: center; gap: 8px; }
+      .checkbox-field .signoff-label { margin-bottom: 0; }
+      .check-box { display: inline-block; width: 18px; height: 18px; border: 1.5px solid #475569; border-radius: 4px; flex-shrink: 0; }
       .footer { margin-top: 24px; padding-top: 10px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8; text-align: center; }
       @media print { .no-print { display: none; } }
     </style></head><body>
@@ -100,10 +108,38 @@ export function buildPickListHtml({ delivery, job, vehicle, driverName }) {
         ${vehicleHeight ? `<div style="font-size:13px;color:#b45309;font-weight:600;">Vehicle height: ${vehicleHeight}</div>` : ''}
       ` : ''}
 
-      <div class="sign-line">
-        <div class="line">Picked by (warehouse): </div>
-        <div class="line">Checked by (driver): </div>
-        <div class="line">Time loaded: </div>
+      <div class="section-title">Sign-Off</div>
+      <div class="signoff-block">
+        <div class="signoff-row">
+          <div class="signoff-field">
+            <div class="signoff-label">Picked by (warehouse)</div>
+            <div class="signoff-line"></div>
+          </div>
+          <div class="signoff-field">
+            <div class="signoff-label">Time picked</div>
+            <div class="signoff-line"></div>
+          </div>
+        </div>
+        <div class="signoff-row">
+          <div class="signoff-field">
+            <div class="signoff-label">Loaded by</div>
+            <div class="signoff-line"></div>
+          </div>
+          <div class="signoff-field">
+            <div class="signoff-label">Time loaded</div>
+            <div class="signoff-line"></div>
+          </div>
+        </div>
+        <div class="signoff-row driver-row">
+          <div class="signoff-field checkbox-field">
+            <span class="check-box"></span>
+            <span class="signoff-label">Driver checked load</span>
+          </div>
+          <div class="signoff-field">
+            <div class="signoff-label">Checked by (driver name)</div>
+            <div class="signoff-line"></div>
+          </div>
+        </div>
       </div>
       <div class="footer">Ground Control — Warehouse Pick List · Drop ${delivery?.optimized_sequence_index || ''} · Generated ${new Date().toLocaleString('en-GB')}</div>
     </body></html>`;

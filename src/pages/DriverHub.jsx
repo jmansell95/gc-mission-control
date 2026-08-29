@@ -2,9 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
+import { useNavigate } from 'react-router-dom';
 import {
   Truck, Store, Package, FileText, CheckCircle2, Clock, PlayCircle,
   AlertTriangle, ArrowRightLeft, Boxes, LayoutGrid, List, Navigation, Search, FlaskConical,
+  ClipboardList,
 } from 'lucide-react';
 import { format, isToday, isFuture, isPast } from 'date-fns';
 import DeliveryBoard from '@/components/admin/DeliveryBoard';
@@ -47,6 +49,7 @@ const dateFilters = [
  * tracking, and reconciliation. Replaces the old AdminDeliveryHub.
  */
 export default function DriverHub() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState('runs');
   const [sub, setSub] = useState('board');
   const [view, setView] = useState('board');
@@ -105,9 +108,13 @@ export default function DriverHub() {
         { id: 'hire', label: 'Hire Management', icon: Package },
         { id: 'purchased', label: 'Purchased-for-Job', icon: FileText },
         { id: 'reconcile', label: 'Reconciliation', icon: CheckCircle2 },
+        { id: 'pick-lists', label: 'Pick Lists', icon: ClipboardList },
       ]}
       activeTab={tab}
-      onTabChange={(t) => { setTab(t); setSub(t === 'procurement' ? 'goods-in' : 'board'); }}
+      onTabChange={(t) => {
+        if (t === 'pick-lists') { navigate('/depot-pick-lists'); return; }
+        setTab(t); setSub(t === 'procurement' ? 'goods-in' : 'board');
+      }}
       kpiStrip={
         <HubStatsBar tiles={[
           { icon: Clock, label: 'Today', value: stats.today, color: 'amber' },

@@ -1,34 +1,37 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ClipboardList, Printer, X } from 'lucide-react';
-import { buildPickListHtml, printPickListHtml } from './pickListHtml';
+import { useAuth } from '@/lib/AuthContext';
+import {
+  ClipboardList, Printer, X, MapPin, Truck, User, Package,
+  CheckCircle2, Circle, Clock, Navigation, FileText, AlertTriangle,
+} from 'lucide-react';
+import { buildPickListHtml, printPickListHtml, parsePickItems } from './pickListHtml';
+import { useToast } from '@/components/ui/use-toast';
 
 /**
- * Viewable + printable warehouse pick list modal. Renders an on-screen
- * preview of the pick sheet (via an iframe using the shared HTML generator)
- * with a Print button that triggers the existing window.open + print flow.
- *
- * Self-sufficient: if `job` or `vehicle` are not supplied, it fetches them by
- * ID so every trigger surface only needs to pass the delivery record.
+ * Mobile-first full-screen Pick List modal with in-app digital sign-off.
  *
  * Props:
  *   delivery   — the DeliveryLog record
- *   job        — optional Job record (reference / what3words / site contact)
- *   vehicle    — optional Vehicle record (reg + height for loading bay)
+ *   job        — optional Job record
+ *   vehicle    — optional Vehicle record
  *   driverName — optional driver display name
- *   open       — boolean, whether the modal is visible
- *   onClose    — callback to close the modal
+ *   open       — boolean
+ *   onClose    — callback
  */
 export default function PickListModal({ delivery, job, vehicle, driverName, open, onClose }) {
-  // Fetch the job if not supplied (e.g. field card / job-detail list only pass delivery)
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [busy, setBusy] = useState(null);
+
   const { data: fetchedJob } = useQuery({
     queryKey: ['picklist-job', delivery?.job_id],
     queryFn: () => base44.entities.Job.get(delivery.job_id),
     enabled: open && !!delivery?.job_id && !job,
   });
-  // Fetch the vehicle if not supplied (e.g. admin board card / table don't pass it)
   const { data: fetchedVehicle } = useQuery({
     queryKey: ['picklist-vehicle', delivery?.vehicle_id],
     queryFn: () => base44.entities.Vehicle.get(delivery.vehicle_id),
@@ -37,58 +40,233 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
 
   const resolvedJob = job || fetchedJob || null;
   const resolvedVehicle = vehicle || fetchedVehicle || null;
+  const myName = user?.full_name || user?.email || 'Staff';
 
   const html = useMemo(() => {
     if (!open || !delivery) return '';
     return buildPickListHtml({ delivery, job: resolvedJob, vehicle: resolvedVehicle, driverName });
   }, [open, delivery, resolvedJob, resolvedVehicle, driverName]);
 
+  const items = useMemo(() => parsePickItems(delivery), [delivery]);
+
+  const signStages = useMemo(() => [
+    {
+      key: 'picked',
+      label: 'Picked',
+      icon: Package,
+      done: !!delivery?.picked_at,
+      by: delivery?.picked_by_name,
+      at: delivery?.picked_at,
+      fields: { picked_by_name: myName, picked_at: new Date().toISOString() },
+    },
+    {
+      key: 'loaded',
+      label: 'Loaded',
+      icon: Truck,
+      done: !!delivery?.loaded_at,
+      by: delivery?.loaded_by_name,
+      at: delivery?.loaded_at,
+      fields: { loaded_by_name: myName, loaded_at: new Date().toISOString() },
+    },
+    {
+      key: 'driver_check',
+      label: 'Driver Check',
+      icon: CheckCircle2,
+      done: !!delivery?.driver_checked_at,
+      by: delivery?.driver_checked_by,
+      at: delivery?.driver_checked_at,
+      fields: { driver_checked: true, driver_checked_by: myName, driver_checked_at: new Date().toISOString() },
+    },
+  ], [delivery, myName]);
+
+  const allDone = signStages.every(s => s.done);
+
+  const stampStage = async (stage) => {
+    if (stage.done || busy) return;
+    setBusy(stage.key);
+    try {
+      await base44.entities.DeliveryLog.update(delivery.id, stage.fields);
+      toast({ title: `${stage.label} confirmed`, description: `Signed off by ${myName}` });
+      queryClient.invalidateQueries({ queryKey: ['depot-pick-lists'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-hub-deliveries'] });
+    } catch (e) {
+      toast({ title: 'Sign-off failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBusy(null);
+    }
+  };
+
   if (!open || !delivery) return null;
 
+  const dateStr = delivery.scheduled_date
+    ? new Date(delivery.scheduled_date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+    : '—';
+
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 pt-6 sm:pt-4">
-      <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-pop-in">
-        {/* Brand header strip — matches the print sheet */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
-              <ClipboardList className="w-4 h-4 text-white" />
+    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/96 backdrop-blur-md animate-pop-in">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white safe-area-top flex-shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
+            <ClipboardList className="w-4 h-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold truncate leading-tight text-sm">Warehouse Pick List</h3>
+            <p className="text-[11px] text-white/70 truncate">
+              {delivery.job_name || 'Drop'}
+              {delivery.optimized_sequence_index ? ` · Stop ${delivery.optimized_sequence_index}` : ''}
+            </p>
+          </div>
+        </div>
+        <button onClick={onClose} className="p-2 hover:bg-white/15 rounded-lg transition flex-shrink-0 touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center">
+          <X className="w-5 h-5 text-white" />
+        </button>
+      </div>
+
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="max-w-2xl mx-auto w-full p-4 space-y-4">
+          {/* Job & route details */}
+          <div className="insight-card rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <FileText className="w-4 h-4 text-[#2E5A1A]" />
+              <h4 className="text-sm font-bold text-slate-900">Job Details</h4>
             </div>
-            <div className="min-w-0">
-              <h3 className="font-bold truncate leading-tight">Warehouse Pick List</h3>
-              <p className="text-[11px] text-white/70 truncate">
-                {delivery?.job_name || 'Drop'}
-                {delivery?.optimized_sequence_index ? ` · Stop ${delivery.optimized_sequence_index}` : ' · Single drop'}
-              </p>
+            <DetailRow icon={FileText} label="Job" value={delivery.job_name || resolvedJob?.name} />
+            <DetailRow icon={Navigation} label="Job Ref" value={delivery.job_reference || resolvedJob?.job_reference} />
+            <DetailRow icon={MapPin} label="Deliver To" value={delivery.delivery_address} />
+            {resolvedJob?.what3words && (
+              <DetailRow icon={MapPin} label="what3words" value={`///${resolvedJob.what3words}`} mono />
+            )}
+            <DetailRow icon={User} label="Site Contact" value={resolvedJob?.site_contact_name ? `${resolvedJob.site_contact_name}${resolvedJob.site_contact_phone ? ' · ' + resolvedJob.site_contact_phone : ''}` : delivery.contact_name} />
+            <DetailRow icon={Clock} label="Scheduled" value={dateStr} />
+            {delivery.po_number && <DetailRow icon={FileText} label="PO / Ref" value={delivery.po_number} />}
+          </div>
+
+          {/* Vehicle */}
+          <div className="insight-card rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <Truck className="w-4 h-4 text-[#2E5A1A]" />
+              <h4 className="text-sm font-bold text-slate-900">Vehicle & Loading</h4>
+            </div>
+            <DetailRow icon={Truck} label="Vehicle" value={resolvedVehicle?.name ? `${resolvedVehicle.name}${resolvedVehicle.registration_number ? ` (${resolvedVehicle.registration_number})` : ''}` : '—'} />
+            <DetailRow icon={User} label="Driver" value={driverName || delivery.driver_staff_name || '—'} />
+            <DetailRow icon={MapPin} label="Pick Up From" value={delivery.pickup_address || 'Depot / Yard'} />
+            {resolvedVehicle?.height_m && (
+              <div className="flex items-start gap-2.5 px-1">
+                <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs font-semibold text-amber-700">Vehicle height: {resolvedVehicle.height_m} m — check bridge clearance</p>
+              </div>
+            )}
+          </div>
+
+          {/* Items to pick */}
+          <div className="insight-card rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <Package className="w-4 h-4 text-[#2E5A1A]" />
+              <h4 className="text-sm font-bold text-slate-900">Items to Pick ({items.length})</h4>
+            </div>
+            <div className="space-y-1.5">
+              {items.map((line, i) => (
+                <div key={i} className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-slate-50 transition">
+                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-[#2E5A1A] text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                  <span className="text-sm text-slate-700 flex-1">{line}</span>
+                  <span className="w-5 h-5 rounded border-1.5 border-slate-400 flex-shrink-0" />
+                  <span className="w-5 h-5 rounded border-1.5 border-slate-400 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-slate-400 px-1">☐ Picked &nbsp; ☐ Loaded — tick on the printed sheet</p>
+          </div>
+
+          {/* Notes */}
+          {delivery.notes && (
+            <div className="rounded-2xl p-4 bg-amber-50 border border-amber-200">
+              <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wide mb-1">Driver / Special Instructions</p>
+              <p className="text-sm text-slate-700 whitespace-pre-wrap">{delivery.notes}</p>
+            </div>
+          )}
+
+          {/* Digital sign-off */}
+          <div className="insight-card rounded-2xl p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+              <CheckCircle2 className="w-4 h-4 text-[#2E5A1A]" />
+              <h4 className="text-sm font-bold text-slate-900">Digital Sign-Off</h4>
+              {allDone && (
+                <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">
+                  <CheckCircle2 className="w-3 h-3" /> Complete
+                </span>
+              )}
+            </div>
+            <div className="space-y-2">
+              {signStages.map(stage => {
+                const Icon = stage.icon;
+                const isBusy = busy === stage.key;
+                return (
+                  <button
+                    key={stage.key}
+                    onClick={() => stampStage(stage)}
+                    disabled={stage.done || busy}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition touch-manipulation min-h-[56px] text-left ${
+                      stage.done
+                        ? 'bg-emerald-50 border-emerald-200'
+                        : 'bg-white border-slate-200 hover:border-[#2E5A1A] active:scale-[0.99]'
+                    } ${busy && !isBusy ? 'opacity-50' : ''}`}
+                  >
+                    <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stage.done ? 'bg-emerald-600' : 'bg-slate-100'}`}>
+                      {stage.done ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-slate-500" />}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-bold ${stage.done ? 'text-emerald-800' : 'text-slate-800'}`}>{stage.label}</p>
+                      {stage.done ? (
+                        <p className="text-[11px] text-emerald-600 truncate">
+                          {stage.by} · {new Date(stage.at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-slate-400">Tap to confirm as {myName}</p>
+                      )}
+                    </div>
+                    {!stage.done && (isBusy ? (
+                      <div className="w-5 h-5 border-2 border-[#2E5A1A] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-slate-300 flex-shrink-0" />
+                    ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-white/15 rounded-lg transition flex-shrink-0">
-            <X className="w-4 h-4 text-white" />
-          </button>
         </div>
+      </div>
 
-        {/* On-screen preview — identical to the printed sheet (shared generator) */}
-        <iframe
-          srcDoc={html}
-          title="Pick List Preview"
-          className="w-full flex-1 min-h-[52vh] border-0 bg-white"
-        />
-
-        {/* Sticky footer */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-200 bg-white">
-          <button onClick={onClose} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-200 transition">
+      {/* Sticky bottom bar */}
+      <div className="flex-shrink-0 bg-white border-t border-slate-200 px-4 py-3 safe-area-bottom">
+        <div className="max-w-2xl mx-auto flex gap-2">
+          <button onClick={onClose} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition touch-manipulation min-h-[48px]">
             Close
           </button>
           <button
             onClick={() => printPickListHtml(html)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#244715] transition shadow-sm"
+            className="flex-[2] inline-flex items-center justify-center gap-2 py-3 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition shadow-sm touch-manipulation min-h-[48px]"
           >
-            <Printer className="w-4 h-4" /> Print
+            <Printer className="w-4 h-4" /> Print Pick Sheet
           </button>
         </div>
       </div>
     </div>,
     document.body
+  );
+}
+
+function DetailRow({ icon: Icon, label, value, mono }) {
+  if (!value) return null;
+  return (
+    <div className="flex items-start gap-2.5 px-1">
+      <Icon className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        <p className="text-[10px] uppercase tracking-wide text-slate-400 font-semibold">{label}</p>
+        <p className={`text-sm text-slate-800 font-medium ${mono ? 'font-mono' : ''}`}>{value}</p>
+      </div>
+    </div>
   );
 }
