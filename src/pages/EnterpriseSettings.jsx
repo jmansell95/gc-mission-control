@@ -50,7 +50,7 @@ export default function EnterpriseSettings() {
     queryFn: async () => {
       try {
         const res = await base44.functions.invoke('getEnterpriseStats');
-        return res.data;
+        return res.globalStats || null;
       } catch { return null; }
     },
     staleTime: 60000,

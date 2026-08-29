@@ -35,7 +35,7 @@ export default async function(req: Request): Promise<Response> {
       return out;
     };
 
-    const [divisions, staff, jobs, vehicles, invoices, timesheets, compliance, assets] = await Promise.all([
+    const [divisions, staff, jobs, vehicles, invoices, timesheets, compliance, assets, snapshots] = await Promise.all([
       sr.entities.Division.list('-sort_order', 500),
       fetchAll('Staff'),
       fetchAll('Job'),
@@ -44,6 +44,7 @@ export default async function(req: Request): Promise<Response> {
       fetchAll('Timesheet'),
       fetchAll('ComplianceItem'),
       fetchAll('SiteAsset'),
+      sr.entities.DivisionSnapshot.list('-created_date', 500),
     ]);
 
     // Per-division stats
@@ -77,7 +78,12 @@ export default async function(req: Request): Promise<Response> {
 
     // Global stats (all divisions — frontend filters by permitted)
     const now = new Date();
+    const parentIds = new Set(divisions.filter(d => d.parent_division_id).map(d => d.parent_division_id));
+    const businessUnits = divisions.filter(d => !d.parent_division_id && parentIds.has(d.id)).length;
+
     const globalStats = {
+      businessUnits,
+      snapshots: snapshots.length,
       divisions: divisions.length,
       activeDivisions: divisions.filter(d => d.status === 'active').length,
       staff: staff.length,
