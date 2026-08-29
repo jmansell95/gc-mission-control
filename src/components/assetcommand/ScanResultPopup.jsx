@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CheckCircle2, AlertTriangle, X, ArrowRight, Plus, ScanLine,
   ShieldCheck, ShieldAlert, ShieldX, Database, Package, Cog,
@@ -71,6 +71,9 @@ export default function ScanResultPopup({
 
 /* ─── Result (normal or already-in-basket) ─── */
 function ResultContent({ asset, alreadyInBasket, refreshing, onViewAsset, onScanNext, onAddToBasket, extraActions = [] }) {
+  const [qty, setQty] = useState(1);
+  const isStockItem = asset.quantity_owned != null && asset.quantity_owned > 1;
+  const maxQty = Math.min(asset.quantity_available || asset.quantity_owned || 99, asset.quantity_owned || 99);
   const status = asset.compliance_status || 'unknown';
   const meta = COMPLIANCE_META[status] || COMPLIANCE_META.unknown;
   const StatusIcon = meta.Icon;
@@ -149,6 +152,31 @@ function ResultContent({ asset, alreadyInBasket, refreshing, onViewAsset, onScan
         </div>
       )}
 
+      {/* Quantity stepper for stock/consumable items */}
+      {isStockItem && !alreadyInBasket && (
+        <div className="px-5 pb-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-slate-900">Quantity</p>
+            <p className="text-[11px] text-slate-400">{asset.quantity_available || 0} available of {asset.quantity_owned} owned</p>
+          </div>
+          <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
+            <button
+              onClick={() => setQty(q => Math.max(1, q - 1))}
+              className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-700 font-bold text-lg active:scale-90 transition"
+            >
+              −
+            </button>
+            <span className="w-12 text-center text-lg font-bold text-slate-900 tabular-nums">{qty}</span>
+            <button
+              onClick={() => setQty(q => Math.min(maxQty, q + 1))}
+              className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-700 font-bold text-lg active:scale-90 transition"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="px-5 flex gap-2">
         <button
@@ -165,7 +193,7 @@ function ResultContent({ asset, alreadyInBasket, refreshing, onViewAsset, onScan
         </button>
         {!alreadyInBasket && (
           <button
-            onClick={() => onAddToBasket(asset)}
+            onClick={() => onAddToBasket(asset, qty)}
             className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-3.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 shadow-sm transition active:scale-95"
           >
             <Plus className="w-4 h-4" /> Add

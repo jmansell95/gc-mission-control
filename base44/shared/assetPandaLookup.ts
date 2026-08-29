@@ -237,8 +237,9 @@ async function localFallback(base44, q, warning) {
     const bc = String(a.barcode || '').toLowerCase().trim();
     const fn = String(a.fleet_number || '').toLowerCase().trim();
     const equip = String(a.equipment_type || '').toLowerCase().trim();
+    const qr = String(a.qr_code || '').toLowerCase().trim();
     const nbc = normalizeBarcode(a.barcode);
-    return sn === q || nm === q || pid === q || bc === q || fn === q ||
+    return sn === q || nm === q || pid === q || bc === q || fn === q || qr === q ||
       (sn && sn.includes(q)) || (nm && nm.includes(q)) || (equip && equip.includes(q)) ||
       (bc && bc.includes(q)) || (nbc && nbc === normalizeBarcode(q));
   });

@@ -15,6 +15,7 @@ export default async function(req) {
 
     const body = await req.json();
     const { job_id, staff_id, staff_name, job_name, scanned_asset_ids, scanned_manifest_ids, notes } = body;
+    const quantities = body?.quantities || {}; // { asset_id: number } — per-item qty for stock items
 
     if (!job_id || !staff_id) {
       return Response.json({ error: 'job_id and staff_id are required' }, { status: 400 });
@@ -98,14 +99,24 @@ export default async function(req) {
       }
     }
 
-    // --- Update SiteAsset stock_level to 'in_stock' ---
+    // --- Update SiteAsset stock for return ---
+    // - Single-unit items: set stock_level to 'in_stock'
+    // - Stock/consumable items (quantity_owned > 1): increment quantity_available by the
+    //   returned qty (capped at quantity_owned) and derive stock_level from the new count
     let assetsUpdated = 0;
     if (assetIdArray.length > 0) {
-      const updates = assetIdArray.map(id => ({
-        id,
-        stock_level: 'in_stock',
-        sync_status: 'pending',
-      }));
+      const updates = assetIdArray.map(id => {
+        const a = assetMap[id] || {};
+        const qty = Math.max(1, Number(quantities[id] || 1));
+        const isStock = a.quantity_owned != null && a.quantity_owned > 1;
+        if (isStock) {
+          const newAvail = Math.min(Number(a.quantity_owned) || 0, (Number(a.quantity_available) || 0) + qty);
+          const lowThreshold = Math.max(1, Math.ceil(a.quantity_owned * 0.2));
+          const newStockLevel = newAvail === 0 ? 'out_of_stock' : (newAvail <= lowThreshold ? 'low_stock' : 'in_stock');
+          return { id, quantity_available: newAvail, stock_level: newStockLevel, sync_status: 'pending' };
+        }
+        return { id, stock_level: 'in_stock', sync_status: 'pending' };
+      });
       await base44.entities.SiteAsset.bulkUpdate(updates);
       assetsUpdated = assetIdArray.length;
     }

@@ -17,6 +17,7 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const assetIds = Array.isArray(body?.asset_ids) ? body.asset_ids.filter(Boolean) : [];
+    const quantities = body?.quantities || {}; // { asset_id: number } — per-item qty for stock items
     const jobId = body?.job_id || '';
     const jobName = body?.job_name || '';
     const staffId = body?.staff_id || user.id;
@@ -29,6 +30,11 @@ Deno.serve(async (req) => {
 
     if (!jobId) return Response.json({ error: 'job_id is required' }, { status: 400 });
     if (assetIds.length === 0) return Response.json({ error: 'No assets to sign out' }, { status: 400 });
+
+    // Fetch the actual SiteAsset records first — needed for weight checks and assignment denormalisation
+    const assets = await base44.entities.SiteAsset.filter({ id: { $in: assetIds } });
+    const assetMap = {};
+    for (const a of assets) assetMap[a.id] = a;
 
     // --- Weight & axle guidance ---
     // Sum loaded weight from the asset records and check against the vehicle's
@@ -64,11 +70,6 @@ Deno.serve(async (req) => {
     }
 
     const today = new Date().toISOString().split('T')[0];
-
-    // Fetch the actual SiteAsset records to denormalise into assignments
-    const assets = await base44.entities.SiteAsset.filter({ id: { $in: assetIds } });
-    const assetMap = {};
-    for (const a of assets) assetMap[a.id] = a;
 
     // Build JobAssetAssignment records
     const records = assetIds.map(id => {
@@ -116,10 +117,21 @@ Deno.serve(async (req) => {
 
     await base44.entities.JobAssetAssignment.bulkCreate(records);
 
-    // Update SiteAsset stock_level to out_of_stock for single-unit items
-    const stockUpdates = assets
-      .filter(a => (a.quantity_owned == null || a.quantity_owned <= 1))
-      .map(a => ({ id: a.id, stock_level: 'out_of_stock', sync_status: 'pending' }));
+    // Update SiteAsset stock for sign-out:
+    // - Single-unit items (quantity_owned <= 1): set stock_level to out_of_stock
+    // - Stock/consumable items (quantity_owned > 1): decrement quantity_available by the
+    //   signed-out qty (floored at 0) and derive stock_level from the new available count
+    const stockUpdates = assets.map(a => {
+      const qty = Math.max(1, Number(quantities[a.id] || 1));
+      const isStock = a.quantity_owned != null && a.quantity_owned > 1;
+      if (isStock) {
+        const newAvail = Math.max(0, (Number(a.quantity_available) || 0) - qty);
+        const lowThreshold = Math.max(1, Math.ceil(a.quantity_owned * 0.2));
+        const newStockLevel = newAvail === 0 ? 'out_of_stock' : (newAvail <= lowThreshold ? 'low_stock' : 'in_stock');
+        return { id: a.id, quantity_available: newAvail, stock_level: newStockLevel, sync_status: 'pending' };
+      }
+      return { id: a.id, stock_level: 'out_of_stock', sync_status: 'pending' };
+    });
     if (stockUpdates.length > 0) {
       try { await base44.entities.SiteAsset.bulkUpdate(stockUpdates); } catch (_) {}
     }

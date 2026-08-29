@@ -266,8 +266,8 @@ export default function AssetScannerPage() {
     setAlreadyInBasket(false);
   }, []);
 
-  const handleAddToBasket = useCallback((asset) => {
-    setBasket(prev => prev.find(a => a.id === asset.id) ? prev : [...prev, asset]);
+  const handleAddToBasket = useCallback((asset, qty = 1) => {
+    setBasket(prev => prev.find(a => a.id === asset.id) ? prev : [...prev, { ...asset, _qty: qty }]);
     handleScanNext();
   }, [handleScanNext]);
 
@@ -332,8 +332,11 @@ export default function AssetScannerPage() {
         const vehicleName = selectedVehicle ? `${selectedVehicle.name}${selectedVehicle.registration_number ? ` (${selectedVehicle.registration_number})` : ''}` : '';
         const selectedTrailer = trailers.find(t => t.id === selectedTrailerId);
         const trailerName = selectedTrailer?.name || '';
+        const quantities = {};
+        basket.forEach(a => { quantities[a.id] = a._qty || 1; });
         const res = await base44.functions.invoke('commitBasketSignOut', {
           asset_ids: assetIds,
+          quantities,
           job_id: selectedJobId,
           job_name: jobName,
           staff_id: me?.id,
@@ -348,12 +351,15 @@ export default function AssetScannerPage() {
         playConfirm();
         toast({ title: 'Signed Out', description: `${data.assignments_created || assetIds.length} item(s) assigned to ${jobName}.` });
       } else {
+        const quantities = {};
+        basket.forEach(a => { quantities[a.id] = a._qty || 1; });
         const res = await base44.functions.invoke('processAssetReturn', {
           job_id: selectedJobId,
           job_name: jobName,
           staff_id: me?.id,
           staff_name: myName,
           scanned_asset_ids: assetIds,
+          quantities,
         });
         const data = res.data || res;
         if (data.error) throw new Error(data.error);

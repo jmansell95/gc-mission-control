@@ -131,6 +131,9 @@ export default function UnifiedScanBasket({
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-slate-900 truncate">{a.name}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
+                          {a._qty > 1 && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold flex-shrink-0">×{a._qty}</span>
+                          )}
                           <span className={`w-2 h-2 rounded-full ${meta.dot}`} />
                           <span className="text-[11px] text-slate-500 font-medium">{meta.label}</span>
                           {a.serial_number && <span className="text-[11px] text-slate-400 font-mono truncate">· {a.serial_number}</span>}

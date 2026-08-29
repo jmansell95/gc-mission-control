@@ -485,6 +485,11 @@ Deno.serve(async (req) => {
           }
           payload.panda_raw_fields = rawFields;
 
+          // Generate a system QR code for assets that don't have one yet (idempotent — never overwrite)
+          if (!match?.qr_code) {
+            payload.qr_code = `GC-${crypto.randomUUID()}`;
+          }
+
           // Fallback: if mapped date fields are empty, scan raw fields for date-like
           // values in relevantly-labelled fields (the label detection may have picked
           // the wrong field key when multiple date fields share similar labels).

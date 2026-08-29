@@ -53,6 +53,10 @@
       "type": "string",
       "description": "Asset Panda barcode value \u2014 the dedicated 'Barcode'/'Asset Tag' field encoded in the Asset Panda barcode labels. Used by the scanner (resolveAssetByQR) to match a scanned Asset Panda barcode to this asset, and pushed back to Asset Panda on bidirectional sync. Auto-detected from group field labels ('barcode', 'asset tag', 'tag id') or via the configured field map."
     },
+    "qr_code": {
+      "type": "string",
+      "description": "System-generated QR code value (e.g. 'GC-<uuid>') for this asset. Generated automatically on Asset Panda sync for every asset that doesn't already have one. Encoded into printable QR labels and resolved by the scanner (resolveAssetByQR) so the asset can be booked in/out by scanning its printed label. Idempotent \u2014 once set, never overwritten by sync."
+    },
     "fleet_number": {
       "type": "string",
       "description": "FAA / Fleet Number \u2014 the primary fleet reference number from Asset Panda (field_1 'Fleet Number'). This is the prominent reference shown on asset cards and the detail hero. Distinct from serial_number which is the manufacturer's serial."
@@ -187,7 +191,7 @@
     },
     "quantity_available": {
       "type": "number",
-      "description": "Quantity currently available in the yard (not out on a job), pulled from Asset Panda's 'Quantity Available' field. Decremented by 1 on book-out (floored at 0) and incremented by 1 on book-in (capped at quantity_owned), with the new value pushed back to Asset Panda. Shown on asset cards as 'available / owned'."
+      "description": "Quantity currently available in the yard (not out on a job), pulled from Asset Panda's 'Quantity Available' field. Decremented by the signed-out qty on book-out (floored at 0) and incremented by the returned qty on book-in (capped at quantity_owned), with the new value pushed back to Asset Panda. Shown on asset cards as 'available / owned'."
     },
     "sync_status": {
       "type": "string",
