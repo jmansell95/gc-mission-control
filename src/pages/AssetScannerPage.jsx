@@ -64,6 +64,7 @@ export default function AssetScannerPage() {
   const [committing, setCommitting] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState('');
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [selectedTrailerId, setSelectedTrailerId] = useState('');
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [showConsumableModal, setShowConsumableModal] = useState(false);
   const [recent, setRecent] = useState(() => loadJSON(RECENT_KEY, []));
@@ -91,6 +92,11 @@ export default function AssetScannerPage() {
   const { data: vehicles = [] } = useQuery({
     queryKey: ['vehicles'],
     queryFn: () => base44.entities.Vehicle.list(),
+  });
+
+  const { data: trailers = [] } = useQuery({
+    queryKey: ['active-trailers'],
+    queryFn: () => base44.entities.SiteAsset.filter({ asset_type: 'trailer', is_active: true }),
   });
 
   const { data: myAssignments = [] } = useQuery({
@@ -270,7 +276,7 @@ export default function AssetScannerPage() {
   }, []);
 
   const removeFromBasket = (id) => setBasket((prev) => prev.filter((a) => a.id !== id));
-  const clearBasket = () => { setBasket([]); setSelectedJobId(''); setSelectedVehicleId(''); };
+  const clearBasket = () => { setBasket([]); setSelectedJobId(''); setSelectedVehicleId(''); setSelectedTrailerId(''); };
 
   const toggleKiosk = () => {
     if (kioskLocked) {
@@ -324,6 +330,8 @@ export default function AssetScannerPage() {
       if (direction === 'signout') {
         const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
         const vehicleName = selectedVehicle ? `${selectedVehicle.name}${selectedVehicle.registration_number ? ` (${selectedVehicle.registration_number})` : ''}` : '';
+        const selectedTrailer = trailers.find(t => t.id === selectedTrailerId);
+        const trailerName = selectedTrailer?.name || '';
         const res = await base44.functions.invoke('commitBasketSignOut', {
           asset_ids: assetIds,
           job_id: selectedJobId,
@@ -332,6 +340,8 @@ export default function AssetScannerPage() {
           staff_name: myName,
           vehicle_id: selectedVehicleId || '',
           vehicle_name: vehicleName,
+          trailer_id: selectedTrailerId || '',
+          trailer_name: trailerName,
         });
         const data = res.data || res;
         if (data.error) throw new Error(data.error);
@@ -603,7 +613,7 @@ export default function AssetScannerPage() {
           onRemove={removeFromBasket}
           onClear={clearBasket}
           direction={direction}
-          onToggleDirection={(d) => { setDirection(d); setSelectedJobId(''); setSelectedVehicleId(''); }}
+          onToggleDirection={(d) => { setDirection(d); setSelectedJobId(''); setSelectedVehicleId(''); setSelectedTrailerId(''); }}
           onCommit={handleCommit}
           committing={committing}
           jobs={availableJobs}
@@ -612,6 +622,9 @@ export default function AssetScannerPage() {
           vehicles={vehicles}
           selectedVehicleId={selectedVehicleId}
           onSelectVehicle={setSelectedVehicleId}
+          trailers={trailers}
+          selectedTrailerId={selectedTrailerId}
+          onSelectTrailer={setSelectedTrailerId}
         />
       )}
 

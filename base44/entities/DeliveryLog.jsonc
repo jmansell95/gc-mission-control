@@ -276,6 +276,23 @@
     "driver_check_signature_data_url": {
       "type": "string",
       "description": "Base64 PNG data URL of the drawn signature captured when the driver confirmed the Driver Check stage. Captured via the in-app SignaturePad so the pre-departure load check has a legally defensible signature audit trail."
+    },
+    "trailer_id": {
+      "type": "string",
+      "description": "Optional SiteAsset (trailer) paired with the vehicle for this delivery. Set when warehouse staff assign a trailer from the asset inventory to a delivery that requires towing."
+    },
+    "trailer_name": {
+      "type": "string",
+      "description": "Trailer name (denormalised for display on delivery cards and the driver hub without a join)."
+    },
+    "towing_checklist_completed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the driver has completed the pre-departure towing safety checklist (number plate grabbed, lights checked, toolbox talk opened) for a delivery with a trailer assigned. Gates the Start button on the driver hub \u2014 the delivery cannot be started until this is true."
+    },
+    "towing_checklist_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the driver confirmed the towing pre-departure checklist."
     }
   },
   "required": [

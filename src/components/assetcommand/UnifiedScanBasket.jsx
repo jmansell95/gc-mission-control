@@ -6,6 +6,7 @@ import {
   Truck, Weight,
 } from 'lucide-react';
 import { COMPLIANCE_META } from '@/utils/rigRollup';
+import TrailerPicker from '@/components/logistics/TrailerPicker';
 
 const TYPE_ICON = { rig: '🛠️', machinery: '🔧', trailer: '📦', vehicle: '🚚', lifting: '⚓', portable_appliance: '🔌' };
 
@@ -23,6 +24,7 @@ export default function UnifiedScanBasket({
   items, onRemove, onClear, direction, onToggleDirection,
   onCommit, committing, jobs = [], selectedJobId, onSelectJob,
   vehicles = [], selectedVehicleId, onSelectVehicle,
+  trailers = [], selectedTrailerId, onSelectTrailer,
 }) {
   const [expanded, setExpanded] = useState(false);
   const count = items.length;
@@ -237,6 +239,11 @@ export default function UnifiedScanBasket({
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Trailer selector (optional) */}
+              <div className="mb-3">
+                <TrailerPicker trailers={trailers} value={selectedTrailerId} onChange={(id) => onSelectTrailer(id)} />
               </div>
               </>
             ) : (

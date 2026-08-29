@@ -12,6 +12,7 @@ import DeliveryRouteMap from '@/components/delivery/DeliveryRouteMap';
 import RouteOptimizeBar from '@/components/delivery/RouteOptimizeBar';
 import PrintLoadManifest from '@/components/logistics/PrintLoadManifest';
 import PrintPickList from '@/components/logistics/PrintPickList';
+import TrailerPicker from '@/components/logistics/TrailerPicker';
 
 const typeConfig = {
   site_delivery: { label: 'Delivery', icon: Truck, accent: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
@@ -52,6 +53,30 @@ export default function DeliveryDetailDrawer({ delivery, jobs, staff, onClose })
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [reconciling, setReconciling] = useState(false);
+  const [savingTrailer, setSavingTrailer] = useState(false);
+
+  // Active trailers from the asset inventory
+  const { data: trailers = [] } = useQuery({
+    queryKey: ['active-trailers'],
+    queryFn: () => base44.entities.SiteAsset.filter({ asset_type: 'trailer', is_active: true }),
+  });
+
+  const handleTrailerChange = async (trailerId, trailer) => {
+    setSavingTrailer(true);
+    try {
+      await base44.entities.DeliveryLog.update(delivery.id, {
+        trailer_id: trailerId || '',
+        trailer_name: trailer?.name || '',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-all-deliveries'] });
+      queryClient.invalidateQueries({ queryKey: ['driver-hub-deliveries'] });
+      toast({ title: trailerId ? 'Trailer assigned' : 'Trailer removed', description: trailer?.name || '' });
+    } catch (e) {
+      toast({ title: 'Could not update trailer', description: e.message, variant: 'destructive' });
+    } finally {
+      setSavingTrailer(false);
+    }
+  };
 
   const job = jobs.find(j => j.id === delivery.job_id);
   const driver = staff.find(s => s.id === delivery.driver_staff_id);
@@ -218,6 +243,15 @@ export default function DeliveryDetailDrawer({ delivery, jobs, staff, onClose })
               )}
             </div>
           )}
+
+          {/* Trailer assignment */}
+          <div className="bg-slate-50 rounded-xl border border-slate-200 p-3">
+            <TrailerPicker trailers={trailers} value={delivery.trailer_id || ''} onChange={handleTrailerChange} />
+            {savingTrailer && <p className="text-[10px] text-slate-400 mt-1.5">Saving…</p>}
+            {delivery.trailer_name && !delivery.trailer_id && (
+              <p className="text-[11px] text-slate-500 mt-1.5">Previously: {delivery.trailer_name}</p>
+            )}
+          </div>
 
           {/* Signature & Photos */}
           {delivery.signature_url && (

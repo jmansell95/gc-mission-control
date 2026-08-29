@@ -23,6 +23,8 @@ Deno.serve(async (req) => {
     const staffName = body?.staff_name || user.full_name || '';
     const vehicleId = body?.vehicle_id || '';
     const vehicleName = body?.vehicle_name || '';
+    const trailerId = body?.trailer_id || '';
+    const trailerName = body?.trailer_name || '';
     const overrideWeight = body?.override_weight === true;
 
     if (!jobId) return Response.json({ error: 'job_id is required' }, { status: 400 });
@@ -106,6 +108,7 @@ Deno.serve(async (req) => {
             total_loaded_weight_kg: Math.round(loadedWeight),
             axle_guidance_note: axle.note,
             weight_override: overrideWeight && maxWeight && loadedWeight > maxWeight,
+            ...(trailerId ? { trailer_id: trailerId, trailer_name: trailerName } : {}),
           });
         }
       } catch (_) {}
