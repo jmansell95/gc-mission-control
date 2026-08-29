@@ -34,7 +34,7 @@ export interface GeofenceConfig {
 
 export const DEFAULT_GEOFENCE_CONFIG: GeofenceConfig = {
   enabled: true,
-  default_radius_meters: 100,
+  default_radius_meters: 91, // 100 yards ≈ 91 metres
   notify_on_arrival: true,
   notify_on_departure: false,
   auto_arrival_on_rota: true,
@@ -70,6 +70,15 @@ export interface GeofencePreload {
  *
  * Returns a summary of events created.
  */
+/** Monday of the week containing the given YYYY-MM-DD string. */
+function getWeekStart(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00Z');
+  const day = d.getUTCDay(); // 0=Sun … 6=Sat
+  const diff = (day === 0 ? -6 : 1) - day; // back to Monday
+  d.setUTCDate(d.getUTCDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
 export async function checkGeofencePresence(
   base44: any,
   vehicleId: string,
@@ -227,7 +236,7 @@ export async function checkGeofencePresence(
       });
       arrivals++;
 
-      // Auto-trigger arrived_on_site_at on the rota assignment
+      // Auto-trigger arrived_on_site_at on the rota assignment + auto-create a linked draft timesheet
       if (config.auto_arrival_on_rota && rota && !rota.arrived_on_site_at) {
         try {
           await base44.asServiceRole.entities.RotaAssignment.update(rota.id, {
@@ -237,6 +246,31 @@ export async function checkGeofencePresence(
             auto_arrival_triggered: true,
           });
           autoArrivals++;
+
+          // Auto-create a draft Geotab timesheet linked to this assignment (idempotent)
+          try {
+            const existing = await base44.asServiceRole.entities.Timesheet.filter(
+              { rota_assignment_id: rota.id, source: 'geotab_auto' },
+              '-created_date',
+              5,
+            );
+            if (existing.length === 0) {
+              const arrivalHHMM = timestamp.length >= 16 ? timestamp.slice(11, 16) : '';
+              await base44.asServiceRole.entities.Timesheet.create({
+                staff_id: rota.staff_id || '',
+                division_id: rota.division_id || '',
+                job_id: rota.job_id || '',
+                date: today,
+                week_start: getWeekStart(today),
+                task_description: 'On site (auto-detected via Geotab)',
+                start_time: arrivalHHMM,
+                task_type: 'on_site',
+                source: 'geotab_auto',
+                status: 'draft',
+                rota_assignment_id: rota.id,
+              });
+            }
+          } catch (_) {}
         } catch (_) {}
       }
 
@@ -261,6 +295,42 @@ export async function checkGeofencePresence(
         auto_arrival_triggered: false,
       });
       departures++;
+
+      // Stamp left_site_at on the rota assignment + close the linked draft timesheet
+      if (target.type === 'job' && config.auto_arrival_on_rota) {
+        const rota = rotaByJobId.get(target.id);
+        if (rota && !rota.left_site_at) {
+          try {
+            await base44.asServiceRole.entities.RotaAssignment.update(rota.id, {
+              left_site_at: timestamp,
+            });
+          } catch (_) {}
+          try {
+            const drafts = await base44.asServiceRole.entities.Timesheet.filter(
+              { rota_assignment_id: rota.id, source: 'geotab_auto', status: 'draft' },
+              '-created_date',
+              5,
+            );
+            if (drafts.length > 0) {
+              const draft = drafts[0];
+              const endHHMM = timestamp.length >= 16 ? timestamp.slice(11, 16) : '';
+              const startStr = draft.start_time || '';
+              let totalHours = 0;
+              if (startStr && endHHMM) {
+                const [sh, sm] = startStr.split(':').map(Number);
+                const [eh, em] = endHHMM.split(':').map(Number);
+                let mins = (eh * 60 + em) - (sh * 60 + sm);
+                if (mins < 0) mins += 24 * 60;
+                totalHours = Math.round((mins / 60) * 100) / 100;
+              }
+              await base44.asServiceRole.entities.Timesheet.update(draft.id, {
+                end_time: endHHMM,
+                total_hours: totalHours,
+              });
+            }
+          } catch (_) {}
+        }
+      }
       lastEventByTarget.set(key, 'departure');
     }
   }

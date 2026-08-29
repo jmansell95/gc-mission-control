@@ -36,6 +36,60 @@
       "type": "string",
       "description": "Direct SafetyCulture/Mitti inspection link for the equipment/plant check. Shown during the site briefing. When blank, falls back to the built-in default SafetyCulture audit link."
     },
+    "safety_forms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique stable id for this form entry (used as the React key)."
+          },
+          "step": {
+            "type": "string",
+            "enum": [
+              "checks",
+              "arrive",
+              "briefing"
+            ],
+            "default": "checks",
+            "description": "Which Shift Wizard step this form button appears on. 'checks' = Daily Checks (pre-departure), 'arrive' = Arrive on Site, 'briefing' = Site Briefing."
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "vehicle",
+              "powra",
+              "equipment",
+              "general"
+            ],
+            "default": "general",
+            "description": "Form category \u2014 controls the icon and the live Mitti verification badge shown next to the button."
+          },
+          "label": {
+            "type": "string",
+            "description": "Button label shown to crew (e.g. 'Daily Vehicle Check', 'POWRA', 'Permit to Dig')."
+          },
+          "url": {
+            "type": "string",
+            "description": "SafetyCulture/Mitti inspection URL opened in a new tab when the crew tap the button."
+          },
+          "required": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this form must be completed before the crew can advance past the step. When true and Mitti is connected, the step gates until the matching audit webhook is received."
+          }
+        },
+        "required": [
+          "id",
+          "step",
+          "label",
+          "url"
+        ]
+      },
+      "default": [],
+      "description": "Admin-configurable list of safety/Mitti form URLs surfaced as big tappable buttons in the Shift Wizard. Each entry appears at the matching step (checks/arrive/briefing) so crew complete the right form at the right moment. When empty, the fixed vehicle_check_url / powra_url / equipment_check_url fields are used as before."
+    },
     "last_webhook_at": {
       "type": "string",
       "description": "ISO timestamp of the last webhook payload received from Mitti."
@@ -52,7 +106,7 @@
     },
     "last_webhook_summary": {
       "type": "string",
-      "description": "Short human-readable summary of the last webhook result (e.g. 'Stored audit \u201cSite RAMS Inspection\u201d \u00b7 2 action items')."
+      "description": "Short human-readable summary of the last webhook result (e.g. 'Stored audit \"Site RAMS Inspection\" \u00b7 2 action items')."
     }
   },
   "required": [

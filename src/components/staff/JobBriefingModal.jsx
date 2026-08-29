@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import SignaturePad from '@/components/staff/SignaturePad';
 import { saveOfflineBriefing } from '@/utils/offlineSync';
+import SafetyFormsList from '@/components/staff/SafetyFormsList';
 
 const POWRA_URL = 'https://app.safetyculture.com/inspection/audit_349a23db07de4cfba675bb2a0a9f7bd8?page=1&isNew=true&holisticOnboarding=false';
 const VEHICLE_CHECK_URL = 'https://app.safetyculture.com/inspection/audit_a7b6591dc3064b2f8e4557c3ce1e432e?page=1&isNew=true&holisticOnboarding=false';
@@ -662,6 +663,9 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
                   </div>
                   <ExternalLink className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 </a>
+
+                {/* Admin-configured safety form buttons for the briefing step */}
+                <SafetyFormsList step="briefing" />
 
                 <button onClick={() => setEquipCheckConfirmed(!equipCheckConfirmed)}
                   className={`flex items-start gap-2.5 w-full text-left rounded-xl border-2 p-3.5 transition ${equipCheckConfirmed ? 'border-blue-300 bg-blue-50/50' : 'border-slate-200 bg-white'}`}>

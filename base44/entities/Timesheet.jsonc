@@ -91,6 +91,10 @@
       "default": "staff",
       "description": "How this timesheet entry was created. 'staff' = manually entered by the crew member; 'geotab_auto' = auto-generated from Geotab GPS vehicle location data (arrival/departure detection via geofencing); 'keylogbook' = parsed from the driller's KeyLogBook daily remarks."
     },
+    "rota_assignment_id": {
+      "type": "string",
+      "description": "ID of the RotaAssignment this auto-generated timesheet is linked to. Set when source is 'geotab_auto' \u2014 the geofence arrival/departure flow creates a draft timesheet linked to the day's assignment so the two stay in sync. Used for idempotency (prevents duplicate auto-creation on repeated arrival events) and to stamp left_site_at / close the timesheet on departure."
+    },
     "linked_delivery_id": {
       "type": "string",
       "description": "ID of the DeliveryLog task this entry was auto-created from. Set when a driver completes a delivery/collection \u2014 the system auto-creates a draft Timesheet entry from the delivery's actual start\u2192complete duration. Used for idempotency (prevents duplicate creation on retry) and to render a 'Delivery' badge in the End of Shift wizard. Blank for manually-entered entries."

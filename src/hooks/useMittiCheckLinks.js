@@ -35,6 +35,7 @@ export function useMittiCheckLinks() {
     vehicleCheckUrl: config?.vehicle_check_url || DEFAULT_VEHICLE_CHECK_URL,
     powraUrl: config?.powra_url || DEFAULT_POWRA_URL,
     equipmentCheckUrl: config?.equipment_check_url || DEFAULT_EQUIP_CHECK_URL,
+    safetyForms: config?.safety_forms || [],
     isLoading,
   };
 }

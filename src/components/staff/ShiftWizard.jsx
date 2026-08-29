@@ -18,6 +18,7 @@ import JobContextCard from '@/components/staff/JobContextCard';
 import ShiftStepRail from '@/components/staff/ShiftStepRail';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
 import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
+import SafetyFormsList from '@/components/staff/SafetyFormsList';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
 import { useGeolocation } from '@/hooks/useGeolocation';
@@ -160,6 +161,9 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
       ) : (
         <MittiSafetyPrompt type="powra" url={powraUrl} />
       )}
+
+      {/* Admin-configured safety form buttons for this step (big tappable buttons) */}
+      <SafetyFormsList step="arrive" />
 
       <div className="grid grid-cols-2 gap-3">
         <div>

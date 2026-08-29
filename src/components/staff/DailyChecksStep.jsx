@@ -5,6 +5,7 @@ import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2,
 import { format } from 'date-fns';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
 import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
+import SafetyFormsList from '@/components/staff/SafetyFormsList';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
 
@@ -116,6 +117,9 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
       ) : (
         <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
       )}
+
+      {/* Admin-configured safety form buttons for this step (big tappable buttons) */}
+      <SafetyFormsList step="checks" />
 
       {/* Generic Mitti hand-off note for plant / PPE checks */}
       <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">

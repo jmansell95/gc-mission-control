@@ -53,6 +53,7 @@ export default function MittiSettings() {
         vehicle_check_url: config.vehicle_check_url || '',
         powra_url: config.powra_url || '',
         equipment_check_url: config.equipment_check_url || '',
+        safety_forms: Array.isArray(config.safety_forms) ? config.safety_forms : [],
       });
     }
   }, [config]);
@@ -98,6 +99,7 @@ export default function MittiSettings() {
         vehicle_check_url: form.vehicle_check_url,
         powra_url: form.powra_url,
         equipment_check_url: form.equipment_check_url,
+        safety_forms: form.safety_forms || [],
       });
       queryClient.invalidateQueries({ queryKey: ['mitti-config'] });
     } catch (e) {
@@ -246,6 +248,96 @@ export default function MittiSettings() {
                   placeholder="SafetyCulture inspection link — shown during site briefing"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
               </div>
+            </div>
+          </div>
+
+          {/* Configurable safety forms list — big buttons in the Shift Wizard */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs font-bold text-slate-700">Safety Forms Checklist (big buttons in Shift Wizard)</p>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, safety_forms: [...(form.safety_forms || []), { id: 'form_' + Date.now(), step: 'checks', category: 'general', label: '', url: '', required: true }] })}
+                className="text-xs font-semibold text-white px-2.5 py-1.5 rounded-lg hover:opacity-90"
+                style={{ background: ACCENT }}
+              >
+                + Add Form
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-400 mb-3">Each form appears as a large tappable button at the chosen Shift Wizard step. Leave the list empty to use the three fixed links above only.</p>
+            <div className="space-y-3">
+              {(form.safety_forms || []).length === 0 && (
+                <p className="text-xs text-slate-400 italic">No extra safety forms configured.</p>
+              )}
+              {(form.safety_forms || []).map((sf, idx) => (
+                <div key={sf.id} className="rounded-lg border border-slate-200 bg-slate-50/50 p-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={sf.label}
+                      onChange={(e) => {
+                        const next = [...form.safety_forms]; next[idx] = { ...sf, label: e.target.value }; setForm({ ...form, safety_forms: next });
+                      }}
+                      placeholder="Button label (e.g. Permit to Dig)"
+                      className="flex-1 px-2.5 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, safety_forms: form.safety_forms.filter((_, i) => i !== idx) })}
+                      className="px-2.5 py-2 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={sf.url}
+                    onChange={(e) => {
+                      const next = [...form.safety_forms]; next[idx] = { ...sf, url: e.target.value }; setForm({ ...form, safety_forms: next });
+                    }}
+                    placeholder="SafetyCulture inspection URL"
+                    className="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600"
+                  />
+                  <div className="flex items-center gap-3">
+                    <label className="text-[11px] text-slate-500">Step:</label>
+                    <select
+                      value={sf.step}
+                      onChange={(e) => {
+                        const next = [...form.safety_forms]; next[idx] = { ...sf, step: e.target.value }; setForm({ ...form, safety_forms: next });
+                      }}
+                      className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-emerald-600"
+                    >
+                      <option value="checks">Daily Checks</option>
+                      <option value="arrive">Arrive on Site</option>
+                      <option value="briefing">Site Briefing</option>
+                    </select>
+                    <label className="text-[11px] text-slate-500">Category:</label>
+                    <select
+                      value={sf.category}
+                      onChange={(e) => {
+                        const next = [...form.safety_forms]; next[idx] = { ...sf, category: e.target.value }; setForm({ ...form, safety_forms: next });
+                      }}
+                      className="px-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-emerald-600"
+                    >
+                      <option value="vehicle">Vehicle</option>
+                      <option value="powra">POWRA</option>
+                      <option value="equipment">Equipment</option>
+                      <option value="general">General</option>
+                    </select>
+                    <label className="flex items-center gap-1.5 text-[11px] text-slate-500 ml-auto">
+                      <input
+                        type="checkbox"
+                        checked={sf.required !== false}
+                        onChange={(e) => {
+                          const next = [...form.safety_forms]; next[idx] = { ...sf, required: e.target.checked }; setForm({ ...form, safety_forms: next });
+                        }}
+                        className="w-3.5 h-3.5 rounded accent-emerald-600"
+                      />
+                      Required
+                    </label>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <div>
