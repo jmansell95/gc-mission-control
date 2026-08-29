@@ -217,8 +217,8 @@ export default function StaffProfile() {
             <div className="flex items-center gap-4">
               <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={64} />
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight truncate">{staff.name}</h1>
-                <p className="text-emerald-100 text-sm font-medium truncate mt-0.5">
+                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight break-words">{staff.name}</h1>
+                <p className="text-emerald-100 text-sm font-medium mt-0.5">
                   {roleLabel || staff.team?.name || 'Crew Member'}
                   {staff.team?.name ? ` · ${staff.team.name}` : ''}
                 </p>
@@ -226,27 +226,27 @@ export default function StaffProfile() {
             </div>
 
             {/* Quick actions */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar mt-4 -mx-1 px-1">
+            <div className="flex flex-wrap items-center gap-2 mt-4">
               {canAccessAdmin && (
                 <button onClick={() => navigate('/admin')} type="button"
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                  className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                   <LayoutDashboard className="w-4 h-4" /> Admin
                 </button>
               )}
               {!viewingOther && (<>
               <button onClick={() => setShowAbsenceForm(true)} type="button"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                 <CalendarPlus className="w-4 h-4" /> Time Off
               </button>
               {reporters.length > 0 && (
                 <button onClick={() => setShowApprovals(true)} type="button"
-                  className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                  className="relative flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                   <ClipboardCheck className="w-4 h-4" /> Approvals
                   {pendingCount > 0 && <span className="min-w-[20px] h-5 px-1.5 bg-amber-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center">{pendingCount}</span>}
                 </button>
               )}
               <button onClick={openChat} type="button"
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
                 <Sparkles className="w-4 h-4" /> Assistant
               </button>
               </>)}
@@ -262,16 +262,16 @@ export default function StaffProfile() {
           <ProfileStats staffId={staff.id} jobType={staff.team?.job_type} />
         </div>
 
-        {/* Tab Bar — in-flow, above the content */}
+        {/* Tab Bar — wraps on mobile, grid on desktop */}
         <div className="mt-5 pt-3 pb-2">
-          <div className="flex md:grid md:grid-cols-5 gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1 md:pb-0">
+          <div className="flex flex-wrap md:grid md:grid-cols-5 gap-1.5">
             {TABS.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;
               const disabled = tab.key === 'crew' && !staff.team_id;
               return (
                 <button key={tab.key} onClick={() => !disabled && setActiveTab(tab.key)} type="button" disabled={disabled}
-                  className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation whitespace-nowrap flex-shrink-0 ${
+                  className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation ${
                     isActive ? 'command-gradient text-white shadow-md' :
                     disabled ? 'bg-slate-100/60 text-slate-300' :
                     'bg-white/70 backdrop-blur-sm text-slate-600 ring-1 ring-slate-200/70 hover:bg-white'
@@ -366,13 +366,13 @@ export default function StaffProfile() {
       {/* Edit Profile Drawer */}
       <StaffProfileEditDrawer open={showEditDrawer} onOpenChange={setShowEditDrawer} staff={staff} />
 
-      {/* Absence Request Modal */}
+      {/* Absence Request Modal — full-screen on mobile */}
       {showAbsenceForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={() => !savingAbsence && setShowAbsenceForm(false)}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-5" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={() => !savingAbsence && setShowAbsenceForm(false)}>
+          <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-md sm:rounded-2xl sm:shadow-xl p-5" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-900 text-lg">Request Time Off</h3>
-              <button onClick={() => setShowAbsenceForm(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition">
+              <button onClick={() => setShowAbsenceForm(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition touch-manipulation">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -402,7 +402,7 @@ export default function StaffProfile() {
                   className="w-full px-3 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-emerald-600 resize-none" />
               </div>
               <button onClick={handleSaveAbsence} disabled={savingAbsence || !absenceForm.start_date || !absenceForm.end_date}
-                className="w-full px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-sm font-semibold disabled:opacity-50">
+                className="w-full px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-sm font-semibold disabled:opacity-50 touch-manipulation active:scale-95">
                 {savingAbsence ? 'Submitting…' : 'Submit Request'}
               </button>
             </div>

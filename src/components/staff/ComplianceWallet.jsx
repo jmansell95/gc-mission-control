@@ -78,9 +78,9 @@ function FlipCard({ item, accentColor }) {
           {hasBack && (
             <button
               onClick={() => setFlipped(true)}
-              className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-lg hover:bg-white transition opacity-0 group-hover:opacity-100"
+              className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 touch-manipulation active:scale-95"
             >
-              <RotateCw className="w-3 h-3 text-slate-600" />
+              <RotateCw className="w-3.5 h-3.5 text-slate-600" />
             </button>
           )}
         </div>
@@ -99,9 +99,9 @@ function FlipCard({ item, accentColor }) {
             )}
             <button
               onClick={() => setFlipped(false)}
-              className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-lg hover:bg-white transition"
+              className="absolute top-2 left-2 bg-white/80 backdrop-blur-sm p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-white transition touch-manipulation active:scale-95"
             >
-              <RotateCw className="w-3 h-3 text-slate-600" />
+              <RotateCw className="w-3.5 h-3.5 text-slate-600" />
             </button>
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
               <p className="text-white text-xs font-bold truncate">{item.title} — Back</p>

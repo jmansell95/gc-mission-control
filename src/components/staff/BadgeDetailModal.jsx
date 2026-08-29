@@ -27,9 +27,9 @@ export default function BadgeDetailModal({ badge, achievement, score, onClose })
   const progress = !isEarned ? getBadgeProgress(badge, score) : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md px-0 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={onClose}>
       <div
-        className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-md sm:max-h-[90vh] sm:rounded-3xl sm:shadow-2xl overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Hero header with badge icon */}

@@ -111,14 +111,14 @@ export default function StaffWeeklySignCard({ staffId, staffName }) {
         </div>
         {/* Week navigator */}
         <div className="flex items-center gap-2">
-          <button onClick={() => setWeekOffset((w) => w - 1)} className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition">
+          <button onClick={() => setWeekOffset((w) => w - 1)} className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition touch-manipulation active:scale-95">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={() => setWeekOffset((w) => w + 1)} disabled={weekOffset >= 0} className="p-1.5 rounded-lg bg-white/15 hover:bg-white/25 transition disabled:opacity-30">
+          <button onClick={() => setWeekOffset((w) => w + 1)} disabled={weekOffset >= 0} className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 transition disabled:opacity-30 touch-manipulation active:scale-95">
             <ChevronRight className="w-4 h-4" />
           </button>
           {weekOffset !== 0 && (
-            <button onClick={() => setWeekOffset(0)} className="text-xs text-emerald-100 hover:text-white font-medium ml-1">This week</button>
+            <button onClick={() => setWeekOffset(0)} className="text-xs text-emerald-100 hover:text-white font-medium ml-1 px-2 py-2 touch-manipulation">This week</button>
           )}
         </div>
       </div>

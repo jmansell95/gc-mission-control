@@ -150,12 +150,12 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
           <div className="flex items-center gap-1.5 flex-shrink-0">
             {canManageTeam && (
               <button onClick={() => setShowAddCompleted(true)} type="button"
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation shadow-sm">
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation shadow-sm">
                 <Plus className="w-3.5 h-3.5" /> Add Completed
               </button>
             )}
             <button onClick={() => setShowRequest(true)} type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg text-xs font-bold hover:bg-violet-700 active:scale-95 transition touch-manipulation shadow-sm">
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-violet-600 text-white rounded-lg text-xs font-bold hover:bg-violet-700 active:scale-95 transition touch-manipulation shadow-sm">
               <UserPlus className="w-3.5 h-3.5" /> Request
             </button>
           </div>

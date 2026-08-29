@@ -239,8 +239,8 @@ export default function RewardsCatalogue({ staffId, staffName }) {
 
       {/* Confirmation modal */}
       {confirmReward && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={() => !redeeming && setConfirmReward(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 animate-pop-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={() => !redeeming && setConfirmReward(null)}>
+          <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-sm sm:rounded-3xl sm:shadow-2xl p-6 sm:animate-pop-in flex flex-col justify-center" onClick={e => e.stopPropagation()}>
             <div className="flex flex-col items-center text-center">
               <div className="w-16 h-16 rounded-2xl stat-gradient-amber flex items-center justify-center shadow-lg mb-3">
                 <Gift className="w-8 h-8 text-white" />

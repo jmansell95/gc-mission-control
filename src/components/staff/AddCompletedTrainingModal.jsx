@@ -136,8 +136,8 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
   const labelCls = 'block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[calc(100dvh-2rem)] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={onClose}>
+      <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-lg sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl sm:shadow-xl overflow-y-auto" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="hero-gradient px-5 py-4 text-white sticky top-0 z-10">
           <div className="flex items-center gap-3">

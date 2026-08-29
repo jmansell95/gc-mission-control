@@ -85,20 +85,20 @@ export default function IncentiveDashboard({ staffId, staffName, teamId }) {
         {/* Header */}
         <div className="hero-gradient relative overflow-hidden px-4 md:px-6 py-4">
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-yellow-300/10 blur-2xl pointer-events-none" />
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center">
+          <div className="relative flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center flex-shrink-0">
                 <Trophy className="w-5 h-5 text-yellow-300" />
               </div>
-              <div>
-                <h2 className="text-white font-bold text-lg leading-tight">Incentives & Achievements</h2>
+              <div className="min-w-0">
+                <h2 className="text-white font-bold text-base sm:text-lg leading-tight">Incentives & Achievements</h2>
                 <p className="text-emerald-100 text-xs">Week of {format(new Date(weekStart + 'T00:00:00'), 'dd MMM yyyy')}</p>
               </div>
             </div>
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="p-2.5 rounded-xl bg-white/15 hover:bg-white/25 ring-1 ring-white/20 text-white transition disabled:opacity-50"
+              className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-white/15 hover:bg-white/25 ring-1 ring-white/20 text-white transition disabled:opacity-50 touch-manipulation active:scale-95 flex-shrink-0"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>

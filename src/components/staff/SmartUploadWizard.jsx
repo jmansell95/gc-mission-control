@@ -160,8 +160,8 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
   // === STEP: TYPE SELECTION ===
   if (step === STEPS.TYPE) {
     return (
-      <div className="fixed inset-0 z-[65] bg-slate-950/60 backdrop-blur-md flex items-center justify-center overflow-y-auto overscroll-contain p-4" onClick={onClose}>
-        <div className="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="fixed inset-0 z-[65] overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={onClose}>
+        <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-lg sm:max-h-[90vh] sm:rounded-3xl sm:shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white px-5 py-4 border-b border-slate-100 flex items-center justify-between z-10">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
@@ -258,8 +258,8 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
   // === STEP: REVIEW & CONFIRM ===
   if (step === STEPS.REVIEW) {
     return (
-      <div className="fixed inset-0 z-[65] bg-slate-950/60 backdrop-blur-md flex items-center justify-center overflow-y-auto overscroll-contain p-4" onClick={onClose}>
-        <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="fixed inset-0 z-[65] overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={onClose}>
+        <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-md sm:max-h-[92vh] sm:rounded-3xl sm:shadow-2xl overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="sticky top-0 bg-white px-5 py-4 border-b border-slate-100 flex items-center justify-between z-10">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">

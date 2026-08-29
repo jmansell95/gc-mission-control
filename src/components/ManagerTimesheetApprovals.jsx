@@ -117,8 +117,8 @@ export default function ManagerTimesheetApprovals({ staffId }) {
                     })()}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <button onClick={() => handleApprove(t.id)} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Approve"><CheckCircle2 className="w-5 h-5" /></button>
-                    <button onClick={() => handleReject(t.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Reject"><XCircle className="w-5 h-5" /></button>
+                    <button onClick={() => handleApprove(t.id)} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-emerald-600 hover:bg-emerald-50 rounded-lg transition touch-manipulation active:scale-95" title="Approve"><CheckCircle2 className="w-5 h-5" /></button>
+                    <button onClick={() => handleReject(t.id)} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-red-500 hover:bg-red-50 rounded-lg transition touch-manipulation active:scale-95" title="Reject"><XCircle className="w-5 h-5" /></button>
                   </div>
                 </div>
               </div>

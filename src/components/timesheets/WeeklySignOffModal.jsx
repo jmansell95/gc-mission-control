@@ -75,8 +75,8 @@ export default function WeeklySignOffModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={() => !submitting && onClose(false)}>
-      <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={() => !submitting && onClose(false)}>
+      <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-md sm:rounded-2xl sm:shadow-xl" onClick={(e) => e.stopPropagation()}>
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center`}>

@@ -74,9 +74,9 @@ export default function StaffProgressModal({ staffId, staffName, teamId, weekSta
   ] : [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md px-0 sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-0 sm:p-4 sm:flex sm:items-center sm:justify-center" onClick={onClose}>
       <div
-        className="bg-slate-50 rounded-t-3xl sm:rounded-3xl shadow-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto"
+        className="bg-slate-50 w-full min-h-full sm:min-h-0 sm:max-w-lg sm:max-h-[92vh] sm:rounded-3xl sm:shadow-2xl overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
