@@ -179,6 +179,19 @@ function GroupsTab() {
 
   return (
     <div className="space-y-5">
+      {/* Business Stream isolation banner */}
+      <div className="insight-card rounded-2xl p-4 flex items-start gap-3 bg-emerald-50/50 border-emerald-200">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-md">
+          <Shield className="w-5 h-5 text-white" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-slate-900">Business Stream Isolation</p>
+          <p className="text-xs text-slate-600 mt-0.5">
+            Staff can only see records within their assigned Business Stream. When editing a staff member, select their Business Stream first, then choose a Permission Group from the filtered list. Field staff are locked to their schedule and profile only.
+          </p>
+        </div>
+      </div>
+
       {/* Stats bar */}
       <div className="grid grid-cols-3 gap-3">
         <StatTile icon={KeyRound} label="Total Groups" value={groups.length} tone="emerald" />
@@ -366,6 +379,8 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
     name: group.name || '',
     description: group.description || '',
     is_read_only: group.is_read_only || false,
+    staff_type: group.staff_type || 'flexible',
+    landing_page: group.landing_page || 'auto',
     permissions: normalizePermissions(group.permissions),
   }));
 
@@ -423,6 +438,40 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
             <p className="text-xs text-slate-500">Force every module to read-only — members can view but never create, edit, or delete anything.</p>
           </div>
         </label>
+
+        {/* Staff type & landing page */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-sm font-medium text-slate-700">Staff Type</label>
+            <select
+              value={form.staff_type}
+              onChange={e => setForm({ ...form, staff_type: e.target.value })}
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+            >
+              <option value="flexible">Flexible (any)</option>
+              <option value="office">Office Staff</option>
+              <option value="field">Field Team</option>
+            </select>
+            <p className="text-xs text-slate-400 mt-1">Classifies this group — drives the default landing page after onboarding.</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">Landing Page</label>
+            <select
+              value={form.landing_page}
+              onChange={e => setForm({ ...form, landing_page: e.target.value })}
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+            >
+              <option value="auto">Auto (from staff type)</option>
+              <option value="/admin">Admin Dashboard</option>
+              <option value="/staff-schedule">My Schedule</option>
+              <option value="/staff-profile">My Profile</option>
+              <option value="/deliveries">Deliveries</option>
+              <option value="/scanner">Scanner</option>
+              <option value="/subcontractor">Subcontractor</option>
+            </select>
+            <p className="text-xs text-slate-400 mt-1">Where members land after login. Individual staff overrides still take priority.</p>
+          </div>
+        </div>
       </div>
 
       {/* Quick presets */}
