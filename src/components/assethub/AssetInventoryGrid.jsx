@@ -342,6 +342,11 @@ export default function AssetInventoryGrid({
                       {rig.panda_asset_id
                         ? <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200" title={syncTitle(rig)}><Database className="w-2.5 h-2.5" /> Panda</span>
                         : <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200" title={syncTitle(rig)}><CircleDot className="w-2.5 h-2.5" /> Local</span>}
+                      {rig.panda_group_label && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 truncate max-w-[140px]" title={`Asset Panda group: ${rig.panda_group_label}`}>
+                          <Boxes className="w-2.5 h-2.5 flex-shrink-0" /> {rig.panda_group_label}
+                        </span>
+                      )}
                       <QuantityBadge available={rig.quantity_available} owned={rig.quantity_owned} />
                       {rig.weight_kg != null && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
@@ -404,6 +409,7 @@ export default function AssetInventoryGrid({
           if (groupBy === 'type') return eq.asset_type || 'other';
           if (groupBy === 'location') return eq.storage_location || 'Unspecified';
           if (groupBy === 'status') return derivedComplianceStatus(eq) || 'unknown';
+          if (groupBy === 'panda_group') return eq.panda_group_label || 'Ungrouped';
           return 'all';
         };
         const groupLabel = (key) => {
@@ -518,6 +524,11 @@ export default function AssetInventoryGrid({
                       {equip.panda_asset_id
                         ? <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200" title={syncTitle(equip)}><Database className="w-2.5 h-2.5" /> Panda</span>
                         : <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200" title={syncTitle(equip)}><CircleDot className="w-2.5 h-2.5" /> Local</span>}
+                      {equip.panda_group_label && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 truncate max-w-[140px]" title={`Asset Panda group: ${equip.panda_group_label}`}>
+                          <Boxes className="w-2.5 h-2.5 flex-shrink-0" /> {equip.panda_group_label}
+                        </span>
+                      )}
                       {parentRig && <span className="text-[10px] text-emerald-700 font-medium flex items-center gap-0.5"><Link2 className="w-3 h-3" /> {parentRig.name}</span>}
                     </div>
                     {d !== null && (

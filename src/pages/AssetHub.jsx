@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Cog, Wrench, Package, Truck, Anchor, Plug,
   Plus, Search, Boxes, ScanLine, X, TrendingUp, TrendingDown, RefreshCw, Lock, ShieldCheck,
-  CheckSquare, Upload, Database, MapPin, QrCode, Trash2, CircleDot, Warehouse, AlertTriangle,
+  CheckSquare, Upload, Database, MapPin, QrCode, Trash2, CircleDot, Warehouse, AlertTriangle, Weight,
 } from 'lucide-react';
 import ConsumableInventoryManager from '@/components/settings/ConsumableInventoryManager';
 import ConsumablesView from '@/components/assethub/ConsumablesView';
@@ -27,6 +27,7 @@ import DepreciationSchedule from '@/components/assethub/DepreciationSchedule';
 import BulkAssetUpload from '@/components/righub/BulkAssetUpload';
 import SmartCertImport from '@/components/righub/SmartCertImport';
 import BulkQRPrinter from '@/components/assetcommand/BulkQRPrinter';
+import BulkWeightModal from '@/components/assethub/BulkWeightModal';
 import PATTestingPanel from '@/components/pat/PATTestingPanel';
 import ScrapPilePanel from '@/components/assetcommand/ScrapPilePanel';
 import AssetInventoryGrid from '@/components/assethub/AssetInventoryGrid';
@@ -74,6 +75,7 @@ export default function AssetHub() {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [showSmartImport, setShowSmartImport] = useState(false);
   const [showBulkQR, setShowBulkQR] = useState(false);
+  const [showBulkWeight, setShowBulkWeight] = useState(false);
   const [groupBy, setGroupBy] = useState('none');
 
   const { data: allAssets = [], isLoading } = useQuery({
@@ -175,6 +177,7 @@ export default function AssetHub() {
               <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
               <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
               <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
+              <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm"><Weight className="w-3.5 h-3.5" /> Bulk Weights</button>
               <button onClick={openAdd} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
             </div>
         }
@@ -217,6 +220,11 @@ export default function AssetHub() {
             <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center mb-3"><QrCode className="w-5 h-5 text-violet-600" /></div>
             <p className="font-bold text-slate-900">QR Labels</p>
             <p className="text-xs text-slate-500 mt-0.5">Print asset QR codes</p>
+          </button>
+          <button onClick={() => setShowBulkWeight(true)} className="insight-card rounded-2xl p-5 text-left hover:shadow-md transition">
+            <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><Weight className="w-5 h-5 text-blue-600" /></div>
+            <p className="font-bold text-slate-900">Bulk Weights</p>
+            <p className="text-xs text-slate-500 mt-0.5">Set weight (kg) for payload checks</p>
           </button>
         </div>
       ) : view === 'consumables' ? (
@@ -298,6 +306,7 @@ export default function AssetHub() {
                     <option value="type">Group by Type</option>
                     <option value="location">Group by Location</option>
                     <option value="status">Group by Status</option>
+                    <option value="panda_group">Group by Panda Group</option>
                   </select>
                   {category !== 'rig' && (
                     <button onClick={() => { setSelectionMode(m => !m); setSelected(new Set()); }} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${selectionMode ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
@@ -412,6 +421,7 @@ export default function AssetHub() {
       {showBulkUpload && <BulkAssetUpload onClose={() => setShowBulkUpload(false)} />}
       {showSmartImport && <SmartCertImport onClose={() => setShowSmartImport(false)} />}
       {showBulkQR && <BulkQRPrinter onClose={() => setShowBulkQR(false)} />}
+      {showBulkWeight && <BulkWeightModal assets={assets} onClose={() => setShowBulkWeight(false)} />}
     </div>
   );
 }
