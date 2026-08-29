@@ -8,7 +8,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "Auto-synced from the staff member's team division. No longer independently editable \u2014 change the team to change the division. Kept as a denormalized cache so RLS rules (which reference data.division_id) continue to work. The source of truth is Team.division_id."
+      "description": "The business stream this staff member belongs to. Set from the Business Stream selector in the staff edit form (the single source of truth for division-scoped RLS). Kept as a denormalized cache so RLS rules (which reference data.division_id) continue to work."
     },
     "email": {
       "type": "string",
@@ -213,7 +213,21 @@
         "role": "admin"
       }
     },
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "user_condition": {
         "role": "admin"
