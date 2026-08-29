@@ -109,15 +109,17 @@ function FlipCard({ item, accentColor }) {
           </div>
         )}
       </div>
-      {/* Expiry info below card */}
-      <div className="flex items-center justify-between mt-2 px-1">
-        <div className="flex items-center gap-1.5">
-          {item.issue_date && <span className="text-[10px] text-slate-400">Issued {formatComplianceDate(item.issue_date)}</span>}
-          {item.expiry_date && <span className="text-[10px] text-slate-400">· Expires {formatComplianceDate(item.expiry_date)}</span>}
+      {/* Expiry info below card — stacked on mobile so dates aren't squashed */}
+      <div className="mt-2 px-1">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <div className="flex items-center gap-1.5">
+            {item.issue_date && <span className="text-[10px] text-slate-400">Issued {formatComplianceDate(item.issue_date)}</span>}
+            {item.expiry_date && <span className="text-[10px] text-slate-400">· Expires {formatComplianceDate(item.expiry_date)}</span>}
+          </div>
+          <a href={frontSrc || '#'} target="_blank" rel="noopener noreferrer" className="text-[10px] text-emerald-600 font-medium hover:underline flex items-center gap-0.5 self-start sm:self-auto">
+            <ExternalLink className="w-2.5 h-2.5" /> Open
+          </a>
         </div>
-        <a href={frontSrc || '#'} target="_blank" rel="noopener noreferrer" className="text-[10px] text-emerald-600 font-medium hover:underline flex items-center gap-0.5">
-          <ExternalLink className="w-2.5 h-2.5" /> Open
-        </a>
       </div>
     </div>
   );

@@ -162,7 +162,7 @@ export default function AssetHub() {
   }), [equipment, category, compFilter, search, sourceFilter, depotOnly]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         icon={Boxes}
         title="Assets Hub"

@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   X, Upload, FileText, Loader2, CheckCircle2, AlertTriangle, Sparkles, Scan,
-  ChevronLeft, ChevronRight, Edit3, Save, ArrowRight, Calendar, Wrench,
-  Hash, Type, ShieldCheck, User, Building2, StickyNote,
+  ChevronLeft, ChevronRight, Edit3, ArrowRight, Calendar, Wrench,
+  Hash, Type, ShieldCheck, User, Building2, StickyNote, RotateCw, FilePlus,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -17,12 +18,14 @@ import {
  * SmartCertImport — upload PDF certificate files and the system reads them
  * automatically to create assets + service records.
  *
- * KEY FEATURE: Preview-first workflow.
- *   1. Upload PDFs → AI extracts data
- *   2. Preview each PDF side-by-side with extracted fields + field mapping
- *   3. Auto-calculates expiry from issue_date + inspection type
- *   4. Auto-detects equipment type
- *   5. User reviews/edits → commits all in one go
+ * OVERHAULED FLOW:
+ *   1. Drag-and-drop or select multiple PDFs
+ *   2. Parallel AI extraction (concurrency-limited) with live per-file progress grid
+ *   3. Thumbnail grid overview of all processed PDFs with NEW / LINKED / FAILED badges
+ *   4. Tap any thumbnail → full-screen swipe-through carousel with large PDF preview
+ *   5. Edit any field inline with auto-expiry recalculation
+ *   6. Retry any failed file individually
+ *   7. Commit all valid entries at once
  */
 
 const EXTRACTION_SCHEMA = {
@@ -52,16 +55,16 @@ const INSPECTION_LABELS = {
   other: 'Other Inspection',
 };
 
-// Auto-calculate expiry from issue date + inspection type
-// LOLER = 6 months, PUWER = 12 months, PAT = 12 months, service = type-based, calibration = 12 months
 const INSPECTION_CYCLE_MONTHS = {
   loler_inspection: 6,
   puwer_inspection: 12,
   pat_inspection: 12,
-  service: null, // uses asset type cycle
+  service: null,
   calibration: 12,
   other: 12,
 };
+
+const CONCURRENCY = 3;
 
 function parseDate(str) {
   if (!str) return '';
@@ -82,14 +85,13 @@ function autoExpiryFromDate(issueDate, inspectionType, assetType) {
   if (!issueDate) return '';
   let cycle = INSPECTION_CYCLE_MONTHS[inspectionType];
   if (!cycle && assetType) cycle = DEFAULT_INSPECTION_CYCLE_MONTHS[assetType];
-  if (!cycle) cycle = 12; // fallback
+  if (!cycle) cycle = 12;
   const d = new Date(issueDate + 'T00:00:00');
   if (isNaN(d.getTime())) return '';
   d.setMonth(d.getMonth() + cycle);
   return d.toISOString().slice(0, 10);
 }
 
-// Field mapping — tells the user exactly what each extracted field connects to
 const FIELD_MAP = [
   { key: 'asset_name', label: 'Asset Name', icon: Type, target: 'SiteAsset.name', editable: true },
   { key: 'serial_number', label: 'Serial Number', icon: Hash, target: 'SiteAsset.serial_number', editable: true },
@@ -107,45 +109,56 @@ const FIELD_MAP = [
 export default function SmartCertImport({ onClose }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
   const [files, setFiles] = useState([]);
-  const [processing, setProcessing] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0, fileName: '' });
-  const [previews, setPreviews] = useState([]); // extracted data per file
+  const [screen, setScreen] = useState('upload'); // upload | processing | review | success
+  const [fileStatuses, setFileStatuses] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [showViewer, setShowViewer] = useState(false);
   const [editing, setEditing] = useState(false);
   const [committing, setCommitting] = useState(false);
-  const [committed, setCommitted] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const { data: existingAssets = [] } = useQuery({
     queryKey: ['site-assets'],
     queryFn: () => base44.entities.SiteAsset.list('-created_date', 500),
   });
 
-  const handleFiles = (fileList) => {
+  const validPreviews = useMemo(() => previews.filter(p => !p.error && !p.retrying), [previews]);
+  const failedPreviews = useMemo(() => previews.map((p, i) => ({ p, i })).filter(({ p }) => p.error), [previews]);
+  const newCount = validPreviews.filter(p => p.isNewAsset).length;
+  const linkedCount = validPreviews.filter(p => !p.isNewAsset).length;
+
+  const handleFiles = useCallback((fileList) => {
     const pdfs = Array.from(fileList).filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
     if (pdfs.length === 0) {
       toast({ title: 'No PDF files', description: 'Select PDF certificate files to import.', variant: 'destructive' });
       return;
     }
-    setFiles(pdfs);
-    setPreviews([]);
+    setFiles(prev => [...prev, ...pdfs]);
+  }, [toast]);
+
+  // === Drag handlers ===
+  const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); setDragActive(false); };
+  const handleDrop = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files) handleFiles(e.dataTransfer.files);
   };
 
+  // === Per-file processing (same logic, stores file ref for retry) ===
   const processFile = async (file) => {
-    // 1. Upload the PDF
     const uploadRes = await base44.integrations.Core.UploadFile({ file });
     const fileUrl = uploadRes.file_url;
-
-    // 2. Extract structured data from the PDF
     const extractRes = await base44.integrations.Core.ExtractDataFromUploadedFile({
       file_url: fileUrl,
       json_schema: EXTRACTION_SCHEMA,
     });
-
     if (extractRes.status !== 'success' || !extractRes.output) {
       throw new Error('Could not read certificate data from PDF');
     }
-
     const data = extractRes.output;
     const assetName = data.asset_name || file.name.replace(/\.pdf$/i, '');
     const serial = data.serial_number || '';
@@ -153,13 +166,9 @@ export default function SmartCertImport({ onClose }) {
     const inspectionDate = parseDate(data.inspection_date) || new Date().toISOString().slice(0, 10);
     const inspectionType = data.inspection_type || 'service';
     let expiryDate = parseDate(data.expiry_date);
-    // Auto-calculate expiry if missing
-    if (!expiryDate) {
-      expiryDate = autoExpiryFromDate(inspectionDate, inspectionType, type);
-    }
+    if (!expiryDate) expiryDate = autoExpiryFromDate(inspectionDate, inspectionType, type);
     const result = data.result || 'pass';
 
-    // 3. Match to existing asset by serial or name
     let matchedAsset = null;
     let matchMethod = '';
     if (serial) {
@@ -173,6 +182,7 @@ export default function SmartCertImport({ onClose }) {
 
     return {
       fileName: file.name,
+      file,
       fileUrl,
       fileSize: file.size,
       extracted: {
@@ -195,30 +205,51 @@ export default function SmartCertImport({ onClose }) {
     };
   };
 
+  // === Parallel extraction (concurrency-limited) ===
   const handleExtract = async () => {
-    setProcessing(true);
-    setProgress({ current: 0, total: files.length, fileName: files[0]?.name || '' });
-    const allPreviews = [];
-    for (let i = 0; i < files.length; i++) {
-      setProgress({ current: i + 1, total: files.length, fileName: files[i].name });
-      try {
-        const p = await processFile(files[i]);
-        allPreviews.push(p);
-      } catch (e) {
-        allPreviews.push({ fileName: files[i].name, error: e.message });
+    setScreen('processing');
+    const toProcess = files;
+    setFileStatuses(toProcess.map(() => 'processing'));
+    const newPreviews = new Array(toProcess.length);
+
+    let nextIndex = 0;
+    const runWorker = async () => {
+      while (nextIndex < toProcess.length) {
+        const i = nextIndex++;
+        try {
+          newPreviews[i] = await processFile(toProcess[i]);
+          setFileStatuses(prev => { const n = [...prev]; n[i] = 'done'; return n; });
+        } catch (e) {
+          newPreviews[i] = { fileName: toProcess[i].name, file: toProcess[i], error: e.message };
+          setFileStatuses(prev => { const n = [...prev]; n[i] = 'failed'; return n; });
+        }
       }
-    }
-    setPreviews(allPreviews);
-    setActiveIdx(0);
-    setProcessing(false);
+    };
+
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, toProcess.length) }, () => runWorker()));
+
+    setPreviews(prev => [...prev, ...newPreviews.filter(Boolean)]);
+    setScreen('review');
     queryClient.invalidateQueries({ queryKey: ['site-assets'] });
+  };
+
+  // === Retry a single failed file ===
+  const retryFile = async (idx) => {
+    const preview = previews[idx];
+    if (!preview?.file) return;
+    setPreviews(prev => prev.map((p, i) => i === idx ? { ...p, retrying: true, error: null } : p));
+    try {
+      const newPreview = await processFile(preview.file);
+      setPreviews(prev => prev.map((p, i) => i === idx ? newPreview : p));
+    } catch (e) {
+      setPreviews(prev => prev.map((p, i) => i === idx ? { ...p, retrying: false, error: e.message } : p));
+    }
   };
 
   const updatePreview = (idx, field, value) => {
     setPreviews(prev => prev.map((p, i) => {
       if (i !== idx || p.error) return p;
       const newExtracted = { ...p.extracted, [field]: value };
-      // Recalculate expiry if issue date or inspection type changes
       if (field === 'inspection_date' || field === 'inspection_type' || field === 'asset_type') {
         if (!newExtracted.expiry_date || p.autoExpiryCalculated) {
           newExtracted.expiry_date = autoExpiryFromDate(
@@ -236,13 +267,11 @@ export default function SmartCertImport({ onClose }) {
     setCommitting(true);
     let success = 0, newAssets = 0, errors = 0;
     for (const p of previews) {
-      if (p.error) { errors++; continue; }
+      if (p.error || p.retrying) { errors++; continue; }
       try {
         const d = p.extracted;
         let asset = p.matchedAsset;
-
         if (!asset) {
-          // Create new asset
           const status = d.expiry_date ? autoComplianceStatus(d.expiry_date) : 'unknown';
           const nextService = d.inspection_date ? autoNextServiceDate(d.inspection_date, d.asset_type) : '';
           const interval = (d.asset_type === 'rig' || d.asset_type === 'machinery')
@@ -269,7 +298,6 @@ export default function SmartCertImport({ onClose }) {
           asset = await base44.entities.SiteAsset.create(payload);
           newAssets++;
         } else {
-          // Update existing asset compliance
           const updates = {};
           if (d.expiry_date) {
             updates.compliance_expiry_date = d.expiry_date;
@@ -282,8 +310,6 @@ export default function SmartCertImport({ onClose }) {
             await base44.entities.SiteAsset.update(asset.id, updates);
           }
         }
-
-        // Create service record
         await base44.entities.ServiceRecord.create({
           site_asset_id: asset.id,
           record_type: d.inspection_type,
@@ -302,7 +328,7 @@ export default function SmartCertImport({ onClose }) {
       }
     }
     setCommitting(false);
-    setCommitted(true);
+    setScreen('success');
     queryClient.invalidateQueries({ queryKey: ['site-assets'] });
     queryClient.invalidateQueries({ queryKey: ['service-records'] });
     queryClient.invalidateQueries({ queryKey: ['cert-vault'] });
@@ -313,13 +339,24 @@ export default function SmartCertImport({ onClose }) {
     });
   };
 
+  const addMoreFiles = (fileList) => {
+    handleFiles(fileList);
+    setScreen('upload');
+  };
+
   const currentPreview = previews[activeIdx];
-  const hasPreviews = previews.length > 0 && !previews[0]?.error || (previews.length > 0 && previews.some(p => !p.error));
-  const validPreviews = previews.filter(p => !p.error);
+
+  // === Helper: status badge for a preview ===
+  const statusBadge = (p) => {
+    if (p.error) return { label: 'Failed', cls: 'bg-red-100 text-red-700', icon: AlertTriangle };
+    if (p.retrying) return { label: 'Retrying', cls: 'bg-amber-100 text-amber-700', icon: Loader2 };
+    if (p.isNewAsset) return { label: 'New', cls: 'bg-blue-100 text-blue-700', icon: Sparkles };
+    return { label: 'Linked', cls: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 };
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-950/60 backdrop-blur-md p-4 overflow-y-auto" onClick={() => !processing && !committing && onClose()}>
-      <div className="bg-white rounded-2xl shadow-xl max-w-5xl w-full my-auto max-h-[calc(100dvh-2rem)] flex flex-col" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-950/60 backdrop-blur-md p-0 sm:p-4 overflow-y-auto" onClick={() => !committing && onClose()}>
+      <div className="bg-white w-full min-h-full sm:min-h-0 sm:max-w-5xl sm:rounded-2xl sm:shadow-xl sm:max-h-[calc(100dvh-2rem)] flex flex-col" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div>
@@ -330,20 +367,18 @@ export default function SmartCertImport({ onClose }) {
               </span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              {hasPreviews && !committed
-                ? 'Review extracted data · edit any field · commit all at once'
-                : 'Upload PDFs — AI reads each file and maps data to your asset fields automatically'}
+              {screen === 'review' ? `${validPreviews.length} ready to commit · ${failedPreviews.length} failed` : 'Drop PDFs — AI reads each file and maps data to your asset fields automatically'}
             </p>
           </div>
-          <button onClick={() => !processing && !committing && onClose()} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition">
+          <button onClick={() => !committing && onClose()} className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg transition">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {committed ? (
-            /* ── Success screen ── */
+          {/* ── Success screen ── */}
+          {screen === 'success' ? (
             <div className="text-center py-10">
               <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8 text-emerald-600" />
@@ -354,36 +389,130 @@ export default function SmartCertImport({ onClose }) {
                 Done
               </button>
             </div>
-          ) : hasPreviews && currentPreview ? (
-            /* ── Preview + Edit screen ── */
+          ) : screen === 'processing' ? (
+            /* ── Processing screen — parallel progress grid ── */
             <div className="space-y-4">
-              {/* File carousel */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {previews.map((p, i) => (
-                  <button key={i} onClick={() => { setActiveIdx(i); setEditing(false); }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                      i === activeIdx ? 'bg-[#2E5A1A] text-white shadow-sm' :
-                      p.error ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              <div className="flex items-center gap-2 text-[#2E5A1A]">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <p className="text-sm font-bold">Reading {files.length} PDFs in parallel…</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {files.map((f, i) => {
+                  const st = fileStatuses[i] || 'processing';
+                  return (
+                    <div key={i} className={`rounded-xl border p-3 flex flex-col items-center gap-2 transition ${
+                      st === 'done' ? 'bg-emerald-50 border-emerald-200' :
+                      st === 'failed' ? 'bg-red-50 border-red-200' :
+                      'bg-slate-50 border-slate-200'
                     }`}>
-                    {p.error ? <AlertTriangle className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
-                    {i + 1}
-                    {!p.error && p.isNewAsset && <span className="text-[9px] bg-blue-500 text-white px-1 rounded-full">NEW</span>}
-                    {!p.error && !p.isNewAsset && <span className="text-[9px] bg-emerald-500 text-white px-1 rounded-full">LINKED</span>}
-                  </button>
-                ))}
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        {st === 'processing' ? <Loader2 className="w-5 h-5 text-slate-400 animate-spin" /> :
+                         st === 'done' ? <CheckCircle2 className="w-5 h-5 text-emerald-600" /> :
+                         <AlertTriangle className="w-5 h-5 text-red-500" />}
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-600 truncate w-full text-center">{f.name}</p>
+                      <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                        st === 'done' ? 'bg-emerald-100 text-emerald-700' :
+                        st === 'failed' ? 'bg-red-100 text-red-700' :
+                        'bg-slate-100 text-slate-500'
+                      }`}>{st}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : screen === 'review' && !showViewer ? (
+            /* ── Thumbnail grid overview ── */
+            <div className="space-y-4">
+              {/* Summary bar */}
+              <div className="flex items-center gap-3 flex-wrap text-xs">
+                <span className="inline-flex items-center gap-1.5 font-bold text-slate-700">{validPreviews.length} ready</span>
+                {newCount > 0 && <span className="inline-flex items-center gap-1 text-blue-600"><span className="w-2 h-2 rounded-full bg-blue-500" /> {newCount} new</span>}
+                {linkedCount > 0 && <span className="inline-flex items-center gap-1 text-emerald-600"><span className="w-2 h-2 rounded-full bg-emerald-500" /> {linkedCount} linked</span>}
+                {failedPreviews.length > 0 && <span className="inline-flex items-center gap-1 text-red-600"><span className="w-2 h-2 rounded-full bg-red-500" /> {failedPreviews.length} failed</span>}
+              </div>
+
+              {/* Thumbnail grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {previews.map((p, i) => {
+                  const badge = statusBadge(p);
+                  const BadgeIcon = badge.icon;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => { if (!p.error && !p.retrying) { setActiveIdx(i); setShowViewer(true); setEditing(false); } }}
+                      disabled={p.error || p.retrying}
+                      className={`relative rounded-xl border-2 p-3 flex flex-col items-center gap-2 transition text-left ${
+                        p.error ? 'bg-red-50/50 border-red-200 cursor-default' :
+                        p.retrying ? 'bg-amber-50/50 border-amber-200 cursor-wait' :
+                        'bg-white border-slate-200 hover:border-[#2E5A1A] hover:shadow-md cursor-pointer'
+                      }`}
+                    >
+                      <div className="w-12 h-14 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-6 h-6 text-red-500" />
+                      </div>
+                      <p className="text-[11px] font-medium text-slate-600 truncate w-full text-center">{p.fileName}</p>
+                      <span className={`inline-flex items-center gap-1 text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${badge.cls}`}>
+                        <BadgeIcon className={`w-2.5 h-2.5 ${p.retrying ? 'animate-spin' : ''}`} /> {badge.label}
+                      </span>
+                      {p.error && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); retryFile(i); }}
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold text-red-600 hover:text-red-700 px-2 py-1 rounded-md bg-red-100 hover:bg-red-200 transition"
+                        >
+                          <RotateCw className="w-3 h-3" /> Retry
+                        </button>
+                      )}
+                    </button>
+                  );
+                })}
+                {/* Add more tile */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-xl border-2 border-dashed border-slate-300 p-3 flex flex-col items-center justify-center gap-2 min-h-[120px] hover:border-[#2E5A1A] hover:bg-emerald-50/30 transition"
+                >
+                  <FilePlus className="w-6 h-6 text-slate-400" />
+                  <span className="text-[11px] font-medium text-slate-500">Add More</span>
+                </button>
+              </div>
+              <input ref={fileInputRef} type="file" accept=".pdf,application/pdf" multiple className="hidden" onChange={e => { if (e.target.files.length > 0) addMoreFiles(e.target.files); e.target.value = ''; }} />
+            </div>
+          ) : screen === 'review' && showViewer && currentPreview ? (
+            /* ── Full-screen carousel viewer ── */
+            <div className="space-y-3">
+              {/* File chips carousel */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {previews.map((p, i) => {
+                  const badge = statusBadge(p);
+                  return (
+                    <button key={i} onClick={() => { setActiveIdx(i); setEditing(false); }}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+                        i === activeIdx ? 'bg-[#2E5A1A] text-white shadow-sm' :
+                        p.error ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' :
+                        'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}>
+                      {i + 1}
+                      {!p.error && p.isNewAsset && <span className="text-[8px] bg-blue-500 text-white px-1 rounded-full">N</span>}
+                      {!p.error && !p.isNewAsset && <span className="text-[8px] bg-emerald-500 text-white px-1 rounded-full">L</span>}
+                    </button>
+                  );
+                })}
               </div>
 
               {currentPreview.error ? (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
-                  <div>
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <div className="flex-1">
                     <p className="text-sm font-semibold text-red-700">{currentPreview.fileName}</p>
                     <p className="text-xs text-red-500 mt-0.5">{currentPreview.error}</p>
                   </div>
+                  <button onClick={() => retryFile(activeIdx)} className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 transition">
+                    <RotateCw className="w-3.5 h-3.5" /> Retry
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* ── Left: PDF Preview ── */}
+                  {/* PDF Preview — swipeable */}
                   <div className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
                     <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-slate-200">
                       <div className="flex items-center gap-1.5 min-w-0">
@@ -392,127 +521,98 @@ export default function SmartCertImport({ onClose }) {
                       </div>
                       <span className="text-[10px] text-slate-400 flex-shrink-0">{(currentPreview.fileSize / 1024).toFixed(0)} KB</span>
                     </div>
-                    <iframe
-                      src={currentPreview.fileUrl}
-                      title="PDF Preview"
-                      className="w-full h-[400px] bg-white"
-                    />
+                    <motion.div
+                      key={activeIdx}
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.2}
+                      onDragEnd={(_, info) => {
+                        if (info.offset.x < -80 && activeIdx < previews.length - 1) setActiveIdx(activeIdx + 1);
+                        if (info.offset.x > 80 && activeIdx > 0) setActiveIdx(activeIdx - 1);
+                      }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <iframe src={currentPreview.fileUrl} title="PDF Preview" className="w-full h-[300px] sm:h-[400px] bg-white" />
+                    </motion.div>
                   </div>
 
-                  {/* ── Right: Extracted Data + Field Mapping ── */}
+                  {/* Extracted Data + Field Mapping */}
                   <div className="space-y-3">
-                    {/* Match status banner */}
                     <div className={`rounded-xl p-3 border flex items-center gap-2.5 ${
                       currentPreview.isNewAsset ? 'bg-blue-50 border-blue-200' : 'bg-emerald-50 border-emerald-200'
                     }`}>
                       {currentPreview.isNewAsset ? (
                         <>
-                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                            <Sparkles className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-blue-700">New Asset will be created</p>
-                            <p className="text-[11px] text-blue-600">No matching serial or name found in your inventory</p>
-                          </div>
+                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0"><Sparkles className="w-4 h-4 text-blue-600" /></div>
+                          <div><p className="text-xs font-bold text-blue-700">New Asset will be created</p><p className="text-[11px] text-blue-600">No matching serial or name found</p></div>
                         </>
                       ) : (
                         <>
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-emerald-700">Linked to existing asset</p>
-                            <p className="text-[11px] text-emerald-600">
-                              Matched by {currentPreview.matchMethod}: <span className="font-semibold">{currentPreview.matchedAsset?.name}</span>
-                            </p>
-                          </div>
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0"><CheckCircle2 className="w-4 h-4 text-emerald-600" /></div>
+                          <div><p className="text-xs font-bold text-emerald-700">Linked to existing asset</p><p className="text-[11px] text-emerald-600">Matched by {currentPreview.matchMethod}: <span className="font-semibold">{currentPreview.matchedAsset?.name}</span></p></div>
                         </>
                       )}
                     </div>
 
-                    {/* Extracted fields with mapping */}
                     <div className="bg-white rounded-xl border border-slate-200 p-3 space-y-2.5">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Extracted Data & Field Mapping</p>
+                        <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Extracted Data</p>
                         <button onClick={() => setEditing(!editing)}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${
-                            editing ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}>
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${editing ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                           <Edit3 className="w-3 h-3" /> {editing ? 'Editing' : 'Edit'}
                         </button>
                       </div>
-
                       {FIELD_MAP.map(field => {
-                        const value = currentPreview.extracted[field.key] || '';
+                        const value = currentPreview.extracted?.[field.key] || '';
                         const Icon = field.icon;
                         const isAuto = field.autoCalc && currentPreview.autoExpiryCalculated;
                         return (
                           <div key={field.key} className="flex items-start gap-2">
-                            <div className="flex items-center gap-1.5 w-36 flex-shrink-0 pt-1.5">
+                            <div className="flex items-center gap-1.5 w-32 flex-shrink-0 pt-1.5">
                               <Icon className="w-3 h-3 text-slate-400 flex-shrink-0" />
                               <span className="text-[11px] text-slate-500 font-medium">{field.label}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               {editing && field.editable ? (
                                 field.isTextarea ? (
-                                  <textarea value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    rows={2}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <textarea value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} rows={2} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
                                 ) : field.isDate ? (
-                                  <input type="date" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <input type="date" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
                                 ) : field.isType ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
                                     {Object.entries(TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                                   </select>
                                 ) : field.isInspection ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
                                     {Object.entries(INSPECTION_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                                   </select>
                                 ) : field.isResult ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
-                                    <option value="pass">Pass</option>
-                                    <option value="fail">Fail</option>
-                                    <option value="advisory">Advisory</option>
-                                    <option value="n/a">N/A</option>
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                    <option value="pass">Pass</option><option value="fail">Fail</option><option value="advisory">Advisory</option><option value="n/a">N/A</option>
                                   </select>
                                 ) : (
-                                  <input type="text" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)}
-                                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <input type="text" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
                                 )
                               ) : (
                                 <div className="flex items-center gap-1.5 flex-wrap pt-1.5">
-                                  <span className={`text-xs font-medium ${value ? 'text-slate-800' : 'text-slate-300 italic'}`}>
-                                    {value || 'Not detected'}
-                                  </span>
-                                  {isAuto && (
-                                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                                      <Sparkles className="w-2.5 h-2.5" /> Auto-calculated
-                                    </span>
-                                  )}
+                                  <span className={`text-xs font-medium ${value ? 'text-slate-800' : 'text-slate-300 italic'}`}>{value || 'Not detected'}</span>
+                                  {isAuto && <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full"><Sparkles className="w-2.5 h-2.5" /> Auto</span>}
                                 </div>
                               )}
-                              {/* Field target mapping */}
-                              <p className="text-[9px] text-slate-400 mt-0.5 flex items-center gap-0.5">
-                                <ArrowRight className="w-2 h-2" /> {field.target}
-                              </p>
+                              <p className="text-[9px] text-slate-400 mt-0.5 flex items-center gap-0.5"><ArrowRight className="w-2 h-2" /> {field.target}</p>
                             </div>
                           </div>
                         );
                       })}
                     </div>
 
-                    {/* Auto-calc explainer */}
                     {currentPreview.autoExpiryCalculated && (
                       <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex items-start gap-2">
                         <Sparkles className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
                         <p className="text-[11px] text-amber-700">
-                          <strong>Auto-expiry:</strong> Expiry date was calculated from the issue date ({currentPreview.extracted.inspection_date}) +
-                          {' '}{INSPECTION_LABELS[currentPreview.extracted.inspection_type] || 'inspection'} cycle
-                          {' '}({INSPECTION_CYCLE_MONTHS[currentPreview.extracted.inspection_type] || DEFAULT_INSPECTION_CYCLE_MONTHS[currentPreview.extracted.asset_type] || 12} months).
+                          <strong>Auto-expiry:</strong> Calculated from issue date + {INSPECTION_LABELS[currentPreview.extracted.inspection_type] || 'inspection'} cycle ({INSPECTION_CYCLE_MONTHS[currentPreview.extracted.inspection_type] || DEFAULT_INSPECTION_CYCLE_MONTHS[currentPreview.extracted.asset_type] || 12} months).
                         </p>
                       </div>
                     )}
@@ -521,22 +621,36 @@ export default function SmartCertImport({ onClose }) {
               )}
             </div>
           ) : (
-            /* ── Upload screen ── */
+            /* ── Upload screen — drag-and-drop ── */
             <>
-              {!files.length ? (
-                <label className="flex flex-col items-center justify-center gap-2 py-12 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition">
-                  <FileText className="w-10 h-10 text-slate-300" />
-                  <p className="text-sm font-medium text-slate-600">Drop or select PDF certificates</p>
-                  <p className="text-xs text-slate-400 max-w-md text-center">The AI reads each file, extracts asset name, serial, dates, etc. — then auto-calculates expiry and links to existing assets. You review everything before commit.</p>
-                  <input type="file" accept=".pdf,application/pdf" multiple className="hidden" onChange={e => e.target.files.length > 0 && handleFiles(e.target.files)} />
-                </label>
-              ) : (
-                <div className="space-y-3">
+              <div
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`flex flex-col items-center justify-center gap-3 py-12 px-6 border-2 border-dashed rounded-2xl cursor-pointer transition ${
+                  dragActive ? 'border-[#2E5A1A] bg-emerald-50/50 scale-[1.01]' : 'border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/30'
+                }`}
+              >
+                <motion.div
+                  animate={dragActive ? { scale: 1.1, y: -4 } : { scale: 1, y: 0 }}
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center ${dragActive ? 'bg-[#2E5A1A]/10' : 'bg-slate-100'}`}
+                >
+                  <Upload className={`w-8 h-8 ${dragActive ? 'text-[#2E5A1A]' : 'text-slate-400'}`} />
+                </motion.div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-slate-700">{dragActive ? 'Drop your PDFs here' : 'Drag & drop PDF certificates'}</p>
+                  <p className="text-xs text-slate-400 mt-1">or click to browse · AI reads each file and extracts asset data automatically</p>
+                </div>
+                <input ref={fileInputRef} type="file" accept=".pdf,application/pdf" multiple className="hidden" onChange={e => { if (e.target.files.length > 0) handleFiles(e.target.files); e.target.value = ''; }} />
+              </div>
+
+              {files.length > 0 && (
+                <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-slate-600">{files.length} PDF file(s) ready</p>
-                    <button onClick={() => { setFiles([]); setPreviews([]); }} disabled={processing} className="text-xs text-slate-400 hover:text-red-500 transition disabled:opacity-50">
-                      Clear
-                    </button>
+                    <p className="text-xs font-semibold text-slate-600">{files.length} PDF file(s) selected</p>
+                    <button onClick={() => setFiles([])} className="text-xs text-slate-400 hover:text-red-500 transition">Clear</button>
                   </div>
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {files.map((f, i) => (
@@ -544,22 +658,12 @@ export default function SmartCertImport({ onClose }) {
                         <FileText className="w-4 h-4 text-red-500 flex-shrink-0" />
                         <p className="text-xs font-medium text-slate-700 truncate flex-1">{f.name}</p>
                         <p className="text-[10px] text-slate-400 flex-shrink-0">{(f.size / 1024).toFixed(0)} KB</p>
+                        <button onClick={(e) => { e.stopPropagation(); setFiles(prev => prev.filter((_, idx) => idx !== i)); }} className="text-slate-300 hover:text-red-500 transition flex-shrink-0">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
-
-                  {processing && (
-                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
-                        <p className="text-xs font-medium text-blue-700">Reading {progress.fileName}...</p>
-                      </div>
-                      <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(progress.current / progress.total) * 100}%` }} />
-                      </div>
-                      <p className="text-[10px] text-blue-500 mt-1 text-center">{progress.current} of {progress.total}</p>
-                    </div>
-                  )}
                 </div>
               )}
             </>
@@ -567,41 +671,51 @@ export default function SmartCertImport({ onClose }) {
         </div>
 
         {/* Footer */}
-        {!committed && (
+        {screen !== 'success' && (
           <div className="px-5 py-3.5 border-t border-slate-100 flex items-center gap-2 flex-shrink-0">
-            {hasPreviews ? (
+            {screen === 'review' && showViewer ? (
+              <>
+                <button onClick={() => setShowViewer(false)} className="inline-flex items-center gap-1.5 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition">
+                  <ChevronLeft className="w-4 h-4" /> Grid
+                </button>
+                {activeIdx > 0 && (
+                  <button onClick={() => { setActiveIdx(activeIdx - 1); setEditing(false); }} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                )}
+                {activeIdx < previews.length - 1 && (
+                  <button onClick={() => { setActiveIdx(activeIdx + 1); setEditing(false); }} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+                <button onClick={commitAll} disabled={committing || validPreviews.length === 0}
+                  className="ml-auto inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-lg text-sm font-bold hover:brightness-110 transition disabled:opacity-50 shadow-sm">
+                  {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {committing ? 'Committing...' : `Commit ${validPreviews.length}`}
+                </button>
+              </>
+            ) : screen === 'review' ? (
               <>
                 <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                  <span className="font-bold text-slate-700">{validPreviews.length}</span> ready to commit
-                  {validPreviews.filter(p => p.isNewAsset).length > 0 && (
-                    <span className="ml-2 inline-flex items-center gap-0.5 text-blue-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> {validPreviews.filter(p => p.isNewAsset).length} new
-                    </span>
-                  )}
-                  {validPreviews.filter(p => !p.isNewAsset).length > 0 && (
-                    <span className="ml-2 inline-flex items-center gap-0.5 text-emerald-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {validPreviews.filter(p => !p.isNewAsset).length} linked
-                    </span>
-                  )}
+                  <span className="font-bold text-slate-700">{validPreviews.length}</span> ready
+                  {failedPreviews.length > 0 && <span className="text-red-500">· {failedPreviews.length} failed</span>}
                 </div>
-                <button onClick={() => !committing && onClose()} disabled={committing} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition disabled:opacity-50">
-                  Cancel
-                </button>
-                <button onClick={commitAll} disabled={committing}
+                <button onClick={() => !committing && onClose()} disabled={committing} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition disabled:opacity-50">Cancel</button>
+                <button onClick={commitAll} disabled={committing || validPreviews.length === 0}
                   className="ml-auto inline-flex items-center gap-1.5 px-5 py-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-lg text-sm font-bold hover:brightness-110 transition disabled:opacity-50 shadow-sm">
                   {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                   {committing ? 'Committing...' : `Commit ${validPreviews.length} to System`}
                 </button>
               </>
+            ) : screen === 'processing' ? (
+              <div className="ml-auto text-xs text-slate-400">Processing in parallel…</div>
             ) : (
               <>
-                <button onClick={() => !processing && onClose()} disabled={processing} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition disabled:opacity-50">
-                  Cancel
-                </button>
-                <button onClick={handleExtract} disabled={!files.length || processing}
+                <button onClick={() => !committing && onClose()} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium transition">Cancel</button>
+                <button onClick={handleExtract} disabled={!files.length}
                   className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-lg text-sm font-semibold hover:brightness-110 transition disabled:opacity-50">
-                  {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                  {processing ? 'Reading PDFs...' : `Read & Extract ${files.length || ''} PDF(s)`}
+                  <Sparkles className="w-4 h-4" />
+                  Read & Extract {files.length || ''} PDF{files.length !== 1 ? 's' : ''}
                 </button>
               </>
             )}

@@ -139,15 +139,17 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
     <div className="space-y-5">
       {/* Qualification Matrix — compact, no scroll */}
       <div className="insight-card rounded-2xl p-4 md:p-5">
-        <div className="flex items-center gap-2.5 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
-            <ShieldCheck className="w-4 h-4 text-violet-700" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-4 h-4 text-violet-700" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-extrabold text-slate-900">My Qualifications</h3>
+              <p className="text-[11px] text-slate-500">{categories.length} categories · {requiredQuals.length} required for your crew</p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-extrabold text-slate-900">My Qualifications</h3>
-            <p className="text-[11px] text-slate-500">{categories.length} categories · {requiredQuals.length} required for your crew</p>
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:flex-shrink-0">
             {canManageTeam && (
               <button onClick={() => setShowAddCompleted(true)} type="button"
                 className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation shadow-sm">
