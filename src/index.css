@@ -466,8 +466,16 @@
    panel fits within the viewport. Targets the common custom modal pattern
    (fixed inset-0 + dark bg) so any modal — even ones not using the shared
    <Modal> component — gets consistent treatment. */
-.fixed.inset-0[class*="bg-slate-950"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
-.fixed.inset-0[class*="bg-blue-950"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]) {
+.fixed.inset-0[class*="bg-slate-9"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.fixed.inset-0[class*="bg-blue-950"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.fixed.inset-0[class*="bg-black"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.fixed.inset-0[class*="bg-gray-9"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.fixed.inset-0[class*="bg-zinc-9"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.fixed.inset-0[class*="bg-neutral-9"]:not([class*="inset-auto"]):not([class*="sm:top-0"]):not([class*="sm:right-0"]):not([class*="sm:left-0"]),
+.absolute.inset-0[class*="bg-slate-9"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-black"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-blue-950"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-gray-9"]:not([class*="inset-auto"]) {
   min-height: 100dvh;
   min-width: 100vw;
 }
@@ -496,7 +504,13 @@
    the lock. The :has() selector is well-supported in modern browsers
    (Chrome 105+, Safari 15.4+, Firefox 121+). */
 body:has(.fixed.inset-0),
-html:has(.fixed.inset-0) {
+html:has(.fixed.inset-0),
+body:has(.absolute.inset-0),
+html:has(.absolute.inset-0),
+body:has(.fixed.inset-y-0.left-0),
+html:has(.fixed.inset-y-0.left-0),
+body:has(.fixed.inset-y-0.right-0),
+html:has(.fixed.inset-y-0.right-0) {
   overflow: hidden;
 }
 
@@ -515,6 +529,19 @@ html:has(.fixed.inset-0) {
 .fixed.inset-0[class*="bg-slate-950"]:not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-blue-950"]:not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-black\/"]:not([class*="bg-background"]) {
+  background-color: rgba(8, 23, 48, 0.85) !important;
+  backdrop-filter: blur(8px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+}
+
+/* === Extended backdrop normalisation — catches zinc/neutral/stone dark overlays
+   and absolute-positioned full-screen popups that bypass the rules above === */
+.absolute.inset-0[class*="bg-zinc-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-neutral-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-stone-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-zinc-9"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-neutral-9"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-stone-9"]:not([class*="bg-background"]) {
   background-color: rgba(8, 23, 48, 0.85) !important;
   backdrop-filter: blur(8px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
