@@ -107,7 +107,20 @@ export default function EnterpriseHelp() {
   return (
     <div className="min-h-screen page-bg-vibrant">
       <EnterpriseHeader />
-      <div className="px-4 pb-24 xl:pt-6 xl:px-6 xl:pb-6 space-y-4">
+      {/* Desktop top bar — visible only on lg+ since EnterpriseHeader is mobile-only */}
+      <div className="hidden lg:block sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/70">
+        <div className="px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/enterprise')} type="button"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-100 transition">
+              <ArrowLeft className="w-4 h-4" /> Enterprise
+            </button>
+            <span className="text-slate-300">/</span>
+            <span className="text-sm font-bold text-slate-900">Help Guides</span>
+          </div>
+        </div>
+      </div>
+      <div className="px-4 pt-5 pb-24 lg:pt-8 lg:px-8 lg:pb-10 space-y-5 max-w-5xl mx-auto">
         {/* Back link + title */}
         <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate(-1)} type="button"

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   FlaskConical, AlertTriangle, XCircle, Search, Layers, User, Briefcase, CalendarDays,
+  CheckCircle2, FileCheck2, Download,
 } from 'lucide-react';
 
 const REVIEW_FILTERS = [
@@ -18,8 +19,8 @@ const GROUP_OPTIONS = [
 ];
 
 /**
- * Sticky hub header — brand title, live pending/queried counts, group-by
- * control, search, review-status pills, and job/type filters.
+ * Sticky hub header — modern, informative, with live stat pills,
+ * group-by control, search, review-status filters, and job/type filters.
  * Shared across desktop, tablet, and mobile (wraps on small screens).
  */
 export default function InvestigationHeader({
@@ -30,32 +31,51 @@ export default function InvestigationHeader({
   jobFilter, setJobFilter, jobs,
   typeFilter, setTypeFilter, logTypes,
 }) {
+  const approvedCount = totalLogs - pendingCount - queriedCount;
+  const approvalRate = totalLogs > 0 ? Math.round((approvedCount / totalLogs) * 100) : 0;
+
   return (
     <div className="insight-card rounded-2xl mb-4 sticky top-0 z-30 shadow-md overflow-hidden">
+      {/* Brand accent strip */}
+      <div className="h-1 bg-gradient-to-r from-[#2E5A1A] via-[#5A8C1E] to-[#8DC63F]" />
+
       <div className="p-4 sm:p-5">
+        {/* Title row */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="p-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] rounded-xl shadow-sm flex-shrink-0">
             <FlaskConical className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">Investigation Hub</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Investigation Hub</h2>
             <p className="text-sm text-slate-500 hidden sm:block">Review every log & borehole record · approve, query, and export to OpenGround</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            {pendingCount > 0 && (
-              <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5" /> {pendingCount} pending
-              </span>
-            )}
-            {queriedCount > 0 && (
-              <span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1">
-                <XCircle className="w-3.5 h-3.5" /> {queriedCount} queried
-              </span>
-            )}
-            <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-semibold tabular-nums">
-              {totalLogs} logs
+        </div>
+
+        {/* Live stat pills — informative at-a-glance */}
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-semibold tabular-nums inline-flex items-center gap-1">
+            <FileCheck2 className="w-3.5 h-3.5" /> {totalLogs} logs
+          </span>
+          {pendingCount > 0 && (
+            <span className="text-xs bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> {pendingCount} pending
             </span>
-          </div>
+          )}
+          {queriedCount > 0 && (
+            <span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> {queriedCount} queried
+            </span>
+          )}
+          {approvedCount > 0 && (
+            <span className="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-semibold inline-flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> {approvedCount} approved
+            </span>
+          )}
+          {totalLogs > 0 && (
+            <span className="text-xs bg-[#2E5A1A]/10 text-[#2E5A1A] px-2.5 py-1 rounded-full font-bold tabular-nums">
+              {approvalRate}% approval rate
+            </span>
+          )}
         </div>
 
         {/* Group-by segmented control */}

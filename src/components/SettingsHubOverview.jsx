@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
-  Search, Lock, Database, Webhook, Layers, FileSpreadsheet,
+  Search, Lock, Database, Webhook, Layers, FileSpreadsheet, Briefcase,
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
   Gift, KeyRound, FileUp, CalendarDays,
 } from 'lucide-react';
@@ -138,7 +138,7 @@ export default function SettingsHubOverview({ onNavigate }) {
           </kbd>
         </div>
 
-        {/* Slim status strip */}
+        {/* Informative status strip — at-a-glance platform health */}
         {!q && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-10 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
@@ -146,6 +146,27 @@ export default function SettingsHubOverview({ onNavigate }) {
               <span className="font-semibold text-slate-700">{integrationConnectedCount}/{integrationList.length}</span>
               <span>integrations connected</span>
             </span>
+            {activeStaff > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-slate-400" />
+                <span className="font-semibold text-slate-700">{activeStaff}</span>
+                <span>active staff</span>
+              </span>
+            )}
+            {activeJobs > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                <span className="font-semibold text-slate-700">{activeJobs}</span>
+                <span>active jobs</span>
+              </span>
+            )}
+            {planningJobs > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-slate-400" />
+                <span className="font-semibold text-slate-700">{planningJobs}</span>
+                <span>in planning</span>
+              </span>
+            )}
           </div>
         )}
 
