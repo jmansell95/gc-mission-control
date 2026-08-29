@@ -5,7 +5,7 @@ import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
   Search, Lock, Database, Webhook, Layers, FileSpreadsheet, Briefcase,
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
-  Gift, FileUp, CalendarDays,
+  Gift, FileUp, CalendarDays, ClipboardCheck, Receipt,
 } from 'lucide-react';
 import IntegrationsOverviewList from '@/components/settings/IntegrationsOverviewList';
 
@@ -82,6 +82,7 @@ export default function SettingsHubOverview({ onNavigate }) {
       { id: 'zapier-webhooks', icon: Webhook, label: 'Zapier / Make', value: '—', sub: 'Outbound webhooks for no-code automation' },
     ]},
     { group: 'System Configuration', items: [
+      { id: 'daily-checklists', icon: ClipboardCheck, label: 'Daily Checklists', value: '—', sub: 'Pre-work checklist per crew type — vehicle, plant, PPE' },
       { id: 'dropdowns', icon: ListChecks, label: 'Dropdown Manager', value: '—', sub: 'Edit every dropdown' },
       { id: 'global-branding', icon: Palette, label: 'Global Branding', value: '—', sub: 'Email colours & banners' },
       { id: 'login-branding', icon: Lock, label: 'Login Page Customiser', value: '—', sub: 'Login & reset screen branding' },
@@ -93,6 +94,7 @@ export default function SettingsHubOverview({ onNavigate }) {
       { id: 'incremental-import', icon: Layers, label: 'Incremental Import', value: '—', sub: 'Non-destructive smart imports' },
       { id: 'system-guide', icon: BookOpen, label: 'System Logic Guide', value: 'PDF', sub: 'Every stat & rule explained' },
       { id: 'rewards', icon: Gift, label: 'Rewards Manager', value: '—', sub: 'Gift cards, points catalogue & redemptions' },
+      { id: 'expense-defaults', icon: Receipt, label: 'Expense Defaults', value: '—', sub: 'Default amounts & VAT rates per expense category' },
     ]},
   ];
 

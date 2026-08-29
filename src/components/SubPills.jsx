@@ -7,6 +7,10 @@ import React from 'react';
  * leaf-green active pills so sub-pages clearly read as a level below the
  * main hub tabs.
  *
+ * Pills WRAP to multiple lines on narrow viewports so every sub-tab is always
+ * visible without scrolling — important on mobile where 4 sub-pills
+ * (e.g. Staff · Crews · Permission Groups · Insights) would otherwise overflow.
+ *
  * Props:
  *  - pills: [{ id, label, icon?, badge?, count? }]
  *  - active: active pill id
@@ -17,7 +21,7 @@ import React from 'react';
 export default function SubPills({ pills = [], active, onChange }) {
   if (!pills || pills.length <= 1) return null;
   return (
-    <div className="relative bg-gradient-to-b from-slate-50/90 to-[#2E5A1A]/[0.04] backdrop-blur-md rounded-2xl border border-[#2E5A1A]/12 shadow-[inset_0_1px_3px_rgba(46,90,26,0.08)] p-1.5 flex gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="relative bg-gradient-to-b from-slate-50/90 to-[#2E5A1A]/[0.04] backdrop-blur-md rounded-2xl border border-[#2E5A1A]/12 shadow-[inset_0_1px_3px_rgba(46,90,26,0.08)] p-1.5 flex flex-wrap gap-1">
       {pills.map(p => {
         const Icon = p.icon;
         const isActive = active === p.id;
@@ -26,7 +30,7 @@ export default function SubPills({ pills = [], active, onChange }) {
             key={p.id}
             onClick={() => onChange(p.id)}
             type="button"
-            className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
+            className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex-1 sm:flex-none justify-center sm:justify-start whitespace-nowrap active:scale-[0.97] ${
               isActive
                 ? 'bg-gradient-to-br from-[#8DC63F] to-[#6fa828] text-[#1c4a12] shadow-sm shadow-emerald-500/30 ring-1 ring-[#8DC63F]/40'
                 : 'text-slate-500 hover:bg-white/70 hover:text-[#2E5A1A]'
