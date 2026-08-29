@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Job this log entry belongs to"
     },
+    "division_id": {
+      "type": "string",
+      "description": "The division this log belongs to (inherited from the job's division). Drives division-scoped RLS."
+    },
     "assignment_id": {
       "type": "string",
       "description": "RotaAssignment this log was recorded from (optional)"
@@ -489,7 +493,24 @@
         }
       ]
     },
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
