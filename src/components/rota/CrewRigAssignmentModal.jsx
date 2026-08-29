@@ -78,13 +78,20 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
   const drillingTeamIds = useMemo(() => {
     const ids = new Set();
     (teams || []).forEach(t => {
-      if (t.job_type === 'cp_drilling' || t.job_type === 'rotary_drilling') ids.add(t.id);
+      if (['drilling', 'cp_drilling', 'rotary_drilling'].includes(t.job_type)) ids.add(t.id);
     });
     return ids;
   }, [teams]);
 
+  // Drillers are identified by team membership OR job title — staff aren't
+  // always linked to a drilling team via team_id, so fall back to job_title
+  // matching (Cable Percussion Driller, Rotary Driller, Lead Driller, etc.)
+  const isDriller = (s) =>
+    drillingTeamIds.has(s.team_id) ||
+    /\b(driller|lead driller|second man)\b/i.test(s.job_title || '');
+
   const drillers = useMemo(
-    () => sortAZ((staff || []).filter(s => drillingTeamIds.has(s.team_id)), 'name'),
+    () => sortAZ((staff || []).filter(s => s.is_active !== false && isDriller(s)), 'name'),
     [staff, drillingTeamIds]
   );
 
@@ -155,7 +162,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
     if (!canCreate) return;
     setSaving(true);
     try {
-      const pairingId = genPairingId();
+      const newPairingId = genPairingId();
       const leadDivision = staff.find(s => s.id === leadId)?.division_id || '';
       const secondDivision = staff.find(s => s.id === secondId)?.division_id || '';
       const assignments = [];
@@ -168,7 +175,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
             division_id: m.div,
             assigned_date: dateStr,
             rig_asset_id: rigId,
-            crew_pairing_id: pairingId,
+            crew_pairing_id: newPairingId,
             crew_role: m.role,
             week_start: computeWeekStart(dateStr),
             start_time: '08:00',
