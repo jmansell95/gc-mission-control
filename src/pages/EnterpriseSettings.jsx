@@ -48,10 +48,17 @@ export default function EnterpriseSettings() {
   const { data: stats } = useQuery({
     queryKey: ['enterprise-settings-stats'],
     queryFn: async () => {
-      try {
-        const res = await base44.functions.invoke('getEnterpriseStats');
-        return res.data?.globalStats || null;
-      } catch { return null; }
+      const [divisions, snapshots] = await Promise.all([
+        base44.entities.Division.list('-sort_order', 500),
+        base44.entities.DivisionSnapshot.list('-created_date', 500),
+      ]);
+      const parentIds = new Set(divisions.filter(d => d.parent_division_id).map(d => d.parent_division_id));
+      return {
+        businessUnits: divisions.filter(d => !d.parent_division_id && parentIds.has(d.id)).length,
+        divisions: divisions.length,
+        activeDivisions: divisions.filter(d => d.status === 'active').length,
+        snapshots: snapshots.length,
+      };
     },
     staleTime: 60000,
   });
