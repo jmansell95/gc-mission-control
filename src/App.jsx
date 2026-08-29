@@ -51,7 +51,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import SetupAccount from './pages/SetupAccount';
 import OAuthConsent from './pages/OAuthConsent';
-import SubcontractorOnboarding from './pages/SubcontractorOnboarding';
 import { StaffAssistantProvider } from '@/components/StaffAssistantChat';
 import { GlobalScannerProvider } from '@/contexts/GlobalScannerContext';
 import { SchedulingAssistantProvider } from '@/components/SchedulingAssistantChat';
@@ -68,7 +67,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
   useJobRealtimeSync();
 
-  const isClientPortalRoute = window.location.pathname.includes('/client-portal/') || window.location.pathname.includes('/subcontractor-onboarding/');
+  const isClientPortalRoute = window.location.pathname.includes('/client-portal/');
 
   // Skip auth checks for public client portal routes
   if (!isClientPortalRoute && (isLoadingPublicSettings || isLoadingAuth)) {
@@ -154,7 +153,6 @@ const AuthenticatedApp = () => {
           <Route path="/asset-inventory" element={<Navigate to="/assets" replace />} />
         </Route>
         <Route path="/client-portal/:token" element={<ClientPortal />} />
-        <Route path="/subcontractor-onboarding/:token" element={<SubcontractorOnboarding />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
         </DivisionProvider>
