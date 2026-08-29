@@ -61,6 +61,8 @@ import RouteLoadingOverlay from '@/components/RouteLoadingOverlay';
 import AppBaseUrlSync from '@/components/AppBaseUrlSync';
 import AssetScannerPage from './pages/AssetScannerPage';
 import KioskScannerRedirect from '@/components/KioskScannerRedirect';
+import MobileFieldRedirect from '@/components/MobileFieldRedirect';
+import MobileFieldShell from '@/components/MobileFieldShell';
 import useJobRealtimeSync from '@/hooks/useJobRealtimeSync';
 
 const AuthenticatedApp = () => {
@@ -105,12 +107,19 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
+          <Route path="/scanner" element={<MobileFieldRedirect><RouteGuard><AssetScannerPage /></RouteGuard></MobileFieldRedirect>} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
           {/* Staff pages — full-screen, no admin header bar; they render their own mobile-first headers */}
-          <Route path="/staff-schedule" element={<RouteGuard><StaffDashboard /></RouteGuard>} />
-          <Route path="/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
-          <Route path="/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
+          <Route path="/staff-schedule" element={<MobileFieldRedirect><RouteGuard><StaffDashboard /></RouteGuard></MobileFieldRedirect>} />
+          <Route path="/staff-profile" element={<MobileFieldRedirect><RouteGuard><StaffProfile /></RouteGuard></MobileFieldRedirect>} />
+          <Route path="/deliveries" element={<MobileFieldRedirect><RouteGuard><DeliveryDashboard /></RouteGuard></MobileFieldRedirect>} />
+          {/* Mobile field crew routes — dedicated /m/ tree for phones, full-screen shell */}
+          <Route element={<MobileFieldShell />}>
+            <Route path="/m/staff-schedule" element={<RouteGuard><StaffDashboard /></RouteGuard>} />
+            <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
+            <Route path="/m/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
+            <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
+          </Route>
           <Route path="/help" element={<HelpGuide />} />
           <Route path="/enterprise" element={<RouteGuard><EnterpriseDashboard /></RouteGuard>} />
           <Route path="/enterprise/business-unit/:id" element={<RouteGuard><BusinessUnitPage /></RouteGuard>} />
@@ -139,7 +148,6 @@ const AuthenticatedApp = () => {
             <Route path="/contacts" element={<Navigate to="/staff" replace />} />
             <Route path="/audit" element={<Navigate to="/compliance" replace />} />
             <Route path="/price-list" element={<Navigate to="/billing" replace />} />
-            <Route path="/reports" element={<Navigate to="/billing" replace />} />
             <Route path="/vehicles" element={<Navigate to="/fleet" replace />} />
             <Route path="/import" element={<Navigate to="/admin" replace />} />
             <Route path="/automations" element={<Navigate to="/admin" replace />} />
