@@ -66,10 +66,6 @@ export default function StaffProfile() {
   const [savingAbsence, setSavingAbsence] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
 
-  // When opened with location.state.staffId (from the Training Matrix or
-  // another manager view), load THAT crew member's profile instead of the
-  // logged-in user's own profile. Falls back to getMyStaffProfile when no
-  // staffId is passed (self-view).
   const targetStaffId = location.state?.staffId || null;
   const viewingOther = !!targetStaffId;
 
@@ -166,16 +162,16 @@ export default function StaffProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen page-bg-vibrant">
-        <div className="w-12 h-12 border-4 border-emerald-200 border-t-emerald-600 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen" style={{ background: '#f8faf9' }}>
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!staff) {
     return (
-      <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
-        <div className="text-center max-w-sm">
+      <div className="flex items-center justify-center min-h-screen px-6" style={{ background: '#f8faf9' }}>
+        <div className="text-center max-w-sm bg-white rounded-3xl shadow-sm p-8">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
             <HardHat className="w-7 h-7 text-slate-400" />
           </div>
@@ -200,7 +196,7 @@ export default function StaffProfile() {
       onBack={() => navigate(-1)}
       actions={
         <button onClick={() => setShowEditDrawer(true)} type="button"
-          className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition active:scale-95 touch-manipulation">
+          className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center transition active:scale-95 touch-manipulation hover:shadow-md">
           <UserCog className="w-4 h-4 text-slate-600" />
         </button>
       }
@@ -208,107 +204,116 @@ export default function StaffProfile() {
       <DivisionIdentityBar />
       <RedAlertBanner />
 
-      {/* ── Vibrant Hero ── */}
-      <div className="relative overflow-hidden">
-        <div className="hero-gradient relative px-4 md:px-6 pt-5 pb-6 text-white shadow-lg">
-          <div className="absolute -top-12 -right-10 w-44 h-44 rounded-full bg-yellow-300/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-emerald-300/10 blur-3xl pointer-events-none" />
-          <div className="relative max-w-4xl mx-auto">
+      {/* ── Clean Canvas: soft off-white background, white cards ── */}
+      <div style={{ background: '#f8faf9' }}>
+        {/* Compact white hero card */}
+        <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4">
+          <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
             <div className="flex items-center gap-4">
               <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={64} />
               <div className="min-w-0 flex-1">
-                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight break-words">{staff.name}</h1>
-                <p className="text-emerald-100 text-sm font-medium mt-0.5">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight break-words">{staff.name}</h1>
+                <p className="text-slate-500 text-sm font-medium mt-0.5">
                   {roleLabel || staff.team?.name || 'Crew Member'}
-                  {staff.team?.name ? ` · ${staff.team.name}` : ''}
                 </p>
               </div>
             </div>
 
-            {/* Quick actions */}
+            {/* Quick action pills */}
             <div className="flex flex-wrap items-center gap-2 mt-4">
               {canAccessAdmin && (
                 <button onClick={() => navigate('/admin')} type="button"
-                  className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-[#1c4a12]">
                   <LayoutDashboard className="w-4 h-4" /> Admin
                 </button>
               )}
               {!viewingOther && (<>
               <button onClick={() => setShowAbsenceForm(true)} type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-slate-200">
                 <CalendarPlus className="w-4 h-4" /> Time Off
               </button>
               {reporters.length > 0 && (
                 <button onClick={() => setShowApprovals(true)} type="button"
-                  className="relative flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-slate-200">
                   <ClipboardCheck className="w-4 h-4" /> Approvals
                   {pendingCount > 0 && <span className="min-w-[20px] h-5 px-1.5 bg-amber-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center">{pendingCount}</span>}
                 </button>
               )}
               <button onClick={openChat} type="button"
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/15 ring-1 ring-white/20 text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 backdrop-blur-sm hover:bg-white/25">
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-slate-200">
                 <Sparkles className="w-4 h-4" /> Assistant
               </button>
               </>)}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Stats + Tabs + Content ── */}
-      <div className="max-w-4xl mx-auto px-4 md:px-6" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
-        {/* Quick Stats */}
-        <div className="-mt-4 relative z-10">
+        {/* Quick Stats — 2x2 grid of white cards */}
+        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
           <ProfileStats staffId={staff.id} jobType={staff.team?.job_type} />
         </div>
 
-        {/* Tab Bar — wraps on mobile, grid on desktop */}
-        <div className="mt-5 pt-3 pb-2">
-          <div className="flex flex-wrap md:grid md:grid-cols-5 gap-1.5">
-            {TABS.map(tab => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.key;
-              const disabled = tab.key === 'crew' && !staff.team_id;
-              return (
-                <button key={tab.key} onClick={() => !disabled && setActiveTab(tab.key)} type="button" disabled={disabled}
-                  className={`flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation ${
-                    isActive ? 'command-gradient text-white shadow-md' :
-                    disabled ? 'bg-slate-100/60 text-slate-300' :
-                    'bg-white/70 backdrop-blur-sm text-slate-600 ring-1 ring-slate-200/70 hover:bg-white'
-                  }`}>
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="leading-tight">{tab.label}</span>
-                </button>
-              );
-            })}
+        {/* Scrollable single-line tab bar */}
+        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-5">
+          <div className="md:grid md:grid-cols-5 md:gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar md:contents">
+              {TABS.map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.key;
+                const disabled = tab.key === 'crew' && !staff.team_id;
+                return (
+                  <button key={tab.key} onClick={() => !disabled && setActiveTab(tab.key)} type="button" disabled={disabled}
+                    className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation flex-shrink-0 whitespace-nowrap ${
+                      isActive ? 'bg-[#2E5A1A] text-white shadow-sm' :
+                      disabled ? 'bg-slate-100 text-slate-300' :
+                      'bg-white text-slate-600 shadow-sm hover:bg-slate-50'
+                    }`}>
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="leading-tight">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Tab Content — sits directly on the page background, no white wrapper */}
-        <div className="mt-4">
+        {/* Tab Content — white rounded cards on off-white background */}
+        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
           {activeTab === 'performance' && (staff.id
-            ? <div className="space-y-5">
-                <StaffPerformanceCard staffId={staff.id} />
-                <StaffPerformanceCharts staffId={staff.id} staffName={staff.name} />
+            ? <div className="space-y-4">
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <StaffPerformanceCard staffId={staff.id} />
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <StaffPerformanceCharts staffId={staff.id} staffName={staff.name} />
+                </div>
               </div>
             : <NoCrewProfileState tab="performance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'earnings' && (staff.id
-            ? <div className="space-y-5">
-                <IncentiveDashboard staffId={staff.id} staffName={staff.name} teamId={staff.team_id} />
-                <RewardsCatalogue staffId={staff.id} staffName={staff.name} />
+            ? <div className="space-y-4">
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <IncentiveDashboard staffId={staff.id} staffName={staff.name} teamId={staff.team_id} />
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <RewardsCatalogue staffId={staff.id} staffName={staff.name} />
+                </div>
               </div>
             : <NoCrewProfileState tab="earnings" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'timesheets' && (staff.id ? (
-            <div className="space-y-5">
-              <StaffWeeklySignCard staffId={staff.id} staffName={staff.name} />
-              <TimesheetHistory staffId={staff.id} />
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <StaffWeeklySignCard staffId={staff.id} staffName={staff.name} />
+              </div>
+              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <TimesheetHistory staffId={staff.id} />
+              </div>
               {upcomingAbsences.length > 0 && (
-                <div className="insight-card rounded-2xl p-4 md:p-5">
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                       <Clock className="w-4 h-4 text-amber-600" />
                     </div>
-                    <h2 className="text-sm font-extrabold text-slate-900">Upcoming Time Off</h2>
+                    <h2 className="text-sm font-bold text-slate-900">Upcoming Time Off</h2>
                   </div>
                   <div className="space-y-2">
                     {upcomingAbsences.map(a => (
@@ -327,25 +332,31 @@ export default function StaffProfile() {
                   </div>
                 </div>
               )}
-              <div className="insight-card rounded-2xl p-4 md:p-5">
+              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
                 <div className="flex items-center gap-2.5 mb-3">
                   <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                     <Wrench className="w-4 h-4 text-amber-600" />
                   </div>
-                  <h2 className="text-sm font-extrabold text-slate-900">Bookings History</h2>
+                  <h2 className="text-sm font-bold text-slate-900">Bookings History</h2>
                 </div>
                 <StaffBookings staffId={staff.id} />
               </div>
             </div>
           ) : <NoCrewProfileState tab="timesheets" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'compliance' && (staff.id
-            ? <div className="space-y-5">
-                <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin || isPlatformAdmin} />
-                <ComplianceWallet staffId={staff.id} staffName={staff.name} />
+            ? <div className="space-y-4">
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin || isPlatformAdmin} />
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                  <ComplianceWallet staffId={staff.id} staffName={staff.name} />
+                </div>
               </div>
             : <NoCrewProfileState tab="compliance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'crew' && (staff.team_id
-            ? <TeamMiniFeed teamId={staff.team_id} currentStaffId={staff.id} />
+            ? <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <TeamMiniFeed teamId={staff.team_id} currentStaffId={staff.id} />
+              </div>
             : <NoCrewProfileState tab="crew" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
         </div>
       </div>
@@ -402,7 +413,7 @@ export default function StaffProfile() {
                   className="w-full px-3 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-emerald-600 resize-none" />
               </div>
               <button onClick={handleSaveAbsence} disabled={savingAbsence || !absenceForm.start_date || !absenceForm.end_date}
-                className="w-full px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-sm font-semibold disabled:opacity-50 touch-manipulation active:scale-95">
+                className="w-full px-4 py-3 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold disabled:opacity-50 touch-manipulation active:scale-95">
                 {savingAbsence ? 'Submitting…' : 'Submit Request'}
               </button>
             </div>

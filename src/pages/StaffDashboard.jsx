@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, CheckCircle2, UserCircle, ShieldCheck, AlertTriangle, Truck, HelpCircle, ScanLine, Package, LayoutDashboard } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, CheckCircle2, UserCircle, ShieldCheck, AlertTriangle, Truck, HelpCircle, ScanLine, Package, LayoutDashboard, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, isFuture, isPast } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -40,6 +40,7 @@ import OfflineBanner from '@/components/field/OfflineBanner';
 import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
+import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 
 
 export default function StaffDashboard() {
@@ -82,6 +83,8 @@ export default function StaffDashboard() {
   const [activeTab, setActiveTab] = useState('today');
   const [showComplianceAlert, setShowComplianceAlert] = useState(false);
   const [showRigScanner, setShowRigScanner] = useState(false);
+  const [showSafetyChecklist, setShowSafetyChecklist] = useState(false);
+  const [safetyChecklistAssignment, setSafetyChecklistAssignment] = useState(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -602,6 +605,27 @@ export default function StaffDashboard() {
           {/* KeyLogBook afternoon prompt — drillers only */}
           <KeyLogBookPromptBanner staff={staff} />
 
+          {/* Pre-Work Safety Checklist — Start My Day button */}
+          {staff?.id && !staff?.is_admin && nextTodayAssignment && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (
+            <button
+              onClick={() => {
+                setSafetyChecklistAssignment(nextTodayAssignment);
+                setShowSafetyChecklist(true);
+              }}
+              type="button"
+              className="w-full flex items-center gap-3 bg-gradient-to-r from-[#2E5A1A] to-[#1c4a12] rounded-2xl px-4 py-4 text-white active:scale-95 transition touch-manipulation shadow-lg shadow-[#2E5A1A]/25 glow-brand"
+            >
+              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-6 h-6 text-white" strokeWidth={2.5} />
+              </div>
+              <div className="text-left min-w-0 flex-1">
+                <p className="text-sm font-bold leading-tight">Start My Day — Safety Checks</p>
+                <p className="text-[11px] text-white/75 truncate font-medium">Vehicle check · {/driller/i.test(staff?.job_title || '') ? 'Plant check · ' : ''}POWRA before you start</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-white/70 flex-shrink-0" />
+            </button>
+          )}
+
           {/* Consolidated alert — single line */}
           <StaffAlerts isOnline={isOnline} staff={staff} />
 
@@ -955,6 +979,24 @@ export default function StaffDashboard() {
           rigs={rigs}
           allStaff={allStaff}
           onSignIn={handleRigSignIn}
+        />
+      )}
+
+      {/* Pre-Work Safety Checklist — full-screen progressive gate modal */}
+      {showSafetyChecklist && safetyChecklistAssignment && (
+        <PreWorkSafetyChecklist
+          open={showSafetyChecklist}
+          onClose={() => { setShowSafetyChecklist(false); setSafetyChecklistAssignment(null); }}
+          assignment={safetyChecklistAssignment}
+          job={jobs.find(j => j.id === safetyChecklistAssignment?.job_id)}
+          staff={staff}
+          isDriller={/driller/i.test(staff?.job_title || '')}
+          onComplete={() => {
+            setShowSafetyChecklist(false);
+            setSafetyChecklistAssignment(null);
+            // Open the existing ShiftWizard at the arrive step
+            handleOpenShiftWizard(safetyChecklistAssignment.id);
+          }}
         />
       )}
 
