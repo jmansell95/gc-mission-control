@@ -86,12 +86,13 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
   // Drillers are identified by team membership OR job title — staff aren't
   // always linked to a drilling team via team_id, so fall back to job_title
   // matching (Cable Percussion Driller, Rotary Driller, Lead Driller, etc.)
-  const isDriller = (s) =>
-    drillingTeamIds.has(s.team_id) ||
-    /\b(driller|lead driller|second man)\b/i.test(s.job_title || '');
-
   const drillers = useMemo(
-    () => sortAZ((staff || []).filter(s => s.is_active !== false && isDriller(s)), 'name'),
+    () => sortAZ((staff || []).filter(s =>
+      s.is_active !== false && (
+        drillingTeamIds.has(s.team_id) ||
+        /\b(driller|lead driller|second man)\b/i.test(s.job_title || '')
+      )
+    ), 'name'),
     [staff, drillingTeamIds]
   );
 
