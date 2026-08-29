@@ -46,7 +46,7 @@ export default function EnterpriseSettings() {
 
   // Enterprise-level stats for the informative header strip
   const { data: stats } = useQuery({
-    queryKey: ['enterprise-settings-stats'],
+    queryKey: ['enterprise-settings-stats-v2'],
     queryFn: async () => {
       const [divisions, snapshots] = await Promise.all([
         base44.entities.Division.list('-sort_order', 500),
@@ -60,7 +60,7 @@ export default function EnterpriseSettings() {
         snapshots: snapshots.length,
       };
     },
-    staleTime: 60000,
+    staleTime: 30000,
   });
 
   const renderTab = () => {
