@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ScanLine, Package, CheckCircle2, AlertTriangle,
   Lock, Unlock, ArrowLeft, Layers, Store, PackageOpen,
-  Wrench, ShieldCheck, Undo2, Barcode,
+  Wrench, ShieldCheck, Undo2, Barcode, ClipboardList,
 } from 'lucide-react';
 import UnifiedScanBasket from '@/components/assetcommand/UnifiedScanBasket';
 import AssetCommandDrawer from '@/components/assetcommand/AssetCommandDrawer';
@@ -21,6 +21,7 @@ import GoodsInDeliveryNote from '@/components/assetcommand/GoodsInDeliveryNote';
 import ConsumableUsageModal from '@/components/assetcommand/ConsumableUsageModal';
 import SiteCollectMode from '@/components/logistics/SiteCollectMode';
 import SiteCollectionScanner from '@/components/logistics/SiteCollectionScanner';
+import ScannerPickListsMode from '@/components/assetcommand/ScannerPickListsMode';
 import { enableKioskScannerMode, disableKioskScannerMode, isKioskScannerMode } from '@/utils/kioskMode';
 import { playSuccess, playError, playConfirm } from '@/utils/scanFeedback';
 import { useToast } from '@/components/ui/use-toast';
@@ -374,6 +375,10 @@ export default function AssetScannerPage() {
     return <GoodsInDeliveryNote onBack={() => setMode('assets')} />;
   }
 
+  if (mode === 'pick-lists') {
+    return <ScannerPickListsMode onBack={() => setMode('assets')} />;
+  }
+
   if (mode === 'site-collect') {
     return (
       <>
@@ -445,6 +450,12 @@ export default function AssetScannerPage() {
           className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'assets' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
         >
           <ScanLine className="w-3.5 h-3.5" /> Assets
+        </button>
+        <button
+          onClick={() => setMode('pick-lists')}
+          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'pick-lists' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
+        >
+          <ClipboardList className="w-3.5 h-3.5" /> Pick Lists
         </button>
         {isHubAdmin && (
           <button
