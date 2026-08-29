@@ -345,6 +345,7 @@ export default function PeopleDirectory() {
                           key={profile.id}
                           profile={profile}
                           onOpenMember={(s) => setEditing(s)}
+                          onOpenPermissions={(s) => setPermissionStaff(s)}
                         />
                       ))
                     )}
@@ -396,7 +397,7 @@ export default function PeopleDirectory() {
           {expandedType === '__unassigned' && (
             <div className="border-t border-slate-100 bg-slate-50/30 px-4 py-3 space-y-1.5">
               {staffByTeam['__unassigned'].map((s) => (
-                <MemberRow key={s.id} member={s} onClick={() => setEditing(s)} />
+                <MemberRow key={s.id} member={s} onClick={() => setEditing(s)} onOpenPermissions={() => setPermissionStaff(s)} />
               ))}
             </div>
           )}
@@ -411,12 +412,17 @@ export default function PeopleDirectory() {
         teams={teams}
         onSaved={refresh}
       />
+
+      {/* Quick permission popup */}
+      {permissionStaff && (
+        <StaffPermissionPopup staff={permissionStaff} onClose={() => setPermissionStaff(null)} />
+      )}
     </div>
   );
 }
 
 /** Crew Profile card — Level 2, with members listed underneath (Level 3). */
-function CrewProfileCard({ profile, onOpenMember }) {
+function CrewProfileCard({ profile, onOpenMember, onOpenPermissions }) {
   const [open, setOpen] = useState(true);
 
   const profileIcon = () => {
@@ -455,7 +461,7 @@ function CrewProfileCard({ profile, onOpenMember }) {
       {open && (
         <div className="border-t border-slate-100 px-2 py-1.5 space-y-0.5">
           {profile.members.map((m) => (
-            <MemberRow key={m.id} member={m} onClick={() => onOpenMember(m)} />
+            <MemberRow key={m.id} member={m} onClick={() => onOpenMember(m)} onOpenPermissions={() => onOpenPermissions(m)} />
           ))}
           {profile.members.length === 0 && (
             <p className="text-xs text-slate-400 text-center py-2">No members yet.</p>
@@ -467,13 +473,13 @@ function CrewProfileCard({ profile, onOpenMember }) {
 }
 
 /** Single member row — Level 3. */
-function MemberRow({ member, onClick }) {
+function MemberRow({ member, onClick, onOpenPermissions }) {
   const linked = !!member.user_id;
   const initials = (member.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   return (
-    <button
+    <div
       onClick={onClick}
-      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-50 transition group text-left"
+      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-50 transition group text-left cursor-pointer"
     >
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-[10px] overflow-hidden">
         {member.avatar_url ? <img src={member.avatar_url} alt={member.name} className="w-full h-full object-cover" /> : initials}
@@ -496,7 +502,16 @@ function MemberRow({ member, onClick }) {
           <ShieldOff className="w-3 h-3" /> No login
         </span>
       )}
+      {onOpenPermissions && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onOpenPermissions(); }}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 hover:bg-[#2E5A1A] hover:text-white text-slate-600 text-[10px] font-semibold transition flex-shrink-0"
+          title="Manage permissions"
+        >
+          <KeyRound className="w-3 h-3" /> Access
+        </button>
+      )}
       <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition flex-shrink-0" />
-    </button>
+    </div>
   );
 }
