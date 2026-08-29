@@ -4,9 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
-import { Save, Loader2, UserCog, Mail, Phone, Briefcase, Users, Calendar, Hash, Shield, ShieldCheck, Truck, Bell, Camera, Trash2 } from 'lucide-react';
+import { Save, Loader2, UserCog, Mail, Phone, Briefcase, Users, Calendar, Hash, Shield, ShieldCheck, Truck, Bell, Camera, Trash2, KeyRound } from 'lucide-react';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import ImageCropper from '@/components/ImageCropper';
+import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 
 /**
  * Full admin editor for a crew (Staff) profile — all fields editable.
@@ -18,11 +19,14 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
   const [saving, setSaving] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showPermissionPopup, setShowPermissionPopup] = useState(false);
 
   const { data: permissionGroups = [] } = useQuery({
     queryKey: ['permission-groups'],
     queryFn: () => base44.entities.PermissionGroup.list(),
   });
+
+  const currentGroupName = permissionGroups.find((g) => g.id === staff?.permission_group_id)?.name || '';
 
   useEffect(() => {
     if (staff) {
@@ -61,7 +65,6 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
         team_id: form.team_id,
         date_of_birth: form.date_of_birth || null,
         ni_number: form.ni_number,
-        permission_group_id: form.permission_group_id || null,
         delivery_dashboard_enabled: form.delivery_dashboard_enabled,
         email_notifications_enabled: form.email_notifications_enabled,
         is_active: form.is_active,
@@ -179,12 +182,24 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
                 {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             </Field>
-            <Field icon={Shield} label="Access Level">
-              <select value={form.permission_group_id} onChange={(e) => set('permission_group_id', e.target.value)} className={inputCls}>
-                <option value="">— Inherit from team —</option>
-                {permissionGroups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select>
-            </Field>
+          </div>
+
+          {/* Permissions — managed on the dedicated Access Levels page */}
+          <div className="insight-card rounded-xl p-4">
+            <div className="flex items-center gap-2.5 mb-2">
+              <Shield className="w-4 h-4 text-[#2E5A1A]" />
+              <p className="text-sm font-semibold text-slate-700">Permissions</p>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">
+              {currentGroupName ? `Currently in "${currentGroupName}".` : 'No permission group assigned yet.'} Access is managed on the dedicated Access Levels page.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowPermissionPopup(true)}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition"
+            >
+              <KeyRound className="w-3.5 h-3.5" /> Manage Permissions
+            </button>
           </div>
 
           {/* Sensitive (admin-only) */}
@@ -222,6 +237,10 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           <ImageCropper imageSrc={avatarSrc} aspect={1} onConfirm={handleAvatarCropConfirm} onCancel={() => setAvatarSrc(null)} title="Crop Profile Photo" />
         )}
       </SheetContent>
+
+      {showPermissionPopup && (
+        <StaffPermissionPopup staff={staff} onClose={() => setShowPermissionPopup(false)} />
+      )}
     </Sheet>
   );
 }

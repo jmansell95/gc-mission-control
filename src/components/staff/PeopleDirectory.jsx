@@ -3,10 +3,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import CrewProfileEditorDrawer from '@/components/staff/CrewProfileEditorDrawer';
+import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Users, Search, ChevronDown, ChevronRight, Plus, ShieldCheck, ShieldOff,
   GitBranch, HardHat, UserCircle, Loader2, UserPlus, Link2, AlertTriangle,
-  Wrench, Truck, Layers,
+  Wrench, Truck, Layers, KeyRound,
 } from 'lucide-react';
 import { TEAM_CATEGORIES } from '@/utils/teamAccess';
 import { formatWorkerType } from '@/utils/format';
@@ -30,6 +31,7 @@ export default function PeopleDirectory() {
   const [expandedType, setExpandedType] = useState(null);
   const [editing, setEditing] = useState(null);
   const [actioningId, setActioningId] = useState(null);
+  const [permissionStaff, setPermissionStaff] = useState(null);
 
   const { data: teams = [], isLoading: teamsLoading } = useQuery({
     queryKey: ['teams'],

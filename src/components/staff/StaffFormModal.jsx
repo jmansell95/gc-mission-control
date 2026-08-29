@@ -6,8 +6,7 @@ import { useConfigLists } from '@/hooks/useConfigLists';
 import { useAuth } from '@/lib/AuthContext';
 import { useDivision } from '@/contexts/DivisionContext';
 import FormModal from '@/components/ui/FormModal';
-import { Mail, Bell, Truck, ShieldCheck, MapPin, KeyRound, LogIn, Compass, Monitor, HardHat } from 'lucide-react';
-import { resolveRoleLandingPage } from '@/utils/access';
+import { Mail, Bell, Truck, ShieldCheck, MapPin } from 'lucide-react';
 
 /**
  * StaffFormModal — standardised popup for creating/editing a crew member.
@@ -72,30 +71,15 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     setSaving(true);
     try {
       const payload = cleanPayload(form);
-      // Auto-derive system_role and landing page from the permission group
-      const grp = permissionGroups.find(g => g.id === form.permission_group_id);
-      if (grp) {
-        if (grp.staff_type === 'field') {
-          payload.system_role = 'field';
-        } else {
-          const perms = grp.permissions || {};
-          payload.system_role = perms.settings === 'write' ? 'admin' : 'user';
-        }
-        if (grp.landing_page && grp.landing_page !== 'auto') {
-          payload.default_landing_page = grp.landing_page;
-        } else if (grp.staff_type === 'office') {
-          payload.default_landing_page = '/admin';
-        } else {
-          payload.default_landing_page = '/staff-schedule';
-        }
-      }
-      // Set division_id from the selected business stream (fallback to team's division)
+      // Access (permission group + business stream) is now managed on the
+      // dedicated Access Levels page. Inherit division_id from the selected
+      // crew's team so RLS scoping still works for new staff.
       if (!payload.division_id && payload.team_id) {
         const selectedTeam = teams.find(t => t.id === payload.team_id);
         if (selectedTeam?.division_id) payload.division_id = selectedTeam.division_id;
       }
-      if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id || !payload.division_id || !payload.permission_group_id) {
-        toast({ title: 'Missing required fields', description: 'Name, email, worker type, crew, business stream and permission group are all required.', variant: 'destructive' });
+      if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id) {
+        toast({ title: 'Missing required fields', description: 'Name, email, worker type and crew are required.', variant: 'destructive' });
         setSaving(false);
         return;
       }
@@ -236,61 +220,6 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               <input type="text" value={form.ni_number || ''} onChange={e => set('ni_number', e.target.value.toUpperCase())} placeholder="AB123456C" className={`${inputCls} font-mono uppercase`} />
             </div>
           </div>
-        </div>
-
-        {/* Access & Business Stream — two-step permission flow */}
-        <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access & Business Stream</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-2.5">
-            <div>
-              <label className={labelCls}>Business Stream *</label>
-              <select value={form.division_id || ''} onChange={e => set('division_id', e.target.value)} className={inputCls}>
-                <option value="">Select Business Stream</option>
-                {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Permission Group *</label>
-              <select value={form.permission_group_id || ''} onChange={e => set('permission_group_id', e.target.value)} className={inputCls}>
-                <option value="">Select Permission Group</option>
-                <optgroup label="System Groups">
-                  {permissionGroups.filter(g => g.is_system).map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                </optgroup>
-                {permissionGroups.filter(g => !g.is_system).length > 0 && (
-                  <optgroup label="Custom Groups">
-                    {permissionGroups.filter(g => !g.is_system).map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                  </optgroup>
-                )}
-              </select>
-            </div>
-          </div>
-          {/* Live landing-page preview — auto-derived from the permission group */}
-          {(() => {
-            const grp = permissionGroups.find(g => g.id === form.permission_group_id) || null;
-            const div = divisions.find(d => d.id === form.division_id) || null;
-            const route = grp ? (grp.landing_page && grp.landing_page !== 'auto' ? grp.landing_page : grp.staff_type === 'office' ? '/admin' : '/staff-schedule') : '/staff-schedule';
-            const isOffice = route === '/admin';
-            const labels = { '/admin': 'Admin Dashboard', '/staff-schedule': 'My Schedule', '/staff-profile': 'My Profile', '/deliveries': 'Delivery Dashboard', '/scanner': 'Asset Scanner', '/subcontractor': 'Subcontractor Portal' };
-            return (
-              <div className="mt-2.5 flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                <div className={'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ' + (isOffice ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-amber-500 to-orange-600')}>
-                  {isOffice ? <Monitor className="w-4 h-4 text-white" /> : <HardHat className="w-4 h-4 text-white" />}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <Compass className="w-3.5 h-3.5 text-[#2E5A1A]" /> Lands on: {labels[route] || route}
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    {grp ? `Set by the "${grp.name}" group` : 'Select a permission group to determine landing page'}
-                    {div && ` · ${div.name} stream`}
-                  </p>
-                </div>
-                {div && (
-                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: div.color || '#2E5A1A' }} title={div.name} />
-                )}
-              </div>
-            );
-          })()}
         </div>
 
         {/* Notifications */}

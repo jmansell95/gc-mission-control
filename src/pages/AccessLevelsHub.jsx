@@ -1,149 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import {
-  KeyRound, Plus, Users, Building2, Crown, Search, Lock,
+  KeyRound, Building2, Users, ShieldCheck,
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import { useToast } from '@/components/ui/use-toast';
 import { useDivision } from '@/contexts/DivisionContext';
 import HubShell from '@/components/HubShell';
-import {
-  SYSTEM_GROUPS, defaultPermissions, normalizePermissions,
-} from '@/utils/permissions';
-import AccessGroupEditor from '@/components/settings/access/AccessGroupEditor';
-import UnifiedCrewAccessList from '@/components/settings/access/UnifiedCrewAccessList';
+import StaffAssignmentPanel from '@/components/access/StaffAssignmentPanel';
+import PermissionGroupsPopup from '@/components/access/PermissionGroupsPopup';
 
 /**
  * Access Levels Hub — division-scoped access management.
  *
- * Replaces the old enterprise-wide Access Levels tab. The admin picks a
- * business stream (via the DivisionSwitcher in the sidebar) and this hub
- * scopes permission groups, lockdown overrides, and crew assignments to
- * that single business stream.
+ * Mobile-first single page with two concerns:
+ *  1. Staff assignment — pick a staff member, assign a permission group.
+ *  2. Permission Groups popup — create / edit / delete custom groups.
+ *
+ * The admin picks a business stream via the DivisionSwitcher in the sidebar;
+ * the staff list and group dropdowns scope to that single business stream.
+ * A focusStaffId prop (passed from the Staff Hub "Permissions" link) auto-
+ * scrolls to and highlights a staff member on load.
  */
-export default function AccessLevelsHub() {
-  const qc = useQueryClient();
-  const { toast } = useToast();
-  const { activeDivision, activeDivisionId, divisions = [] } = useDivision();
-  const [search, setSearch] = useState('');
-  const [selectedGroupId, setSelectedGroupId] = useState(null);
-  const [editing, setEditing] = useState(null);
-
-  const { data: groups = [], isLoading } = useQuery({
-    queryKey: ['permission-groups'],
-    queryFn: async () => (await base44.entities.PermissionGroup.list('-created_date', 200)),
-  });
-  const { data: staff = [] } = useQuery({
-    queryKey: ['staff-access-hub', activeDivisionId],
-    queryFn: async () => {
-      if (!activeDivisionId) return [];
-      return await base44.entities.Staff.filter({ division_id: activeDivisionId }, '-created_date', 5000);
-    },
-    enabled: !!activeDivisionId,
-  });
-  const { data: teams = [] } = useQuery({
-    queryKey: ['teams-access-hub', activeDivisionId],
-    queryFn: async () => {
-      if (!activeDivisionId) return [];
-      return await base44.entities.Team.filter({ division_id: activeDivisionId });
-    },
-    enabled: !!activeDivisionId,
-  });
-  const { data: manifests = [] } = useQuery({
-    queryKey: ['access-manifests-hub', activeDivisionId],
-    queryFn: async () => {
-      if (!activeDivisionId) return [];
-      return await base44.entities.DivisionAccessManifest.filter({ division_id: activeDivisionId });
-    },
-    enabled: !!activeDivisionId,
-  });
-
-  // Backfill landing_page + staff_type on existing system groups (one-time
-  // migration for groups created before these fields existed).
-  const backfillMutation = useMutation({
-    mutationFn: async () => {
-      for (const g of groups) {
-        if (!g.is_system) continue;
-        const sysDef = SYSTEM_GROUPS.find(s => s.name === g.name);
-        if (!sysDef) continue;
-        const patch = {};
-        if (!g.landing_page && sysDef.landing_page) patch.landing_page = sysDef.landing_page;
-        if (!g.staff_type && sysDef.staff_type) patch.staff_type = sysDef.staff_type;
-        if (Object.keys(patch).length > 0) {
-          await base44.entities.PermissionGroup.update(g.id, patch);
-        }
-      }
-    },
-    onSuccess: () => qc.invalidateQueries(['permission-groups']),
-  });
-
-  useEffect(() => {
-    if (groups.length > 0) backfillMutation.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groups.length]);
-
-  // Auto-select first group
-  useEffect(() => {
-    if (!selectedGroupId && groups.length > 0) setSelectedGroupId(groups[0].id);
-  }, [groups, selectedGroupId]);
-
-  // Staff counts per group (within this division)
-  const staffByGroup = useMemo(() => {
-    const m = {};
-    staff.forEach(s => {
-      if (s.permission_group_id) m[s.permission_group_id] = (m[s.permission_group_id] || 0) + 1;
-    });
-    return m;
-  }, [staff]);
-
-  const manifestCountByGroup = useMemo(() => {
-    const m = {};
-    manifests.forEach(man => {
-      if (man.permission_group_id) m[man.permission_group_id] = (m[man.permission_group_id] || 0) + 1;
-    });
-    return m;
-  }, [manifests]);
-
-  const saveMutation = useMutation({
-    mutationFn: async (group) => {
-      const payload = { ...group, permissions: normalizePermissions(group.permissions) };
-      if (group.id) await base44.entities.PermissionGroup.update(group.id, payload);
-      else await base44.entities.PermissionGroup.create(payload);
-    },
-    onSuccess: () => {
-      qc.invalidateQueries(['permission-groups']);
-      toast({ title: 'Permission group saved' });
-      setEditing(null);
-    },
-    onError: (e) => toast({ title: 'Could not save', description: e.message, variant: 'destructive' }),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => { await base44.entities.PermissionGroup.delete(id); },
-    onSuccess: () => {
-      qc.invalidateQueries(['permission-groups']);
-      toast({ title: 'Group deleted' });
-      setSelectedGroupId(null);
-    },
-    onError: (e) => toast({ title: 'Could not delete', description: e.message, variant: 'destructive' }),
-  });
-
-  const handleDelete = (group) => {
-    const count = staffByGroup[group.id] || 0;
-    if (count > 0) {
-      toast({ title: 'Cannot delete group', description: `${count} staff in this business stream are still assigned. Reassign them first.`, variant: 'destructive' });
-      return;
-    }
-    if (confirm(`Delete "${group.name}"? This cannot be undone.`)) deleteMutation.mutate(group.id);
-  };
-
-  const systemGroups = groups.filter(g => g.is_system);
-  const customGroups = groups.filter(g => !g.is_system);
-  const q = search.toLowerCase().trim();
-  const filteredSystem = systemGroups.filter(g => !q || g.name?.toLowerCase().includes(q));
-  const filteredCustom = customGroups.filter(g => !q || g.name?.toLowerCase().includes(q));
-
-  const selectedGroup = groups.find(g => g.id === selectedGroupId);
+export default function AccessLevelsHub({ focusStaffId }) {
+  const { activeDivision, activeDivisionId } = useDivision();
+  const [showGroupsPopup, setShowGroupsPopup] = useState(false);
 
   // No active business stream — prompt the admin to pick one
   if (!activeDivision) {
@@ -151,7 +29,7 @@ export default function AccessLevelsHub() {
       <HubShell
         icon={KeyRound}
         title="Access Levels"
-        subtitle="Manage permission groups and lockdowns per business stream"
+        subtitle="Manage permission groups and staff access per business stream"
       >
         <div className="insight-card rounded-2xl p-10 text-center">
           <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-3" />
@@ -168,55 +46,40 @@ export default function AccessLevelsHub() {
     <HubShell
       icon={KeyRound}
       title="Access Levels"
-      subtitle={`Permission groups & lockdowns · ${activeDivision.name}`}
+      subtitle={`Staff access · ${activeDivision.name}`}
       actions={
         <button
-          onClick={() => setEditing({ name: '', description: '', is_read_only: false, staff_type: 'flexible', landing_page: 'auto', permissions: defaultPermissions() })}
+          onClick={() => setShowGroupsPopup(true)}
           className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm active:scale-95"
         >
-          <Plus className="w-4 h-4" /> New Group
+          <ShieldCheck className="w-4 h-4" /> Permission Groups
         </button>
       }
     >
-      <UnifiedCrewAccessList
-        scopedDivisionId={activeDivisionId}
-        onEditGroup={(g) => setEditing(g)}
-        onDeleteGroup={handleDelete}
-      />
-
-      {editing && (
-        <AccessGroupEditor
-          group={editing}
-          onCancel={() => setEditing(null)}
-          onSave={(g) => saveMutation.mutate(g)}
-          saving={saveMutation.isPending}
-        />
-      )}
-    </HubShell>
-  );
-}
-
-function GroupListItem({ group, active, staffCount, overrideCount, onClick }) {
-  const typeBadge = group.staff_type === 'office'
-    ? { label: 'Office', cls: 'bg-blue-100 text-blue-700' }
-    : group.staff_type === 'field'
-      ? { label: 'Field', cls: 'bg-amber-100 text-amber-700' }
-      : null;
-  return (
-    <button
-      onClick={onClick}
-      className={'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition ' +
-        (active ? 'bg-[#2E5A1A]/10 ring-1 ring-[#2E5A1A]/30' : 'hover:bg-slate-50')}
-    >
-      {group.is_system ? <Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> : <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
-      <div className="min-w-0 flex-1">
-        <p className={'text-xs font-semibold truncate ' + (active ? 'text-[#2E5A1A]' : 'text-slate-700')}>{group.name}</p>
-        <div className="flex items-center gap-2 text-[10px] text-slate-400">
-          {typeBadge && <span className={`px-1.5 py-0.5 rounded-full font-bold ${typeBadge.cls}`}>{typeBadge.label}</span>}
-          {staffCount > 0 && <span className="flex items-center gap-0.5"><Users className="w-2.5 h-2.5" />{staffCount}</span>}
-          {overrideCount > 0 && <span className="flex items-center gap-0.5 text-amber-600"><Lock className="w-2.5 h-2.5" />{overrideCount}</span>}
+      {/* Intro card */}
+      <div className="insight-card rounded-2xl p-4 mb-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm flex-shrink-0">
+            <Users className="w-5 h-5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-sm font-extrabold text-slate-900">Assign staff access</h2>
+            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+              Search for a crew member below and pick their permission group. Use <strong>Permission Groups</strong> to create or edit groups.
+            </p>
+          </div>
         </div>
       </div>
-    </button>
+
+      {/* Staff assignment list */}
+      <StaffAssignmentPanel scopedDivisionId={activeDivisionId} focusStaffId={focusStaffId} />
+
+      {/* Permission Groups popup */}
+      <PermissionGroupsPopup
+        open={showGroupsPopup}
+        onClose={() => setShowGroupsPopup(false)}
+        scopedDivisionId={activeDivisionId}
+      />
+    </HubShell>
   );
 }
