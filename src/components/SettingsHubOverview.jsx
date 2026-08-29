@@ -5,7 +5,7 @@ import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
   Search, Lock, Database, Webhook, Layers, FileSpreadsheet, Briefcase,
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
-  Gift, KeyRound, FileUp, CalendarDays,
+  Gift, FileUp, CalendarDays,
 } from 'lucide-react';
 import IntegrationsOverviewList from '@/components/settings/IntegrationsOverviewList';
 
@@ -60,9 +60,6 @@ export default function SettingsHubOverview({ onNavigate }) {
   const planningJobs = stats?.planningJobs || 0;
 
   const groups = [
-    { group: 'Security & Access', items: [
-      { id: 'access-levels', icon: KeyRound, label: 'Access Levels', value: stats?.permissionGroupsCount || 0, sub: 'Permission groups & lockdowns per stream' },
-    ]},
     { group: 'Ground Investigation', items: [
       { id: 'ags-import', icon: FileUp, label: 'KeyLogBook', value: '—', sub: 'AGS & borehole data sync — webhook, manual upload & pull sync' },
       { id: 'openground-sync', icon: Database, label: 'OpenGround', value: '—', sub: 'Push approved borehole logs to Bentley OpenGround' },

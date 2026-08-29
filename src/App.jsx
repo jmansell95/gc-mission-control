@@ -136,7 +136,6 @@ const AuthenticatedApp = () => {
             <Route path="/pat-testing" element={<RouteGuard><PATTestingConsole /></RouteGuard>} />
             <Route path="/compliance" element={<RouteGuard><HubReadinessGate featureId="compliance"><CompliancePage /></HubReadinessGate></RouteGuard>} />
             <Route path="/billing" element={<RouteGuard><HubReadinessGate featureId="billing"><BillingPage /></HubReadinessGate></RouteGuard>} />
-            <Route path="/access-levels" element={<Navigate to="/admin" state={{ section: 'settings', settingsTab: 'access-levels' }} replace />} />
 
             <Route path="/reports" element={<RouteGuard><HubReadinessGate featureId="reports"><ReportingHub /></HubReadinessGate></RouteGuard>} />
             <Route path="/staff" element={<RouteGuard><HubReadinessGate featureId="staff"><StaffPage /></HubReadinessGate></RouteGuard>} />

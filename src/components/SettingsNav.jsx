@@ -30,12 +30,7 @@ export const settingsGroups = [
   // Enterprise-level items (Divisions, Integrations, Readiness, Backup & Restore) have
   // been moved to Enterprise Settings (/enterprise/settings). They are no longer shown
   // in the division-level settings sidebar to avoid split-brain configuration.
-  {
-    label: 'Security & Access',
-    items: [
-      { id: 'access-levels', label: 'Access Levels', icon: KeyRound, desc: 'Permission groups & lockdowns for this business stream — create groups, assign crews, and override access per division', roles: ['admin'] },
-    ],
-  },
+
   {
     label: 'Ground Investigation',
     items: [

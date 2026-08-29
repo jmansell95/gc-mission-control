@@ -37,7 +37,7 @@ import DailyChecklistManager from '@/components/settings/DailyChecklistManager';
 import ImportDashboard from '@/pages/ImportDashboard';
 import SafetyCultureSettings from '@/components/SafetyCultureSettings';
 import SystemLogicGuide from '@/components/SystemLogicGuide';
-import AccessLevelsHub from '@/pages/AccessLevelsHub';
+
 import ExpensePresetManager from '@/components/settings/ExpensePresetManager';
 import ExpenseDefaultsManager from '@/components/settings/ExpenseDefaultsManager';
 import ConcurSyncSettings from '@/components/settings/ConcurSyncSettings';
@@ -137,7 +137,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'integrations': return <IntegrationsHub onNavigate={setActiveTab} />;
       case 'staff': return <StaffCommand />;
       case 'teams': return <CrewTypeCommand />;
-      case 'access-levels': return <AccessLevelsHub />;
+
       case 'asset-panda': return <AssetPandaSettings />;
       case 'asset-manifests': return <AssetManifestManager />;
       case 'vehicles': return <VehicleManager />;
