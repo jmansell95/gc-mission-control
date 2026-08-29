@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Job this delivery/collection is associated with"
     },
+    "division_id": {
+      "type": "string",
+      "description": "The division this delivery belongs to (inherited from the job's division). Drives division-scoped delivery views and RLS."
+    },
     "job_name": {
       "type": "string",
       "description": "Job name (for display)"
@@ -245,7 +249,21 @@
         "role": "admin"
       }
     },
-    "read": null,
+    "read": {
+      "$or": [
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
     "update": {
       "$or": [
         {
