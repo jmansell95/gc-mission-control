@@ -3,10 +3,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import CrewProfileEditorDrawer from '@/components/staff/CrewProfileEditorDrawer';
+import StaffFormModal from '@/components/staff/StaffFormModal';
 import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Search, Users, Mail, Phone, HardHat, Wrench, UserCog, ShieldCheck,
-  ShieldOff, ChevronRight, KeyRound, UserPlus, Loader2, AlertCircle,
+  ShieldOff, ChevronRight, KeyRound, UserPlus, Loader2, AlertCircle, Trash2,
 } from 'lucide-react';
 import { formatWorkerType } from '@/utils/format';
 
@@ -21,6 +22,7 @@ export default function StaffListTab() {
   const [editing, setEditing] = useState(null);
   const [permissionStaff, setPermissionStaff] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [formModalOpen, setFormModalOpen] = useState(false);
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['staff'],
@@ -30,6 +32,11 @@ export default function StaffListTab() {
   const { data: teams = [] } = useQuery({
     queryKey: ['teams'],
     queryFn: () => base44.entities.Team.list(),
+  });
+
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ['vehicles-staff-list'],
+    queryFn: () => base44.entities.Vehicle.list(),
   });
 
   const teamMap = useMemo(() => {
@@ -55,21 +62,18 @@ export default function StaffListTab() {
     qc.invalidateQueries({ queryKey: ['staff-page-hub'] });
   };
 
-  const handleAdd = async () => {
-    setCreating(true);
+  const handleAdd = () => {
+    setFormModalOpen(true);
+  };
+
+  const handleDelete = async (staffId) => {
+    if (!window.confirm('Delete this staff member? This cannot be undone.')) return;
     try {
-      const created = await base44.entities.Staff.create({
-        name: 'New Staff Member',
-        worker_type: 'direct_employee',
-        is_active: true,
-      });
-      setEditing(created);
-      toast({ title: 'Staff created', description: 'Fill in the details below.' });
+      await base44.entities.Staff.delete(staffId);
+      toast({ title: 'Staff member deleted' });
       refresh();
     } catch (e) {
-      toast({ title: 'Could not create staff', description: e?.message, variant: 'destructive' });
-    } finally {
-      setCreating(false);
+      toast({ title: 'Could not delete', description: e?.message, variant: 'destructive' });
     }
   };
 
@@ -118,6 +122,7 @@ export default function StaffListTab() {
               team={teamMap[s.team_id]}
               onOpen={() => setEditing(s)}
               onPermissions={() => setPermissionStaff(s)}
+              onDelete={() => handleDelete(s.id)}
             />
           ))}
         </div>
@@ -131,6 +136,16 @@ export default function StaffListTab() {
         onSaved={refresh}
       />
 
+      <StaffFormModal
+        open={formModalOpen}
+        onClose={() => setFormModalOpen(false)}
+        editing={null}
+        staff={null}
+        teams={teams}
+        vehicles={vehicles}
+        staffList={staff}
+      />
+
       {permissionStaff && (
         <StaffPermissionPopup staff={permissionStaff} onClose={() => setPermissionStaff(null)} />
       )}
@@ -138,7 +153,7 @@ export default function StaffListTab() {
   );
 }
 
-function StaffCard({ staff, team, onOpen, onPermissions }) {
+function StaffCard({ staff, team, onOpen, onPermissions, onDelete }) {
   const linked = !!staff.user_id;
   const initials = (staff.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   const wtMeta = {
@@ -220,6 +235,13 @@ function StaffCard({ staff, team, onOpen, onPermissions }) {
           className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-[11px] font-semibold hover:bg-[#1c4a12] transition"
         >
           Edit <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={onDelete}
+          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition flex-shrink-0"
+          title="Delete staff member"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
