@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Keyboard, AlertTriangle, ScanLine, Loader2, WifiOff, Zap, CheckCircle2 } from 'lucide-react';
+import { X, Keyboard, AlertTriangle, ScanLine, WifiOff, Zap, CheckCircle2 } from 'lucide-react';
 import ScanResultPopup from './ScanResultPopup';
 import useBackIntercept from '@/hooks/useBackIntercept';
 

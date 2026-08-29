@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
-  ScanLine, Package, Truck, CheckCircle2, AlertTriangle,
+  ScanLine, Package, CheckCircle2, AlertTriangle,
   Lock, Unlock, ArrowLeft, Layers, Store, PackageOpen,
   Wrench, ShieldCheck, Undo2, Barcode,
 } from 'lucide-react';
