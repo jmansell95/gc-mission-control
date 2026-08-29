@@ -25,6 +25,10 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     queryKey: ['permission-groups-all'],
     queryFn: () => base44.entities.PermissionGroup.list('name', 100),
   });
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions-all-staff-form'],
+    queryFn: () => base44.entities.Division.list('name', 50),
+  });
 
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -36,6 +40,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     manager_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false,
     system_role: 'field', phone_gps_consent: false,
     permission_group_id: '', default_landing_page: '',
+    division_id: '',
   };
 
   useEffect(() => {
@@ -50,13 +55,13 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   }, [open, editing, staff]);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
-  const filteredTeams = activeDivisionId
-    ? teams.filter(t => t.division_id === activeDivisionId)
+  const filteredTeams = form.division_id
+    ? teams.filter(t => t.division_id === form.division_id)
     : teams;
 
   const cleanPayload = (data) => {
     const cleaned = { ...data };
-    ['default_vehicle_id', 'manager_id', 'system_role', 'permission_group_id', 'default_landing_page'].forEach(k => {
+    ['default_vehicle_id', 'manager_id', 'system_role', 'permission_group_id', 'default_landing_page', 'division_id'].forEach(k => {
       if (cleaned[k] === '') delete cleaned[k];
     });
     return cleaned;
@@ -67,13 +72,30 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     setSaving(true);
     try {
       const payload = cleanPayload(form);
-      // Auto-set division_id from the selected team's division (denormalized RLS cache)
-      const selectedTeam = teams.find(t => t.id === payload.team_id);
-      if (selectedTeam?.division_id) {
-        payload.division_id = selectedTeam.division_id;
+      // Auto-derive system_role and landing page from the permission group
+      const grp = permissionGroups.find(g => g.id === form.permission_group_id);
+      if (grp) {
+        if (grp.staff_type === 'field') {
+          payload.system_role = 'field';
+        } else {
+          const perms = grp.permissions || {};
+          payload.system_role = perms.settings === 'write' ? 'admin' : 'user';
+        }
+        if (grp.landing_page && grp.landing_page !== 'auto') {
+          payload.default_landing_page = grp.landing_page;
+        } else if (grp.staff_type === 'office') {
+          payload.default_landing_page = '/admin';
+        } else {
+          payload.default_landing_page = '/staff-schedule';
+        }
       }
-      if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id) {
-        toast({ title: 'Missing required fields', description: 'Name, email, worker type and crew are all required.', variant: 'destructive' });
+      // Set division_id from the selected business stream (fallback to team's division)
+      if (!payload.division_id && payload.team_id) {
+        const selectedTeam = teams.find(t => t.id === payload.team_id);
+        if (selectedTeam?.division_id) payload.division_id = selectedTeam.division_id;
+      }
+      if (!payload.name?.trim() || !payload.email?.trim() || !payload.worker_type || !payload.team_id || !payload.division_id || !payload.permission_group_id) {
+        toast({ title: 'Missing required fields', description: 'Name, email, worker type, crew, business stream and permission group are all required.', variant: 'destructive' });
         setSaving(false);
         return;
       }
@@ -216,34 +238,37 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           </div>
         </div>
 
-        {/* Access & Landing Page */}
+        {/* Access & Business Stream — two-step permission flow */}
         <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access & Landing Page</p>
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access & Business Stream</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-2.5">
             <div>
-              <label className={labelCls}>Permission Group</label>
-              <select value={form.permission_group_id || ''} onChange={e => set('permission_group_id', e.target.value)} className={inputCls}>
-                <option value="">None (legacy role-based)</option>
-                {permissionGroups.map(pg => <option key={pg.id} value={pg.id}>{pg.name}</option>)}
+              <label className={labelCls}>Business Stream *</label>
+              <select value={form.division_id || ''} onChange={e => set('division_id', e.target.value)} className={inputCls}>
+                <option value="">Select Business Stream</option>
+                {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
             <div>
-              <label className={labelCls}>Landing Page</label>
-              <select value={form.default_landing_page || ''} onChange={e => set('default_landing_page', e.target.value)} className={inputCls}>
-                <option value="">Auto (from role)</option>
-                <option value="/admin">Admin Dashboard</option>
-                <option value="/staff-schedule">My Schedule</option>
-                <option value="/staff-profile">My Profile</option>
-                <option value="/deliveries">Delivery Dashboard</option>
-                <option value="/scanner">Scanner</option>
-                <option value="/subcontractor">Subcontractor Portal</option>
+              <label className={labelCls}>Permission Group *</label>
+              <select value={form.permission_group_id || ''} onChange={e => set('permission_group_id', e.target.value)} className={inputCls}>
+                <option value="">Select Permission Group</option>
+                <optgroup label="System Groups">
+                  {permissionGroups.filter(g => g.is_system).map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                </optgroup>
+                {permissionGroups.filter(g => !g.is_system).length > 0 && (
+                  <optgroup label="Custom Groups">
+                    {permissionGroups.filter(g => !g.is_system).map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                  </optgroup>
+                )}
               </select>
             </div>
           </div>
-          {/* Live landing-page preview */}
+          {/* Live landing-page preview — auto-derived from the permission group */}
           {(() => {
             const grp = permissionGroups.find(g => g.id === form.permission_group_id) || null;
-            const route = resolveRoleLandingPage({ default_landing_page: form.default_landing_page || '', permission_group: grp, worker_type: form.worker_type, system_role: 'field' }, false);
+            const div = divisions.find(d => d.id === form.division_id) || null;
+            const route = grp ? (grp.landing_page && grp.landing_page !== 'auto' ? grp.landing_page : grp.staff_type === 'office' ? '/admin' : '/staff-schedule') : '/staff-schedule';
             const isOffice = route === '/admin';
             const labels = { '/admin': 'Admin Dashboard', '/staff-schedule': 'My Schedule', '/staff-profile': 'My Profile', '/deliveries': 'Delivery Dashboard', '/scanner': 'Asset Scanner', '/subcontractor': 'Subcontractor Portal' };
             return (
@@ -251,10 +276,18 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 <div className={'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ' + (isOffice ? 'bg-gradient-to-br from-blue-500 to-indigo-600' : 'bg-gradient-to-br from-amber-500 to-orange-600')}>
                   {isOffice ? <Monitor className="w-4 h-4 text-white" /> : <HardHat className="w-4 h-4 text-white" />}
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5"><Compass className="w-3.5 h-3.5 text-[#2E5A1A]" /> Lands on: {labels[route] || route}</p>
-                  <p className="text-[11px] text-slate-400">{form.default_landing_page ? 'Set by the explicit override above' : grp?.landing_page && grp.landing_page !== 'auto' ? `Set by the "${grp.name}" group` : grp?.staff_type === 'office' ? 'Office groups land on the admin dashboard' : grp?.staff_type === 'field' ? 'Field groups land on their schedule' : 'Derived from their role'}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-[#2E5A1A]" /> Lands on: {labels[route] || route}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {grp ? `Set by the "${grp.name}" group` : 'Select a permission group to determine landing page'}
+                    {div && ` · ${div.name} stream`}
+                  </p>
                 </div>
+                {div && (
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: div.color || '#2E5A1A' }} title={div.name} />
+                )}
               </div>
             );
           })()}
