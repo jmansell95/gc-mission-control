@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
-  ScanLine, Package, Truck, CheckCircle2,
+  ScanLine, Package, Truck, CheckCircle2, AlertTriangle,
   Lock, Unlock, ArrowLeft, Layers, Store, PackageOpen,
   Wrench, ShieldCheck, Undo2, Barcode,
 } from 'lucide-react';
@@ -438,55 +438,35 @@ export default function AssetScannerPage() {
         </div>
       </header>
 
-      {/* Mode toggles — segmented control */}
-      <div className="bg-white/90 backdrop-blur-lg border-b border-slate-200 px-4 py-2.5 flex gap-2 flex-shrink-0 overflow-x-auto no-scrollbar">
+      {/* Mode toggles — compact segmented control */}
+      <div className="bg-white/90 backdrop-blur-lg border-b border-slate-200 px-3 py-2 flex gap-1.5 flex-shrink-0 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setMode('assets')}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition active:scale-95 ${mode === 'assets' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}`}
+          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'assets' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
         >
           <ScanLine className="w-3.5 h-3.5" /> Assets
         </button>
         {isHubAdmin && (
           <button
             onClick={() => setMode('goods-in')}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition active:scale-95 ${mode === 'goods-in' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}`}
+            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'goods-in' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
           >
             <Store className="w-3.5 h-3.5" /> Goods In
           </button>
         )}
         <button
           onClick={() => setMode('site-collect')}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition active:scale-95 ${mode === 'site-collect' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'}`}
+          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'site-collect' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
         >
           <PackageOpen className="w-3.5 h-3.5" /> Collect
         </button>
         <button
           onClick={() => setShowConsumableModal(true)}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold transition active:scale-95 bg-white text-slate-600 border border-slate-200"
+          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 bg-slate-100 text-slate-600"
         >
           <Package className="w-3.5 h-3.5" /> Use Stock
         </button>
       </div>
-
-      {/* Direction toggle — Sign Out / Return */}
-      {hubTab === 'scan' && (
-        <div className="bg-white/60 backdrop-blur-md px-4 py-2 flex-shrink-0">
-          <div className="flex gap-1 p-1 bg-slate-100/80 rounded-xl max-w-xs">
-            <button
-              onClick={() => { setDirection('signout'); setSelectedJobId(''); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition ${isSignOut ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}
-            >
-              <ShieldCheck className="w-4 h-4" /> Sign Out
-            </button>
-            <button
-              onClick={() => { setDirection('return'); setSelectedJobId(''); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition ${!isSignOut ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-500'}`}
-            >
-              <Undo2 className="w-4 h-4" /> Return
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
@@ -511,50 +491,62 @@ export default function AssetScannerPage() {
                 onClear={() => { setRecent([]); saveJSON(RECENT_KEY, []); }}
               />
 
-              {/* Quick stats */}
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="bg-white rounded-2xl border border-slate-200 p-3 flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <Package className="w-5 h-5 text-emerald-700" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-lg font-bold text-slate-900 leading-none tabular-nums">{quickStats.total}</p>
-                    <p className="text-[10px] text-slate-400 font-medium mt-0.5">Total Assets</p>
-                  </div>
-                </div>
-                <div className="bg-white rounded-2xl border border-slate-200 p-3 flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <Layers className="w-5 h-5 text-blue-700" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-lg font-bold text-slate-900 leading-none tabular-nums">{quickStats.rigs}</p>
-                    <p className="text-[10px] text-slate-400 font-medium mt-0.5">Rigs</p>
-                  </div>
-                </div>
-                <div className={`bg-white rounded-2xl border p-3 flex items-center gap-2.5 ${quickStats.issues > 0 ? 'border-amber-200' : 'border-slate-200'}`}>
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${quickStats.issues > 0 ? 'bg-amber-100' : 'bg-emerald-100'}`}>
-                    <CheckCircle2 className={`w-5 h-5 ${quickStats.issues > 0 ? 'text-amber-600' : 'text-emerald-600'}`} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className={`text-lg font-bold leading-none tabular-nums ${quickStats.issues > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>{quickStats.issues > 0 ? quickStats.issues : '✓'}</p>
-                    <p className="text-[10px] text-slate-400 font-medium mt-0.5">{quickStats.issues > 0 ? 'Issues' : 'All Clear'}</p>
-                  </div>
-                </div>
+              {/* Compact stats strip */}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-600">
+                  <Package className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="tabular-nums">{quickStats.total}</span> assets
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-600">
+                  <Layers className="w-3.5 h-3.5 text-blue-600" />
+                  <span className="tabular-nums">{quickStats.rigs}</span> rigs
+                </span>
+                {quickStats.issues > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 font-semibold text-amber-700">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span className="tabular-nums">{quickStats.issues}</span> issues
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-700">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> All clear
+                  </span>
+                )}
               </div>
 
-              {/* Hero scan card — tap to open full-screen scanner */}
-              <div className="relative rounded-3xl overflow-hidden border border-slate-200 insight-card">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-[#F5FBF6]" />
+              {/* Hero scan card — focal point with integrated direction toggle */}
+              <div className="relative rounded-3xl overflow-hidden insight-card">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2E5A1A] via-[#3a7a22] to-[#1c4a12]" />
+                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 20%, rgba(141,198,63,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(16,185,129,0.3) 0%, transparent 50%)' }} />
                 <div className="relative p-6 flex flex-col items-center text-center">
+                  {/* Direction toggle — integrated */}
+                  <div className="flex gap-1 p-1 bg-white/15 backdrop-blur-md rounded-xl mb-5 w-full max-w-xs">
+                    <button
+                      onClick={() => { setDirection('signout'); setSelectedJobId(''); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${isSignOut ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-white/80'}`}
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" /> Sign Out
+                    </button>
+                    <button
+                      onClick={() => { setDirection('return'); setSelectedJobId(''); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${!isSignOut ? 'bg-white text-sky-700 shadow-sm' : 'text-white/80'}`}
+                    >
+                      <Undo2 className="w-3.5 h-3.5" /> Return
+                    </button>
+                  </div>
+
+                  {/* Scan button — the focal point */}
                   <button
                     onClick={() => setShowFullScreen(true)}
-                    className="relative w-24 h-24 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-lg active:scale-95 transition group"
+                    className="relative w-28 h-28 rounded-full bg-white/15 backdrop-blur-sm border-2 border-white/30 flex items-center justify-center shadow-2xl active:scale-95 transition group"
                   >
-                    <span className="absolute -inset-2 rounded-full bg-emerald-400/30 blur-xl animate-pulse group-hover:bg-emerald-400/40" />
-                    <Barcode className="w-10 h-10 text-white relative z-10" />
+                    <span className="absolute -inset-3 rounded-full bg-emerald-400/20 blur-xl animate-pulse group-hover:bg-emerald-400/30" />
+                    <span className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping-slow" />
+                    <Barcode className="w-12 h-12 text-white relative z-10" />
                   </button>
-                  <p className="mt-4 text-base font-bold text-slate-900">Tap to Scan</p>
-                  <p className="text-sm text-slate-500 mt-0.5">Opens the camera scanner</p>
+                  <p className="mt-5 text-lg font-bold text-white">Tap to Scan</p>
+                  <p className="text-sm text-white/70 mt-0.5">
+                    {isSignOut ? 'Sign out gear to a job' : 'Return gear to the yard'}
+                  </p>
                 </div>
               </div>
 
