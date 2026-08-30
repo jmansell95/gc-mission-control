@@ -188,6 +188,23 @@
       "default": false,
       "description": "Whether the staff member has consented to phone GPS location tracking for automated travel-time detection. When true, the app uses the crew member's phone GPS (via the browser Geolocation API) to detect arrival at and departure from job sites via geofencing \u2014 even when they're not in a tracked vehicle (e.g. travelling home by train). Set via the staff profile or a consent prompt in the shift wizard."
     },
+    "home_lat": {
+      "type": "number",
+      "description": "Learned home location latitude. Auto-learned from repeated overnight GPS positions after the staff member confirms their home location 3+ times. Used by the zero-touch timesheet engine to calculate travel-from-site duration (home \u2192 site and site \u2192 home) for payable travel time. Blank until the first confirmation is captured."
+    },
+    "home_lng": {
+      "type": "number",
+      "description": "Learned home location longitude. Auto-learned alongside home_lat. Used for travel-from-site geofence detection \u2014 when the crew member's phone GPS enters this radius, the system stamps 'arrived home' and closes the travel-from entry."
+    },
+    "home_geofence_confidence": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of times the home location has been corroborated by the crew member confirming 'I'm home' at roughly the same GPS position. 0 = not yet learned, 1-2 = candidate (still confirming), 3+ = confirmed (high confidence, used for auto travel-from detection). Incremented by the confirmHomeLocation function when a new confirmation is within 200m of the existing home_lat/lng."
+    },
+    "home_learned_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last home location confirmation. Set every time the crew member confirms their home position, whether it incremented confidence or established a new candidate."
+    },
     "market_dojo_onboarded": {
       "type": "boolean",
       "default": false,

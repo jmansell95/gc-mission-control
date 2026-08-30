@@ -612,6 +612,8 @@ export default function StaffDashboard() {
               assignment={nextTodayAssignment}
               job={jobs.find(j => j.id === nextTodayAssignment?.job_id)}
               staffId={staff?.id}
+              homeLat={staff?.home_lat}
+              homeLng={staff?.home_lng}
               shiftStartTime={nextTodayAssignment?.start_time}
             />
           )}

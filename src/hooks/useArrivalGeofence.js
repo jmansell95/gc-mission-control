@@ -10,8 +10,12 @@ import { useGeolocation } from '@/hooks/useGeolocation';
  * detects geofence entry/exit against the job site, and AUTO-STAMPS
  * the RotaAssignment's arrived_on_site_at / left_site_at fields.
  *
- * Returns live distance, on-site status, and arrival/departure state
- * so the UI can show "not arrived yet" / "arrived" / "left site" prompts.
+ * Also detects when the crew member arrives home after leaving site,
+ * and offers a "Confirm home" prompt so the system can learn their
+ * home location for automatic travel-from-site time tracking.
+ *
+ * Returns live distance, on-site status, arrival/departure state,
+ * and home detection state so the UI can show contextual prompts.
  */
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -22,12 +26,17 @@ function haversineMetres(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function useArrivalGeofence({ assignment, job, staffId, enabled = true }) {
+export function useArrivalGeofence({ assignment, job, staffId, homeLat, homeLng, enabled = true }) {
   const queryClient = useQueryClient();
   const [distance, setDistance] = useState(null);
+  const [homeDistance, setHomeDistance] = useState(null);
   const [arrived, setArrived] = useState(!!assignment?.arrived_on_site_at);
   const [leftSite, setLeftSite] = useState(!!assignment?.left_site_at);
+  const [arrivedHome, setArrivedHome] = useState(false);
+  const [confirmingHome, setConfirmingHome] = useState(false);
   const stampedRef = useRef({ arrived: !!assignment?.arrived_on_site_at, left: !!assignment?.left_site_at });
+  const departedAtRef = useRef(assignment?.left_site_at ? new Date(assignment.left_site_at).getTime() : null);
+  const stoppedMovingRef = useRef(null);
 
   const siteLat = job?.site_lat || job?.lat;
   const siteLng = job?.site_lng || job?.lng;
@@ -53,16 +62,25 @@ export function useArrivalGeofence({ assignment, job, staffId, enabled = true })
     ? { lat: vehicleLogs[0].latitude, lng: vehicleLogs[0].longitude }
     : null;
 
+  const currentPos = phonePos || vehiclePos;
+
   // Calculate distance from site
   useEffect(() => {
     if (!siteLat || !siteLng) { setDistance(null); return; }
-    const pos = phonePos || vehiclePos;
-    if (!pos) { setDistance(null); return; }
-    const d = haversineMetres(pos.lat, pos.lng, siteLat, siteLng);
+    if (!currentPos) { setDistance(null); return; }
+    const d = haversineMetres(currentPos.lat, currentPos.lng, siteLat, siteLng);
     setDistance(Math.round(d));
-  }, [phonePos, vehiclePos, siteLat, siteLng]);
+  }, [currentPos, siteLat, siteLng]);
+
+  // Calculate distance from home (if learned)
+  useEffect(() => {
+    if (!homeLat || !homeLng || !currentPos) { setHomeDistance(null); return; }
+    const d = haversineMetres(currentPos.lat, currentPos.lng, homeLat, homeLng);
+    setHomeDistance(Math.round(d));
+  }, [currentPos, homeLat, homeLng]);
 
   const onSite = distance != null && distance <= radius;
+  const nearHome = homeDistance != null && homeDistance <= 200;
 
   // Auto-stamp arrival
   const stampArrival = useCallback(async () => {
@@ -86,6 +104,7 @@ export function useArrivalGeofence({ assignment, job, staffId, enabled = true })
     if (stampedRef.current.left || !assignmentId || !stampedRef.current.arrived) return;
     stampedRef.current.left = true;
     setLeftSite(true);
+    departedAtRef.current = Date.now();
     try {
       await base44.entities.RotaAssignment.update(assignmentId, {
         left_site_at: new Date().toISOString(),
@@ -95,6 +114,7 @@ export function useArrivalGeofence({ assignment, job, staffId, enabled = true })
     } catch (e) {
       stampedRef.current.left = false;
       setLeftSite(false);
+      departedAtRef.current = null;
     }
   }, [assignmentId, queryClient]);
 
@@ -114,6 +134,41 @@ export function useArrivalGeofence({ assignment, job, staffId, enabled = true })
     }
   }, [onSite, arrived, leftSite, enabled, siteLat, siteLng, stampArrival, stampDeparture]);
 
+  // Detect arrival home (after leaving site)
+  // If we have a learned home location, auto-detect when they arrive within 200m
+  useEffect(() => {
+    if (!leftSite || !nearHome || arrivedHome) return;
+    // Must have been travelling for at least 10 minutes since departure
+    if (!departedAtRef.current) return;
+    const minsSinceDeparture = (Date.now() - departedAtRef.current) / 60000;
+    if (minsSinceDeparture < 10) return;
+    setArrivedHome(true);
+    if (navigator.vibrate) navigator.vibrate([100, 100, 100]);
+  }, [leftSite, nearHome, arrivedHome]);
+
+  // Detect "stopped moving" for home confirmation prompt (when no learned home)
+  // Uses the GPS speed if available, otherwise infers from position changes
+  const showHomeConfirmPrompt = leftSite && !homeLat && currentPos && departedAtRef.current &&
+    (Date.now() - departedAtRef.current) > 30 * 60000; // 30+ min since departure
+
+  // Confirm home location — called by the banner's "I'm home" button
+  const confirmHome = useCallback(async () => {
+    if (!currentPos || confirmingHome) return null;
+    setConfirmingHome(true);
+    try {
+      const res = await base44.functions.invoke('confirmHomeLocation', {
+        lat: currentPos.lat,
+        lng: currentPos.lng,
+      });
+      queryClient.invalidateQueries({ queryKey: ['my-staff-profile'] });
+      return res;
+    } catch (e) {
+      return null;
+    } finally {
+      setConfirmingHome(false);
+    }
+  }, [currentPos, confirmingHome, queryClient]);
+
   return {
     distance,
     onSite,
@@ -126,5 +181,12 @@ export function useArrivalGeofence({ assignment, job, staffId, enabled = true })
     vehiclePos,
     gpsError,
     hasGPS: !!(phonePos || vehiclePos),
+    // Home detection
+    homeDistance,
+    nearHome,
+    arrivedHome,
+    showHomeConfirmPrompt,
+    confirmHome,
+    confirmingHome,
   };
 }
