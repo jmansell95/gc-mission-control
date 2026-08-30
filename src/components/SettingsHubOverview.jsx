@@ -5,31 +5,25 @@ import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
   Search, Lock, Database, Webhook, Layers, FileSpreadsheet, Briefcase,
   Satellite, Radio, Landmark, ShieldAlert, Cloud, MapPin, MessageCircle, CreditCard,
-  Gift, FileUp, CalendarDays, ClipboardCheck, Receipt,
+  Gift, FileUp, CalendarDays, ClipboardCheck, Receipt, Settings as SettingsIcon,
 } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 import IntegrationsOverviewList from '@/components/settings/IntegrationsOverviewList';
 
 /**
- * Settings Command Hub — Clean Canvas overview.
- * Ultra-light, borderless, typography-led, centered single column with an
- * oversized search hero, a flat metric row, a slim status strip, and flat
- * hover-highlighted list rows grouped by category.
+ * Settings Command Hub — rebuilt onto the shared hub shell (PageHeader +
+ * hub tokens) so Settings is visually identical to every other hub.
+ * Keeps the search hero, grouped flat lists, and integration status.
  */
 export default function SettingsHubOverview({ onNavigate }) {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
 
-  // Single batched query — replaces ~10 individual entity list calls with one
-  // round trip to getSettingsHubStats, which returns all counts + integration
-  // statuses server-side.
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
   });
 
-  // Per-integration "Coming Soon" toggle — persisted to a single AppSetting
-  // record (key 'integration_coming_soon') so the state is shared across
-  // admins and survives reloads.
   const toggleComingSoon = useMutation({
     mutationFn: async ({ id, comingSoon }) => {
       const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
@@ -45,14 +39,6 @@ export default function SettingsHubOverview({ onNavigate }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings-hub-stats'] }),
   });
 
-  const staff = [];
-  const teams = [];
-  const clients = [];
-  const vehicles = [];
-  const rateItems = [];
-  const billingRules = [];
-  const complianceItems = [];
-  const permissionGroups = [];
   const integrationList = stats?.integrations || [];
   const integrationConnectedCount = stats?.integrationConnectedCount || 0;
   const activeStaff = stats?.activeStaff || 0;
@@ -103,7 +89,6 @@ export default function SettingsHubOverview({ onNavigate }) {
     ? groups.map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q) || i.sub.toLowerCase().includes(q)) })).filter(g => g.items.length > 0)
     : groups;
 
-  // Integration status map: { [id]: { connected, comingSoon } }
   const integrationStatusMap = {};
   (stats?.integrations || []).forEach(i => {
     integrationStatusMap[i.id] = {
@@ -113,87 +98,58 @@ export default function SettingsHubOverview({ onNavigate }) {
   });
 
   return (
-    <div className="min-h-full bg-[#FAFAF9]">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "'Inter Tight', Inter, sans-serif" }}>
-            Settings
-          </h1>
-          <p className="text-slate-500 mt-1 text-sm sm:text-base">Full control of your site — manage everything from one place.</p>
+    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
+      <PageHeader
+        icon={SettingsIcon}
+        title="Settings"
+        subtitle="Full control of your site — manage everything from one place."
+        stats={[
+          { icon: Webhook, label: 'Integrations', value: `${integrationConnectedCount}/${integrationList.length}` },
+          { icon: Users, label: 'Active Staff', value: activeStaff },
+          { icon: Briefcase, label: 'Active Jobs', value: activeJobs },
+          { icon: Layers, label: 'In Planning', value: planningJobs },
+        ]}
+      />
+
+      {/* Search hero */}
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search settings..."
+          className="w-full h-14 pl-12 pr-16 sm:pr-20 bg-white border border-slate-200 rounded-2xl text-base font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 shadow-sm transition"
+        />
+        <kbd className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 items-center gap-0.5 px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400 pointer-events-none">
+          ⌘K
+        </kbd>
+      </div>
+
+      {/* No results */}
+      {q && filteredGroups.length === 0 && (
+        <div className="insight-card rounded-2xl p-8 text-center">
+          <p className="text-sm text-slate-400">No settings match "{search}"</p>
         </div>
+      )}
 
-        {/* Search hero */}
-        <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search settings..."
-            className="w-full h-14 pl-12 pr-16 sm:pr-20 bg-white border border-slate-200 rounded-2xl text-base font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 shadow-sm transition"
-          />
-          <kbd className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 items-center gap-0.5 px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-400 pointer-events-none">
-            ⌘K
-          </kbd>
-        </div>
-
-        {/* Informative status strip — at-a-glance platform health */}
-        {!q && (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-10 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${integrationConnectedCount > 0 ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-              <span className="font-semibold text-slate-700">{integrationConnectedCount}/{integrationList.length}</span>
-              <span>integrations connected</span>
-            </span>
-            {activeStaff > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-slate-400" />
-                <span className="font-semibold text-slate-700">{activeStaff}</span>
-                <span>active staff</span>
-              </span>
-            )}
-            {activeJobs > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-slate-400" />
-                <span className="font-semibold text-slate-700">{activeJobs}</span>
-                <span>active jobs</span>
-              </span>
-            )}
-            {planningJobs > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-slate-400" />
-                <span className="font-semibold text-slate-700">{planningJobs}</span>
-                <span>in planning</span>
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* No results */}
-        {q && filteredGroups.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-sm text-slate-400">No settings match "{search}"</p>
-          </div>
-        )}
-
-        {/* Category sections as flat lists */}
-        {filteredGroups.map(group => {
-          if (group.group === 'Integrations') {
-            return (
-              <section key={group.group} className="mb-10">
-                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">{group.group}</h2>
-                <IntegrationsOverviewList
-                  items={group.items}
-                  statusMap={integrationStatusMap}
-                  onToggle={(id, comingSoon) => toggleComingSoon.mutate({ id, comingSoon })}
-                  onNavigate={onNavigate}
-                />
-              </section>
-            );
-          }
+      {/* Category sections as flat lists */}
+      {filteredGroups.map(group => {
+        if (group.group === 'Integrations') {
           return (
-          <section key={group.group} className="mb-10">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">{group.group}</h2>
+            <section key={group.group}>
+              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">{group.group}</h2>
+              <IntegrationsOverviewList
+                items={group.items}
+                statusMap={integrationStatusMap}
+                onToggle={(id, comingSoon) => toggleComingSoon.mutate({ id, comingSoon })}
+                onNavigate={onNavigate}
+              />
+            </section>
+          );
+        }
+        return (
+          <section key={group.group}>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">{group.group}</h2>
             <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
               {group.items.map((item, idx) => {
                 const Icon = item.icon;
@@ -220,9 +176,8 @@ export default function SettingsHubOverview({ onNavigate }) {
               })}
             </div>
           </section>
-          );
-        })}
-      </div>
+        );
+      })}
     </div>
   );
 }

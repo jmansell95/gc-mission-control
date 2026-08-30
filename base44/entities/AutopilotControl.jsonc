@@ -1,0 +1,125 @@
+{
+  "name": "AutopilotControl",
+  "type": "object",
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "description": "Unique stable identifier for this autonomous agent (e.g. 'billing', 'scheduling', 'compliance', 'logistics', 'financial'). Used as the primary key for upserts."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the agent (e.g. 'Autonomous Billing Engine')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short human-readable summary of what this agent does autonomously."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "billing",
+        "scheduling",
+        "compliance",
+        "logistics",
+        "financial"
+      ],
+      "description": "Operational domain this agent belongs to \u2014 drives the icon and grouping in the control panel."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "error"
+      ],
+      "default": "paused",
+      "description": "Current run state. 'active' = agent is running on its schedule and auto-acting; 'paused' = halted by an admin, no autonomous actions taken; 'error' = last run failed and the agent auto-paused for safety."
+    },
+    "aggressiveness": {
+      "type": "string",
+      "enum": [
+        "conservative",
+        "balanced",
+        "aggressive"
+      ],
+      "default": "conservative",
+      "description": "How aggressively the agent auto-acts. 'conservative' = only green-path, high-confidence actions; 'balanced' = green-path + low-risk; 'aggressive' = act on anything below the exception threshold. Admin-tunable per agent."
+    },
+    "last_run_at": {
+      "type": "string",
+      "description": "ISO timestamp of the agent's last execution."
+    },
+    "last_run_summary": {
+      "type": "string",
+      "description": "Short human-readable summary of the last run (e.g. 'Auto-billed 12 timesheets \u00b7 2 exceptions flagged')."
+    },
+    "last_run_status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "partial",
+        "error"
+      ],
+      "description": "Outcome of the last run. 'success' = all actions completed; 'partial' = some actions succeeded, some flagged; 'error' = run failed and agent auto-paused."
+    },
+    "decision_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total autonomous decisions this agent has made since it was activated (auto-incremented by each run)."
+    },
+    "exception_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Total decisions that were flagged for human review rather than auto-acted (auto-incremented by each run)."
+    },
+    "paused_by": {
+      "type": "string",
+      "description": "Name of the admin who paused the agent (denormalised for display)."
+    },
+    "paused_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the agent was paused."
+    },
+    "pause_reason": {
+      "type": "string",
+      "description": "Reason recorded when an admin manually paused the agent. Auto-set to 'Auto-paused: last run errored' when status moves to 'error'."
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error details when the last run failed and the agent auto-paused. Cleared on the next successful run."
+    },
+    "config": {
+      "type": "object",
+      "description": "Per-agent tunable configuration (thresholds, confidence cutoffs, enabled sub-actions). Stored as a flexible JSON object so each agent can define its own knobs without schema changes.",
+      "additionalProperties": true,
+      "default": {}
+    }
+  },
+  "required": [
+    "agent_id",
+    "name",
+    "category"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

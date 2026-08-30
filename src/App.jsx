@@ -58,6 +58,7 @@ import { SchedulingAssistantProvider } from '@/components/SchedulingAssistantCha
 import { DrillingIntelligenceProvider } from '@/components/DrillingIntelligenceChat';
 import { AIHubProvider } from '@/components/ai/AIHub';
 import { DivisionProvider } from '@/contexts/DivisionContext';
+import { AutopilotToastProvider } from '@/components/autopilot/AutopilotToastProvider';
 import RouteLoadingOverlay from '@/components/RouteLoadingOverlay';
 import AppBaseUrlSync from '@/components/AppBaseUrlSync';
 import AssetScannerPage from './pages/AssetScannerPage';
@@ -95,6 +96,7 @@ const AuthenticatedApp = () => {
         <DrillingIntelligenceProvider>
         <AIHubProvider>
         <DivisionProvider>
+        <AutopilotToastProvider>
         <AppBaseUrlSync />
         <RouteLoadingOverlay />
         <Routes>
@@ -164,6 +166,7 @@ const AuthenticatedApp = () => {
         <Route path="/client-portal/:token" element={<ClientPortal />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
+        </AutopilotToastProvider>
         </DivisionProvider>
         </AIHubProvider>
         </DrillingIntelligenceProvider>

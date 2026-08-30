@@ -21,6 +21,7 @@ import AssetManifestManager from '@/components/assetpanda/AssetManifestManager';
 import RateCardManager from '@/components/RateCardManager';
 import DropdownConfigManager from '@/components/DropdownConfigManager';
 import SettingsHubOverview from '@/components/SettingsHubOverview';
+import AutopilotControlPanel from '@/components/autopilot/AutopilotControlPanel';
 import { accessibleSettingsItems } from '@/components/SettingsNav';
 import ComplianceManager from '@/components/ComplianceManager';
 import ComplianceRulesSettings from '@/components/ComplianceRulesSettings';
@@ -132,6 +133,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
    
     switch (activeTab) {
       case 'hub': return <SettingsHubOverview onNavigate={setActiveTab} />;
+      case 'autopilot': return <AutopilotControlPanel />;
       case 'divisions': return <DivisionManager />;
       case 'readiness': return <ReadinessManager />;
       case 'integrations': return <IntegrationsHub onNavigate={setActiveTab} />;

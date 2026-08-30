@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift } from 'lucide-react';
+import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift, Bot } from 'lucide-react';
 import { normalizePermissions } from '@/utils/permissions';
 
 // Items that have migrated to operational hubs (Financial Control, Compliance,
@@ -31,6 +31,12 @@ export const settingsGroups = [
   // been moved to Enterprise Settings (/enterprise/settings). They are no longer shown
   // in the division-level settings sidebar to avoid split-brain configuration.
 
+  {
+    label: 'Autopilot',
+    items: [
+      { id: 'autopilot', label: 'Autopilot Control', icon: Bot, desc: 'Autonomous agents that decide and act — billing, scheduling, compliance, logistics & financial. Pause, configure aggressiveness, and review every decision in the audit trail.', roles: ['admin'] },
+    ],
+  },
   {
     label: 'Ground Investigation',
     items: [
