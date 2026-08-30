@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Wrench, Truck, Users, ArrowRightLeft, MapPin, Loader2 } from 'lucide-react';
+import { Wrench, Truck, Users, ArrowRightLeft, MapPin, Loader2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+
+const PREVIEW_COUNT = 8;
 
 /**
  * CrossDivisionResourceBoard — enterprise-level view showing idle rigs,
@@ -11,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
  */
 export default function CrossDivisionResourceBoard() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [tab, setTab] = useState('rigs');
   const [loaning, setLoaning] = useState(null);
 
@@ -115,7 +119,7 @@ export default function CrossDivisionResourceBoard() {
         </div>
       ) : (
         <div className="space-y-2 max-h-80 overflow-y-auto">
-          {currentTab.items.slice(0, 20).map(item => {
+          {currentTab.items.slice(0, PREVIEW_COUNT).map(item => {
             const divName = divMap[item.division_id]?.name || 'Unassigned';
             const divColor = divMap[item.division_id]?.color || '#94a3b8';
             const name = item.name || item.fleet_number || `${item.make || ''} ${item.model || ''}`.trim() || 'Unknown';
@@ -145,13 +149,20 @@ export default function CrossDivisionResourceBoard() {
               </div>
             );
           })}
-          {currentTab.items.length > 20 && (
+          {currentTab.items.length > PREVIEW_COUNT && (
             <p className="text-xs text-center text-slate-400 pt-2">
-              +{currentTab.items.length - 20} more…
+              +{currentTab.items.length - PREVIEW_COUNT} more…
             </p>
           )}
         </div>
       )}
+
+      <button
+        onClick={() => navigate('/enterprise/resource-pool')}
+        className="w-full mt-3 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-600 transition"
+      >
+        View all resources <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }

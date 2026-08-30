@@ -1,86 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
-import { Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { format, addDays, startOfWeek } from 'date-fns';
+import { Users, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useCrewAvailability, HEATMAP_LEGEND } from '@/hooks/useCrewAvailability';
 
 /**
- * CrewAvailabilityHeatmap — enterprise-level heatmap showing every active
- * crew member × day, colour-coded by division. Directors can see at a glance
- * who is free, who is on leave, and who is cross-divisional.
- * Click a cell to draft a cross-division assignment.
+ * CrewAvailabilityHeatmap — compact dashboard widget showing a preview of the
+ * crew availability heatmap. Capped at 12 staff with a "View all crew" link to
+ * the full /enterprise/crew-availability page.
  */
+const PREVIEW_COUNT = 12;
+
 export default function CrewAvailabilityHeatmap() {
+  const navigate = useNavigate();
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const { staff, divMap, days, dayStrs, getCellStatus, stats } = useCrewAvailability(weekStart);
   const [selectedCell, setSelectedCell] = useState(null);
-
-  const { data: staff = [] } = useQuery({ queryKey: ['heatmap-staff'], queryFn: () => base44.entities.Staff.filter({ is_active: true }) });
-  const { data: assignments = [] } = useQuery({ queryKey: ['heatmap-assignments'], queryFn: () => base44.entities.RotaAssignment.list('-created_date', 500) });
-  const { data: divisions = [] } = useQuery({ queryKey: ['heatmap-divisions'], queryFn: () => base44.entities.Division.list() });
-  const { data: absences = [] } = useQuery({ queryKey: ['heatmap-absences'], queryFn: () => base44.entities.Absence.filter({ status: 'approved' }) });
-
-  const divMap = Object.fromEntries(divisions.map(d => [d.id, d]));
-
-  const days = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  }, [weekStart]);
-
-  const dayStrs = days.map(d => format(d, 'yyyy-MM-dd'));
-
-  // Build assignment map: staffId -> { date -> assignment }
-  const assignMap = useMemo(() => {
-    const map = {};
-    for (const a of assignments) {
-      if (!map[a.staff_id]) map[a.staff_id] = {};
-      map[a.staff_id][a.assigned_date] = a;
-    }
-    return map;
-  }, [assignments]);
-
-  // Build absence map: staffId -> Set of date strings
-  const absenceMap = useMemo(() => {
-    const map = {};
-    for (const ab of absences) {
-      if (!ab.staff_id) continue;
-      if (!map[ab.staff_id]) map[ab.staff_id] = new Set();
-      const start = new Date(ab.start_date);
-      const end = new Date(ab.end_date || ab.start_date);
-      for (let d = start; d <= end; d = addDays(d, 1)) {
-        map[ab.staff_id].add(format(d, 'yyyy-MM-dd'));
-      }
-    }
-    return map;
-  }, [absences]);
-
-  const getCellStatus = (staffId, dateStr) => {
-    const a = assignMap[staffId]?.[dateStr];
-    if (a) {
-      if (a.assignment_type === 'annual_leave') return { status: 'leave', color: '#3b82f6', label: 'AL' };
-      if (a.assignment_type === 'sick') return { status: 'sick', color: '#f43f5e', label: 'S' };
-      if (a.assignment_type === 'training') return { status: 'training', color: '#f59e0b', label: 'T' };
-      if (a.assignment_type === 'yard_depot') return { status: 'depot', color: '#64748b', label: 'D' };
-      return { status: 'job', color: '#10b981', label: 'J' };
-    }
-    if (absenceMap[staffId]?.has(dateStr)) return { status: 'leave', color: '#3b82f6', label: 'AL' };
-    return { status: 'free', color: null, label: '' };
-  };
-
-  const sortedStaff = [...staff].sort((a, b) => {
-    const aDiv = a.division_id || 'zzz';
-    const bDiv = b.division_id || 'zzz';
-    return aDiv.localeCompare(bDiv) || (a.name || '').localeCompare(b.name || '');
-  });
-
-  // Stats
-  const freeCount = sortedStaff.reduce((sum, s) => {
-    return sum + dayStrs.filter(d => getCellStatus(s.id, d).status === 'free').length;
-  }, 0);
-  const onJobCount = sortedStaff.reduce((sum, s) => {
-    return sum + dayStrs.filter(d => getCellStatus(s.id, d).status === 'job').length;
-  }, 0);
-  const leaveCount = sortedStaff.reduce((sum, s) => {
-    return sum + dayStrs.filter(d => getCellStatus(s.id, d).status === 'leave').length;
-  }, 0);
 
   return (
     <div className="insight-card rounded-2xl p-4 sm:p-5">
@@ -91,15 +26,14 @@ export default function CrewAvailabilityHeatmap() {
           </div>
           <div>
             <h3 className="font-bold text-slate-900 text-sm">Crew Availability Heatmap</h3>
-            <p className="text-xs text-slate-500">All divisions · {sortedStaff.length} crew members</p>
+            <p className="text-xs text-slate-500">All divisions · {stats.total} crew members</p>
           </div>
         </div>
-        {/* Week navigation */}
         <div className="flex items-center gap-1">
           <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
             <ChevronLeft className="w-4 h-4 text-slate-500" />
           </button>
-          <span className="text-xs font-semibold text-slate-600 px-2">
+          <span className="text-xs font-semibold text-slate-600 px-2 whitespace-nowrap tabular-nums">
             {format(weekStart, 'dd MMM')} — {format(addDays(weekStart, 6), 'dd MMM')}
           </span>
           <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
@@ -108,20 +42,18 @@ export default function CrewAvailabilityHeatmap() {
         </div>
       </div>
 
-      {/* Stats bar */}
       <div className="flex gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" /> On Job · {onJobCount}
+          <span className="w-2 h-2 rounded-full bg-emerald-500" /> On Job · {stats.onJobCount}
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200">
-          <span className="w-2 h-2 rounded-full bg-slate-300" /> Free · {freeCount}
+          <span className="w-2 h-2 rounded-full bg-slate-300" /> Free · {stats.freeCount}
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
-          <span className="w-2 h-2 rounded-full bg-blue-500" /> Leave · {leaveCount}
+          <span className="w-2 h-2 rounded-full bg-blue-500" /> Leave · {stats.leaveCount}
         </div>
       </div>
 
-      {/* Heatmap grid */}
       <div className="overflow-x-auto -mx-1 px-1">
         <table className="w-full text-xs">
           <thead>
@@ -138,7 +70,7 @@ export default function CrewAvailabilityHeatmap() {
             </tr>
           </thead>
           <tbody>
-            {sortedStaff.slice(0, 30).map(s => {
+            {staff.slice(0, PREVIEW_COUNT).map(s => {
               const divColor = divMap[s.division_id]?.color || '#94a3b8';
               return (
                 <tr key={s.id} className="border-t border-slate-100">
@@ -171,29 +103,28 @@ export default function CrewAvailabilityHeatmap() {
             })}
           </tbody>
         </table>
-        {sortedStaff.length > 30 && (
+        {staff.length > PREVIEW_COUNT && (
           <p className="text-xs text-center text-slate-400 pt-2">
-            +{sortedStaff.length - 30} more crew members…
+            +{staff.length - PREVIEW_COUNT} more crew members…
           </p>
         )}
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
-        {[
-          { label: 'On Job', color: '#10b981' },
-          { label: 'Free', color: '#cbd5e1' },
-          { label: 'Annual Leave', color: '#3b82f6' },
-          { label: 'Sick', color: '#f43f5e' },
-          { label: 'Training', color: '#f59e0b' },
-          { label: 'Depot', color: '#64748b' },
-        ].map(l => (
+        {HEATMAP_LEGEND.map(l => (
           <div key={l.label} className="flex items-center gap-1 text-[10px] text-slate-500">
             <span className="w-2.5 h-2.5 rounded" style={{ background: l.color }} />
             {l.label}
           </div>
         ))}
       </div>
+
+      <button
+        onClick={() => navigate('/enterprise/crew-availability')}
+        className="w-full mt-3 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-600 transition"
+      >
+        View all crew <ArrowRight className="w-4 h-4" />
+      </button>
     </div>
   );
 }
