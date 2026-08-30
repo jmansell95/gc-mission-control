@@ -27,6 +27,7 @@ import IncentiveDashboard from '@/components/staff/IncentiveDashboard';
 import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import TrainingTab from '@/components/staff/TrainingTab';
 import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
+import AutoTimesheetStatus from '@/components/staff/AutoTimesheetStatus';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
@@ -252,6 +253,13 @@ export default function StaffProfile() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
           <ProfileStats staffId={staff.id} jobType={staff.team?.job_type} />
         </div>
+
+        {/* Zero-touch timesheet status — shows today's auto-built timesheet */}
+        {!viewingOther && staff?.id && (
+          <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
+            <AutoTimesheetStatus staffId={staff.id} />
+          </div>
+        )}
 
         {/* Scrollable single-line tab bar */}
         <div className="max-w-4xl mx-auto px-4 md:px-6 mt-5">
