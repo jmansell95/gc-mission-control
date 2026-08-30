@@ -19,8 +19,8 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight truncate">{title}</h1>
-              {subtitle && <p className="text-xs text-slate-500 truncate mt-0.5">{subtitle}</p>}
+              <h1 className="text-hub-title text-slate-900 tracking-tight truncate">{title}</h1>
+              {subtitle && <p className="text-hub-caption text-slate-500 truncate mt-0.5">{subtitle}</p>}
             </div>
           </div>
           {actions && (

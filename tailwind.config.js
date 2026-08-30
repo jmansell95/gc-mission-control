@@ -70,6 +70,21 @@ module.exports = {
   			display: ['var(--font-display)'],
   			mono: ['var(--font-mono)']
   		},
+  		spacing: {
+  			'hub-gap': 'var(--hub-gap)',
+  			'hub-gap-sm': 'var(--hub-gap-sm)',
+  			'hub-card-pad': 'var(--hub-card-pad)',
+  			'hub-card-pad-sm': 'var(--hub-card-pad-sm)'
+  		},
+  		fontSize: {
+  			'hub-title': ['var(--hub-title-size)', { lineHeight: '1.2', fontWeight: '700' }],
+  			'hub-section': ['var(--hub-section-size)', { lineHeight: '1.3', fontWeight: '700' }],
+  			'hub-body': ['var(--hub-body-size)', { lineHeight: '1.55' }],
+  			'hub-caption': ['var(--hub-caption-size)', { lineHeight: '1.4' }]
+  		},
+  		borderRadius: {
+  			'hub': 'var(--hub-radius)'
+  		},
   		keyframes: {
   			'accordion-down': {
   				from: {

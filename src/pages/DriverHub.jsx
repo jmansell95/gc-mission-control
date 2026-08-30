@@ -52,7 +52,6 @@ export default function DriverHub() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('runs');
   const [sub, setSub] = useState('board');
-  const [view, setView] = useState('board');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -128,6 +127,7 @@ export default function DriverHub() {
         <>
           <SubPills active={sub} onChange={setSub} pills={[
             { id: 'board', label: 'Board', icon: LayoutGrid },
+            { id: 'list', label: 'List', icon: List },
             { id: 'day-plan', label: 'Day Plan', icon: Clock },
             { id: 'route', label: 'Route View', icon: Navigation },
           ]} />
@@ -139,7 +139,7 @@ export default function DriverHub() {
           {sub !== 'day-plan' && (
             <>
               {/* Filter bar */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-3 md:p-4 space-y-3">
+              <div className="bg-white rounded-hub border border-slate-200 p-hub-card-pad-sm md:p-hub-card-pad space-y-3">
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -147,31 +147,21 @@ export default function DriverHub() {
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                       placeholder="Search by job, items, address, driver…"
-                      className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                      className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-hub-body focus:outline-none focus:border-emerald-500"
                     />
                   </div>
-                  {sub === 'board' && (
-                    <div className="flex bg-slate-100 rounded-xl p-1">
-                      <button onClick={() => setView('board')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'board' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>
-                        <LayoutGrid className="w-4 h-4" /> Board
-                      </button>
-                      <button onClick={() => setView('list')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${view === 'list' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}>
-                        <List className="w-4 h-4" /> List
-                      </button>
-                    </div>
-                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {typeFilters.map(f => (
                     <button key={f.value} onClick={() => setTypeFilter(f.value)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${typeFilter === f.value ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-hub-caption font-medium transition ${typeFilter === f.value ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       <f.icon className="w-3.5 h-3.5" />{f.label}
                     </button>
                   ))}
                   <span className="w-px bg-slate-200 my-1" />
                   {dateFilters.map(f => (
                     <button key={f.value} onClick={() => setDateFilter(f.value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${dateFilter === f.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                      className={`px-3 py-1.5 rounded-lg text-hub-caption font-medium transition ${dateFilter === f.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       {f.label}
                     </button>
                   ))}
@@ -179,7 +169,7 @@ export default function DriverHub() {
                     <>
                       <span className="w-px bg-slate-200 my-1" />
                       <select value={driverFilter} onChange={e => setDriverFilter(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 border-0 focus:outline-none">
+                        className="px-3 py-1.5 rounded-lg text-hub-caption font-medium bg-slate-100 text-slate-600 border-0 focus:outline-none">
                         <option value="all">All Drivers</option>
                         {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                       </select>
@@ -204,15 +194,15 @@ export default function DriverHub() {
                   {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-slate-200">
+                <div className="bg-white rounded-hub border border-slate-200">
                   <EmptyState icon={Truck} title="No runs found" message="Try adjusting your filters." />
                 </div>
               ) : sub === 'route' ? (
                 <DriverRunBoard deliveries={filtered} jobs={jobs} drivers={staff} onSelectDelivery={setSelected} />
-              ) : view === 'board' ? (
-                <DeliveryBoard deliveries={filtered} jobs={jobs} drivers={staff} onSelectDelivery={setSelected} />
-              ) : (
+              ) : sub === 'list' ? (
                 <DeliveryTable deliveries={filtered} jobs={jobs} drivers={staff} onSelectDelivery={setSelected} />
+              ) : (
+                <DeliveryBoard deliveries={filtered} jobs={jobs} drivers={staff} onSelectDelivery={setSelected} />
               )}
             </>
           )}

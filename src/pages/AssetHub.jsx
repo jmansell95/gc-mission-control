@@ -164,7 +164,7 @@ export default function AssetHub() {
   }), [equipment, category, compFilter, search, sourceFilter, depotOnly]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
       <PageHeader
         icon={Boxes}
         title="Assets Hub"
@@ -232,7 +232,7 @@ export default function AssetHub() {
       ) : (
         <>
           {/* Fleet health strip — refined brand card with sync + health visuals */}
-          <div className="insight-card rounded-2xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="insight-card rounded-hub px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex w-9 h-9 rounded-xl stat-gradient-brand items-center justify-center flex-shrink-0">
                 <ShieldCheck className="w-4 h-4 text-white" />
@@ -253,7 +253,7 @@ export default function AssetHub() {
 
           {/* Filters (inventory tab only) */}
           {view === 'inventory' && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 space-y-3">
+            <div className="bg-white rounded-hub border border-slate-200 shadow-sm p-hub-card-pad-sm space-y-3">
               {/* Category pills */}
               <div className="flex gap-1.5 flex-wrap">
                 {CATEGORIES.map(cat => {

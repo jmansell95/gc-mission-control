@@ -43,6 +43,22 @@
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 96 52% 22%;
+
+    /* === Unified Hub Design System tokens ===
+       Single source of truth for hub spacing, typography, and radii.
+       Every hub consumes these via the mapped Tailwind classes below
+       so text size, spacing, and layout are identical across the site. */
+    --hub-gap: 1rem;
+    --hub-gap-sm: 0.75rem;
+    --hub-card-pad: 1rem;
+    --hub-card-pad-sm: 0.75rem;
+    --hub-title-size: 1.125rem;
+    --hub-section-size: 0.9rem;
+    --hub-body-size: 0.875rem;
+    --hub-caption-size: 0.75rem;
+    --hub-radius: 1rem;
+    --hub-tab-h: 2.5rem;
+    --hub-kpi-h: 5rem;
   }
 
   .dark {

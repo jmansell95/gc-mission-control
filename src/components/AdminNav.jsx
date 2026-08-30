@@ -188,19 +188,9 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
           );
         })}
       </div>
-      {/* Action cluster — bigger search, 2 assistant buttons, full-width collapse */}
+      {/* Action cluster — search + collapse toggle (Scan Asset & AI Hubs moved to profile dropdown) */}
       <div className={`${effectiveCollapsed ? 'px-1.5' : 'px-3'} pt-2 pb-2 border-t border-white/10 space-y-2`}>
         {!effectiveCollapsed && <GlobalSearch />}
-        <button onClick={openScanner} type="button" title="Scan Asset"
-          className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-white/10 text-white hover:bg-white/20 active:scale-[0.98] transition cursor-pointer touch-manipulation select-none ring-1 ring-white/15">
-          <ScanLine className="w-4 h-4 flex-shrink-0 text-[#8DC63F]" />
-          {!effectiveCollapsed && <span className="text-xs font-bold">Scan Asset</span>}
-        </button>
-        <button onClick={openHub} type="button" title="AI Hubs"
-          className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white hover:opacity-90 active:scale-[0.98] transition cursor-pointer touch-manipulation select-none shadow-lg glow-brand">
-          <Sparkles className="w-4 h-4 flex-shrink-0" />
-          {!effectiveCollapsed && <span className="text-xs font-bold">AI Hubs</span>}
-        </button>
         {/* Collapse toggle — desktop only (hidden on tablet where icon-rail is always on) */}
         {!isTablet && (
           <button onClick={toggleCollapsed} type="button" title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -266,6 +256,14 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                         <Truck className="w-4 h-4 text-slate-400" /> Driver Hub
                       </button>
                     )}
+                    <button onClick={() => { openScanner(); setProfileMenuOpen(false); }} type="button"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      <ScanLine className="w-4 h-4 text-[#2E5A1A]" /> Scan Asset
+                    </button>
+                    <button onClick={() => { openHub(); setProfileMenuOpen(false); }} type="button"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      <Sparkles className="w-4 h-4 text-[#2E5A1A]" /> AI Hubs
+                    </button>
                     <button onClick={() => { navigate('/reports'); setProfileMenuOpen(false); }} type="button"
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <FileBarChart className="w-4 h-4 text-slate-400" /> Reports Hub

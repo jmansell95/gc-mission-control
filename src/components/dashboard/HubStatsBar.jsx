@@ -43,7 +43,7 @@ export default function HubStatsBar({ tiles = [], columns }) {
           <Wrapper
             key={i}
             onClick={tile.onClick}
-            className={`insight-card rounded-xl p-3 text-left transition ${tile.onClick ? 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}
+            className={`insight-card rounded-hub p-hub-card-pad-sm text-left transition ${tile.onClick ? 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}
           >
             <div className="flex items-center gap-2 mb-1">
               {Icon && (
@@ -51,10 +51,10 @@ export default function HubStatsBar({ tiles = [], columns }) {
                   <Icon className={`w-3.5 h-3.5 ${c.iconText}`} />
                 </div>
               )}
-              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">{tile.label}</p>
+              <p className="text-hub-caption text-slate-500 font-medium uppercase tracking-wide truncate">{tile.label}</p>
             </div>
-            <p className={`text-lg sm:text-xl font-bold tabular-nums ${c.value} truncate`}>{tile.value}</p>
-            {tile.sublabel && <p className="text-[10px] text-slate-400 mt-0.5 truncate">{tile.sublabel}</p>}
+            <p className={`text-hub-title font-bold tabular-nums ${c.value} truncate`}>{tile.value}</p>
+            {tile.sublabel && <p className="text-hub-caption text-slate-400 mt-0.5 truncate">{tile.sublabel}</p>}
           </Wrapper>
         );
       })}

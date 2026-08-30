@@ -148,7 +148,7 @@ export default function ReportingHub() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
       <ReportHeroHeader onBuildCustom={() => setShowCustom(true)} />
 
       {/* Summary stat tiles — hidden on special tabs */}

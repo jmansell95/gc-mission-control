@@ -30,7 +30,7 @@ export default function HubShell({
   showBack = true,
 }) {
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
       {showBack && (
         <div className="flex items-center">
           <BackButton fallback={backTo || '/admin'} />
@@ -47,7 +47,7 @@ export default function HubShell({
         <TabBar tabs={tabs} activeTab={activeTab} onChange={onTabChange} />
       ) : null}
 
-      <div className="space-y-3 sm:space-y-4">{children}</div>
+      <div className="space-y-hub-gap-sm sm:space-y-hub-gap">{children}</div>
     </div>
   );
 }
