@@ -260,6 +260,12 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <User className="w-4 h-4 text-slate-400" /> My Profile
                     </button>
+                    {profile?.delivery_dashboard_enabled && (
+                      <button onClick={() => { navigate('/deliveries'); setProfileMenuOpen(false); }} type="button"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                        <Truck className="w-4 h-4 text-slate-400" /> Driver Hub
+                      </button>
+                    )}
                     <button onClick={() => { navigate('/reports'); setProfileMenuOpen(false); }} type="button"
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <FileBarChart className="w-4 h-4 text-slate-400" /> Reports Hub

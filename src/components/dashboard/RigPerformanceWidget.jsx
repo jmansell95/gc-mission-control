@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Drill, Ruler, Loader2, Wrench, ChevronRight,
-  PoundSterling, HardHat, Briefcase, Clock,
+  PoundSterling, HardHat, Briefcase, Clock, CheckCircle2, MapPin,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -19,14 +19,30 @@ const fmtGBPm = (v) => {
   return '£' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 }) + '/m';
 };
 
+function fmtDuration(ms) {
+  const mins = Math.max(0, Math.floor(ms / 60000));
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}h ${m}m`;
+}
+
 /**
- * RigPerformanceWidget — today's rigs as box cards in a 2-column grid.
- * Each card shows the crew (Lead Driller + Second Man), a full earnings
- * breakdown (meterage × rate, day rate, hours), and a "Job Breakdown"
- * button that navigates to the job's financials tab.
+ * RigPerformanceWidget — today's rigs with live progressive earnings.
+ *
+ * Each rig card shows one combined "Daily Cost" figure that accrues as the
+ * shift progresses: crew day rate × progress fraction + meterage revenue.
+ * Visual states: Scheduled (grey), On Site (green/pulse), Completed (solid
+ * green), Assigned (muted — on a job but not deployed today).
  */
 export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const [now, setNow] = useState(Date.now());
+
+  // Live tick — updates every 60s so progressive revenue stays current
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
 
   const { data: assignments = [], isLoading } = useQuery({
     queryKey: ['rig-perf-assignments', todayStr],
@@ -43,15 +59,8 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
     staleTime: 60000,
   });
 
-  const drillingTeamIds = useMemo(() => {
-    const ids = new Set();
-    teams.forEach(t => {
-      if (t.job_type === 'cp_drilling' || t.job_type === 'rotary_drilling') ids.add(t.id);
-    });
-    return ids;
-  }, [teams]);
-
-  const rigDayRate = useMemo(() => {
+  // Crew day rate per rig from the Master Price List (rig + crew combined)
+  const rigCrewDayRate = useMemo(() => {
     const map = {};
     rigs.forEach(rig => {
       const match = findRigRateCardItem(rig, rateCards);
@@ -60,83 +69,144 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
     return map;
   }, [rigs, rateCards]);
 
+  const drillingTeamIds = useMemo(() => {
+    const ids = new Set();
+    teams.forEach(t => {
+      if (t.job_type === 'cp_drilling' || t.job_type === 'rotary_drilling') ids.add(t.id);
+    });
+    return ids;
+  }, [teams]);
+
   const rigStats = useMemo(() => {
     const byRig = {};
 
+    // Source 1: JobAssetAssignments — rigs assigned to active jobs (may not be on site today)
     jobAssetAssignments.forEach(jaa => {
       const rig = rigs.find(r => r.id === jaa.asset_id || r.id === jaa.site_asset_id);
       if (!rig) return;
       if (jaa.status === 'returned') return;
       const job = jobs.find(j => j.id === jaa.job_id);
       if (job && (job.status === 'completed' || job.status === 'cancelled')) return;
-      if (!byRig[rig.id]) byRig[rig.id] = { assignments: [], job, totalMeterage: 0, totalRevenue: 0 };
+      if (!byRig[rig.id]) byRig[rig.id] = { rotaAssignments: [], job, totalMeterage: 0, hasJAA: true };
+      byRig[rig.id].hasJAA = true;
+      if (!byRig[rig.id].job) byRig[rig.id].job = job;
     });
 
+    // Source 2: today's RotaAssignments — rigs actually scheduled today
     assignments.forEach(a => {
       if (!a.rig_asset_id) return;
       const job = jobs.find(j => j.id === a.job_id);
       if (job && (job.status === 'completed' || job.status === 'cancelled')) return;
-      if (!byRig[a.rig_asset_id]) byRig[a.rig_asset_id] = { assignments: [], job, totalMeterage: 0, totalRevenue: 0 };
-      byRig[a.rig_asset_id].assignments.push(a);
+      if (!byRig[a.rig_asset_id]) byRig[a.rig_asset_id] = { rotaAssignments: [], job, totalMeterage: 0, hasJAA: false };
+      byRig[a.rig_asset_id].rotaAssignments.push(a);
       if (!byRig[a.rig_asset_id].job) byRig[a.rig_asset_id].job = job;
     });
 
+    // Calculate per-rig stats
     Object.entries(byRig).forEach(([rigId, data]) => {
       const job = data.job;
       const disciplines = Array.isArray(job?.disciplines) ? job.disciplines : [];
       const drillDisc = disciplines.find(d => d.type === 'drilling') || {};
-      const rigMeterage = data.assignments.reduce((s, a) => s + (Number(a.meterage) || 0), 0);
-      let rev = 0;
-      let revMethod = 'day_rate';
-      let meterageRate = 0;
-      let dayRate = 0;
-      if (job) {
-        meterageRate = drillDisc.meterage_rate || job.meterage_rate || 0;
-        dayRate = drillDisc.unit_price || job.unit_price || rigDayRate[rigId] || 0;
-        revMethod = drillDisc.revenue_method || job.revenue_method || 'day_rate';
-        if (revMethod === 'meterage_rate' && meterageRate && rigMeterage) {
-          rev = rigMeterage * meterageRate;
-        } else if (revMethod === 'day_rate') {
-          rev = dayRate || rigDayRate[rigId] || 0;
-        } else if (revMethod === 'flat_fee' && job.client_charge) {
-          rev = job.client_charge;
-        } else if (meterageRate && rigMeterage) {
-          rev = rigMeterage * meterageRate;
-          revMethod = 'meterage_rate';
-        } else {
-          rev = rigDayRate[rigId] || 0;
-          revMethod = 'day_rate';
+
+      // Meterage from rota assignments
+      const rigMeterage = data.rotaAssignments.reduce((s, a) => s + (Number(a.meterage) || 0), 0);
+
+      // Revenue method and rates
+      const meterageRate = drillDisc.meterage_rate || job?.meterage_rate || 0;
+      const crewDayRate = drillDisc.unit_price || job?.unit_price || rigCrewDayRate[rigId] || 0;
+      let revMethod = drillDisc.revenue_method || job?.revenue_method || 'day_rate';
+
+      // Determine shift state
+      const hasStarted = data.rotaAssignments.some(a => a.started_at || a.arrived_on_site_at);
+      const isCompleted = data.rotaAssignments.some(a => a.status === 'completed' || a.completed_at);
+      const hasRotaToday = data.rotaAssignments.length > 0;
+
+      let state = 'assigned';
+      if (hasRotaToday) {
+        if (isCompleted) state = 'completed';
+        else if (hasStarted) state = 'on_site';
+        else state = 'scheduled';
+      }
+
+      // Planned shift hours from first rota assignment's start/end time
+      let plannedShiftHours = 8;
+      const firstA = data.rotaAssignments[0];
+      if (firstA?.start_time && firstA?.end_time) {
+        const [sh, sm] = firstA.start_time.split(':').map(Number);
+        const [eh, em] = firstA.end_time.split(':').map(Number);
+        plannedShiftHours = ((eh + em / 60) - (sh + sm / 60));
+        if (plannedShiftHours <= 0) plannedShiftHours += 24;
+        if (plannedShiftHours <= 0 || plannedShiftHours > 24) plannedShiftHours = 8;
+      }
+
+      // Progress fraction
+      let progressFraction = 0;
+      let hoursWorkedSoFar = 0;
+      let shiftStart = null;
+
+      if (hasStarted) {
+        const startTimes = data.rotaAssignments
+          .map(a => a.started_at || a.arrived_on_site_at)
+          .filter(Boolean)
+          .sort();
+        shiftStart = startTimes[0] ? new Date(startTimes[0]).getTime() : null;
+
+        if (isCompleted) {
+          progressFraction = 1;
+          hoursWorkedSoFar = plannedShiftHours;
+        } else if (shiftStart) {
+          hoursWorkedSoFar = (now - shiftStart) / (3600 * 1000);
+          progressFraction = Math.min(hoursWorkedSoFar / plannedShiftHours, 1);
         }
       }
-      data.totalRevenue = rev;
+
+      // Revenue calculation — only when on site or completed
+      let dayRateRevenue = 0;
+      let meterageRevenue = 0;
+      let totalRevenue = 0;
+
+      if (state === 'on_site' || state === 'completed') {
+        if (revMethod === 'meterage_rate' && meterageRate) {
+          meterageRevenue = rigMeterage * meterageRate;
+          dayRateRevenue = crewDayRate * progressFraction;
+        } else if (revMethod === 'day_rate') {
+          dayRateRevenue = crewDayRate * progressFraction;
+        } else if (revMethod === 'flat_fee' && job?.client_charge) {
+          dayRateRevenue = Number(job.client_charge) * progressFraction;
+        } else if (meterageRate && rigMeterage) {
+          meterageRevenue = rigMeterage * meterageRate;
+          dayRateRevenue = crewDayRate * progressFraction;
+          revMethod = 'meterage_rate';
+        } else {
+          dayRateRevenue = crewDayRate * progressFraction;
+          revMethod = 'day_rate';
+        }
+        totalRevenue = dayRateRevenue + meterageRevenue;
+      }
+
+      data.state = state;
+      data.totalRevenue = totalRevenue;
+      data.dayRateRevenue = dayRateRevenue;
+      data.meterageRevenue = meterageRevenue;
       data.totalMeterage = rigMeterage;
       data.revMethod = revMethod;
       data.meterageRate = meterageRate;
-      data.dayRate = dayRate;
+      data.crewDayRate = crewDayRate;
+      data.progressFraction = progressFraction;
+      data.hoursWorkedSoFar = hoursWorkedSoFar;
+      data.plannedShiftHours = plannedShiftHours;
+      data.shiftStart = shiftStart;
+      data.hasRotaToday = hasRotaToday;
     });
 
     return Object.entries(byRig).map(([rigId, data]) => {
       const rig = rigs.find(r => r.id === rigId);
-      const rigAssignments = assignments.filter(a => a.rig_asset_id === rigId);
-      const jobAssignments = data.job
-        ? assignments.filter(a => a.job_id === data.job.id)
-        : data.assignments;
-      const crewSource = rigAssignments.length > 0 ? rigAssignments : jobAssignments;
+      const crewSource = data.rotaAssignments;
       const crew = crewSource.map(a => allStaff.find(s => s.id === a.staff_id)).filter(Boolean);
       const lead = crewSource.find(a => a.crew_role === 'lead_driller');
       const second = crewSource.find(a => a.crew_role === 'second_man');
       const leadDriller = lead ? allStaff.find(s => s.id === lead.staff_id) : null;
       const secondMan = second ? allStaff.find(s => s.id === second.staff_id) : null;
-
-      // Hours worked from the first assignment's start/end time
-      let hoursWorked = 0;
-      const firstA = crewSource[0];
-      if (firstA?.start_time && firstA?.end_time) {
-        const [sh, sm] = firstA.start_time.split(':').map(Number);
-        const [eh, em] = firstA.end_time.split(':').map(Number);
-        hoursWorked = (eh + em / 60) - (sh + sm / 60);
-        if (hoursWorked < 0) hoursWorked += 24;
-      }
 
       return {
         rigId,
@@ -145,16 +215,26 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         leadDriller,
         secondMan,
         job: data.job,
+        state: data.state,
         meterage: data.totalMeterage,
         revenue: data.totalRevenue,
+        dayRateRevenue: data.dayRateRevenue,
+        meterageRevenue: data.meterageRevenue,
         revMethod: data.revMethod,
         meterageRate: data.meterageRate,
-        dayRate: data.dayRate,
-        hoursWorked,
-        assignmentCount: data.assignments.length,
+        crewDayRate: data.crewDayRate,
+        progressFraction: data.progressFraction,
+        hoursWorkedSoFar: data.hoursWorkedSoFar,
+        plannedShiftHours: data.plannedShiftHours,
+        shiftStart: data.shiftStart,
+        hasRotaToday: data.hasRotaToday,
+        firstAssignment: data.rotaAssignments[0],
       };
-    }).sort((a, b) => b.revenue - a.revenue);
-  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, rigDayRate]);
+    }).sort((a, b) => {
+      const stateOrder = { completed: 0, on_site: 1, scheduled: 2, assigned: 3 };
+      return (stateOrder[a.state] - stateOrder[b.state]) || (b.revenue - a.revenue);
+    });
+  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, rigCrewDayRate, now]);
 
   const drillingCrewsOut = useMemo(() => {
     const jobsWithRigs = new Set(
@@ -171,9 +251,12 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
     return crewOut.size;
   }, [assignments, allStaff, drillingTeamIds, jobAssetAssignments]);
 
-  const totalRevenue = rigStats.reduce((sum, r) => sum + r.revenue, 0);
+  // Header total — only on-site and completed rigs count
+  const totalRevenue = rigStats.filter(r => r.state === 'on_site' || r.state === 'completed').reduce((sum, r) => sum + r.revenue, 0);
   const totalMeterage = rigStats.reduce((sum, r) => sum + r.meterage, 0);
   const activeRigCount = rigStats.length;
+  const onSiteCount = rigStats.filter(r => r.state === 'on_site').length;
+  const scheduledCount = rigStats.filter(r => r.state === 'scheduled').length;
 
   if (isLoading) {
     return (
@@ -225,7 +308,9 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             </div>
             <div>
               <h3 className="text-sm font-bold">Rigs on Site Today</h3>
-              <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')} · {activeRigCount} rig{activeRigCount !== 1 ? 's' : ''} deployed</p>
+              <p className="text-[11px] text-white/70">
+                {format(new Date(), 'EEE dd MMM')} · {onSiteCount} on site{scheduledCount > 0 ? ` · ${scheduledCount} scheduled` : ''}
+              </p>
             </div>
           </div>
           <div className="text-right">
@@ -238,103 +323,182 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
 
       {/* Rig cards — 2-column grid */}
       <div className="p-2.5 grid grid-cols-2 gap-2.5">
-        {rigStats.map((stat, i) => (
-          <motion.div
-            key={stat.rigId}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.04 }}
-            className="rounded-xl border border-slate-200/80 bg-white overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow"
-          >
-            {/* Card header — rig name */}
-            <div className="px-3 py-2 bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 border-b border-slate-100">
-              <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                  <Drill className="w-3.5 h-3.5 text-[#2E5A1A]" />
+        {rigStats.map((stat, i) => {
+          const isScheduled = stat.state === 'scheduled';
+          const isOnSite = stat.state === 'on_site';
+          const isCompleted = stat.state === 'completed';
+          const isAssigned = stat.state === 'assigned';
+
+          // Visual state classes
+          const cardBorder = isOnSite
+            ? 'border-emerald-300 ring-1 ring-emerald-200'
+            : isCompleted
+            ? 'border-emerald-400'
+            : isScheduled
+            ? 'border-slate-200'
+            : 'border-slate-200 border-dashed';
+          const headerBg = isOnSite
+            ? 'bg-gradient-to-br from-emerald-50 to-green-50'
+            : isCompleted
+            ? 'bg-gradient-to-br from-emerald-50 to-emerald-100'
+            : isScheduled
+            ? 'bg-gradient-to-br from-slate-50 to-slate-100'
+            : 'bg-slate-50';
+          const revenueColor = isOnSite
+            ? 'text-emerald-700'
+            : isCompleted
+            ? 'text-emerald-700'
+            : 'text-slate-400';
+
+          // Subtitle text
+          let subtitle = null;
+          if (isScheduled && stat.firstAssignment?.start_time) {
+            subtitle = `Starts at ${stat.firstAssignment.start_time}`;
+          } else if (isOnSite && stat.shiftStart) {
+            subtitle = `On site · ${fmtDuration(now - stat.shiftStart)}`;
+          } else if (isCompleted) {
+            subtitle = 'Shift complete';
+          } else if (isAssigned) {
+            subtitle = 'Assigned · not on site';
+          }
+
+          return (
+            <motion.div
+              key={stat.rigId}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04 }}
+              className={`rounded-xl border ${cardBorder} bg-white overflow-hidden flex flex-col shadow-sm hover:shadow-md transition-shadow`}
+            >
+              {/* Card header — rig name + state indicator */}
+              <div className={`px-3 py-2 ${headerBg} border-b border-slate-100`}>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    isOnSite ? 'bg-emerald-500' : isCompleted ? 'bg-emerald-600' : isScheduled ? 'bg-slate-300' : 'bg-slate-200'
+                  }`}>
+                    {isCompleted ? (
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    ) : isOnSite ? (
+                      <Drill className="w-3.5 h-3.5 text-white" />
+                    ) : (
+                      <Clock className="w-3.5 h-3.5 text-slate-600" />
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-slate-900 truncate flex-1">{stat.rig?.name || 'Unknown Rig'}</p>
+                  {stat.rig?.rig_type && stat.rig.rig_type !== 'n/a' && (
+                    <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{stat.rig.rig_type}</span>
+                  )}
+                  {isOnSite && (
+                    <span className="relative flex h-2 w-2 flex-shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                  )}
                 </div>
-                <p className="text-xs font-bold text-slate-900 truncate flex-1">{stat.rig?.name || 'Unknown Rig'}</p>
-                {stat.rig?.rig_type && stat.rig.rig_type !== 'n/a' && (
-                  <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{stat.rig.rig_type}</span>
+                {subtitle && (
+                  <p className={`text-[9px] mt-1 flex items-center gap-1 ${
+                    isOnSite ? 'text-emerald-600 font-semibold' : isCompleted ? 'text-emerald-600 font-semibold' : 'text-slate-400'
+                  }`}>
+                    {isOnSite && <MapPin className="w-2.5 h-2.5" />}
+                    {isScheduled && <Clock className="w-2.5 h-2.5" />}
+                    {subtitle}
+                  </p>
                 )}
               </div>
-            </div>
 
-            {/* Crew */}
-            <div className="px-3 py-2 space-y-1 border-b border-slate-50">
-              <div className="flex items-center gap-1.5">
-                <HardHat className="w-3 h-3 text-emerald-600 flex-shrink-0" />
-                <p className="text-[10px] text-slate-500 truncate">
-                  <span className="font-bold text-slate-700">Lead:</span> {stat.leadDriller?.name || <span className="text-slate-400">—</span>}
+              {/* Crew */}
+              <div className="px-3 py-2 space-y-1 border-b border-slate-50">
+                <div className="flex items-center gap-1.5">
+                  <HardHat className="w-3 h-3 text-emerald-600 flex-shrink-0" />
+                  <p className="text-[10px] text-slate-500 truncate">
+                    <span className="font-bold text-slate-700">Lead:</span> {stat.leadDriller?.name || <span className="text-slate-400">—</span>}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <HardHat className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                  <p className="text-[10px] text-slate-500 truncate">
+                    <span className="font-bold text-slate-700">Second:</span> {stat.secondMan?.name || <span className="text-slate-400">—</span>}
+                  </p>
+                </div>
+                {!stat.leadDriller && !stat.secondMan && stat.crew.length === 0 && (
+                  <p className="text-[9px] text-amber-600 font-medium pl-4">No crew assigned</p>
+                )}
+              </div>
+
+              {/* Earnings breakdown */}
+              <div className="px-3 py-2 bg-slate-50/40 flex-1">
+                <p className="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-0.5">
+                  {isCompleted ? 'Day total' : isOnSite ? 'Earned so far' : 'Daily cost'}
                 </p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <HardHat className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                <p className="text-[10px] text-slate-500 truncate">
-                  <span className="font-bold text-slate-700">Second:</span> {stat.secondMan?.name || (stat.crew.length > 0 ? <span className="text-slate-400">—</span> : <span className="text-slate-400">—</span>)}
-                </p>
-              </div>
-              {!stat.leadDriller && !stat.secondMan && stat.crew.length === 0 && (
-                <p className="text-[9px] text-amber-600 font-medium pl-4">No crew assigned</p>
-              )}
-            </div>
+                <div className="flex items-center gap-1">
+                  <PoundSterling className={`w-3.5 h-3.5 ${isOnSite || isCompleted ? 'text-emerald-600' : 'text-slate-300'}`} />
+                  <p className={`text-base font-bold tabular-nums leading-tight ${revenueColor}`}>{fmtGBP(stat.revenue)}</p>
+                  {(isOnSite || isCompleted) && stat.crewDayRate > 0 && (
+                    <span className="text-[8px] text-slate-400 font-medium">/ {fmtGBP(stat.crewDayRate)} day</span>
+                  )}
+                </div>
 
-            {/* Earnings breakdown */}
-            <div className="px-3 py-2 bg-slate-50/40 flex-1">
-              <p className="text-[8px] text-slate-400 uppercase font-bold tracking-wide mb-0.5">Earned today</p>
-              <div className="flex items-center gap-1">
-                <PoundSterling className="w-3.5 h-3.5 text-emerald-600" />
-                <p className="text-base font-bold text-emerald-700 tabular-nums leading-tight">{fmtGBP(stat.revenue)}</p>
-              </div>
-              {/* Breakdown details */}
-              <div className="mt-1.5 space-y-0.5">
-                {stat.revMethod === 'meterage_rate' && stat.meterage > 0 && (
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                    <Ruler className="w-2.5 h-2.5 text-amber-500" />
-                    <span className="tabular-nums">{stat.meterage.toFixed(1)}m × {fmtGBPm(stat.meterageRate)}</span>
+                {/* Progress bar — on site or completed */}
+                {(isOnSite || isCompleted) && stat.crewDayRate > 0 && (
+                  <div className="mt-1.5 h-1 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 ${isCompleted ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                      style={{ width: `${Math.round(stat.progressFraction * 100)}%` }}
+                    />
                   </div>
                 )}
-                {stat.revMethod === 'day_rate' && (
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                    <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
-                    <span>Day rate: {fmtGBP(stat.dayRate)}</span>
-                  </div>
-                )}
-                {stat.revMethod === 'flat_fee' && (
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                    <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
-                    <span>Flat fee</span>
-                  </div>
-                )}
-                {stat.meterage > 0 && stat.revMethod !== 'meterage_rate' && (
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                    <Ruler className="w-2.5 h-2.5 text-amber-500" />
-                    <span className="tabular-nums">{stat.meterage.toFixed(1)}m drilled</span>
-                  </div>
-                )}
-                {stat.hoursWorked > 0 && (
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500">
-                    <Clock className="w-2.5 h-2.5 text-blue-500" />
-                    <span className="tabular-nums">{stat.hoursWorked.toFixed(1)}h shift</span>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            {/* Job Breakdown button */}
-            <div className="p-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => onJobBreakdown?.(stat.job)}
-                disabled={!stat.job}
-                className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-[10px] font-bold hover:bg-[#1c4a12] transition disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Briefcase className="w-3 h-3" />
-                Job Breakdown
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
+                {/* Breakdown details */}
+                <div className="mt-1.5 space-y-0.5">
+                  {stat.revMethod === 'meterage_rate' && stat.meterage > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                      <Ruler className="w-2.5 h-2.5 text-amber-500" />
+                      <span className="tabular-nums">{stat.meterage.toFixed(1)}m × {fmtGBPm(stat.meterageRate)}</span>
+                    </div>
+                  )}
+                  {stat.revMethod === 'day_rate' && stat.crewDayRate > 0 && (isOnSite || isCompleted) && (
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                      <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
+                      <span>Crew rate: {fmtGBP(stat.crewDayRate)}/day</span>
+                    </div>
+                  )}
+                  {stat.revMethod === 'flat_fee' && (
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                      <PoundSterling className="w-2.5 h-2.5 text-slate-400" />
+                      <span>Flat fee</span>
+                    </div>
+                  )}
+                  {stat.meterage > 0 && stat.revMethod !== 'meterage_rate' && (
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                      <Ruler className="w-2.5 h-2.5 text-amber-500" />
+                      <span className="tabular-nums">{stat.meterage.toFixed(1)}m drilled</span>
+                    </div>
+                  )}
+                  {isOnSite && stat.hoursWorkedSoFar > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500">
+                      <Clock className="w-2.5 h-2.5 text-blue-500" />
+                      <span className="tabular-nums">{stat.hoursWorkedSoFar.toFixed(1)}h / {stat.plannedShiftHours.toFixed(0)}h shift</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Job Breakdown button */}
+              <div className="p-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => onJobBreakdown?.(stat.job)}
+                  disabled={!stat.job}
+                  className="w-full flex items-center justify-center gap-1 px-2 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-[10px] font-bold hover:bg-[#1c4a12] transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Briefcase className="w-3 h-3" />
+                  Job Breakdown
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
