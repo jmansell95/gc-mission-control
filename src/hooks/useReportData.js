@@ -9,6 +9,11 @@ import { base44 } from '@/api/base44Client';
 export function useReportData(filters = {}) {
   const divQuery = filters.divisionId ? { division_id: filters.divisionId } : {};
 
+  const divisions = useQuery({
+    queryKey: ['report-divisions'],
+    queryFn: () => base44.entities.Division.list('-sort_order', 100),
+  });
+
   const jobs = useQuery({
     queryKey: ['report-jobs', filters.divisionId],
     queryFn: () => base44.entities.Job.filter(divQuery, '-created_date', 500),
@@ -52,6 +57,7 @@ export function useReportData(filters = {}) {
   const isLoading = jobs.isLoading || staff.isLoading || vehicles.isLoading || assets.isLoading;
 
   return {
+    divisions: divisions.data || [],
     jobs: jobs.data || [],
     staff: staff.data || [],
     vehicles: vehicles.data || [],

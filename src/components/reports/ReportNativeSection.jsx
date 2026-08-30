@@ -13,7 +13,32 @@ import ReportChartCard from './ReportChartCard';
 export default function ReportNativeSection({ hub, filters }) {
   const data = useReportData(filters);
 
-  const filteredJobs = useMemo(() => filterJobsByDate(data.jobs, filters.dateFrom, filters.dateTo), [data.jobs, filters.dateFrom, filters.dateTo]);
+  const filteredJobs = useMemo(() => {
+    let result = filterJobsByDate(data.jobs, filters.dateFrom, filters.dateTo);
+    if (filters.clientId) result = result.filter(j => j.client_id === filters.clientId);
+    if (filters.jobTypeId) result = result.filter(j => j.job_type === filters.jobTypeId);
+    return result;
+  }, [data.jobs, filters.dateFrom, filters.dateTo, filters.clientId, filters.jobTypeId]);
+
+  const filteredStaff = useMemo(() => {
+    if (!filters.teamId) return data.staff;
+    return data.staff.filter(s => s.team_id === filters.teamId);
+  }, [data.staff, filters.teamId]);
+
+  const filteredTimesheets = useMemo(() => {
+    let result = data.timesheets;
+    if (filters.dateFrom) result = result.filter(t => !t.date || t.date >= filters.dateFrom);
+    if (filters.dateTo) result = result.filter(t => !t.date || t.date <= filters.dateTo);
+    if (filters.teamId) {
+      const staffIds = new Set(filteredStaff.map(s => s.id));
+      result = result.filter(t => staffIds.has(t.staff_id));
+    }
+    if (filters.clientId || filters.jobTypeId) {
+      const jobIds = new Set(filteredJobs.map(j => j.id));
+      result = result.filter(t => !t.job_id || jobIds.has(t.job_id));
+    }
+    return result;
+  }, [data.timesheets, filters.dateFrom, filters.dateTo, filters.teamId, filters.clientId, filters.jobTypeId, filteredStaff, filteredJobs]);
 
   const charts = useMemo(() => {
     const all = [
@@ -23,7 +48,7 @@ export default function ReportNativeSection({ hub, filters }) {
       { id: 'jobs-div', title: 'Jobs by Business Stream', icon: Briefcase, data: tally(filteredJobs, 'division_id'), type: 'bar', rows: filteredJobs },
       { id: 'revenue', title: 'AFP Revenue (Agreed)', icon: PoundSterling, data: [{ name: 'Total', value: sumField(data.afps, 'agreed_total') || sumField(data.afps, 'total_claimed') }], type: 'stat', rows: data.afps, valuePrefix: '£',
         drillDown: { route: '/billing' } },
-      { id: 'staff-team', title: 'Staff by Team', icon: Users, data: tally(data.staff, 'team_id'), type: 'bar', rows: data.staff,
+      { id: 'staff-team', title: 'Staff by Team', icon: Users, data: tally(filteredStaff, 'team_id'), type: 'bar', rows: filteredStaff,
         drillDown: { route: '/staff' } },
       { id: 'fleet-status', title: 'Fleet by Geotab Sync', icon: Car, data: tally(data.vehicles, 'geotab_sync_status'), type: 'pie', rows: data.vehicles,
         drillDown: { route: '/fleet' } },
@@ -38,7 +63,7 @@ export default function ReportNativeSection({ hub, filters }) {
       { id: 'afp-revenue', title: 'AFP Agreed Total', icon: PoundSterling, data: [{ name: 'Agreed', value: sumField(data.afps, 'agreed_total') }], type: 'stat', rows: data.afps, valuePrefix: '£' },
       { id: 'job-profit', title: 'Job Profitability', icon: TrendingUp, data: filteredJobs.map(j => ({ name: j.name || '—', value: (Number(j.client_charge) || 0) - (Number(j.actual_cost) || 0) })).sort((a, b) => b.value - a.value).slice(0, 10), type: 'bar', rows: filteredJobs,
         drillDown: { route: '/billing' } },
-      { id: 'timesheet-hours', title: 'Timesheet Hours', icon: Users, data: [{ name: 'Total Hours', value: sumField(data.timesheets, 'total_hours') }], type: 'stat', rows: data.timesheets },
+      { id: 'timesheet-hours', title: 'Timesheet Hours', icon: Users, data: [{ name: 'Total Hours', value: sumField(filteredTimesheets, 'total_hours') }], type: 'stat', rows: filteredTimesheets },
 
       // ── Jobs ──
       { id: 'jobs-type', title: 'Jobs by Type', icon: Briefcase, data: tally(filteredJobs, 'job_type'), type: 'bar', rows: filteredJobs },
@@ -50,9 +75,9 @@ export default function ReportNativeSection({ hub, filters }) {
       { id: 'fleet-fuel', title: 'Fleet by Fuel Type', icon: Car, data: tally(data.vehicles, 'fuel_type'), type: 'pie', rows: data.vehicles },
 
       // ── Staff ──
-      { id: 'staff-status', title: 'Staff by Status', icon: Users, data: tally(data.staff, 'status'), type: 'pie', rows: data.staff,
+      { id: 'staff-status', title: 'Staff by Status', icon: Users, data: tally(filteredStaff, 'status'), type: 'pie', rows: filteredStaff,
         drillDown: { route: '/staff' } },
-      { id: 'staff-role', title: 'Staff by Job Title', icon: Users, data: tally(data.staff, 'job_title'), type: 'bar', rows: data.staff },
+      { id: 'staff-role', title: 'Staff by Job Title', icon: Users, data: tally(filteredStaff, 'job_title'), type: 'bar', rows: filteredStaff },
 
       // ── Compliance ──
       { id: 'comp-status', title: 'Asset Compliance Status', icon: ShieldCheck, data: tally(data.assets, 'compliance_status'), type: 'pie', rows: data.assets,

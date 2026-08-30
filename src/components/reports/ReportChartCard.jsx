@@ -6,6 +6,8 @@ import {
 } from 'recharts';
 import { Download, ChevronRight } from 'lucide-react';
 import { downloadCsv } from '@/utils/csvExport';
+// Note: chart cards still use the legacy downloadCsv for raw row dumps.
+// The structured CSV export is used by the main report export buttons.
 
 const COLORS = ['#2E5A1A', '#8DC63F', '#0ea5e9', '#f59e0b', '#e11d48', '#8b5cf6', '#14b8a6', '#f97316'];
 
