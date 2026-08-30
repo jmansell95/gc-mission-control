@@ -218,6 +218,19 @@
       "type": "boolean",
       "default": false,
       "description": "True once the staff member has completed the first-login profile setup screen (photo + phone). When false, Home.jsx routes them to /onboarding instead of their landing page so new invitees finish their profile before entering the app. Existing staff are backfilled to true so only genuinely new users see the gate."
+    },
+    "tracking_consent_signed_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the staff member signed the GPS tracking consent form, acknowledging that their location is tracked during working hours (home→site and site→home only). Required before zero-touch GPS tracking is activated."
+    },
+    "tracking_consent_signature_data_url": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the staff member's drawn signature on the GPS tracking consent form. Captured via the SignaturePad component so there is a legally defensible audit trail for location tracking."
+    },
+    "tracking_consent_version": {
+      "type": "string",
+      "default": "v1_2026",
+      "description": "Version of the tracking consent agreement the staff member signed. When the consent text is updated, this version is bumped so staff are re-prompted to sign the new version."
     }
   },
   "required": [

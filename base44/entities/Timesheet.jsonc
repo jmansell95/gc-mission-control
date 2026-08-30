@@ -76,10 +76,11 @@
       "enum": [
         "on_site",
         "travel_to",
-        "travel_from"
+        "travel_from",
+        "inter_site_travel"
       ],
       "default": "on_site",
-      "description": "Type of work entry. 'on_site' = normal task, 'travel_to' = travelling to site, 'travel_from' = travelling home from site."
+      "description": "Type of work entry. 'on_site' = normal task, 'travel_to' = travelling to site, 'travel_from' = travelling home from site, 'inter_site_travel' = travelling between two different job sites during the same day (chargeable to client)."
     },
     "source": {
       "type": "string",

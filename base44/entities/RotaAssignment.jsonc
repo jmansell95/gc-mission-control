@@ -190,6 +190,23 @@
     "notes": {
       "type": "string",
       "description": "Staff notes for this assignment"
+    },
+    "arrived_home_at": {
+      "type": "string",
+      "description": "ISO timestamp when the crew member arrived home after leaving site. Auto-stamped by the smart GPS geofence when they enter the home geofence (or hotel geofence for away jobs). Used to calculate travel-from-site duration and close the day's tracking window."
+    },
+    "inter_site_travel_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Total minutes spent travelling between different job sites during this assignment's day (e.g. Site A → Site B). Auto-calculated by the geofence engine from inter-site transitions. Chargeable to the client."
+    },
+    "end_of_day_signature_data_url": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the crew member's drawn signature at the end of the shift, confirming their tracked hours, travel times, and tasks are accurate. Captured in the EndOfShiftWizard as the final step before submission."
+    },
+    "end_of_day_signed_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the crew member signed the end-of-day declaration. Gates timesheet submission — the shift cannot be submitted without this signature."
     }
   },
   "required": [
