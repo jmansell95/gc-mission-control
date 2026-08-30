@@ -174,13 +174,14 @@
       "enum": [
         "draft",
         "submitted",
+        "auto_submitted",
         "approved",
         "rejected",
         "deleted",
         "merged"
       ],
       "default": "submitted",
-      "description": "Timesheet approval status. 'draft' = still being edited, 'submitted' = awaiting approval, 'approved'/'rejected' = manager decision, 'deleted' = withdrawn by staff, 'merged' = daily summary merged into a weekly record (no longer individually approvable)."
+      "description": "Timesheet approval status. 'draft' = still being edited or auto-build couldn't find enough data, 'submitted' = awaiting manager review, 'auto_submitted' = auto-built with high confidence and eligible for green-path auto-approval, 'approved'/'rejected' = manager decision, 'deleted' = withdrawn by staff, 'merged' = daily summary merged into a weekly record (no longer individually approvable)."
     },
     "deletion_reason": {
       "type": "string",
@@ -227,6 +228,19 @@
     "payroll_exported_at": {
       "type": "string",
       "description": "ISO timestamp when this timesheet was exported to payroll."
+    },
+    "auto_built": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this daily summary was auto-built by the autoBuildDailyTimesheets function (zero-touch timesheet engine) rather than manually submitted by the staff member. Drives the confidence-sorted manager approval queue."
+    },
+    "auto_built_sources": {
+      "type": "string",
+      "description": "Comma-separated data sources used to auto-build this summary (e.g. 'gps,keylogbook,delivery,mitti,rota'). Shown as source badges in the manager confidence queue so they can see at a glance what data backed the auto-built timesheet."
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "Confidence score (0-100) for auto-built timesheets. 80+ = green path (auto-approve eligible), 40-79 = review needed, <40 = missing data (staff nudge). Calculated from how many data sources corroborated the entry: GPS arrival + KeyLogBook logs + Mitti verification = high confidence; GPS only or rota-only = low confidence."
     }
   },
   "required": [

@@ -65,7 +65,7 @@ export default async function(req) {
     }
 
     const pending = await base44.asServiceRole.entities.Timesheet.filter({
-      status: 'submitted',
+      status: { $in: ['submitted', 'auto_submitted'] },
       is_summary: true,
     });
 
@@ -104,7 +104,7 @@ export default async function(req) {
 function checkGreenPath(t) {
   if (!t) return { passed: false, reason: 'No timesheet data' };
   if (!t.is_summary) return { passed: false, reason: 'Not a summary entry' };
-  if (t.status !== 'submitted') return { passed: false, reason: `Status is ${t.status}` };
+  if (t.status !== 'submitted' && t.status !== 'auto_submitted') return { passed: false, reason: `Status is ${t.status}` };
   if (!t.job_id) return { passed: false, reason: 'No job assigned' };
 
   const onSite = t.on_site_minutes || 0;

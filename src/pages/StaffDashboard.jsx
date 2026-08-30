@@ -41,6 +41,7 @@ import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
+import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
 
 
 export default function StaffDashboard() {
@@ -604,6 +605,16 @@ export default function StaffDashboard() {
 
           {/* KeyLogBook afternoon prompt — drillers only */}
           <KeyLogBookPromptBanner staff={staff} />
+
+          {/* Zero-touch arrival detection — auto-stamps arrived_on_site_at via GPS geofence */}
+          {nextTodayAssignment && !staff?.is_admin && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (
+            <ArrivalPromptBanner
+              assignment={nextTodayAssignment}
+              job={jobs.find(j => j.id === nextTodayAssignment?.job_id)}
+              staffId={staff?.id}
+              shiftStartTime={nextTodayAssignment?.start_time}
+            />
+          )}
 
           {/* Pre-Work Safety Checklist — Start My Day button */}
           {staff?.id && !staff?.is_admin && nextTodayAssignment && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (

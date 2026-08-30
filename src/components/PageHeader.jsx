@@ -11,7 +11,7 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
       <div className="relative px-4 md:px-5 py-3.5">
         {/* Brand-green left accent line — the signature Ground Control thread */}
         <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-[#2E5A1A] to-[#8DC63F]" />
-        <div className="flex items-center justify-between gap-3 flex-wrap pl-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 pl-2">
           <div className="flex items-center gap-3 min-w-0">
             {Icon && (
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -24,7 +24,7 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
             </div>
           </div>
           {actions && (
-            <div className="flex flex-wrap items-center gap-2 flex-shrink-0 [&>button]:whitespace-nowrap">
+            <div className="flex flex-wrap items-center gap-2 flex-shrink-0 [&>button]:whitespace-nowrap sm:justify-end">
               {actions}
             </div>
           )}
