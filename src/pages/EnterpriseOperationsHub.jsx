@@ -18,11 +18,15 @@ export default function EnterpriseOperationsHub() {
   const divisionStats = (statsData?.divisionStats || []).filter(ds =>
     permittedDivisions.some(d => d.id === ds.division.id)
   );
+  // Drilling/rigs is exclusive to the Geotechnical business stream — other
+  // streams and BUs do not deploy rigs, so rig-related KPIs and per-stream
+  // stats are only surfaced when at least one permitted division is geotechnical.
+  const hasGeotechnical = permittedDivisions.some(d => d.division_type === 'geotechnical');
 
   const kpis = [
     { label: 'Active Jobs', value: g.activeJobs || 0, icon: Activity, gradient: 'stat-gradient-amber' },
     { label: 'Active Deliveries', value: g.activeDeliveries || 0, icon: Package, gradient: 'stat-gradient-blue' },
-    { label: 'Rigs Deployed', value: g.rigsDeployed || 0, icon: Wrench, gradient: 'stat-gradient-brand' },
+    ...(hasGeotechnical ? [{ label: 'Rigs Deployed', value: g.rigsDeployed || 0, icon: Wrench, gradient: 'stat-gradient-brand' }] : []),
     { label: 'Fleet Utilisation', value: `${g.fleetUtilisation || 0}%`, icon: TrendingUp, gradient: 'stat-gradient-emerald' },
   ];
 
@@ -79,7 +83,7 @@ export default function EnterpriseOperationsHub() {
                 <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                   <StreamStat value={ds.activeJobs} label="Jobs" />
                   <StreamStat value={ds.pendingDeliveries} label="Deliveries" />
-                  <StreamStat value={ds.rigsDeployed} label="Rigs" />
+                  {ds.division.division_type === 'geotechnical' && <StreamStat value={ds.rigsDeployed} label="Rigs" />}
                 </div>
               </div>
             ))}
