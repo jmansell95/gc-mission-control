@@ -10,9 +10,10 @@ import { useDivision } from '@/contexts/DivisionContext';
 
 // Enterprise-only help categories — excludes division-specific topics
 // (delivery, compliance, safety, logistics) which belong to division contexts.
-const ENTERPRISE_CATEGORIES = ['general', 'app_usage', 'financial'];
+const ENTERPRISE_CATEGORIES = ['enterprise', 'general', 'app_usage', 'financial'];
 
 const CATEGORY_LABELS = {
+  enterprise: 'Enterprise',
   general: 'General',
   app_usage: 'Using the Platform',
   financial: 'Financial',
@@ -252,6 +253,9 @@ export default function EnterpriseHelp() {
             <div className="px-5 py-5">
               {selectedTopic.summary && (
                 <p className="text-sm text-slate-500 italic mb-4 pb-4 border-b border-slate-100">{selectedTopic.summary}</p>
+              )}
+              {selectedTopic.updated_date && (
+                <p className="text-[11px] text-slate-400 mb-4">Last updated {new Date(selectedTopic.updated_date).toLocaleDateString('en-GB')}</p>
               )}
               <div className="prose prose-sm max-w-none text-slate-700 whitespace-pre-wrap">{selectedTopic.content}</div>
             </div>

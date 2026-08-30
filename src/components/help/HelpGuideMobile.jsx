@@ -12,6 +12,7 @@ const categoryConfig = {
   general: { label: 'General', icon: 'ℹ️', color: 'text-slate-600', bg: 'bg-slate-50', dot: 'bg-slate-400' },
   app_usage: { label: 'Using the App', icon: '❓', color: 'text-purple-600', bg: 'bg-purple-50', dot: 'bg-purple-500' },
   financial: { label: 'Financial', icon: '💷', color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-600' },
+  enterprise: { label: 'Enterprise', icon: '🏢', color: 'text-indigo-600', bg: 'bg-indigo-50', dot: 'bg-indigo-500' },
 };
 
 export default function HelpGuideMobile({
@@ -153,6 +154,7 @@ export default function HelpGuideMobile({
                 </span>
                 <h1 className="text-xl font-bold text-slate-900 mt-1 leading-tight">{selectedTopic.title}</h1>
                 {selectedTopic.summary && <p className="text-sm text-slate-500 mt-2 leading-relaxed">{selectedTopic.summary}</p>}
+                {selectedTopic.updated_date && <p className="text-[11px] text-slate-400 mt-2">Last updated {new Date(selectedTopic.updated_date).toLocaleDateString('en-GB')}</p>}
                 <div className="mt-5 pt-5 border-t border-slate-100">
                   <ReactMarkdown
                     components={{

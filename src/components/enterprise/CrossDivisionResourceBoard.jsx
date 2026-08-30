@@ -17,6 +17,7 @@ export default function CrossDivisionResourceBoard() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('rigs');
   const [loaning, setLoaning] = useState(null);
+  const [pendingLoan, setPendingLoan] = useState(null);
 
   const { data: divisions = [] } = useQuery({ queryKey: ['divisions'], queryFn: () => base44.entities.Division.list() });
   const { data: assets = [], isLoading: assetsLoading } = useQuery({
@@ -136,7 +137,12 @@ export default function CrossDivisionResourceBoard() {
                   </p>
                 </div>
                 <select
-                  onChange={(e) => handleLoan(item.id, currentTab.type, item.division_id, e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      setPendingLoan({ resourceId: item.id, resourceType: currentTab.type, resourceName: name, fromDivId: item.division_id, targetDivId: e.target.value });
+                    }
+                    e.target.value = "";
+                  }}
                   disabled={loaning === item.id}
                   defaultValue=""
                   className="text-xs px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
@@ -163,6 +169,36 @@ export default function CrossDivisionResourceBoard() {
       >
         View all resources <ArrowRight className="w-4 h-4" />
       </button>
+
+      {pendingLoan && (
+        <div className="fixed inset-0 z-[70] bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPendingLoan(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                <ArrowRightLeft className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-base font-extrabold text-slate-900">Confirm loan</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              Loan <span className="font-bold text-slate-900">{pendingLoan.resourceName}</span> from{' '}
+              <span className="font-semibold" style={{ color: divMap[pendingLoan.fromDivId]?.color || '#475569' }}>{divMap[pendingLoan.fromDivId]?.name || 'Unassigned'}</span>{' '}
+              to <span className="font-semibold" style={{ color: divMap[pendingLoan.targetDivId]?.color || '#475569' }}>{divMap[pendingLoan.targetDivId]?.name || 'target'}</span>?
+            </p>
+            <p className="text-xs text-slate-400 mb-4">This reassigns the resource to the target division immediately. You can loan it back the same way if needed.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setPendingLoan(null)} type="button" className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
+              <button
+                onClick={() => { handleLoan(pendingLoan.resourceId, pendingLoan.resourceType, pendingLoan.fromDivId, pendingLoan.targetDivId); setPendingLoan(null); }}
+                disabled={loaning === pendingLoan.resourceId}
+                type="button"
+                className="flex-1 py-2.5 rounded-xl command-gradient text-white text-sm font-semibold glow-brand disabled:opacity-50 transition"
+              >
+                {loaning === pendingLoan.resourceId ? 'Transferring…' : 'Confirm loan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

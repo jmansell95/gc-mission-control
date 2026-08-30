@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, HelpCircle, User } from 'lucide-react';
+import { LogOut, HelpCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import Logo, { LandWaterLogo } from '@/components/Logo';

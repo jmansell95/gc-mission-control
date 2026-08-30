@@ -8,7 +8,7 @@ import {
   Building2, Users, Briefcase, Truck, ClipboardCheck, PoundSterling,
   ArrowRight, Layers, Settings, Sparkles, AlertTriangle, CheckCircle2,
   LayoutGrid, X, Activity, Wrench, TrendingUp, Clock,
-  User, HelpCircle, LogOut, ShieldCheck, BarChart3,
+  HelpCircle, LogOut, ShieldCheck, BarChart3,
 } from 'lucide-react';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
