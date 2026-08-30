@@ -20,6 +20,9 @@ import EnterpriseSettings from './pages/EnterpriseSettings';
 import EnterpriseHelp from './pages/EnterpriseHelp';
 import EnterpriseStaffHub from './pages/EnterpriseStaffHub';
 import EnterpriseFleetHub from './pages/EnterpriseFleetHub';
+import EnterpriseOperationsHub from './pages/EnterpriseOperationsHub';
+import EnterpriseFinancialHub from './pages/EnterpriseFinancialHub';
+import EnterpriseComplianceHub from './pages/EnterpriseComplianceHub';
 import AdminDashboard from './pages/AdminDashboard';
 import PrehistoricImportPage from './components/import/PrehistoricImportPage';
 import StaffDashboard from './pages/StaffDashboard';
@@ -129,6 +132,9 @@ const AuthenticatedApp = () => {
           <Route path="/enterprise/help" element={<RouteGuard><EnterpriseHelp /></RouteGuard>} />
           <Route path="/enterprise/staff" element={<RouteGuard><EnterpriseStaffHub /></RouteGuard>} />
           <Route path="/enterprise/fleet" element={<RouteGuard><EnterpriseFleetHub /></RouteGuard>} />
+          <Route path="/enterprise/operations" element={<RouteGuard><EnterpriseOperationsHub /></RouteGuard>} />
+          <Route path="/enterprise/financial" element={<RouteGuard><EnterpriseFinancialHub /></RouteGuard>} />
+          <Route path="/enterprise/compliance" element={<RouteGuard><EnterpriseComplianceHub /></RouteGuard>} />
           <Route element={<AppLayout />}>
             <Route path="/subcontractor" element={<RouteGuard><SubcontractorDashboard /></RouteGuard>} />
             <Route path="/admin/logistics" element={<RouteGuard><HubReadinessGate featureId="logistics"><DriverHub /></HubReadinessGate></RouteGuard>} />

@@ -14,4 +14,7 @@ export const DEFAULT_WIDGETS = {
   fleetAssets: true,
   rigPerformance: true,
   workforceOverview: true,
+  operationsHub: true,
+  financialHub: true,
+  complianceHub: true,
 };

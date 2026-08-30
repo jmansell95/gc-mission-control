@@ -1,21 +1,25 @@
 import React from 'react';
-import { ArrowRight, Layers, Users, ChevronRight } from 'lucide-react';
+import { ArrowRight, Layers, Users, Briefcase, PoundSterling, ChevronRight } from 'lucide-react';
 import { STATUS_STYLES } from './enterpriseConstants';
 
 /**
- * BusinessUnitCard — prominent Level-1 card for a top-level business unit.
- * Shows the BU's aggregated staff total (sum of child divisions) and a preview
- * strip of its child divisions (name + staff count). Clicking navigates to the
- * dedicated BU drill-down page.
+ * BusinessUnitCard — prominent Level-1 card for a top-level business unit
+ * (holding group). Visually heavier than DivisionCard: large gradient header
+ * with "Business Unit" label, stream-count badge, and a row of rolled-up
+ * aggregate counters (streams, staff, active jobs, outstanding £) that are
+ * distinct from the per-stream operating counters on DivisionCard.
  */
 export default function BusinessUnitCard({ unit, childStats, onEnter }) {
   const d = unit;
   const st = STATUS_STYLES[d.status || 'setup'] || STATUS_STYLES.setup;
   const divColor = d.color || '#2E5A1A';
   const headerGradient = `linear-gradient(135deg, ${divColor}, ${divColor}dd)`;
+  const gbp = (n) => n ? '\u00A3' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u00A30';
 
   const totalStaff = childStats.reduce((s, c) => s + (c.staffCount || 0), 0);
   const totalActive = childStats.reduce((s, c) => s + (c.activeStaff || 0), 0);
+  const totalActiveJobs = childStats.reduce((s, c) => s + (c.activeJobs || 0), 0);
+  const totalOutstanding = childStats.reduce((s, c) => s + (c.outstanding || 0), 0);
   const childCount = childStats.length;
 
   return (
@@ -23,7 +27,7 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
       onClick={() => onEnter(d)}
       className="insight-card relative rounded-3xl overflow-hidden text-left group w-full"
     >
-      {/* Gradient header */}
+      {/* Gradient header — large, with BU label and stream count */}
       <div className="h-20 sm:h-24 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden" style={{ background: headerGradient }}>
         <div className="absolute inset-0 opacity-25" style={{ backgroundImage: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.35) 0%, transparent 60%)' }} />
         <div className="absolute right-3 top-3 opacity-15">
@@ -48,15 +52,19 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
       <div className="p-4 sm:p-5">
         {d.tagline && <p className="text-xs sm:text-sm text-slate-500 font-medium truncate mb-3 sm:mb-4">{d.tagline}</p>}
 
-        {/* Aggregated staff total — the headline metric per the PRD */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: `${divColor}15` }}>
-            <Users className="w-6 h-6" style={{ color: divColor }} />
-          </div>
-          <div className="min-w-0">
-            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">{totalStaff}</p>
-            <p className="text-[11px] text-slate-500 font-semibold mt-0.5">Total Crew · <span className="text-emerald-600 font-bold">{totalActive} active</span></p>
-          </div>
+        {/* Rolled-up aggregate counters — BU-level, distinct from stream stat tiles */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          <AggCounter value={childCount} label="Streams" icon={Layers} color={divColor} />
+          <AggCounter value={totalStaff} label="Crew" icon={Users} color={divColor} />
+          <AggCounter value={totalActiveJobs} label="Jobs" icon={Briefcase} color={divColor} />
+          <AggCounter value={gbp(totalOutstanding)} label="Outstanding" icon={PoundSterling} color={divColor} small />
+        </div>
+
+        {/* Active staff highlight */}
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[11px] text-slate-500 font-semibold">Active crew:</span>
+          <span className="text-sm font-extrabold text-emerald-600 tabular-nums">{totalActive}</span>
+          <span className="text-[11px] text-slate-400">of {totalStaff}</span>
         </div>
 
         {/* Division preview strip */}
@@ -85,5 +93,15 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
         </div>
       </div>
     </button>
+  );
+}
+
+function AggCounter({ value, label, icon: Icon, color, small }) {
+  return (
+    <div className="flex flex-col items-center text-center p-2 rounded-xl" style={{ background: `${color}08` }}>
+      <Icon className="w-3.5 h-3.5 mb-1 opacity-50" style={{ color }} />
+      <p className={`font-extrabold text-slate-900 tabular-nums leading-none truncate w-full ${small ? 'text-[10px] sm:text-xs' : 'text-sm sm:text-lg'}`}>{value}</p>
+      <p className="text-[8px] sm:text-[9px] text-slate-500 uppercase font-bold mt-1">{label}</p>
+    </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   Building2, Users, Briefcase, Truck, ClipboardCheck, PoundSterling,
   ArrowRight, Layers, Settings, Sparkles, AlertTriangle, CheckCircle2,
   LayoutGrid, X, Activity, Wrench, TrendingUp, Clock,
-  User, HelpCircle, LogOut,
+  User, HelpCircle, LogOut, ShieldCheck, BarChart3,
 } from 'lucide-react';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
@@ -367,6 +367,52 @@ export default function EnterpriseDashboard() {
           </section>
         )}
 
+        {/* Enterprise Hub Widgets — Operations, Financial, Compliance */}
+        {widgets.operationsHub && (
+          <section className="insight-card rounded-2xl p-4 sm:p-5">
+            <SectionTitle icon={Activity} title="Operations & Logistics" subtitle="Active jobs, deliveries, rigs and fleet utilisation" gradient="from-cyan-500 to-blue-600" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
+              <HubStatTile value={globalStats.activeJobs} label="Active Jobs" icon={Activity} gradient="stat-gradient-amber" />
+              <HubStatTile value={globalStats.activeDeliveries || 0} label="Deliveries" icon={Truck} gradient="stat-gradient-blue" />
+              <HubStatTile value={globalStats.rigsDeployed || 0} label="Rigs" icon={Wrench} gradient="stat-gradient-brand" />
+              <HubStatTile value={`${globalStats.fleetUtilisation || 0}%`} label="Fleet" icon={TrendingUp} gradient="stat-gradient-emerald" />
+            </div>
+            <button onClick={() => navigate('/enterprise/operations')} className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-600 transition">
+              Open Operations Hub <ArrowRight className="w-4 h-4" />
+            </button>
+          </section>
+        )}
+
+        {widgets.financialHub && (
+          <section className="insight-card rounded-2xl p-4 sm:p-5">
+            <SectionTitle icon={PoundSterling} title="Financial Performance" subtitle="Revenue, outstanding, cash flow and profitability" gradient="from-emerald-500 to-teal-600" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
+              <HubStatTile value={gbp(globalStats.totalRevenue)} label="Revenue" icon={TrendingUp} gradient="stat-gradient-emerald" />
+              <HubStatTile value={gbp(globalStats.totalOutstanding)} label="Outstanding" icon={AlertTriangle} gradient="stat-gradient-rose" />
+              <HubStatTile value={globalStats.overdueInvoices || 0} label="Overdue" icon={BarChart3} gradient="stat-gradient-amber" />
+              <HubStatTile value={gbp(globalStats.totalInvoiced)} label="Invoiced" icon={PoundSterling} gradient="stat-gradient-blue" />
+            </div>
+            <button onClick={() => navigate('/enterprise/financial')} className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-600 transition">
+              Open Financial Hub <ArrowRight className="w-4 h-4" />
+            </button>
+          </section>
+        )}
+
+        {widgets.complianceHub && (
+          <section className="insight-card rounded-2xl p-4 sm:p-5">
+            <SectionTitle icon={ShieldCheck} title="Compliance & Safety" subtitle="Compliance status, expiring certs and open incidents" gradient="from-violet-500 to-purple-600" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
+              <HubStatTile value={`${globalStats.compliancePassRate || 100}%`} label="Pass Rate" icon={ShieldCheck} gradient="stat-gradient-emerald" />
+              <HubStatTile value={globalStats.openCompliance} label="Expired" icon={AlertTriangle} gradient="stat-gradient-rose" />
+              <HubStatTile value={globalStats.expiringCompliance || 0} label="Expiring" icon={Clock} gradient="stat-gradient-amber" />
+              <HubStatTile value={globalStats.openIncidents || 0} label="Incidents" icon={AlertTriangle} gradient="stat-gradient-orange" />
+            </div>
+            <button onClick={() => navigate('/enterprise/compliance')} className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-600 transition">
+              Open Compliance Hub <ArrowRight className="w-4 h-4" />
+            </button>
+          </section>
+        )}
+
         {/* Cross-Division Resource Pool & Crew Availability Heatmap */}
         <CrossDivisionResourceBoard />
         <CrewAvailabilityHeatmap />
@@ -398,6 +444,9 @@ export default function EnterpriseDashboard() {
                 { key: 'divisionHealth', label: 'Business Units', desc: 'BU cards with division previews' },
                 { key: 'fleetAssets', label: 'Fleet & Assets', desc: 'Vehicles, equipment & compliance' },
                 { key: 'workforceOverview', label: 'Workforce by BU', desc: 'Headcount aggregated per BU' },
+                { key: 'operationsHub', label: 'Operations Hub', desc: 'Active jobs, deliveries, rigs' },
+                { key: 'financialHub', label: 'Financial Hub', desc: 'Revenue, outstanding, cash flow' },
+                { key: 'complianceHub', label: 'Compliance Hub', desc: 'Certs, incidents, safety scores' },
               ].map(w => (
                 <label key={w.key} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
                   <div>
@@ -426,6 +475,18 @@ function SectionTitle({ icon: Icon, title, subtitle, gradient }) {
       <div className="min-w-0">
         <h2 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">{title}</h2>
         {subtitle && <p className="text-[11px] sm:text-xs text-slate-500 truncate">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
+function HubStatTile({ value, label, icon: Icon, gradient }) {
+  return (
+    <div className={`${gradient} rounded-xl sm:rounded-2xl p-2.5 sm:p-3 text-white relative overflow-hidden`}>
+      <div className="absolute right-1 top-1 opacity-20"><Icon className="w-6 h-6 sm:w-7 sm:h-7" /></div>
+      <div className="relative">
+        <p className="text-[9px] sm:text-[10px] font-bold text-white/80 uppercase tracking-wide">{label}</p>
+        <p className="text-sm sm:text-lg xl:text-xl font-extrabold tabular-nums mt-0.5 truncate">{value}</p>
       </div>
     </div>
   );
