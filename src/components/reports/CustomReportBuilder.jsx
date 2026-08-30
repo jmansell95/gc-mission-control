@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { FileBarChart, Plus, Trash2, Download, Loader2, Settings2 } from 'lucide-react';
+import { FileBarChart, Plus, Trash2, Download, Loader2, Settings2, FileText } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import SearchableSelect from '@/components/SearchableSelect';
 import { useToast } from '@/components/ui/use-toast';
+import { downloadStructuredCsv } from '@/utils/csvExport';
+import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
 import { format, parseISO, subDays, isWithinInterval } from 'date-fns';
 
 /**
@@ -125,6 +127,7 @@ export default function CustomReportBuilder() {
   const [reportName, setReportName] = useState('');
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState(null);
+  const [exporting, setExporting] = useState(null);
 
   const source = DATA_SOURCES.find(s => s.id === sourceId);
 
@@ -163,67 +166,64 @@ export default function CustomReportBuilder() {
     });
   };
 
+  const fmtVal = (val) => {
+    if (val == null) return '';
+    if (Array.isArray(val)) return val.join('; ');
+    if (typeof val === 'object') return JSON.stringify(val);
+    return String(val);
+  };
+
   const exportCSV = () => {
     if (filteredRecords.length === 0) {
       toast({ title: 'No data to export', variant: 'destructive' });
       return;
     }
-    const headers = selectedFields.map(f => f);
-    const rows = filteredRecords.map(r => selectedFields.map(f => {
-      const val = r[f];
-      if (val == null) return '';
-      if (Array.isArray(val)) return val.join('; ');
-      if (typeof val === 'object') return JSON.stringify(val);
-      return String(val);
+    const columns = selectedFields.map(f => ({
+      key: f,
+      label: f.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
     }));
-    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${reportName || source.label.toLowerCase().replace(/\s/g, '_')}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const rows = filteredRecords.map(r => {
+      const row = {};
+      selectedFields.forEach(f => { row[f] = fmtVal(r[f]); });
+      return row;
+    });
+    const filename = `${reportName || source.label.toLowerCase().replace(/\s/g, '_')}_report_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    downloadStructuredCsv(filename, columns, rows);
     toast({ title: 'Report exported', description: `${filteredRecords.length} records exported to CSV` });
   };
 
-  const printPDF = () => {
+  const printPDF = async () => {
     if (filteredRecords.length === 0) {
       toast({ title: 'No data to print', variant: 'destructive' });
       return;
     }
-    const win = window.open('', '_blank');
-    const headers = selectedFields.map(f => `<th>${f.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</th>`).join('');
-    const rows = filteredRecords.map(r =>
-      `<tr>${selectedFields.map(f => {
-        const val = r[f];
-        let display = '';
-        if (val == null) display = '';
-        else if (Array.isArray(val)) display = val.join('; ');
-        else if (typeof val === 'object') display = JSON.stringify(val).substring(0, 50);
-        else display = String(val);
-        return `<td>${display}</td>`;
-      }).join('')}</tr>`
-    ).join('');
+    setExporting('pdf');
+    try {
+      const columns = selectedFields.map(f => ({
+        label: f.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        align: 'left',
+        width: 1,
+      }));
+      const rows = filteredRecords.map(r => selectedFields.map(f => fmtVal(r[f])));
 
-    win.document.write(`
-      <html><head><title>${reportName || 'Custom Report'}</title>
-      <style>
-        body { font-family: Inter, sans-serif; margin: 20px; }
-        h1 { color: #2E5A1A; font-size: 20px; }
-        .meta { color: #64748b; font-size: 12px; margin-bottom: 16px; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { background: #2E5A1A; color: white; padding: 8px; text-align: left; }
-        td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; }
-        tr:nth-child(even) { background: #f8fafc; }
-      </style></head><body>
-      <h1>${reportName || 'Custom Report'}</h1>
-      <div class="meta">Generated ${format(new Date(), 'dd MMM yyyy HH:mm')} · ${filteredRecords.length} records · Source: ${source.label}</div>
-      <table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>
-      </body></html>
-    `);
-    win.document.close();
-    setTimeout(() => win.print(), 500);
+      const filterSummary = [
+        `Data Source: ${source.label}`,
+        `Records: ${filteredRecords.length}`,
+        dateFilter !== 'all' ? `Date Range: Last ${dateFilter} days` : 'Date Range: All time',
+        statusFilter ? `Status Filter: ${statusFilter}` : 'Status: All',
+      ];
+
+      await generateReportPdf({
+        title: reportName || 'Custom Report',
+        subtitle: `Source: ${source.label}`,
+        filterSummary,
+        sections: [{ title: reportName || source.label, columns, rows }],
+      });
+      toast({ title: 'PDF exported', description: `${filteredRecords.length} records.` });
+    } catch (e) {
+      toast({ title: 'PDF export failed', variant: 'destructive' });
+    }
+    setExporting(null);
   };
 
   return (
@@ -238,9 +238,9 @@ export default function CustomReportBuilder() {
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-50">
               <Download className="w-4 h-4" /> CSV
             </button>
-            <button onClick={printPDF} disabled={isLoading || filteredRecords.length === 0}
+            <button onClick={printPDF} disabled={isLoading || filteredRecords.length === 0 || exporting === 'pdf'}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
-              <FileBarChart className="w-4 h-4" /> Print PDF
+              {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} PDF
             </button>
           </>
         }
