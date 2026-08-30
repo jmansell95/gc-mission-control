@@ -128,7 +128,6 @@ export default function EnterpriseDashboard() {
     { label: 'Help', icon: HelpCircle, action: () => navigate('/enterprise/help'), gradient: 'from-rose-500 to-pink-600' },
   ] : [
     { label: 'Settings', icon: Settings, action: () => goToSettings(), gradient: 'from-slate-600 to-slate-800' },
-    { label: 'Profile', icon: User, action: () => navigate('/enterprise-profile'), gradient: 'from-blue-600 to-indigo-700' },
     { label: 'Help', icon: HelpCircle, action: () => navigate('/enterprise/help'), gradient: 'from-rose-500 to-pink-600' },
   ];
 
@@ -181,9 +180,6 @@ export default function EnterpriseDashboard() {
                         {user?.email && <p className="text-xs text-slate-500 truncate mt-0.5">{user.email}</p>}
                       </div>
                       <div className="py-1">
-                        <button onClick={() => { navigate('/enterprise-profile'); setProfileMenuOpen(false); }} type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
-                          <User className="w-4 h-4 text-slate-400" /> My Profile
-                        </button>
                         <button onClick={() => { navigate('/enterprise/help'); setProfileMenuOpen(false); }} type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                           <HelpCircle className="w-4 h-4 text-slate-400" /> Help Guides
                         </button>

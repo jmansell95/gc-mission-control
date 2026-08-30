@@ -177,6 +177,21 @@ const SECTIONS = [
       { stat: 'Geofence Event Feed', meaning: 'A dashboard widget showing the latest 30 arrival/departure events with vehicle, location, distance and time. Clicking a job event opens the job detail drawer. Supplier and client events show the location name without navigation.' },
     ],
   },
+  {
+    id: 'enterprise',
+    icon: Layers,
+    title: 'Enterprise Hubs & Cross-Division Tools',
+    desc: 'Multi-division dashboards, crew availability and resource loaning',
+    items: [
+      { stat: 'Enterprise Dashboard', meaning: 'The top-level landing page (/enterprise) sits above all divisions. It shows a two-level hierarchy: Business Units (holding groups) contain Business Streams (operating entities). BU cards aggregate child-stream stats with a preview strip; stream cards show per-division crew, jobs, fleet and outstanding. Enterprise KPIs (total crew, active jobs, outstanding) roll up across every permitted division. Super admins can add new BUs or streams via a guided wizard.' },
+      { stat: 'Business Unit vs Stream', meaning: 'A Business Unit is a parent holding group (e.g. a group that owns several specialist firms). A Business Stream is an operating entity underneath a BU (or standalone). The dashboard distinguishes them with different card styles and counters: BU cards show aggregated child-stream totals; stream cards show direct operational counts. An orphaned stream whose parent is not visible is treated as standalone so it never disappears.' },
+      { stat: 'Operations Hub', meaning: 'The Enterprise Operations Hub (/enterprise/operations) is a cross-division command view of live operations: active jobs, in-progress deliveries, deployed rigs (geotechnical only) and fleet utilisation. Per-stream breakdowns show each division\'s operational load. Drilling and rig stats are gated to geotechnical-type streams only, so non-drilling divisions do not see empty rig tiles.' },
+      { stat: 'Financial Hub', meaning: 'The Enterprise Financial Hub (/enterprise/financial) rolls up revenue, outstanding, overdue invoices and total invoiced across all permitted divisions. It gives finance leaders a single view of group-wide cash position without entering each division. Figures are denominated in GBP and refresh from the live invoice and job data.' },
+      { stat: 'Compliance Hub', meaning: 'The Enterprise Compliance Hub (/enterprise/compliance) aggregates compliance pass rate, expired items, expiring certificates and open incidents across every division. Safety and compliance leaders use it to spot group-wide risk hotspots before they become incidents.' },
+      { stat: 'Crew Availability Heatmap', meaning: 'A card-per-staff week view of crew availability. Each crew member renders as a full-width card with their 7-day strip inside (on-job, leave, sick, training, depot, available), so the layout is mobile-friendly with no horizontal page scroll. The dashboard widget shows a 12-staff preview; the full page (/enterprise/crew-availability) shows everyone. The division-scoped version lives in the Scheduling Hub Availability Heatmap tab. Both share the same card style and colour-coded status cells.' },
+      { stat: 'Cross-Division Resource Pool', meaning: 'The Resource Pool (/enterprise/resource-pool) shows idle rigs, vehicles and crews across all divisions and lets managers loan a resource from one division to another without leaving the page. Loaning reassigns the resource\'s division_id instantly. The dashboard widget shows a tabbed preview (idle rigs / idle vehicles / available crew) with a one-tap loan-to-division picker.' },
+    ],
+  },
 ];
 
 export default function SystemLogicGuide() {
