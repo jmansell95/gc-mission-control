@@ -15,7 +15,7 @@ import BookToVehicleModal from '@/components/assetcommand/BookToVehicleModal';
 import FullScreenScanner from '@/components/assetcommand/FullScreenScanner';
 import RecentScansStrip from '@/components/assetcommand/RecentScansStrip';
 import OfflineScanQueueBanner from '@/components/assetcommand/OfflineScanQueueBanner';
-import FieldHubTabs from '@/components/fieldhub/FieldHubTabs';
+import TabBar from '@/components/TabBar';
 import MyGearTab from '@/components/fieldhub/MyGearTab';
 import GoodsInDeliveryNote from '@/components/assetcommand/GoodsInDeliveryNote';
 import ConsumableUsageModal from '@/components/assetcommand/ConsumableUsageModal';
@@ -408,8 +408,8 @@ export default function AssetScannerPage() {
                 <PackageOpen className="w-5 h-5 text-blue-700" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-slate-900 leading-tight">Site Collection</h1>
-                <p className="text-xs text-slate-400">Scan QR codes to collect items from site</p>
+                <h1 className="text-hub-title font-bold text-slate-900 leading-tight">Site Collection</h1>
+                <p className="text-hub-caption text-slate-400">Scan QR codes to collect items from site</p>
               </div>
             </div>
           </header>
@@ -442,8 +442,8 @@ export default function AssetScannerPage() {
             <ScanLine className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-base font-bold text-slate-900 leading-tight">Asset Scanner</h1>
-            <p className="text-[11px] text-slate-500">{basket.length} item{basket.length !== 1 ? 's' : ''} · {isSignOut ? 'Sign Out' : 'Return'} mode</p>
+            <h1 className="text-hub-title font-bold text-slate-900 leading-tight">Asset Scanner</h1>
+            <p className="text-hub-caption text-slate-500">{basket.length} item{basket.length !== 1 ? 's' : ''} · {isSignOut ? 'Sign Out' : 'Return'} mode</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -459,48 +459,38 @@ export default function AssetScannerPage() {
         </div>
       </header>
 
-      {/* Mode toggles — compact segmented control */}
-      <div className="bg-white/90 backdrop-blur-lg border-b border-slate-200 px-3 py-2 flex gap-1.5 flex-shrink-0 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => setMode('assets')}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'assets' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
-        >
-          <ScanLine className="w-3.5 h-3.5" /> Assets
-        </button>
-        <button
-          onClick={() => setMode('pick-lists')}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'pick-lists' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
-        >
-          <ClipboardList className="w-3.5 h-3.5" /> Pick Lists
-        </button>
-        {isHubAdmin && (
+      {/* Unified TabBar — replaces the old dual mode-toggles + FieldHubTabs */}
+      <div className="bg-white/90 backdrop-blur-lg border-b border-slate-200 px-3 py-2 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <TabBar
+            tabs={[
+              { id: 'scan', label: 'Scan', icon: ScanLine },
+              { id: 'mygear', label: 'My Gear', icon: Wrench },
+              { id: 'pick-lists', label: 'Pick Lists', icon: ClipboardList },
+              ...(isHubAdmin ? [{ id: 'goods-in', label: 'Goods In', icon: Store }] : []),
+              { id: 'collect', label: 'Collect', icon: PackageOpen },
+            ]}
+            activeTab={mode === 'assets' ? hubTab : mode}
+            onChange={(tabId) => {
+              if (tabId === 'scan') { setMode('assets'); setHubTab('scan'); }
+              else if (tabId === 'mygear') { setMode('assets'); setHubTab('mygear'); }
+              else if (tabId === 'pick-lists') setMode('pick-lists');
+              else if (tabId === 'goods-in') setMode('goods-in');
+              else if (tabId === 'collect') setMode('site-collect');
+            }}
+          />
           <button
-            onClick={() => setMode('goods-in')}
-            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'goods-in' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
+            onClick={() => setShowConsumableModal(true)}
+            className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition active:scale-95 bg-slate-100 text-slate-600 hover:bg-slate-200"
           >
-            <Store className="w-3.5 h-3.5" /> Goods In
+            <Package className="w-3.5 h-3.5" /> Use Stock
           </button>
-        )}
-        <button
-          onClick={() => setMode('site-collect')}
-          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 ${mode === 'site-collect' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}
-        >
-          <PackageOpen className="w-3.5 h-3.5" /> Collect
-        </button>
-        <button
-          onClick={() => setShowConsumableModal(true)}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition active:scale-95 bg-slate-100 text-slate-600"
-        >
-          <Package className="w-3.5 h-3.5" /> Use Stock
-        </button>
+        </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl xl:max-w-4xl mx-auto w-full p-4 space-y-4" style={{ paddingBottom: basket.length > 0 ? '100px' : '16px' }}>
-          {/* Field Hub Tabs */}
-          <FieldHubTabs activeTab={hubTab} onChange={setHubTab} isAdmin={isHubAdmin} />
-
+        <div className="max-w-3xl xl:max-w-4xl mx-auto w-full p-4 space-y-hub-gap-sm sm:space-y-hub-gap" style={{ paddingBottom: basket.length > 0 ? '100px' : '16px' }}>
           {hubTab === 'scan' && (
             <>
               {/* Offline queue banner */}
@@ -578,8 +568,8 @@ export default function AssetScannerPage() {
               </div>
 
               {/* Scanner + My Gear split (tablet) / stacked (mobile) */}
-              <div className="md:grid md:grid-cols-2 md:gap-4">
-                <div className="space-y-4">
+              <div className="md:grid md:grid-cols-2 md:gap-hub-gap">
+                <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
                   {/* Resolving overlay (when full-screen scanner is closed) */}
                   {resolving && !showFullScreen && (
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex items-center justify-center gap-2.5">

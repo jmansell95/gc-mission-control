@@ -62,7 +62,7 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
   ];
 
   return (
-    <div>
+    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
       {/* Scheduling KPI Bar — today's deployment snapshot */}
       {schedStats.total > 0 && (
         <HubStatsBar tiles={[
@@ -73,7 +73,7 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
         ]} />
       )}
 
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <TabBar tabs={tabs} activeTab={tab} onChange={setTab} />
         <div className="flex items-center gap-2 flex-wrap">
           <TemplateWeekCopy targetWeekStart={currentWeekStart} />

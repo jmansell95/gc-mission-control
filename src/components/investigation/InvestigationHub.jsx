@@ -113,7 +113,7 @@ export default function InvestigationHub({ onNavigate }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative space-y-hub-gap-sm sm:space-y-hub-gap">
       <InvestigationHeader
         totalLogs={logs.length}
         pendingCount={pendingCount}
@@ -127,7 +127,7 @@ export default function InvestigationHub({ onNavigate }) {
 
       {/* Bulk-select toggle — sits under the header */}
       {!hasNoLogs && (
-        <div className="flex items-center justify-end mb-3">
+        <div className="flex items-center justify-end">
           <button
             onClick={() => { setBulkMode(m => !m); setBulkSelected(new Set()); }}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
@@ -139,7 +139,7 @@ export default function InvestigationHub({ onNavigate }) {
 
       {/* Empty state */}
       {hasNoLogs && (
-        <div className="insight-card rounded-2xl p-8 mb-4 text-center">
+        <div className="insight-card rounded-2xl p-8 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mx-auto mb-4">
             <FlaskConical className="w-8 h-8 text-slate-400" />
           </div>

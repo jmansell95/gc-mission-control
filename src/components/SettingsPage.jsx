@@ -209,7 +209,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-hub-gap">
       {!standalone && (
         <div className="w-60 flex-shrink-0 hidden lg:block">
           <SettingsSidebar activeTab={activeTab} onNavigate={setActiveTab} items={items} />
@@ -219,7 +219,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
         {!standalone && activeTab !== 'hub' && (
           <button
             onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
-            className="mb-4 inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm lg:hidden"
+            className="mb-hub-gap-sm inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm lg:hidden"
           >
             <ArrowLeft className="w-4 h-4" />
             {isIntegration ? 'Back to Integrations' : 'Back to Overview'}
