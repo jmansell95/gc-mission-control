@@ -226,16 +226,18 @@ export default function EnterpriseDashboard() {
       <div className="px-4 lg:px-6 pb-8 lg:pb-6 space-y-4 max-w-7xl mx-auto">
 
         {/* Quick Access */}
-        <div className={'grid gap-2 sm:gap-3 mt-5 sm:mt-8 relative z-10 ' + (quickActions.length === 2 ? 'grid-cols-2' : quickActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
-          {quickActions.map(a => {
-            const Icon = a.icon;
-            return (
-              <button key={a.label} onClick={a.action} className={'bg-gradient-to-br ' + a.gradient + ' rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200'}>
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-[10px] sm:text-[11px] font-bold truncate w-full text-center">{a.label}</span>
-              </button>
-            );
-          })}
+        <div className="insight-card rounded-2xl p-4 sm:p-5 mt-5 sm:mt-8 relative z-10">
+          <div className={'grid gap-2 sm:gap-3 ' + (quickActions.length === 2 ? 'grid-cols-2' : quickActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
+            {quickActions.map(a => {
+              const Icon = a.icon;
+              return (
+                <button key={a.label} onClick={a.action} className={'bg-gradient-to-br ' + a.gradient + ' rounded-xl sm:rounded-2xl p-2.5 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200'}>
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-[10px] sm:text-[11px] font-bold truncate w-full text-center">{a.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Business Units — Level 1 with division previews */}
@@ -365,10 +367,7 @@ export default function EnterpriseDashboard() {
           </section>
         )}
 
-      </div>
-
-      {/* Cross-Division Resource Pool & Crew Availability Heatmap */}
-      <div className="mt-4 space-y-4">
+        {/* Cross-Division Resource Pool & Crew Availability Heatmap */}
         <CrossDivisionResourceBoard />
         <CrewAvailabilityHeatmap />
       </div>

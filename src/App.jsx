@@ -47,7 +47,6 @@ import DepotPickLists from './pages/DepotPickLists';
 
 import StaffPage from './pages/StaffPage';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import SetupAccount from './pages/SetupAccount';
@@ -101,7 +100,6 @@ const AuthenticatedApp = () => {
         <RouteLoadingOverlay />
         <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/setup-account" element={<SetupAccount />} />
