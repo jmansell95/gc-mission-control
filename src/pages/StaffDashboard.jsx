@@ -42,6 +42,7 @@ import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
+import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 
 
 export default function StaffDashboard() {
@@ -86,6 +87,7 @@ export default function StaffDashboard() {
   const [showRigScanner, setShowRigScanner] = useState(false);
   const [showSafetyChecklist, setShowSafetyChecklist] = useState(false);
   const [safetyChecklistAssignment, setSafetyChecklistAssignment] = useState(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -110,6 +112,13 @@ export default function StaffDashboard() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Auto-show tracking consent modal if staff hasn't signed
+  useEffect(() => {
+    if (staff && !staff?.is_admin && !staff?.phone_gps_consent && !staff?.no_staff_profile) {
+      setShowConsentModal(true);
+    }
+  }, [staff?.id, staff?.phone_gps_consent]);
 
   // Real-time sync: reflect assignment changes (including deletions) immediately
   useEffect(() => {
@@ -615,6 +624,7 @@ export default function StaffDashboard() {
               homeLat={staff?.home_lat}
               homeLng={staff?.home_lng}
               shiftStartTime={nextTodayAssignment?.start_time}
+              allJobs={jobs}
             />
           )}
 
@@ -1010,6 +1020,15 @@ export default function StaffDashboard() {
             // Open the existing ShiftWizard at the arrive step
             handleOpenShiftWizard(safetyChecklistAssignment.id);
           }}
+        />
+      )}
+
+      {/* GPS Tracking Consent Modal — shown on first login if not signed */}
+      {showConsentModal && (
+        <TrackingConsentModal
+          open={showConsentModal}
+          onClose={() => setShowConsentModal(false)}
+          staff={staff}
         />
       )}
 

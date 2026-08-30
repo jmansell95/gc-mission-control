@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { X, CheckCircle2, Car, Ruler, FileText, ClipboardCheck, Send, ChevronRight, AlertTriangle, Coffee, Briefcase, Info, ShieldCheck, Clock, Receipt, Boxes, DoorOpen, Truck, Tablet, ExternalLink, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import DailyExpenseStep from './DailyExpenseStep';
+import EndOfDaySignatureStep from './EndOfDaySignatureStep';
 import AssetRecoveryStep from './AssetRecoveryStep';
 import VoiceToTextButton from '@/components/ui/VoiceToTextButton';
 import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
@@ -42,6 +43,7 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
   const [submitting, setSubmitting] = useState(false);
   const [assetReturnData, setAssetReturnData] = useState({ scannedItems: [], scannedAssetIds: [], scannedManifestIds: [] });
   const [confirmations, setConfirmations] = useState({ tasks: false, travel: false, hours: false });
+  const [endOfDaySignature, setEndOfDaySignature] = useState(null);
 
   const isDecommissioning = job?.status === 'decommissioning';
 
@@ -109,6 +111,7 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
     ...(isDecommissioning ? [{ key: 'assets', label: 'Gear Return' }] : []),
     ...(isLastJob ? [{ key: 'travel', label: 'Travel Home' }] : []),
     { key: 'submit', label: 'Submit' },
+    { key: 'signature', label: 'Sign' },
   ];
 
   const entries = todayEntries.filter(t => t.status !== 'deleted' && t.status !== 'rejected' && t.status !== 'merged');
@@ -122,6 +125,8 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
   const onSiteMins = onSiteEntries.reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
   const travelEntries = entries.filter(isTravel);
   const travelMinsLogged = travelEntries.reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
+  const interSiteEntries = entries.filter(t => t.task_type === 'inter_site_travel');
+  const interSiteMins = interSiteEntries.reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
 
   const meetsRequiredHours = onSiteMins >= REQUIRED_WORK_MINS;
   const earlyLeaveRecorded = !!(assignment?.early_leave_reason);
@@ -133,8 +138,18 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
     : 0;
   const invalidTravel = departSite && arriveHome && travelMins === 0;
 
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = async (overrideSignature = null) => {
+    const sigToSave = overrideSignature || endOfDaySignature;
     setSubmitting(true);
+    // Save end-of-day signature to the assignment
+    if (sigToSave && assignment?.id) {
+      try {
+        await base44.entities.RotaAssignment.update(assignment.id, {
+          end_of_day_signature_data_url: sigToSave,
+          end_of_day_signed_at: new Date().toISOString(),
+        });
+      } catch (e) { console.error('Signature save failed:', e); }
+    }
     // Save any logged expenses as DailyCost records
     if (expenses.length > 0 && job?.id && staffId) {
       const today = format(new Date(), 'yyyy-MM-dd');
@@ -182,6 +197,7 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
   const canAdvance = () => {
     if (currentStep.key === 'review') return hasTasks;
     if (currentStep.key === 'travel') return !invalidTravel;
+    if (currentStep.key === 'submit') return allConfirmationsChecked && !shortDayWithoutReason;
     return true;
   };
 
@@ -595,6 +611,25 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
                   </p>
                 </div>
               )}
+
+              {/* Step: End-of-Day Signature */}
+              {currentStep.key === 'signature' && (
+                <EndOfDaySignatureStep
+                  summary={{
+                    onSiteMinutes: onSiteMins,
+                    travelToMinutes: travelEntries.filter(t => t.task_type === 'travel_to').reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0),
+                    travelFromMinutes: travelMins > 0 ? travelMins : travelEntries.filter(t => t.task_type === 'travel_from').reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0),
+                    interSiteMinutes: interSiteMins,
+                    totalMinutes: onSiteMins + travelMinsLogged + interSiteMins,
+                    gpsTracked: !!assignment?.arrived_on_site_at,
+                  }}
+                  onSigned={(sig) => {
+                    setEndOfDaySignature(sig);
+                    handleFinalSubmit(sig);
+                  }}
+                  saving={submitting}
+                />
+              )}
             </div>
 
             {/* Footer */}
@@ -605,13 +640,17 @@ export default function EndOfShiftWizard({ open, onClose, onSubmit, assignment, 
                   Back
                 </button>
               )}
-              {!isLastStep ? (
+              {currentStep.key === 'signature' ? (
+                <div className="flex-1 text-center text-xs text-slate-400 py-3.5">
+                  Draw your signature above to submit
+                </div>
+              ) : !isLastStep ? (
                 <button onClick={() => setStep(s => s + 1)} disabled={!canAdvance() || submitting}
                   className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                   Continue <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
-                <button onClick={handleFinalSubmit} disabled={!canSubmit || submitting}
+                <button onClick={() => handleFinalSubmit()} disabled={!canSubmit || submitting}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                   {submitting ? 'Submitting…' : 'Submit Shift'} <Send className="w-4 h-4" />
                 </button>
