@@ -20,6 +20,8 @@ import DivisionCard from '@/components/enterprise/DivisionCard';
 import BusinessUnitCard from '@/components/enterprise/BusinessUnitCard';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import CrossDivisionResourceBoard from '@/components/enterprise/CrossDivisionResourceBoard';
+import CrewAvailabilityHeatmap from '@/components/enterprise/CrewAvailabilityHeatmap';
 import { STATUS_STYLES, WIDGET_STORAGE_KEY, DEFAULT_WIDGETS } from '@/components/enterprise/enterpriseConstants';
 
 export default function EnterpriseDashboard() {
@@ -363,6 +365,12 @@ export default function EnterpriseDashboard() {
           </section>
         )}
 
+      </div>
+
+      {/* Cross-Division Resource Pool & Crew Availability Heatmap */}
+      <div className="mt-4 space-y-4">
+        <CrossDivisionResourceBoard />
+        <CrewAvailabilityHeatmap />
       </div>
 
       {/* Creation flow */}

@@ -10,6 +10,7 @@ import WeatherBadge from '@/components/weather/WeatherBadge';
 import QuickEditJobModal from '@/components/jobs/QuickEditJobModal';
 import MiniLocationMap from '@/components/jobs/MiniLocationMap';
 import What3WordsPill from '@/components/jobs/What3WordsPill';
+import LiveMarginBadge from '@/components/dashboard/LiveMarginBadge';
 
 const STATUS_META = {
   planning: { label: 'Planning', icon: CircleDashed, grad: 'from-slate-500 to-slate-600', chip: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' },
@@ -105,6 +106,7 @@ export default function JobSummaryCard({
                 <StatusIcon className="w-3 h-3" /> {status.label}
               </span>
               <DisciplinePills job={job} size="sm" />
+              <LiveMarginBadge job={job} />
               {job.site_lat != null && job.site_lng != null && (
                 <WeatherBadge lat={job.site_lat} lng={job.site_lng} />
               )}

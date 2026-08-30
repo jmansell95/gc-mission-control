@@ -125,6 +125,60 @@ export async function resolveFromRateCards(
   };
 }
 
+// ── BillingRule locked rate card resolution ──
+// When a BillingRule has locked_rate_card_item_id set, use that RateCardItem
+// directly without fuzzy matching. This is the manual override mechanism that
+// prevents fragile text matches from breaking when rate card wording changes.
+export async function resolveFromLockedRateCard(
+  base44: any,
+  lockedRateCardItemId: string,
+  quantity: number = 1,
+): Promise<ResolvedRate | null> {
+  if (!lockedRateCardItemId) return null;
+  try {
+    const item: any = await base44.entities.RateCardItem.get(lockedRateCardItemId);
+    if (!item) return null;
+    const unitPrice = Number(item.price) || 0;
+    const qty = Number(quantity) || 1;
+    return {
+      rate_card_item_id: item.id,
+      description: item.description,
+      unit_price: unitPrice,
+      quantity: qty,
+      total: round2(unitPrice * qty),
+      unit: item.unit || null,
+      subcategory: item.subcategory || null,
+      category: (item as any).category || null,
+      rate_source: 'global_master',
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
+// ── Resolve from a BillingRule (with locked override) ──
+// If the BillingRule has locked_rate_card_item_id, use it directly.
+// Otherwise, fall through to the normal resolveRate flow.
+export async function resolveFromBillingRule(
+  base44: any,
+  billingRule: any,
+  params: {
+    job_id: string;
+    description: string;
+    quantity?: number;
+    activeContract?: { rate_snapshot?: string | null } | null;
+    job_date?: string | null;
+  },
+): Promise<ResolvedRate | null> {
+  // Check locked rate card first (manual override)
+  if (billingRule?.locked_rate_card_item_id) {
+    const locked = await resolveFromLockedRateCard(base44, billingRule.locked_rate_card_item_id, params.quantity);
+    if (locked) return locked;
+  }
+  // Fall through to normal resolution (contract snapshot → job rate card → global master)
+  return resolveRate(base44, params);
+}
+
 // ── Master resolver — the single entry point ──
 // Tries contract snapshot first, then falls back to live rate cards.
 // Pass an optional activeContract object (with rate_snapshot) to enable

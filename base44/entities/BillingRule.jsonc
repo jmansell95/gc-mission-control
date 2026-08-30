@@ -36,55 +36,70 @@
         "flat_plus_mileage_plus_time"
       ],
       "default": "flat_fee",
-      "description": "How the charge is calculated. 'flat_fee' = single fixed amount, 'per_mile' = miles \u00d7 rate, 'per_hour' = hours \u00d7 rate, 'per_unit' = units \u00d7 rate, 'flat_plus_mileage' = flat + miles \u00d7 rate, 'flat_plus_time' = flat + hours \u00d7 rate, 'flat_plus_mileage_plus_time' = all three."
+      "description": "How the charge is calculated."
     },
     "rate_card_item_id": {
       "type": "string",
-      "description": "Linked RateCardItem \u2014 when set, this rule pulls its rate dynamically from the rate card item's 'price' field instead of using the hardcoded flat_fee/per_mile_rate/per_hour_rate/per_unit_rate fields. This makes the rate card the single source of truth: update the rate card and all linked billing rules update automatically. The charge_method determines how the rate card price is applied (per_mile, per_hour, per_unit, or flat_fee)."
+      "description": "Linked RateCardItem \u2014 when set, this rule pulls its rate dynamically from the rate card item's 'price' field. Auto-set by the fuzzy matcher. When locked_rate_card_item_id is also set, that takes precedence."
+    },
+    "locked_rate_card_item_id": {
+      "type": "string",
+      "description": "Manual override \u2014 when set, this rule is permanently pinned to this specific RateCardItem. The rate resolver uses this ID directly without fuzzy matching, so wording changes in the rate card never break the link. Managers use this to lock fragile matches. Takes precedence over rate_card_item_id. Shown with a 'Match Locked' badge in the Billing Rules UI."
     },
     "rate_card_item_description": {
       "type": "string",
       "description": "Denormalised description of the linked RateCardItem (for display without joining). Updated when the rule is saved."
     },
+    "match_confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "locked",
+        "unmatched"
+      ],
+      "description": "Confidence of the rate-card match. 'high' = strong tokenised match, 'medium' = partial match, 'low' = weak match (review recommended), 'locked' = manually pinned via locked_rate_card_item_id, 'unmatched' = no match found. Shown as a badge in the Billing Rules UI."
+    },
     "flat_fee": {
       "type": "number",
-      "description": "Base flat fee in GBP \u2014 used when charge_method includes a flat component. Ignored when rate_card_item_id is set (the rate card price is used instead)."
+      "description": "Base flat fee in GBP. Ignored when rate_card_item_id or locked_rate_card_item_id is set."
     },
     "per_mile_rate": {
       "type": "number",
-      "description": "Rate per mile in GBP \u2014 used when charge_method includes mileage. Ignored when rate_card_item_id is set (the rate card price is used instead)."
+      "description": "Rate per mile in GBP. Ignored when rate_card_item_id or locked_rate_card_item_id is set."
     },
     "per_hour_rate": {
       "type": "number",
-      "description": "Rate per hour in GBP \u2014 used when charge_method includes time. Ignored when rate_card_item_id is set (the rate card price is used instead)."
+      "description": "Rate per hour in GBP. Ignored when rate_card_item_id or locked_rate_card_item_id is set."
     },
     "per_unit_rate": {
       "type": "number",
-      "description": "Rate per unit in GBP \u2014 used for consumables (per_unit method). Ignored when rate_card_item_id is set (the rate card price is used instead)."
+      "description": "Rate per unit in GBP. Ignored when rate_card_item_id or locked_rate_card_item_id is set."
     },
     "unit_label": {
       "type": "string",
       "default": "each",
-      "description": "Unit label for per_unit charges (e.g. 'bag', 'can', 'each')"
+      "description": "Unit label for per_unit charges"
     },
     "is_chargeable": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this rule produces a charge. Set to false for tasks included in the day rate that aren't billed separately to the client."
+      "description": "Whether this rule produces a charge."
     },
     "is_active": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this rule is available for new charges. Inactive rules are kept for historical records but not offered in dropdowns."
+      "description": "Whether this rule is available for new charges."
     },
     "category": {
       "type": "string",
-      "description": "Sub-category for grouping (e.g. 'drilling', 'groundworks', 'deliveries'). Optional."
+      "description": "Sub-category for grouping (e.g. 'drilling', 'groundworks', 'deliveries')."
     },
     "sort_order": {
       "type": "number",
       "default": 0,
-      "description": "Display order (lower = first in dropdowns and lists)"
+      "description": "Display order"
     }
   },
   "required": [

@@ -23,6 +23,7 @@ import JobContextView from '@/components/JobContextView';
 import GeotechDataTab from '@/components/geotech/GeotechDataTab';
 import TabStatRibbon from '@/components/TabStatRibbon';
 import JobFinancialsTab from '@/components/afp/JobFinancialsTab';
+import ProcurementPipeline from '@/components/enterprise/ProcurementPipeline';
 
 /**
  * JobDetailTabs — consolidated, progressive-disclosure tab structure.
@@ -221,6 +222,7 @@ export default function JobDetailTabs({
           ]}
         />
         <JobLogisticsHub jobId={job.id} job={job} suppliers={suppliers} contractors={contractors} canSeeCosts={canSeeCosts} isDrillingJob={isDrillingJob} />
+        {canSeeCosts && <ProcurementPipeline jobId={job.id} job={job} />}
       </TabsContent>
 
       {/* ── Financials ── */}
