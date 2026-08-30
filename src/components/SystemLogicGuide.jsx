@@ -225,7 +225,7 @@ export default function SystemLogicGuide() {
       doc.setTextColor(SLATE_700);
       doc.setFontSize(10);
       const intro = doc.splitTextToSize(
-        'This guide explains every statistic, rule and automation in the Ground Control Mission Control. It is the reference document for anyone who needs to understand what the system is doing and why — from new managers to auditors to the board.',
+        'This guide explains every statistic, rule and automation in the Ground Control Mission Control. It is the reference document for anyone who needs to understand what the system is doing and why — from new managers to auditors to the board. It complements the user-facing Help Guides (Help → Help Guides) — when you add a new stat or feature, update both this guide and the relevant Help Topic so the two stay in sync.',
         pageW - margin * 2
       );
       doc.text(intro, margin, y);
@@ -300,6 +300,7 @@ export default function SystemLogicGuide() {
             <div>
               <h2 className="text-lg font-bold tracking-tight">System Logic & Stats Guide</h2>
               <p className="text-white/80 text-sm">Every stat, rule and automation explained — downloadable as a PDF</p>
+              <p className="text-white/60 text-xs mt-1">Companion to the user-facing Help Guides — update both when adding new stats or features.</p>
             </div>
           </div>
           <button onClick={buildPDF} disabled={generating}
