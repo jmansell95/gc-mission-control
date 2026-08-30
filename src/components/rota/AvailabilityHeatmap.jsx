@@ -8,24 +8,21 @@ import { format, startOfWeek, addDays, parseISO, isWeekend } from 'date-fns';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 
 /**
- * AvailabilityHeatmap — redesigned modern calendar-grid view.
+ * AvailabilityHeatmap — card-per-staff week view of crew availability.
  *
- * Responsive week heatmap of crew availability with:
- *  - Color-coded cells (refined brand palette): on-job, leave, sick, training, depot, available
- *  - Team / crew-type filter
- *  - Per-person row summaries (status breakdown)
- *  - Per-day column totals (headcount by status)
- *  - Hover tooltips with detail
- *  - Legend
+ * Each crew member renders as a full-width card with their 7-day week strip
+ * inside, so the layout is mobile-friendly with no horizontal page scroll.
+ * Keeps the team filter, week navigation, division-scoped assignments, and
+ * the existing status colours / logic.
  */
 
 const STATUS_CONFIG = {
-  job:          { bg: 'bg-emerald-500', text: 'text-white', label: 'On Job',     icon: Briefcase },
-  annual_leave: { bg: 'bg-blue-400',    text: 'text-white', label: 'Leave',      icon: Coffee },
-  sick:         { bg: 'bg-rose-400',    text: 'text-white', label: 'Sick',       icon: Stethoscope },
-  training:     { bg: 'bg-amber-400',   text: 'text-white', label: 'Training',   icon: Users },
-  yard_depot:   { bg: 'bg-slate-400',   text: 'text-white', label: 'Depot',      icon: Warehouse },
-  available:    { bg: 'bg-slate-100',   text: 'text-slate-400', label: 'Available', icon: null },
+  job:          { bg: 'bg-emerald-500', text: 'text-white', label: 'On Job',     icon: Briefcase, hex: '#10b981' },
+  annual_leave: { bg: 'bg-blue-400',    text: 'text-white', label: 'Leave',      icon: Coffee,    hex: '#3b82f6' },
+  sick:         { bg: 'bg-rose-400',    text: 'text-white', label: 'Sick',       icon: Stethoscope, hex: '#f43f5e' },
+  training:     { bg: 'bg-amber-400',   text: 'text-white', label: 'Training',   icon: Users,     hex: '#f59e0b' },
+  yard_depot:   { bg: 'bg-slate-400',   text: 'text-white', label: 'Depot',      icon: Warehouse, hex: '#64748b' },
+  available:    { bg: 'bg-slate-100',   text: 'text-slate-400', label: 'Available', icon: null,   hex: '#cbd5e1' },
 };
 
 const STATUS_ORDER = ['job', 'annual_leave', 'sick', 'training', 'yard_depot', 'available'];
@@ -110,17 +107,17 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
     return counts;
   };
 
-  // Per-day column totals: headcount on job / unavailable / available
-  const dayTotals = useMemo(() => {
-    return days.map((d) => {
-      const counts = { job: 0, annual_leave: 0, sick: 0, training: 0, yard_depot: 0, available: 0 };
-      filteredStaff.forEach((s) => {
-        const st = getDayStatus(s.id, d.dateStr);
-        counts[st.type] = (counts[st.type] || 0) + 1;
-      });
-      return { ...d, counts };
+  // Aggregate stats across all filtered staff for the week
+  const weekStats = useMemo(() => {
+    let onJob = 0, available = 0, off = 0;
+    filteredStaff.forEach((s) => {
+      const sum = rowSummary(s.id);
+      onJob += sum.job;
+      available += sum.available;
+      off += sum.annual_leave + sum.sick + sum.training + sum.yard_depot;
     });
-  }, [days, filteredStaff, assignments, absences]);
+    return { onJob, available, off, total: filteredStaff.length };
+  }, [filteredStaff, days, assignments, absences]);
 
   const prevWeek = () => setWeekStart(format(addDays(new Date(weekStart), -7), 'yyyy-MM-dd'));
   const nextWeek = () => setWeekStart(format(addDays(new Date(weekStart), 7), 'yyyy-MM-dd'));
@@ -138,7 +135,7 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900">Availability Heatmap</h3>
-            <p className="text-xs text-slate-400">{weekLabel}</p>
+            <p className="text-xs text-slate-400">{weekLabel} · {weekStats.total} crew</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -163,8 +160,21 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
         </div>
       </div>
 
+      {/* Week stats bar */}
+      <div className="flex flex-wrap gap-2 mb-4 pb-3 border-b border-slate-100 text-xs">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" /> On Job · {weekStats.onJob}
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200">
+          <span className="w-2 h-2 rounded-full bg-slate-300" /> Available · {weekStats.available}
+        </div>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
+          <span className="w-2 h-2 rounded-full bg-blue-400" /> Off · {weekStats.off}
+        </div>
+      </div>
+
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 mb-4 pb-3 border-b border-slate-100">
+      <div className="flex flex-wrap gap-3 mb-4">
         {STATUS_ORDER.map((key) => {
           const cfg = STATUS_CONFIG[key];
           return (
@@ -184,70 +194,58 @@ export default function AvailabilityHeatmap({ weekStart: propWeekStart }) {
           <p className="text-sm">No active staff in this crew type.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <div className="min-w-[640px]">
-            {/* Day headers + column totals */}
-            <div className="grid gap-1.5 mb-1.5" style={{ gridTemplateColumns: `180px repeat(7, minmax(70px, 1fr))` }}>
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-end pb-1">Crew Member</div>
-              {dayTotals.map((d) => {
-                const weekend = isWeekend(d.date);
-                const onJob = d.counts.job;
-                const off = d.counts.annual_leave + d.counts.sick + d.counts.training + d.counts.yard_depot;
-                return (
-                  <div key={d.dateStr} className={`text-center rounded-lg py-1.5 ${weekend ? 'bg-slate-50' : ''}`}>
-                    <p className={`text-xs font-bold ${weekend ? 'text-slate-400' : 'text-slate-700'}`}>{d.label}</p>
-                    <p className="text-[10px] text-slate-400 tabular-nums">{d.dayNum}</p>
-                    <div className="flex items-center justify-center gap-1 mt-1">
-                      <span className="text-[9px] font-bold text-emerald-600 tabular-nums">{onJob}</span>
-                      {off > 0 && <span className="text-[9px] font-bold text-slate-400 tabular-nums">·{off}</span>}
-                    </div>
+        <div className="space-y-2">
+          {filteredStaff.map((s) => {
+            const summary = rowSummary(s.id);
+            const team = teamMap[s.team_id];
+            const initials = (s.full_name || s.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+            return (
+              <div key={s.id} className="rounded-2xl border border-slate-100 bg-white overflow-hidden">
+                {/* Header row */}
+                <div className="flex items-center gap-3 p-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {initials}
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{s.full_name || s.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{team?.name || 'Unassigned'}</p>
+                  </div>
+                  {/* Week mini-summary */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0 text-xs">
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold">
+                      {summary.job}<span className="hidden sm:inline"> jobs</span>
+                    </span>
+                    <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-slate-100 text-slate-500 font-bold">
+                      {summary.available}<span className="hidden sm:inline"> free</span>
+                    </span>
+                  </div>
+                </div>
 
-            {/* Rows */}
-            <div className="space-y-1.5">
-              {filteredStaff.slice(0, 30).map((s) => {
-                const summary = rowSummary(s.id);
-                const team = teamMap[s.team_id];
-                const initials = (s.full_name || s.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-                return (
-                  <div key={s.id} className="grid gap-1.5 items-center" style={{ gridTemplateColumns: `180px repeat(7, minmax(70px, 1fr))` }}>
-                    {/* Name + summary */}
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                        {initials}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 truncate">{s.full_name || s.name}</p>
-                        <p className="text-[10px] text-slate-400 truncate">{team?.name || 'Unassigned'}</p>
-                      </div>
-                    </div>
-                    {/* Day cells */}
+                {/* 7-day strip */}
+                <div className="px-3 pb-3">
+                  <div className="grid grid-cols-7 gap-1.5">
                     {days.map((d) => {
                       const status = getDayStatus(s.id, d.dateStr);
                       const cfg = STATUS_CONFIG[status.type] || STATUS_CONFIG.available;
                       const weekend = isWeekend(d.date);
                       return (
-                        <div
-                          key={d.dateStr}
-                          title={`${s.full_name || s.name} · ${format(d.date, 'EEE dd')} · ${cfg.label}${status.label ? ` (${status.label})` : ''}`}
-                          className={`h-9 rounded-lg flex items-center justify-center text-[10px] font-bold ${cfg.bg} ${cfg.text} ${weekend ? 'opacity-60' : ''} transition hover:scale-[1.08] hover:shadow-md cursor-default`}
-                        >
-                          {status.type === 'job' ? 'J' : status.type === 'available' ? '' : (status.label || cfg.label.slice(0, 3))}
+                        <div key={d.dateStr} className="flex flex-col items-center gap-1">
+                          <span className={`text-[10px] font-bold uppercase ${weekend ? 'text-slate-300' : 'text-slate-400'}`}>{d.label}</span>
+                          <span className={`text-[10px] tabular-nums ${weekend ? 'text-slate-300' : 'text-slate-400'}`}>{d.dayNum}</span>
+                          <div
+                            title={`${s.full_name || s.name} · ${format(d.date, 'EEE dd')} · ${cfg.label}${status.label ? ` (${status.label})` : ''}`}
+                            className={`w-full aspect-square min-h-[36px] rounded-lg flex items-center justify-center text-[10px] font-extrabold ${cfg.bg} ${cfg.text} ${weekend ? 'opacity-60' : ''} transition hover:scale-[1.06] cursor-default`}
+                          >
+                            {status.type === 'job' ? 'J' : status.type === 'available' ? '' : (status.label || cfg.label.slice(0, 3))}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
-                );
-              })}
-            </div>
-
-            {filteredStaff.length > 30 && (
-              <p className="text-center text-xs text-slate-400 mt-3">Showing first 30 of {filteredStaff.length} staff</p>
-            )}
-          </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
