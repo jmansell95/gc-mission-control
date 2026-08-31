@@ -1,6 +1,7 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Clock } from 'lucide-react';
+import { Clock, ExternalLink } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
@@ -17,6 +18,7 @@ import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
  * own header), preventing a duplicated title.
  */
 export default function SettingsSidebar({ activeTab, onNavigate, items, hideHeader }) {
+  const navigate = useNavigate();
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
@@ -59,7 +61,7 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => item.external ? navigate(item.external) : onNavigate(item.id)}
                     className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition text-left ${
                       isActive
                         ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]'
@@ -70,6 +72,9 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
                   >
                     <Icon className={`w-4 h-4 flex-shrink-0 ${cs ? 'text-slate-300' : ''}`} />
                     <span className={`truncate flex-1 ${cs ? 'line-through decoration-slate-300' : ''}`}>{item.label}</span>
+                    {item.external && (
+                      <ExternalLink className="w-3 h-3 text-slate-300 flex-shrink-0" />
+                    )}
                     {cs && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-bold flex-shrink-0">
                         <Clock className="w-2.5 h-2.5" />

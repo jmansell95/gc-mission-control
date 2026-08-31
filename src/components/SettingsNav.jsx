@@ -65,6 +65,13 @@ export const settingsGroups = [
     ],
   },
   {
+    label: 'Planning & Briefing',
+    items: [
+      { id: 'azure-migration', label: 'Azure Migration Plan', icon: Cloud, desc: '13-week 1:1 migration roadmap to Azure-native architecture with A3 wall chart and parity matrix', external: '/azure-migration-plan', roles: ['admin'] },
+      { id: 'presentation-pack', label: 'Team Briefing Pack', icon: FileText, desc: 'Full platform walkthrough — why we built it, every hub, and recent major work. Download a print-ready PDF', external: '/presentation-pack', roles: ['admin'] },
+    ],
+  },
+  {
     label: 'System Configuration',
     items: [
       { id: 'daily-checklists', label: 'Daily Checklists', icon: ClipboardCheck, desc: 'Configure the pre-work checklist crew complete before each shift — vehicle, plant, PPE checks per crew type' },

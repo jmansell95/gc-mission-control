@@ -1,14 +1,15 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Settings as SettingsIcon, CheckCircle2, Clock, Webhook, AlertTriangle,
-  Search, X, ChevronRight,
+  Search, X, ChevronRight, ExternalLink,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
-// Item IDs that belong to the Integrations section (everything else → System Configuration)
+// Item IDs that belong to the Integrations section
 const INTEGRATION_IDS = new Set([
   'geotab-sync', 'holman-sync', 'asset-panda', 'bob-hr', 'concur-sync',
   'safety-culture', 'cis-verification', 'payroll-export',
@@ -16,7 +17,11 @@ const INTEGRATION_IDS = new Set([
   'microsoft-365', 'zapier-webhooks', 'ags-import', 'openground-sync',
 ]);
 
+// Item IDs that belong to the Planning & Briefing section (external routes)
+const PLANNING_IDS = new Set(['azure-migration', 'presentation-pack']);
+
 export default function SettingsHubOverview({ onNavigate, items }) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
   const { data: stats } = useQuery({
@@ -45,7 +50,8 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   }, [query, allItems]);
 
   const integrationItems = filtered.filter(i => INTEGRATION_IDS.has(i.id));
-  const systemItems = filtered.filter(i => !INTEGRATION_IDS.has(i.id));
+  const planningItems = filtered.filter(i => PLANNING_IDS.has(i.id));
+  const systemItems = filtered.filter(i => !INTEGRATION_IDS.has(i.id) && !PLANNING_IDS.has(i.id));
 
   const statsTiles = [
     { icon: CheckCircle2, label: 'Active', value: activeCount, tone: 'emerald' },
@@ -64,10 +70,18 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   const renderItem = (item) => {
     const Icon = item.icon;
     const isCs = !!comingSoonMap[item.id] && integrations.find(i => i.id === item.id)?.status !== 'active';
+    const isExternal = !!item.external;
+    const handleClick = () => {
+      if (isExternal) {
+        navigate(item.external);
+      } else {
+        onNavigate?.(item.id);
+      }
+    };
     return (
       <button
         key={item.id}
-        onClick={() => onNavigate?.(item.id)}
+        onClick={handleClick}
         className={`insight-card rounded-xl p-3.5 flex items-center gap-3 text-left transition hover:shadow-md ${
           isCs ? 'opacity-60' : ''
         }`}
@@ -87,7 +101,9 @@ export default function SettingsHubOverview({ onNavigate, items }) {
             </span>
           )}
         </div>
-        <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+        {isExternal
+          ? <ExternalLink className="w-4 h-4 text-slate-300 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />}
       </button>
     );
   };
@@ -158,6 +174,7 @@ export default function SettingsHubOverview({ onNavigate, items }) {
       ) : (
         <div className="space-y-4">
           {renderSection('Integrations', integrationItems)}
+          {renderSection('Planning & Briefing', planningItems)}
           {renderSection('System Configuration', systemItems)}
         </div>
       )}
