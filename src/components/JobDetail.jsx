@@ -40,22 +40,6 @@ const statusLabels = {
 export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const [job, setJob] = useState(initialJob);
   const queryClient = useQueryClient();
-
-  // Null guard — if job is undefined (e.g. opened from dashboard before data
-  // resolved), show a loading state instead of crashing on job.id access.
-  if (!job) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 px-4">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin mb-4"></div>
-        <p className="text-sm text-slate-500">Loading project details…</p>
-        {onBack && (
-          <button onClick={onBack} className="mt-4 text-sm text-[#2E5A1A] font-semibold hover:underline">
-            Go back
-          </button>
-        )}
-      </div>
-    );
-  }
   const [showEditWizard, setShowEditWizard] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
@@ -96,8 +80,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list() });
   const { data: contractors = [] } = useQuery({ queryKey: ['contractors'], queryFn: () => base44.entities.Contractor.list() });
   const { data: suppliers = [] } = useQuery({ queryKey: ['suppliers-job-detail'], queryFn: () => base44.entities.Supplier.list() });
-  const { data: rotas = [] } = useQuery({ queryKey: ['rotas-for-job', job.id], queryFn: () => base44.entities.RotaAssignment.filter({ job_id: job.id }) });
-  const { data: hotelBookings = [] } = useQuery({ queryKey: ['hotel-bookings-for-job', job.id], queryFn: () => base44.entities.HotelBooking.filter({ job_id: job.id }) });
+  const { data: rotas = [] } = useQuery({ queryKey: ['rotas-for-job', job?.id], queryFn: () => base44.entities.RotaAssignment.filter({ job_id: job?.id }) });
+  const { data: hotelBookings = [] } = useQuery({ queryKey: ['hotel-bookings-for-job', job?.id], queryFn: () => base44.entities.HotelBooking.filter({ job_id: job?.id }) });
 
   const assignedStaffIds = [...new Set(rotas.map(r => r.staff_id))];
   const assignedStaff = assignedStaffIds.map(id => allStaff.find(s => s.id === id)).filter(Boolean);
@@ -118,8 +102,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const isDrillingJob = isDrillingJobByTeams(job, teams, jobTypes);
   const isGroundworksJob = isGroundworksJobByTeams(job, teams, jobTypes);
   const { data: invLogs = [] } = useQuery({
-    queryKey: ['investigation-logs', job.id],
-    queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job.id }),
+    queryKey: ['investigation-logs', job?.id],
+    queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job?.id }),
   });
   // Use the centralized getTotalMetres() — same function used by the
   // Boreholes tab and Billing Summary — so the metreage shown in the hero
