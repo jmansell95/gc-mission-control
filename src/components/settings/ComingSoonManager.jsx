@@ -229,8 +229,16 @@ export default function ComingSoonManager() {
 
           return (
             <div key={item.id}
-              className={'flex items-center gap-3 px-4 py-3.5 transition ' + (isLast ? '' : 'border-b border-slate-100 ') + (isComingSoon ? 'bg-amber-50/40' : '')}>
-              <Icon className={'w-5 h-5 flex-shrink-0 ' + (isConnected ? 'text-emerald-500' : isComingSoon ? 'text-amber-400' : 'text-slate-400')} />
+              className={'flex items-center gap-3 px-4 py-3.5 transition ' + (isLast ? '' : 'border-b border-slate-100 ') + (isComingSoon ? 'bg-amber-50/50' : '')}>
+              <div className={'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition ' + (
+                isConnected ? 'bg-emerald-50' : isComingSoon ? 'bg-amber-100' : 'bg-slate-100'
+              )}>
+                {isComingSoon ? (
+                  <Clock className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <Icon className={'w-4 h-4 ' + (isConnected ? 'text-emerald-500' : 'text-slate-400')} />
+                )}
+              </div>
               <div className="min-w-0 flex-1">
                 <p className={'text-sm font-semibold truncate ' + (isComingSoon ? 'text-slate-500' : 'text-slate-800')}>{item.label}</p>
                 <p className="text-xs text-slate-400 truncate">{item.sub}</p>
