@@ -1,14 +1,39 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Clock } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
 /**
  * Settings Sidebar — persistent left navigation for the settings area.
  * Only shows items that have NOT migrated to operational hubs.
- * Migrated items (billing rules, compliance rules, etc.) are rendered as
- * tabs inside their respective hub pages (Financial Control, Compliance,
- * Assets, Staff) instead of here.
+ *
+ * Coming-soon integrations (flagged in the Coming Soon Manager) are rendered
+ * with a muted/greyed style and a small Clock badge so the locked state is
+ * visible right in the menu.
+ *
+ * `hideHeader` suppresses the internal "Settings Menu" card header — used
+ * when the sidebar is embedded inside the mobile drawer (which provides its
+ * own header), preventing a duplicated title.
  */
-export default function SettingsSidebar({ activeTab, onNavigate, items }) {
+export default function SettingsSidebar({ activeTab, onNavigate, items, hideHeader }) {
+  const { data: stats } = useQuery({
+    queryKey: ['settings-hub-stats'],
+    queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
+  });
+  const comingSoonMap = stats?.integrationComingSoon || {};
+  const integrationStatusById = React.useMemo(() => {
+    const m = {};
+    for (const i of (stats?.integrations || [])) m[i.id] = i;
+    return m;
+  }, [stats]);
+
+  const isComingSoon = (id) => {
+    if (!comingSoonMap[id]) return false;
+    // An active integration is never coming-soon (backend auto-cleans).
+    return integrationStatusById[id]?.status !== 'active';
+  };
+
   const itemMap = Object.fromEntries(items.map(i => [i.id, i]));
   const groups = settingsGroups
     .filter(g => g.label !== '_hidden_migrated')
@@ -16,11 +41,13 @@ export default function SettingsSidebar({ activeTab, onNavigate, items }) {
     .filter(g => g.items.length > 0);
 
   return (
-    <div className="sticky top-4">
+    <div className={hideHeader ? '' : 'sticky top-4'}>
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="px-3 py-3 border-b border-slate-100">
-          <h3 className="text-sm font-bold text-slate-900">Settings Menu</h3>
-        </div>
+        {!hideHeader && (
+          <div className="px-3 py-3 border-b border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900">Settings Menu</h3>
+          </div>
+        )}
         <div className="p-2 max-h-[calc(100vh-180px)] overflow-y-auto">
           {groups.map(group => (
             <div key={group.label} className="mb-1.5">
@@ -28,6 +55,7 @@ export default function SettingsSidebar({ activeTab, onNavigate, items }) {
               {group.items.map(item => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
+                const cs = isComingSoon(item.id);
                 return (
                   <button
                     key={item.id}
@@ -35,11 +63,19 @@ export default function SettingsSidebar({ activeTab, onNavigate, items }) {
                     className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition text-left ${
                       isActive
                         ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]'
-                        : 'text-slate-600 hover:bg-slate-50'
+                        : cs
+                          ? 'text-slate-400 hover:bg-slate-50'
+                          : 'text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{item.label}</span>
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${cs ? 'text-slate-300' : ''}`} />
+                    <span className={`truncate flex-1 ${cs ? 'line-through decoration-slate-300' : ''}`}>{item.label}</span>
+                    {cs && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-bold flex-shrink-0">
+                        <Clock className="w-2.5 h-2.5" />
+                        Soon
+                      </span>
+                    )}
                   </button>
                 );
               })}

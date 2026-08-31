@@ -47,7 +47,7 @@ export default function SettingsMobileNav({ activeTab, onNavigate, items }) {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <SettingsSidebar activeTab={activeTab} onNavigate={handleNavigate} items={items} />
+              <SettingsSidebar activeTab={activeTab} onNavigate={handleNavigate} items={items} hideHeader />
             </div>
           </div>
         </div>

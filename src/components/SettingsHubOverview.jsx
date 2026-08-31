@@ -74,6 +74,26 @@ export default function SettingsHubOverview({ onNavigate }) {
         })}
       </div>
 
+      {/* Coming Soon list */}
+      {comingSoonCount > 0 && (
+        <div className="insight-card rounded-2xl p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-bold text-slate-900">Coming Soon</h3>
+            <span className="text-xs text-slate-400">·</span>
+            <span className="text-xs text-slate-500">{comingSoonCount} locked integration{comingSoonCount !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {integrations.filter(i => comingSoonMap[i.id] && i.status !== 'active').map(i => (
+              <span key={i.id} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold">
+                <Clock className="w-3 h-3 text-slate-400" />
+                {i.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Menu message */}
       <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center mx-auto mb-4 shadow-md icon-tile-glow">
