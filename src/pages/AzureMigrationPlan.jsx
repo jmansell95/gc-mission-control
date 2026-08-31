@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MigrationRoadmap from '@/components/azure/MigrationRoadmap';
+import ParityMatrix from '@/components/azure/ParityMatrix';
+import { generateA3WallChart } from '@/utils/azureWallChartPdf';
 
 const PHASE_ICONS = {
   0: Package,
@@ -201,11 +203,19 @@ export default function AzureMigrationPlan() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setView(v => v === 'presentation' ? 'runbook' : 'presentation')}
+              onClick={() => setView(v => v === 'presentation' ? 'runbook' : v === 'runbook' ? 'parity' : 'presentation')}
               className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition whitespace-nowrap"
             >
               <Presentation className="w-4 h-4" />
-              <span className="hidden sm:inline">{view === 'presentation' ? 'Runbook' : 'Presentation'}</span>
+              <span className="hidden sm:inline">{view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}</span>
+            </button>
+            <button
+              onClick={() => generateA3WallChart()}
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md whitespace-nowrap"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">A3 Wall Chart</span>
+              <span className="sm:hidden">A3</span>
             </button>
             <button
               onClick={() => window.print()}
@@ -247,6 +257,9 @@ export default function AzureMigrationPlan() {
           <>
             {/* Presentation view — exec summary + roadmap */}
             {view === 'presentation' && <MigrationRoadmap />}
+
+            {/* Parity Matrix view — 1:1 mapping verification */}
+            {view === 'parity' && <ParityMatrix />}
 
             {/* Runbook view — detailed phased checklist */}
             {view === 'runbook' && (
