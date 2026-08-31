@@ -78,7 +78,7 @@ import OpenGroundSettings from '@/components/settings/OpenGroundSettings';
 import RewardsManager from '@/components/settings/RewardsManager';
 import ComingSoonManager from '@/components/settings/ComingSoonManager';
 import ComingSoonLock from '@/components/settings/ComingSoonLock';
-import SettingsMobileNav from '@/components/settings/SettingsMobileNav';
+
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
 import SettingsAccessGuard from '@/components/settings/SettingsAccessGuard';
@@ -162,7 +162,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
     }
    
     switch (activeTab) {
-      case 'hub': return <SettingsHubOverview onNavigate={setActiveTab} />;
+      case 'hub': return <SettingsHubOverview onNavigate={setActiveTab} items={items} />;
       case 'autopilot': return <AutopilotControlPanel />;
       case 'divisions': return <DivisionManager />;
       case 'readiness': return <ReadinessManager />;
@@ -250,20 +250,15 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        {!standalone && (
+        {!standalone && activeTab !== 'hub' && (
           <div className="flex items-center gap-2 mb-hub-gap-sm lg:hidden">
-            {activeTab !== 'hub' && (
-              <button
-                onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {isIntegration ? 'Integrations' : 'Overview'}
-              </button>
-            )}
-            <div className="ml-auto">
-              <SettingsMobileNav activeTab={activeTab} onNavigate={setActiveTab} items={items} />
-            </div>
+            <button
+              onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              {isIntegration ? 'Integrations' : 'Settings'}
+            </button>
           </div>
         )}
         <ErrorBoundary key={activeTab}>

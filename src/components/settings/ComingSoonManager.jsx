@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
@@ -11,13 +11,15 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 
 /**
- * Coming Soon Manager — admin page to control which integrations display as
- * "Coming Soon" on the Settings overview. This is a display-only flag; it
- * does not disable functionality. Connected integrations cannot be marked
- * coming-soon (the toggle is disabled and the backend auto-cleans them).
+ * Coming Soon Manager — controls which integrations display as "Coming Soon"
+ * across the site. A Coming Soon integration is greyed out and cannot be opened
+ * or configured until the flag is removed.
  *
- * The flag is stored in a single AppSetting record keyed
- * `integration_coming_soon` as a map of { integrationId: true }.
+ * The flag is stored in a single AppSetting record keyed `integration_coming_soon`
+ * as a map of { integrationId: true }.
+ *
+ * Active (working) integrations cannot be marked coming-soon — the backend
+ * auto-cleans them and the toggle is disabled here.
  */
 const INTEGRATIONS = [
   { id: 'geotab-sync', icon: Satellite, label: 'Geotab GPS', sub: 'Live vehicle locations + specs' },
@@ -42,7 +44,8 @@ export default function ComingSoonManager() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
-  const [localMap, setLocalMap] = useState({});
+  const [localMap, setLocalMap] = useState(null); // null = not yet synced from server
+  const [settingId, setSettingId] = useState(null); // cached AppSetting record ID
 
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
@@ -52,42 +55,71 @@ export default function ComingSoonManager() {
   const integrations = stats?.integrations || [];
   const serverComingSoon = stats?.integrationComingSoon || {};
 
-  // Sync local state when server data loads
+  // Sync local state from server ONCE when data first arrives (or after save).
+  // Using null sentinel so we don't fight the user's edits on every render.
   React.useEffect(() => {
-    setLocalMap({ ...serverComingSoon });
-  }, [JSON.stringify(serverComingSoon)]);
+    if (localMap === null && stats) {
+      setLocalMap({ ...serverComingSoon });
+    }
+  }, [stats]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Cache the AppSetting record ID so we don't re-filter on every save.
+  React.useEffect(() => {
+    if (settingId === null && stats) {
+      base44.entities.AppSetting.filter({ key: 'integration_coming_soon' })
+        .then(recs => { if (recs[0]) setSettingId(recs[0].id); })
+        .catch(() => {});
+    }
+  }, [stats, settingId]);
 
   const connectedIds = useMemo(() => new Set(integrations.filter(i => i.connected).map(i => i.id)), [integrations]);
 
-  const toggle = (id) => {
-    if (connectedIds.has(id)) return; // can't mark connected as coming-soon
+  const toggle = useCallback((id) => {
+    if (connectedIds.has(id)) return;
     setLocalMap(prev => {
-      const next = { ...prev };
+      const next = { ...(prev || {}) };
       if (next[id]) delete next[id]; else next[id] = true;
       return next;
     });
-  };
+  }, [connectedIds]);
 
-  const hasChanges = JSON.stringify(localMap) !== JSON.stringify(serverComingSoon);
+  const currentMap = localMap || {};
+  const hasChanges = localMap !== null && JSON.stringify(currentMap) !== JSON.stringify(serverComingSoon);
 
   const save = async () => {
     setSaving(true);
     try {
-      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
-      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: localMap };
-      if (existing[0]) {
-        await base44.entities.AppSetting.update(existing[0].id, payload);
-      } else {
-        await base44.entities.AppSetting.create(payload);
+      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: currentMap };
+
+      // Use cached ID if available; otherwise filter for the record.
+      let id = settingId;
+      if (!id) {
+        const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+        id = existing[0]?.id;
       }
-      await qc.invalidateQueries({ queryKey: ['settings-hub-stats'] });
-      toast({ title: 'Coming Soon flags saved', description: 'The Settings overview will update immediately.' });
+
+      if (id) {
+        await base44.entities.AppSetting.update(id, payload);
+        setSettingId(id);
+      } else {
+        const created = await base44.entities.AppSetting.create(payload);
+        setSettingId(created.id);
+      }
+
+      // Force an immediate refetch (not just invalidation) so every component
+      // reading 'settings-hub-stats' updates right away.
+      await qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
+      toast({ title: 'Coming Soon flags saved', description: 'The Settings overview has been updated.' });
     } catch (e) {
       toast({ title: 'Save failed', description: e.message || 'Please try again.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
   };
+
+  const activeCount = integrations.filter(i => i.status === 'active').length;
+  const comingSoonCount = Object.keys(currentMap).filter(k => !connectedIds.has(k)).length;
+  const notSetUpCount = integrations.filter(i => i.status !== 'active' && !currentMap[i.id]).length;
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-5">
@@ -114,17 +146,17 @@ export default function ComingSoonManager() {
       <div className="grid grid-cols-3 gap-3">
         <div className="insight-card rounded-xl p-3 text-center">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{integrations.filter(i => i.status === 'active').length}</p>
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{activeCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Active</p>
         </div>
         <div className="insight-card rounded-xl p-3 text-center">
           <Clock className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{Object.keys(localMap).filter(k => !connectedIds.has(k)).length}</p>
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{comingSoonCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Coming Soon</p>
         </div>
         <div className="insight-card rounded-xl p-3 text-center">
           <Sparkles className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{integrations.filter(i => i.status !== 'active' && !localMap[i.id]).length}</p>
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{notSetUpCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Not Set Up</p>
         </div>
       </div>
@@ -135,7 +167,7 @@ export default function ComingSoonManager() {
           const Icon = item.icon;
           const isLast = idx === INTEGRATIONS.length - 1;
           const isConnected = connectedIds.has(item.id);
-          const isComingSoon = !!localMap[item.id] && !isConnected;
+          const isComingSoon = !!currentMap[item.id] && !isConnected;
 
           return (
             <div key={item.id}
@@ -153,7 +185,7 @@ export default function ComingSoonManager() {
               )}
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className={'text-[10px] font-bold ' + (isComingSoon ? 'text-amber-600' : isConnected ? 'text-emerald-600' : 'text-slate-400')}>
-                  {isComingSoon ? 'Coming Soon' : isConnected ? 'Live' : 'Active'}
+                  {isComingSoon ? 'Coming Soon' : isConnected ? 'Live' : 'Available'}
                 </span>
                 <Switch
                   checked={isComingSoon}
