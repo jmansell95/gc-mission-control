@@ -50,11 +50,23 @@ export default async function(req) {
       }
       const result = checkGreenPath(timesheetData);
       if (result.passed) {
+        const now = new Date();
+        const until = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         await base44.asServiceRole.entities.Timesheet.update(timesheetId, {
           status: 'approved',
           approved_by_name: 'Green-Path Auto-Approval',
+          auto_approved_at: now.toISOString(),
+          auto_approved_until: until.toISOString(),
         });
         return Response.json({ success: true, auto_approved: true, id: timesheetId, checks: result.checks });
+      }
+      // Flag overtime entries for explicit line-manager approval
+      if (timesheetData?.is_overtime || (timesheetData?.weekly_overtime_minutes || 0) > 0) {
+        await base44.asServiceRole.entities.Timesheet.update(timesheetId, {
+          overtime_pending: true,
+          status: 'submitted',
+        });
+        return Response.json({ success: true, auto_approved: false, id: timesheetId, reason: 'Overtime pending line-manager approval' });
       }
       return Response.json({ success: true, auto_approved: false, id: timesheetId, reason: result.reason });
     }
@@ -73,14 +85,25 @@ export default async function(req) {
     let skipped = 0;
     const skippedReasons = [];
 
+    const now = new Date();
+    const until = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     for (const t of pending) {
       const result = checkGreenPath(t);
       if (result.passed) {
         await base44.asServiceRole.entities.Timesheet.update(t.id, {
           status: 'approved',
           approved_by_name: 'Green-Path Auto-Approval',
+          auto_approved_at: now.toISOString(),
+          auto_approved_until: until.toISOString(),
         });
         approved++;
+      } else if (t.is_overtime || (t.weekly_overtime_minutes || 0) > 0) {
+        await base44.asServiceRole.entities.Timesheet.update(t.id, {
+          overtime_pending: true,
+          status: 'submitted',
+        });
+        skipped++;
+        skippedReasons.push({ id: t.id, reason: 'Overtime pending line-manager approval' });
       } else {
         skipped++;
         skippedReasons.push({ id: t.id, reason: result.reason });
@@ -126,6 +149,7 @@ function checkGreenPath(t) {
   if (!checks.reasonable_day) return { passed: false, reason: `Long day (${totalMins}m > 720m)`, checks };
   if (!checks.reasonable_travel) return { passed: false, reason: `Excessive travel (${travelMins}m > 120m)`, checks };
   if (!checks.no_overtime) return { passed: false, reason: 'Overtime flagged', checks };
+  if ((t.weekly_overtime_minutes || 0) > 0) return { passed: false, reason: 'Weekly overtime hours present', checks };
   if (!checks.has_break) return { passed: false, reason: `Break too short (${breakMin}m < 30m)`, checks };
 
   return { passed: true, checks };

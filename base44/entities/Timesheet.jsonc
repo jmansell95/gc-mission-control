@@ -242,6 +242,27 @@
     "confidence_score": {
       "type": "number",
       "description": "Confidence score (0-100) for auto-built timesheets. 80+ = green path (auto-approve eligible), 40-79 = review needed, <40 = missing data (staff nudge). Calculated from how many data sources corroborated the entry: GPS arrival + KeyLogBook logs + Mitti verification = high confidence; GPS only or rota-only = low confidence."
+    },
+    "auto_approved_at": {
+      "type": "string",
+      "description": "ISO timestamp when this summary was auto-approved by the green-path engine. Set when the greenPathApproveTimesheet function auto-approves a high-confidence non-overtime summary. Used to populate the 'Auto-approved today' strip and determine undo eligibility."
+    },
+    "auto_approved_until": {
+      "type": "string",
+      "description": "ISO timestamp of the undo-window expiry (auto_approved_at + 24h). While now < auto_approved_until, the manager can tap Undo to revert the entry to 'submitted' for manual review. After expiry the entry stays approved."
+    },
+    "overtime_pending": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this summary contains overtime hours (is_overtime or weekly_overtime_minutes > 0) and needs explicit line-manager approval before it can be merged for payroll. Green-path auto-approval never fires when this is true."
+    },
+    "overtime_approved_by": {
+      "type": "string",
+      "description": "Name of the line manager who explicitly approved the overtime on this summary. Stamped when the manager taps 'Approve Overtime' on the card."
+    },
+    "overtime_approved_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the line manager approved the overtime. Audit trail for the overtime sign-off."
     }
   },
   "required": [

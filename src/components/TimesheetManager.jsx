@@ -14,6 +14,7 @@ import { fmtDur, getWeekSignatures, computeWeekStatus } from '@/utils/timesheetH
 import WeeklyTimesheetCard from '@/components/timesheets/WeeklyTimesheetCard';
 import PendingReviewQueue from '@/components/timesheets/PendingReviewQueue';
 import WeeklySummaryTable from '@/components/timesheets/WeeklySummaryTable';
+import AutoApprovedStrip from '@/components/timesheets/AutoApprovedStrip';
 
 const meterageOf = (t) => Number(t?.meterage) || 0;
 
@@ -50,7 +51,17 @@ export default function TimesheetManager() {
   const [customStart, setCustomStart] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [customEnd, setCustomEnd] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [bulkMerging, setBulkMerging] = useState(false);
+  const [confidenceFilter, setConfidenceFilter] = useState('all');
   const queryClient = useQueryClient();
+
+  const handleUndoAutoApprove = async (id) => {
+    await base44.entities.Timesheet.update(id, {
+      status: 'submitted',
+      auto_approved_at: null,
+      auto_approved_until: null,
+    });
+    queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+  };
 
   const { data: timesheets = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['timesheets'],
@@ -146,11 +157,32 @@ export default function TimesheetManager() {
     });
   }, [rangeFiltered, staffFilter, statusFilter, search, staff, jobs]);
 
+  // Auto-approved entries for the undo strip (only in week mode)
+  const autoApprovedStripEntries = useMemo(() => {
+    if (rangeMode !== 'week') return [];
+    return rangeFiltered.filter((t) =>
+      t.auto_approved_at && t.auto_approved_until &&
+      new Date(t.auto_approved_until) > new Date() &&
+      !t.overtime_pending
+    );
+  }, [rangeFiltered, rangeMode]);
+
+  // Apply confidence tier filter
+  const confidenceFiltered = useMemo(() => {
+    if (confidenceFilter === 'all') return displayFiltered;
+    return displayFiltered.filter((t) => {
+      if (confidenceFilter === 'auto') return t.auto_approved_at;
+      if (confidenceFilter === 'overtime') return t.overtime_pending;
+      if (confidenceFilter === 'missing') return t.auto_built && (t.confidence_score || 0) < 40;
+      return true;
+    });
+  }, [displayFiltered, confidenceFilter]);
+
   // Group by staff + week_start (for week mode — uses WeeklyTimesheetCard)
   const weeklyGroups = useMemo(() => {
     if (rangeMode !== 'week') return [];
     const groups = {};
-    displayFiltered.forEach((t) => {
+    confidenceFiltered.forEach((t) => {
       const wk = t.week_start || weekKey(t.date);
       const key = `${t.staff_id}|${wk}`;
       if (!groups[key]) groups[key] = { staffId: t.staff_id, weekStart: wk, entries: [] };
@@ -167,7 +199,7 @@ export default function TimesheetManager() {
   const byDateGroups = useMemo(() => {
     if (rangeMode === 'week') return [];
     const groups = {};
-    displayFiltered.forEach((t) => {
+    confidenceFiltered.forEach((t) => {
       if (!groups[t.date]) groups[t.date] = [];
       groups[t.date].push(t);
     });
@@ -381,6 +413,31 @@ export default function TimesheetManager() {
         </div>
       ) : rangeMode === 'week' ? (
         <div className="space-y-4">
+          {/* 0. Auto-approved today strip */}
+          <AutoApprovedStrip
+            entries={autoApprovedStripEntries}
+            staffMap={Object.fromEntries(staff.map((s) => [s.id, s]))}
+            onUndo={handleUndoAutoApprove}
+          />
+
+          {/* 0b. Confidence tier filters */}
+          <div className="flex flex-wrap gap-2">
+            {[
+              { key: 'all', label: 'All' },
+              { key: 'auto', label: 'Auto-approved' },
+              { key: 'overtime', label: 'Overtime pending' },
+              { key: 'missing', label: 'Missing data' },
+            ].map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setConfidenceFilter(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${confidenceFilter === f.key ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           {/* 1. Pending Review Queue */}
           <PendingReviewQueue
             timesheets={rangeFiltered}

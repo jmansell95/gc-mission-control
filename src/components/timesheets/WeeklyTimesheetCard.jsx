@@ -5,8 +5,11 @@ import { format } from 'date-fns';
 import {
   CheckCircle2, Clock, XCircle, Circle, CalendarDays, Download,
   Loader2, ChevronDown, ChevronRight, Merge, AlertTriangle, Ruler, TrendingUp, Car, User, ShieldCheck, PenLine,
+  Undo2, Zap, MapPin,
 } from 'lucide-react';
 import { downloadWeeklyTimesheetPDF } from './WeeklyTimesheetPDF';
+import ConfidenceRing from './ConfidenceRing';
+import SourceBadges from './SourceBadges';
 import { fetchSignaturesForWeek, markSignatureInjected } from '@/utils/signatureFlow';
 import { fmtDur, getWeekSignatures, computeWeekStatus, buildWeekDates, groupByDate, DAY_LABELS } from '@/utils/timesheetHelpers';
 import WeeklySignOffModal from './WeeklySignOffModal';
@@ -62,6 +65,52 @@ export default function WeeklyTimesheetCard({ staffMember, weekStart, dailySumma
   const travelMins = countedEntries.reduce((s, t) => s + (Number(t.payable_travel_minutes) || 0), 0);
   const meterage = countedEntries.reduce((s, t) => s + (Number(t.meterage) || 0), 0);
   const otMins = countedEntries.reduce((s, t) => s + (otBreakdowns[t.id]?.otMins || 0), 0);
+
+  // Auto-built intelligence
+  const autoBuiltEntries = dailySummaries.filter((t) => t.auto_built);
+  const bestConfidence = autoBuiltEntries.length > 0
+    ? Math.max(...autoBuiltEntries.map((t) => t.confidence_score || 0))
+    : null;
+  const allSources = autoBuiltEntries.length > 0
+    ? [...new Set(autoBuiltEntries.flatMap((t) => (t.auto_built_sources || '').split(',').filter(Boolean)))].join(',')
+    : '';
+  const hasOvertimePending = dailySummaries.some((t) => t.overtime_pending);
+  const autoApprovedEntries = dailySummaries.filter(
+    (t) => t.auto_approved_at && t.auto_approved_until && new Date(t.auto_approved_until) > new Date()
+  );
+  const hasUndoable = autoApprovedEntries.length > 0;
+
+  // GPS times from the first entry that has them
+  const gpsEntry = dailySummaries.find((t) => t.travel_arrive_site || t.travel_depart_site);
+  const gpsArrive = gpsEntry?.travel_arrive_site;
+  const gpsDepart = gpsEntry?.travel_depart_site;
+
+  const handleUndoAutoApprove = async (entryId) => {
+    await base44.entities.Timesheet.update(entryId, {
+      status: 'submitted',
+      auto_approved_at: null,
+      auto_approved_until: null,
+    });
+    queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+    queryClient.invalidateQueries({ queryKey: ['all-timesheets-mgr'] });
+  };
+
+  const handleApproveOvertime = async () => {
+    const otEntries = dailySummaries.filter((t) => t.overtime_pending);
+    const name = currentUser?.full_name || '';
+    await base44.entities.Timesheet.bulkUpdate(
+      otEntries.map((t) => ({
+        id: t.id,
+        overtime_pending: false,
+        overtime_approved_by: name,
+        overtime_approved_at: new Date().toISOString(),
+        status: 'approved',
+        approved_by_name: name,
+      }))
+    );
+    queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+    queryClient.invalidateQueries({ queryKey: ['all-timesheets-mgr'] });
+  };
 
   const handleApproveDay = async (entryId) => {
     setApprovingId(entryId);
@@ -156,15 +205,16 @@ export default function WeeklyTimesheetCard({ staffMember, weekStart, dailySumma
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex items-center gap-3 flex-wrap">
-        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-          <span className="text-emerald-700 font-bold text-sm">{(staffMember?.name || '?').charAt(0)}</span>
-        </div>
+        <ConfidenceRing score={bestConfidence} size={44}>
+          <span className="text-xs font-bold text-slate-700">{(staffMember?.name || '?').charAt(0)}</span>
+        </ConfidenceRing>
         <div className="min-w-0">
           <p className="text-sm font-bold text-slate-900 truncate">{staffMember?.name || 'Unknown'}</p>
           <p className="text-xs text-slate-400 flex items-center gap-1">
             <CalendarDays className="w-3 h-3" />
             {format(new Date(weekStart + 'T00:00:00'), 'dd MMM')} – {format(weekEndDate, 'dd MMM yyyy')}
           </p>
+          {allSources && <div className="mt-1"><SourceBadges sources={allSources} size="xs" /></div>}
         </div>
         <div className="flex items-center gap-3 ml-auto flex-wrap justify-end">
           <div className="text-right">
@@ -203,6 +253,35 @@ export default function WeeklyTimesheetCard({ staffMember, weekStart, dailySumma
         </div>
       </div>
 
+      {/* State pills + GPS times */}
+      <div className="px-4 sm:px-5 py-1.5 flex items-center gap-1.5 flex-wrap bg-slate-50/40 border-b border-slate-50">
+        {hasOvertimePending && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700">
+            <Zap className="w-2.5 h-2.5" /> Overtime pending
+          </span>
+        )}
+        {hasUndoable && !hasOvertimePending && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">
+            <ShieldCheck className="w-2.5 h-2.5" /> Auto-approved
+          </span>
+        )}
+        {bestConfidence != null && bestConfidence < 40 && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-700">
+            <AlertTriangle className="w-2.5 h-2.5" /> Missing data
+          </span>
+        )}
+        {bestConfidence != null && bestConfidence >= 40 && bestConfidence < 80 && !hasOvertimePending && !hasUndoable && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700">
+            <Clock className="w-2.5 h-2.5" /> Needs review
+          </span>
+        )}
+        {gpsArrive && gpsDepart && (
+          <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600">
+            <MapPin className="w-2.5 h-2.5" /> {gpsArrive} → {gpsDepart}
+          </span>
+        )}
+      </div>
+
       {/* Signature status badges */}
       <div className="px-4 sm:px-5 py-2 flex items-center gap-2 flex-wrap bg-slate-50/40 border-b border-slate-50">
         <SigStatusBadge signed={staffSigned} label="Staff signed" icon={PenLine} signedClass="bg-blue-100 text-blue-700" />
@@ -226,6 +305,18 @@ export default function WeeklyTimesheetCard({ staffMember, weekStart, dailySumma
 
       {/* Action bar */}
       <div className="px-4 sm:px-5 py-2.5 bg-slate-50/60 border-t border-slate-100 flex items-center gap-2 flex-wrap">
+        {hasOvertimePending && (
+          <button onClick={handleApproveOvertime}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition active:scale-95">
+            <Zap className="w-3.5 h-3.5" /> Approve overtime
+          </button>
+        )}
+        {hasUndoable && !hasOvertimePending && (
+          <button onClick={() => handleUndoAutoApprove(autoApprovedEntries[0].id)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-100 border border-slate-200 transition active:scale-95">
+            <Undo2 className="w-3.5 h-3.5" /> Undo auto-approve
+          </button>
+        )}
         {!isMerged && readyToMerge && (
           <button onClick={handleMerge} disabled={merging}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 text-white rounded-lg text-xs font-semibold hover:bg-emerald-800 disabled:opacity-50 transition">

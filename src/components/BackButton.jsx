@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { resolveBackFallback } from '@/utils/backFallback';
 
 /**
  * Universal BackButton — appears in every hub/page header.
@@ -15,8 +16,9 @@ import { ChevronLeft } from 'lucide-react';
  *  - label: button text (default 'Back')
  *  - className: extra classes
  */
-export default function BackButton({ fallback = '/', label = 'Back', className = '' }) {
+export default function BackButton({ fallback, label = 'Back', className = '' }) {
   const navigate = useNavigate();
+  const resolvedFallback = fallback || resolveBackFallback(window.location.pathname);
 
   const handleClick = () => {
     const state = window.history.state;
@@ -24,7 +26,7 @@ export default function BackButton({ fallback = '/', label = 'Back', className =
     if (hasHistory) {
       navigate(-1);
     } else {
-      navigate(fallback);
+      navigate(resolvedFallback);
     }
   };
 
