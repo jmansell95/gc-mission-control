@@ -192,20 +192,23 @@ export default function SettingsHubOverview({ onNavigate }) {
                   {gComingSoon > 0 && <span className="text-amber-600">· {gComingSoon} soon</span>}
                 </div>
               </div>
+              {/* Prominent Coming Soon Manager button — easy to find on mobile */}
+              <button onClick={() => onNavigate('coming-soon-manager')}
+                className="w-full mt-2 flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 transition group">
+                <div className="w-9 h-9 rounded-lg bg-amber-200 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-5 h-5 text-amber-700" />
+                </div>
+                <div className="text-left flex-1 min-w-0">
+                  <p className="text-sm font-bold text-amber-900">Coming Soon Manager</p>
+                  <p className="text-xs text-amber-700">Toggle which integrations show as "Coming Soon" vs "Active"</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-amber-600 group-hover:translate-x-0.5 transition flex-shrink-0" />
+              </button>
               <IntegrationsOverviewList
                 items={group.items}
                 statusMap={integrationStatusMap}
                 onNavigate={onNavigate}
               />
-              {/* Coming Soon Manager link */}
-              <div className="mt-2 px-1">
-                <button onClick={() => onNavigate('coming-soon-manager')}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
-                  <Clock className="w-3.5 h-3.5" />
-                  Manage Coming Soon flags
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
             </section>
           );
         }
