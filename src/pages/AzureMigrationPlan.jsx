@@ -201,29 +201,30 @@ export default function AzureMigrationPlan() {
               <p className="text-xs text-slate-400 truncate">3-Month Plan · UK South · GDPR-Compliant</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             <button
               onClick={() => setView(v => v === 'presentation' ? 'runbook' : v === 'runbook' ? 'parity' : 'presentation')}
-              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition whitespace-nowrap"
+              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-3 sm:py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition whitespace-nowrap"
+              title={view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}
             >
               <Presentation className="w-4 h-4" />
-              <span className="hidden sm:inline">{view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}</span>
+              <span className="hidden sm:inline ml-1.5">{view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}</span>
             </button>
             <button
               onClick={() => generateA3WallChart()}
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md whitespace-nowrap"
+              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md whitespace-nowrap"
+              title="Download A3 Wall Chart"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">A3 Wall Chart</span>
-              <span className="sm:hidden">A3</span>
+              <span className="hidden sm:inline ml-1.5">A3 Wall Chart</span>
             </button>
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md whitespace-nowrap"
+              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md whitespace-nowrap"
+              title="Download PDF"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline">Download PDF</span>
-              <span className="sm:hidden">PDF</span>
+              <span className="hidden sm:inline ml-1.5">Download PDF</span>
             </button>
           </div>
         </div>
