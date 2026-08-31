@@ -40,8 +40,8 @@ export const settingsGroups = [
   {
     label: 'Ground Investigation',
     items: [
-      { id: 'ags-import', label: 'KeyLogBook', icon: FileUp, desc: 'AGS & borehole data sync — webhook config, manual AGS upload, and pull sync settings for this business stream' },
-      { id: 'openground-sync', label: 'OpenGround', icon: Database, desc: 'Push approved borehole logs from this stream to Bentley OpenGround cloud database' },
+      { id: 'ags-import', label: 'KeyLogBook', icon: FileUp, desc: 'Dedicated KeyLogBook integration page — AGS webhook config, auto-sync, and manual upload for this business stream' },
+      { id: 'openground-sync', label: 'OpenGround', icon: Database, desc: 'Dedicated OpenGround integration page — push approved borehole logs from this stream to Bentley OpenGround cloud database' },
     ],
   },
   {
@@ -72,10 +72,10 @@ export const settingsGroups = [
       { id: 'global-branding', label: 'Global Branding', icon: Palette, desc: 'Default colours, banner and footer for all automated emails' },
       { id: 'login-branding', label: 'Login Page Customiser', icon: Palette, desc: 'Customise the staff login page — background, colours, logo, welcome text & live preview', roles: ['admin'] },
       { id: 'portal-branding', label: 'Portal Branding Editor', icon: Palette, desc: 'Customise the client portal & subcontractor onboarding portal — welcome text, logo, colours, support contacts & live preview', roles: ['admin'] },
-      { id: 'email-templates', label: 'Email Templates', icon: Mail, desc: 'Manage branded email templates for portal invitations, schedules, billing & compliance notifications with {{variable}} token support' },
+      { id: 'email-templates', label: 'Email Builder', icon: Mail, desc: 'Modern branded email template builder — live preview, design kit, tables, pills & buttons. Every email uses the same GC Mission Control design' },
+      { id: 'report-templates', label: 'Report Builder', icon: FileBarChart, desc: 'Modern report template builder — mirrors the Email Builder. Pick data source, fields, chart type, filters & scheduling with a live layout preview' },
       { id: 'email-alerts', label: 'Email Alerts', icon: Mail, desc: 'Edit templates, recipients and timing for each automated email' },
       { id: 'automations', label: 'Automations', icon: Zap, desc: 'Background automations & alerts' },
-      { id: 'planner-import', label: 'Planner Import', icon: FileSpreadsheet, desc: 'Upload weekly rota spreadsheet' },
       { id: 'incremental-import', label: 'Incremental Import', icon: Layers, desc: 'Non-destructive smart imports' },
       { id: 'system-guide', label: 'System Logic Guide', icon: BookOpen, desc: 'Download a PDF explaining every stat, rule and automation in the system', roles: ['admin', 'manager', 'viewer'] },
       { id: 'rewards', label: 'Rewards Manager', icon: Gift, desc: 'Create gift cards & rewards for the points catalogue, and fulfil staff redemptions', roles: ['admin'] },

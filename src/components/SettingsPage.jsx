@@ -28,7 +28,9 @@ import ComplianceRulesSettings from '@/components/ComplianceRulesSettings';
 import LogQualityControl from '@/components/investigation/LogQualityControl';
 import AuditTrailHub from '@/components/audit/AuditTrailHub';
 import SystemAuditLogViewer from '@/components/audit/SystemAuditLogViewer';
-import EmailTemplateManager from '@/components/settings/EmailTemplateManager';
+import EmailTemplateBuilder from '@/components/settings/EmailTemplateBuilder';
+import ReportTemplateBuilder from '@/components/settings/ReportTemplateBuilder';
+import KeyLogBookSettings from '@/components/settings/KeyLogBookSettings';
 import TimesheetManager from '@/components/TimesheetManager';
 import BillingPage from '@/components/BillingPage';
 import FinancialDataExchange from '@/components/billing/FinancialDataExchange';
@@ -164,11 +166,12 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'log-qc': return <LogQualityControl />;
       case 'audit-trail': return <AuditTrailHub />;
       case 'system-audit-log': return <SystemAuditLogViewer />;
-      case 'email-templates': return <EmailTemplateManager />;
+      case 'email-templates': return <EmailTemplateBuilder />;
+      case 'report-templates': return <ReportTemplateBuilder />;
       case 'timesheets': return <TimesheetManager />;
       case 'invoicing': return <BillingPage onSelectJob={onSelectJob} />;
       case 'data-exchange': return <FinancialDataExchange />;
-      case 'ags-import': return <GeotechSettings />;
+      case 'ags-import': return <KeyLogBookSettings />;
       case 'planner-import': return <ImportDashboard />;
       case 'safety-culture': return <SafetyCultureSettings />;
       case 'system-guide': return <SystemLogicGuide />;
@@ -204,7 +207,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'zapier-webhooks': return <ZapierWebhookSettings />;
       case 'push-notifications': return <PushNotificationSettings />;
       case 'incremental-import': return <IncrementalImportSettings />;
-      case 'openground-sync': return <GeotechSettings />;
+      case 'openground-sync': return <OpenGroundSettings />;
       case 'rewards': return <RewardsManager />;
       default: return null;
     }

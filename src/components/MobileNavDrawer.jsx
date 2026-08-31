@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, LogOut, HelpCircle, User, CalendarDays, Truck, Bell, Crown, ScanLine, Sparkles } from 'lucide-react';
 import Logo from '@/components/Logo';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
+import DivisionSwitcher from '@/components/DivisionSwitcher';
+import GlobalSearch from '@/components/GlobalSearch';
 
 export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSection, onNavigate, onLogout, onHelp, onProfile, onDeliveries, onNotifications, notifCount = 0, profile, onEnterprise, onScan, onAIHub }) {
   return (
@@ -44,6 +46,14 @@ export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSecti
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Division switcher — parity with desktop sidebar */}
+            <div className="px-3 pt-2 pb-1">
+              <DivisionSwitcher variant="sidebar" />
+            </div>
+
+            {/* Search — parity with desktop sidebar footer */}
+            <div className="px-3 pb-2"><GlobalSearch /></div>
 
             <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto overscroll-contain">
               {onEnterprise && (
