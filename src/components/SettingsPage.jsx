@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import StaffCommand from '@/components/StaffCommand';
 import VehicleManager from '@/components/VehicleManager';
@@ -77,11 +77,14 @@ import IncrementalImportSettings from '@/components/settings/IncrementalImportSe
 import OpenGroundSettings from '@/components/settings/OpenGroundSettings';
 import RewardsManager from '@/components/settings/RewardsManager';
 import ComingSoonManager from '@/components/settings/ComingSoonManager';
+import ComingSoonLock from '@/components/settings/ComingSoonLock';
+import SettingsMobileNav from '@/components/settings/SettingsMobileNav';
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
 import SettingsAccessGuard from '@/components/settings/SettingsAccessGuard';
 import SettingsSidebar from '@/components/SettingsSidebar';
 import { useSettingsAccess } from '@/hooks/useSettingsAccess';
+import { useQuery } from '@tanstack/react-query';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { resolveRole } from '@/utils/access';
 import { base44 } from '@/api/base44Client';
@@ -97,6 +100,19 @@ const INTEGRATION_IDS = new Set([
 export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
   const [activeTab, setActiveTab] = useState(initialTab || 'hub');
   const [profile, setProfile] = useState(null);
+
+  // Coming Soon flags — used to lock integration pages that are flagged
+  // coming-soon (and not active). Single source of truth: getSettingsHubStats.
+  const { data: hubStats } = useQuery({
+    queryKey: ['settings-hub-stats'],
+    queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
+  });
+  const comingSoonMap = hubStats?.integrationComingSoon || {};
+  const integrationStatusById = useMemo(() => {
+    const m = {};
+    for (const i of (hubStats?.integrations || [])) m[i.id] = i;
+    return m;
+  }, [hubStats]);
 
   useEffect(() => {
     (async () => {
@@ -132,6 +148,17 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
     // If this page is locked down and the user doesn't have access, show the guard.
     if (isLockedOut) {
       return <SettingsAccessGuard pageLabel={active.label} lockedBy={activeLockdown.lockedBy} lockedAt={activeLockdown.lockedAt} />;
+    }
+
+    // Coming Soon enforcement — an integration flagged coming-soon (and not
+    // active) is locked: show the locked state instead of the config page.
+    if (INTEGRATION_IDS.has(activeTab)) {
+      const st = integrationStatusById[activeTab];
+      const isCs = !!comingSoonMap[activeTab] && st?.status !== 'active';
+      if (isCs) {
+        const label = active?.label || 'This integration';
+        return <ComingSoonLock label={label} onBack={() => setActiveTab('integrations')} />;
+      }
     }
    
     switch (activeTab) {
@@ -223,14 +250,21 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
         </div>
       )}
       <div className="flex-1 min-w-0">
-        {!standalone && activeTab !== 'hub' && (
-          <button
-            onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
-            className="mb-hub-gap-sm inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm lg:hidden"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {isIntegration ? 'Back to Integrations' : 'Back to Overview'}
-          </button>
+        {!standalone && (
+          <div className="flex items-center gap-2 mb-hub-gap-sm lg:hidden">
+            {activeTab !== 'hub' && (
+              <button
+                onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
+                className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {isIntegration ? 'Integrations' : 'Overview'}
+              </button>
+            )}
+            <div className="ml-auto">
+              <SettingsMobileNav activeTab={activeTab} onNavigate={setActiveTab} items={items} />
+            </div>
+          </div>
         )}
         <ErrorBoundary key={activeTab}>
           {renderContent()}

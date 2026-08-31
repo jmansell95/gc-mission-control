@@ -3,83 +3,96 @@ import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 /**
- * Subscribes to realtime Job entity changes (create / update / delete) and
- * invalidates all job-related React Query caches so every dashboard, hub and
- * detail view stays in sync without manual refreshes.
+ * Global realtime sync — the single source of "no manual refresh" for the
+ * whole site. Mounted once near the app root (inside AuthenticatedApp).
  *
- * Mount once near the app root (e.g. inside AuthenticatedApp).
+ * Subscribes to every core entity. On any create/update/delete event (from
+ * this user OR any other user/device), it invalidates the React Query caches
+ * that depend on that entity, so every open list, dashboard and detail view
+ * refreshes automatically.
+ *
+ * This is intentionally broad — invalidating a partial key like ['rotas']
+ * refreshes every ['rotas', weekStart, division] variant. That keeps the
+ * behaviour identical across the site without wiring a hook into each page.
  */
-const JOB_QUERY_KEYS = [
-  ['jobs'],
-  ['job'],
-  ['my-today-assignments'],
-  ['outstanding-asset-assignments'],
-  ['job-asset-assignments'],
-  ['job-chain-legs-detail'],
-  ['job-chain-legs'],
-  ['delivery-legs-map'],
-  ['admin-all-deliveries'],
-  ['driver-day-stops'],
-  ['all-jobs-financials'],
-  ['job-financials'],
-  ['site-assets'],
-  ['investigation-logs'],
-  ['staff-timesheets'],
-  ['all-timesheets-mgr'],
-  ['timesheets'],
-];
+const ENTITY_QUERY_KEYS = {
+  Job: [
+    ['jobs'], ['job'], ['my-today-assignments'], ['outstanding-asset-assignments'],
+    ['job-asset-assignments'], ['job-chain-legs-detail'], ['job-chain-legs'],
+    ['delivery-legs-map'], ['admin-all-deliveries'], ['driver-day-stops'],
+    ['all-jobs-financials'], ['job-financials'], ['site-assets'],
+    ['investigation-logs'], ['job-cost-items'], ['job-deliveries'],
+  ],
+  RotaAssignment: [
+    ['rotas'], ['staff-all-rotas'], ['staff-assignments'], ['my-today-assignments'],
+    ['rota-week'], ['recurring-depot-duty'],
+  ],
+  Timesheet: [
+    ['timesheets'], ['staff-timesheets'], ['all-timesheets-mgr'], ['timesheet-delegations'],
+  ],
+  InvestigationLog: [
+    ['investigation-logs'], ['site-logs'], ['staff-timesheets'], ['all-timesheets-mgr'],
+  ],
+  Staff: [
+    ['staff'], ['staff-all-rotas'], ['compliance-staff-all'], ['staff-assignments'],
+    ['my-today-assignments'], ['permission-groups'], ['teams'],
+  ],
+  Vehicle: [
+    ['vehicles'], ['fleet-vehicles'], ['driver-day-stops'], ['deliveries-for-drivers'],
+  ],
+  SiteAsset: [
+    ['site-assets'], ['rigs-active'], ['rigs-active-rota'], ['assets'],
+    ['job-asset-assignments'], ['outstanding-asset-assignments'],
+  ],
+  DeliveryLog: [
+    ['deliveries-for-drivers'], ['admin-all-deliveries'], ['driver-day-stops'],
+    ['delivery-legs-map'], ['deliveries'], ['job-deliveries'],
+  ],
+  JobCostItem: [
+    ['job-cost-items'], ['job-financials'], ['all-jobs-financials'], ['cvr'],
+  ],
+  ComplianceItem: [
+    ['compliance-items'], ['compliance-staff-all'], ['compliance'],
+  ],
+  Invoice: [
+    ['invoices'], ['invoicing'], ['all-jobs-financials'],
+  ],
+  AFP: [
+    ['afp'], ['afps'], ['job-financials'], ['all-jobs-financials'],
+  ],
+  CVR: [
+    ['cvr'], ['cvrs'], ['job-financials'], ['all-jobs-financials'],
+  ],
+  Absence: [
+    ['absences'], ['recurring-absences'], ['staff-all-rotas'],
+  ],
+  HotelBooking: [
+    ['hotel-bookings'], ['job-hotel-bookings'],
+  ],
+};
 
 export default function useJobRealtimeSync() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    let unsubscribe = null;
-    let unsubLogs = null;
-    try {
-      unsubscribe = base44.entities.Job.subscribe((event) => {
-        if (!event || !event.type) return;
-        // Invalidate all job-scoped queries so every view refreshes.
-        JOB_QUERY_KEYS.forEach(key => queryClient.invalidateQueries({ queryKey: key }));
-      });
-    } catch {
-      // Realtime not available — silently skip; views still refresh on navigation.
-    }
-    try {
-      unsubLogs = base44.entities.InvestigationLog.subscribe((event) => {
-        if (!event || !event.type) return;
-        // Invalidate log + timesheet queries so the Site Logs tab refreshes
-        // when the KeyLogBook webhook creates new entries.
-        queryClient.invalidateQueries({ queryKey: ['investigation-logs'] });
-        queryClient.invalidateQueries({ queryKey: ['staff-timesheets'] });
-        queryClient.invalidateQueries({ queryKey: ['all-timesheets-mgr'] });
-        queryClient.invalidateQueries({ queryKey: ['timesheets'] });
-      });
-    } catch {
-      // Realtime not available — silently skip
-    }
-    let unsubTimesheets = null;
-    try {
-      unsubTimesheets = base44.entities.Timesheet.subscribe((event) => {
-        if (!event || !event.type) return;
-        // Invalidate all timesheet queries so both the staff view and the
-        // manager Timesheets tab update instantly when entries are submitted,
-        // approved, rejected, or merged — no manual refresh needed.
-        queryClient.invalidateQueries({ queryKey: ['timesheets'] });
-        queryClient.invalidateQueries({ queryKey: ['staff-timesheets'] });
-        queryClient.invalidateQueries({ queryKey: ['all-timesheets-mgr'] });
-      });
-    } catch {
-      // Realtime not available — silently skip
+    const unsubs = [];
+    for (const entityName of Object.keys(ENTITY_QUERY_KEYS)) {
+      try {
+        const keys = ENTITY_QUERY_KEYS[entityName];
+        const unsub = base44.entities[entityName]?.subscribe((event) => {
+          if (!event || !event.type) return;
+          for (const key of keys) {
+            queryClient.invalidateQueries({ queryKey: key });
+          }
+        });
+        if (typeof unsub === 'function') unsubs.push(unsub);
+      } catch {
+        // Realtime not available for this entity — silently skip.
+      }
     }
     return () => {
-      if (typeof unsubscribe === 'function') {
-        try { unsubscribe(); } catch {}
-      }
-      if (typeof unsubLogs === 'function') {
-        try { unsubLogs(); } catch {}
-      }
-      if (typeof unsubTimesheets === 'function') {
-        try { unsubTimesheets(); } catch {}
+      for (const unsub of unsubs) {
+        try { unsub(); } catch {}
       }
     };
   }, [queryClient]);

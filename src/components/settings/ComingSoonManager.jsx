@@ -93,7 +93,7 @@ export default function ComingSoonManager() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-5">
       <SettingsSectionHeader
         title="Coming Soon Manager"
-        description="Control which integrations display as 'Coming Soon' on the Settings overview. This is a display flag only — it does not disable functionality. Connected integrations cannot be marked as coming soon."
+        description="Control which integrations are locked as 'Coming Soon'. A Coming Soon integration is greyed out across the site and cannot be opened or configured until the flag is removed. Active (working) integrations cannot be marked as coming soon."
         icon={Clock}
       />
 
@@ -105,7 +105,7 @@ export default function ComingSoonManager() {
         <div>
           <p className="text-sm font-semibold text-slate-800">How this works</p>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-            Toggle an integration ON to mark it as "Coming Soon" — it will appear greyed out on the overview with a Coming Soon badge. Toggle OFF to show it as "Active" (available to configure). Integrations with credentials already set up show a "Connected" badge and cannot be marked coming soon.
+            Toggle an integration ON to lock it as "Coming Soon" — it will be greyed out and cannot be opened or configured anywhere on the site until you toggle it back off. Active integrations (credentials saved + working connection) cannot be marked coming soon.
           </p>
         </div>
       </div>

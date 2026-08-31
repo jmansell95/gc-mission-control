@@ -4,6 +4,17 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // getSettingsHubStats — single-call batched stats for the Settings Command Hub.
 // Returns every count and integration-status the overview needs in one round
 // trip, replacing the ~10 separate entity queries the overview used to fire.
+//
+// Integration status resolution (the single source of truth for the overview,
+// IntegrationsHub and ComingSoonManager):
+//   • not_configured  — no credentials saved (slate)
+//   • needs_attention — credentials saved but the last cached sync failed /
+//                       never ran (amber)
+//   • active          — credentials saved AND (no sync mechanism OR the last
+//                       cached sync succeeded) (emerald)
+// `connected` is kept as a boolean = hasCredentials for backward compatibility
+// with the ComingSoonManager toggle lock (you can't mark a configured
+// integration as coming-soon).
 // ---------------------------------------------------------------------------
 
 const INTEGRATION_SETTING_KEYS = [
@@ -36,6 +47,24 @@ const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   accounting_config: { id: 'accounting-sync', label: 'Accounting' },
   stripe_config: { id: 'payment-gateway', label: 'Payments' },
 };
+// Fields on a config record/value that hold a cached sync outcome.
+const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_status', 'last_sync_status'];
+// Integrations that have no scheduled sync / connection test — for these,
+// "credentials saved" alone counts as a working connection (there is no cached
+// status to check). Everything else is expected to persist a sync status.
+const NO_SYNC_MECHANISM = new Set([
+  'cis_config', 'google_maps_config', 'whatsapp_config', 'stripe_config',
+]);
+
+function resolveSyncStatus(values: any[]): string | null {
+  for (const v of values) {
+    if (!v || typeof v !== 'object') continue;
+    for (const k of SYNC_STATUS_FIELDS) {
+      if (v[k]) return String(v[k]).toLowerCase();
+    }
+  }
+  return null;
+}
 
 export default async function (req: Request): Promise<Response> {
   try {
@@ -64,38 +93,60 @@ export default async function (req: Request): Promise<Response> {
       sr.KeyLogBookConfig.list('-created_date', 50),
     ]);
 
-    // Aggregate AppSetting configs across all divisions — a key is "connected"
-    // if ANY record with that key (any division) has the connected field set.
+    // Aggregate AppSetting configs across all divisions.
     const settingsByKey: Record<string, any[]> = {};
     for (const s of allSettings || []) {
       const k = s.key;
       if (!settingsByKey[k]) settingsByKey[k] = [];
       settingsByKey[k].push(s.value || {});
     }
-    const isAppSettingConnected = (k: string) => {
+    const hasAppSettingCredentials = (k: string) => {
       const field = INTEGRATION_CONNECTED_FIELDS[k];
       if (!field) return false;
       return (settingsByKey[k] || []).some(v => !!(v && v[field]));
     };
-    // Dedicated config entities (not stored in AppSetting) — read directly.
-    const assetPandaConnected = (assetPandaConfigs || []).some(c => !!(c.email || c.api_token));
-    const mittiConnected = (mittiConfigs || []).some(c => !!(c.enabled || c.webhook_secret || c.api_token));
-    const klbConnected = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
+    const appSettingSyncStatus = (k: string) => resolveSyncStatus(settingsByKey[k] || []);
+
+    // Dedicated config entities (not stored in AppSetting).
+    const assetPandaHasCreds = (assetPandaConfigs || []).some(c => !!(c.email || c.api_token));
+    const assetPandaSync = (assetPandaConfigs || []).map(c => c.last_sync_status).find(Boolean) || null;
+    const mittiHasCreds = (mittiConfigs || []).some(c => !!(c.enabled || c.webhook_secret || c.api_token));
+    const mittiSync = (mittiConfigs || []).map(c => c.last_webhook_status).find(Boolean) || null;
+    const klbHasCreds = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
+    const klbSync = (klbConfigs || []).map(c => c.last_sync_status || c.sync_status).find(Boolean) || null;
 
     const integrations = INTEGRATION_SETTING_KEYS.filter(k => k !== 'integration_coming_soon').map(k => {
       const meta = INTEGRATION_META[k];
-      let connected = false;
-      if (k === 'asset_panda_config') connected = assetPandaConnected;
-      else if (k === 'safety_culture_config') connected = mittiConnected;
-      else if (k === 'keylogbook_config') connected = klbConnected;
-      else connected = isAppSettingConnected(k);
-      return { id: meta.id, label: meta.label, connected };
+      let hasCredentials = false;
+      let syncStatus: string | null = null;
+      if (k === 'asset_panda_config') { hasCredentials = assetPandaHasCreds; syncStatus = assetPandaSync; }
+      else if (k === 'safety_culture_config') { hasCredentials = mittiHasCreds; syncStatus = mittiSync; }
+      else if (k === 'keylogbook_config') { hasCredentials = klbHasCreds; syncStatus = klbSync; }
+      else { hasCredentials = hasAppSettingCredentials(k); syncStatus = appSettingSyncStatus(k); }
+
+      // Resolve the displayed status.
+      let status: string;
+      if (!hasCredentials) {
+        status = 'not_configured';
+      } else if (NO_SYNC_MECHANISM.has(k)) {
+        status = 'active'; // credentials saved = working (no sync to verify)
+      } else if (syncStatus === 'success' || syncStatus === 'synced') {
+        status = 'active';
+      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'never') {
+        status = 'needs_attention';
+      } else {
+        // Credentials saved but no cached sync status recorded yet — treat as
+        // active (optimistic; the first scheduled sync will refine this).
+        status = 'active';
+      }
+      return { id: meta.id, label: meta.label, connected: hasCredentials, hasCredentials, status };
     });
 
     const activeStaff = (staff || []).filter(s => s.is_active !== false).length;
     const activeJobs = (jobs || []).filter(j => (j.status || 'planning') === 'in_progress').length;
     const planningJobs = (jobs || []).filter(j => (j.status || 'planning') === 'planning').length;
-    const integrationConnectedCount = integrations.filter(i => i.connected).length;
+    const integrationConnectedCount = integrations.filter(i => i.status === 'active').length;
+    const integrationNeedsAttention = integrations.filter(i => i.status === 'needs_attention').length;
 
     const comingSoonRaw = (settingsByKey['integration_coming_soon'] || [{}])[0] || {};
     const integrationComingSoon: Record<string, boolean> = {};
@@ -104,10 +155,9 @@ export default async function (req: Request): Promise<Response> {
         if (val) integrationComingSoon[id] = true;
       }
     }
-    // Auto-clean: a connected integration is never "coming soon" — remove
-    // stale flags so live integrations always show as active/connected.
+    // Auto-clean: an active (working) integration is never "coming soon".
     for (const int of integrations) {
-      if (int.connected) delete integrationComingSoon[int.id];
+      if (int.status === 'active') delete integrationComingSoon[int.id];
     }
 
     return Response.json({
@@ -126,6 +176,7 @@ export default async function (req: Request): Promise<Response> {
         permissionGroupsCount: (permissionGroups || []).length,
         integrations,
         integrationConnectedCount,
+        integrationNeedsAttention,
         integrationComingSoon,
       },
     });
