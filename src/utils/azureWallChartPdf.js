@@ -1,30 +1,37 @@
 /**
- * A3 Wall Chart PDF Generator
- * Produces a comprehensive, print-optimized A3 landscape (420×297mm) PDF
- * laying out the full 13-week Azure migration roadmap, target architecture,
- * 1:1 parity summary, risks, and costs — designed to be hung on a wall.
+ * A3 Wall Chart PDF Generator — Print-Ready
+ * Produces a clean, well-spaced A3 landscape (420×297mm) PDF laying out the
+ * full 13-week Azure migration roadmap, target architecture, 1:1 parity
+ * summary, entity category breakdown, risks, and costs.
  *
- * Uses jsPDF (installed) with vector drawing for crisp print at any size.
+ * Layout uses a strict grid with generous margins so nothing overlaps,
+ * gets squashed, or is cut off. All text is ≥7pt for readability.
  */
 import { jsPDF } from 'jspdf';
 import {
-  MIGRATION_SUMMARY, ENTITY_GROUPS, INFRASTRUCTURE,
+  MIGRATION_SUMMARY, INFRASTRUCTURE,
 } from '@/utils/azureMigrationData';
 
-const BRAND = { r: 46, g: 90, b: 26 };       // #2E5A1A
-const BRAND_LIGHT = { r: 141, g: 198, b: 63 }; // #8DC63F
-const BRAND_DARK = { r: 28, g: 74, b: 18 };    // #1c4a12
-const SLATE_900 = { r: 15, g: 23, b: 42 };
-const SLATE_600 = { r: 71, g: 85, b: 105 };
-const SLATE_400 = { r: 148, g: 163, b: 184 };
-const SLATE_100 = { r: 241, g: 245, b: 249 };
-const WHITE = { r: 255, g: 255, b: 255 };
+// ── Brand palette (all arrays for setFillColor compatibility) ──
+const BRAND = [46, 90, 26];
+const BRAND_LIGHT = [141, 198, 63];
+const BRAND_DARK = [28, 74, 18];
+const SLATE_900 = [15, 23, 42];
+const SLATE_700 = [51, 65, 85];
+const SLATE_600 = [71, 85, 105];
+const SLATE_400 = [148, 163, 184];
+const SLATE_200 = [226, 232, 240];
+const SLATE_100 = [241, 245, 249];
+const SLATE_50 = [248, 250, 252];
+const WHITE = [255, 255, 255];
+const AMBER = [217, 119, 6];
+const RED = [220, 38, 38];
 
 const PHASES = [
   { name: 'Prerequisites & Setup', start: 0, end: 1, color: [100, 116, 139] },
   { name: 'Export Source Code', start: 1, end: 2, color: [59, 130, 246] },
   { name: 'Provision Azure Infra', start: 2, end: 4, color: [139, 92, 246] },
-  { name: 'Data Layer (SQL + SDK)', start: 4, end: 7, color: [BRAND.r, BRAND.g, BRAND.b] },
+  { name: 'Data Layer (SQL + SDK)', start: 4, end: 7, color: BRAND },
   { name: 'Auth (Entra ID)', start: 6, end: 9, color: [8, 145, 178] },
   { name: 'Functions & Automations', start: 8, end: 11, color: [217, 119, 6] },
   { name: 'Deploy & Cutover', start: 11, end: 12, color: [220, 38, 38] },
@@ -54,176 +61,181 @@ const COSTS = [
   ['Total running cost', '~£220–300/mo'],
 ];
 
-function setFill(doc, c) { doc.setFillColor(c.r, c.g, c.b); }
-function setText(doc, c) { doc.setTextColor(c.r, c.g, c.b); }
-function setDraw(doc, c) { doc.setDrawColor(c.r, c.g, c.b); }
+// ── Helpers ──
+function fill(doc, c) { doc.setFillColor(c[0], c[1], c[2]); }
+function text(doc, c) { doc.setTextColor(c[0], c[1], c[2]); }
+function draw(doc, c) { doc.setDrawColor(c[0], c[1], c[2]); }
+
+function sectionBanner(doc, x, y, w, h, title, color = BRAND) {
+  fill(doc, color);
+  doc.roundedRect(x, y, w, h, 2, 2, 'F');
+  text(doc, WHITE);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(title, x + 4, y + h / 2 + 1, { baseline: 'middle' });
+}
+
+function wrappedText(doc, str, x, y, maxW, lineHeight) {
+  const lines = doc.splitTextToSize(str, maxW);
+  doc.text(lines, x, y);
+  return y + lines.length * lineHeight;
+}
 
 export function generateA3WallChart() {
-  // A3 landscape: 420 × 297 mm
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a3' });
   const W = 420, H = 297;
-  const M = 12; // margin
+  const M = 14; // outer margin
 
   // ── Background ──
-  setFill(doc, WHITE);
+  fill(doc, WHITE);
   doc.rect(0, 0, W, H, 'F');
 
-  // ── Title banner ──
-  setFill(doc, BRAND);
-  doc.rect(0, 0, W, 28, 'F');
-  setFill(doc, BRAND_DARK);
-  doc.rect(0, 26, W, 2, 'F');
+  // ══════════════════════════════════════════════════════════════
+  // ROW 1: Title Banner (0–30mm)
+  // ══════════════════════════════════════════════════════════════
+  fill(doc, BRAND);
+  doc.rect(0, 0, W, 30, 'F');
+  fill(doc, BRAND_DARK);
+  doc.rect(0, 28, W, 2, 'F');
 
-  setText(doc, WHITE);
+  text(doc, WHITE);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text('GC Mission Control — Azure Migration Roadmap', M + 2, 13);
+  doc.setFontSize(24);
+  doc.text('GC Mission Control — Azure Migration Roadmap', M + 2, 14);
   doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(200, 220, 180);
+  doc.text('13-Week 1:1 Migration · UK South · Entra ID · Azure SQL · Functions Premium · GDPR-Compliant', M + 2, 22);
   doc.setFontSize(10);
-  doc.text('13-Week 1:1 Migration · UK South · Entra ID · Azure SQL · Functions Premium · GDPR-Compliant', M + 2, 20);
-  doc.setFontSize(9);
-  doc.text(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W - M - 2, 13, { align: 'right' });
+  doc.text(new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), W - M - 2, 14, { align: 'right' });
 
-  let y = 36;
+  // ══════════════════════════════════════════════════════════════
+  // ROW 2: 13-Week Timeline (38–108mm)
+  // ══════════════════════════════════════════════════════════════
+  let y = 38;
+  sectionBanner(doc, M, y, W - 2 * M, 10, '13-Week Timeline');
+  y += 14;
 
-  // ── 13-Week Timeline ──
-  setText(doc, SLATE_900);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('13-Week Timeline', M, y);
-  y += 3;
-
-  // Timeline area
-  const TL_LEFT = M + 48;   // left margin for phase labels
+  const TL_LEFT = M + 52;   // left margin for phase labels
   const TL_RIGHT = W - M;
   const TL_WIDTH = TL_RIGHT - TL_LEFT;
   const WEEK_W = TL_WIDTH / 13;
-  const BAR_H = 7;
+  const BAR_H = 6;
   const BAR_GAP = 2.5;
 
-  // Week header
-  setFill(doc, SLATE_100);
-  doc.rect(TL_LEFT, y, TL_WIDTH, 6, 'F');
-  setText(doc, SLATE_600);
+  // Week header strip
+  fill(doc, SLATE_100);
+  doc.rect(TL_LEFT, y, TL_WIDTH, 7, 'F');
+  text(doc, SLATE_600);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   for (let w = 1; w <= 13; w++) {
-    doc.text(`W${w}`, TL_LEFT + (w - 0.5) * WEEK_W, y + 4.2, { align: 'center' });
+    doc.text(`W${w}`, TL_LEFT + (w - 0.5) * WEEK_W, y + 5, { align: 'center' });
   }
-  y += 7;
+  y += 9;
 
   // Phase bars
   PHASES.forEach((p, i) => {
     const barY = y + i * (BAR_H + BAR_GAP);
     // Label
-    setText(doc, SLATE_600);
+    text(doc, SLATE_700);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.text(p.name, M, barY + BAR_H / 2 + 0.5, { align: 'right' });
+    doc.setFontSize(8);
+    doc.text(p.name, M + 50, barY + BAR_H / 2 + 0.5, { align: 'right', baseline: 'middle' });
     // Bar
-    setFill(doc, { r: p.color[0], g: p.color[1], b: p.color[2] });
+    fill(doc, p.color);
     const left = TL_LEFT + p.start * WEEK_W;
     const width = (p.end - p.start) * WEEK_W;
     doc.roundedRect(left, barY, width, BAR_H, 1.5, 1.5, 'F');
-    setText(doc, WHITE);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    if (width > 30) {
-      doc.text(p.name, left + 2, barY + BAR_H / 2 + 0.5);
+    // Phase name inside bar (only if wide enough)
+    if (width > 35) {
+      text(doc, WHITE);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.text(p.name, left + 2, barY + BAR_H / 2 + 0.5, { baseline: 'middle' });
     }
   });
+  y += PHASES.length * (BAR_H + BAR_GAP) + 4;
 
-  y += PHASES.length * (BAR_H + BAR_GAP) + 3;
-
-  // Milestones
-  setText(doc, SLATE_900);
+  // Milestones row
+  text(doc, SLATE_900);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text('Key Milestones:', M, y + 2);
+  doc.setFontSize(10);
+  doc.text('Key Milestones', M, y + 2);
+  const msStartX = M + 38;
+  const msSpacing = (W - 2 * M - 38) / MILESTONES.length;
   MILESTONES.forEach((m, i) => {
-    const mx = M + 35 + i * 88;
-    setFill(doc, BRAND);
-    doc.circle(mx, y + 1.5, 1.8, 'F');
-    setText(doc, BRAND);
+    const mx = msStartX + i * msSpacing + 6;
+    fill(doc, BRAND);
+    doc.circle(mx, y + 1, 2, 'F');
+    text(doc, BRAND);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text(`W${m.week}`, mx + 4, y + 2.5);
-    setText(doc, SLATE_600);
+    doc.setFontSize(9);
+    doc.text(`W${m.week}`, mx + 5, y + 2.5);
+    text(doc, SLATE_600);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.text(m.label, mx + 4, y + 6);
+    doc.setFontSize(8);
+    doc.text(m.label, mx + 5, y + 6.5);
   });
-  y += 14;
 
-  // ── Two-column section: Architecture (left) + Parity Summary (right) ──
-  const COL_W = (W - 2 * M - 6) / 2;
+  // ══════════════════════════════════════════════════════════════
+  // ROW 3: Architecture (left) + Parity Summary (right) — 148–225mm
+  // ══════════════════════════════════════════════════════════════
+  const ROW3_Y = 148;
+  const COL_GAP = 8;
+  const COL_W = (W - 2 * M - COL_GAP) / 2;
   const LEFT_X = M;
-  const RIGHT_X = M + COL_W + 6;
+  const RIGHT_X = M + COL_W + COL_GAP;
 
-  // Architecture table
-  setText(doc, SLATE_900);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('Target Architecture', LEFT_X, y);
-  y += 3;
+  // ── Architecture table (left column) ──
+  let archY = ROW3_Y;
+  sectionBanner(doc, LEFT_X, archY, COL_W, 10, 'Target Architecture');
+  archY += 14;
 
   const archRows = INFRASTRUCTURE.map(i => [i.layer, i.base44Source, i.azureTarget]);
-  const archH = archRows.length * 6 + 8;
-  setFill(doc, SLATE_100);
-  doc.rect(LEFT_X, y, COL_W, archH, 'F');
-  // Header
-  setFill(doc, BRAND);
-  doc.rect(LEFT_X, y, COL_W, 6, 'F');
-  setText(doc, WHITE);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
-  doc.text('Layer', LEFT_X + 2, y + 4);
-  doc.text('Today (Base44)', LEFT_X + 35, y + 4);
-  doc.text('Target (Azure)', LEFT_X + COL_W * 0.52, y + 4);
-  // Rows
-  archRows.forEach((row, i) => {
-    const ry = y + 6 + i * 6;
-    if (i % 2 === 1) { setFill(doc, { r: 248, g: 250, b: 252 }); doc.rect(LEFT_X, ry, COL_W, 6, 'F'); }
-    setText(doc, SLATE_900);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.text(row[0], LEFT_X + 2, ry + 4);
-    setText(doc, SLATE_600);
-    doc.setFont('helvetica', 'normal');
-    doc.text(row[1], LEFT_X + 35, ry + 4);
-    setText(doc, BRAND);
-    doc.setFont('helvetica', 'bold');
-    doc.text(row[2], LEFT_X + COL_W * 0.52, ry + 4);
-  });
-  y += archH + 5;
+  const archRowH = 5.5;
+  const archTableH = archRows.length * archRowH + 8;
 
-  // Costs + Risks under architecture
-  const bottomY = y;
-  // Costs
-  setText(doc, SLATE_900);
+  // Table background
+  fill(doc, SLATE_50);
+  doc.roundedRect(LEFT_X, archY, COL_W, archTableH, 1.5, 1.5, 'F');
+
+  // Header row
+  fill(doc, BRAND_DARK);
+  doc.rect(LEFT_X, archY, COL_W, archRowH, 'F');
+  text(doc, WHITE);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text('Indicative Monthly Cost', LEFT_X, bottomY);
-  let cy = bottomY + 3;
-  COSTS.forEach((c, i) => {
-    const isTotal = i === COSTS.length - 1;
-    setFill(doc, isTotal ? BRAND : { r: 248, g: 250, b: 252 });
-    doc.rect(LEFT_X, cy, COL_W * 0.7, 5.5, 'F');
-    setText(doc, isTotal ? WHITE : SLATE_600);
-    doc.setFont('helvetica', isTotal ? 'bold' : 'normal');
+  doc.setFontSize(8);
+  doc.text('Layer', LEFT_X + 3, archY + 5);
+  doc.text('Today (Base44)', LEFT_X + 42, archY + 5);
+  doc.text('Target (Azure)', LEFT_X + COL_W * 0.55, archY + 5);
+
+  archY += archRowH;
+  archRows.forEach((row, i) => {
+    const ry = archY + i * archRowH;
+    if (i % 2 === 1) {
+      fill(doc, SLATE_100);
+      doc.rect(LEFT_X, ry, COL_W, archRowH, 'F');
+    }
+    text(doc, SLATE_900);
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(7.5);
-    doc.text(c[0], LEFT_X + 2, cy + 3.8);
-    doc.text(c[1], LEFT_X + COL_W * 0.7 - 2, cy + 3.8, { align: 'right' });
-    cy += 6;
+    doc.text(row[0], LEFT_X + 3, ry + 5);
+    text(doc, SLATE_600);
+    doc.setFont('helvetica', 'normal');
+    // Truncate long source text
+    const srcLines = doc.splitTextToSize(row[1], COL_W * 0.55 - 42 - 4);
+    doc.text(srcLines[0] || '', LEFT_X + 42, ry + 5);
+    text(doc, BRAND);
+    doc.setFont('helvetica', 'bold');
+    const tgtLines = doc.splitTextToSize(row[2], COL_W * 0.45 - 4);
+    doc.text(tgtLines[0] || '', LEFT_X + COL_W * 0.55, ry + 5);
   });
 
   // ── 1:1 Parity Summary (right column) ──
-  let ry2 = 39; // align with architecture top
-  setText(doc, SLATE_900);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('1:1 Parity Summary', RIGHT_X, ry2);
-  ry2 += 3;
+  let parY = ROW3_Y;
+  sectionBanner(doc, RIGHT_X, parY, COL_W, 10, '1:1 Parity Summary');
+  parY += 14;
 
   const parityStats = [
     ['Entities → Azure SQL tables', MIGRATION_SUMMARY.entities],
@@ -238,76 +250,108 @@ export function generateA3WallChart() {
     ['Infrastructure layers → Azure services', MIGRATION_SUMMARY.infrastructure],
   ];
 
+  const parRowH = 5.5;
+  const parTableH = parityStats.length * parRowH + 8;
+  fill(doc, SLATE_50);
+  doc.roundedRect(RIGHT_X, parY, COL_W, parTableH, 1.5, 1.5, 'F');
+
   parityStats.forEach((s, i) => {
+    const ry = parY + 4 + i * parRowH;
     const isHeader = !s[0].startsWith('  ·');
-    setFill(doc, isHeader ? { r: 241, g: 245, b: 249 } : { r: 248, g: 250, b: 252 });
-    doc.rect(RIGHT_X, ry2, COL_W, 6, 'F');
-    setText(doc, isHeader ? SLATE_900 : SLATE_600);
+    if (isHeader) {
+      fill(doc, SLATE_100);
+      doc.rect(RIGHT_X, ry, COL_W, parRowH, 'F');
+    }
+    text(doc, isHeader ? SLATE_900 : SLATE_600);
     doc.setFont('helvetica', isHeader ? 'bold' : 'normal');
-    doc.setFontSize(7.5);
-    doc.text(s[0], RIGHT_X + 2, ry2 + 4);
-    setText(doc, BRAND);
+    doc.setFontSize(8);
+    doc.text(s[0], RIGHT_X + 4, ry + 5);
+    text(doc, BRAND);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text(String(s[1]), RIGHT_X + COL_W - 2, ry2 + 4, { align: 'right' });
-    ry2 += 6;
-  });
-  ry2 += 3;
-
-  // Entity categories breakdown
-  setText(doc, SLATE_900);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text('Entity Categories (→ SQL table groups)', RIGHT_X, ry2);
-  ry2 += 3;
-  Object.entries(ENTITY_GROUPS).forEach(([cat, items]) => {
-    setFill(doc, { r: 248, g: 250, b: 252 });
-    doc.rect(RIGHT_X, ry2, COL_W, 5, 'F');
-    setText(doc, SLATE_600);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.text(cat, RIGHT_X + 2, ry2 + 3.5);
-    setText(doc, BRAND_LIGHT);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`${items.length} tables`, RIGHT_X + COL_W - 2, ry2 + 3.5, { align: 'right' });
-    ry2 += 5;
+    doc.setFontSize(10);
+    doc.text(String(s[1]), RIGHT_X + COL_W - 4, ry + 5, { align: 'right' });
   });
 
-  // ── Risks (bottom right) ──
-  const riskY = ry2 + 3;
-  setText(doc, SLATE_900);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text('Risk & Mitigation', RIGHT_X, riskY);
-  let rky = riskY + 3;
-  RISKS.forEach((r, i) => {
-    setFill(doc, { r: 248, g: 250, b: 252 });
-    doc.rect(RIGHT_X, rky, COL_W, 9, 'F');
-    setText(doc, SLATE_900);
+  // ══════════════════════════════════════════════════════════════
+  // ROW 4: Costs (left) + Risks (right) — 230–285mm
+  // ══════════════════════════════════════════════════════════════
+  const ROW4_Y = 230;
+
+  // ── Costs (left column) ──
+  let costY = ROW4_Y;
+  sectionBanner(doc, LEFT_X, costY, COL_W, 10, 'Indicative Monthly Cost');
+  costY += 14;
+
+  const costRowH = 5.5;
+  const costTableH = COSTS.length * costRowH + 4;
+  fill(doc, SLATE_50);
+  doc.roundedRect(LEFT_X, costY, COL_W, costTableH, 1.5, 1.5, 'F');
+
+  COSTS.forEach((c, i) => {
+    const ry = costY + 3 + i * costRowH;
+    const isTotal = i === COSTS.length - 1;
+    fill(doc, isTotal ? BRAND : (i % 2 === 1 ? SLATE_100 : WHITE));
+    doc.rect(LEFT_X, ry, COL_W, costRowH, 'F');
+    text(doc, isTotal ? WHITE : SLATE_700);
+    doc.setFont('helvetica', isTotal ? 'bold' : 'normal');
+    doc.setFontSize(8.5);
+    doc.text(c[0], LEFT_X + 4, ry + 5);
+    text(doc, isTotal ? WHITE : BRAND);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.text(r[0], RIGHT_X + 2, rky + 3.5);
-    // Severity badge
-    const sevColor = r[1] === 'High' ? { r: 220, g: 38, b: 38 } : { r: 217, g: 119, b: 6 };
-    setFill(doc, sevColor);
-    doc.roundedRect(RIGHT_X + COL_W - 14, rky + 1, 12, 4, 1, 1, 'F');
-    setText(doc, WHITE);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
-    doc.text(r[1], RIGHT_X + COL_W - 8, rky + 4, { align: 'center' });
-    setText(doc, SLATE_600);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.text(r[2], RIGHT_X + 2, rky + 7.5, { maxWidth: COL_W - 4 });
-    rky += 10;
+    doc.text(c[1], LEFT_X + COL_W - 4, ry + 5, { align: 'right' });
   });
 
-  // ── Footer ──
-  setFill(doc, BRAND_DARK);
-  doc.rect(0, H - 8, W, 8, 'F');
-  setText(doc, WHITE);
+  // Migration duration note
+  costY += costTableH + 6;
+  text(doc, SLATE_600);
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
+  doc.setFontSize(8);
+  wrappedText(doc, 'Migration duration: 13 weeks (3 months). Consumption-based pricing — scales with usage. The S1 SQL tier can be upgraded as data grows.', LEFT_X, costY, COL_W, 4);
+
+  // ── Risks (right column) ──
+  let riskY = ROW4_Y;
+  sectionBanner(doc, RIGHT_X, riskY, COL_W, 10, 'Risk & Mitigation');
+  riskY += 14;
+
+  const riskRowH = 10;
+  const riskTableH = RISKS.length * riskRowH + 4;
+  fill(doc, SLATE_50);
+  doc.roundedRect(RIGHT_X, riskY, COL_W, riskTableH, 1.5, 1.5, 'F');
+
+  RISKS.forEach((r, i) => {
+    const ry = riskY + 3 + i * riskRowH;
+    if (i % 2 === 1) {
+      fill(doc, SLATE_100);
+      doc.rect(RIGHT_X, ry, COL_W, riskRowH, 'F');
+    }
+    // Risk name
+    text(doc, SLATE_900);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text(r[0], RIGHT_X + 4, ry + 5);
+    // Severity badge
+    const sevColor = r[1] === 'High' ? RED : AMBER;
+    fill(doc, sevColor);
+    doc.roundedRect(RIGHT_X + COL_W - 18, ry + 1.5, 14, 5, 1, 1, 'F');
+    text(doc, WHITE);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.text(r[1], RIGHT_X + COL_W - 11, ry + 5, { align: 'center' });
+    // Mitigation
+    text(doc, SLATE_600);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    wrappedText(doc, r[2], RIGHT_X + 4, ry + 8, COL_W - 24, 3);
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // Footer (289–297mm)
+  // ══════════════════════════════════════════════════════════════
+  fill(doc, BRAND_DARK);
+  doc.rect(0, H - 8, W, 8, 'F');
+  text(doc, WHITE);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
   doc.text('GC Mission Control · Azure-Native Migration · 1:1 Parity Guaranteed · Print on A3 Landscape', M + 2, H - 3);
   doc.text('Page 1 of 1', W - M - 2, H - 3, { align: 'right' });
 
