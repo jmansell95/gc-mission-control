@@ -24,7 +24,7 @@ const PHASES = [
   { name: 'Prerequisites & Setup', start: 0, end: 1, color: [100, 116, 139] },
   { name: 'Export Source Code', start: 1, end: 2, color: [59, 130, 246] },
   { name: 'Provision Azure Infra', start: 2, end: 4, color: [139, 92, 246] },
-  { name: 'Data Layer (SQL + SDK)', start: 4, end: 7, color: BRAND },
+  { name: 'Data Layer (SQL + SDK)', start: 4, end: 7, color: [BRAND.r, BRAND.g, BRAND.b] },
   { name: 'Auth (Entra ID)', start: 6, end: 9, color: [8, 145, 178] },
   { name: 'Functions & Automations', start: 8, end: 11, color: [217, 119, 6] },
   { name: 'Deploy & Cutover', start: 11, end: 12, color: [220, 38, 38] },
