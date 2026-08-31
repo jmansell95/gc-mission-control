@@ -56,7 +56,7 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
 
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
   const { data: jobTypes = [] } = useQuery({ queryKey: ['job-types'], queryFn: () => base44.entities.JobType.list('-order') });
-  const primaryType = getJobPrimaryType(job, teams);
+  const primaryType = getJobPrimaryType(job || {}, teams);
   const colors = getJobTypeColor(primaryType, jobTypes);
 
   const { user: authUser } = useAuth();
@@ -85,8 +85,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
 
   const assignedStaffIds = [...new Set(rotas.map(r => r.staff_id))];
   const assignedStaff = assignedStaffIds.map(id => allStaff.find(s => s.id === id)).filter(Boolean);
-  const client = clients.find(c => c.id === job.client_id);
-  const contractor = contractors.find(c => c.id === job.contractor_id);
+  const client = clients.find(c => c.id === job?.client_id);
+  const contractor = contractors.find(c => c.id === job?.contractor_id);
 
   // Live Geotab drivers — vehicles assigned to this job's rotas that have a driver detected by Geotab
   const assignedVehicleIds = [...new Set(rotas.map(r => r.vehicle_id).filter(Boolean))];
@@ -99,8 +99,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   rotas.forEach(r => { if (!rotasByDate[r.assigned_date]) rotasByDate[r.assigned_date] = []; rotasByDate[r.assigned_date].push(r); });
   const sortedDates = Object.keys(rotasByDate).sort();
 
-  const isDrillingJob = isDrillingJobByTeams(job, teams, jobTypes);
-  const isGroundworksJob = isGroundworksJobByTeams(job, teams, jobTypes);
+  const isDrillingJob = isDrillingJobByTeams(job || {}, teams, jobTypes);
+  const isGroundworksJob = isGroundworksJobByTeams(job || {}, teams, jobTypes);
   const { data: invLogs = [] } = useQuery({
     queryKey: ['investigation-logs', job?.id],
     queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job?.id }),
@@ -109,7 +109,7 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   // Boreholes tab and Billing Summary — so the metreage shown in the hero
   // always matches every other view.
   const reconciledMetres = getTotalMetres(invLogs);
-  const jobMeterage = isDrillingJob && job.meterage != null && job.meterage !== '' ? Number(job.meterage) : 0;
+  const jobMeterage = isDrillingJob && job?.meterage != null && job?.meterage !== '' ? Number(job?.meterage) : 0;
   const useJobMeterage = jobMeterage > 0;
   const staffCosts = assignedStaff.map(member => {
     const memberRotas = rotas.filter(r => r.staff_id === member.id);
@@ -119,8 +119,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const totalCost = 0;
   const totalMeterage = useJobMeterage ? jobMeterage : reconciledMetres;
 
-  const startDate = job.start_date ? new Date(job.start_date + 'T00:00:00') : null;
-  const endDate = job.end_date ? new Date(job.end_date + 'T00:00:00') : null;
+  const startDate = job?.start_date ? new Date(job.start_date + 'T00:00:00') : null;
+  const endDate = job?.end_date ? new Date(job.end_date + 'T00:00:00') : null;
 
   const handleFullReport = async () => {
     setGeneratingReport(true);
@@ -167,6 +167,23 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
     ${assignedStaff.length > 0 ? `<h2>Assigned Staff (${assignedStaff.length})</h2><table><thead><tr><th>Name</th><th>Role</th><th>Type</th><th>Shifts</th></tr></thead><tbody>${staffRows}</tbody></table>` : ''}
     ${job.notes ? `<h2>Notes</h2><p>${job.notes}</p>` : ''}</body></html>`;
   };
+
+  // Null guard — if job is undefined (e.g. opened from dashboard before data
+  // resolved), show a loading state instead of rendering the full detail page.
+  // This is placed AFTER all hooks to respect the rules-of-hooks rule.
+  if (!job) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin mb-4"></div>
+        <p className="text-sm text-slate-500">Loading project details…</p>
+        {onBack && (
+          <button onClick={onBack} className="mt-4 text-sm text-[#2E5A1A] font-semibold hover:underline">
+            Go back
+          </button>
+        )}
+      </div>
+    );
+  }
 
   if (showEditWizard) {
     return (
