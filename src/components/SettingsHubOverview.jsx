@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Users, Mail, Palette, Zap, ListChecks, ShieldCheck, ChevronRight, BookOpen,
@@ -19,27 +19,11 @@ import IntegrationsOverviewList from '@/components/settings/IntegrationsOverview
  * Planner Import has been removed entirely.
  */
 export default function SettingsHubOverview({ onNavigate }) {
-  const qc = useQueryClient();
   const [search, setSearch] = useState('');
 
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
-  });
-
-  const toggleComingSoon = useMutation({
-    mutationFn: async ({ id, comingSoon }) => {
-      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
-      const map = (existing[0]?.value) || {};
-      const next = { ...map };
-      if (comingSoon) next[id] = true; else delete next[id];
-      if (existing[0]) {
-        await base44.entities.AppSetting.update(existing[0].id, { value: next });
-      } else {
-        await base44.entities.AppSetting.create({ key: 'integration_coming_soon', value: next });
-      }
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings-hub-stats'] }),
   });
 
   const integrationList = stats?.integrations || [];
@@ -98,8 +82,10 @@ export default function SettingsHubOverview({ onNavigate }) {
       for (const item of g.items) {
         if (item.isIntegration) {
           const intItem = integrationList.find(i => i.id === item.intId);
-          if (intItem?.connected) connected++;
-          if (comingSoonMap[item.intId]) comingSoon++; else active++;
+          const isConnected = !!intItem?.connected;
+          if (isConnected) { connected++; active++; }
+          else if (comingSoonMap[item.intId]) comingSoon++;
+          else active++;
         } else {
           active++;
         }
@@ -113,9 +99,11 @@ export default function SettingsHubOverview({ onNavigate }) {
     ? groups.map(g => ({ ...g, items: g.items.filter(i => i.label.toLowerCase().includes(q) || i.sub.toLowerCase().includes(q)) })).filter(g => g.items.length > 0)
     : groups;
 
+  // Connected integrations are never "coming soon" — enforced here as a
+  // frontend safety net (the backend auto-cleans this too).
   const integrationStatusMap = {};
   integrationList.forEach(i => {
-    integrationStatusMap[i.id] = { connected: !!i.connected, comingSoon: !!comingSoonMap[i.id] };
+    integrationStatusMap[i.id] = { connected: !!i.connected, comingSoon: !!comingSoonMap[i.id] && !i.connected };
   });
 
   return (
@@ -186,9 +174,13 @@ export default function SettingsHubOverview({ onNavigate }) {
 
       {/* Group sections */}
       {filteredGroups.map(group => {
-        // Per-group active/coming-soon counts
-        const gActive = group.items.filter(i => i.isIntegration ? !comingSoonMap[i.intId] : true).length;
-        const gComingSoon = group.items.filter(i => i.isIntegration && comingSoonMap[i.intId]).length;
+        // Per-group active/coming-soon counts (connected = active, never coming-soon)
+        const gComingSoon = group.items.filter(i => {
+          if (!i.isIntegration) return false;
+          const intItem = integrationList.find(int => int.id === i.intId);
+          return !intItem?.connected && comingSoonMap[i.intId];
+        }).length;
+        const gActive = group.items.length - gComingSoon;
 
         if (group.group === 'Integrations') {
           return (
@@ -203,9 +195,17 @@ export default function SettingsHubOverview({ onNavigate }) {
               <IntegrationsOverviewList
                 items={group.items}
                 statusMap={integrationStatusMap}
-                onToggle={(id, comingSoon) => toggleComingSoon.mutate({ id, comingSoon })}
                 onNavigate={onNavigate}
               />
+              {/* Coming Soon Manager link */}
+              <div className="mt-2 px-1">
+                <button onClick={() => onNavigate('coming-soon-manager')}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+                  <Clock className="w-3.5 h-3.5" />
+                  Manage Coming Soon flags
+                  <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
             </section>
           );
         }

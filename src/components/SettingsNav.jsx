@@ -80,6 +80,7 @@ export const settingsGroups = [
       { id: 'system-guide', label: 'System Logic Guide', icon: BookOpen, desc: 'Download a PDF explaining every stat, rule and automation in the system', roles: ['admin', 'manager', 'viewer'] },
       { id: 'rewards', label: 'Rewards Manager', icon: Gift, desc: 'Create gift cards & rewards for the points catalogue, and fulfil staff redemptions', roles: ['admin'] },
       { id: 'expense-defaults', label: 'Expense Defaults', icon: Receipt, desc: 'Global default amounts & VAT rates per expense category — pre-fill every staff expense entry so crews only adjust when their spend differs', roles: ['admin'] },
+      { id: 'coming-soon-manager', label: 'Coming Soon Manager', icon: Clock, desc: 'Control which integrations display as "Coming Soon" on the Settings overview — display flag only, does not disable functionality', roles: ['admin'] },
     ],
   },
   // Hidden groups — items remain here for access control / lockdown but are

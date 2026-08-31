@@ -104,6 +104,11 @@ export default async function (req: Request): Promise<Response> {
         if (val) integrationComingSoon[id] = true;
       }
     }
+    // Auto-clean: a connected integration is never "coming soon" — remove
+    // stale flags so live integrations always show as active/connected.
+    for (const int of integrations) {
+      if (int.connected) delete integrationComingSoon[int.id];
+    }
 
     return Response.json({
       data: {
