@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2, AlertTriangle, ShieldCheck, ArrowRight } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
+import MicrosoftIcon from "@/components/MicrosoftIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
@@ -33,21 +34,35 @@ export default function Login() {
     base44.auth.loginWithProvider("google", safeReturnTo());
   };
 
+  const handleMicrosoft = () => {
+    base44.auth.loginWithProvider("microsoft", safeReturnTo());
+  };
+
   return (
     <AuthLayout
       icon={LogIn}
       title="Welcome back"
       subtitle="Log in to your account"
     >
-      {/* Google SSO */}
-      <button
-        type="button"
-        onClick={handleGoogle}
-        className="w-full h-12 text-sm font-semibold mb-5 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 active:scale-[0.98]"
-      >
-        <GoogleIcon className="w-5 h-5" />
-        Continue with Google
-      </button>
+      {/* SSO buttons */}
+      <div className="space-y-2.5 mb-5">
+        <button
+          type="button"
+          onClick={handleGoogle}
+          className="w-full h-12 text-sm font-semibold bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 active:scale-[0.98]"
+        >
+          <GoogleIcon className="w-5 h-5" />
+          Continue with Google
+        </button>
+        <button
+          type="button"
+          onClick={handleMicrosoft}
+          className="w-full h-12 text-sm font-semibold bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2.5 active:scale-[0.98]"
+        >
+          <MicrosoftIcon className="w-5 h-5" />
+          Continue with Microsoft
+        </button>
+      </div>
 
       {/* Divider */}
       <div className="relative mb-5">
