@@ -148,11 +148,14 @@ export default async function (req: Request): Promise<Response> {
     const integrationConnectedCount = integrations.filter(i => i.status === 'active').length;
     const integrationNeedsAttention = integrations.filter(i => i.status === 'needs_attention').length;
 
-    const comingSoonRaw = (settingsByKey['integration_coming_soon'] || [{}])[0] || {};
+    // Merge ALL integration_coming_soon records (there may be duplicates from
+    // old saves) so the flag is never lost due to a split-brain record.
     const integrationComingSoon: Record<string, boolean> = {};
-    if (comingSoonRaw && typeof comingSoonRaw === 'object') {
-      for (const [id, val] of Object.entries(comingSoonRaw)) {
-        if (val) integrationComingSoon[id] = true;
+    for (const recValue of (settingsByKey['integration_coming_soon'] || [])) {
+      if (recValue && typeof recValue === 'object') {
+        for (const [id, val] of Object.entries(recValue)) {
+          if (val) integrationComingSoon[id] = true;
+        }
       }
     }
     // Auto-clean: an active (working) integration is never "coming soon".
