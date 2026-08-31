@@ -10,6 +10,7 @@ import {
   whyBuilt, hubTour, deepDive, closingPoints,
 } from '@/lib/teamBriefingContent';
 import { EMBLEM_URL } from '@/components/Logo';
+import PageHeader from '@/components/PageHeader';
 
 const ICONS = {
   Building2, Users, Truck, Package, ShieldCheck, PoundSterling,
@@ -67,32 +68,24 @@ export default function PresentationPack() {
   };
 
   return (
-    <div className="min-h-full bg-[#FAFAF9]">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-slate-200/70">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-md">
-              <FileText className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Team Briefing Pack</h1>
-              <p className="text-xs text-slate-400 truncate">Full platform walkthrough · Print-ready PDF</p>
-            </div>
-          </div>
+    <div className="space-y-4">
+      <PageHeader
+        icon={FileText}
+        title="Team Briefing Pack"
+        subtitle="Full platform walkthrough · Print-ready PDF"
+        actions={
           <button
             onClick={handleDownload}
             disabled={generating}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md disabled:opacity-60 whitespace-nowrap"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md disabled:opacity-60"
           >
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            <span className="hidden sm:inline">{generating ? 'Building…' : 'Download PDF'}</span>
-            <span className="sm:hidden">{generating ? '…' : 'PDF'}</span>
+            <span>{generating ? 'Building…' : 'Download PDF'}</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         {/* Hero */}
         <div className="insight-card rounded-2xl overflow-hidden">
           <div className="hero-gradient px-5 sm:px-7 py-6 text-white">

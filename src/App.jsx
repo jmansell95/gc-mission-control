@@ -141,7 +141,7 @@ const AuthenticatedApp = () => {
             <Route path="/subcontractor" element={<RouteGuard><SubcontractorDashboard /></RouteGuard>} />
             <Route path="/admin/logistics" element={<RouteGuard><HubReadinessGate featureId="logistics"><DriverHub /></HubReadinessGate></RouteGuard>} />
             <Route path="/depot-pick-lists" element={<RouteGuard><HubReadinessGate featureId="logistics"><DepotPickLists /></HubReadinessGate></RouteGuard>} />
-            <Route path="/presentation-pack" element={<PresentationPack />} />
+            <Route path="/presentation-pack" element={<RouteGuard><PresentationPack /></RouteGuard>} />
 
             <Route path="/pat-testing" element={<RouteGuard><PATTestingConsole /></RouteGuard>} />
             <Route path="/compliance" element={<RouteGuard><HubReadinessGate featureId="compliance"><CompliancePage /></HubReadinessGate></RouteGuard>} />

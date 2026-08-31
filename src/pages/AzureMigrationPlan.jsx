@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
-  Download, ArrowLeft, FileText, ChevronDown, ChevronRight,
+  Download, FileText, ChevronDown, ChevronRight,
   Check, Copy, ClipboardCheck, Cloud, Database, ShieldCheck,
   Server, Rocket, Package, ListChecks, Printer, Presentation,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import PageHeader from '@/components/PageHeader';
 import MigrationRoadmap from '@/components/azure/MigrationRoadmap';
 import ParityMatrix from '@/components/azure/ParityMatrix';
 import { generateA3WallChart } from '@/utils/azureWallChartPdf';
@@ -116,7 +116,6 @@ function PhaseSection({ index, title, content, isDone, onToggle, defaultOpen }) 
 }
 
 export default function AzureMigrationPlan() {
-  const navigate = useNavigate();
   const [md, setMd] = useState('');
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState({});
@@ -181,73 +180,60 @@ export default function AzureMigrationPlan() {
   }, [saveProgress]);
 
   return (
-    <div className="min-h-full bg-[#FAFAF9]">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-slate-200/70">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition flex-shrink-0"
-              aria-label="Back"
-            >
-              <ArrowLeft className="w-4 h-4 text-slate-600" />
-            </button>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-md">
-              <FileText className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Azure Migration Runbook</h1>
-              <p className="text-xs text-slate-400 truncate">3-Month Plan · UK South · GDPR-Compliant</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+    <div className="space-y-4">
+      <PageHeader
+        icon={FileText}
+        title="Azure Migration Runbook"
+        subtitle="3-Month Plan · UK South · GDPR-Compliant"
+        actions={
+          <>
             <button
               onClick={() => setView(v => v === 'presentation' ? 'runbook' : v === 'runbook' ? 'parity' : 'presentation')}
-              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-3 sm:py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200 transition"
               title={view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}
             >
               <Presentation className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1.5">{view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}</span>
+              <span>{view === 'presentation' ? 'Runbook' : view === 'runbook' ? 'Parity Matrix' : 'Presentation'}</span>
             </button>
             <button
               onClick={() => generateA3WallChart()}
-              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] text-white text-sm font-semibold hover:from-[#1c4a12] hover:to-[#4d7c2a] transition shadow-md"
               title="Download A3 Wall Chart"
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1.5">A3 Wall Chart</span>
+              <span className="hidden sm:inline">A3 Wall Chart</span>
             </button>
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center justify-center w-9 h-9 sm:w-auto sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md"
               title="Download PDF"
             >
               <Printer className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1.5">Download PDF</span>
+              <span className="hidden sm:inline">PDF</span>
             </button>
+          </>
+        }
+      />
+
+      {/* Progress bar */}
+      {!loading && totalCount > 0 && (
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#2E5A1A] to-[#8DC63F] transition-all duration-500"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap">
+              {completedCount}/{totalCount} phases
+            </span>
           </div>
         </div>
-        {/* Progress bar */}
-        {!loading && totalCount > 0 && (
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#2E5A1A] to-[#8DC63F] transition-all duration-500"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              <span className="text-xs font-bold text-slate-600 tabular-nums whitespace-nowrap">
-                {completedCount}/{totalCount} phases
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-4 print-area">
+      <div className="max-w-3xl mx-auto space-y-4 print-area">
         {loading ? (
           <div className="space-y-4">
             {[...Array(6)].map((_, i) => (
