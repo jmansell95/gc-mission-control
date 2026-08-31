@@ -1,25 +1,21 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Satellite, Radio, Database, Users, Landmark, ShieldAlert, ShieldCheck,
   FileSpreadsheet, Cloud, MapPin, MessageCircle, CreditCard, CalendarDays,
-  Webhook, FileUp, Clock, CheckCircle2, Sparkles, Save, Loader2, Info,
+  Webhook, FileUp, Clock, CheckCircle2, Sparkles, Loader2, Info, Lock, Unlock,
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 
 /**
- * Coming Soon Manager — controls which integrations display as "Coming Soon"
- * across the site. A Coming Soon integration is greyed out and cannot be opened
- * or configured until the flag is removed.
+ * Coming Soon Manager — controls which integrations display as "Coming Soon".
  *
- * The flag is stored in a single AppSetting record keyed `integration_coming_soon`
- * as a map of { integrationId: true }.
- *
- * Active (working) integrations cannot be marked coming-soon — the backend
- * auto-cleans them and the toggle is disabled here.
+ * No toggle, no save button. Each integration has an instant action button:
+ * click "Lock as Coming Soon" → writes immediately. Click "Unlock" → writes
+ * immediately. Every click persists straight to the AppSetting record and
+ * refetches the hub stats so the whole site updates in real time.
  */
 const INTEGRATIONS = [
   { id: 'geotab-sync', icon: Satellite, label: 'Geotab GPS', sub: 'Live vehicle locations + specs' },
@@ -43,90 +39,146 @@ const INTEGRATIONS = [
 export default function ComingSoonManager() {
   const { toast } = useToast();
   const qc = useQueryClient();
-  const [saving, setSaving] = useState(false);
-  const [localMap, setLocalMap] = useState(null); // null = not yet synced from server
-  const [settingId, setSettingId] = useState(null); // cached AppSetting record ID
+  const [busyId, setBusyId] = useState(null);
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
   });
 
   const integrations = stats?.integrations || [];
-  const serverComingSoon = stats?.integrationComingSoon || {};
-
-  // Sync local state from server ONCE when data first arrives (or after save).
-  // Using null sentinel so we don't fight the user's edits on every render.
-  React.useEffect(() => {
-    if (localMap === null && stats) {
-      setLocalMap({ ...serverComingSoon });
-    }
-  }, [stats]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Cache the AppSetting record ID so we don't re-filter on every save.
-  React.useEffect(() => {
-    if (settingId === null && stats) {
-      base44.entities.AppSetting.filter({ key: 'integration_coming_soon' })
-        .then(recs => { if (recs[0]) setSettingId(recs[0].id); })
-        .catch(() => {});
-    }
-  }, [stats, settingId]);
-
+  const comingSoonMap = stats?.integrationComingSoon || {};
   const connectedIds = useMemo(() => new Set(integrations.filter(i => i.connected).map(i => i.id)), [integrations]);
 
-  const toggle = useCallback((id) => {
-    if (connectedIds.has(id)) return;
-    setLocalMap(prev => {
-      const next = { ...(prev || {}) };
-      if (next[id]) delete next[id]; else next[id] = true;
-      return next;
-    });
-  }, [connectedIds]);
+  const refresh = () => qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
 
-  const currentMap = localMap || {};
-  const hasChanges = localMap !== null && JSON.stringify(currentMap) !== JSON.stringify(serverComingSoon);
-
-  const save = async () => {
-    setSaving(true);
+  const setComingSoon = async (id, lock) => {
+    if (busyId) return;
+    setBusyId(id);
     try {
-      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: currentMap };
+      // Read the current coming-soon record(s).
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
 
-      // Use cached ID if available; otherwise filter for the record.
-      let id = settingId;
-      if (!id) {
-        const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
-        id = existing[0]?.id;
+      // Build the new map from ALL existing records (merge in case there are
+      // duplicates from old saves), then apply the change.
+      let merged = {};
+      for (const rec of existing) {
+        if (rec.value && typeof rec.value === 'object') {
+          merged = { ...merged, ...rec.value };
+        }
       }
+      if (lock) merged[id] = true; else delete merged[id];
 
-      if (id) {
-        await base44.entities.AppSetting.update(id, payload);
-        setSettingId(id);
+      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: merged };
+
+      if (existing.length > 0) {
+        // Update the first record, delete any duplicates to prevent split-brain.
+        await base44.entities.AppSetting.update(existing[0].id, payload);
+        if (existing.length > 1) {
+          for (let i = 1; i < existing.length; i++) {
+            await base44.entities.AppSetting.delete(existing[i].id).catch(() => {});
+          }
+        }
       } else {
-        const created = await base44.entities.AppSetting.create(payload);
-        setSettingId(created.id);
+        await base44.entities.AppSetting.create(payload);
       }
 
-      // Force an immediate refetch (not just invalidation) so every component
-      // reading 'settings-hub-stats' updates right away.
-      await qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
-      toast({ title: 'Coming Soon flags saved', description: 'The Settings overview has been updated.' });
+      await refresh();
+      toast({
+        title: lock ? 'Locked as Coming Soon' : 'Unlocked',
+        description: lock
+          ? 'This integration is now greyed out across the site.'
+          : 'This integration can now be opened and configured.',
+      });
     } catch (e) {
-      toast({ title: 'Save failed', description: e.message || 'Please try again.', variant: 'destructive' });
+      toast({ title: 'Failed to update', description: e.message || 'Please try again.', variant: 'destructive' });
     } finally {
-      setSaving(false);
+      setBusyId(null);
+    }
+  };
+
+  const lockAll = async () => {
+    if (busyId) return;
+    setBusyId('__all');
+    try {
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      let merged = {};
+      for (const rec of existing) {
+        if (rec.value && typeof rec.value === 'object') merged = { ...merged, ...rec.value };
+      }
+      // Lock every non-connected integration.
+      for (const item of INTEGRATIONS) {
+        if (!connectedIds.has(item.id)) merged[item.id] = true;
+      }
+      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: merged };
+      if (existing.length > 0) {
+        await base44.entities.AppSetting.update(existing[0].id, payload);
+        for (let i = 1; i < existing.length; i++) {
+          await base44.entities.AppSetting.delete(existing[i].id).catch(() => {});
+        }
+      } else {
+        await base44.entities.AppSetting.create(payload);
+      }
+      await refresh();
+      toast({ title: 'All available integrations locked', description: 'Every non-connected integration is now Coming Soon.' });
+    } catch (e) {
+      toast({ title: 'Failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const unlockAll = async () => {
+    if (busyId) return;
+    setBusyId('__all');
+    try {
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: {} };
+      if (existing.length > 0) {
+        await base44.entities.AppSetting.update(existing[0].id, payload);
+        for (let i = 1; i < existing.length; i++) {
+          await base44.entities.AppSetting.delete(existing[i].id).catch(() => {});
+        }
+      }
+      await refresh();
+      toast({ title: 'All integrations unlocked', description: 'No integrations are marked as Coming Soon.' });
+    } catch (e) {
+      toast({ title: 'Failed', description: e.message, variant: 'destructive' });
+    } finally {
+      setBusyId(null);
     }
   };
 
   const activeCount = integrations.filter(i => i.status === 'active').length;
-  const comingSoonCount = Object.keys(currentMap).filter(k => !connectedIds.has(k)).length;
-  const notSetUpCount = integrations.filter(i => i.status !== 'active' && !currentMap[i.id]).length;
+  const comingSoonCount = Object.keys(comingSoonMap).filter(k => !connectedIds.has(k)).length;
+  const availableCount = INTEGRATIONS.filter(i => !connectedIds.has(i.id) && !comingSoonMap[i.id]).length;
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-5">
       <SettingsSectionHeader
         title="Coming Soon Manager"
-        description="Control which integrations are locked as 'Coming Soon'. A Coming Soon integration is greyed out across the site and cannot be opened or configured until the flag is removed. Active (working) integrations cannot be marked as coming soon."
+        description="Lock integrations as 'Coming Soon' so they're greyed out and cannot be opened anywhere on the site. Click to lock or unlock — changes save instantly."
         icon={Clock}
+        actions={
+          <>
+            <button
+              onClick={lockAll}
+              disabled={!!busyId}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition disabled:opacity-50"
+            >
+              {busyId === '__all' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+              Lock All
+            </button>
+            <button
+              onClick={unlockAll}
+              disabled={!!busyId}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 hover:bg-slate-200 transition disabled:opacity-50"
+            >
+              <Unlock className="w-3.5 h-3.5" />
+              Unlock All
+            </button>
+          </>
+        }
       />
 
       {/* Info banner */}
@@ -137,7 +189,7 @@ export default function ComingSoonManager() {
         <div>
           <p className="text-sm font-semibold text-slate-800">How this works</p>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-            Toggle an integration ON to lock it as "Coming Soon" — it will be greyed out and cannot be opened or configured anywhere on the site until you toggle it back off. Active integrations (credentials saved + working connection) cannot be marked coming soon.
+            Click <strong>Lock</strong> to grey out an integration across the entire site — it cannot be opened or configured until you click <strong>Unlock</strong>. Active (connected) integrations cannot be locked. Every click saves instantly — there's no save button.
           </p>
         </div>
       </div>
@@ -156,25 +208,31 @@ export default function ComingSoonManager() {
         </div>
         <div className="insight-card rounded-xl p-3 text-center">
           <Sparkles className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{notSetUpCount}</p>
-          <p className="text-[11px] text-slate-500 font-semibold">Not Set Up</p>
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{availableCount}</p>
+          <p className="text-[11px] text-slate-500 font-semibold">Available</p>
         </div>
       </div>
 
       {/* Integration list */}
       <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+          </div>
+        )}
         {INTEGRATIONS.map((item, idx) => {
           const Icon = item.icon;
           const isLast = idx === INTEGRATIONS.length - 1;
           const isConnected = connectedIds.has(item.id);
-          const isComingSoon = !!currentMap[item.id] && !isConnected;
+          const isComingSoon = !!comingSoonMap[item.id] && !isConnected;
+          const isBusy = busyId === item.id;
 
           return (
             <div key={item.id}
-              className={'flex items-center gap-3 px-4 py-3.5 ' + (isLast ? '' : 'border-b border-slate-100 ') + (isComingSoon ? 'bg-slate-50/60' : '')}>
-              <Icon className={'w-5 h-5 flex-shrink-0 ' + (isConnected ? 'text-emerald-500' : isComingSoon ? 'text-slate-300' : 'text-slate-400')} />
+              className={'flex items-center gap-3 px-4 py-3.5 transition ' + (isLast ? '' : 'border-b border-slate-100 ') + (isComingSoon ? 'bg-amber-50/40' : '')}>
+              <Icon className={'w-5 h-5 flex-shrink-0 ' + (isConnected ? 'text-emerald-500' : isComingSoon ? 'text-amber-400' : 'text-slate-400')} />
               <div className="min-w-0 flex-1">
-                <p className={'text-sm font-semibold truncate ' + (isComingSoon ? 'text-slate-400' : 'text-slate-800')}>{item.label}</p>
+                <p className={'text-sm font-semibold truncate ' + (isComingSoon ? 'text-slate-500' : 'text-slate-800')}>{item.label}</p>
                 <p className="text-xs text-slate-400 truncate">{item.sub}</p>
               </div>
               {isConnected && (
@@ -183,41 +241,33 @@ export default function ComingSoonManager() {
                   Connected
                 </span>
               )}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className={'text-[10px] font-bold ' + (isComingSoon ? 'text-amber-600' : isConnected ? 'text-emerald-600' : 'text-slate-400')}>
-                  {isComingSoon ? 'Coming Soon' : isConnected ? 'Live' : 'Available'}
-                </span>
-                <Switch
-                  checked={isComingSoon}
-                  disabled={isConnected}
-                  onCheckedChange={() => toggle(item.id)}
-                  aria-label={`Mark ${item.label} as coming soon`}
-                />
+              <div className="flex-shrink-0">
+                {isConnected ? (
+                  <span className="text-[10px] font-bold text-emerald-600 px-3">Live</span>
+                ) : isComingSoon ? (
+                  <button
+                    onClick={() => setComingSoon(item.id, false)}
+                    disabled={!!busyId}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition disabled:opacity-50 active:scale-95"
+                  >
+                    {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlock className="w-3.5 h-3.5" />}
+                    Unlock
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setComingSoon(item.id, true)}
+                    disabled={!!busyId}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition disabled:opacity-50 active:scale-95"
+                  >
+                    {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+                    Lock
+                  </button>
+                )}
               </div>
             </div>
           );
         })}
       </div>
-
-      {/* Save bar */}
-      {hasChanges && (
-        <div className="sticky bottom-4 z-10">
-          <div className="insight-card rounded-2xl p-3 flex items-center justify-between gap-3 shadow-lg">
-            <p className="text-sm font-semibold text-slate-700 pl-2">You have unsaved changes</p>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setLocalMap({ ...serverComingSoon })}
-                className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:bg-slate-100 transition">
-                Discard
-              </button>
-              <button onClick={save} disabled={saving}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold text-white bg-[#2E5A1A] hover:bg-[#1c4a12] transition disabled:opacity-60">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
