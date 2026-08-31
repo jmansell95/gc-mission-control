@@ -222,8 +222,8 @@ export default function SettingsHubOverview({ onNavigate }) {
               {group.items.map((item, idx) => {
                 const Icon = item.icon;
                 const isLast = idx === group.items.length - 1;
-                const isComingSoon = item.isIntegration && comingSoonMap[item.intId];
                 const isConnected = item.isIntegration && integrationStatusMap[item.intId]?.connected;
+                const isComingSoon = item.isIntegration && !isConnected && comingSoonMap[item.intId];
                 return (
                   <button key={item.id} onClick={() => onNavigate(item.id)}
                     className={'w-full flex items-center gap-3 px-4 py-3.5 text-left transition group ' +
