@@ -80,7 +80,7 @@ export default function MigrationRoadmap() {
         <div className="p-5 sm:p-7">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatTile icon={Calendar} value="13 wks" label="Realistic timeline" gradient="stat-gradient-blue" />
-            <StatTile icon={Server} value="7" label="Azure resources" gradient="stat-gradient-violet" />
+            <StatTile icon={Server} value="8" label="Azure resources" gradient="stat-gradient-violet" />
             <StatTile icon={Database} value="90+" label="Entities → SQL tables" gradient="stat-gradient-brand" />
             <StatTile icon={Zap} value="180+" label="Functions to port" gradient="stat-gradient-amber" />
           </div>

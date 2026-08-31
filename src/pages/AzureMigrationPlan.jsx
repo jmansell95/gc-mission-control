@@ -16,6 +16,7 @@ const PHASE_ICONS = {
   4: ShieldCheck,
   5: Server,
   6: Rocket,
+  7: ShieldCheck,
 };
 
 const STORAGE_KEY = 'gcmc-azure-migration-progress';
@@ -195,7 +196,7 @@ export default function AzureMigrationPlan() {
             </div>
             <div className="min-w-0">
               <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Azure Migration Runbook</h1>
-              <p className="text-xs text-slate-400 truncate">GC Mission Control — off Base44, onto Azure</p>
+              <p className="text-xs text-slate-400 truncate">3-Month Plan · UK South · GDPR-Compliant</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

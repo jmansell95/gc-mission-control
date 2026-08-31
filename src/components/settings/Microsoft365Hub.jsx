@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   Calendar, Files, MessageSquare, HardDrive, Loader2, CheckCircle2,
   AlertCircle, ExternalLink, Copy, KeyRound, Building2, Shield, Cloud,
-  RefreshCw, X, Download, FileText,
+  Download,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';

@@ -1011,7 +1011,7 @@ If issues arise, DNS rollback is instant:
 
 ---
 
-## Stabilization & Sign-off (Week 13)
+## Phase 7 — Stabilization & Sign-off (Week 13)
 
 ### 7.1 Set up monitoring and alerts
 
@@ -1144,24 +1144,30 @@ Users can request deletion of their personal data. The process:
 
 ## Known Issues Resolution Log
 
-| Issue | Status | Resolution |
-|-------|--------|------------|
-| Discrepancies in calculated financial figures | Fixed | Rate-card description matching hardened; locked_rate_card_item_id takes precedence |
-| Two-phase reverse geocoding not rendering | Fixed | useReverseGeocode hook updated to handle async two-phase lookup |
-| Safety event date/time formatting | Fixed | Date formatting standardised to Europe/London timezone |
-| Mobile/tablet navigation missing key hubs | Fixed | Mobile nav drawer updated with all admin hubs |
-| Inaccurate financial attribution in rig profitability | Fixed | runRigProfitabilityCheck updated to use locked rate card items |
-| KeyLogBook integration API docs | Documented | Inferred endpoints documented in KeyLogBookDocs page |
-| Assets Hub lacks certification tracking | Fixed | Certificate Vault + RecertActionModal added to Rig Hub |
-| CI sheet parsing errors | Fixed | parseAFPUpload updated with robust number parsing |
-| Incomplete date capture for EWR site logs | Fixed | importEWRApplicationData updated to capture all date fields |
-| Rota concurrent-leave bug | Fixed | AssignmentModal conflict detection updated |
-| JobDetail blank screen | Fixed | Error boundary + null-safe rendering added |
-| RLS missing for SafetyCultureConfig | Fixed | Admin-only RLS added |
-| Rig dashboard 'no rigs' false positive | Fixed | RigPerformanceWidget null-safe check added |
-| Stat tiles rendering line characters | Fixed | EnterpriseSettings stat tiles use tabular-nums |
-| EnterpriseSettings stat boxes inaccurate | Fixed | getSettingsHubStats batched resolver updated |
-| Microsoft365Hub import error | Fixed | Import path corrected |
+### Fixed in Current App (This Release)
+
+| Issue | Resolution |
+|-------|------------|
+| JobDetail blank screen | Null guard added — shows loading state when `job` prop is undefined instead of crashing on `job.id` access |
+| RLS missing for MittiConfig (SafetyCulture config) | Admin-only RLS added to all operations — webhook secrets and API tokens are no longer readable by non-admin users |
+| Rig dashboard 'no rigs' false positive | RigPerformanceWidget now waits for the `rigs` query to load before checking `activeRigCount === 0` — prevents false empty state during data fetch |
+| EnterpriseSettings stat tiles showing line characters | Em-dash placeholders replaced with `0` — tiles now show numeric counts immediately instead of `—` while stats load |
+| Microsoft365Hub import error | Unused imports (`RefreshCw`, `X`, `FileText`) removed — eliminates the build warning that was flagged as an import error |
+
+### Planned for Migration Phase (Weeks 5–11)
+
+| Issue | Plan | Phase |
+|-------|------|-------|
+| Discrepancies in calculated financial figures | Harden rate-card description matching; `locked_rate_card_item_id` takes precedence over fuzzy match in the Azure SQL port | Phase 3 (Data Layer) |
+| Two-phase reverse geocoding not rendering | Update `useReverseGeocode` hook to handle async two-phase lookup with proper loading states | Phase 5 (Functions) |
+| Safety event date/time formatting | Standardise all date formatting to Europe/London timezone in the Azure Functions API layer | Phase 5 (Functions) |
+| Mobile/tablet navigation missing key hubs | Add all admin hubs to the mobile nav drawer during the frontend refactor | Phase 1 (Export) |
+| Inaccurate financial attribution in rig profitability | Update `runRigProfitabilityCheck` to use locked rate card items; port to Azure Function with SQL joins | Phase 5 (Functions) |
+| Assets Hub lacks certification tracking | Certificate Vault + RecertActionModal already added to Rig Hub; verify during migration | Phase 5 (Functions) |
+| CI sheet parsing errors | Update `parseAFPUpload` with robust number parsing (handle commas, currency symbols, blank cells) | Phase 5 (Functions) |
+| Incomplete date capture for EWR site logs | Update `importEWRApplicationData` to capture all date fields during bulk AGS import | Phase 5 (Functions) |
+| Rota concurrent-leave bug | Update AssignmentModal conflict detection to handle concurrent leave requests during scheduling | Phase 5 (Functions) |
+| KeyLogBook integration API docs | Document inferred endpoints in KeyLogBookDocs page; verify against live API during migration | Phase 5 (Functions) |
 
 ---
 

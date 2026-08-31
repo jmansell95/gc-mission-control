@@ -48,7 +48,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
     queryKey: ['rig-perf-assignments', todayStr],
     queryFn: () => base44.entities.RotaAssignment.filter({ assigned_date: todayStr }),
   });
-  const { data: rigs = [] } = useQuery({ queryKey: ['rigs-all'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
+  const { data: rigs = [], isLoading: rigsLoading } = useQuery({ queryKey: ['rigs-all'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
   const { data: jobAssetAssignments = [] } = useQuery({ queryKey: ['job-asset-assignments-rig-perf'], queryFn: () => base44.entities.JobAssetAssignment.list('-created_date', 500) });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
@@ -258,7 +258,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const onSiteCount = rigStats.filter(r => r.state === 'on_site').length;
   const scheduledCount = rigStats.filter(r => r.state === 'scheduled').length;
 
-  if (isLoading) {
+  if (isLoading || rigsLoading) {
     return (
       <div className="insight-card rounded-2xl p-5 flex items-center justify-center">
         <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />

@@ -40,6 +40,22 @@ const statusLabels = {
 export default function JobDetail({ job: initialJob, onBack, initialTab }) {
   const [job, setJob] = useState(initialJob);
   const queryClient = useQueryClient();
+
+  // Null guard — if job is undefined (e.g. opened from dashboard before data
+  // resolved), show a loading state instead of crashing on job.id access.
+  if (!job) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin mb-4"></div>
+        <p className="text-sm text-slate-500">Loading project details…</p>
+        {onBack && (
+          <button onClick={onBack} className="mt-4 text-sm text-[#2E5A1A] font-semibold hover:underline">
+            Go back
+          </button>
+        )}
+      </div>
+    );
+  }
   const [showEditWizard, setShowEditWizard] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);

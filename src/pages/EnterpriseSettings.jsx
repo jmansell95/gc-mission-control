@@ -122,10 +122,10 @@ export default function EnterpriseSettings() {
           {/* Informative stat strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
-              { icon: Building2, label: 'Business Units', value: stats?.businessUnits ?? '—', tint: 'text-emerald-600 bg-emerald-50' },
-              { icon: Layers, label: 'Business Streams', value: stats?.divisions ?? '—', tint: 'text-blue-600 bg-blue-50' },
-              { icon: Server, label: 'Active Divisions', value: stats?.activeDivisions ?? '—', tint: 'text-violet-600 bg-violet-50' },
-              { icon: HardDrive, label: 'Snapshots', value: stats?.snapshots ?? '—', tint: 'text-amber-600 bg-amber-50' },
+              { icon: Building2, label: 'Business Units', value: stats?.businessUnits ?? 0, tint: 'text-emerald-600 bg-emerald-50' },
+              { icon: Layers, label: 'Business Streams', value: stats?.divisions ?? 0, tint: 'text-blue-600 bg-blue-50' },
+              { icon: Server, label: 'Active Divisions', value: stats?.activeDivisions ?? 0, tint: 'text-violet-600 bg-violet-50' },
+              { icon: HardDrive, label: 'Snapshots', value: stats?.snapshots ?? 0, tint: 'text-amber-600 bg-amber-50' },
             ].map((s, i) => {
               const SIcon = s.icon;
               return (
