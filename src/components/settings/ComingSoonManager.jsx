@@ -114,18 +114,18 @@ export default function ComingSoonManager() {
       <div className="grid grid-cols-3 gap-3">
         <div className="insight-card rounded-xl p-3 text-center">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{connectedIds.size}</p>
-          <p className="text-[11px] text-slate-500 font-semibold">Connected</p>
-        </div>
-        <div className="insight-card rounded-xl p-3 text-center">
-          <Sparkles className="w-5 h-5 text-[#2E5A1A] mx-auto mb-1" />
-          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{INTEGRATIONS.length - connectedIds.size - Object.keys(localMap).filter(k => !connectedIds.has(k)).length}</p>
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{integrations.filter(i => i.status === 'active').length}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Active</p>
         </div>
         <div className="insight-card rounded-xl p-3 text-center">
           <Clock className="w-5 h-5 text-amber-500 mx-auto mb-1" />
           <p className="text-xl font-extrabold text-slate-900 tabular-nums">{Object.keys(localMap).filter(k => !connectedIds.has(k)).length}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Coming Soon</p>
+        </div>
+        <div className="insight-card rounded-xl p-3 text-center">
+          <Sparkles className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+          <p className="text-xl font-extrabold text-slate-900 tabular-nums">{integrations.filter(i => i.status !== 'active' && !localMap[i.id]).length}</p>
+          <p className="text-[11px] text-slate-500 font-semibold">Not Set Up</p>
         </div>
       </div>
 

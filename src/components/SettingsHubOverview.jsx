@@ -26,7 +26,7 @@ export default function SettingsHubOverview({ onNavigate }) {
   const activeCount = integrations.filter(i => i.status === 'active').length;
   const needsAttention = integrations.filter(i => i.status === 'needs_attention').length;
   const comingSoonMap = stats?.integrationComingSoon || {};
-  const comingSoonCount = integrations.filter(i => comingSoonMap[i.id] && i.status !== 'active').length;
+  const comingSoonCount = Object.keys(comingSoonMap).length;
   const notConfigured = integrations.filter(i => i.status === 'not_configured').length;
 
   const statsTiles = [
@@ -84,12 +84,16 @@ export default function SettingsHubOverview({ onNavigate }) {
             <span className="text-xs text-slate-500">{comingSoonCount} locked integration{comingSoonCount !== 1 ? 's' : ''}</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {integrations.filter(i => comingSoonMap[i.id] && i.status !== 'active').map(i => (
-              <span key={i.id} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold">
-                <Clock className="w-3 h-3 text-slate-400" />
-                {i.label}
-              </span>
-            ))}
+            {Object.keys(comingSoonMap).map(id => {
+              const int = integrations.find(i => i.id === id);
+              const label = int?.label || id.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+              return (
+                <span key={id} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold">
+                  <Clock className="w-3 h-3 text-slate-400" />
+                  {label}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
