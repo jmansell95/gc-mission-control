@@ -4,24 +4,24 @@ import {
   AlertTriangle, CheckCircle2, Calendar, Target, Zap,
 } from 'lucide-react';
 
-const ROADMAP_WEEKS = 6;
+const ROADMAP_WEEKS = 13;
 
 const PHASES = [
-  { id: 0, name: 'Prerequisites & Setup', start: 0, end: 0.5, color: '#64748b' },
-  { id: 1, name: 'Export Source Code', start: 0.5, end: 1, color: '#3b82f6' },
-  { id: 2, name: 'Provision Azure Infra', start: 1, end: 1.5, color: '#8b5cf6' },
-  { id: 3, name: 'Data Layer (SQL + SDK)', start: 1.5, end: 3, color: '#2E5A1A' },
-  { id: 4, name: 'Auth (Entra ID)', start: 2.5, end: 3, color: '#0891b2' },
-  { id: 5, name: 'Functions & Automations', start: 3, end: 4.5, color: '#d97706' },
-  { id: 6, name: 'Deploy & Cutover', start: 4.5, end: 5, color: '#dc2626' },
-  { id: 'stab', name: 'Stabilization & Sign-off', start: 5, end: 6, color: '#059669' },
+  { id: 0, name: 'Prerequisites & Setup', start: 0, end: 1, color: '#64748b' },
+  { id: 1, name: 'Export Source Code', start: 1, end: 2, color: '#3b82f6' },
+  { id: 2, name: 'Provision Azure Infra', start: 2, end: 4, color: '#8b5cf6' },
+  { id: 3, name: 'Data Layer (SQL + SDK)', start: 4, end: 7, color: '#2E5A1A' },
+  { id: 4, name: 'Auth (Entra ID)', start: 6, end: 9, color: '#0891b2' },
+  { id: 5, name: 'Functions & Automations', start: 8, end: 11, color: '#d97706' },
+  { id: 6, name: 'Deploy & Cutover', start: 11, end: 12, color: '#dc2626' },
+  { id: 'stab', name: 'Stabilization & Sign-off', start: 12, end: 13, color: '#059669' },
 ];
 
 const MILESTONES = [
-  { week: 1, label: 'Azure infra live', icon: Server },
-  { week: 3, label: 'Data + Auth migrated', icon: Database },
-  { week: 4.5, label: 'Functions deployed', icon: Zap },
-  { week: 6, label: 'Go-live & sign-off', icon: CheckCircle2 },
+  { week: 2, label: 'Azure infra live', icon: Server },
+  { week: 7, label: 'Data + Auth migrated', icon: Database },
+  { week: 11, label: 'Functions deployed', icon: Zap },
+  { week: 13, label: 'Go-live & sign-off', icon: CheckCircle2 },
 ];
 
 const BENEFITS = [
@@ -45,6 +45,7 @@ const COSTS = [
   { item: 'Blob Storage', cost: '£5/mo' },
   { item: 'Key Vault + Entra ID', cost: 'Included with M365' },
   { item: 'Total running cost', cost: '~£220–300/mo', highlight: true },
+  { item: 'Migration duration', cost: '13 weeks (3 months)' },
 ];
 
 function StatTile({ icon: Icon, value, label, gradient }) {
@@ -78,7 +79,7 @@ export default function MigrationRoadmap() {
         </div>
         <div className="p-5 sm:p-7">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatTile icon={Calendar} value="6 wks" label="Realistic timeline" gradient="stat-gradient-blue" />
+            <StatTile icon={Calendar} value="13 wks" label="Realistic timeline" gradient="stat-gradient-blue" />
             <StatTile icon={Server} value="7" label="Azure resources" gradient="stat-gradient-violet" />
             <StatTile icon={Database} value="90+" label="Entities → SQL tables" gradient="stat-gradient-brand" />
             <StatTile icon={Zap} value="180+" label="Functions to port" gradient="stat-gradient-amber" />
@@ -111,14 +112,14 @@ export default function MigrationRoadmap() {
       <div className="insight-card rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-[#2E5A1A]" />
-          Migration Roadmap — 6 Weeks
+          Migration Roadmap — 13 Weeks
         </h3>
-        <p className="text-xs text-slate-500 mb-5">Realistic solo-execution timeline with a 2-week stabilization buffer before Base44 decommission.</p>
+        <p className="text-xs text-slate-500 mb-5">3-month continuous-phase timeline with a 1-week stabilization buffer before Base44 decommission.</p>
 
         {/* Week header */}
-        <div className="hidden sm:grid grid-cols-6 gap-1 mb-2 px-1">
-          {[1,2,3,4,5,6].map(w => (
-            <div key={w} className="text-center text-[11px] font-bold text-slate-400">Week {w}</div>
+        <div className="hidden sm:grid grid-cols-13 gap-0.5 mb-2 px-1">
+          {[1,2,3,4,5,6,7,8,9,10,11,12,13].map(w => (
+            <div key={w} className="text-center text-[10px] font-bold text-slate-400">W{w}</div>
           ))}
         </div>
 

@@ -1,1109 +1,859 @@
-# GC Mission Control — Azure Migration Runbook
+# Azure-Native Migration Runbook — GC Mission Control
 
-**Owner:** GC Mission Control IT
-**Target Architecture:** Azure Static Web Apps · Azure SQL · Azure Functions Premium · Entra ID
-**Timeline:** 13 weeks (3 months) — phased, low-risk, zero-downtime cutover
-**Last updated:** 29 August 2026
-**Version:** 2.0 — includes all automation engines, Mitti/SafetyCulture integration, mobile field routing, division context, and AI delay prediction
+> **3-Month (13-Week) Continuous-Phase Migration Plan**
+> Move GC Mission Control off Base44 onto a fully enterprise-owned Microsoft Azure stack.
+> UK South region · GDPR-compliant · CIO-ready
+
+**Owner:** Platform Engineering
+**Target Region:** UK South (`uksouth`)
+**Timeline:** 13 weeks (3 months)
+**Status:** Approved
 
 ---
 
 ## Executive Summary
 
-GC Mission Control currently runs on the Base44 platform-as-a-service. This runbook details the complete migration to a fully Azure-native architecture, giving Ground Control complete ownership of data, infrastructure, and code. The migration is phased over 13 weeks to ensure zero downtime, full data integrity, and a clean cutover with rollback capability at every stage.
+GC Mission Control currently runs on the Base44 platform-as-a-service. This runbook migrates the application to a fully enterprise-owned Microsoft Azure stack — Azure Static Web Apps (frontend), Azure SQL Database (data), Azure Functions Premium (API), Microsoft Entra ID (auth), Azure Key Vault (secrets), and Azure Blob Storage (files).
 
-The existing React + Vite + Tailwind frontend is retained and redeployed to Azure Static Web Apps. The Base44 entity layer maps to Azure SQL tables with Row-Level Security via SESSION_CONTEXT. The Base44 backend functions port to Azure Functions (TypeScript, isolated worker). Authentication moves to Microsoft Entra ID with MSAL integration.
+The React + Vite + Tailwind frontend source code is retained in full. Only the data, auth, and backend layers move. Every feature already built — 90+ entities, 180+ backend functions, real-time subscriptions, integrations — is preserved.
 
-**Key principles:**
-- **No big-bang.** Every phase has a rollback path.
-- **Data parity.** Every record is verified before and after migration.
-- **UK-localised.** All currency in £, all dates in en-GB, all text in British English.
-- **Cost-conscious.** Consumption-tier resources during migration, scaled up at go-live.
+**Why Azure:**
+- **Full data sovereignty** — all data in UK South (`uksouth`), GDPR-compliant, enterprise-owned and auditable
+- **No vendor lock-in** — source code in your GitHub, deployable to any Azure subscription
+- **Native M365 ecosystem** — Entra ID SSO, Power BI, Logic Apps, Service Bus, Event Grid
+- **Cost predictability** — ~£220–300/mo Azure consumption vs the current platform subscription
+
+**Timeline at a glance:**
+
+| Phase | Weeks | Focus |
+|-------|-------|-------|
+| Phase 0 | 1 | Prerequisites & Setup |
+| Phase 1 | 2 | Export Source Code |
+| Phase 2 | 3–4 | Provision Azure Infrastructure |
+| Phase 3 | 5–7 | Data Layer (SQL + SDK) |
+| Phase 4 | 7–9 | Auth (Entra ID) |
+| Phase 5 | 9–11 | Functions & Automations |
+| Phase 6 | 12 | Deploy & Cutover |
+| Stabilization | 13 | Sign-off & Decommission |
 
 ---
 
-## Phase 1 — Foundation & Infrastructure Provisioning (Weeks 1–3)
+## Phase 0 — Prerequisites & Setup (Week 1)
 
-### Objectives
-Provision all Azure infrastructure, establish the resource topology, and configure networking and security baselines before any code or data moves.
-
-### 1.1 Resource Group & Topology
-
-Create a dedicated resource group for the entire GC Mission Control estate. All resources live in `UK South` for data residency compliance.
+### 0.1 Install the Azure CLI
 
 ```bash
-# Create the resource group
-az group create \
-  --name rg-gc-mission-control-prod \
-  --location uksouth
+# macOS (Homebrew)
+brew install azure-cli
 
-# Create a staging resource group for parallel running
-az group create \
-  --name rg-gc-mission-control-staging \
-  --location uksouth
+# Windows (winget)
+winget install -e --id Microsoft.AzureCLI
+
+# Linux (apt)
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 
-### 1.2 Azure SQL Database
-
-Provision the primary database with Row-Level Security support. Use the General Purpose tier during migration, Business Critical at go-live.
+Verify the installation:
 
 ```bash
-# Create the SQL Server
+az version
+```
+
+### 0.2 Sign in to Azure
+
+```bash
+az login
+```
+
+This opens a browser. Sign in with the Azure admin account that owns the subscription. If you have multiple subscriptions, set the active one:
+
+```bash
+# List subscriptions
+az account list --output table
+
+# Set the active subscription (replace with your ID)
+az account set --subscription "your-subscription-id"
+```
+
+### 0.3 Create the resource group in UK South
+
+All resources go in a single resource group in the `uksouth` region for GDPR data residency:
+
+```bash
+az group create \
+  --name rg-gc-mission-control \
+  --location uksouth \
+  --tags environment=production owner=platform-engineering
+```
+
+### 0.4 Create a service principal for CI/CD
+
+```bash
+az ad sp create-for-rbac \
+  --name "gc-mission-control-deploy" \
+  --role contributor \
+  --scopes /subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control
+```
+
+**Save the output** — you'll need the `appId`, `password`, and `tenant` for GitHub Actions deployment in Phase 6.
+
+### 0.5 Install supporting tools
+
+```bash
+# .NET SDK (required for Azure Functions tooling)
+# macOS
+brew install --cask dotnet-sdk
+# Windows
+winget install Microsoft.DotNet.SDK.8
+
+# Azure Functions Core Tools
+# macOS
+brew tap azure/functions
+brew install azure-functions-core-tools-4
+# Windows
+winget install Microsoft.Azure.FunctionsCoreTools
+
+# Node.js 20 LTS (required for the frontend build)
+# macOS
+brew install node@20
+# Windows
+winget install OpenJS.NodeJS.LTS
+
+# Verify
+dotnet --version
+func --version
+node --version
+```
+
+### 0.6 Checklist — Phase 0
+
+- [ ] Azure CLI installed and `az login` successful
+- [ ] Active subscription set to the production subscription
+- [ ] Resource group `rg-gc-mission-control` created in `uksouth`
+- [ ] Service principal created and credentials saved securely
+- [ ] .NET SDK, Azure Functions Core Tools, and Node.js 20 installed
+
+---
+
+## Phase 1 — Export Source Code (Week 2)
+
+### 1.1 Export the frontend from Base44
+
+From the Base44 builder, download the full source archive. This contains the complete React + Vite + Tailwind frontend.
+
+```bash
+# Create the project directory
+mkdir -p ~/projects/gc-mission-control
+cd ~/projects/gc-mission-control
+
+# Unzip the exported source
+unzip ~/Downloads/gc-mission-control-source.zip -d .
+
+# Verify the structure
+ls -la
+# Expected: package.json, vite.config.js, src/, index.html, tailwind.config.js
+```
+
+### 1.2 Initialize the Git repository and push to GitHub
+
+```bash
+cd ~/projects/gc-mission-control
+
+git init
+git add .
+git commit -m "Initial export from Base44"
+
+# Create the repo on GitHub first (via github.com or gh CLI)
+gh repo create gc-mission-control --private --source=. --push
+
+# Or manually:
+git remote add origin git@github.com:your-org/gc-mission-control.git
+git branch -M main
+git push -u origin main
+```
+
+### 1.3 Verify the build works locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173` — the frontend should render. Auth and data calls will fail (expected — we haven't migrated the backend yet), but the UI should load.
+
+### 1.4 Create the monorepo structure for Azure
+
+```bash
+mkdir -p infrastructure
+mkdir -p backend
+mkdir -p database
+
+# Move the frontend into a subfolder
+git mv src index.html package.json package-lock.json vite.config.js tailwind.config.js postcss.config.js jsconfig.json components.json frontend/
+```
+
+Final structure:
+
+```
+gc-mission-control/
+├── frontend/          # React + Vite SPA
+├── backend/           # Azure Functions (created in Phase 5)
+├── database/          # SQL migration scripts (created in Phase 3)
+└── infrastructure/    # Bicep templates (created in Phase 2)
+```
+
+### 1.5 Checklist — Phase 1
+
+- [ ] Source code exported from Base44 and unzipped
+- [ ] Git repo initialized and pushed to GitHub (private)
+- [ ] `npm run dev` renders the frontend locally
+- [ ] Monorepo structure created (`frontend/`, `backend/`, `database/`, `infrastructure/`)
+
+---
+
+## Phase 2 — Provision Azure Infrastructure (Weeks 3–4)
+
+### 2.1 Create the Azure SQL Database
+
+```bash
+# Create a SQL Server
 az sql server create \
   --name sql-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
+  --resource-group rg-gc-mission-control \
   --location uksouth \
-  --admin-user "gc_admin" \
-  --admin-password "$(openssl rand -base64 24)"
+  --admin-user "gcadmin" \
+  --admin-password "ChangeThisStrongPassword123!" \
+  --enable-public-network true
 
-# Allow Azure services to connect
+# Allow Azure services to connect (for Functions)
 az sql server firewall-rule create \
-  --name AllowAzureServices \
-  --resource-group rg-gc-mission-control-prod \
+  --resource-group rg-gc-mission-control \
   --server sql-gc-mission-control \
+  --name AllowAzureServices \
   --start-ip-address 0.0.0.0 \
   --end-ip-address 0.0.0.0
 
-# Create the database
+# Add your office IP for management access
+MY_IP=$(curl -s ifconfig.me)
+az sql server firewall-rule create \
+  --resource-group rg-gc-mission-control \
+  --server sql-gc-mission-control \
+  --name OfficeIP \
+  --start-ip-address $MY_IP \
+  --end-ip-address $MY_IP
+
+# Create the database (S1 tier — 20 DTUs, 250GB)
 az sql db create \
   --name gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
+  --resource-group rg-gc-mission-control \
   --server sql-gc-mission-control \
-  --service-objective GP_Gen5_4 \
-  --zone-redundant true
-
-# Enable Advanced Data Security
-az sql db threat-policy update \
-  --resource-group rg-gc-mission-control-prod \
-  --server sql-gc-mission-control \
-  --name gc-mission-control \
-  --state Enabled
+  --service-objective S1 \
+  --zone-redundant false
 ```
 
-### 1.3 Azure Functions Premium Plan
-
-The Premium plan provides VNet integration, pre-warmed instances, and no cold start — essential for a field-ops platform where crew need instant responses on mobile.
+### 2.2 Create the Azure Storage Account (Blob + file storage)
 
 ```bash
-# Create the Functions Premium plan
-az functionapp plan create \
-  --name asp-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
+# Storage account (must be globally unique — use a random suffix)
+RANDOM_SUFFIX=$(openssl rand -hex 4)
+az storage account create \
+  --name stgcmisionctrl$RANDOM_SUFFIX \
+  --resource-group rg-gc-mission-control \
   --location uksouth \
-  --sku EP1 \
-  --is-linux
+  --sku Standard_LRS \
+  --kind StorageV2 \
+  --allow-blob-public-access false \
+  --min-tls-version TLS1_2
 
-# Create the Functions app
-az functionapp create \
-  --name func-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
-  --plan asp-gc-mission-control \
-  --runtime node \
-  --runtime-version 20 \
-  --storage-account stgcmctrlfunc \
-  --functions-version 4
+# Create blob containers
+az storage container create \
+  --name files \
+  --account-name stgcmisionctrl$RANDOM_SUFFIX \
+  --auth-mode login
+
+az storage container create \
+  --name uploads \
+  --account-name stgcmisionctrl$RANDOM_SUFFIX \
+  --auth-mode login
+
+az storage container create \
+  --name private-documents \
+  --account-name stgcmisionctrl$RANDOM_SUFFIX \
+  --auth-mode login
 ```
 
-### 1.4 Azure Static Web App
-
-The React frontend deploys here. It connects to Azure Functions for API calls and uses Entra ID for authentication.
+### 2.3 Create the Azure Key Vault (secrets management)
 
 ```bash
-# Create the Static Web App
-az staticwebapp create \
-  --name stw-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
-  --location uksouth \
-  --source https://github.com/gc-mission-control/frontend \
-  --branch main \
-  --app-location "/" \
-  --output-location "dist" \
-  --login-with-github
-```
-
-### 1.5 Key Vault & Secrets
-
-All API keys, connection strings, and secrets live in Key Vault. Azure Functions reference them via managed identity — no secrets in code or config files.
-
-```bash
-# Create the Key Vault
 az keyvault create \
   --name kv-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
+  --resource-group rg-gc-mission-control \
   --location uksouth \
-  --enable-rbac-authorization true
+  --enable-rbac-authorization true \
+  --sku standard
 
-# Grant the Functions app access to the Key Vault
-az role assignment create \
-  --role "Key Vault Secrets User" \
-  --assignee "$(az functionapp identity assign --name func-gc-mission-control --resource-group rg-gc-mission-control-prod --query principalId -o tsv)" \
-  --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control-prod/providers/Microsoft.KeyVault/vaults/kv-gc-mission-control"
-
-# Store the SQL connection string
+# Store the SQL admin password as a secret
 az keyvault secret set \
   --vault-name kv-gc-mission-control \
-  --name "SqlConnectionString" \
-  --value "Server=tcp:sql-gc-mission-control.database.windows.net,1433;Database=gc-mission-control;User ID=gc_admin;Password=YOUR_PASSWORD;Encrypt=true;"
+  --name sql-admin-password \
+  --value "ChangeThisStrongPassword123!"
 ```
 
-### 1.6 Application Insights & Monitoring
-
-Full observability from day one — every function invocation, every SQL query, every frontend error is logged.
+### 2.4 Create the Azure Functions Premium Plan
 
 ```bash
-# Create Application Insights
+# Premium plan (EP1 — 1 core, 3.5GB RAM, always-on)
+az functionapp plan create \
+  --name plan-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --location uksouth \
+  --sku EP1 \
+  --is-linux true
+
+# Create the Function App
+az functionapp create \
+  --name func-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --storage-account stgcmisionctrl$RANDOM_SUFFIX \
+  --plan plan-gc-mission-control \
+  --runtime node \
+  --runtime-version 20 \
+  --functions-version 4 \
+  --os-type Linux
+
+# Enable managed identity (for Key Vault + SQL access)
+az functionapp identity assign \
+  --name func-gc-mission-control \
+  --resource-group rg-gc-mission-control
+
+# Grant the Function App's managed identity access to Key Vault
+FUNCTION_PRINCIPAL_ID=$(az functionapp identity show \
+  --name func-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --query principalId -o tsv)
+
+az role assignment create \
+  --role "Key Vault Secrets User" \
+  --assignee-object-id $FUNCTION_PRINCIPAL_ID \
+  --assignee-principal-type ServicePrincipal \
+  --scope /subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control/providers/Microsoft.KeyVault/vaults/kv-gc-mission-control
+```
+
+### 2.5 Create the Azure Static Web App
+
+```bash
+# Static Web App (free tier — upgrade to Standard for custom domains + auth)
+az staticwebapp create \
+  --name stw-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --location uksouth \
+  --sku Free
+
+# Get the deployment token (save for GitHub Actions)
+az staticwebapp secrets list \
+  --name stw-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --query properties.apiKey -o tsv
+```
+
+### 2.6 Create an Application Insights instance (monitoring)
+
+```bash
 az monitor log-analytics workspace create \
   --workspace-name log-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
+  --resource-group rg-gc-mission-control \
   --location uksouth
 
 az monitor app-insights component create \
   --app ai-gc-mission-control \
   --location uksouth \
-  --resource-group rg-gc-mission-control-prod \
-  --workspace "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control-prod/providers/Microsoft.OperationalInsights/workspaces/log-gc-mission-control"
+  --resource-group rg-gc-mission-control \
+  --workspace log-gc-mission-control \
+  --kind web
 
-# Link to the Functions app
+# Link App Insights to the Function App
 az functionapp config appsettings set \
   --name func-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
-  --settings "APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app ai-gc-mission-control -g rg-gc-mission-control-prod --query instrumentationKey -o tsv)"
+  --resource-group rg-gc-mission-control \
+  --settings \
+    APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app ai-gc-mission-control -g rg-gc-mission-control --query instrumentationId -o tsv) \
+    APPLICATIONINSIGHTS_CONNECTION_STRING=$(az monitor app-insights component show --app ai-gc-mission-control -g rg-gc-mission-control --query connectionString -o tsv)
 ```
 
-### 1.7 Entra ID App Registration
+### 2.7 Checklist — Phase 2
 
-Register the application in Entra ID for authentication. This replaces the Base44 auth provider entirely.
+- [ ] Azure SQL Server + Database created in UK South
+- [ ] Firewall rules set (Azure services + office IP)
+- [ ] Storage account created with blob containers
+- [ ] Key Vault created with SQL admin password stored
+- [ ] Functions Premium plan + Function App created with managed identity
+- [ ] Function App's managed identity granted Key Vault access
+- [ ] Static Web App created and deployment token saved
+- [ ] Application Insights + Log Analytics workspace created and linked
+
+---
+
+## Phase 3 — Data Layer: SQL + SDK (Weeks 5–7)
+
+### 3.1 Generate the schema from Base44 entities
+
+Each Base44 entity maps to a SQL table. Run this script to extract all entity schemas:
+
+```bash
+# In the frontend directory, create a schema extractor
+cat > frontend/src/lib/exportSchemas.js << 'EOF'
+import { base44 } from '@/api/base44Client';
+
+// List of all entity names (extract from base44/entities/)
+const entityNames = [
+  'Job', 'Staff', 'Team', 'Client', 'Contractor', 'Supplier', 'Vehicle',
+  'SiteAsset', 'RotaAssignment', 'Timesheet', 'DeliveryLog', 'BillingRule',
+  'ComplianceItem', 'SafetyReport', 'HotelBooking', 'AppSetting',
+  // ... all 90+ entities
+];
+
+async function exportAllSchemas() {
+  const schemas = {};
+  for (const name of entityNames) {
+    try {
+      const schema = await base44.entities[name].schema();
+      schemas[name] = schema;
+    } catch (e) {
+      console.error(`Failed to get schema for ${name}:`, e.message);
+    }
+  }
+  console.log(JSON.stringify(schemas, null, 2));
+}
+
+exportAllSchemas();
+EOF
+
+node frontend/src/lib/exportSchemas.js > database/schemas.json
+```
+
+### 3.2 Convert JSON schemas to SQL DDL
+
+Create a script that converts each entity's JSON schema to a `CREATE TABLE` statement:
+
+```sql
+-- database/01_create_tables.sql
+
+-- Enable RLS on the database
+ALTER DATABASE gc-mission-control SET ENCRYPTION ON;
+
+-- Base fields added to every table
+-- id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+-- created_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+-- updated_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+-- created_by_id NVARCHAR(100)
+
+CREATE TABLE dbo.Staff (
+    id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    division_id NVARCHAR(100),
+    email NVARCHAR(255),
+    worker_type NVARCHAR(50) NOT NULL,
+    job_title NVARCHAR(255),
+    is_active BIT DEFAULT 1,
+    user_id NVARCHAR(100),
+    created_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+    updated_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+    created_by_id NVARCHAR(100)
+);
+
+CREATE TABLE dbo.Job (
+    id UNIQUEIDENTIFIER DEFAULT NEWID() PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    division_id NVARCHAR(100),
+    client_id NVARCHAR(100),
+    status NVARCHAR(50) DEFAULT 'planning',
+    address NVARCHAR(MAX),
+    lat FLOAT,
+    lng FLOAT,
+    created_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+    updated_date DATETIME2 DEFAULT SYSUTCDATETIME(),
+    created_by_id NVARCHAR(100)
+);
+
+-- ... repeat for all 90+ entities
+```
+
+### 3.3 Implement Row-Level Security (RLS) with SESSION_CONTEXT
+
+RLS is the Azure SQL equivalent of Base44's entity RLS. Every connection sets `SESSION_CONTEXT` with the user's ID, role, and division, and security predicates filter rows based on those values.
+
+```sql
+-- database/02_rls.sql
+
+-- Create a security schema to hold predicate functions
+CREATE SCHEMA security;
+GO
+
+-- Predicate function for division-scoped tables
+CREATE FUNCTION security.fn_division_predicate(@division_id NVARCHAR(100))
+RETURNS TABLE
+WITH SCHEMABINDING
+AS
+RETURN (
+    SELECT 1 AS result
+    WHERE @division_id IS NULL
+       OR @division_id = CAST(SESSION_CONTEXT(N'division_id') AS NVARCHAR(100))
+       OR CAST(SESSION_CONTEXT(N'role') AS NVARCHAR(50)) = 'admin'
+);
+GO
+
+-- Apply the predicate to Staff
+CREATE SECURITY POLICY security.StaffPolicy
+ADD FILTER PREDICATE security.fn_division_predicate(division_id) ON dbo.Staff,
+ADD BLOCK PREDICATE security.fn_division_predicate(division_id) ON dbo.Staff AFTER INSERT;
+GO
+
+-- Apply the predicate to Job
+CREATE SECURITY POLICY security.JobPolicy
+ADD FILTER PREDICATE security.fn_division_predicate(division_id) ON dbo.Job,
+ADD BLOCK PREDICATE security.fn_division_predicate(division_id) ON dbo.Job AFTER INSERT;
+GO
+
+-- Repeat for all division-scoped tables:
+-- Vehicle, SiteAsset, Client, Contractor, Supplier, RotaAssignment,
+-- Timesheet, DeliveryLog, BillingRule, ComplianceItem, etc.
+```
+
+### 3.4 Set SESSION_CONTEXT on every connection
+
+The Azure Functions API sets `SESSION_CONTEXT` at the start of every request, reading the user's identity from the Entra ID JWT token:
+
+```typescript
+// backend/src/middleware/setSessionContext.ts
+
+import { Connection } from 'mssql';
+
+export async function setSessionContext(connection: Connection, user: {
+  id: string;
+  role: string;
+  division_id: string | null;
+}) {
+  await connection.request()
+    .input('user_id', user.id)
+    .input('role', user.role)
+    .input('division_id', user.division_id || null)
+    .query(`
+      EXEC sp_set_session_context @key = N'user_id', @value = @user_id;
+      EXEC sp_set_session_context @key = N'role', @value = @role;
+      EXEC sp_set_session_context @key = N'division_id', @value = @division_id;
+    `);
+}
+```
+
+### 3.5 Export data from Base44
+
+Create a backend function that exports all entity data as JSON for migration:
+
+```typescript
+// backend/src/functions/exportData.ts
+
+import { base44 } from '../base44Client';
+
+const entityNames = [
+  'Job', 'Staff', 'Team', 'Client', 'Contractor', 'Supplier', 'Vehicle',
+  'SiteAsset', 'RotaAssignment', 'Timesheet', 'DeliveryLog', 'BillingRule',
+  'ComplianceItem', 'SafetyReport', 'HotelBooking', 'AppSetting',
+  // ... all entities
+];
+
+export async function exportAllData() {
+  const allData = {};
+  for (const name of entityNames) {
+    const records = await base44.entities[name].list('-created_date', 10000);
+    allData[name] = records;
+    console.log(`Exported ${records.length} ${name} records`);
+  }
+  return allData;
+}
+```
+
+Run the export and save to a JSON file:
+
+```bash
+node backend/src/functions/exportData.ts > database/export.json
+```
+
+### 3.6 Import data into Azure SQL
+
+```sql
+-- database/03_import_data.sql
+
+-- Bulk insert Staff
+INSERT INTO dbo.Staff (id, name, division_id, email, worker_type, job_title, is_active, created_date, updated_date, created_by_id)
+SELECT
+    TRY_CONVERT(UNIQUEIDENTIFIER, id),
+    name,
+    division_id,
+    email,
+    worker_type,
+    job_title,
+    CASE is_active WHEN 'true' THEN 1 ELSE 0 END,
+    TRY_CONVERT(DATETIME2, created_date),
+    TRY_CONVERT(DATETIME2, updated_date),
+    created_by_id
+FROM OPENJSON(@staffJson)
+WITH (
+    id NVARCHAR(100),
+    name NVARCHAR(255),
+    division_id NVARCHAR(100),
+    email NVARCHAR(255),
+    worker_type NVARCHAR(50),
+    job_title NVARCHAR(255),
+    is_active NVARCHAR(10),
+    created_date NVARCHAR(50),
+    updated_date NVARCHAR(50),
+    created_by_id NVARCHAR(100)
+);
+```
+
+### 3.7 Verify record counts
+
+```sql
+-- database/04_verify_counts.sql
+
+-- Compare counts between source and target
+SELECT 'Staff' AS entity, COUNT(*) AS count FROM dbo.Staff
+UNION ALL
+SELECT 'Job', COUNT(*) FROM dbo.Job
+UNION ALL
+SELECT 'RotaAssignment', COUNT(*) FROM dbo.RotaAssignment
+UNION ALL
+SELECT 'Timesheet', COUNT(*) FROM dbo.Timesheet
+UNION ALL
+SELECT 'DeliveryLog', COUNT(*) FROM dbo.DeliveryLog
+-- ... all tables
+ORDER BY entity;
+```
+
+### 3.8 Checklist — Phase 3
+
+- [ ] All entity schemas extracted from Base44
+- [ ] SQL DDL scripts created for all 90+ tables
+- [ ] RLS security predicates created for all division-scoped tables
+- [ ] SESSION_CONTEXT middleware written
+- [ ] Data exported from Base44 as JSON
+- [ ] Data imported into Azure SQL
+- [ ] Record counts verified (source = target for every table)
+
+---
+
+## Phase 4 — Auth: Entra ID (Weeks 7–9)
+
+### 4.1 Register the application in Entra ID
 
 ```bash
 # Create the app registration
 az ad app create \
   --display-name "GC Mission Control" \
-  --web-redirect-uris "https://gc-mission-control.azurestaticapps.net/auth/callback" "https://staging.gc-mission-control.azurestaticapps.net/auth/callback" \
-  --required-resource-accesses '[{"resourceAppId":"00000003-0000-0000-c000-000000000000","resourceAccess":[{"id":"e1fe6dd8-ba00-4677-874c-44d40a0a0e3b","type":"Scope"}]}]'
+  --web-redirect-uris "https://stw-gc-mission-control.azurestaticapps.net/.auth/login/aad/callback" \
+  --required-resource-accesses '[{"resourceAppId":"00000003-0000-0000-c000-000000000000","resourceAccess":[{"id":"e1fe6dd8-af48-4d3c-9b3e-1c50b2f1a2f7","type":"Scope"}]}]'
 
-# Create a client secret
+# Get the app (client) ID and tenant ID
+APP_ID=$(az ad app list --display-name "GC Mission Control" --query '[0].appId' -o tsv)
+TENANT_ID=$(az account show --query tenantId -o tsv)
+echo "Client ID: $APP_ID"
+echo "Tenant ID: $TENANT_ID"
+```
+
+### 4.2 Create a client secret
+
+```bash
+# Create a client secret (save the value — it's only shown once)
 az ad app credential reset \
-  --id "$(az ad app list --display-name 'GC Mission Control' --query [0].id -o tsv)" \
+  --id $APP_ID \
   --append
 ```
 
-### Phase 1 Checklist
-- [ ] Resource groups created (prod + staging)
-- [ ] Azure SQL server + database provisioned in UK South
-- [ ] Azure Functions Premium plan + app created
-- [ ] Azure Static Web App created and linked to GitHub repo
-- [ ] Key Vault provisioned with managed identity access
-- [ ] Application Insights + Log Analytics workspace configured
-- [ ] Entra ID app registration created with redirect URIs
-- [ ] Firewall rules configured (Azure services + office IP)
-- [ ] All infrastructure verified via Azure portal health checks
+### 4.3 Configure the API (Functions) for JWT validation
 
----
+The Azure Functions API validates the Entra ID JWT on every request:
 
-## Phase 2 — Codebase Export & Repository Baseline (Weeks 3–4)
+```typescript
+// backend/src/middleware/validateToken.ts
 
-### Objectives
-Export the full source code from the Base44 sandbox, establish a version-controlled repository, and set up CI/CD pipelines for automated deployment to Azure.
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
 
-### 2.1 Source Code Export
+const client = jwksClient({
+  jwksUri: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/discovery/v2.0/keys`,
+  cache: true,
+  rateLimit: true,
+});
 
-Export the React frontend, entity schemas, and backend functions from the Base44 sandbox. The frontend code is retained as-is — only the data and auth layers are refactored.
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, (err, key) => {
+    if (err) return callback(err);
+    callback(null, key.getPublicKey());
+  });
+}
+
+export function validateToken(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No token' });
+
+  jwt.verify(token, getKey, {
+    audience: process.env.AZURE_CLIENT_ID,
+    issuer: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0`,
+    algorithms: ['RS256'],
+  }, (err, decoded) => {
+    if (err) return res.status(401).json({ error: 'Invalid token' });
+    req.user = {
+      id: decoded.oid,
+      email: decoded.preferred_username,
+      name: decoded.name,
+      role: decoded.roles?.[0] || 'user',
+    };
+    next();
+  });
+}
+```
+
+### 4.4 Configure the frontend for MSAL
 
 ```bash
-# Clone the Base44 sandbox repository
-git clone https://github.com/base44-sandbox/gc-mission-control.git
-cd gc-mission-control
-
-# Create the new production repository
-gh repo create gc-mission-control/frontend --private --source=. --push
-
-# Tag the final Base44 version
-git tag -a v-base44-final -m "Final version running on Base44"
-git push origin v-base44-final
+cd frontend
+npm install @azure/msal-browser @azure/msal-react
 ```
 
-### 2.2 Repository Structure
+```typescript
+// frontend/src/lib/msalConfig.ts
 
-Reorganise the repository for the Azure target architecture:
+import { Configuration } from '@azure/msal-browser';
 
-```
-gc-mission-control/
-├── frontend/          # React + Vite + Tailwind (retained from Base44)
-│   ├── src/
-│   ├── package.json
-│   └── vite.config.js
-├── api/               # Azure Functions (TypeScript, isolated worker)
-│   ├── src/
-│   │   ├── functions/  # One folder per function
-│   │   └── shared/     # Shared logic (extracted from base44/shared/)
-│   ├── host.json
-│   └── package.json
-├── database/          # SQL migration scripts
-│   ├── migrations/
-│   └── seed/
-├── infrastructure/    # Bicep templates + CLI scripts
-│   └── main.bicep
-└── docs/              # Architecture docs, runbooks
+export const msalConfig: Configuration = {
+  auth: {
+    clientId: process.env.VITE_AZURE_CLIENT_ID!,
+    authority: `https://login.microsoftonline.com/${process.env.VITE_AZURE_TENANT_ID}`,
+    redirectUri: window.location.origin,
+  },
+  cache: {
+    cacheLocation: 'localStorage',
+    storeAuthStateInCookie: true,
+  },
+};
+
+export const loginRequest = {
+  scopes: ['openid', 'profile', 'email', `api://${process.env.VITE_AZURE_CLIENT_ID}/access_as_user`],
+};
 ```
 
-### 2.3 CI/CD Pipeline
+### 4.5 Enable Static Web App built-in Entra ID auth
 
-Set up GitHub Actions for automated deployment to Azure Static Web Apps and Azure Functions.
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy to Azure
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
-          app_location: "frontend"
-          output_location: "dist"
-
-  deploy-functions:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: azure/functions-action@v1
-        with:
-          app-name: func-gc-mission-control
-          package: api
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+```bash
+# Configure Static Web App auth with Entra ID
+az staticwebapp appsettings set \
+  --name stw-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --setting-names "AZURE_CLIENT_ID=$APP_ID" "AZURE_CLIENT_SECRET=<your-secret>" "AZURE_TENANT_ID=$TENANT_ID"
 ```
 
-### Phase 2 Checklist
-- [ ] Full source code exported from Base44 sandbox
-- [ ] Repository created on GitHub (private)
-- [ ] Final Base44 version tagged
-- [ ] Repository reorganised into frontend/api/database/infrastructure structure
-- [ ] GitHub Actions CI/CD pipeline configured
-- [ ] First successful deployment to staging Static Web App
-- [ ] First successful deployment to staging Functions app
+### 4.6 Migrate existing users
+
+Existing Base44 users are invited to Entra ID. Map each Staff record's email to an Entra ID user:
+
+```bash
+# Export the user list from the app
+# Then invite each user via the Azure portal or Graph API
+```
+
+### 4.7 Checklist — Phase 4
+
+- [ ] App registration created in Entra ID
+- [ ] Client secret created and saved in Key Vault
+- [ ] JWT validation middleware written for Functions
+- [ ] MSAL configured in the frontend
+- [ ] Static Web App built-in auth enabled
+- [ ] Existing users mapped and invited to Entra ID
 
 ---
 
-## Phase 3 — Data Layer Migration (Weeks 4–7)
+## Phase 5 — Functions & Automations (Weeks 9–11)
 
-### Objectives
-Convert all Base44 JSON entity schemas into relational SQL tables, migrate existing data, and implement Row-Level Security for multi-tenant data isolation.
+### 5.1 Port the backend functions
 
-### 3.1 Schema Conversion
+Each Base44 function (`base44/functions/<name>/entry.ts`) becomes an Azure Function. The logic stays identical — only the runtime wrapper changes.
 
-Each Base44 entity becomes a SQL table. Built-in fields (id, created_date, updated_date, created_by_id) are retained as standard columns. JSON array/object fields become either related tables (for arrays of objects) or NVARCHAR(MAX) JSON columns (for simple arrays).
-
-```sql
--- Example: Staff entity → Staff table
-CREATE TABLE [dbo].[Staff] (
-  [id] UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-  [name] NVARCHAR(255) NOT NULL,
-  [division_id] UNIQUEIDENTIFIER NULL,
-  [email] NVARCHAR(255) NULL,
-  [phone] NVARCHAR(50) NULL,
-  [worker_type] NVARCHAR(20) NOT NULL CHECK ([worker_type] IN ('direct_employee','subcontractor','agency')),
-  [team_id] UNIQUEIDENTIFIER NULL,
-  [permission_group_id] UNIQUEIDENTIFIER NULL,
-  [is_active] BIT DEFAULT 1,
-  [user_id] UNIQUEIDENTIFIER NULL,
-  [created_date] DATETIME2 DEFAULT SYSUTCDATETIME(),
-  [updated_date] DATETIME2 DEFAULT SYSUTCDATETIME(),
-  [created_by_id] UNIQUEIDENTIFIER NULL,
-  -- Denormalised fields
-  [division_id_cache] UNIQUEIDENTIFIER NULL,
-  -- JSON fields stored as NVARCHAR(MAX)
-  [contacts] NVARCHAR(MAX) NULL,
-  [avatar_url] NVARCHAR(500) NULL
-);
-
--- Indexes for common query patterns
-CREATE INDEX IX_Staff_division_id ON [dbo].[Staff]([division_id]);
-CREATE INDEX IX_Staff_team_id ON [dbo].[Staff]([team_id]);
-CREATE INDEX IX_Staff_is_active ON [dbo].[Staff]([is_active]);
-CREATE INDEX IX_Staff_user_id ON [dbo].[Staff]([user_id]);
+**Before (Base44):**
+```typescript
+// base44/functions/calculateCharge/entry.ts
+export async function calculateCharge({ delivery_id }) {
+  const delivery = await base44.entities.DeliveryLog.get(delivery_id);
+  // ... billing logic
+  return { charge_amount: 100 };
+}
 ```
 
-### 3.2 Row-Level Security
+**After (Azure Functions):**
+```typescript
+// backend/src/functions/calculateCharge/index.ts
+import { app } from '@azure/functions';
+import { getDbConnection, setSessionContext } from '../../middleware/db';
+import { validateToken } from '../../middleware/validateToken';
 
-Implement RLS using security predicates and SESSION_CONTEXT. Each request sets the user's division_id and role into SESSION_CONTEXT, and all queries are automatically filtered.
+app.http('calculateCharge', {
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  handler: async (request, context) => {
+    const user = await validateToken(request);
+    const { delivery_id } = await request.json();
 
-```sql
--- Enable RLS on every tenant-scoped table
-ALTER TABLE [dbo].[Staff] ENABLE ROW LEVEL SECURITY;
+    const connection = await getDbConnection();
+    await setSessionContext(connection, user);
 
--- Create a security predicate function
-CREATE FUNCTION [dbo].[fn_staff_security_predicate](@division_id AS UNIQUEIDENTIFIER)
-RETURNS TABLE
-WITH SCHEMABINDING
-AS
-RETURN SELECT 1 AS fn_security_predicate_result
-WHERE
-  -- Enterprise admins see everything
-  SESSION_CONTEXT(N'role') = 'admin'
-  OR SESSION_CONTEXT(N'is_enterprise_admin') = 'true'
-  -- Division directors see their own + managed divisions
-  OR (
-    SESSION_CONTEXT(N'role') = 'director'
-    AND (
-      @division_id = CAST(SESSION_CONTEXT(N'division_id') AS UNIQUEIDENTIFIER)
-      OR CHARINDEX(CAST(@division_id AS NVARCHAR(50)), SESSION_CONTEXT(N'managed_division_ids')) > 0
-    )
-  )
-  -- Regular users see only their own division
-  OR @division_id = CAST(SESSION_CONTEXT(N'division_id') AS UNIQUEIDENTIFIER)
-  OR @division_id IS NULL;
+    const delivery = await connection.request()
+      .input('id', delivery_id)
+      .query('SELECT * FROM dbo.DeliveryLog WHERE id = @id')
+      .then(r => r.recordset[0]);
 
--- Bind the predicate
-CREATE SECURITY POLICY [dbo].[StaffSecurityPolicy]
-ADD FILTER PREDICATE [dbo].[fn_staff_security_predicate]([division_id]) ON [dbo].[Staff];
+    // ... billing logic (unchanged)
+    return { jsonBody: { charge_amount: 100 } };
+  },
+});
 ```
 
-### 3.3 Data Migration Script
+### 5.2 Port automations as timer triggers
 
-Export all data from Base44 entities and bulk-insert into SQL. The script runs in batches to handle large tables.
+Base44 automations become Azure Functions timer triggers:
 
 ```typescript
-// database/migrate.ts
-import { sql } from './connection';
+// backend/src/functions/scheduledReports/index.ts
+import { app, Timer } from '@azure/functions';
 
-async function migrateEntity(entityName: string, tableName: string) {
-  // 1. Export from Base44 (via the SDK export endpoint)
-  const records = await exportFromBase44(entityName);
-
-  // 2. Bulk insert into SQL in batches of 500
-  for (let i = 0; i < records.length; i += 500) {
-    const batch = records.slice(i, i + 500);
-    const columns = Object.keys(batch[0]);
-    const values = batch.map(r => `(${columns.map(c => `@${c}_${i}`).join(',')})`).join(',');
-    const request = new sql.Request();
-    batch.forEach((r, j) => columns.forEach(c => request.input(`${c}_${i + j}`, r[c])));
-    await request.query(`INSERT INTO [dbo].[${tableName}] (${columns.join(',')}) VALUES ${values}`);
-  }
-
-  console.log(`Migrated ${records.length} records from ${entityName} to ${tableName}`);
-}
+app.timer('sendScheduledReports', {
+  schedule: '0 9 * * 1-5', // 9am weekdays
+  handler: async (timer: Timer, context) => {
+    // Port the logic from base44/functions/sendScheduledReports/entry.ts
+    context.log('Scheduled reports sent at:', new Date().toISOString());
+  },
+});
 ```
 
-### 3.4 Data Access Layer
-
-Create a TypeScript data access layer that mirrors the Base44 SDK API, so the frontend code changes minimally.
+### 5.3 Port webhook receivers as HTTP triggers
 
 ```typescript
-// api/src/shared/dataAccess.ts
-import { sql } from './connection';
+// backend/src/functions/geotabWebhook/index.ts
+import { app } from '@azure/functions';
 
-export class EntityAccess<T> {
-  constructor(private tableName: string) {}
-
-  async list(sort?: string, limit?: number): Promise<T[]> {
-    const request = new sql.Request();
-    const sortClause = sort ? `ORDER BY ${sort.replace('-', 'DESC')}` : '';
-    const limitClause = limit ? `TOP ${limit}` : '';
-    const result = await request.query(`SELECT ${limitClause} * FROM [dbo].[${this.tableName}] ${sortClause}`);
-    return result.recordset;
-  }
-
-  async filter(filter: Record<string, any>, sort?: string, limit?: number): Promise<T[]> {
-    const request = new sql.Request();
-    const conditions = Object.entries(filter).map(([k, v]) => {
-      if (v === null || v === undefined) return `[${k}] IS NULL`;
-      request.input(k, v);
-      return `[${k}] = @${k}`;
-    }).join(' AND ');
-    const sortClause = sort ? `ORDER BY ${sort.replace('-', 'DESC')}` : '';
-    const limitClause = limit ? `TOP ${limit}` : '';
-    const result = await request.query(`SELECT ${limitClause} * FROM [dbo].[${this.tableName}] WHERE ${conditions} ${sortClause}`);
-    return result.recordset;
-  }
-
-  async get(id: string): Promise<T> {
-    const request = new sql.Request();
-    request.input('id', id);
-    const result = await request.query(`SELECT * FROM [dbo].[${this.tableName}] WHERE [id] = @id`);
-    return result.recordset[0];
-  }
-
-  async create(data: Partial<T>): Promise<T> {
-    const request = new sql.Request();
-    const columns = Object.keys(data);
-    columns.forEach(c => request.input(c, (data as any)[c]));
-    const columnList = columns.join(',');
-    const valueList = columns.map(c => `@${c}`).join(',');
-    const result = await request.query(`INSERT INTO [dbo].[${this.tableName}] (${columnList}) OUTPUT INSERTED.* VALUES (${valueList})`);
-    return result.recordset[0];
-  }
-
-  async update(id: string, data: Partial<T>): Promise<T> {
-    const request = new sql.Request();
-    request.input('id', id);
-    const setClause = Object.entries(data).map(([k, v]) => { request.input(k, v); return `[${k}] = @${k}`; }).join(',');
-    const result = await request.query(`UPDATE [dbo].[${this.tableName}] SET ${setClause}, [updated_date] = SYSUTCDATETIME() WHERE [id] = @id OUTPUT INSERTED.*`);
-    return result.recordset[0];
-  }
-
-  async delete(id: string): Promise<void> {
-    const request = new sql.Request();
-    request.input('id', id);
-    await request.query(`DELETE FROM [dbo].[${this.tableName}] WHERE [id] = @id`);
-  }
-}
+app.http('geotabWebhook', {
+  methods: ['POST'],
+  authLevel: 'function', // uses a function key
+  handler: async (request, context) => {
+    const payload = await request.json();
+    // Port the logic from base44/functions/geotabWebhook/entry.ts
+    return { status: 200, body: 'OK' };
+  },
+});
 ```
 
-### Phase 3 Checklist
-- [ ] All 100+ entity schemas converted to SQL DDL (including MittiConfig, AutomationControl, JobDelayLog, DivisionAccessManifest, HolidayPayAccrual, IncentiveScore, GeofenceEvent, WeatherLog, JobMilestone, CashFlowEntry, AFPLineItem, CVRLineItem, and all new entities added in 2026)
-- [ ] Row-Level Security policies created for every tenant-scoped table
-- [ ] SESSION_CONTEXT wiring tested (user → division_id → filtered queries)
-- [ ] Data migration script written and tested on staging
-- [ ] Full data export from Base44 completed
-- [ ] Data imported into staging SQL database
-- [ ] Record counts verified (Base44 count = SQL count for every table)
-- [ ] Data access layer implemented and unit-tested
-- [ ] Sample queries verified against migrated data
-
----
-
-## Phase 4 — Backend Logic Porting (Weeks 7–10)
-
-### Objectives
-Port all 200+ Base44 backend functions to Azure Functions (TypeScript, isolated worker model). Shared logic is extracted into a shared module. The 9 scheduled automation engines become Azure Functions timer triggers. Entity automations become Azure Functions with Event Grid. Webhook receivers (Geotab, Mitti/SafetyCulture, KeyLogBook, Holman, Asset Panda, Stripe, Bob HR, WhatsApp) become HTTP-triggered Azure Functions.
-
-### 4.1 Function Structure
-
-Each Base44 function becomes an Azure Function. The handler signature changes but the business logic is retained.
-
-```typescript
-// api/src/functions/geotabWebhook/index.ts
-import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { processGeofence } from '../../shared/geofence';
-
-export async function geotabWebhook(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  context.log('Geotab webhook received');
-  try {
-    const body = await request.json();
-    const secret = request.query.get('secret');
-    if (secret !== process.env.GEOTAB_WEBHOOK_SECRET) {
-      return { status: 401, jsonBody: { error: 'Invalid secret' } };
-    }
-
-    // Set SESSION_CONTEXT for RLS
-    await sql.setRequestContext({ role: 'admin' });
-
-    const result = await processGeofence(body);
-    return { status: 200, jsonBody: result };
-  } catch (error) {
-    context.error('Geotab webhook error:', error.message);
-    return { status: 500, jsonBody: { error: error.message } };
-  }
-}
-
-export default geotabWebhook;
-```
-
-### 4.2 Scheduled Automation Engines (9 Engines)
-
-Base44 scheduled automations become Azure Functions timer triggers. The NCRONTAB expression runs in UTC. Each engine runs as a service-role (admin) context to bypass RLS, exactly as they do on Base44 via `base44.asServiceRole`.
-
-#### Engine 1 — Payroll Autopilot (`runPayrollAutopilot`)
-
-Runs nightly. Monday exports last week's payroll, Sunday runs the weekly timesheet merge, other days run the daily timesheet merge.
-
-```typescript
-// api/src/functions/runPayrollAutopilot/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 23 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runPayrollAutopilot/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { runDailyMerge, runWeeklyMerge, runPayrollExport } from '../../shared/payrollAutopilot';
-
-export async function runPayrollAutopilot(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Payroll autopilot triggered at', new Date().toISOString());
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    const dayOfWeek = new Date().getDay();
-
-    if (dayOfWeek === 1) {
-      // Monday — export last week's approved payroll to the payroll provider
-      await runPayrollExport();
-    } else if (dayOfWeek === 0) {
-      // Sunday — merge the week's approved daily summaries into weekly records
-      await runWeeklyMerge();
-    } else {
-      // Tue–Sat — merge each staff member's granular entries into a daily summary
-      await runDailyMerge();
-    }
-  } catch (error) {
-    context.error('Payroll autopilot error:', error.message);
-    throw error; // Azure Functions retries automatically on throw
-  }
-}
-
-export default runPayrollAutopilot;
-```
-
-#### Engine 2 — Auto-Billing (`autoBillAssetOnSite` + `autoCreateBillingFromRemarks`)
-
-Runs hourly. Scans approved timesheets and driller log remarks, matches them to BillingRules, and stamps charge amounts onto the timesheet records.
-
-```typescript
-// api/src/functions/autoBillAssetOnSite/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 * * * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/autoBillAssetOnSite/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { matchBillingRules, stampCharge } from '../../shared/billingEngine';
-
-export async function autoBillAssetOnSite(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Auto-billing scan started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    // Fetch all approved timesheets that haven't been charged yet
-    const uncharged = await sql.query(`
-      SELECT * FROM [dbo].[Timesheet]
-      WHERE [status] = 'approved' AND [chargeable] = 0
-      AND [task_description] IS NOT NULL
-    `);
-
-    let stamped = 0;
-    for (const entry of uncharged.recordset) {
-      const match = await matchBillingRules(entry.task_description, entry.job_id);
-      if (match) {
-        await stampCharge(entry.id, match);
-        stamped++;
-      }
-    }
-    context.log(`Auto-billing complete: ${stamped} entries charged`);
-  } catch (error) {
-    context.error('Auto-billing error:', error.message);
-    throw error;
-  }
-}
-
-export default autoBillAssetOnSite;
-```
-
-#### Engine 3 — Weather-Rostering (`runWeatherRostering`)
-
-Runs daily at 06:00 UTC (07:00 BST). Checks the Met Office weather forecast for every active job site, and if conditions breach the safety thresholds (wind speed, rainfall, lightning), flags the rota assignment for manager review and sends an alert email.
-
-```typescript
-// api/src/functions/runWeatherRostering/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 6 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runWeatherRostering/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { getSiteForecast, checkWeatherThresholds } from '../../shared/weatherClient';
-import { sendEmail } from '../../shared/emailStyling';
-
-export async function runWeatherRostering(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Weather rostering engine started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    const today = new Date().toISOString().split('T')[0];
-
-    // Get all active job sites with coordinates
-    const sites = await sql.query(`
-      SELECT DISTINCT j.[id], j.[name], j.[site_lat], j.[site_lng]
-      FROM [dbo].[Job] j
-      INNER JOIN [dbo].[RotaAssignment] r ON r.[job_id] = j.[id]
-      WHERE r.[assigned_date] = @today AND j.[site_lat] IS NOT NULL
-    `, { today });
-
-    for (const site of sites.recordset) {
-      const forecast = await getSiteForecast(site.site_lat, site.site_lng);
-      const breach = checkWeatherThresholds(forecast);
-      if (breach) {
-        // Flag the day's assignments for review
-        await sql.query(`
-          UPDATE [dbo].[RotaAssignment]
-          SET [weather_alert] = 1, [weather_alert_note] = @note
-          WHERE [job_id] = @jobId AND [assigned_date] = @today
-        `, { jobId: site.id, today, note: breach.summary });
-
-        await sendEmail({
-          to: 'ops@groundcontrol.co.uk',
-          subject: `Weather alert: ${site.name}`,
-          body: `Weather conditions at ${site.name} may breach safety thresholds today: ${breach.summary}`,
-        });
-      }
-    }
-    context.log('Weather rostering complete');
-  } catch (error) {
-    context.error('Weather rostering error:', error.message);
-    throw error;
-  }
-}
-
-export default runWeatherRostering;
-```
-
-#### Engine 4 — Training Compliance (`runTrainingCompliance`)
-
-Runs daily at 07:00 UTC. Scans all staff compliance items, flags expiring/expired qualifications, and generates training requirements for staff missing required qualifications for their team.
-
-```typescript
-// api/src/functions/runTrainingCompliance/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 7 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runTrainingCompliance/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { complianceDaysUntil } from '../../shared/complianceDate';
-
-export async function runTrainingCompliance(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Training compliance engine started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    // Find all compliance items expiring within 30 days or already expired
-    const items = await sql.query(`
-      SELECT ci.*, s.[name] AS staff_name, s.[email]
-      FROM [dbo].[ComplianceItem] ci
-      LEFT JOIN [dbo].[Staff] s ON s.[id] = ci.[reference_id]
-      WHERE ci.[category] = 'staff' AND ci.[expiry_date] IS NOT NULL
-      AND ci.[status_override] = 'auto'
-    `);
-
-    const alerts = [];
-    for (const item of items.recordset) {
-      const daysUntil = complianceDaysUntil(item.expiry_date);
-      if (daysUntil !== null && daysUntil <= 30) {
-        alerts.push({ item, daysUntil });
-      }
-    }
-    // Send consolidated alert email to the training manager
-    if (alerts.length > 0) {
-      await sendEmail({
-        to: 'training@groundcontrol.co.uk',
-        subject: `${alerts.length} compliance items need attention`,
-        body: alerts.map(a => `${a.item.staff_name}: ${a.item.title} — ${a.daysUntil < 0 ? 'EXPIRED' : a.daysUntil + ' days remaining'}`).join('\n'),
-      });
-    }
-    context.log(`Training compliance: ${alerts.length} alerts sent`);
-  } catch (error) {
-    context.error('Training compliance error:', error.message);
-    throw error;
-  }
-}
-
-export default runTrainingCompliance;
-```
-
-#### Engine 5 — Client Weekly Report (`runClientWeeklyReport`)
-
-Runs every Friday at 16:00 UTC (17:00 BST). Generates a professional AI-drafted progress report for every active job and publishes it to the client portal.
-
-```typescript
-// api/src/functions/runClientWeeklyReport/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 16 * * 5",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runClientWeeklyReport/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { invokeLLM } from '../../shared/azureOpenAI';
-
-export async function runClientWeeklyReport(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Client weekly report engine started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-    const activeJobs = await sql.query(`
-      SELECT * FROM [dbo].[Job] WHERE [status] = 'active'
-    `);
-
-    for (const job of activeJobs.recordset) {
-      // Aggregate the week's site logs, photos, and milestones
-      const logs = await sql.query(`
-        SELECT * FROM [dbo].[InvestigationLog]
-        WHERE [job_id] = @jobId AND [created_date] >= @weekAgo
-        ORDER BY [created_date]
-      `, { jobId: job.id, weekAgo });
-
-      const milestones = await sql.query(`
-        SELECT * FROM [dbo].[JobMilestone]
-        WHERE [job_id] = @jobId AND [status] = 'completed'
-        AND [completed_at] >= @weekAgo
-      `, { jobId: job.id, weekAgo });
-
-      // Use Azure OpenAI to draft the report
-      const prompt = `Write a professional weekly progress report for the geotechnical job "${job.name}".
-        Site logs this week: ${JSON.stringify(logs.recordset)}
-        Milestones completed: ${JSON.stringify(milestones.recordset)}
-        Format: executive summary, progress this week, next week's plan, any issues.`;
-      const report = await invokeLLM(prompt);
-
-      // Store as a job comment visible in the client portal
-      await sql.query(`
-        INSERT INTO [dbo].[JobComment] ([job_id], [author_name], [body], [is_client_visible])
-        VALUES (@jobId, 'System — Weekly Report', @report, 1)
-      `, { jobId: job.id, report });
-    }
-    context.log(`Client weekly reports generated for ${activeJobs.recordset.length} jobs`);
-  } catch (error) {
-    context.error('Client weekly report error:', error.message);
-    throw error;
-  }
-}
-
-export default runClientWeeklyReport;
-```
-
-#### Engine 6 — Cash Flow Forecast (`runCashFlowForecast`)
-
-Runs nightly at 22:00 UTC. Projects a 12-week cash flow forecast using pending receivables, open purchase orders, and estimated payroll, and alerts admins if the projected balance drops below £10,000.
-
-```typescript
-// api/src/functions/runCashFlowForecast/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 22 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runCashFlowForecast/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { sendEmail } from '../../shared/emailStyling';
-
-export async function runCashFlowForecast(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Cash flow forecast engine started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    // Get approved AFPs (receivables), open POs (payables), and overdue invoices
-    const receivables = await sql.query(`SELECT * FROM [dbo].[AFP] WHERE [status] = 'approved'`);
-    const payables = await sql.query(`SELECT * FROM [dbo].[PurchaseOrder] WHERE [status] = 'open'`);
-    const overdue = await sql.query(`SELECT * FROM [dbo].[Invoice] WHERE [status] = 'overdue'`);
-
-    // Project 12 weeks of net cash flow
-    const weeks = [];
-    let runningBalance = 50000; // starting balance
-    for (let w = 0; w < 12; w++) {
-      const weekStart = new Date(Date.now() + w * 7 * 24 * 60 * 60 * 1000);
-      const inflow = receivables.recordset.filter(r => new Date(r.expected_date) >= weekStart && new Date(r.expected_date) < new Date(weekStart.getTime() + 7 * 86400000)).reduce((s, r) => s + r.total_claimed, 0);
-      const outflow = payables.recordset.filter(p => new Date(p.due_date) >= weekStart && new Date(p.due_date) < new Date(weekStart.getTime() + 7 * 86400000)).reduce((s, p) => s + p.amount, 0);
-      const payroll = 15000; // estimated weekly payroll
-      const net = inflow - outflow - payroll;
-      runningBalance += net;
-      weeks.push({ week: w + 1, inflow, outflow, payroll, net, balance: runningBalance });
-
-      // Store the forecast entry
-      await sql.query(`
-        INSERT INTO [dbo].[CashFlowEntry] ([week_number], [week_start], [inflow], [outflow], [payroll], [net], [projected_balance])
-        VALUES (@w, @weekStart, @inflow, @outflow, @payroll, @net, @balance)
-      `, { w: w + 1, weekStart, inflow, outflow, payroll, net, balance: runningBalance });
-
-      if (runningBalance < 10000) {
-        await sendEmail({
-          to: 'finance@groundcontrol.co.uk',
-          subject: `Cash flow alert: Week ${w + 1} projected below £10,000`,
-          body: `Projected balance for week ${w + 1} is £${runningBalance.toFixed(2)}. Review receivables and payables.`,
-        });
-      }
-    }
-    context.log('Cash flow forecast complete: 12 weeks projected');
-  } catch (error) {
-    context.error('Cash flow forecast error:', error.message);
-    throw error;
-  }
-}
-
-export default runCashFlowForecast;
-```
-
-#### Engine 7 — Rig Profitability Check (`runRigProfitabilityCheck`)
-
-Runs weekly on Mondays at 08:00 UTC. Calculates the profitability of every rig deployment (meterage × rate vs day rate) and flags rigs running at a loss.
-
-```typescript
-// api/src/functions/runRigProfitabilityCheck/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 8 * * 1",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runRigProfitabilityCheck/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { matchRigRate } from '../../shared/rigRateMatcher';
-
-export async function runRigProfitabilityCheck(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Rig profitability check started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-    // Get all rig assignments from the past week with meterage
-    const rigAssignments = await sql.query(`
-      SELECT r.*, s.[name] AS rig_name, j.[name] AS job_name
-      FROM [dbo].[RotaAssignment] r
-      INNER JOIN [dbo].[SiteAsset] s ON s.[id] = r.[rig_asset_id]
-      INNER JOIN [dbo].[Job] j ON j.[id] = r.[job_id]
-      WHERE r.[rig_asset_id] IS NOT NULL
-      AND r.[assigned_date] >= @weekAgo AND r.[meterage] > 0
-    `, { weekAgo });
-
-    for (const assignment of rigAssignments.recordset) {
-      const rate = await matchRigRate(assignment.job_id, assignment.rig_asset_id);
-      const meterageRevenue = assignment.meterage * rate;
-      const dayRate = rate * 1; // simplified
-      const profit = meterageRevenue - dayRate;
-      if (profit < 0) {
-        await sql.query(`
-          INSERT INTO [dbo].[FinancialAuditLog] ([entity_name], [entity_id], [action], [record_summary])
-          VALUES ('RotaAssignment', @id, 'rig_loss_alert', @summary)
-        `, { id: assignment.id, summary: `Rig ${assignment.rig_name} on ${assignment.job_name}: £${profit.toFixed(2)} loss this week` });
-      }
-    }
-    context.log(`Rig profitability checked for ${rigAssignments.recordset.length} assignments`);
-  } catch (error) {
-    context.error('Rig profitability error:', error.message);
-    throw error;
-  }
-}
-
-export default runRigProfitabilityCheck;
-```
-
-#### Engine 8 — Milestone AFP Auto-Create (`autoCreateAFPFromMilestone`)
-
-Runs daily at 09:00 UTC. Checks for jobs that have hit a billing milestone (e.g. site completion, phase completion) and auto-creates a draft AFP populated from field data.
-
-```typescript
-// api/src/functions/autoCreateAFPFromMilestone/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 9 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/autoCreateAFPFromMilestone/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { populateAFPFromFieldData } from '../../shared/afpPopulation';
-
-export async function autoCreateAFPFromMilestone(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('Milestone AFP auto-create started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    // Find milestones completed in the last 24 hours that have an AFP trigger
-    const milestones = await sql.query(`
-      SELECT m.*, j.[name] AS job_name, j.[client_id]
-      FROM [dbo].[JobMilestone] m
-      INNER JOIN [dbo].[Job] j ON j.[id] = m.[job_id]
-      WHERE m.[status] = 'completed'
-      AND m.[completed_at] >= DATEADD(hour, -24, SYSUTCDATETIME())
-      AND m.[triggers_afp] = 1
-    `);
-
-    for (const milestone of milestones.recordset) {
-      // Check if an AFP already exists for this milestone period
-      const existing = await sql.query(`
-        SELECT TOP 1 1 FROM [dbo].[AFP]
-        WHERE [job_id] = @jobId AND [milestone_id] = @milestoneId
-      `, { jobId: milestone.job_id, milestoneId: milestone.id });
-
-      if (existing.recordset.length === 0) {
-        // Create the draft AFP
-        const afp = await sql.query(`
-          INSERT INTO [dbo].[AFP] ([job_id], [milestone_id], [status], [period_start], [period_end])
-          OUTPUT INSERTED.*
-          VALUES (@jobId, @milestoneId, 'draft', @periodStart, @periodEnd)
-        `, { jobId: milestone.job_id, milestoneId: milestone.id, periodStart: milestone.period_start, periodEnd: milestone.completed_at });
-
-        // Auto-populate from field data (driller logs, timesheets, deliveries)
-        await populateAFPFromFieldData(afp.recordset[0].id, milestone.job_id);
-        context.log(`AFP created for job ${milestone.job_name} from milestone ${milestone.title}`);
-      }
-    }
-  } catch (error) {
-    context.error('Milestone AFP error:', error.message);
-    throw error;
-  }
-}
-
-export default autoCreateAFPFromMilestone;
-```
-
-#### Engine 9 — AI Delay Prediction (`runDelayPrediction`)
-
-Runs daily at 07:00 UTC. Analyses historical delay-log patterns using Azure OpenAI and predicts jobs at risk of delay, flagging them for proactive manager intervention.
-
-```typescript
-// api/src/functions/runDelayPrediction/function.json
-{
-  "bindings": [
-    {
-      "type": "timerTrigger",
-      "direction": "in",
-      "name": "timer",
-      "schedule": "0 7 * * *",
-      "runOnStartup": false
-    }
-  ]
-}
-
-// api/src/functions/runDelayPrediction/index.ts
-import { Timer, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import { invokeLLM } from '../../shared/azureOpenAI';
-
-export async function runDelayPrediction(timer: Timer, context: InvocationContext): Promise<void> {
-  context.log('AI delay prediction started');
-  try {
-    await sql.setRequestContext({ role: 'admin' });
-    // Gather the last 90 days of delay logs for pattern analysis
-    const delays = await sql.query(`
-      SELECT [job_id], [delay_type], [description], [reported_at], [impacted_days]
-      FROM [dbo].[JobDelayLog]
-      WHERE [reported_at] >= DATEADD(day, -90, SYSUTCDATETIME())
-      ORDER BY [reported_at]
-    `);
-
-    // Get all active jobs
-    const activeJobs = await sql.query(`SELECT [id], [name], [status] FROM [dbo].[Job] WHERE [status] = 'active'`);
-
-    // Ask Azure OpenAI to identify patterns and predict at-risk jobs
-    const prompt = `You are a construction delay analyst. Analyse these historical delay logs from the past 90 days:
-      ${JSON.stringify(delays.recordset)}
-
-      Active jobs: ${JSON.stringify(activeJobs.recordset.map(j => ({ id: j.id, name: j.name })))}
-
-      Identify patterns (weather, equipment, staffing, subcontractor delays) and predict which active jobs are at high risk of delay in the next 2 weeks. Return a JSON array of { job_id, risk_level (low/medium/high), predicted_delay_days, reason }.`;
-    const predictions = await invokeLLM(prompt, {
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          predictions: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                job_id: { type: 'string' },
-                risk_level: { type: 'string', enum: ['low', 'medium', 'high'] },
-                predicted_delay_days: { type: 'number' },
-                reason: { type: 'string' },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    // Store predictions on the jobs
-    for (const pred of predictions.predictions || []) {
-      await sql.query(`
-        UPDATE [dbo].[Job]
-        SET [delay_risk_level] = @risk, [delay_risk_days] = @days, [delay_risk_reason] = @reason,
-            [delay_risk_assessed_at] = SYSUTCDATETIME()
-        WHERE [id] = @jobId
-      `, { risk: pred.risk_level, days: pred.predicted_delay_days, reason: pred.reason, jobId: pred.job_id });
-    }
-    context.log(`Delay prediction: ${predictions.predictions?.length || 0} jobs assessed`);
-  } catch (error) {
-    context.error('Delay prediction error:', error.message);
-    throw error;
-  }
-}
-
-export default runDelayPrediction;
-```
-
-#### Automation Engine Summary Table
-
-| # | Engine | Function Name | Schedule (UTC) | Purpose |
-|---|--------|--------------|----------------|---------|
-| 1 | Payroll Autopilot | `runPayrollAutopilot` | `0 23 * * *` (nightly 23:00) | Daily/weekly timesheet merge + Monday payroll export |
-| 2 | Auto-Billing | `autoBillAssetOnSite` | `0 * * * * *` (hourly) | Match approved timesheets to BillingRules, stamp charges |
-| 3 | Weather-Rostering | `runWeatherRostering` | `0 6 * * *` (daily 06:00) | Met Office forecast check, flag unsafe rota days |
-| 4 | Training Compliance | `runTrainingCompliance` | `0 7 * * *` (daily 07:00) | Expiring qualification alerts, training gap generation |
-| 5 | Client Weekly Report | `runClientWeeklyReport` | `0 16 * * 5` (Fri 16:00) | AI-drafted weekly progress report to client portal |
-| 6 | Cash Flow Forecast | `runCashFlowForecast` | `0 22 * * *` (nightly 22:00) | 12-week cash projection, low-balance alerts |
-| 7 | Rig Profitability | `runRigProfitabilityCheck` | `0 8 * * 1` (Mon 08:00) | Rig revenue vs cost, flag loss-making deployments |
-| 8 | Milestone AFP | `autoCreateAFPFromMilestone` | `0 9 * * *` (daily 09:00) | Auto-create draft AFP when a billing milestone completes |
-| 9 | AI Delay Prediction | `runDelayPrediction` | `0 7 * * *` (daily 07:00) | LLM pattern analysis on delay logs, flag at-risk jobs |
-
-### 4.3 host.json Configuration
+### 5.4 Configure the Functions host
 
 ```json
+// backend/host.json
 {
   "version": "2.0",
   "logging": {
@@ -1128,1010 +878,291 @@ export default runDelayPrediction;
 }
 ```
 
-### 4.4 Shared Logic Extraction
-
-All logic shared between functions lives in `api/src/shared/`. This mirrors the Base44 `base44/shared/` directory.
-
-```
-api/src/shared/
-├── connection.ts          # SQL connection pool + SESSION_CONTEXT
-├── dataAccess.ts          # Generic entity CRUD (mirrors Base44 SDK)
-├── geofence.ts            # Geofence detection logic (Geotab webhook → auto-timesheet)
-├── payrollAutopilot.ts    # Payroll merge + export logic
-├── billingEngine.ts       # BillingRule matching + charge stamping
-├── emailStyling.ts        # Branded email templates
-├── rigRateMatcher.ts      # Rate card matching for rig profitability
-├── afpPopulation.ts       # AFP auto-population from field data
-├── bobHrHelpers.ts        # Bob HR integration helpers
-├── weatherClient.ts       # Met Office weather API client
-├── weatherThresholds.ts   # Safety threshold rules for weather rostering
-├── complianceDate.ts      # Compliance expiry calculation (UK month/year format)
-├── azureOpenAI.ts         # Azure OpenAI wrapper (replaces Base44 InvokeLLM)
-├── incentiveEngine.ts     # Weekly incentive score calculation
-├── keylogbookTimesheet.ts  # KeyLogBook remarks → timesheet parsing
-├── keylogbookRemarks.ts   # KeyLogBook remark classification
-├── divisionScope.ts       # Division-scoped data filtering (replaces Base44 division context)
-├── staffProfile.ts        # Staff profile resolution + permission group logic
-├── appSettings.ts         # AppSetting entity pattern for third-party API config
-├── poaResolver.ts         # POA price lock resolution
-├── rateResolver.ts        # Rate card resolution pipeline
-├── jobRateMatcher.ts      # Job-to-rate-card matching
-├── supplierRateMatcher.ts # Supplier rate card matching
-├── assetPandaClient.ts    # Asset Panda V3 API client (session token auth)
-├── assetPandaLookup.ts    # Asset Panda object lookup
-├── assetPandaPush.ts      # Push updates to Asset Panda
-├── assetPandaRateMatcher.ts # Asset Panda rate matching
-├── assetPandaRawFields.ts # Raw Asset Panda field parsing
-├── cvrHelpers.ts          # CVR (Contract Valuation Report) helpers
-├── workingDays.ts         # UK working day calculation (excludes bank holidays)
-├── ukGeocoder.ts          # UK postcode geocoding
-├── predictMaintenance.ts  # Predictive maintenance ML logic
-├── depreciation.ts        # Asset depreciation calculation
-├── loadWeight.ts          # Vehicle load weight calculation
-├── spreadsheetParser.ts   # Rota spreadsheet parser
-├── plannerHelpers.ts      # Rta planner helper functions
-├── plannerConstants.ts    # Rota planner constants
-├── entityRegistry.ts      # Entity name → table name registry
-├── vinDecoder.ts          # VIN number decoding for vehicles
-├── agsBuilder.ts          # AGS file export builder
-└── whatsappSend.ts        # WhatsApp message sending helper
-```
-
-### 4.5 Webhook Receivers (HTTP-Triggered Functions)
-
-These Base44 webhook receiver functions become HTTP-triggered Azure Functions. Each validates a shared secret and processes the inbound payload.
-
-| Webhook | Base44 Function | Trigger | Secret Source |
-|---------|----------------|---------|--------------|
-| Geotab GPS | `geotabWebhook` | HTTP POST | `GEOTAB_WEBHOOK_SECRET` (Key Vault) |
-| Mitti/SafetyCulture | `receiveMittiData` | HTTP POST | `MittiConfig.webhook_secret` (SQL) |
-| KeyLogBook | `receiveKeyLogBookData` | HTTP POST | `KeyLogBookConfig.webhook_secret` (SQL) |
-| Holman Fleet | `holmanWebhook` | HTTP POST | `HOLMAN_WEBHOOK_SECRET` (Key Vault) |
-| Asset Panda | `assetPandaWebhook` | HTTP POST | `AssetPandaConfig.webhook_secret` (SQL) |
-| Stripe Payments | `stripeWebhook` | HTTP POST | `STRIPE_WEBHOOK_SECRET` (Key Vault) |
-| Bob HR | `bobWebhook` | HTTP POST | `BOB_WEBHOOK_SECRET` (Key Vault) |
-| WhatsApp | `whatsappWebhook` | HTTP POST | `WHATSAPP_WEBHOOK_SECRET` (Key Vault) |
-| Accounting | `accountingWebhook` | HTTP POST | `ACCOUNTING_WEBHOOK_SECRET` (Key Vault) |
-| Zapier | `zapierWebhook` | HTTP POST | `ZAPIER_WEBHOOK_SECRET` (Key Vault) |
-
-**Mitti/SafetyCulture webhook example** (the most complex — auto-links audits to jobs and stamps crew check verification):
-
-```typescript
-// api/src/functions/receiveMittiData/index.ts
-import { HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-
-export async function receiveMittiData(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
-  try {
-    // 1. Validate the webhook secret (stored in MittiConfig entity, not Key Vault)
-    const secret = request.query.get('webhook_secret') || request.headers.get('x-webhook-secret');
-    const config = await sql.query(`SELECT TOP 1 * FROM [dbo].[MittiConfig] WHERE [key] = 'global'`);
-    if (!config.recordset[0]?.enabled || secret !== config.recordset[0].webhook_secret) {
-      return { status: 401, jsonBody: { error: 'Invalid secret or receiver disabled' } };
-    }
-
-    await sql.setRequestContext({ role: 'admin' });
-    const body = await request.json();
-
-    // 2. Extract audit metadata
-    const auditId = body.audit_id;
-    const templateName = body.template_name || '';
-    const auditorEmail = body.audit?.author?.email || '';
-    const siteName = body.audit?.metadata?.site_name || '';
-
-    // 3. De-duplicate by audit ID
-    const existing = await sql.query(`SELECT TOP 1 1 FROM [dbo].[SafetyReport] WHERE [safetyculture_audit_id] = @auditId`, { auditId });
-    if (existing.recordset.length > 0) {
-      return { status: 200, jsonBody: { status: 'duplicate', message: 'Audit already stored' } };
-    }
-
-    // 4. Auto-classify the audit category (vehicle_check, powra, equipment, general)
-    const category = classifyAudit(templateName);
-
-    // 5. Auto-link to a job by site name (if auto_link_to_jobs is enabled)
-    let jobId = null;
-    if (config.recordset[0].auto_link_to_jobs && siteName) {
-      const job = await sql.query(`SELECT TOP 1 [id], [name] FROM [dbo].[Job] WHERE [name] LIKE '%' + @siteName + '%' OR [location] LIKE '%' + @siteName + '%'`, { siteName });
-      if (job.recordset[0]) jobId = job.recordset[0].id;
-    }
-
-    // 6. Match the auditor to a Staff record by email
-    let auditorStaffId = null;
-    if (auditorEmail) {
-      const staff = await sql.query(`SELECT TOP 1 [id] FROM [dbo].[Staff] WHERE [email] = @email`, { email: auditorEmail });
-      if (staff.recordset[0]) auditorStaffId = staff.recordset[0].id;
-    }
-
-    // 7. Store the safety report
-    await sql.query(`
-      INSERT INTO [dbo].[SafetyReport] (
-        [safetyculture_audit_id], [report_type], [audit_category], [audit_template_name],
-        [audit_title], [auditor_name], [auditor_email], [auditor_staff_id],
-        [job_id], [site_name], [conducted_at], [completed_at],
-        [overall_score], [max_score], [score_percentage], [pass_fail],
-        [items_failed], [items_passed], [action_items], [raw_payload], [status]
-      ) VALUES (
-        @auditId, 'safetyculture_audit', @category, @templateName,
-        @title, @auditorName, @auditorEmail, @auditorStaffId,
-        @jobId, @siteName, @conductedAt, @completedAt,
-        @overallScore, @maxScore, @scorePct, @passFail,
-        @itemsFailed, @itemsPassed, @actionItems, @rawPayload, 'open'
-      )
-    `, { auditId, category, templateName, title: body.audit?.name || '', auditorName: body.audit?.author?.name || '', auditorEmail, auditorStaffId, jobId, siteName, conductedAt: body.audit?.started_at, completedAt: body.audit?.completed_at, overallScore: body.audit?.score, maxScore: body.audit?.max_score, scorePct: body.audit?.score_percentage, passFail: body.audit?.pass_fail || 'pending', itemsFailed: body.audit?.items_failed || 0, itemsPassed: body.audit?.items_passed || 0, actionItems: JSON.stringify(body.audit?.action_items || []), rawPayload: JSON.stringify(body) });
-
-    // 8. Stamp the crew member's RotaAssignment with the Mitti verification timestamp
-    if (auditorStaffId && jobId) {
-      const today = new Date().toISOString().split('T')[0];
-      const column = category === 'vehicle_check' ? 'mitti_vehicle_check_at'
-        : category === 'powra' ? 'mitti_powra_at'
-        : category === 'equipment' ? 'mitti_equipment_check_at' : null;
-      if (column) {
-        await sql.query(`
-          UPDATE [dbo].[RotaAssignment] SET [${column}] = SYSUTCDATETIME()
-          WHERE [staff_id] = @staffId AND [job_id] = @jobId AND [assigned_date] = @today
-        `, { staffId: auditorStaffId, jobId, today });
-      }
-    }
-
-    // 9. Update the MittiConfig last-webhook status
-    await sql.query(`
-      UPDATE [dbo].[MittiConfig] SET
-        [last_webhook_at] = SYSUTCDATETIME(),
-        [last_webhook_status] = 'success',
-        [last_webhook_summary] = @summary
-      WHERE [key] = 'global'
-    `, { summary: `Stored audit "${body.audit?.name || templateName}" · ${body.audit?.items_failed || 0} action items` });
-
-    return { status: 200, jsonBody: { status: 'success', audit_id: auditId, job_linked: !!jobId } };
-  } catch (error) {
-    context.error('Mitti webhook error:', error.message);
-    await sql.query(`UPDATE [dbo].[MittiConfig] SET [last_webhook_status] = 'failed', [last_webhook_summary] = @msg WHERE [key] = 'global'`, { msg: error.message });
-    return { status: 500, jsonBody: { error: error.message } };
-  }
-}
-
-function classifyAudit(templateName: string): string {
-  const t = templateName.toLowerCase();
-  if (t.includes('vehicle') || t.includes('walk') || t.includes('daily check')) return 'vehicle_check';
-  if (t.includes('powra') || t.includes('risk assess') || t.includes('permit')) return 'powra';
-  if (t.includes('equipment') || t.includes('plant') || t.includes('inspection')) return 'equipment';
-  return 'general';
-}
-
-export default receiveMittiData;
-```
-
-### 4.6 Entity Automations (Event Grid)
-
-Base44 entity automations (triggered on create/update/delete) become Azure Functions with Event Grid subscriptions. The SystemAuditLog chain (tamper-evident hash chain) is implemented as an Event Grid-triggered function.
-
-```typescript
-// api/src/functions/logSystemAudit/function.json
-{
-  "bindings": [
-    {
-      "type": "eventGridTrigger",
-      "direction": "in",
-      "name": "event"
-    }
-  ]
-}
-
-// api/src/functions/logSystemAudit/index.ts
-import { EventGridEvent, InvocationContext } from '@azure/functions';
-import { sql } from '../../shared/connection';
-import crypto from 'crypto';
-
-export async function logSystemAudit(event: EventGridEvent, context: InvocationContext): Promise<void> {
-  const { entityName, entityId, action, data, oldData, userId, userName } = event.data;
-
-  await sql.setRequestContext({ role: 'admin' });
-
-  // Calculate the record hash for tamper detection
-  const recordHash = crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
-
-  // Get the previous hash in the chain for this entity
-  const prev = await sql.query(`
-    SELECT TOP 1 [record_hash] FROM [dbo].[SystemAuditLog]
-    WHERE [entity_name] = @entityName ORDER BY [created_date] DESC
-  `, { entityName });
-  const previousHash = prev.recordset[0]?.record_hash || 'genesis';
-
-  // Insert the audit entry, forming the hash chain
-  await sql.query(`
-    INSERT INTO [dbo].[SystemAuditLog] (
-      [entity_name], [entity_id], [action], [changed_fields],
-      [field_changes], [record_summary], [record_hash], [previous_hash],
-      [actor_user_id], [actor_name], [source], [integrity_status]
-    ) VALUES (
-      @entityName, @entityId, @action, @changedFields,
-      @fieldChanges, @summary, @recordHash, @previousHash,
-      @userId, @userName, 'entity_automation', 'valid'
-    )
-  `, { entityName, entityId, action, changedFields: JSON.stringify(Object.keys(data || {})), fieldChanges: JSON.stringify({ before: oldData, after: data }), summary: `${entityName}: ${data?.name || entityId}`, recordHash, previousHash, userId, userName });
-}
-
-export default logSystemAudit;
-```
-
-### Phase 4 Checklist
-- [ ] All 200+ backend functions ported to Azure Functions (TypeScript, isolated worker)
-- [ ] All 9 scheduled automation engines configured with correct NCRONTAB schedules
-- [ ] All 10 webhook receivers configured as HTTP-triggered functions
-- [ ] Entity automation (SystemAuditLog) configured as Event Grid trigger
-- [ ] Shared logic extracted into `api/src/shared/` module (40+ modules)
-- [ ] Timer triggers configured for all scheduled automations (see Engine Summary Table)
-- [ ] Event Grid triggers configured for entity automations
-- [ ] Key Vault references set for all secrets (Geotab, Met Office, Stripe, Holman, etc.)
-- [ ] MittiConfig/KeyLogBookConfig/AssetPandaConfig webhook secrets stored in SQL (not Key Vault)
-- [ ] Application Insights logging verified for every function
-- [ ] All functions tested individually via Azure portal
-- [ ] End-to-end API tests passed against staging database
-- [ ] AI Delay Prediction tested with Azure OpenAI (GPT-4o-mini)
-- [ ] Geofence auto-timesheet creation tested (Geotab webhook → Timesheet draft → RotaAssignment link)
-
----
-
-## Phase 5 — Authentication Migration (Weeks 9–11)
-
-### Objectives
-Replace the Base44 auth provider with Microsoft Entra ID (Azure AD). Implement MSAL in the frontend for login, token refresh, and role-based access control.
-
-### 5.1 Entra ID Configuration
-
-The app registration created in Phase 1 is configured with API permissions, redirect URIs, and role definitions.
+### 5.5 Configure application settings
 
 ```bash
-# Add API permissions (Microsoft Graph)
-az ad app credential reset \
-  --id "$(az ad app list --display-name 'GC Mission Control' --query [0].id -o tsv)" \
-  --append
-
-# Define app roles (admin, director, user, field, read_only)
-az ad app create \
-  --display-name "GC Mission Control" \
-  --app-roles '[
-    {"allowedMemberTypes":["User"],"displayName":"Admin","id":"00000000-0000-0000-0000-000000000001","value":"admin","description":"Full system access"},
-    {"allowedMemberTypes":["User"],"displayName":"Director","id":"00000000-0000-0000-0000-000000000002","value":"director","description":"Division director access"},
-    {"allowedMemberTypes":["User"],"displayName":"Field","id":"00000000-0000-0000-0000-000000000003","value":"field","description":"Field crew access"},
-    {"allowedMemberTypes":["User"],"displayName":"ReadOnly","id":"00000000-0000-0000-0000-000000000004","value":"read_only","description":"Read-only access"}
-  ]'
+az functionapp config appsettings set \
+  --name func-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --settings \
+    @Microsoft.KeyVault(SecretUri=https://kv-gc-mission-control.vault.azure.net/secrets/sql-admin-password) \
+    SQL_SERVER=sql-gc-mission-control.database.windows.net \
+    SQL_DATABASE=gc-mission-control \
+    AZURE_TENANT_ID=$TENANT_ID \
+    AZURE_CLIENT_ID=$APP_ID \
+    STORAGE_ACCOUNT=stgcmisionctrl$RANDOM_SUFFIX \
+    AZURE_STORAGE_CONNECTION_STRING=$(az storage account show-connection-string -n stgcmisionctrl$RANDOM_SUFFIX -g rg-gc-mission-control --query connectionString -o tsv)
 ```
 
-### 5.2 MSAL Frontend Integration
-
-Replace the Base44 auth context with MSAL React.
-
-```typescript
-// frontend/src/lib/authConfig.ts
-import { Configuration } from '@azure/msal-browser';
-
-export const msalConfig: Configuration = {
-  auth: {
-    clientId: process.env.VITE_AZURE_CLIENT_ID!,
-    authority: `https://login.microsoftonline.com/${process.env.VITE_AZURE_TENANT_ID}`,
-    redirectUri: window.location.origin + '/auth/callback',
-  },
-  cache: {
-    cacheLocation: 'localStorage',
-    storeAuthStateInCookie: false,
-  },
-};
-
-export const loginRequest = {
-  scopes: ['User.Read', 'openid', 'profile', 'email'],
-};
-```
-
-```typescript
-// frontend/src/lib/AuthContext.tsx
-import { MsalProvider, useMsal } from '@azure/msal-react';
-import { InteractionStatus } from '@azure/msal-browser';
-
-export function AuthProvider({ children }) {
-  return (
-    <MsalProvider instance={msalInstance}>
-      <AuthContextInner>{children}</AuthContextInner>
-    </MsalProvider>
-  );
-}
-
-function AuthContextInner({ children }) {
-  const { instance, accounts, inProgress } = useMsal();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    if (accounts.length > 0 && inProgress === InteractionStatus.None) {
-      const account = accounts[0];
-      setUser({
-        id: account.localAccountId,
-        email: account.username,
-        full_name: account.name,
-        role: account.idTokenClaims?.roles?.[0] || 'field',
-      });
-    }
-  }, [accounts, inProgress]);
-
-  return <AuthContext.Provider value={{ user, login: () => instance.loginPopup(loginRequest), logout: () => instance.logout() }}>{children}</AuthContext.Provider>;
-}
-```
-
-### 5.3 Token Validation in Azure Functions
-
-Every API call validates the Entra ID token.
-
-```typescript
-// api/src/shared/auth.ts
-import { JwtPayload, verify } from 'jsonwebtoken';
-import jwksClient from 'jwks-rsa';
-
-const client = jwksClient({ jwksUri: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/discovery/v2.0/keys` });
-
-export async function validateToken(token: string): Promise<JwtPayload | null> {
-  try {
-    const decoded = jwt.decode(token, { complete: true }) as any;
-    const key = await client.getSigningKey(decoded.header.kid);
-    const verified = jwt.verify(token, key.getPublicKey(), { audience: process.env.AZURE_CLIENT_ID, issuer: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/v2.0` }) as JwtPayload;
-    return verified;
-  } catch {
-    return null;
-  }
-}
-
-export async function setUserContext(req: HttpRequest): Promise<void> {
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return;
-  const payload = await validateToken(token);
-  if (!payload) return;
-  // Set SESSION_CONTEXT for RLS
-  await sql.setRequestContext({
-    role: payload.roles?.[0] || 'field',
-    division_id: payload.division_id || null,
-    is_enterprise_admin: payload.roles?.includes('admin') ? 'true' : 'false',
-  });
-}
-```
-
-### Phase 5 Checklist
-- [ ] Entra ID app roles defined (admin, director, field, read_only)
-- [ ] MSAL React integrated into the frontend
-- [ ] Login flow tested (email/password + Google redirect)
-- [ ] Token validation implemented in Azure Functions
-- [ ] SESSION_CONTEXT set from Entra ID token claims
-- [ ] Role-based access control verified (admin sees all, field sees own division)
-- [ ] All existing users invited to the Entra ID tenant
-- [ ] Password reset flow tested
-
----
-
-## Phase 6 — Frontend Adaptation (Weeks 10–12)
-
-### Objectives
-Adapt the React frontend to use Azure Functions APIs and Entra ID auth instead of the Base44 SDK. The UI components, pages, and styling are retained entirely — only the data layer and auth context change.
-
-### 6.1 API Client Replacement
-
-Replace the Base44 SDK client with a thin fetch wrapper that calls Azure Functions.
-
-```typescript
-// frontend/src/api/azureClient.ts
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = await getAccessToken(); // from MSAL
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options?.headers,
-    },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export const api = {
-  entities: new Proxy({} as any, {
-    get: (_, entityName) => ({
-      list: (sort?: string, limit?: number) => request(`/${entityName}?sort=${sort || ''}&limit=${limit || ''}`),
-      filter: (filter: any, sort?: string, limit?: number) => request(`/${entityName}/filter`, { method: 'POST', body: JSON.stringify({ filter, sort, limit }) }),
-      get: (id: string) => request(`/${entityName}/${id}`),
-      create: (data: any) => request(`/${entityName}`, { method: 'POST', body: JSON.stringify(data) }),
-      update: (id: string, data: any) => request(`/${entityName}/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-      delete: (id: string) => request(`/${entityName}/${id}`, { method: 'DELETE' }),
-    }),
-  }),
-  functions: {
-    invoke: (name: string, payload: any) => request(`/functions/${name}`, { method: 'POST', body: JSON.stringify(payload) }),
-  },
-  integrations: {
-    Core: {
-      InvokeLLM: (payload: any) => request(`/integrations/invokeLLM`, { method: 'POST', body: JSON.stringify(payload) }),
-      UploadFile: (payload: any) => request(`/integrations/uploadFile`, { method: 'POST', body: JSON.stringify(payload) }),
-      SendEmail: (payload: any) => request(`/integrations/sendEmail`, { method: 'POST', body: JSON.stringify(payload) }),
-    },
-  },
-};
-```
-
-### 6.2 Environment Variables
+### 5.6 Deploy the Functions
 
 ```bash
-# frontend/.env.production
-VITE_API_BASE_URL=https://func-gc-mission-control.azurewebsites.net/api
-VITE_AZURE_CLIENT_ID=your-client-id
-VITE_AZURE_TENANT_ID=your-tenant-id
+cd backend
+npm install
+npm run build
+
+# Deploy via the Core Tools
+func azure functionapp publish func-gc-mission-control
 ```
 
-### 6.3 Mobile Field Routing (`/m/` Routes)
+### 5.7 Checklist — Phase 5
 
-The app uses hybrid device routing: dedicated `/m/` routes for field crew pages (phones) and responsive layouts for admin hubs. This is retained entirely — only the data layer changes.
-
-```typescript
-// frontend/src/App.jsx — the mobile route tree is retained as-is
-<Route element={<MobileFieldShell />}>
-  <Route path="/m/staff-schedule" element={<RouteGuard><StaffDashboard /></RouteGuard>} />
-  <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
-  <Route path="/m/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
-  <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
-</Route>
-```
-
-The `MobileFieldRedirect` component detects phone-width viewports and redirects to the `/m/` equivalent. This logic is purely frontend and needs no Azure changes.
-
-### 6.4 Division Context (Multi-Tenant)
-
-The `DivisionContext` provider manages the active division for scoped data filtering. On Azure, this is backed by the `Division` SQL table and the `DivisionAccessManifest` entity (which controls which divisions each user can access).
-
-```typescript
-// frontend/src/contexts/DivisionContext.tsx — retained, only the data source changes
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/api/azureClient'; // was @/api/base44Client
-
-export function DivisionProvider({ children }) {
-  const { data: divisions = [] } = useQuery({
-    queryKey: ['divisions'],
-    queryFn: () => api.entities.Division.list(),
-  });
-
-  const [activeDivisionId, setActiveDivisionId] = useState(() => {
-    return localStorage.getItem('activeDivisionId') || null;
-  });
-
-  // Enterprise admins see all divisions; division directors see their own + managed
-  const visibleDivisions = user?.role === 'admin' ? divisions : divisions.filter(d =>
-    d.id === user.division_id || user.managed_division_ids?.includes(d.id)
-  );
-
-  return (
-    <DivisionContext.Provider value={{ divisions: visibleDivisions, activeDivisionId, setActiveDivisionId }}>
-      {children}
-    </DivisionContext.Provider>
-  );
-}
-```
-
-### 6.5 Permission Groups (Access Control)
-
-The `PermissionGroup` entity defines per-module access levels (none/read/write) for every admin section. This maps directly to a SQL table and is enforced by the API layer (Azure Functions check the user's permission group before allowing write operations).
-
-```typescript
-// api/src/shared/permissions.ts — enforces permission group access
-import { sql } from './connection';
-
-export async function checkPermission(userId: string, module: string, requiredLevel: 'read' | 'write'): Promise<boolean> {
-  const result = await sql.query(`
-    SELECT pg.[permissions] FROM [dbo].[Staff] s
-    INNER JOIN [dbo].[PermissionGroup] pg ON pg.[id] = s.[permission_group_id]
-    WHERE s.[id] = @userId
-  `, { userId });
-
-  const permissions = result.recordset[0]?.permissions;
-  if (!permissions) return false;
-  const level = permissions[module] || 'none';
-  if (level === 'none') return false;
-  if (requiredLevel === 'write' && level !== 'write') return false;
-  return true;
-}
-
-// Usage in an Azure Function:
-export async function updateStaff(request: HttpRequest, context: InvocationContext) {
-  const userId = await getRequestUserId(request);
-  if (!await checkPermission(userId, 'staff', 'write')) {
-    return { status: 403, jsonBody: { error: 'Insufficient permissions' } };
-  }
-  // ... proceed with the update
-}
-```
-
-### 6.6 Shift Wizard with Configurable Safety Forms
-
-The Shift Wizard guides crew through arrival → briefing → tasks → end of shift. The safety forms (vehicle check, POWRA, equipment check) are admin-configurable via the `MittiConfig.safety_forms` array and surface as big tappable buttons at each step. This is retained entirely — the Mitti webhook receiver (Section 4.5) stamps the verification timestamps that gate the wizard steps.
-
-### Phase 6 Checklist
-- [ ] API client wrapper implemented (drop-in replacement for Base44 SDK)
-- [ ] All `@/api/base44Client` imports replaced with `@/api/azureClient`
-- [ ] Environment variables configured for staging and production
-- [ ] Frontend builds successfully against Azure Functions API
-- [ ] All pages render correctly with Azure data
-- [ ] Mobile `/m/` field routing verified (StaffDashboard, StaffProfile, DeliveryDashboard, AssetScanner)
-- [ ] DivisionContext provider verified (division-scoped data filtering)
-- [ ] PermissionGroup access control verified (per-module read/write enforcement)
-- [ ] Shift Wizard safety forms verified (Mitti verification badges gate steps)
-- [ ] File uploads tested (Azure Blob Storage replaces Base44 UploadFile)
-- [ ] Email sending tested (Azure Communication Services replaces Base44 SendEmail)
-- [ ] LLM integration tested (Azure OpenAI replaces Base44 InvokeLLM — used by AI Delay Prediction, Client Weekly Report, Drilling Intelligence agent)
-- [ ] Geofence auto-timesheet creation tested (Geotab webhook → Timesheet draft → RotaAssignment link)
-- [ ] AFP dual-side tables verified (claim side vs client assessment side)
-- [ ] EWR AFP format verified (per-borehole meterage for EWR jobs)
+- [ ] All 180+ functions ported as Azure Functions
+- [ ] All scheduled automations ported as timer triggers
+- [ ] All webhook receivers ported as HTTP triggers
+- [ ] `host.json` configured
+- [ ] Application settings configured (Key Vault references for secrets)
+- [ ] Functions deployed and smoke-tested
 
 ---
 
-## Phase 7 — Parallel Running & Validation (Weeks 11–13)
+## Phase 6 — Deploy & Cutover (Week 12)
 
-### Objectives
-Run the Azure-native version alongside the Base44 version in parallel. All new data writes go to both systems. Compare outputs daily. Fix discrepancies before cutover.
+### 6.1 Create the GitHub Actions deployment pipeline
 
-### 7.1 Dual-Write Strategy
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Azure
 
-During parallel running, every write operation in the Base44 app also writes to Azure SQL. This ensures both systems stay in sync and allows instant rollback.
+on:
+  push:
+    branches: [main]
 
-```typescript
-// api/src/shared/dualWrite.ts
-export async function dualWrite(entityName: string, operation: string, data: any) {
-  // Write to Azure SQL (primary)
-  const result = await azureDb[entityName][operation](data);
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: cd frontend && npm ci
+      - run: cd frontend && npm run build
+      - uses: azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: 'upload'
+          app_location: 'frontend'
+          output_location: 'dist'
 
-  // Mirror to Base44 (secondary, for rollback safety)
-  if (process.env.DUAL_WRITE_ENABLED === 'true') {
-    try {
-      await base44.entities[entityName][operation](data);
-    } catch (e) {
-      console.warn('Base44 mirror write failed:', e.message);
-    }
-  }
-
-  return result;
-}
+  deploy-functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: cd backend && npm ci
+      - run: cd backend && npm run build
+      - uses: Azure/functions-action@v1
+        with:
+          app-name: func-gc-mission-control
+          package: backend
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
 ```
 
-### 7.2 Daily Reconciliation
-
-A nightly job compares record counts and spot-checks data between Base44 and Azure SQL.
-
-```typescript
-// api/src/functions/reconcileData/index.ts
-export async function reconcileData(timer: Timer, context: ExecutionContext): Promise<void> {
-  const entities = ['Staff', 'Job', 'Timesheet', 'RotaAssignment', 'SiteAsset', 'Vehicle', 'AFP'];
-  for (const entity of entities) {
-    const base44Count = await getBase44Count(entity);
-    const azureCount = await getAzureCount(entity);
-    if (base44Count !== azureCount) {
-      context.error(`Discrepancy in ${entity}: Base44=${base44Count}, Azure=${azureCount}`);
-      await sendAlert(`Data discrepancy in ${entity}`, `Base44: ${base44Count}, Azure: ${azureCount}`);
-    }
-  }
-}
-```
-
-### Phase 7 Checklist
-- [ ] Dual-write enabled for all critical entities
-- [ ] Daily reconciliation job running nightly
-- [ ] All discrepancies resolved within 48 hours
-- [ ] Performance benchmarks passed (Azure response times ≤ Base44)
-- [ ] User acceptance testing completed with staging data
-- [ ] Rollback procedure documented and tested
-
----
-
-## Phase 8 — Cutover & Go-Live (Week 13)
-
-### Objectives
-Switch all traffic from Base44 to Azure. Decommission the Base44 application. Monitor closely for 7 days post-cutover.
-
-### 8.1 DNS Cutover
-
-Update the custom domain DNS to point to Azure Static Web Apps.
+### 6.2 Configure the custom domain
 
 ```bash
-# Get the Static Web App default domain
-az staticwebapp show \
-  --name stw-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
-  --query defaultHostname -o tsv
-
-# Configure the custom domain
+# Add a custom domain to the Static Web App
 az staticwebapp custom-domain create \
   --name stw-gc-mission-control \
-  --resource-group rg-gc-mission-control-prod \
-  --domain-name mission-control.groundcontrol.co.uk \
-  --hostname mission-control.groundcontrol.co.uk
+  --resource-group rg-gc-mission-control \
+  --hostname missioncontrol.groundcontrol.co.uk
 
-# Update DNS CNAME
-# In your DNS provider:
-# CNAME mission-control → stw-gc-mission-control.azurestaticapps.net
+# The CLI returns a CNAME/TXT record to add to your DNS provider
+# Add the record, then validate:
+az staticwebapp custom-domain validate \
+  --name stw-gc-mission-control \
+  --resource-group rg-gc-mission-control \
+  --hostname missioncontrol.groundcontrol.co.uk
 ```
 
-### 8.2 Final Data Sync
+### 6.3 Run parallel
 
-Run a final delta sync to capture any records written during the cutover window.
+Keep Base44 running in read-only mode while the Azure stack runs in parallel. Users access the Azure URL; data is live-migrated. Compare outputs daily.
+
+### 6.4 DNS cutover
 
 ```bash
-# Run the final sync
-az functionapp function invoke \
-  --name func-gc-mission-control \
-  --function-name finalDataSync \
-  --resource-group rg-gc-mission-control-prod
+# Update DNS to point the primary domain to Azure Static Web App
+# This is done in your DNS provider's dashboard:
+# CNAME missioncontrol.groundcontrol.co.uk -> stw-gc-mission-control.azurestaticapps.net
+
+# Keep the Base44 URL as a rollback for 1 week
 ```
 
-### 8.3 Post-Cutover Monitoring
+### 6.5 Rollback plan
 
-Monitor closely for 7 days. Key alerts:
-- API error rate > 1%
-- SQL DTU > 80%
-- Function execution time > 2s (p95)
-- Login failure rate > 5%
-
-### 8.4 Base44 Decommission
-
-After 7 days of stable operation, decommission the Base44 application.
+If issues arise, DNS rollback is instant:
 
 ```bash
-# Export a final backup from Base44
-# (via the Base44 dashboard export tool)
-
-# Archive the Base44 sandbox repository
-gh repo archive base44-sandbox/gc-mission-control
-
-# Cancel the Base44 subscription
-# (via the Base44 dashboard billing settings)
+# Revert the DNS CNAME to the Base44 URL
+# Base44 is still running in read-only mode — users can continue working
 ```
 
-### Phase 8 Checklist
-- [ ] DNS cutover completed (custom domain → Azure Static Web Apps)
-- [ ] Final delta sync run
-- [ ] All users redirected to the Azure-native app
-- [ ] 7-day monitoring period completed with no critical alerts
-- [ ] Base44 application decommissioned
-- [ ] Final backup archived
-- [ ] Post-migration review completed
-- [ ] Runbook handed to the operations team
+### 6.6 Checklist — Phase 6
+
+- [ ] GitHub Actions pipeline created and tested
+- [ ] Custom domain configured and validated
+- [ ] Parallel run completed (at least 3 days)
+- [ ] DNS cutover executed
+- [ ] Rollback plan documented and tested
 
 ---
 
-## Rollback Plan
+## Stabilization & Sign-off (Week 13)
 
-At every phase, a rollback path is documented and tested:
+### 7.1 Set up monitoring and alerts
 
-| Phase | Rollback Action | Time to Roll Back |
-|-------|----------------|-------------------|
-| 1–2 | Delete Azure resources | < 1 hour |
-| 3 | Drop SQL database, keep Base44 as source of truth | < 2 hours |
-| 4 | Disable Azure Functions, revert API client to Base44 SDK | < 1 hour |
-| 5 | Revert auth context to Base44 provider | < 30 minutes |
-| 6 | Redeploy previous frontend build | < 15 minutes |
-| 7 | Disable dual-write, revert DNS to Base44 | < 30 minutes |
-| 8 | Revert DNS CNAME to Base44, re-enable Base44 app | < 15 minutes |
+```bash
+# Create alert rules for the Function App
+az monitor metrics alert create \
+  --name "High-Error-Rate" \
+  --resource-group rg-gc-mission-control \
+  --condition "avg HttpResultRate > 5" \
+  --window-size 5m \
+  --description "Alert when HTTP error rate exceeds 5%" \
+  --scopes /subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control/providers/Microsoft.Web/sites/func-gc-mission-control
 
----
+az monitor metrics alert create \
+  --name "SQL-DTU-High" \
+  --resource-group rg-gc-mission-control \
+  --condition "avg dtu_consumption_percent > 80" \
+  --window-size 5m \
+  --description "Alert when SQL DTU usage exceeds 80%" \
+  --scopes /subscriptions/$(az account show --query id -o tsv)/resourceGroups/rg-gc-mission-control/providers/Microsoft.Sql/servers/sql-gc-mission-control/databases/gc-mission-control
+```
 
-## Cost Estimates (Monthly, Post-Migration)
+### 7.2 Configure backup
 
-| Resource | Tier | Estimated Cost (GBP) |
-|----------|------|---------------------|
-| Azure SQL Database | Business Critical, Gen5_4 | £1,150 |
-| Azure Functions Premium | EP1 | £280 |
-| Azure Static Web Apps | Standard | £12 |
-| Key Vault | Standard | £3 |
-| Application Insights | Pay-as-you-go | £40 |
-| Azure Blob Storage | Hot, 50GB | £8 |
-| Azure Communication Services | Email, 5k/month | £15 |
-| Azure OpenAI | GPT-4o-mini, 1M tokens (AI Delay Prediction + Client Reports + Drilling Intelligence agent) | £120 |
-| Azure Event Grid | Entity automation triggers | £15 |
-| Azure Blob Storage (private) | Safety audit PDFs, site photos, compliance documents | £12 |
-| **Total** | | **~£1,655/month** |
+```bash
+# Enable automated SQL backups (long-term retention — 7 years for GDPR)
+az sql db ltr-policy set \
+  --resource-group rg-gc-mission-control \
+  --server sql-gc-mission-control \
+  --name gc-mission-control \
+  --weekly-retention "P52W" \
+  --monthly-retention "P120M" \
+  --yearly-retention "P7Y" \
+  --week-of-year 1
+```
 
-*Costs are estimates based on UK South pricing as of August 2026. Actual costs will vary based on usage.*
+### 7.3 Decommission Base44
 
----
+Once the Azure stack has run stable for 5 business days:
 
-## Risk Register
+1. Export a final data snapshot from Base44
+2. Import any delta records into Azure SQL
+3. Verify final record counts
+4. Cancel the Base44 subscription
+5. Archive the Base44 project
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Data loss during migration | Low | Critical | Dual-write + daily reconciliation + final delta sync |
-| RLS misconfiguration exposes data | Medium | Critical | Security review by external auditor before cutover |
-| Auth migration locks out users | Medium | High | All users pre-invited to Entra ID; test logins in staging |
-| Performance regression | Low | Medium | Load testing in staging before cutover |
-| Third-party integration breakage | Medium | Medium | All integrations (Geotab, Asset Panda, Met Office) tested in staging |
-| DNS cutover downtime | Low | Low | Low TTL on DNS records 48 hours before cutover |
+### 7.4 CIO compliance sign-off
 
----
+Present the compliance pack:
+- This runbook (13-week timeline with code)
+- Security hardening summary (RLS coverage matrix, audit log coverage, secrets management)
+- GDPR data-flow diagram (UK South region, data residency statement, retention policy)
+- Known-issues resolution log
 
-## Azure & PowerApps Guidance
+### 7.5 Checklist — Stabilization
 
-**Can you start building in Azure now?** Yes — all the infrastructure in Phase 1 can be provisioned immediately. You do not need anything extra from me.
-
-**PowerApps consideration:** The GC Mission Control frontend is a custom React SPA with complex UI (drag-and-drop rota builder, live maps, real-time geofence widgets, AFP dual-side tables). PowerApps is a low-code canvas platform that cannot host this existing codebase or replicate these custom components. The React SPA deploys to Azure Static Web Apps as-is. However, **Power Automate** (included in your Microsoft 365 licence) can replace some of the scheduled automation flows if you prefer a no-code approach — for example, the nightly payroll merge and the weekly client report could run as Power Automate flows calling Azure Functions. The recommendation is: keep the React SPA on Azure Static Web Apps, use Azure Functions for the API layer, and optionally use Power Automate for orchestration where your team prefers visual workflows.
-
-**What you can do now:**
-1. Run the Phase 1 Azure CLI scripts to provision all infrastructure.
-2. Create the Entra ID app registration.
-3. Create the GitHub repository and export the codebase.
-4. I'll handle the schema conversion, function porting, and frontend adaptation in the subsequent phases.
-
----
-
-## Appendix A — Complete Entity Inventory (100+ Entities)
-
-Every Base44 entity becomes a SQL table. Below is the full inventory grouped by domain. Built-in fields (`id`, `created_date`, `updated_date`, `created_by_id`) are standard on every table.
-
-### Core Operations
-| Entity | Purpose | RLS (Tenant-Scoped) |
-|--------|---------|---------------------|
-| Job | Geotechnical job/site | Yes — `division_id` |
-| JobType | Job type configuration | No |
-| Client | Client company | Yes — `division_id` |
-| Team | Crew/team grouping | Yes — `division_id` |
-| Staff | Staff member | Yes — `division_id` |
-| DrillingCrew | 2-man drilling crew pairing | Yes — `division_id` |
-| Contractor | Subcontractor/agency company | Yes — `division_id` |
-| Supplier | Equipment/material supplier | Yes — `division_id` |
-| Division | Business stream/division | No |
-| PermissionGroup | Access level definition | No |
-| DivisionAccessManifest | User-to-division access map | No |
-
-### Scheduling & Rota
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| RotaAssignment | Daily staff assignment | Yes — `division_id` |
-| RotaWeek | Weekly rota publish/supersede | Yes — `division_id` |
-| RecurringDepotDuty | Continuous depot duty | Yes — `division_id` |
-| RecurringAbsence | Recurring leave pattern | Yes — `division_id` |
-| Absence | Single absence record | Yes — `division_id` |
-| ShiftSwap | Shift swap request | Yes — `division_id` |
-| StaffShift | Staff shift definition | Yes — `division_id` |
-| BankHoliday | UK bank holiday | No |
-| ShutdownPeriod | Christmas/period shutdown | No |
-| OvertimeSetting | Overtime configuration | No |
-| OvertimeRate | Day-of-week overtime rate | No |
-
-### Timesheets & Payroll
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| Timesheet | Daily timesheet entry | User-owned + admin |
-| TimesheetDelegation | Manager approval delegation | Yes — `division_id` |
-| HolidayPayAccrual | Holiday pay accrual tracking | Yes — `division_id` |
-| IncentiveScore | Weekly incentive score | Yes — `division_id` |
-| Achievement | Staff achievement/badge | Yes — `division_id` |
-| Reward | Reward catalogue item | No |
-| RewardRedemption | Reward redemption record | Yes — `division_id` |
-| StaffReview | Staff performance review | Yes — `division_id` |
-| StaffMessage | Staff-to-staff message | User-owned |
-
-### Assets & Equipment
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| SiteAsset | Rig/plant/vehicle/asset | Yes — `division_id` |
-| Vehicle | Vehicle record | Yes — `division_id` |
-| VehicleLocationLog | GPS location log | Yes — `division_id` |
-| VehicleMOTHistory | MOT test history | Yes — `division_id` |
-| VehicleMaintenanceBooking | Maintenance booking | Yes — `division_id` |
-| ServiceRecord | Asset service record | Yes — `division_id` |
-| EquipmentCalibration | Calibration record | Yes — `division_id` |
-| EquipmentCatalogue | Equipment catalogue | No |
-| AssetManifest | Asset manifest (QR) | Yes — `division_id` |
-| AssetReturnLog | Gear return log | Yes — `division_id` |
-| DepreciationProfile | Depreciation config | No |
-| ConsumableStockItem | Consumable inventory | Yes — `division_id` |
-| GoodsInReceipt | Goods-in receipt | Yes — `division_id` |
-| ScrapLog | Scrap disposal log | Yes — `division_id` |
-
-### Compliance & Safety
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| ComplianceItem | Staff/vehicle/job compliance | User-owned + admin |
-| ComplianceTask | Compliance task | Yes — `division_id` |
-| ComplianceConfig | Compliance configuration | Admin |
-| SafetyReport | SafetyCulture/Mitti audit | Admin |
-| ToolboxTalk | Toolbox talk record | Yes — `division_id` |
-| EnvironmentalReport | Environmental incident | Yes — `division_id` |
-| GeofenceEvent | Geofence entry/exit event | Yes — `division_id` |
-| BriefingSignature | Job briefing signature | Yes — `division_id` |
-| Signature | E-signature record | User-owned |
-
-### Billing & Financials
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| AFP | Application for Payment | Admin + enterprise admin |
-| AFPLineItem | AFP line item (dual-side) | Admin + enterprise admin |
-| AFPTemplate | AFP template | Admin |
-| CVR | Contract Valuation Report | Admin |
-| CVRLineItem | CVR line item | Admin |
-| VariationOrder | Variation order | Admin |
-| Invoice | Client invoice | Admin |
-| PurchaseOrder | Purchase order | Admin |
-| JobBillingContract | Billing contract | Admin |
-| JobBillOfQuantities | BOQ | Admin |
-| JobCostItem | Job cost item | Yes — `division_id` |
-| DailyCost | Daily cost record | Yes — `division_id` |
-| CashFlowEntry | Cash flow forecast entry | Admin |
-| FinancialAuditLog | Financial audit trail | Admin |
-| RateCardItem | Rate card line item | Admin |
-| KeywordRateMapping | Keyword-to-rate mapping | Admin |
-| POAPriceLock | POA price lock | Admin |
-| BillingRule | Billing rule | Admin |
-| ExpensePreset | Expense preset | Admin |
-| CostPreset | Cost preset | Admin |
-| PresetItem | Preset line item | Admin |
-
-### Investigation & Geotechnical
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| InvestigationLog | Driller/groundworker site log | Yes — `division_id` |
-| InvestigationSOR | Schedule of rates | Yes — `division_id` |
-| Sample | Soil/water sample | Yes — `division_id` |
-| MonitoringWell | Monitoring well | Yes — `division_id` |
-| LabTestResult | Lab test result | Yes — `division_id` |
-| JobMilestone | Job milestone | Yes — `division_id` |
-| JobDelayLog | Delay log | Yes — `division_id` |
-| JobComment | Job comment | Yes — `division_id` |
-| JobDocument | Job document | Yes — `division_id` |
-| JobPack | Job pack (audit) | Yes — `division_id` |
-| SitePhoto | Site photo | Yes — `division_id` |
-| JobAssetAssignment | Asset-to-job assignment | Yes — `division_id` |
-| SubcontractorLog | Subcontractor work log | Yes — `division_id` |
-
-### Logistics & Deliveries
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| DeliveryLog | Delivery task | Yes — `division_id` |
-| DeliveryLeg | Delivery route leg | Yes — `division_id` |
-
-### Training
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| TrainingCourse | Training course | No |
-| TrainingBooking | Course booking | Yes — `division_id` |
-| TrainingRequirement | Training requirement | Yes — `division_id` |
-
-### Configuration & Integrations
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| AppSetting | Generic config (GL codes, Concur, etc.) | Admin |
-| BusinessConfig | Business config | Admin |
-| MittiConfig | SafetyCulture/Mitti webhook config | Admin |
-| AssetPandaConfig | Asset Panda sync config | Admin |
-| KeyLogBookConfig | KeyLogBook webhook config | Admin |
-| ComplianceConfig | Compliance config | Admin |
-| AutomationControl | Automation enable/disable | Admin |
-| ConfigList | Dropdown config list | Admin |
-| CustomField | Custom field definition | Admin |
-| EmailTemplate | Email template | Admin |
-| EmailAlertSetting | Email alert config | Admin |
-| PortalBranding | Client portal branding | Admin |
-| LoginBranding | Login page branding | Admin |
-| DashboardLayout | User dashboard layout | User-owned |
-| ReportTemplate | Report template | Admin |
-| PowerBIDataset | Power BI dataset ref | Admin |
-| BackupSchedule | Backup schedule | Admin |
-| DivisionSnapshot | Division backup snapshot | Admin |
-| HelpTopic | Help guide article | No |
-| WeatherLog | Daily weather log | Yes — `division_id` |
-
-### Webhook Logs
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| KeyLogBookWebhookLog | KeyLogBook webhook log | Admin |
-
-### System
-| Entity | Purpose | RLS |
-|--------|---------|-----|
-| SystemAuditLog | Tamper-evident audit chain | Read: all, Write: admin |
+- [ ] Monitoring and alerts configured
+- [ ] Long-term SQL backups enabled (7-year retention)
+- [ ] 5-day stable parallel run completed
+- [ ] Final data delta migrated
+- [ ] Base44 subscription cancelled
+- [ ] CIO compliance pack delivered and signed off
 
 ---
 
-## Appendix B — New Feature Migration Notes (2026 Additions)
+## Security Hardening — Current App (Immediate)
 
-### B.1 Mitti/SafetyCulture Integration
-The Mitti webhook receiver (`receiveMittiData`) auto-links safety audits to jobs and stamps crew check verification timestamps on RotaAssignment records. The `MittiConfig` entity stores the webhook secret, API token, and configurable safety form URLs. See Section 4.5 for the full Azure Function port.
+The following security improvements are applied to the current Base44 app NOW, before the Azure migration:
 
-### B.2 Geofence Auto-Timesheet Creation
-The Geotab webhook (`geotabWebhook`) detects vehicle arrival/departure at job sites via geofencing (100-yard/91-metre radius) and auto-creates draft Timesheet entries linked to the day's RotaAssignment. This eliminates manual timesheet entry for field crew.
+### RLS Audit & Gaps
 
-```typescript
-// api/src/shared/geofence.ts — the core geofence detection logic
-export async function processGeofence(payload: GeotabPayload): Promise<void> {
-  const { vehicleId, lat, lng, eventType, timestamp } = payload;
+Every entity with sensitive data must have RLS configured. The known gap is `SafetyCultureConfig` — it currently has no RLS, meaning any authenticated user can read/write it.
 
-  // Find the vehicle's assigned staff for today
-  const assignment = await sql.query(`
-    SELECT TOP 1 r.* FROM [dbo].[RotaAssignment] r
-    INNER JOIN [dbo].[Vehicle] v ON v.[id] = r.[vehicle_id]
-    WHERE v.[id] = @vehicleId AND r.[assigned_date] = @today
-    AND r.[status] != 'completed'
-  `, { vehicleId, today: timestamp.split('T')[0] });
+**Fix:** Add admin-only RLS to SafetyCultureConfig:
 
-  if (!assignment.recordset[0]) return;
-
-  if (eventType === 'arrival') {
-    // Check if a draft timesheet already exists for this assignment (idempotency)
-    const existing = await sql.query(`
-      SELECT TOP 1 1 FROM [dbo].[Timesheet]
-      WHERE [rota_assignment_id] = @assignmentId AND [source] = 'geotab_auto'
-    `, { assignmentId: assignment.recordset[0].id });
-    if (existing.recordset.length > 0) return;
-
-    // Create the draft timesheet linked to the assignment
-    await sql.query(`
-      INSERT INTO [dbo].[Timesheet] (
-        [staff_id], [division_id], [job_id], [date], [task_description],
-        [task_type], [source], [rota_assignment_id], [status]
-      ) VALUES (
-        @staffId, @divisionId, @jobId, @date, 'Auto-detected on-site arrival',
-        'on_site', 'geotab_auto', @assignmentId, 'draft'
-      )
-    `, { staffId: assignment.recordset[0].staff_id, divisionId: assignment.recordset[0].division_id, jobId: assignment.recordset[0].job_id, date: timestamp.split('T')[0], assignmentId: assignment.recordset[0].id });
-
-    // Stamp the assignment arrival timestamp
-    await sql.query(`UPDATE [dbo].[RotaAssignment] SET [arrived_on_site_at] = @ts WHERE [id] = @id`, { ts: timestamp, id: assignment.recordset[0].id });
-  } else if (eventType === 'departure') {
-    // Close the draft timesheet and stamp left_site_at
-    await sql.query(`
-      UPDATE [dbo].[Timesheet] SET [task_duration_minutes] = DATEDIFF(minute, [created_date], @ts)
-      WHERE [rota_assignment_id] = @assignmentId AND [source] = 'geotab_auto' AND [status] = 'draft'
-    `, { assignmentId: assignment.recordset[0].id, ts: timestamp });
-    await sql.query(`UPDATE [dbo].[RotaAssignment] SET [left_site_at] = @ts WHERE [id] = @id`, { ts: timestamp, id: assignment.recordset[0].id });
-  }
+```jsonc
+// base44/entities/SafetyCultureConfig.jsonc — add to the schema:
+"rls": {
+  "create": { "user_condition": { "role": "admin" } },
+  "read": { "user_condition": { "role": "admin" } },
+  "update": { "user_condition": { "role": "admin" } },
+  "delete": { "user_condition": { "role": "admin" } }
 }
 ```
 
-### B.3 AI Delay Prediction
-The `runDelayPrediction` automation (Engine 9) uses Azure OpenAI to analyse 90 days of delay logs and predict at-risk jobs. The predictions are stored on the Job record (`delay_risk_level`, `delay_risk_days`, `delay_risk_reason`) and surfaced on the admin dashboard. See Section 4.2 for the full implementation.
+### Audit Logging
 
-### B.4 AFP Dual-Side Tables
-The AFP (Application for Payment) system uses dual-side line items: the "our claim" side (qty_complete, gross_applied, previous_applied, applied_in_period) and the "client assessment" side (assessed_qty, gross_assessed, previous_assessed, assessed_in_period). The `AFPLineItem` entity stores both sides. The dispute workflow (disputed → counter_offered → agreed → rejected) with full history is retained.
+Every sensitive create/update/delete must write to `SystemAuditLog`. Verify that all admin actions (staff edits, billing rule changes, settings changes, compliance updates) call `logSystemAudit` after the mutation.
 
-### B.5 EWR AFP Format
-EWR (Engineering Waste Remediation) jobs use a per-borehole AFP format with dedicated sheet names (ewr_rotary_drilling, ewr_cp_drilling, ewr_rotary_dayworks, ewr_cp_dayworks, ewr_enabling_crew, ewr_accommodation, ewr_misc, ewr_hires, ewr_mileage). The `week_breakdown` array on AFPLineItem stores per-borehole quantities for EWR drilling lines.
+### Secrets Management
 
-### B.6 Mobile Field Routing
-Dedicated `/m/` routes for field crew pages ensure optimal mobile spacing. The `MobileFieldShell` component provides a full-screen shell with no admin header bar. `MobileFieldRedirect` detects phone-width viewports and redirects to the `/m/` equivalent. This is purely frontend — no Azure changes needed.
-
-### B.7 Division Context & Permission Groups
-The `DivisionContext` provider manages the active division for scoped data filtering. `PermissionGroup` entities define per-module access levels (none/read/write) enforced by the API layer. See Sections 6.4 and 6.5.
-
-### B.8 Hybrid Device Routing
-The app uses hybrid routing: separate `/m/` paths for field-facing pages (phones) and responsive layouts for administrative hubs (tablets/desktop). This ensures responsive perfection across all device classes without compromising the admin experience.
+All third-party API credentials (Concur, Bob HR, HMRC CIS, Asset Panda, Geotab, Holman) are stored as `AppSetting` records — not as platform secrets or hardcoded values. Verify no secrets are committed to the Git repo.
 
 ---
 
-## Appendix C — PDF Download & Print Instructions
+## GDPR Compliance — UK Data Residency
 
-This runbook is designed to be downloaded as a PDF and printed for offline reference.
+### Data Residency Statement
 
-### How to Download as PDF
-1. Click the **"Download PDF"** button at the top of the page (or press `Ctrl+P` / `Cmd+P`).
-2. In the browser's print dialog, select **"Save as PDF"** as the destination.
-3. Set paper size to **A4**, margins to **Default**, and enable **Background graphics**.
-4. Click **Save** — the PDF will download with all sections, code blocks, and checklists.
+All GC Mission Control data is stored in the **UK South (`uksouth`)** Azure region. No data leaves the UK. This includes:
+- Azure SQL Database (all entity data)
+- Azure Blob Storage (uploaded files, documents, photos)
+- Azure Key Vault (secrets)
+- Application Insights (telemetry — configure data residency)
 
-### Print Layout
-The print CSS automatically:
-- Hides all interactive chrome (buttons, sticky headers, progress bars)
-- Expands all collapsible phase sections so every step is visible
-- Uses brand dark-green (`#2E5A1A`) for all headings
-- Formats code blocks with a light background and monospace font
-- Paginates cleanly with A4 margins (14mm)
-- Keeps tables and code blocks from splitting across pages
+### Data Retention Policy
 
-### Reading the PDF
-- Each phase starts on a new section with a checklist at the end
-- Code blocks are copy-pasteable — each has a "Copy" button in the on-screen version
-- The presentation view (toggle at the top) shows the executive summary and roadmap for stakeholders
-- The runbook view (default) shows the full detailed checklist for the technical team
+- **Operational data** (jobs, rotas, timesheets): 7 years (HMRC requirement)
+- **Compliance documents** (certificates, insurance): 7 years after expiry
+- **Audit logs**: 7 years
+- **User uploaded files**: Retained for the active job lifecycle + 1 year
+- **Deleted records**: Soft-deleted, purged after 90 days
+
+### Data Subject Access Requests (DSAR)
+
+Users can request a copy of their personal data. The process:
+1. User emails the Data Protection Officer
+2. DPO runs a DSAR export query against Azure SQL for the user's `created_by_id` / `staff_id`
+3. Export delivered as JSON within 30 days (GDPR requirement)
+
+### Right to Erasure
+
+Users can request deletion of their personal data. The process:
+1. User emails the Data Protection Officer
+2. DPO verifies the request
+3. Personal data is anonymised (name → "Deleted User", email → null, PII fields nulled)
+4. Audit log entry created recording the erasure
 
 ---
 
-*This runbook is a living document. Update it as the migration progresses, and tick off each checklist item as it completes. Your progress is saved on this device. Version 2.0 — 29 August 2026.*
+## Known Issues Resolution Log
+
+| Issue | Status | Resolution |
+|-------|--------|------------|
+| Discrepancies in calculated financial figures | Fixed | Rate-card description matching hardened; locked_rate_card_item_id takes precedence |
+| Two-phase reverse geocoding not rendering | Fixed | useReverseGeocode hook updated to handle async two-phase lookup |
+| Safety event date/time formatting | Fixed | Date formatting standardised to Europe/London timezone |
+| Mobile/tablet navigation missing key hubs | Fixed | Mobile nav drawer updated with all admin hubs |
+| Inaccurate financial attribution in rig profitability | Fixed | runRigProfitabilityCheck updated to use locked rate card items |
+| KeyLogBook integration API docs | Documented | Inferred endpoints documented in KeyLogBookDocs page |
+| Assets Hub lacks certification tracking | Fixed | Certificate Vault + RecertActionModal added to Rig Hub |
+| CI sheet parsing errors | Fixed | parseAFPUpload updated with robust number parsing |
+| Incomplete date capture for EWR site logs | Fixed | importEWRApplicationData updated to capture all date fields |
+| Rota concurrent-leave bug | Fixed | AssignmentModal conflict detection updated |
+| JobDetail blank screen | Fixed | Error boundary + null-safe rendering added |
+| RLS missing for SafetyCultureConfig | Fixed | Admin-only RLS added |
+| Rig dashboard 'no rigs' false positive | Fixed | RigPerformanceWidget null-safe check added |
+| Stat tiles rendering line characters | Fixed | EnterpriseSettings stat tiles use tabular-nums |
+| EnterpriseSettings stat boxes inaccurate | Fixed | getSettingsHubStats batched resolver updated |
+| Microsoft365Hub import error | Fixed | Import path corrected |
+
+---
+
+*This runbook is a living document. Update it as the migration progresses. Your progress is saved on your device — tick each phase as you complete it.*
