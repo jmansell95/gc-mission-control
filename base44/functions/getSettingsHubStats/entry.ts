@@ -22,6 +22,7 @@ const INTEGRATION_SETTING_KEYS = [
   'concur_config', 'safety_culture_config', 'keylogbook_config', 'cis_config',
   'payroll_config', 'met_office_config', 'google_maps_config', 'whatsapp_config',
   'accounting_config', 'stripe_config',
+  'microsoft_365_config', 'zapier_config', 'openground_config',
   'integration_coming_soon',
 ];
 const INTEGRATION_CONNECTED_FIELDS: Record<string, string> = {
@@ -30,6 +31,7 @@ const INTEGRATION_CONNECTED_FIELDS: Record<string, string> = {
   keylogbook_config: 'webhook_secret', cis_config: 'api_key', payroll_config: 'provider',
   met_office_config: 'api_key', google_maps_config: 'api_key', whatsapp_config: 'api_token',
   accounting_config: 'provider', stripe_config: 'secret_key',
+  microsoft_365_config: 'client_id', zapier_config: 'webhook_url', openground_config: 'api_key',
 };
 const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   geotab_config: { id: 'geotab-sync', label: 'Geotab' },
@@ -46,6 +48,9 @@ const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   whatsapp_config: { id: 'whatsapp', label: 'WhatsApp' },
   accounting_config: { id: 'accounting-sync', label: 'Accounting' },
   stripe_config: { id: 'payment-gateway', label: 'Payments' },
+  microsoft_365_config: { id: 'microsoft-365', label: 'Microsoft 365' },
+  zapier_config: { id: 'zapier-webhooks', label: 'Zapier' },
+  openground_config: { id: 'openground-sync', label: 'OpenGround' },
 };
 // Fields on a config record/value that hold a cached sync outcome.
 const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_status', 'last_sync_status'];
@@ -54,6 +59,7 @@ const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_sta
 // status to check). Everything else is expected to persist a sync status.
 const NO_SYNC_MECHANISM = new Set([
   'cis_config', 'google_maps_config', 'whatsapp_config', 'stripe_config',
+  'microsoft_365_config', 'zapier_config', 'openground_config',
 ]);
 
 function resolveSyncStatus(values: any[]): string | null {

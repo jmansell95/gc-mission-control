@@ -50,13 +50,13 @@ export default function ReportSidebar({ category, setCategory, counts = {} }) {
       </div>
 
       {/* Mobile pills */}
-      <div className="lg:hidden flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      <div className="lg:hidden w-full flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
         {REPORT_CATEGORIES.map(c => {
           const Icon = c.icon;
           const active = c.id === category;
           return (
             <button key={c.id} onClick={() => setCategory(c.id)}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${active ? 'command-gradient text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600'}`}>
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap flex-shrink-0 transition ${active ? 'command-gradient text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600'}`}>
               <Icon className="w-4 h-4" /> {c.label}
             </button>
           );

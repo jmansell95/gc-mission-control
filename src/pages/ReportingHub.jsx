@@ -166,7 +166,7 @@ export default function ReportingHub() {
         />
       )}
 
-      <div className="flex gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <ReportSidebar category={category} setCategory={setCategory} />
 
         <div className="flex-1 min-w-0 space-y-4">

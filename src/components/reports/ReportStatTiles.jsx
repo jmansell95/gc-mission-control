@@ -31,14 +31,14 @@ export default function ReportStatTiles({ data }) {
       {tiles.map((t, i) => {
         const Icon = t.icon;
         return (
-          <div key={i} className={`${t.gradient} rounded-2xl p-4 text-white relative overflow-hidden`}>
+          <div key={i} className={`${t.gradient} rounded-2xl p-3 sm:p-4 text-white relative overflow-hidden min-w-0`}>
             <div className="absolute -right-4 -bottom-4 opacity-20">
-              <Icon className="w-16 h-16" />
+              <Icon className="w-12 h-12 sm:w-16 sm:h-16" />
             </div>
             <div className="relative">
-              <Icon className="w-5 h-5 mb-2 opacity-80" />
-              <p className="text-[10px] font-bold uppercase tracking-wide opacity-80">{t.label}</p>
-              <p className="text-xl sm:text-2xl font-extrabold tabular-nums mt-0.5">{t.value}</p>
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5 mb-1.5 sm:mb-2 opacity-80" />
+              <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide opacity-80 leading-tight">{t.label}</p>
+              <p className="text-lg sm:text-2xl font-extrabold tabular-nums mt-0.5 truncate">{t.value}</p>
             </div>
           </div>
         );

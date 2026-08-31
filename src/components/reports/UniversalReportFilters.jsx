@@ -79,7 +79,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
     setFilters(prev => ({ ...prev, divisionId: val, teamId: '', clientId: '' }));
   };
 
-  const selectCls = 'rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[130px] bg-white';
+  const selectCls = 'rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[110px] sm:min-w-[130px] bg-white flex-1 sm:flex-none';
 
   return (
     <div className="insight-card rounded-2xl p-4 space-y-3">
@@ -117,9 +117,9 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
       </div>
 
       {/* Dimension filters row */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
         {/* Division */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0">
           <Building2 className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
           <select value={filters.divisionId || ''} onChange={e => onDivisionChange(e.target.value)} className={selectCls}>
             <option value="">All Streams</option>
@@ -128,7 +128,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         </div>
 
         {/* Team */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0">
           <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
           <select value={filters.teamId || ''} onChange={e => set('teamId', e.target.value)} className={selectCls}>
             <option value="">All Teams</option>
@@ -137,7 +137,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         </div>
 
         {/* Client */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0">
           <Briefcase className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
           <select value={filters.clientId || ''} onChange={e => set('clientId', e.target.value)} className={selectCls}>
             <option value="">All Clients</option>
@@ -146,7 +146,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         </div>
 
         {/* Job Type */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-1 sm:flex-none min-w-0">
           <Tag className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
           <select value={filters.jobTypeId || ''} onChange={e => set('jobTypeId', e.target.value)} className={selectCls}>
             <option value="">All Job Types</option>
@@ -155,13 +155,13 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         </div>
 
         {/* Export buttons */}
-        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 sm:ml-auto">
           <button onClick={onExportCsv} disabled={exporting}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition disabled:opacity-50">
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition disabled:opacity-50 flex-1 sm:flex-none justify-center">
             {exporting === 'csv' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} CSV
           </button>
           <button onClick={onExportPdf} disabled={exporting}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm flex-1 sm:flex-none justify-center">
             {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} PDF
           </button>
         </div>

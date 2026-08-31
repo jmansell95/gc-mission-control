@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Settings as SettingsIcon, CheckCircle2, Clock, Webhook, AlertTriangle,
-  Search, X, ChevronRight, ExternalLink,
+  Search, X, ChevronRight, ExternalLink, Link2, Link2Off, Lock,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
@@ -40,6 +40,13 @@ export default function SettingsHubOverview({ onNavigate, items }) {
     .flatMap(g => g.items)
     .filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id));
 
+  // Build a status lookup from the backend integration stats
+  const integrationStatusById = useMemo(() => {
+    const m = {};
+    for (const i of (integrations || [])) m[i.id] = i;
+    return m;
+  }, [integrations]);
+
   const filtered = useMemo(() => {
     if (!query.trim()) return allItems;
     const q = query.toLowerCase();
@@ -67,9 +74,43 @@ export default function SettingsHubOverview({ onNavigate, items }) {
     blue: 'bg-blue-50 text-blue-600',
   };
 
+  const renderStatusBadge = (item) => {
+    const isCs = !!comingSoonMap[item.id] && integrationStatusById[item.id]?.status !== 'active';
+    if (isCs) {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
+          <Lock className="w-2.5 h-2.5" /> Coming Soon
+        </span>
+      );
+    }
+    const st = integrationStatusById[item.id]?.status;
+    if (st === 'active') {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-600">
+          <Link2 className="w-2.5 h-2.5" /> Active
+        </span>
+      );
+    }
+    if (st === 'needs_attention') {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
+          <AlertTriangle className="w-2.5 h-2.5" /> Needs attention
+        </span>
+      );
+    }
+    if (INTEGRATION_IDS.has(item.id)) {
+      return (
+        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
+          <Link2Off className="w-2.5 h-2.5" /> Not configured
+        </span>
+      );
+    }
+    return null;
+  };
+
   const renderItem = (item) => {
     const Icon = item.icon;
-    const isCs = !!comingSoonMap[item.id] && integrations.find(i => i.id === item.id)?.status !== 'active';
+    const isCs = !!comingSoonMap[item.id] && integrationStatusById[item.id]?.status !== 'active';
     const isExternal = !!item.external;
     const handleClick = () => {
       if (isExternal) {
@@ -95,11 +136,7 @@ export default function SettingsHubOverview({ onNavigate, items }) {
           <p className={`text-sm font-semibold truncate ${isCs ? 'text-slate-400' : 'text-slate-800'}`}>
             {item.label}
           </p>
-          {isCs && (
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
-              <Clock className="w-2.5 h-2.5" /> Coming Soon
-            </span>
-          )}
+          {renderStatusBadge(item)}
         </div>
         {isExternal
           ? <ExternalLink className="w-4 h-4 text-slate-300 flex-shrink-0" />
