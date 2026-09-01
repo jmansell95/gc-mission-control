@@ -25,13 +25,15 @@ const INTEGRATION_SETTING_KEYS = [
   'microsoft_365_config', 'zapier_config', 'openground_config',
   'integration_coming_soon',
 ];
-const INTEGRATION_CONNECTED_FIELDS: Record<string, string> = {
-  geotab_config: 'username', holman_config: 'api_key', asset_panda_config: 'api_token',
-  bob_hr_config: 'username', concur_config: 'client_id', safety_culture_config: 'api_token',
-  keylogbook_config: 'webhook_secret', cis_config: 'api_key', payroll_config: 'provider',
-  met_office_config: 'api_key', google_maps_config: 'api_key', whatsapp_config: 'api_token',
-  accounting_config: 'provider', stripe_config: 'secret_key',
-  microsoft_365_config: 'client_id', zapier_config: 'webhook_url', openground_config: 'api_key',
+const INTEGRATION_CONNECTED_FIELDS: Record<string, string[]> = {
+  geotab_config: ['username'], holman_config: ['api_key'], asset_panda_config: ['api_token'],
+  bob_hr_config: ['username'], concur_config: ['client_id'], safety_culture_config: ['api_token'],
+  keylogbook_config: ['webhook_secret'], cis_config: ['api_key'], payroll_config: ['provider'],
+  met_office_config: ['api_key'], google_maps_config: ['api_key'],
+  whatsapp_config: ['api_token', 'phone_number_id', 'webhook_secret'],
+  accounting_config: ['provider', 'xero_client_id', 'sage_client_id', 'xero_webhook_secret'],
+  stripe_config: ['secret_key'],
+  microsoft_365_config: ['client_id'], zapier_config: ['webhook_url'], openground_config: ['api_key'],
 };
 const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   geotab_config: { id: 'geotab-sync', label: 'Geotab' },
@@ -53,7 +55,12 @@ const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   openground_config: { id: 'openground-sync', label: 'OpenGround' },
 };
 // Fields on a config record/value that hold a cached sync outcome.
-const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_status', 'last_sync_status'];
+const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_status', 'last_ags_sync_status', 'last_pull_sync_status'];
+// Fields that prove the integration has been active (received data / ran a sync).
+// Used to distinguish "not configured" from "working without credentials" (e.g.
+// free Open-Meteo weather, or webhook receivers getting data without outbound
+// API credentials saved).
+const SYNC_ACTIVITY_FIELDS = ['last_sync_at', 'last_webhook_at', 'last_ags_sync_at', 'last_pull_sync_at', 'last_sync_status', 'last_webhook_status', 'last_ags_sync_status', 'last_pull_sync_status', 'last_sync_summary', 'last_webhook_summary'];
 // Integrations that have no scheduled sync / connection test — for these,
 // "credentials saved" alone counts as a working connection (there is no cached
 // status to check). Everything else is expected to persist a sync status.
@@ -70,6 +77,16 @@ function resolveSyncStatus(values: any[]): string | null {
     }
   }
   return null;
+}
+
+function hasAnySyncActivity(values: any[]): boolean {
+  for (const v of values) {
+    if (!v || typeof v !== 'object') continue;
+    for (const k of SYNC_ACTIVITY_FIELDS) {
+      if (v[k]) return true;
+    }
+  }
+  return false;
 }
 
 export default async function (req: Request): Promise<Response> {
@@ -107,42 +124,51 @@ export default async function (req: Request): Promise<Response> {
       settingsByKey[k].push(s.value || {});
     }
     const hasAppSettingCredentials = (k: string) => {
-      const field = INTEGRATION_CONNECTED_FIELDS[k];
-      if (!field) return false;
-      return (settingsByKey[k] || []).some(v => !!(v && v[field]));
+      const fields = INTEGRATION_CONNECTED_FIELDS[k];
+      if (!fields || !Array.isArray(fields)) return false;
+      return (settingsByKey[k] || []).some(v => !!(v && fields.some(f => v[f])));
     };
     const appSettingSyncStatus = (k: string) => resolveSyncStatus(settingsByKey[k] || []);
 
     // Dedicated config entities (not stored in AppSetting).
     const assetPandaHasCreds = (assetPandaConfigs || []).some(c => !!(c.email || c.api_token));
     const assetPandaSync = (assetPandaConfigs || []).map(c => c.last_sync_status).find(Boolean) || null;
+    const assetPandaActivity = hasAnySyncActivity(assetPandaConfigs || []);
     const mittiHasCreds = (mittiConfigs || []).some(c => !!(c.enabled || c.webhook_secret || c.api_token));
     const mittiSync = (mittiConfigs || []).map(c => c.last_webhook_status).find(Boolean) || null;
+    const mittiActivity = hasAnySyncActivity(mittiConfigs || []);
     const klbHasCreds = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
-    const klbSync = (klbConfigs || []).map(c => c.last_sync_status || c.sync_status).find(Boolean) || null;
+    const klbSync = (klbConfigs || []).map(c => c.last_webhook_status || c.last_ags_sync_status || c.last_pull_sync_status || c.last_sync_status || c.sync_status).find(Boolean) || null;
+    const klbActivity = hasAnySyncActivity(klbConfigs || []);
 
     const integrations = INTEGRATION_SETTING_KEYS.filter(k => k !== 'integration_coming_soon').map(k => {
       const meta = INTEGRATION_META[k];
       let hasCredentials = false;
       let syncStatus: string | null = null;
-      if (k === 'asset_panda_config') { hasCredentials = assetPandaHasCreds; syncStatus = assetPandaSync; }
-      else if (k === 'safety_culture_config') { hasCredentials = mittiHasCreds; syncStatus = mittiSync; }
-      else if (k === 'keylogbook_config') { hasCredentials = klbHasCreds; syncStatus = klbSync; }
-      else { hasCredentials = hasAppSettingCredentials(k); syncStatus = appSettingSyncStatus(k); }
+      let syncActivity = false;
+      if (k === 'asset_panda_config') { hasCredentials = assetPandaHasCreds; syncStatus = assetPandaSync; syncActivity = assetPandaActivity; }
+      else if (k === 'safety_culture_config') { hasCredentials = mittiHasCreds; syncStatus = mittiSync; syncActivity = mittiActivity; }
+      else if (k === 'keylogbook_config') { hasCredentials = klbHasCreds; syncStatus = klbSync; syncActivity = klbActivity; }
+      else { hasCredentials = hasAppSettingCredentials(k); syncStatus = appSettingSyncStatus(k); syncActivity = hasAnySyncActivity(settingsByKey[k] || []); }
 
-      // Resolve the displayed status.
+      // Resolve the displayed status. An integration is only "not_configured"
+      // when it has NO credentials AND no evidence of sync activity (no sync
+      // has ever run, no webhook received). If there's sync activity, the
+      // integration is working — show active or needs_attention based on the
+      // last sync outcome.
       let status: string;
-      if (!hasCredentials) {
+      if (!hasCredentials && !syncActivity) {
         status = 'not_configured';
       } else if (NO_SYNC_MECHANISM.has(k)) {
         status = 'active'; // credentials saved = working (no sync to verify)
-      } else if (syncStatus === 'success' || syncStatus === 'synced') {
+      } else if (syncStatus === 'success' || syncStatus === 'synced' || syncStatus === 'ok') {
         status = 'active';
-      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'never') {
+      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'never' || syncStatus === 'partial') {
         status = 'needs_attention';
       } else {
-        // Credentials saved but no cached sync status recorded yet — treat as
-        // active (optimistic; the first scheduled sync will refine this).
+        // Credentials saved or sync activity exists but no cached sync status
+        // recorded yet — treat as active (optimistic; the first scheduled sync
+        // will refine this).
         status = 'active';
       }
       return { id: meta.id, label: meta.label, connected: hasCredentials, hasCredentials, status };
