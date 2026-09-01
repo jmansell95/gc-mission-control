@@ -6,7 +6,7 @@ import React from 'react';
  */
 export default function WidgetShell({ icon: Icon, iconBg = 'bg-[#2E5A1A]/10', iconColor = 'text-[#2E5A1A]', title, subtitle, action, children, bodyClassName = 'p-5' }) {
   return (
-    <div className="insight-card relative rounded-2xl overflow-hidden">
+    <div className="insight-card relative rounded-2xl overflow-hidden h-full flex flex-col min-h-[200px]">
       <div className="px-4 sm:px-5 py-4 bg-gradient-to-r from-slate-50/90 via-white to-white border-b border-slate-100/80 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           {Icon && (
@@ -21,7 +21,7 @@ export default function WidgetShell({ icon: Icon, iconBg = 'bg-[#2E5A1A]/10', ic
         </div>
         {action && <div className="flex-shrink-0 w-full sm:w-auto flex justify-end">{action}</div>}
       </div>
-      <div className={bodyClassName}>
+      <div className={`${bodyClassName} flex-1`}>
         {children}
       </div>
     </div>

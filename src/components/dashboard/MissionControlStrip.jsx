@@ -77,7 +77,7 @@ export default function MissionControlStrip({ onNavigate }) {
   const ph = phMeta[m.projectHealth];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
+    <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm h-full flex flex-col min-h-[200px]">
       <div className="px-3 py-2.5 sm:px-4 sm:py-3 flex items-center gap-2.5">
         <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ring-1 flex-shrink-0 ${healthBg} ${healthRing}`}>
           {isHealthy ? <Activity className={`w-4 h-4 sm:w-5 sm:h-5 ${healthColor}`} /> : <AlertTriangle className={`w-4 h-4 sm:w-5 sm:h-5 ${healthColor}`} />}
@@ -91,7 +91,7 @@ export default function MissionControlStrip({ onNavigate }) {
           {m.issues.length > 0 && <p className="text-[11px] text-slate-400 truncate">{m.issues.join(' · ')}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 px-3 pb-3 sm:px-4 sm:pb-4 pt-2.5 border-t border-slate-100">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 px-3 pb-3 sm:px-4 sm:pb-4 pt-2.5 border-t border-slate-100 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0"><Gauge className="w-4 h-4 text-slate-500" /></div>
           <div className="min-w-0">

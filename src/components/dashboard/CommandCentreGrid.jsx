@@ -276,7 +276,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
                                 <div
                                   ref={prov.innerRef}
                                   {...prov.draggableProps}
-                                  className={`${colspanClass} relative ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
+                                  className={`${colspanClass} relative h-full ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
                                 >
                                   {customise && (
                                     <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">

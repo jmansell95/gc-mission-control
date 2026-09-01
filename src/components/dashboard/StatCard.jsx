@@ -25,7 +25,7 @@ export default function StatCard({
     <Tag
       type={interactive ? 'button' : undefined}
       onClick={onClick}
-      className={`relative rounded-2xl border p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50/50 flex items-center gap-2.5 sm:gap-3.5 text-left transition-all duration-200 ${active ? 'border-emerald-400 ring-2 ring-emerald-100 shadow-md' : interactive ? 'border-slate-200 hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5 group' : 'border-slate-200 shadow-sm'} ${interactive ? 'group' : ''} ${className}`}
+      className={`relative min-h-[140px] rounded-2xl border p-3 sm:p-4 bg-gradient-to-br from-white to-slate-50/50 flex items-center gap-2.5 sm:gap-3.5 text-left transition-all duration-200 ${active ? 'border-emerald-400 ring-2 ring-emerald-100 shadow-md' : interactive ? 'border-slate-200 hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5 group' : 'border-slate-200 shadow-sm'} ${interactive ? 'group' : ''} ${className}`}
     >
       <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${gradient} flex items-center justify-center flex-shrink-0 shadow-md icon-tile-glow`}>
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
