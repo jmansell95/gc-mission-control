@@ -160,27 +160,11 @@ export default async function (req: Request): Promise<Response> {
       else if (k === 'keylogbook_config') { hasCredentials = klbHasCreds; syncStatus = klbSync; syncActivity = klbActivity; }
       else { hasCredentials = hasAppSettingCredentials(k); syncStatus = appSettingSyncStatus(k); syncActivity = hasAnySyncActivity(settingsByKey[k] || []); }
 
-      // Resolve the displayed status. An integration is only "not_configured"
-      // when it has NO credentials AND no evidence of sync activity (no sync
-      // has ever run, no webhook received). If there's sync activity, the
-      // integration is working — show active or needs_attention based on the
-      // last sync outcome.
-      let status: string;
-      if (!hasCredentials && !syncActivity) {
-        status = 'not_configured';
-      } else if (NO_SYNC_MECHANISM.has(k)) {
-        status = 'active'; // credentials saved = working (no sync to verify)
-      } else if (syncStatus === 'success' || syncStatus === 'synced' || syncStatus === 'ok') {
-        status = 'active';
-      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'partial') {
-        status = 'needs_attention';
-      } else {
-        // Credentials saved or sync activity exists but no cached sync status
-        // recorded yet — treat as active (optimistic; the first scheduled sync
-        // will refine this).
-        status = 'active';
-      }
-      return { id: meta.id, label: meta.label, connected: hasCredentials, hasCredentials, status };
+      // Binary status: active if there are credentials OR any sync activity
+      // (webhooks received, syncs completed), otherwise not_configured.
+      const isActive = hasCredentials || syncActivity;
+      const status = isActive ? 'active' : 'not_configured';
+      return { id: meta.id, label: meta.label, connected: isActive, hasCredentials, status };
     });
 
     const activeStaff = (staff || []).filter(s => s.is_active !== false).length;

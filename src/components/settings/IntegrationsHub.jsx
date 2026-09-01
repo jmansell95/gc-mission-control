@@ -68,7 +68,7 @@ export default function IntegrationsHub({ onNavigate }) {
   const comingSoonIds = useMemo(() => new Set(INTEGRATIONS.filter(i => isComingSoon(i.id)).map(i => i.id)), [comingSoonMap, statusById]);
 
   const activeCount = integrationStats.filter(i => i.status === 'active').length;
-  const needsAttentionCount = integrationStats.filter(i => i.status === 'needs_attention').length;
+  const notConfiguredCount = integrationStats.filter(i => i.status === 'not_configured').length;
 
   const categories = [...new Set(INTEGRATIONS.map(i => i.category))];
   const grouped = categories.map(cat => ({
@@ -131,13 +131,6 @@ export default function IntegrationsHub({ onNavigate }) {
         </span>
       );
     }
-    if (st === 'needs_attention') {
-      return (
-        <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-600">
-          <AlertTriangle className="w-3 h-3" /> Needs attention
-        </span>
-      );
-    }
     return (
       <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-400">
         <Link2Off className="w-3 h-3" /> Not configured
@@ -150,7 +143,7 @@ export default function IntegrationsHub({ onNavigate }) {
       <SettingsSectionHeader
         icon={Link2}
         title="Integrations Hub"
-        description={`All external system connections in one place. ${activeCount} of ${INTEGRATIONS.length} active, ${needsAttentionCount} need attention. An integration is only Active when it has saved credentials and a working connection.`}
+        description={`All external system connections in one place. ${activeCount} of ${INTEGRATIONS.length} active, ${INTEGRATIONS.length - activeCount} not configured. An integration is Active when it has saved credentials or is receiving data.`}
         actions={
           <button
             onClick={() => { setManageMode(m => !m); setSelected(new Set()); }}
@@ -173,8 +166,8 @@ export default function IntegrationsHub({ onNavigate }) {
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{activeCount}</p><p className="text-[10px] text-slate-500 font-semibold">Active</p></div>
         </div>
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center"><AlertTriangle className="w-5 h-5 text-amber-600" /></div>
-          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{needsAttentionCount}</p><p className="text-[10px] text-slate-500 font-semibold">Needs attention</p></div>
+          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Link2Off className="w-5 h-5 text-slate-500" /></div>
+          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{notConfiguredCount}</p><p className="text-[10px] text-slate-500 font-semibold">Not configured</p></div>
         </div>
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Lock className="w-5 h-5 text-slate-500" /></div>
