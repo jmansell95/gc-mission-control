@@ -34,9 +34,11 @@ Deno.serve(async (req) => {
     pick('email_notifications_enabled');
     pick('delivery_dashboard_enabled');
     pick('phone_gps_consent');
+    pick('tracking_enabled');
     pick('tracking_consent_signed_at');
     pick('tracking_consent_signature_data_url');
     pick('tracking_consent_version');
+    pick('tracking_consent_declined_at');
 
     if (Object.keys(allowed).length === 0) {
       return Response.json({ error: 'No updatable fields provided' }, { status: 400 });

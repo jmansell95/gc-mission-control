@@ -167,5 +167,14 @@ export async function buildMyProfile(base44, user) {
       : null,
     last_acknowledged_week: s.last_acknowledged_week || null,
     onboarding_complete: s.onboarding_complete === true,
+    // Tracking & GPS fields
+    tracking_enabled: s.tracking_enabled !== false,
+    phone_gps_consent: s.phone_gps_consent === true,
+    tracking_consent_signed_at: s.tracking_consent_signed_at || null,
+    tracking_consent_declined_at: s.tracking_consent_declined_at || null,
+    home_lat: s.home_lat ?? null,
+    home_lng: s.home_lng ?? null,
+    job_title: s.job_title || null,
+    manager_id: s.manager_id || null,
   };
 }

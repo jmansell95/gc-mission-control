@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ShieldCheck, MapPin, Car, Clock, ChevronRight, X } from 'lucide-react';
 
 /**
