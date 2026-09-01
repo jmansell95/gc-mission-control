@@ -30,6 +30,7 @@ import DeliveryInFrontBanner from '@/components/rota/DeliveryInFrontBanner';
 import DepotDutyBadge from '@/components/rota/DepotDutyBadge';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 import LiveDriverBadge from '@/components/rota/LiveDriverBadge';
+import RotaDayCards from '@/components/rota/RotaDayCards';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -1154,175 +1155,22 @@ export default function WeeklyRotaBuilder() {
         )}
       </div>
 
-      {/* Mobile Day Cards */}
-      <div className="lg:hidden space-y-3">
-        {staffLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-                <Skeleton className="h-5 w-24 mb-3" />
-                <SkeletonText lines={3} />
-              </div>
-            ))}
-          </div>
-        ) : staffError ? (
-          <ErrorState message="Couldn't load the rota" onRetry={refetchStaff} />
-        ) : days.map((day) => {
-          const dayStr = format(day, 'yyyy-MM-dd');
-          const isToday = dayStr === todayStr;
-          const dayAssignments = rotas.filter(r => r.assigned_date === dayStr && (!r.assignment_type || r.assignment_type === 'job' || r.assignment_type === 'yard_depot') && filteredStaff.some(s => s.id === r.staff_id));
-          // Group by staff member so multi-job days show as stacked cards per person
-          const byStaff = {};
-          dayAssignments.forEach(r => {
-            if (!byStaff[r.staff_id]) byStaff[r.staff_id] = [];
-            byStaff[r.staff_id].push(r);
-          });
-          Object.values(byStaff).forEach(arr => arr.sort((a, b) => (a.start_time || '23:59').localeCompare(b.start_time || '23:59')));
-          return (
-            <div key={dayStr} className={`bg-white rounded-xl border shadow-sm overflow-hidden ${isToday ? 'border-emerald-400 ring-1 ring-emerald-200' : 'border-slate-200'}`}>
-              <div className={`px-4 py-3 flex items-center justify-between ${isToday ? 'bg-gradient-to-r from-emerald-700 to-emerald-600 text-white' : 'bg-slate-50 border-b border-slate-100'}`}>
-                <div className="flex items-center gap-2">
-                  {isToday && <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />}
-                  <span className={`font-bold text-sm ${isToday ? 'text-white' : 'text-slate-800'}`}>{format(day, 'EEEE')}</span>
-                </div>
-                <span className={`text-xs font-medium ${isToday ? 'text-emerald-100' : 'text-slate-500'}`}>{format(day, 'dd MMM')} · {dayAssignments.length} shifts · {Object.keys(byStaff).length} crew</span>
-              </div>
-              {dayAssignments.length === 0 ? (
-                <p className="px-4 py-3 text-xs text-slate-400">No assignments</p>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {Object.entries(byStaff).map(([staffId, staffAssignments]) => {
-                    const member = staff.find(s => s.id === staffId);
-                    const isMulti = staffAssignments.length >= 2;
-                    const ls = leaveState(staffId, dayStr);
-                    const dif = getDeliveryInFrontState({ deliveries, assignments: rotas, staffId, dateStr: dayStr });
-                    return (
-                      <div key={staffId} className="px-4 py-3">
-                        {/* Staff header row with multi-job badge */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                            <span className="text-emerald-700 font-bold text-xs">{member?.name?.charAt(0) || '?'}</span>
-                          </div>
-                          <p className="text-sm font-semibold text-slate-900 truncate flex-1">{member?.name || 'Unknown'}</p>
-                          {isMulti && (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#2E5A1A] text-white">
-                              <Layers className="w-2.5 h-2.5" /> {staffAssignments.length} jobs
-                            </span>
-                          )}
-                          <button
-                            onClick={() => setRotaManagerStaff(member)}
-                            className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-md transition flex items-center gap-0.5 flex-shrink-0"
-                          >
-                            <Calendar className="w-3 h-3" /> Manage
-                          </button>
-                        </div>
-                        {crewSubLine(member) && (
-                          <p className="text-[10px] text-blue-600 font-medium truncate ml-9 -mt-1 mb-1">{crewSubLine(member)}</p>
-                        )}
-                        {member && getDynamicTeamInfo(member).isDynamic && (
-                          <span className="inline-flex items-center gap-0.5 self-start text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-100 text-emerald-700 mb-2">
-                            <Zap className="w-2.5 h-2.5" /> DYNAMIC
-                          </span>
-                        )}
-                        {(() => {
-                          const depotRule = getDepotRuleForStaff(staffId);
-                          const hasRealDepot = staffAssignments.some(a => a.assignment_type === 'yard_depot');
-                          if (depotRule && isDepotDutyDate(depotRule, dayStr) && !hasRealDepot && !ls) {
-                            return (
-                              <div className="mb-1.5">
-                                <VirtualDepotCard rule={depotRule} dayStr={dayStr} onStop={handleStopDepotDuty} />
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
-                        {ls && ls.type !== 'yard_depot' && (
-                          <div className={`mb-2 px-3 py-1.5 rounded-lg text-xs font-bold text-center ${
-                            ls.recurring ? 'bg-slate-200 text-slate-600' :
-                            ls.type === 'sick' ? 'bg-rose-100 text-rose-600' :
-                            ls.type === 'training' ? 'bg-violet-100 text-violet-600' :
-                            ls.type === 'bank_holiday' ? 'bg-blue-100 text-blue-700' :
-                            ls.type === 'shutdown' ? 'bg-purple-100 text-purple-700' :
-                            'bg-red-100 text-red-600'
-                          }`}>
-                            {(ls.label || 'ON LEAVE').toUpperCase()}
-                          </div>
-                        )}
-                        {/* Delivery-in-front banner — active delivery surfaces above depot duty */}
-                        {dif.deliveryInFront && (
-                          <div className="mb-2">
-                            <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} vehicles={vehicles} />
-                          </div>
-                        )}
-                        {/* Stacked job cards — hidden when on leave/bank holiday/shutdown so the rota stays clean */}
-                        {(!ls || ls.type === 'yard_depot') && (
-                        <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
-                          {staffAssignments.map((assignment, idx) => {
-                            const job = jobs.find(j => j.id === assignment.job_id);
-                            const vehicle = vehicles.find(v => v.id === assignment.vehicle_id);
-                            const client = clients.find(c => c.id === job?.client_id);
-                            const colors = assignment.assignment_type === 'yard_depot'
-                              ? { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' }
-                              : (jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot);
-                            const status = statusConfig[assignment.status || 'assigned'] || statusConfig.assigned;
-                            const StatusIcon = status.icon;
-                            if (assignment.assignment_type === 'yard_depot' && dif.deliveryInFront) {
-                              return <DepotDutyBadge key={assignment.id} assignment={assignment} onEdit={() => handleEditAssignment(assignment)} />;
-                            }
-                            return (
-                              <div key={assignment.id} className={`rounded-lg border-l-[3px] cursor-pointer hover:shadow-sm transition ${colors.bg} ${colors.border} px-2.5 py-2 ${isMulti ? 'relative' : ''}`}
-                                onClick={() => handleEditAssignment(assignment)}>
-                                <div className="flex items-start justify-between gap-1 mb-1">
-                                   <span className="font-bold text-slate-900 truncate flex-1 text-xs leading-tight">{assignment.assignment_type === 'yard_depot' ? 'Depot Duty' : (job?.name || '—')}</span>
-                                   <div className="flex items-center gap-1 flex-shrink-0">
-                                     {job && <RotaWeatherBadge job={job} />}
-                                     {isMulti && <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold">#{idx + 1}</span>}
-                                   </div>
-                                  <div className="flex items-center gap-0.5 flex-shrink-0">
-                                    <button onClick={(e) => { e.stopPropagation(); setSwapAssignment(assignment); }} className="p-1 text-emerald-500 hover:bg-emerald-50 rounded transition" title="Swap / add staff">
-                                      <Repeat className="w-3 h-3" />
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteAssignment(assignment.id); }} className="p-1 text-red-400 hover:bg-red-50 rounded transition">
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 text-xs">
-                                  {job && <span className={`px-1.5 py-0.5 rounded-full font-medium ${colors.badge}`}>{formatJobType(getJobPrimaryType(job, teams))}</span>}
-                                  {vehicle && <span className="flex items-center gap-0.5 text-slate-500"><Truck className="w-3 h-3" />{vehicle.registration_number}</span>}
-                                  {job?.location && <span className="flex items-center gap-0.5 text-slate-500"><MapPin className="w-3 h-3" />{job.location}</span>}
-                                  {(assignment.start_time || assignment.end_time) && <span className="flex items-center gap-0.5 text-slate-500"><Clock className="w-3 h-3" />{assignment.start_time || '—'}{assignment.end_time ? `–${assignment.end_time}` : ''}</span>}
-                                  <span className={`inline-flex items-center gap-0.5 ${status.text}`}><StatusIcon className="w-3 h-3" />{status.label}</span>
-                                  {assignment.briefing_signed && <span className="inline-flex items-center text-emerald-600"><ClipboardCheck className="w-3 h-3" />Briefed</span>}
-                                  {assignment.arrived_on_site_at && <span className="inline-flex items-center gap-0.5 text-emerald-600"><LogIn className="w-3 h-3" />{format(new Date(assignment.arrived_on_site_at), 'HH:mm')}</span>}
-                                  {assignment.meterage > 0 && <span className="text-amber-600 font-medium">{assignment.meterage}m</span>}
-                                </div>
-                                {assignment.is_overtime && (
-                                  <span className="mt-1 inline-block text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">
-                                    OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
-                                  </span>
-                                )}
-                                {assignment.notes && (
-                                  <div className="mt-1 flex items-start gap-1 text-[10px] text-slate-500">
-                                    <StickyNote className="w-2.5 h-2.5 flex-shrink-0 mt-0.5" />
-                                    <span className="italic truncate">{assignment.notes}</span>
-                                  </div>
-                                )}
-                                {client && <p className="text-[10px] text-slate-400 mt-1">{client.name}</p>}
-                              </div>
-                            );
-                          })}
-                          </div>
-                          )}
-                          </div>
-                          );
-                          })}
-                          </div>
-                          )}
-                          </div>
-                          );
-                          })}
-                          </div>
+      {/* Mobile Day Cards — grouped by job */}
+      <div className="lg:hidden">
+        <RotaDayCards
+          days={days}
+          todayStr={todayStr}
+          rotas={rotas}
+          filteredStaff={filteredStaff}
+          staff={staff}
+          jobs={jobs}
+          teams={teams}
+          onEditAssignment={handleEditAssignment}
+          staffLoading={staffLoading}
+          staffError={staffError}
+          refetchStaff={refetchStaff}
+        />
+      </div>
                           </div>
                           );
                           }
