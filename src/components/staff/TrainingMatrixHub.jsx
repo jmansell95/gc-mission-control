@@ -19,10 +19,10 @@ import { CardGridSkeleton } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';
 
 const TRAINING_VIEWS = [
-  { id: 'cards', label: 'Cards' },
-  { id: 'calendar', label: 'Calendar' },
-  { id: 'courses', label: 'Courses' },
-  { id: 'providers', label: 'Providers' },
+  { id: 'cards', label: 'Cards', icon: Users },
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'courses', label: 'Courses', icon: BookOpen },
+  { id: 'providers', label: 'Providers', icon: Building2 },
 ];
 
 const ICON_MAP = { IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap };

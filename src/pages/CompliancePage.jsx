@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import {
   ShieldCheck, ShieldAlert, AlertTriangle, BarChart3, HardHat,
   CalendarDays, ExternalLink, Lock,
-  TrendingUp, FileX, Clock, Users,
+  TrendingUp, FileX, Clock, Users, Siren, Leaf,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
@@ -28,21 +28,21 @@ const SC_URL = 'https://app.safetyculture.com';
 const TABS = [
   {
     id: 'safety', label: 'Safety', icon: ShieldAlert, sub: [
-      { id: 'safety-hub', label: 'Safety Hub' },
-      { id: 'incidents', label: 'Incidents' },
-      { id: 'stats', label: 'H&S Stats' },
+      { id: 'safety-hub', label: 'Safety Hub', icon: ShieldAlert },
+      { id: 'incidents', label: 'Incidents', icon: Siren },
+      { id: 'stats', label: 'H&S Stats', icon: BarChart3 },
     ],
   },
   {
     id: 'readiness', label: 'Readiness', icon: ShieldCheck, sub: [
-      { id: 'readiness', label: 'Readiness Gate' },
-      { id: 'calendar', label: 'Calendar' },
+      { id: 'readiness', label: 'Readiness Gate', icon: ShieldCheck },
+      { id: 'calendar', label: 'Calendar', icon: CalendarDays },
     ],
   },
   {
     id: 'training-env', label: 'Training & Env', icon: HardHat, sub: [
-      { id: 'toolbox', label: 'Toolbox Talks' },
-      { id: 'environmental', label: 'Environmental' },
+      { id: 'toolbox', label: 'Toolbox Talks', icon: HardHat },
+      { id: 'environmental', label: 'Environmental', icon: Leaf },
     ],
   },
 ];

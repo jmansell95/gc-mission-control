@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -8,6 +9,7 @@ import {
   Truck, HardHat, ShieldCheck, Building2, Phone, User, FolderOpen,
   Loader2, RefreshCw, Gauge, ArrowRightLeft, Receipt,
   Send, CheckCircle2, CalendarClock, UsersRound, StickyNote, Briefcase, UserPlus,
+  ChevronRight, Navigation,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { getJobTypeLabel } from '@/utils/jobTeams';
@@ -232,6 +234,7 @@ function SetupChecklist({ job, rotas, hotelBookings }) {
  * status, type, name) is omitted here.
  */
 export default function JobContextView({ job, primaryType, assignedStaff, rotas, allStaff, client, contractor, suppliers, vehicles, hotelBookings, canSeeCosts, isDrillingJob, colors, statusBadge: sb, statusLabels: sl, startDate, endDate, jobTypes, subTab = 'overview' }) {
+  const navigate = useNavigate();
   const [activeActivity, setActiveActivity] = useState('all');
   const [showAssignStaff, setShowAssignStaff] = useState(false);
   const [showDisciplineEditor, setShowDisciplineEditor] = useState(false);
@@ -373,15 +376,25 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
             </div>
             {assignedVehicles.length > 0 ? (
               <div className="space-y-1.5">
-                {assignedVehicles.map(v => (
-                  <div key={v.id} className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center flex-shrink-0"><Truck className="w-3 h-3 text-slate-500" /></div>
-                    <div className="min-w-0">
+                {assignedVehicles.map(v => {
+                  const liveDriver = v.current_operator_name || v.geotab_driver_name;
+                  return (
+                  <button key={v.id} type="button" onClick={() => navigate(`/fleet?vehicle=${v.id}`)}
+                    className="w-full flex items-center gap-2 p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group text-left">
+                    <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center flex-shrink-0"><Truck className="w-3 h-3 text-slate-500 group-hover:text-[#2E5A1A] transition" /></div>
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs font-mono font-bold text-slate-900">{v.registration_number}</p>
                       <p className="text-[11px] text-slate-500 truncate">{v.name}</p>
+                      {liveDriver && (
+                        <p className="text-[10px] font-semibold text-emerald-600 flex items-center gap-0.5 truncate">
+                          <Navigation className="w-2.5 h-2.5 flex-shrink-0" /> {liveDriver}
+                        </p>
+                      )}
                     </div>
-                  </div>
-                ))}
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#2E5A1A] flex-shrink-0 transition" />
+                  </button>
+                  );
+                })}
                 {job.requisition_list_url && (
                   <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 mt-1.5 px-2.5 py-1.5 bg-[#2E5A1A]/10 text-[#2E5A1A] hover:bg-[#2E5A1A]/20 rounded-lg text-xs font-medium transition">
                     <FileText className="w-3 h-3" /> Requisition List

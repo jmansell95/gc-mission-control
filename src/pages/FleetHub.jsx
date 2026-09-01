@@ -20,7 +20,8 @@ import VehicleMaintenanceManager from '@/components/VehicleMaintenanceManager';
 export default function FleetHub() {
   const [searchParams] = useSearchParams();
   const focusVehicleId = searchParams.get('vehicle');
-  const [activeTab, setActiveTab] = useState(focusVehicleId ? 'live' : 'live');
+  const liveVehicleId = searchParams.get('liveVehicle');
+  const [activeTab, setActiveTab] = useState(focusVehicleId ? 'fleet' : 'live');
 
   const { data: vehicles = [] } = useScopedEntity('Vehicle', { queryKey: ['vehicles-fleet-hub'], sort: '-created_date', limit: 500 });
 
@@ -60,8 +61,8 @@ export default function FleetHub() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >
-      {activeTab === 'live' && <LiveTrackingTab initialVehicleId={focusVehicleId} />}
-      {activeTab === 'fleet' && <Vehicles />}
+      {activeTab === 'live' && <LiveTrackingTab initialVehicleId={liveVehicleId} />}
+      {activeTab === 'fleet' && <Vehicles focusVehicleId={focusVehicleId} />}
       {activeTab === 'maintenance' && <VehicleMaintenanceManager />}
     </HubShell>
   );

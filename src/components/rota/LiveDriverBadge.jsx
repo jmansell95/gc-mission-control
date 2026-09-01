@@ -21,7 +21,7 @@ export default function LiveDriverBadge({ vehicle }) {
     : 'live';
   return (
     <Link
-      to={`/fleet?vehicle=${vehicle.id}`}
+      to={`/fleet?liveVehicle=${vehicle.id}`}
       className="mt-1 flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#2E5A1A] text-white text-[10px] font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation"
       title={`Live tracking — ${vehicle.registration_number || vehicle.name}\nTap to open in Fleet Hub`}
     >

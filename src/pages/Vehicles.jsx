@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -46,9 +46,10 @@ function getVehicleStatus(v) {
  * Fleet tab — the vehicle card grid for the Fleet Hub.
  * (Live Tracking and Maintenance are now separate hub-level tabs.)
  */
-export default function Vehicles() {
+export default function Vehicles({ focusVehicleId }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const focusRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
   const [showNumbers, setShowNumbers] = useState(false);
@@ -134,7 +135,9 @@ export default function Vehicles() {
     return map;
   }, [staff]);
 
-  const filtered = vehicles.filter(v => {
+  const filtered = focusVehicleId
+    ? vehicles.filter(v => v.id === focusVehicleId)
+    : vehicles.filter(v => {
     const hasGeotab = v.geotab_sync_status === 'synced' || !!v.geotab_device_id;
     const hasHolman = v.holman_sync_status === 'synced' || !!v.holman_vehicle_id;
     if (sourceFilter === 'geotab' && !hasGeotab) return false;
@@ -155,6 +158,12 @@ export default function Vehicles() {
       driver.toLowerCase().includes(q)
     );
   });
+
+  useEffect(() => {
+    if (focusVehicleId && focusRef.current) {
+      focusRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [focusVehicleId, filtered]);
 
   return (
     <>
@@ -234,17 +243,22 @@ export default function Vehicles() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map(v => (
-            <FleetVehicleCard
-              key={v.id}
-              vehicle={v}
-              liveLocation={latestByVehicle[v.id]}
-              nextBooking={nextBookingByVehicle[v.id]}
-              driverName={staffByVehicle[v.assigned_staff_id]?.name || ''}
-              onSelect={setSelectedVehicle}
-              onBookMaintenance={() => { setMaintModalVehicleId(v.id); setShowMaintModal(true); }}
-            />
-          ))}
+          {filtered.map(v => {
+            const isFocus = focusVehicleId && v.id === focusVehicleId;
+            return (
+            <div key={v.id} ref={isFocus ? focusRef : null}
+              className={isFocus ? 'rounded-2xl ring-4 ring-[#8DC63F] ring-offset-2 animate-pop-in' : ''}>
+              <FleetVehicleCard
+                vehicle={v}
+                liveLocation={latestByVehicle[v.id]}
+                nextBooking={nextBookingByVehicle[v.id]}
+                driverName={staffByVehicle[v.assigned_staff_id]?.name || ''}
+                onSelect={setSelectedVehicle}
+                onBookMaintenance={() => { setMaintModalVehicleId(v.id); setShowMaintModal(true); }}
+              />
+            </div>
+            );
+          })}
         </div>
       )}
 

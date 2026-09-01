@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat } from 'lucide-react';
+import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat, KeyRound, BarChart3, ClipboardList, UserCog, CalendarClock, CalendarX, Package } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
@@ -42,27 +42,27 @@ const TAB_MAP = {
 const TABS = [
   {
     id: 'people', label: 'People', icon: Users, sub: [
-      { id: 'staff', label: 'Staff' },
-      { id: 'crews', label: 'Crews' },
-      { id: 'permission-groups', label: 'Permission Groups' },
-      { id: 'insights', label: 'Insights' },
+      { id: 'staff', label: 'Staff', icon: UserCheck },
+      { id: 'crews', label: 'Crews', icon: UsersRound },
+      { id: 'permission-groups', label: 'Permission Groups', icon: KeyRound },
+      { id: 'insights', label: 'Insights', icon: BarChart3 },
     ],
   },
   {
     id: 'time-pay', label: 'Time & Pay', icon: Clock, sub: [
-      { id: 'timesheets', label: 'Timesheets' },
-      { id: 'timesheet-delegation', label: 'Delegation' },
-      { id: 'holiday-accrual', label: 'Absence Accrual' },
-      { id: 'absences', label: 'Absences' },
+      { id: 'timesheets', label: 'Timesheets', icon: ClipboardList },
+      { id: 'timesheet-delegation', label: 'Delegation', icon: UserCog },
+      { id: 'holiday-accrual', label: 'Absence Accrual', icon: CalendarClock },
+      { id: 'absences', label: 'Absences', icon: CalendarX },
     ],
   },
   { id: 'training', label: 'Training', icon: GraduationCap },
   {
     id: 'contacts', label: 'Contacts', icon: Building2, sub: [
-      { id: 'clients', label: 'Clients' },
-      { id: 'contractors', label: 'Subcontractors' },
-      { id: 'suppliers', label: 'Suppliers' },
-      { id: 'agency', label: 'Agency' },
+      { id: 'clients', label: 'Clients', icon: Building2 },
+      { id: 'contractors', label: 'Subcontractors', icon: HardHat },
+      { id: 'suppliers', label: 'Suppliers', icon: Package },
+      { id: 'agency', label: 'Agency', icon: UserCog },
     ],
   },
 ];
