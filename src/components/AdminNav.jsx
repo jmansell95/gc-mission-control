@@ -16,6 +16,7 @@ import { useReadiness } from '@/hooks/useReadiness';
 import DivisionSwitcher from '@/components/DivisionSwitcher';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useGlobalScanner } from '@/contexts/GlobalScannerContext';
+import { useMobileApp } from '@/contexts/MobileAppContext';
 
 export default function AdminNav({ activeSection, setActiveSection, onSettingsTabClick }) {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
   const { isComingSoon, isLocked } = useReadiness();
   const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
   const { openScanner } = useGlobalScanner();
+  const { isMobileApp } = useMobileApp();
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px) and (max-width: 1279px)');
@@ -122,6 +124,10 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
     })
     .map(item => ({ ...item, comingSoon: isComingSoon(item.id) }));
   const canViewSchedule = canAccessSection(profile, 'staff_schedule');
+
+  // Mobile app mode: the MobileAppShell provides the tab bar and More sheet.
+  // AdminNav renders nothing — no sidebar, no mobile header, no drawer.
+  if (isMobileApp) return null;
 
   const desktopNav = (
     <>

@@ -10,6 +10,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import RouteGuard from '@/components/RouteGuard';
 import AppLayout from '@/components/AppLayout';
 import HubReadinessGate from '@/components/HubReadinessGate';
+import { MobileAppProvider } from '@/contexts/MobileAppContext';
+import AppShell from '@/components/mobile/AppShell';
 import Home from './pages/Home';
 import PendingAccess from './pages/PendingAccess';
 import Onboarding from './pages/Onboarding';
@@ -94,6 +96,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <MobileAppProvider>
     <StaffAssistantProvider>
       <SchedulingAssistantProvider>
         <DrillingIntelligenceProvider>
@@ -178,6 +181,7 @@ const AuthenticatedApp = () => {
         </DrillingIntelligenceProvider>
       </SchedulingAssistantProvider>
     </StaffAssistantProvider>
+    </MobileAppProvider>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useMobileApp } from '@/contexts/MobileAppContext';
 import AdminNav from '@/components/AdminNav';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
@@ -35,6 +36,11 @@ const ROUTE_SECTION_MAP = {
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMobileApp } = useMobileApp();
+
+  // Mobile app mode: the MobileAppShell provides the tab bar and chrome.
+  // AppLayout becomes a pass-through so there's exactly one navigation layer.
+  if (isMobileApp) return <Outlet />;
 
   const activeSection = ROUTE_SECTION_MAP[location.pathname] || '';
 

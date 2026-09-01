@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useMobileApp } from '@/contexts/MobileAppContext';
 
 /**
  * Detects mobile devices and redirects field crew pages to their /m/ equivalents.
@@ -21,10 +22,15 @@ const FIELD_ROUTE_MAP = {
 
 export default function MobileFieldRedirect({ children }) {
   const location = useLocation();
+  const { isMobileApp } = useMobileApp();
 
   // Only redirect for the four field routes
   const target = FIELD_ROUTE_MAP[location.pathname];
   if (!target) return children;
+
+  // Mobile app mode: the unified MobileAppShell handles all routes —
+  // no redirect to /m/ needed.
+  if (isMobileApp) return children;
 
   // Check if this is a phone (not tablet). Tablets (768px+) keep the responsive layout.
   const isPhone = typeof window !== 'undefined' && window.innerWidth < 768;
