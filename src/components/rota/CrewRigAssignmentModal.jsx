@@ -321,7 +321,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                     <Select value={rigId} onValueChange={setRigId}>
                       <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select Rig" /></SelectTrigger>
                       <SelectContent>
-                        {activeRigs.map(r => <SelectItem key={r.id} value={r.id}>{r.name}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>)}
+                        {activeRigs.map(r => <SelectItem key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -409,7 +409,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                   <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select replacement rig" /></SelectTrigger>
                   <SelectContent>
                     {activeRigs.filter(r => r.id !== selectedPairing?.rig_id).map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>
+                      <SelectItem key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
