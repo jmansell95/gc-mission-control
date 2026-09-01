@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Users, Briefcase, Grid3x3, Calendar, MapPin } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
 import CommandCentreGrid from '@/components/dashboard/CommandCentreGrid';
-import AiInsightsWidget from '@/components/dashboard/AiInsightsWidget';
 import FieldPrioritiesWidget from '@/components/dashboard/FieldPrioritiesWidget';
 import ExceptionMonitorWidget from '@/components/dashboard/ExceptionMonitorWidget';
 import RigPerformanceWidget from '@/components/dashboard/RigPerformanceWidget';
@@ -92,7 +91,6 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
     'mission-control':    () => <MissionControlStrip onNavigate={onNavigate} />,
     'field-priorities':    () => <FieldPrioritiesWidget onNavigate={onNavigate} />,
     'exception-monitor':   () => <ExceptionMonitorWidget onNavigate={onNavigate} />,
-    'ai-insights':         () => <AiInsightsWidget onNavigate={onNavigate} />,
     'stat-outstanding':    () => <OutstandingInvoicesTile onNavigate={onNavigate} />,
     'stat-burn-rate':      () => <BurnRateTile onNavigate={onNavigate} />,
     'stat-overdue-actions':() => <OverdueActionsTile onNavigate={onNavigate} />,

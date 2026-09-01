@@ -1,6 +1,6 @@
 import {
   Briefcase, Percent, ClipboardCheck, ShieldAlert, Drill, Radio,
-  Radar, AlertTriangle, AlertOctagon, Sparkles, PoundSterling, Gauge, ShieldCheck,
+  Radar, AlertTriangle, AlertOctagon, PoundSterling, Gauge, ShieldCheck,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -31,7 +31,6 @@ export const BLOCK_REGISTRY = {
   'rigs-on-site':         { title: 'Rigs on Site Today',    icon: Drill,           rail: 'right', defaultSize: 'xl' },
   'site-snapshot':        { title: 'Active Sites',          icon: Radio,           rail: 'right', defaultSize: 'xl' },
   'mission-control':      { title: 'Mission Control',       icon: Radar,           rail: 'right', defaultSize: 'xl' },
-  'ai-insights':          { title: 'AI Weekly Insights',    icon: Sparkles,       rail: 'right', defaultSize: 'md' },
 };
 
 export const DEFAULT_SECTION_LAYOUT = {
@@ -41,7 +40,7 @@ export const DEFAULT_SECTION_LAYOUT = {
     'stat-overdue-actions', 'stat-red-alerts', 'stat-fleet-compliance',
     'field-priorities', 'exception-monitor',
   ],
-  right: ['rigs-on-site', 'site-snapshot', 'mission-control', 'ai-insights'],
+  right: ['rigs-on-site', 'site-snapshot', 'mission-control'],
 };
 
 export const DEFAULT_HIDDEN_BLOCKS = [];
