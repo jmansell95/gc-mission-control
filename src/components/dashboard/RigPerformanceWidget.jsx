@@ -3,11 +3,21 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Drill, Ruler, Loader2, Wrench, ChevronRight,
-  PoundSterling, HardHat, Briefcase, Clock, CheckCircle2, MapPin,
+  PoundSterling, HardHat, Briefcase, Clock, CheckCircle2, MapPin, Navigation, Satellite,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
+
+// Haversine distance between two lat/lng points, in metres
+function haversineMeters(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 const fmtGBP = (v) => {
   if (v == null || isNaN(v)) return '£0';
@@ -52,12 +62,25 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const { data: jobAssetAssignments = [] } = useQuery({ queryKey: ['job-asset-assignments-rig-perf'], queryFn: () => base44.entities.JobAssetAssignment.list('-created_date', 500) });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
+  const { data: allVehicles = [] } = useQuery({ queryKey: ['vehicles-rig-perf'], queryFn: () => base44.entities.Vehicle.list() });
   const { data: teams = [] } = useQuery({ queryKey: ['teams-rig-perf'], queryFn: () => base44.entities.Team.list() });
   const { data: rateCards = [] } = useQuery({
     queryKey: ['rate-card-items-rig-perf'],
     queryFn: () => base44.entities.RateCardItem.list(),
     staleTime: 60000,
   });
+
+  // Live Geotab vehicle positions — reused from Fleet Hub live tracking
+  const { data: liveData } = useQuery({
+    queryKey: ['geotab-live-locations'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getVehicleLocationHistory', { mode: 'live_fast', limit: 500 });
+      return res?.data ?? res;
+    },
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+  const liveVehicles = liveData?.vehicles || [];
 
   // Crew day rate per rig from the Master Price List (rig + crew combined)
   const rigCrewDayRate = useMemo(() => {
@@ -116,17 +139,47 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
       const crewDayRate = drillDisc.unit_price || job?.unit_price || rigCrewDayRate[rigId] || 0;
       let revMethod = drillDisc.revenue_method || job?.revenue_method || 'day_rate';
 
-      // Determine shift state
+      // Determine shift state — GPS/geofence first, fall back to manual tap
       const hasStarted = data.rotaAssignments.some(a => a.started_at || a.arrived_on_site_at);
       const isCompleted = data.rotaAssignments.some(a => a.status === 'completed' || a.completed_at);
       const hasRotaToday = data.rotaAssignments.length > 0;
 
+      // Resolve rig → vehicle from today's rota assignments
+      const vehicleId = data.rotaAssignments.find(a => a.vehicle_id)?.vehicle_id;
+      const vehicleEntity = vehicleId ? allVehicles.find(v => v.id === vehicleId) : null;
+      // Match live Geotab data by entity ID, Geotab device ID, or registration number
+      const liveVehicle = vehicleId ? liveVehicles.find(v =>
+        v.vehicle_id === vehicleId || v.id === vehicleId ||
+        (vehicleEntity?.geotab_device_id && v.vehicle_id === vehicleEntity.geotab_device_id) ||
+        (vehicleEntity?.registration_number && v.registration_number === vehicleEntity.registration_number)
+      ) : null;
+      const hasGps = !!liveVehicle && liveVehicle.lat != null && liveVehicle.lng != null;
+
+      // GPS geofence detection — is the rig's vehicle inside the job geofence?
+      let gpsState = null;
+      if (hasGps && job && job.site_lat != null && job.site_lng != null) {
+        const distance = haversineMeters(liveVehicle.lat, liveVehicle.lng, job.site_lat, job.site_lng);
+        const radius = job.geofence_radius_override || 200; // 200m default site geofence
+        if (distance <= radius) {
+          gpsState = 'on_site';
+        } else if (liveVehicle.ignition_on && (liveVehicle.speed_kph || 0) > 5) {
+          gpsState = 'en_route';
+        }
+        data.gpsDistance = Math.round(distance);
+      }
+
       let state = 'assigned';
       if (hasRotaToday) {
         if (isCompleted) state = 'completed';
-        else if (hasStarted) state = 'on_site';
+        else if (gpsState === 'on_site') state = 'on_site';
+        else if (gpsState === 'en_route') state = 'en_route';
+        else if (hasStarted) state = 'on_site'; // fall back to manual crew tap
         else state = 'scheduled';
       }
+
+      data.hasGps = hasGps;
+      data.gpsState = gpsState;
+      data.liveVehicle = liveVehicle;
 
       // Planned shift hours from first rota assignment's start/end time
       let plannedShiftHours = 8;
@@ -228,13 +281,17 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         plannedShiftHours: data.plannedShiftHours,
         shiftStart: data.shiftStart,
         hasRotaToday: data.hasRotaToday,
+        hasGps: data.hasGps,
+        gpsState: data.gpsState,
+        liveVehicle: data.liveVehicle,
+        gpsDistance: data.gpsDistance,
         firstAssignment: data.rotaAssignments[0],
       };
     }).sort((a, b) => {
-      const stateOrder = { completed: 0, on_site: 1, scheduled: 2, assigned: 3 };
+      const stateOrder = { completed: 0, on_site: 1, en_route: 2, scheduled: 3, assigned: 4 };
       return (stateOrder[a.state] - stateOrder[b.state]) || (b.revenue - a.revenue);
     });
-  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, rigCrewDayRate, now]);
+  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, allVehicles, rigCrewDayRate, now, liveVehicles]);
 
   const drillingCrewsOut = useMemo(() => {
     const jobsWithRigs = new Set(
@@ -256,7 +313,9 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const totalMeterage = rigStats.reduce((sum, r) => sum + r.meterage, 0);
   const activeRigCount = rigStats.length;
   const onSiteCount = rigStats.filter(r => r.state === 'on_site').length;
+  const enRouteCount = rigStats.filter(r => r.state === 'en_route').length;
   const scheduledCount = rigStats.filter(r => r.state === 'scheduled').length;
+  const gpsCount = rigStats.filter(r => r.hasGps).length;
 
   if (isLoading || rigsLoading) {
     return (
@@ -308,8 +367,9 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             </div>
             <div>
               <h3 className="text-sm font-bold">Rigs on Site Today</h3>
-              <p className="text-[11px] text-white/70">
-                {format(new Date(), 'EEE dd MMM')} · {onSiteCount} on site{scheduledCount > 0 ? ` · ${scheduledCount} scheduled` : ''}
+              <p className="text-[11px] text-white/70 flex items-center gap-1.5">
+                {format(new Date(), 'EEE dd MMM')} · {onSiteCount} on site{enRouteCount > 0 ? ` · ${enRouteCount} en route` : ''}{scheduledCount > 0 ? ` · ${scheduledCount} scheduled` : ''}
+                {gpsCount > 0 && <span className="inline-flex items-center gap-0.5"><Satellite className="w-2.5 h-2.5" />GPS</span>}
               </p>
             </div>
           </div>
@@ -326,12 +386,15 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         {rigStats.map((stat, i) => {
           const isScheduled = stat.state === 'scheduled';
           const isOnSite = stat.state === 'on_site';
+          const isEnRoute = stat.state === 'en_route';
           const isCompleted = stat.state === 'completed';
           const isAssigned = stat.state === 'assigned';
 
           // Visual state classes
           const cardBorder = isOnSite
             ? 'border-emerald-300 ring-1 ring-emerald-200'
+            : isEnRoute
+            ? 'border-amber-300 ring-1 ring-amber-200'
             : isCompleted
             ? 'border-emerald-400'
             : isScheduled
@@ -339,6 +402,8 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             : 'border-slate-200 border-dashed';
           const headerBg = isOnSite
             ? 'bg-gradient-to-br from-emerald-50 to-green-50'
+            : isEnRoute
+            ? 'bg-gradient-to-br from-amber-50 to-orange-50'
             : isCompleted
             ? 'bg-gradient-to-br from-emerald-50 to-emerald-100'
             : isScheduled
@@ -356,6 +421,10 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             subtitle = `Starts at ${stat.firstAssignment.start_time}`;
           } else if (isOnSite && stat.shiftStart) {
             subtitle = `On site · ${fmtDuration(now - stat.shiftStart)}`;
+          } else if (isOnSite) {
+            subtitle = 'On site';
+          } else if (isEnRoute) {
+            subtitle = stat.gpsDistance != null ? `En route · ${stat.gpsDistance}m from site` : 'En route to site';
           } else if (isCompleted) {
             subtitle = 'Shift complete';
           } else if (isAssigned) {
@@ -374,12 +443,14 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
               <div className={`px-3 py-2 ${headerBg} border-b border-slate-100`}>
                 <div className="flex items-center gap-1.5">
                   <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    isOnSite ? 'bg-emerald-500' : isCompleted ? 'bg-emerald-600' : isScheduled ? 'bg-slate-300' : 'bg-slate-200'
+                    isOnSite ? 'bg-emerald-500' : isEnRoute ? 'bg-amber-500' : isCompleted ? 'bg-emerald-600' : isScheduled ? 'bg-slate-300' : 'bg-slate-200'
                   }`}>
                     {isCompleted ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                     ) : isOnSite ? (
                       <Drill className="w-3.5 h-3.5 text-white" />
+                    ) : isEnRoute ? (
+                      <Navigation className="w-3.5 h-3.5 text-white" />
                     ) : (
                       <Clock className="w-3.5 h-3.5 text-slate-600" />
                     )}
@@ -388,18 +459,28 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
                   {stat.rig?.rig_type && stat.rig.rig_type !== 'n/a' && (
                     <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{stat.rig.rig_type}</span>
                   )}
+                  {!stat.hasGps && stat.hasRotaToday && (
+                    <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-slate-100 text-slate-400 uppercase flex-shrink-0" title="No GPS vehicle linked">No GPS</span>
+                  )}
                   {isOnSite && (
                     <span className="relative flex h-2 w-2 flex-shrink-0">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                   )}
+                  {isEnRoute && (
+                    <span className="relative flex h-2 w-2 flex-shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                  )}
                 </div>
                 {subtitle && (
                   <p className={`text-[9px] mt-1 flex items-center gap-1 ${
-                    isOnSite ? 'text-emerald-600 font-semibold' : isCompleted ? 'text-emerald-600 font-semibold' : 'text-slate-400'
+                    isOnSite ? 'text-emerald-600 font-semibold' : isEnRoute ? 'text-amber-600 font-semibold' : isCompleted ? 'text-emerald-600 font-semibold' : 'text-slate-400'
                   }`}>
                     {isOnSite && <MapPin className="w-2.5 h-2.5" />}
+                    {isEnRoute && <Navigation className="w-2.5 h-2.5" />}
                     {isScheduled && <Clock className="w-2.5 h-2.5" />}
                     {subtitle}
                   </p>

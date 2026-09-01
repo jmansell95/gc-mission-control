@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Users, Briefcase, Grid3x3, Calendar, MapPin, Percent, ClipboardCheck, ShieldAlert } from 'lucide-react';
+import { Users, Briefcase, Grid3x3, Calendar, MapPin } from 'lucide-react';
 import { format, startOfWeek, addDays } from 'date-fns';
-import { GLOBAL_ONLY_WIDGETS } from '@/components/dashboard/registry';
-import CustomisableWidgetGrid from '@/components/dashboard/CustomisableWidgetGrid';
+import CommandCentreGrid from '@/components/dashboard/CommandCentreGrid';
 import AiInsightsWidget from '@/components/dashboard/AiInsightsWidget';
 import FieldPrioritiesWidget from '@/components/dashboard/FieldPrioritiesWidget';
 import ExceptionMonitorWidget from '@/components/dashboard/ExceptionMonitorWidget';
-import CommandCentreSection from '@/components/dashboard/CommandCentreSection';
 import RigPerformanceWidget from '@/components/dashboard/RigPerformanceWidget';
+import MissionControlStrip from '@/components/dashboard/MissionControlStrip';
+import {
+  ActiveJobsTile, CrewUtilisationTile, TimesheetQueueTile,
+  OutstandingInvoicesTile, BurnRateTile,
+  OverdueActionsTile, RedAlertsTile, FleetComplianceTile,
+} from '@/components/dashboard/DashboardStatTiles';
 import { useJobFilter } from '@/components/dashboard/JobFilterContext';
 import JobSelectorBar from '@/components/dashboard/JobSelectorBar';
 import QuickActionBar from '@/components/dashboard/QuickActionBar';
@@ -74,17 +78,27 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
 
   const openJobDrawer = (job) => setDrawerJob(job);
 
-  const renderWidget = (widgetId) => {
-    switch (widgetId) {
-      case 'field-priorities': return <FieldPrioritiesWidget onNavigate={onNavigate} />;
-      case 'exception-monitor': return <ExceptionMonitorWidget onNavigate={onNavigate} />;
-      case 'ai-insights': return <AiInsightsWidget onNavigate={onNavigate} />;
-      default: return null;
-    }
-  };
-
-  const canShowWidget = (id) => isAllJobs || !GLOBAL_ONLY_WIDGETS.includes(id);
   const selectedJob = !isAllJobs ? jobs.find(j => j.id === selectedJobId) : null;
+
+  // Block renderers — each block ID maps to its component. All blocks are
+  // self-contained (fetch their own data) so the CommandCentreGrid can
+  // drag/resize/hide them without any data plumbing from this page.
+  const blockRenderers = {
+    'stat-active-jobs':    () => <ActiveJobsTile onNavigate={onNavigate} />,
+    'stat-crew-util':      () => <CrewUtilisationTile onNavigate={onNavigate} />,
+    'stat-timesheet-queue':() => <TimesheetQueueTile onNavigate={onNavigate} />,
+    'rigs-on-site':        () => <RigPerformanceWidget onJobBreakdown={(job) => onSelectJob?.(job, 'financials')} />,
+    'site-snapshot':       () => <SiteSnapshotGrid onSelectJob={openJobDrawer} onNavigate={onNavigate} />,
+    'mission-control':    () => <MissionControlStrip onNavigate={onNavigate} />,
+    'field-priorities':    () => <FieldPrioritiesWidget onNavigate={onNavigate} />,
+    'exception-monitor':   () => <ExceptionMonitorWidget onNavigate={onNavigate} />,
+    'ai-insights':         () => <AiInsightsWidget onNavigate={onNavigate} />,
+    'stat-outstanding':    () => <OutstandingInvoicesTile onNavigate={onNavigate} />,
+    'stat-burn-rate':      () => <BurnRateTile onNavigate={onNavigate} />,
+    'stat-overdue-actions':() => <OverdueActionsTile onNavigate={onNavigate} />,
+    'stat-red-alerts':     () => <RedAlertsTile onNavigate={onNavigate} />,
+    'stat-fleet-compliance':() => <FleetComplianceTile onNavigate={onNavigate} />,
+  };
 
   return (
     <div>
@@ -239,35 +253,15 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
         </div>
       )}
 
-      {/* Command Centre — stat tiles + Mission Control strip merged into one cohesive section */}
-      {isAllJobs && (
-        <CommandCentreSection
-          onNavigate={onNavigate}
-          monitors={[
-            { key: 'active', icon: Briefcase, label: 'Active Jobs', value: activeJobs.length, sublabel: `${scopedJobs.length} total in system`, tone: 'emerald', nav: 'jobs', live: true },
-            { key: 'util', icon: Percent, label: 'Crew Utilisation', value: utilizationPct, unit: '%', sublabel: `${staffToday} of ${activeStaff} active crew on site`, tone: 'blue', nav: 'rota', trend: staffToday > 0 ? 'up' : 'down' },
-            { key: 'ts', icon: ClipboardCheck, label: 'Timesheet Queue', value: pendingTs, sublabel: overdueSubmittedTs > 0 ? `${overdueSubmittedTs} overdue (>48h)` : 'All within target', tone: overdueSubmittedTs > 0 ? 'rose' : 'amber', nav: { section: 'staff', staffTab: 'timesheets' }, trend: overdueSubmittedTs > 0 ? 'up' : null },
-            { key: 'actions', icon: ShieldAlert, label: 'Overdue Actions', value: overdueActions, sublabel: scConnected ? (overdueActions > 0 ? 'Safety items past due' : 'No overdue safety actions') : 'SafetyCulture not connected', tone: overdueActions > 0 ? 'rose' : 'slate', nav: 'compliance', trend: overdueActions > 0 ? 'up' : 'down' },
-          ]}
-        />
-      )}
-
       <JobSelectorBar onSelectJob={onSelectJob} />
 
-      {/* Rig Performance — today's meterage & revenue per rig with crew */}
+      {/* Command Centre — unified customisable grid with three sections.
+          Every block (stat tiles, rigs on site, site snapshot, mission
+          control, insight widgets) is drag-to-reorder, resizable, and
+          hideable. Layout persists to the user's DashboardLayout record. */}
       {isAllJobs && (
-        <div className="mb-4">
-          <RigPerformanceWidget onJobBreakdown={(job) => onSelectJob?.(job, 'financials')} />
-        </div>
+        <CommandCentreGrid blockRenderers={blockRenderers} />
       )}
-
-      {/* Live Site Activity — visual snapshot grid of active sites */}
-      {isAllJobs && (
-        <SiteSnapshotGrid onSelectJob={openJobDrawer} onNavigate={onNavigate} />
-      )}
-
-      {/* Customisable widget grid — drag to reorder, toggle visibility */}
-      <CustomisableWidgetGrid renderWidget={renderWidget} canShowWidget={canShowWidget} />
 
       {/* Job Quick Drawer — slide-out drill-down without leaving the dashboard */}
       <JobQuickDrawer job={drawerJob} onClose={() => setDrawerJob(null)} onOpenFullDetails={onSelectJob} />

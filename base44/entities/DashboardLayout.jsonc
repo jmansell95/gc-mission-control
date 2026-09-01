@@ -6,12 +6,53 @@
       "type": "string",
       "description": "Staff member this dashboard layout belongs to"
     },
+    "section_layout": {
+      "type": "object",
+      "description": "Command Centre section layout \u2014 maps each section ID ('operations', 'financial', 'safety') to an ordered array of block IDs in that section. Controls which blocks appear in which section and their order. Blocks can be dragged between sections via the Customise Dashboard editor.",
+      "properties": {
+        "operations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "financial": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "safety": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "block_sizes": {
+      "type": "object",
+      "description": "Map of block ID to size ('sm', 'md', 'lg', 'xl'). Controls how many grid columns each block spans on large screens. 'sm' = 1 col (quarter), 'md' = 2 cols (half, default), 'lg' = 3 cols, 'xl' = 4 cols (full width). Stored so each user's sizing preference persists across logins.",
+      "default": {}
+    },
+    "hidden_blocks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Block IDs that are currently hidden via the Customise Dashboard panel. These stay in section_layout so their position is preserved when toggled back on, but are not rendered."
+    },
     "widget_order": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Ordered list of all known widget IDs (visible + hidden). Controls the drag-and-drop arrangement of widgets on the dashboard."
+      "description": "DEPRECATED \u2014 kept for backward compatibility with the old CustomisableWidgetGrid. Now derived from section_layout (all sections concatenated). The Command Centre grid uses section_layout instead."
     },
     "hidden_widgets": {
       "type": "array",
@@ -19,11 +60,11 @@
         "type": "string"
       },
       "default": [],
-      "description": "Widget IDs that are currently hidden via the Customise panel. These stay in widget_order so their position is preserved when toggled back on, but are not rendered."
+      "description": "DEPRECATED \u2014 kept for backward compatibility. Use hidden_blocks instead."
     },
     "widget_sizes": {
       "type": "object",
-      "description": "Map of widget ID to size ('sm', 'md', 'lg'). Controls how many grid columns each widget spans on large screens. 'sm' = quarter width (1 col), 'md' = half width (2 cols, default), 'lg' = full width (4 cols). Stored so each user's sizing preference persists across logins."
+      "description": "DEPRECATED \u2014 kept for backward compatibility. Use block_sizes instead."
     }
   },
   "required": [
