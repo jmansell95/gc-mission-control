@@ -139,10 +139,17 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
       const crewDayRate = drillDisc.unit_price || job?.unit_price || rigCrewDayRate[rigId] || 0;
       let revMethod = drillDisc.revenue_method || job?.revenue_method || 'day_rate';
 
-      // Determine shift state — GPS/geofence first, fall back to manual tap
+      // Determine shift state — delivery sign-off (JAA on_site) is primary,
+      // GPS geofence is the 'en route' indicator only (arriving, not yet signed
+      // off), manual crew tap is the last-resort fallback when no delivery exists.
       const hasStarted = data.rotaAssignments.some(a => a.started_at || a.arrived_on_site_at);
       const isCompleted = data.rotaAssignments.some(a => a.status === 'completed' || a.completed_at);
       const hasRotaToday = data.rotaAssignments.length > 0;
+
+      // Delivery sign-off: does this rig have an active on_site JobAssetAssignment at the job?
+      const hasOnSiteJAA = jobAssetAssignments.some(jaa =>
+        jaa.asset_id === rigId && jaa.job_id === job?.id && jaa.status === 'on_site'
+      );
 
       // Resolve rig → vehicle from today's rota assignments
       const vehicleId = data.rotaAssignments.find(a => a.vehicle_id)?.vehicle_id;
@@ -169,13 +176,16 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
       }
 
       let state = 'assigned';
+      let onSiteSource = null;
       if (hasRotaToday) {
         if (isCompleted) state = 'completed';
-        else if (gpsState === 'on_site') state = 'on_site';
+        else if (hasOnSiteJAA) { state = 'on_site'; onSiteSource = 'delivered'; } // delivery sign-off — primary, locked
+        else if (gpsState === 'on_site') state = 'en_route'; // GPS near site — arriving (not yet signed off)
         else if (gpsState === 'en_route') state = 'en_route';
-        else if (hasStarted) state = 'on_site'; // fall back to manual crew tap
+        else if (hasStarted) { state = 'on_site'; onSiteSource = 'manual'; } // manual crew tap fallback
         else state = 'scheduled';
       }
+      data.onSiteSource = onSiteSource;
 
       data.hasGps = hasGps;
       data.gpsState = gpsState;
@@ -285,6 +295,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         gpsState: data.gpsState,
         liveVehicle: data.liveVehicle,
         gpsDistance: data.gpsDistance,
+        onSiteSource: data.onSiteSource,
         firstAssignment: data.rotaAssignments[0],
       };
     }).sort((a, b) => {
@@ -458,6 +469,9 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
                   <p className="text-xs font-bold text-slate-900 truncate flex-1">{stat.rig?.name || 'Unknown Rig'}</p>
                   {stat.rig?.rig_type && stat.rig.rig_type !== 'n/a' && (
                     <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{stat.rig.rig_type}</span>
+                  )}
+                  {stat.onSiteSource === 'delivered' && (
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 uppercase flex-shrink-0 inline-flex items-center gap-0.5"><CheckCircle2 className="w-2 h-2" />Delivered</span>
                   )}
                   {!stat.hasGps && stat.hasRotaToday && (
                     <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-slate-100 text-slate-400 uppercase flex-shrink-0" title="No GPS vehicle linked">No GPS</span>

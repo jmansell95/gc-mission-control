@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
+import QRCode from 'qrcode';
 import {
   X, Cog, Wrench, Package, Truck, Anchor, Plug, ShieldCheck, ShieldAlert, ShieldX,
   HelpCircle, Pencil, Link2, Unlink, Plus, Save, ChevronRight, ScanLine, Layers, RefreshCw,
-  Warehouse, MapPin, CalendarClock, Activity, Hash, Settings,
+  Warehouse, MapPin, CalendarClock, Activity, Hash, Settings, Printer,
 } from 'lucide-react';
 import { safeFormat } from '@/utils/format';
 import { rollupCompliance, COMPLIANCE_META, ASSET_TYPE_META, daysUntil } from '@/utils/rigRollup';
@@ -82,6 +83,19 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
 
   const depotTagged = (rig.storage_location || '').toLowerCase().match(/depot|yard|dartford/);
 
+  const printQrLabel = async () => {
+    try {
+      const qrData = rig.qr_code || rig.serial_number || rig.name || rig.id;
+      const qrDataUrl = await QRCode.toDataURL(qrData, { width: 300, margin: 2, errorCorrectionLevel: 'M', color: { dark: '#000000', light: '#FFFFFF' } });
+      const w = window.open('', '_blank', 'width=800,height=600');
+      if (!w) return;
+      w.document.write(`<html><head><title>QR Label — ${rig.name || 'Rig'}</title><style>@page{margin:10mm;size:A4;}*{box-sizing:border-box;}body{font-family:Inter,sans-serif;margin:0;padding:0;display:flex;align-items:center;justify-content:center;min-height:100vh}.label{border:2px solid #2E5A1A;border-radius:8px;padding:6mm;text-align:center;width:70mm}.label img{width:50mm;height:50mm;display:block;margin:0 auto}.name{font-size:13px;font-weight:700;color:#1c4a12;margin-top:3mm}.fleet{font-size:10px;color:#475569;font-family:monospace;margin-top:1mm}</style></head><body><div class="label"><img src="${qrDataUrl}" alt="QR" /><div class="name">${rig.name || 'Rig'}</div>${rig.fleet_number ? `<div class="fleet">Fleet: ${rig.fleet_number}</div>` : ''}<div class="fleet">Scan with GC app</div></div></body></html>`);
+      w.document.close();
+      w.focus();
+      setTimeout(() => w.print(), 400);
+    } catch (e) { console.error('QR print failed:', e); }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-8 sm:pt-4">
       <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-md" onClick={onClose} />
@@ -103,6 +117,9 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <MasterBadge master={rollup.master} />
+              <button onClick={printQrLabel} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-lg text-xs font-semibold transition backdrop-blur-sm">
+                <Printer className="w-3.5 h-3.5" /> Print QR
+              </button>
               {onEdit && (
                 <button onClick={() => onEdit(rig)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white rounded-lg text-xs font-semibold transition backdrop-blur-sm">
                   <Pencil className="w-3.5 h-3.5" /> Edit

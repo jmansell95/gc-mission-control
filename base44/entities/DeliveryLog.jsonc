@@ -53,6 +53,10 @@
       "type": "string",
       "description": "Comma-separated IDs of JobCostItem groups linked to this delivery \u2014 used to auto-populate items and track which material sets are on this load"
     },
+    "linked_rig_ids": {
+      "type": "string",
+      "description": "Comma-separated SiteAsset IDs of rigs being moved by this delivery. Set by the dispatcher when creating a rig delivery/collection so that delivery sign-off stamps the rig on-site (site_delivery) or releases it back to the yard (supplier_collection). When blank on a site delivery, the sign-off falls back to stamping every rig currently assigned to the job."
+    },
     "sample_ids": {
       "type": "string",
       "description": "Comma-separated Sample entity IDs linked to this delivery task. Set when a driver is collecting samples from site or delivering them to a laboratory. Drives the sample checklist shown in the sign-off modal \u2014 the driver must tick 'all samples accounted' before completing."

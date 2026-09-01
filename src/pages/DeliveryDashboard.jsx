@@ -281,6 +281,13 @@ export default function DeliveryDashboard() {
         await base44.functions.invoke('createDeliveryTimesheetEntry', { delivery_id: deliveryId });
       } catch (e) { console.error('Delivery timesheet creation error:', e); }
 
+      // Stamp rig on-site state from the delivery sign-off (site delivery → on
+      // site, collection → release to yard). Best-effort — never blocks the
+      // sign-off itself.
+      try {
+        await base44.functions.invoke('stampRigOnSiteFromDelivery', { delivery_id: deliveryId });
+      } catch (e) { console.error('Rig on-site stamp error:', e); }
+
       queryClient.invalidateQueries({ queryKey: ['my-deliveries'] });
 
       // Surface the next stop so the driver knows where to go next.

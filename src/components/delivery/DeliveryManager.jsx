@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Truck, Plus, X, Package, MapPin, User, Phone, Calendar, FileText, ClipboardList, PoundSterling, Route, ToggleRight, ToggleLeft, AlertTriangle, Boxes, ExternalLink, Weight, FlaskConical } from 'lucide-react';
+import { Truck, Plus, X, Package, MapPin, User, Phone, Calendar, FileText, ClipboardList, PoundSterling, Route, ToggleRight, ToggleLeft, AlertTriangle, Boxes, ExternalLink, Weight, FlaskConical, Drill } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton, EmptyState } from '@/components/StateViews';
@@ -41,7 +41,8 @@ export default function DeliveryManager({ jobId, jobName }) {
     billing_rule_id: '',
     weight_kg: '',
     volume_m3: '',
-    linked_cost_item_ids: []
+    linked_cost_item_ids: [],
+    linked_rig_ids: []
   });
 
   const { data: deliveries = [], isLoading } = useQuery({
@@ -55,6 +56,7 @@ export default function DeliveryManager({ jobId, jobName }) {
 
   const { data: staff = [] } = useQuery({ queryKey: ['delivery-staff'], queryFn: () => base44.entities.Staff.filter({ is_active: true }) });
   const { data: vehicles = [] } = useQuery({ queryKey: ['delivery-vehicles-mgr'], queryFn: () => base44.entities.Vehicle.list() });
+  const { data: rigs = [] } = useQuery({ queryKey: ['delivery-rigs-mgr'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true, is_active: true }) });
   const { data: billingRules = [] } = useQuery({ queryKey: ['billing-rules-delivery'], queryFn: () => base44.entities.BillingRule.filter({ rule_type: 'delivery', is_active: true }) });
   const { data: profile } = useQuery({ queryKey: ['my-staff-profile'], queryFn: async () => { const res = await base44.functions.invoke('getMyStaffProfile'); return res.data; } });
   // Show cost-gated content while the profile is loading or errored (published
@@ -111,7 +113,8 @@ export default function DeliveryManager({ jobId, jobName }) {
         billing_rule_id: formData.billing_rule_id || '',
         weight_kg: formData.weight_kg === '' ? 0 : parseFloat(formData.weight_kg),
         volume_m3: formData.volume_m3 === '' ? 0 : parseFloat(formData.volume_m3),
-        linked_cost_item_ids: Array.isArray(formData.linked_cost_item_ids) ? formData.linked_cost_item_ids.join(',') : ''
+        linked_cost_item_ids: Array.isArray(formData.linked_cost_item_ids) ? formData.linked_cost_item_ids.join(',') : '',
+        linked_rig_ids: Array.isArray(formData.linked_rig_ids) ? formData.linked_rig_ids.join(',') : ''
       };
       let savedId = editingDeliveryId;
       if (editingDeliveryId) {
@@ -171,7 +174,8 @@ export default function DeliveryManager({ jobId, jobName }) {
         billing_rule_id: '',
         weight_kg: '',
         volume_m3: '',
-        linked_cost_item_ids: []
+        linked_cost_item_ids: [],
+        linked_rig_ids: []
       });
       setEditingDeliveryId(null);
       setShowForm(false);
@@ -201,7 +205,8 @@ export default function DeliveryManager({ jobId, jobName }) {
       billing_rule_id: d.billing_rule_id || '',
       weight_kg: d.weight_kg != null ? String(d.weight_kg) : '',
       volume_m3: d.volume_m3 != null ? String(d.volume_m3) : '',
-      linked_cost_item_ids: d.linked_cost_item_ids ? d.linked_cost_item_ids.split(',').filter(Boolean) : []
+      linked_cost_item_ids: d.linked_cost_item_ids ? d.linked_cost_item_ids.split(',').filter(Boolean) : [],
+      linked_rig_ids: d.linked_rig_ids ? d.linked_rig_ids.split(',').filter(Boolean) : []
     });
     setEditingDeliveryId(d.id);
     setShowForm(true);
@@ -317,6 +322,27 @@ export default function DeliveryManager({ jobId, jobName }) {
               {costItems.some(ci => ci.category === 'contractor_supplied') && (
                 <p className="text-[10px] text-slate-400 mt-1.5">Contractor-supplied items are hidden — the contractor delivers those directly.</p>
               )}
+            </div>
+          )}
+          {rigs.length > 0 && (formData.delivery_type === 'site_delivery' || formData.delivery_type === 'supplier_delivery' || formData.delivery_type === 'supplier_collection') && (
+            <div>
+              <label className="flex items-center gap-1 text-xs font-medium text-slate-600 mb-1"><Drill className="w-3 h-3" /> Rigs on this delivery</label>
+              <p className="text-[10px] text-slate-400 mb-1.5">Link the rig(s) being moved so sign-off stamps them on-site (delivery) or releases them back to the yard (collection).</p>
+              <div className="flex flex-wrap gap-1.5">
+                {rigs.map(r => {
+                  const isSelected = (formData.linked_rig_ids || []).includes(r.id);
+                  return (
+                    <button key={r.id} type="button" onClick={() => {
+                      const ids = formData.linked_rig_ids || [];
+                      const newIds = ids.includes(r.id) ? ids.filter(id => id !== r.id) : [...ids, r.id];
+                      setFormData(p => ({ ...p, linked_rig_ids: newIds }));
+                    }}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-600 hover:bg-slate-50'}`}>
+                      {r.name}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

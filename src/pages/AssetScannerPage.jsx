@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import UnifiedScanBasket from '@/components/assetcommand/UnifiedScanBasket';
 import AssetCommandDrawer from '@/components/assetcommand/AssetCommandDrawer';
+import RigRedirectModal from '@/components/assetcommand/RigRedirectModal';
 import DriveAwayModal from '@/components/assetcommand/DriveAwayModal';
 import ReportFaultModal from '@/components/assetcommand/ReportFaultModal';
 import BookToVehicleModal from '@/components/assetcommand/BookToVehicleModal';
@@ -56,6 +57,7 @@ export default function AssetScannerPage() {
   const [staffProfile, setStaffProfile] = useState(null);
   const [scanResult, setScanResult] = useState(null);
   const [commandAsset, setCommandAsset] = useState(null);
+  const [redirectRig, setRedirectRig] = useState(null);
   const [driveAwayAsset, setDriveAwayAsset] = useState(null);
   const [faultAsset, setFaultAsset] = useState(null);
   const [hubTab, setHubTab] = useState('scan');
@@ -99,6 +101,13 @@ export default function AssetScannerPage() {
     queryFn: () => base44.entities.SiteAsset.filter({ asset_type: 'trailer', is_active: true }),
   });
 
+  // Active rig on-site assignments — used to offer the 'Redirect to another
+  // site' action when a rig that's currently on-site is scanned.
+  const { data: rigOnSiteAssignments = [] } = useQuery({
+    queryKey: ['job-asset-assignments'],
+    queryFn: () => base44.entities.JobAssetAssignment.filter({ asset_type: 'rig', status: { $in: ['on_site', 'assigned'] } }),
+  });
+
   const { data: myAssignments = [] } = useQuery({
     queryKey: ['my-today-assignments', staffProfile?.id],
     queryFn: () => base44.entities.RotaAssignment.filter({ staff_id: staffProfile.id, assigned_date: new Date().toISOString().slice(0, 10) }),
@@ -125,6 +134,15 @@ export default function AssetScannerPage() {
   }, [outstandingAssignments, jobs]);
 
   const availableJobs = direction === 'signout' ? todaysJobs : returnJobs;
+
+  // When the scanned asset is a rig currently on-site at a job, offer a
+  // 'Redirect to another site' action so staff can self-redirect it via QR.
+  const scannedRigOnSite = scanResult?.is_rig
+    ? rigOnSiteAssignments.find(jaa => jaa.asset_id === scanResult.id && jaa.status === 'on_site')
+    : null;
+  const scannerExtraActions = scannedRigOnSite
+    ? [{ label: 'Redirect to another site', className: 'flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-3.5 rounded-xl text-sm font-bold bg-amber-100 text-amber-700 hover:bg-amber-200 transition active:scale-95', onClick: (asset) => setRedirectRig({ asset, jobId: scannedRigOnSite.job_id, jobName: scannedRigOnSite.job_name }) }]
+    : [];
 
   const quickStats = useMemo(() => {
     const active = assets.filter(a => a.is_active !== false);
@@ -641,6 +659,7 @@ export default function AssetScannerPage() {
           onAddToBasket={handleAddToBasket}
           onConfirmPanda={handleConfirmPandaLink}
           onCancelPanda={() => { setPendingPanda(null); setLastScan(''); }}
+          extraActions={scannerExtraActions}
         />
       )}
 
@@ -686,6 +705,18 @@ export default function AssetScannerPage() {
         <ConsumableUsageModal
           onClose={() => setShowConsumableModal(false)}
           onUsed={() => queryClient.invalidateQueries({ queryKey: ['consumable-stock-items'] })}
+        />
+      )}
+
+      {/* Rig self-redirect modal — opened when a rig that's on-site is scanned */}
+      {redirectRig && (
+        <RigRedirectModal
+          rig={redirectRig.asset}
+          currentJobId={redirectRig.jobId}
+          currentJobName={redirectRig.jobName}
+          staffProfile={staffProfile}
+          onClose={() => setRedirectRig(null)}
+          onDone={() => { setScanResult(null); setLastScan(''); queryClient.invalidateQueries({ queryKey: ['job-asset-assignments'] }); }}
         />
       )}
     </div>
