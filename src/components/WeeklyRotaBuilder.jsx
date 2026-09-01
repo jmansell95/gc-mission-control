@@ -1104,11 +1104,11 @@ export default function WeeklyRotaBuilder() {
                                   <Layers className="w-2.5 h-2.5" /> {sortedAssignments.length} JOBS
                                 </div>
                               )}
-                              {sortedAssignments.map((assignment, aIdx) => (
+                              {(!ls || ls.type === 'yard_depot') && sortedAssignments.map((assignment, aIdx) => (
                                 <Draggable draggableId={assignment.id} index={aIdx} key={assignment.id}>
                                   {(p) => (
                                     <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
-                                      className={`active:cursor-grabbing ${isMulti && aIdx > 0 ? 'border-l-2 border-l-[#2E5A1A]/30' : ''} ${ls ? 'opacity-40' : ''}`}>
+                                      className={`active:cursor-grabbing ${isMulti && aIdx > 0 ? 'border-l-2 border-l-[#2E5A1A]/30' : ''}`}>
                                       {assignment.assignment_type === 'yard_depot' && dif.deliveryInFront ? (
                                         <DepotDutyBadge assignment={assignment} onEdit={() => handleEditAssignment(assignment)} />
                                       ) : (
@@ -1254,8 +1254,9 @@ export default function WeeklyRotaBuilder() {
                             <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} vehicles={vehicles} />
                           </div>
                         )}
-                        {/* Stacked job cards */}
-                        <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''} ${ls ? 'opacity-40' : ''}`}>
+                        {/* Stacked job cards — hidden when on leave/bank holiday/shutdown so the rota stays clean */}
+                        {(!ls || ls.type === 'yard_depot') && (
+                        <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''}`}>
                           {staffAssignments.map((assignment, idx) => {
                             const job = jobs.find(j => j.id === assignment.job_id);
                             const vehicle = vehicles.find(v => v.id === assignment.vehicle_id);
@@ -1311,16 +1312,17 @@ export default function WeeklyRotaBuilder() {
                               </div>
                             );
                           })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                )}
-                </div>
-                );
-                })}
-                </div>
-                </div>
-                );
-                }
+                          </div>
+                          )}
+                          </div>
+                          );
+                          })}
+                          </div>
+                          )}
+                          </div>
+                          );
+                          })}
+                          </div>
+                          </div>
+                          );
+                          }
