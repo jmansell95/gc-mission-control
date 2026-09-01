@@ -138,7 +138,16 @@ export default async function (req: Request): Promise<Response> {
     const mittiSync = (mittiConfigs || []).map(c => c.last_webhook_status).find(Boolean) || null;
     const mittiActivity = hasAnySyncActivity(mittiConfigs || []);
     const klbHasCreds = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
-    const klbSync = (klbConfigs || []).map(c => c.last_webhook_status || c.last_ags_sync_status || c.last_pull_sync_status || c.last_sync_status || c.sync_status).find(Boolean) || null;
+    // Pick the best status across all KLB sync methods (webhook, AGS, pull) —
+    // prefer success over never so a working AGS sync isn't masked by a
+    // never-used real-time webhook status.
+    const klbAllStatuses = (klbConfigs || []).flatMap(c =>
+      [c.last_webhook_status, c.last_ags_sync_status, c.last_pull_sync_status]
+        .filter(Boolean).map(s => String(s).toLowerCase()));
+    const klbSync = klbAllStatuses.find(s => s === 'success' || s === 'synced' || s === 'ok')
+      || klbAllStatuses.find(s => s === 'partial')
+      || klbAllStatuses.find(s => s === 'failed' || s === 'error')
+      || klbAllStatuses[0] || null;
     const klbActivity = hasAnySyncActivity(klbConfigs || []);
 
     const integrations = INTEGRATION_SETTING_KEYS.filter(k => k !== 'integration_coming_soon').map(k => {
@@ -163,7 +172,7 @@ export default async function (req: Request): Promise<Response> {
         status = 'active'; // credentials saved = working (no sync to verify)
       } else if (syncStatus === 'success' || syncStatus === 'synced' || syncStatus === 'ok') {
         status = 'active';
-      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'never' || syncStatus === 'partial') {
+      } else if (syncStatus === 'failed' || syncStatus === 'error' || syncStatus === 'partial') {
         status = 'needs_attention';
       } else {
         // Credentials saved or sync activity exists but no cached sync status
