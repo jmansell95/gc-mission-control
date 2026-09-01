@@ -53,7 +53,7 @@ export default function ComingSoonManager() {
   const refresh = () => qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
 
   const setComingSoon = async (id, lock) => {
-    if (busyId) return;
+    if (busyId === id) return;
     setBusyId(id);
     try {
       // Read the current coming-soon record(s).
@@ -255,7 +255,7 @@ export default function ComingSoonManager() {
                 ) : isComingSoon ? (
                   <button
                     onClick={() => setComingSoon(item.id, false)}
-                    disabled={!!busyId}
+                    disabled={busyId === item.id}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition disabled:opacity-50 active:scale-95"
                   >
                     {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlock className="w-3.5 h-3.5" />}
@@ -264,7 +264,7 @@ export default function ComingSoonManager() {
                 ) : (
                   <button
                     onClick={() => setComingSoon(item.id, true)}
-                    disabled={!!busyId}
+                    disabled={busyId === item.id}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition disabled:opacity-50 active:scale-95"
                   >
                     {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}

@@ -87,18 +87,30 @@ export default function IntegrationsHub({ onNavigate }) {
   const saveComingSoon = async (idsToMark) => {
     setSaving(true);
     try {
-      // Write to the unified `integration_coming_soon` map (same store the
-      // Coming Soon Manager uses) so both surfaces stay in sync.
-      const map = {};
-      for (const id of idsToMark) map[id] = true;
+      // Read existing coming-soon flags and MERGE with the selection so
+      // locks not in the current selection are preserved (not replaced).
       const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      let map = {};
+      for (const rec of existing) {
+        if (rec.value && typeof rec.value === 'object') map = { ...map, ...rec.value };
+      }
+      // Apply the selection: selected IDs are locked, unselected IDs are removed.
+      // (idsToMark is the full set the user wants locked — everything else unlocks.)
+      const selectedSet = new Set(idsToMark);
+      for (const id of Object.keys(map)) {
+        if (!selectedSet.has(id)) delete map[id];
+      }
+      for (const id of idsToMark) map[id] = true;
       const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: map };
       if (existing[0]) {
         await base44.entities.AppSetting.update(existing[0].id, payload);
+        for (let i = 1; i < existing.length; i++) {
+          await base44.entities.AppSetting.delete(existing[i].id).catch(() => {});
+        }
       } else {
         await base44.entities.AppSetting.create(payload);
       }
-      await qc.invalidateQueries({ queryKey: ['settings-hub-stats'] });
+      await qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
       toast({
         title: 'Coming Soon badges updated',
         description: `${idsToMark.size} integration${idsToMark.size === 1 ? '' : 's'} marked as Coming Soon.`,
