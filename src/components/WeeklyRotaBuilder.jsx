@@ -26,6 +26,9 @@ import { sortAZ } from '@/utils';
 import { buildDriverStaffIds } from '@/utils/driverDetection';
 import RotaWeatherBadge from '@/components/rota/RotaWeatherBadge';
 import VirtualDepotCard from '@/components/rota/VirtualDepotCard';
+import DeliveryInFrontBanner from '@/components/rota/DeliveryInFrontBanner';
+import DepotDutyBadge from '@/components/rota/DepotDutyBadge';
+import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -1060,6 +1063,7 @@ export default function WeeklyRotaBuilder() {
                     const isMulti = sortedAssignments.length >= 2;
                     const isToday = dayStr === todayStr;
                     const ls = leaveState(member.id, dayStr);
+                    const dif = getDeliveryInFrontState({ deliveries, assignments: rotas, staffId: member.id, dateStr: dayStr });
                     return (
                       <td key={`${member.id}-${dayIdx}`} className={`px-2 py-2 align-top ${isToday ? 'bg-emerald-50/40' : ''} ${ls ? (ls.recurring ? 'bg-slate-100/70' : ls.type === 'yard_depot' ? 'bg-amber-50/60' : ls.type === 'bank_holiday' ? 'bg-blue-50/60' : ls.type === 'shutdown' ? 'bg-purple-50/60' : 'bg-red-50/60') : ''} group/cell`}>
                         <Droppable droppableId={`${member.id}|${dayStr}`}>
@@ -1079,6 +1083,10 @@ export default function WeeklyRotaBuilder() {
                                   {(ls.label || 'ON LEAVE').toUpperCase()}
                                 </div>
                               )}
+                              {/* Delivery-in-front banner — active delivery surfaces above depot duty */}
+                              {dif.deliveryInFront && (
+                                <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} />
+                              )}
                               {/* Multi-job count badge — shows when 2+ jobs are assigned */}
                               {isMulti && !ls && (
                                 <div className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-[#2E5A1A] text-white text-[9px] font-bold">
@@ -1090,7 +1098,11 @@ export default function WeeklyRotaBuilder() {
                                   {(p) => (
                                     <div ref={p.innerRef} {...p.draggableProps} {...p.dragHandleProps}
                                       className={`active:cursor-grabbing ${isMulti && aIdx > 0 ? 'border-l-2 border-l-[#2E5A1A]/30' : ''} ${ls ? 'opacity-40' : ''}`}>
-                                      {renderAssignmentCard(assignment, { isMulti, jobIndex: aIdx + 1 })}
+                                      {assignment.assignment_type === 'yard_depot' && dif.deliveryInFront ? (
+                                        <DepotDutyBadge assignment={assignment} onEdit={() => handleEditAssignment(assignment)} />
+                                      ) : (
+                                        renderAssignmentCard(assignment, { isMulti, jobIndex: aIdx + 1 })
+                                      )}
                                     </div>
                                   )}
                                 </Draggable>
@@ -1172,6 +1184,7 @@ export default function WeeklyRotaBuilder() {
                     const member = staff.find(s => s.id === staffId);
                     const isMulti = staffAssignments.length >= 2;
                     const ls = leaveState(staffId, dayStr);
+                    const dif = getDeliveryInFrontState({ deliveries, assignments: rotas, staffId, dateStr: dayStr });
                     return (
                       <div key={staffId} className="px-4 py-3">
                         {/* Staff header row with multi-job badge */}
@@ -1224,6 +1237,12 @@ export default function WeeklyRotaBuilder() {
                             {(ls.label || 'ON LEAVE').toUpperCase()}
                           </div>
                         )}
+                        {/* Delivery-in-front banner — active delivery surfaces above depot duty */}
+                        {dif.deliveryInFront && (
+                          <div className="mb-2">
+                            <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} />
+                          </div>
+                        )}
                         {/* Stacked job cards */}
                         <div className={`space-y-1.5 ${isMulti ? 'pl-2 border-l-2 border-[#2E5A1A]/20' : ''} ${ls ? 'opacity-40' : ''}`}>
                           {staffAssignments.map((assignment, idx) => {
@@ -1235,6 +1254,9 @@ export default function WeeklyRotaBuilder() {
                               : (jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot);
                             const status = statusConfig[assignment.status || 'assigned'] || statusConfig.assigned;
                             const StatusIcon = status.icon;
+                            if (assignment.assignment_type === 'yard_depot' && dif.deliveryInFront) {
+                              return <DepotDutyBadge key={assignment.id} assignment={assignment} onEdit={() => handleEditAssignment(assignment)} />;
+                            }
                             return (
                               <div key={assignment.id} className={`rounded-lg border-l-[3px] cursor-pointer hover:shadow-sm transition ${colors.bg} ${colors.border} px-2.5 py-2 ${isMulti ? 'relative' : ''}`}
                                 onClick={() => handleEditAssignment(assignment)}>

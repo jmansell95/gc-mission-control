@@ -43,6 +43,9 @@ import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
+import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
+import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
+import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 
 
 export default function StaffDashboard() {
@@ -178,6 +181,7 @@ export default function StaffDashboard() {
   const { data: myHotelBookings = [] } = useQuery({ queryKey: ['my-hotel-bookings', staff?.id], queryFn: () => base44.entities.HotelBooking.list('-created_date', 500).then(list => list.filter(b => (b.assigned_staff_ids || []).includes(staff.id) || b.staff_id === staff.id)), enabled: !!staff?.id });
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-active-staff'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true, is_active: true }) });
   const { data: jobTypes = [] } = useJobTypes();
+  const { data: myDeliveries = [] } = useQuery({ queryKey: ['my-deliveries-today', staff?.id], queryFn: () => base44.entities.DeliveryLog.filter({ driver_staff_id: staff.id }), enabled: !!staff?.id });
 
   const handleStartJob = async (assignmentId) => {
     try {
@@ -540,6 +544,9 @@ export default function StaffDashboard() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const todaysAssignments = visibleAssignments.filter(a => a.assigned_date === todayStr);
   const todaysSorted = [...todaysAssignments].sort((a, b) => (a.start_time || '23:59').localeCompare(b.start_time || '23:59'));
+  const todayActiveDeliveries = myDeliveries.filter(d => d.scheduled_date === todayStr && d.status !== 'completed');
+  const hasDepotDutyToday = todaysAssignments.some(a => a.assignment_type === 'yard_depot');
+  const deliveryInFront = todayActiveDeliveries.length > 0 && hasDepotDutyToday;
   const upcomingAssignments = visibleAssignments.filter(a => isFuture(new Date(a.assigned_date + 'T00:00:00')) && a.assigned_date !== todayStr);
   const upcomingGrouped = {};
   upcomingAssignments.forEach(a => {
@@ -786,8 +793,30 @@ export default function StaffDashboard() {
                 myHotelBookings={myHotelBookings}
                 staffId={staff.id}
               />
+              {/* Delivery-in-front — when the driver has an active delivery + depot
+                  duty, the delivery surfaces as the hero and depot collapses to a badge */}
+              {deliveryInFront && (
+                <>
+                  <DeliveryHeroToday deliveries={todayActiveDeliveries} jobs={jobs} />
+                  {todaysSorted
+                    .filter(a => a.assignment_type === 'yard_depot' && (a.status || 'assigned') !== 'completed')
+                    .map(a => (
+                      <DepotDutyCollapsible
+                        key={a.id}
+                        assignment={a}
+                        staff={staff}
+                        onOpenShiftWizard={(id, opts) => handleOpenShiftWizard(id, opts)}
+                        canPerformActions={canPerformActions}
+                      />
+                    ))}
+                  {/* Other non-depot jobs today — compact cards */}
+                  {todaysSorted
+                    .filter(a => a.assignment_type !== 'yard_depot' && a.id !== nextTodayAssignment?.id)
+                    .map(a => <AssignmentCard key={a.id} {...cardProps(a)} />)}
+                </>
+              )}
               {/* Active / next job — hero card with big action button */}
-              {nextTodayAssignment && (
+              {nextTodayAssignment && !deliveryInFront && (
                 nextTodayAssignment.assignment_type === 'yard_depot' ? (
                   <DepotAssignmentCard
                     assignment={nextTodayAssignment}
@@ -822,7 +851,7 @@ export default function StaffDashboard() {
                 )
               )}
               {/* Other jobs today — compact cards */}
-              {todaysSorted.filter(a => a.id !== nextTodayAssignment?.id).map(a => (
+              {!deliveryInFront && todaysSorted.filter(a => a.id !== nextTodayAssignment?.id).map(a => (
                 a.assignment_type === 'yard_depot'
                   ? <DepotAssignmentCard key={a.id} assignment={a} staff={staff} onOpenShiftWizard={(id, opts) => handleOpenShiftWizard(id, opts)} canPerformActions={canPerformActions} defaultExpanded />
                   : <AssignmentCard key={a.id} {...cardProps(a)} />
