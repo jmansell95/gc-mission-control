@@ -10,8 +10,17 @@ import { Outlet } from 'react-router-dom';
  */
 export default function MobileFieldShell() {
   return (
-    <div className="min-h-[100dvh] bg-background safe-area-top safe-area-bottom">
-      <Outlet />
+    <div className="h-[100dvh] bg-background safe-area-top safe-area-bottom overflow-hidden flex flex-col">
+      <main
+        className="flex-1 overflow-y-auto overflow-x-hidden mobile-app-content"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+        }}
+      >
+        <Outlet />
+      </main>
     </div>
   );
 }

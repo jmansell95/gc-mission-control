@@ -44,11 +44,16 @@ export default function MobileAppShell() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col page-bg-vibrant">
+    <div className="h-[100dvh] flex flex-col page-bg-vibrant overflow-hidden">
       <RedAlertBanner />
       <main
-        className="flex-1 overflow-auto"
-        style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}
+        className="flex-1 overflow-y-auto overflow-x-hidden mobile-app-content"
+        style={{
+          paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+          WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
+          overscrollBehavior: 'contain',
+        }}
       >
         <Outlet />
       </main>

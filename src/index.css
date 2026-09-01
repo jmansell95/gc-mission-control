@@ -573,6 +573,10 @@ html:has(.fixed.inset-y-0.right-0) {
    by the MobileAppContext provider (installed PWA or Android APK). */
 
 body.mobile-app {
+  /* Fixed-height body — inner containers handle scrolling (fixes Android APK touch scroll) */
+  height: 100dvh;
+  overflow: hidden;
+  touch-action: pan-y;
   /* Prevent rubber-band overscroll — feels native */
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
@@ -580,6 +584,13 @@ body.mobile-app {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+}
+
+/* Explicit touch-scrollable containers — used by MobileAppShell & MobileFieldShell */
+body.mobile-app .mobile-app-content {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
 }
 
 /* Allow text selection inside inputs, textareas, and content-editable areas */
