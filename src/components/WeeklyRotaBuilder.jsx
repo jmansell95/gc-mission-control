@@ -184,13 +184,19 @@ export default function WeeklyRotaBuilder() {
 
   const jobGroupsMap = {};
   filteredStaff.forEach(s => {
-    const mainKey = resolvedMainJob[s.id] || '__unassigned__';
+    let mainKey = resolvedMainJob[s.id];
+    if (!mainKey) {
+      // No rota assignments this week — depot team staff go in the Depot group,
+      // everyone else goes in Unassigned.
+      const team = teams.find(t => t.id === s.team_id);
+      mainKey = team?.category === 'depot' ? '__depot__' : '__unassigned__';
+    }
     if (!jobGroupsMap[mainKey]) jobGroupsMap[mainKey] = [];
     jobGroupsMap[mainKey].push(s);
   });
   const staffByGroup = Object.entries(jobGroupsMap).map(([key, members]) => {
     members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    if (key === '__depot__') return { key, label: 'Depot Duty', members, color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
+    if (key === '__depot__') return { key, label: 'Depot Staff', members, color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
     if (key === '__unassigned__') return { key, label: 'Unassigned', members, color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-300' };
     const job = jobs.find(j => j.id === key);
     const colors = jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot;
