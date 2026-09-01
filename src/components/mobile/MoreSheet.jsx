@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, X, LogOut, Grid3x3, Briefcase, Calendar, Users, Truck, Boxes,
   Car, FlaskConical, ShieldCheck, PoundSterling, FileBarChart, Settings,
-  CalendarDays, User, HelpCircle, ArrowLeftRight, ScanLine, Sparkles,
+  CalendarDays, User, HelpCircle, ArrowLeftRight, ScanLine,
   ChevronRight,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { canAccessSection, resolveRole } from '@/utils/access';
+import { canAccessSection } from '@/utils/access';
 import { STANDALONE_ROUTES } from '@/utils/standaloneRoutes';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useReadiness } from '@/hooks/useReadiness';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
-import Logo from '@/components/Logo';
 
 const ALL_HUBS = [
   { id: 'overview', label: 'Dashboard', icon: Grid3x3 },

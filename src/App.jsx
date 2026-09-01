@@ -112,6 +112,7 @@ const AuthenticatedApp = () => {
         <Route path="/setup-account" element={<SetupAccount />} />
         <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<AppShell />}>
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -171,6 +172,7 @@ const AuthenticatedApp = () => {
           </Route>
           <Route path="/rig-hub" element={<Navigate to="/assets" replace />} />
           <Route path="/asset-inventory" element={<Navigate to="/assets" replace />} />
+        </Route>
         </Route>
         <Route path="/client-portal/:token" element={<ClientPortal />} />
         <Route path="*" element={<PageNotFound />} />

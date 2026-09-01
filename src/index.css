@@ -568,6 +568,42 @@ html:has(.fixed.inset-y-0.right-0) {
   -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
 }
 
+/* === Mobile App Shell (PWA / APK) ===
+   Native-app chrome that activates only when body.mobile-app is set
+   by the MobileAppContext provider (installed PWA or Android APK). */
+
+body.mobile-app {
+  /* Prevent rubber-band overscroll — feels native */
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+  /* Prevent text selection / callout on long-press (app-like) */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Allow text selection inside inputs, textareas, and content-editable areas */
+body.mobile-app input,
+body.mobile-app textarea,
+body.mobile-app [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Hide the bottom tab bar whenever a full-screen modal / sheet / drawer
+   is open so content isn't cramped. Mirrors the scroll-lock selector. */
+body.mobile-app:has(.fixed.inset-0) .mobile-tab-bar,
+body.mobile-app:has(.fixed.inset-y-0) .mobile-tab-bar {
+  display: none;
+}
+
+/* When the tab bar is hidden, remove the extra bottom padding so the
+   page content fills the screen behind the modal. */
+body.mobile-app:has(.fixed.inset-0) .mobile-app-content,
+body.mobile-app:has(.fixed.inset-y-0) .mobile-app-content {
+  padding-bottom: 0 !important;
+}
+
 /* === 3D Flip Card (Compliance Wallet) === */
 .flip-card-perspective { perspective: 1000px; }
 .flip-card-3d { transform-style: preserve-3d; }
