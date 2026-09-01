@@ -39,15 +39,38 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
   };
 
   const todayStr = new Date().toISOString().slice(0, 10);
+  const [leaveFilter, setLeaveFilter] = useState('all');
   const { data: todayAssignments = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rota-today-scheduling', todayStr], filter: { assigned_date: todayStr }, sort: '-created_date', limit: 500 });
+  const { data: absences = [] } = useQuery({ queryKey: ['absences-scheduling'], queryFn: () => base44.entities.Absence.list() });
+
+  const leaveFilterOrder = ['all', 'annual', 'sick', 'training'];
+  const leaveFilterLabels = { all: 'All leave · click to filter', annual: 'Annual leave', sick: 'Sick', training: 'Training' };
+  const cycleLeaveFilter = () => {
+    const idx = leaveFilterOrder.indexOf(leaveFilter);
+    setLeaveFilter(leaveFilterOrder[(idx + 1) % leaveFilterOrder.length]);
+  };
 
   const schedStats = useMemo(() => {
     const onJob = todayAssignments.filter(a => a.assignment_type === 'job').length;
-    const onLeave = todayAssignments.filter(a => a.assignment_type === 'annual_leave').length;
-    const sick = todayAssignments.filter(a => a.assignment_type === 'sick').length;
     const conflicts = todayAssignments.filter(a => a.has_conflict).length;
-    return { total: todayAssignments.length, onJob, onLeave, sick, conflicts };
-  }, [todayAssignments]);
+    // Staff on leave today: approved absences + non-job rota assignments (annual_leave/sick/training)
+    const leaveByType = { annual: new Set(), sick: new Set(), training: new Set() };
+    const allLeave = new Set();
+    absences.forEach(a => {
+      if (a.status === 'approved' && a.start_date <= todayStr && a.end_date >= todayStr) {
+        allLeave.add(a.staff_id);
+        const type = a.reason === 'sick' ? 'sick' : a.reason === 'training' ? 'training' : 'annual';
+        leaveByType[type].add(a.staff_id);
+      }
+    });
+    todayAssignments.forEach(a => {
+      if (a.assignment_type === 'annual_leave') { allLeave.add(a.staff_id); leaveByType.annual.add(a.staff_id); }
+      else if (a.assignment_type === 'sick') { allLeave.add(a.staff_id); leaveByType.sick.add(a.staff_id); }
+      else if (a.assignment_type === 'training') { allLeave.add(a.staff_id); leaveByType.training.add(a.staff_id); }
+    });
+    const onLeave = leaveFilter === 'all' ? allLeave.size : (leaveByType[leaveFilter]?.size || 0);
+    return { total: todayAssignments.length, onJob, onLeave, conflicts };
+  }, [todayAssignments, absences, todayStr, leaveFilter]);
 
   const currentWeekStart = (() => {
     const d = new Date();
@@ -68,7 +91,7 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
         <HubStatsBar tiles={[
           { icon: Users, label: 'Assigned Today', value: schedStats.total, sublabel: 'Total shifts', color: 'brand' },
           { icon: CheckCircle2, label: 'On Jobs', value: schedStats.onJob, sublabel: 'Field deployments', color: 'emerald' },
-          { icon: Coffee, label: 'On Leave', value: schedStats.onLeave, sublabel: 'Annual leave / off', color: 'amber' },
+          { icon: Coffee, label: 'On Leave', value: schedStats.onLeave, sublabel: leaveFilterLabels[leaveFilter], color: 'amber', onClick: cycleLeaveFilter },
           { icon: AlertTriangle, label: 'Conflicts', value: schedStats.conflicts, sublabel: 'Double-booked', color: schedStats.conflicts > 0 ? 'rose' : 'slate' },
         ]} />
       )}

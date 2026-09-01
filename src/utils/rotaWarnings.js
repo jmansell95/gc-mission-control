@@ -26,7 +26,7 @@ export function computeRotaWarnings({ weekStartStr, rotas = [], staff = [], jobs
   });
   Object.entries(byStaffDate).forEach(([key, items]) => {
     const [staffId, date] = key.split('|');
-    const jobIds = [...new Set(items.map(r => r.job_id))];
+    const jobIds = [...new Set(items.map(r => r.job_id).filter(Boolean))];
     if (jobIds.length > 1) {
       const member = staffMap[staffId];
       warnings.push({

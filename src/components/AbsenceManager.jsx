@@ -64,7 +64,26 @@ export default function AbsenceManager() {
     recalcAccruals();
   };
 
-  const handleApprove = async (id) => { await base44.entities.Absence.update(id, { status: 'approved' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
+  const handleApprove = async (id) => {
+    await base44.entities.Absence.update(id, { status: 'approved' });
+    // Replace existing shifts with leave so the absence fully replaces any scheduled shifts
+    const absence = absences.find(a => a.id === id);
+    if (absence) {
+      try {
+        await base44.functions.invoke('replaceShiftsWithLeave', {
+          staff_id: absence.staff_id,
+          start_date: absence.start_date,
+          end_date: absence.end_date,
+        });
+        queryClient.invalidateQueries({ queryKey: ['rotas'] });
+        queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+      } catch (e) {
+        console.error('Failed to replace shifts with leave:', e);
+      }
+    }
+    queryClient.invalidateQueries({ queryKey: ['absences'] });
+    recalcAccruals();
+  };
   const handleReject = async (id) => { await base44.entities.Absence.update(id, { status: 'rejected' }); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
   const handleDelete = async (id) => { await base44.entities.Absence.delete(id); queryClient.invalidateQueries({ queryKey: ['absences'] }); recalcAccruals(); };
 

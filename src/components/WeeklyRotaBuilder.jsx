@@ -20,7 +20,6 @@ import { getCrewLabel } from '@/utils/terminology';
 import { getCurrentTimeStr, SITE_CLOSE_TIME } from '@/utils/siteHours';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { computeRotaWarnings } from '@/utils/rotaWarnings';
-import RotaWarningsPanel from '@/components/RotaWarningsPanel';
 import { useDivision } from '@/contexts/DivisionContext';
 import { sortAZ } from '@/utils';
 import { buildDriverStaffIds } from '@/utils/driverDetection';
@@ -31,6 +30,8 @@ import DepotDutyBadge from '@/components/rota/DepotDutyBadge';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 import LiveDriverBadge from '@/components/rota/LiveDriverBadge';
 import RotaDayCards from '@/components/rota/RotaDayCards';
+import TodayCrewPopup from '@/components/rota/TodayCrewPopup';
+import RotaSuggestionsPopup from '@/components/rota/RotaSuggestionsPopup';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -90,7 +91,6 @@ export default function WeeklyRotaBuilder() {
   const [showWeekends, setShowWeekends] = useState(false);
   const [complianceViolations, setComplianceViolations] = useState(null);
   const [swapAssignment, setSwapAssignment] = useState(null);
-  const [todayCrewExpanded, setTodayCrewExpanded] = useState(false);
   const [rotaManagerStaff, setRotaManagerStaff] = useState(null);
   const [crewRigOpen, setCrewRigOpen] = useState(false);
 
@@ -189,7 +189,8 @@ export default function WeeklyRotaBuilder() {
       // No rota assignments this week — depot team staff go in the Depot group,
       // everyone else goes in Unassigned.
       const team = teams.find(t => t.id === s.team_id);
-      mainKey = team?.category === 'depot' ? '__depot__' : '__unassigned__';
+      const isDepotTeam = team?.category === 'depot' || team?.job_type === 'depot' || /depot/i.test(team?.name || '');
+      mainKey = isDepotTeam ? '__depot__' : '__unassigned__';
     }
     if (!jobGroupsMap[mainKey]) jobGroupsMap[mainKey] = [];
     jobGroupsMap[mainKey].push(s);
@@ -716,6 +717,15 @@ export default function WeeklyRotaBuilder() {
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm">
                 <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Shift</span>
               </button>
+              <TodayCrewPopup
+                rotas={rotas}
+                staff={staff}
+                jobs={jobs}
+                teams={teams}
+                todayStr={todayStr}
+                onEditAssignment={handleEditAssignment}
+              />
+              <RotaSuggestionsPopup warnings={rotaWarnings} />
               <button onClick={handleCleanupDuplicates} disabled={cleaningUp}
                 title="Remove duplicate assignments (keep one shift per staff per day; drivers exempt)"
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium disabled:opacity-50">
@@ -848,92 +858,6 @@ export default function WeeklyRotaBuilder() {
           </div>
         </div>
       </div>
-
-      <RotaWarningsPanel warnings={rotaWarnings} />
-
-      {/* Today's Crew — collapsed toggle bar, sits right under the filters */}
-      {(() => {
-        const todayRotas = rotas.filter(r => r.assigned_date === todayStr && (!r.assignment_type || r.assignment_type === 'job' || r.assignment_type === 'yard_depot'));
-        const todayCrew = [...new Set(todayRotas.map(r => r.staff_id))];
-        const todayLeave = rotas.filter(r => r.assigned_date === todayStr && r.assignment_type && r.assignment_type !== 'job');
-        const byJob = {};
-        todayRotas.forEach(r => {
-          if (r.assignment_type === 'yard_depot') {
-            if (!byJob['depot']) byJob['depot'] = [];
-            byJob['depot'].push(r);
-          } else {
-            const jid = r.job_id || 'unassigned';
-            if (!byJob[jid]) byJob[jid] = [];
-            byJob[jid].push(r);
-          }
-        });
-        const jobGroups = Object.entries(byJob);
-        return (
-          <div className="mb-3 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <button
-              onClick={() => setTodayCrewExpanded(v => !v)}
-              className="w-full flex items-center justify-between px-4 py-2.5 bg-slate-50 border-b border-slate-200 hover:bg-slate-100/60 transition"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
-                  <Users className="w-3.5 h-3.5 text-white" />
-                </div>
-                <h3 className="text-sm font-bold text-slate-900">Today's Crew</h3>
-                <span className="text-[11px] text-slate-400">{format(new Date(), 'EEEE dd MMM')}</span>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-slate-500"><strong className="text-slate-900">{todayCrew.length}</strong> on site</span>
-                <span className="text-slate-500"><strong className="text-slate-900">{jobGroups.length}</strong> jobs</span>
-                {todayLeave.length > 0 && <span className="text-amber-600"><strong className="text-amber-700">{todayLeave.length}</strong> off</span>}
-                <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${todayCrewExpanded ? 'rotate-90' : ''}`} />
-              </div>
-            </button>
-            {todayCrewExpanded && (
-              todayRotas.length === 0 ? (
-                <div className="px-4 py-3 text-sm text-slate-400 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-300" />
-                  No crew assigned for today — add shifts in the grid below or import from the planner.
-                </div>
-              ) : (
-                <div className="p-3 space-y-2">
-                  {jobGroups.map(([jid, group]) => {
-                    const job = jobs.find(j => j.id === jid);
-                    const colors = jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot;
-                    return (
-                      <div key={jid} className={`rounded-lg border ${colors.border} ${colors.bg} px-3 py-2`}>
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                          <span className={`w-2 h-2 rounded-full ${colors.dot}`} />
-                          <p className="text-sm font-bold text-slate-800 truncate flex-1">{jid === 'depot' ? 'Depot Duty' : (job?.name || 'Unassigned')}</p>
-                          {job?.location && <span className="hidden sm:flex items-center gap-0.5 text-xs text-slate-400 truncate max-w-[140px]"><MapPin className="w-3 h-3" />{job.location}</span>}
-                          <span className="text-[10px] font-bold text-slate-500 bg-white/70 rounded-full px-1.5 py-0.5 flex-shrink-0">{group.length}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {group.map(a => {
-                            const member = staff.find(s => s.id === a.staff_id);
-                            const status = statusConfig[a.status || 'assigned'] || statusConfig.assigned;
-                            const StatusIcon = status.icon;
-                            return (
-                              <button key={a.id} onClick={() => handleEditAssignment(a)}
-                                className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full pl-1 pr-2.5 py-1 hover:shadow-sm hover:border-emerald-300 transition group">
-                                <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-emerald-700 font-bold text-[10px]">{member?.name?.charAt(0) || '?'}</span>
-                                </span>
-                                <span className="text-xs font-medium text-slate-700 leading-none">{member?.name || 'Unknown'}</span>
-                                <StatusIcon className={`w-3 h-3 ${status.text}`} />
-                                {a.briefing_signed && <ClipboardCheck className="w-3 h-3 text-emerald-500" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )
-            )}
-          </div>
-        );
-      })()}
 
       {/* Per-day capacity strip */}
       <div className="hidden lg:flex gap-2 mb-3 pl-[228px]">

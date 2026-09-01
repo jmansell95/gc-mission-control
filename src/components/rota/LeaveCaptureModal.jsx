@@ -83,7 +83,21 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
           source: 'manual',
         }))
       );
+      // Delete existing job/depot shifts on the leave dates so leave replaces the shift
+      for (const r of validRows) {
+        try {
+          await base44.functions.invoke('replaceShiftsWithLeave', {
+            staff_id: staffId,
+            start_date: r.start_date,
+            end_date: r.end_date,
+          });
+        } catch (e) {
+          console.error('Failed to replace shifts with leave:', e);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['absences'] });
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
       toast({ title: `${validRows.length} leave range${validRows.length === 1 ? '' : 's'} saved`, description: `${staffName}'s rota will show ON LEAVE on those dates.` });
       onClose();
     } catch (e) {
