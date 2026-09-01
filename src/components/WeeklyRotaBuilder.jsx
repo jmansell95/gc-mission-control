@@ -161,36 +161,50 @@ export default function WeeklyRotaBuilder() {
     return true;
   });
 
-  // Group staff by team category for visual separation on the rota:
-  // Field Teams → Depot Teams → Management → Unassigned.
-  // Each group gets a coloured header row so managers can instantly see
-  // where field crews, depot staff, and management are for any given day.
-  const STAFF_GROUPS = [
-    { key: 'field_ops', label: 'Direct Staff', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-300' },
-    { key: 'agency', label: 'Agency Staff', color: 'text-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-300' },
-    { key: 'subcontractor', label: 'Subcontractors', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-300' },
-    { key: 'depot', label: 'Depot Team Staff', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' },
-    { key: 'management', label: 'Management', color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-300' },
-    { key: 'unassigned', label: 'Unassigned', color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-300' },
-  ];
-  const staffByGroup = STAFF_GROUPS.map(g => ({
-    ...g,
-    members: filteredStaff.filter(s => {
-      // Agency and subcontractor workers always group under their own headers,
-      // regardless of team assignment, so managers see all external labour together.
-      if (g.key === 'agency') return s.worker_type === 'agency';
-      if (g.key === 'subcontractor') return s.worker_type === 'subcontractor';
-      const team = teams.find(t => t.id === s.team_id);
-      const cat = team?.category;
-      const isExternal = s.worker_type === 'agency' || s.worker_type === 'subcontractor';
-      if (isExternal) return false;
-      if (g.key === 'field_ops') return cat === 'field_ops';
-      if (g.key === 'depot') return cat === 'depot';
-      if (g.key === 'management') return cat === 'management';
-      if (g.key === 'unassigned') return !cat;
-      return false;
-    }),
-  }));
+  // Group staff by their MAIN JOB this week so managers can see who is on
+  // which job at a glance. Each staff member's main job is the one they're
+  // assigned to the most days this week (ties broken by earliest day).
+  // Depot duty is its own group; staff with no assignments go in 'Unassigned'.
+  // Members within each group are sorted alphabetically by name.
+  const mainJobByStaff = {};
+  rotas.forEach(r => {
+    if (r.assignment_type && r.assignment_type !== 'job' && r.assignment_type !== 'yard_depot') return;
+    const key = r.assignment_type === 'yard_depot' ? '__depot__' : (r.job_id || '__unassigned__');
+    if (!mainJobByStaff[r.staff_id]) mainJobByStaff[r.staff_id] = {};
+    if (!mainJobByStaff[r.staff_id][key]) mainJobByStaff[r.staff_id][key] = { count: 0, firstDate: r.assigned_date };
+    mainJobByStaff[r.staff_id][key].count++;
+    if (r.assigned_date < mainJobByStaff[r.staff_id][key].firstDate) mainJobByStaff[r.staff_id][key].firstDate = r.assigned_date;
+  });
+  const resolvedMainJob = {};
+  Object.keys(mainJobByStaff).forEach(staffId => {
+    const entries = Object.entries(mainJobByStaff[staffId]);
+    entries.sort((a, b) => b[1].count - a[1].count || a[1].firstDate.localeCompare(b[1].firstDate));
+    resolvedMainJob[staffId] = entries[0][0];
+  });
+
+  const jobGroupsMap = {};
+  filteredStaff.forEach(s => {
+    const mainKey = resolvedMainJob[s.id] || '__unassigned__';
+    if (!jobGroupsMap[mainKey]) jobGroupsMap[mainKey] = [];
+    jobGroupsMap[mainKey].push(s);
+  });
+  const staffByGroup = Object.entries(jobGroupsMap).map(([key, members]) => {
+    members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    if (key === '__depot__') return { key, label: 'Depot Duty', members, color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
+    if (key === '__unassigned__') return { key, label: 'Unassigned', members, color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-300' };
+    const job = jobs.find(j => j.id === key);
+    const colors = jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot;
+    return { key, label: job?.name || 'Unassigned', members, color: colors.text, bg: colors.bg, border: colors.border };
+  });
+  // Sort: real jobs by name first, then Depot Duty, then Unassigned.
+  staffByGroup.sort((a, b) => {
+    const aSpecial = a.key === '__depot__' || a.key === '__unassigned__';
+    const bSpecial = b.key === '__depot__' || b.key === '__unassigned__';
+    if (aSpecial !== bSpecial) return aSpecial ? 1 : -1;
+    if (a.key === '__depot__') return -1;
+    if (b.key === '__depot__') return 1;
+    return a.label.localeCompare(b.label);
+  });
 
   const rotasByStaff = {};
   filteredStaff.forEach(s => { rotasByStaff[s.id] = Array.from({ length: days.length }, () => []); });
