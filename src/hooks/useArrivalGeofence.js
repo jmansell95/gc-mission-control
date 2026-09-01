@@ -49,6 +49,7 @@ export function useArrivalGeofence({
   depotLat = null,
   depotLng = null,
   enabled = true,
+  trackingEnabled = true,
 }) {
   const queryClient = useQueryClient();
   const [distance, setDistance] = useState(null);
@@ -95,7 +96,7 @@ export function useArrivalGeofence({
     return now.getTime() >= windowStart.getTime();
   }, [shiftStart, arrivedHome]);
 
-  const shouldTrack = enabled && !!siteLat && !!siteLng && isWithinWindow();
+  const shouldTrack = enabled && trackingEnabled !== false && !!siteLat && !!siteLng && isWithinWindow();
 
   // Phone GPS — only watch during the working window
   const { position: phonePos, error: gpsError } = useGeolocation({

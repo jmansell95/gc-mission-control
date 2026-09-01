@@ -186,7 +186,12 @@
     "phone_gps_consent": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the staff member has consented to phone GPS location tracking for automated travel-time detection. When true, the app uses the crew member's phone GPS (via the browser Geolocation API) to detect arrival at and departure from job sites via geofencing \u2014 even when they're not in a tracked vehicle (e.g. travelling home by train). Set via the staff profile or a consent prompt in the shift wizard."
+      "description": "Legacy consent flag. Kept for backward compatibility. Use tracking_enabled (the master toggle) and tracking_consent_signed_at (the signed consent form) instead."
+    },
+    "tracking_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Master toggle for GPS location tracking during working hours. When true (default), the app tracks the crew member's GPS location during their shift \u2014 from the moment they start travelling to site until they arrive home \u2014 covering home\u2192site, on-site, site\u2192home, and inter-site travel. Staff can turn this off in their profile at any time (e.g. of an evening). When false, all GPS tracking stops immediately. Separate from the consent form signature (tracking_consent_signed_at) \u2014 tracking starts on by default but staff must sign the consent form to keep it active; if they explicitly decline, tracking_enabled flips to false."
     },
     "home_lat": {
       "type": "number",
@@ -221,7 +226,7 @@
     },
     "tracking_consent_signed_at": {
       "type": "string",
-      "description": "ISO timestamp of when the staff member signed the GPS tracking consent form, acknowledging that their location is tracked during working hours (home→site and site→home only). Required before zero-touch GPS tracking is activated."
+      "description": "ISO timestamp of when the staff member signed the GPS tracking consent form, acknowledging that their location is tracked during working hours. Required to keep tracking enabled \u2014 if a staff member explicitly declines, tracking_enabled flips to false."
     },
     "tracking_consent_signature_data_url": {
       "type": "string",
@@ -231,6 +236,10 @@
       "type": "string",
       "default": "v1_2026",
       "description": "Version of the tracking consent agreement the staff member signed. When the consent text is updated, this version is bumped so staff are re-prompted to sign the new version."
+    },
+    "tracking_consent_declined_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the staff member explicitly declined the GPS tracking consent. When set, tracking_enabled is flipped to false and the consent reminders stop. Cleared if the staff member later signs the consent form."
     }
   },
   "required": [

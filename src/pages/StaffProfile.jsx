@@ -28,6 +28,8 @@ import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import TrainingTab from '@/components/staff/TrainingTab';
 import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
 import AutoTimesheetStatus from '@/components/staff/AutoTimesheetStatus';
+import TrackingSettings from '@/components/staff/TrackingSettings';
+import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
@@ -66,6 +68,7 @@ export default function StaffProfile() {
   const [absenceForm, setAbsenceForm] = useState({ start_date: format(new Date(), 'yyyy-MM-dd'), end_date: format(new Date(), 'yyyy-MM-dd'), reason: 'holiday', notes: '' });
   const [savingAbsence, setSavingAbsence] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   const targetStaffId = location.state?.staffId || null;
   const viewingOther = !!targetStaffId;
@@ -359,6 +362,9 @@ export default function StaffProfile() {
                 <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
                   <ComplianceWallet staffId={staff.id} staffName={staff.name} />
                 </div>
+                {!viewingOther && (
+                  <TrackingSettings staff={staff} onSignConsent={() => setShowConsentModal(true)} />
+                )}
               </div>
             : <NoCrewProfileState tab="compliance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'crew' && (staff.team_id
@@ -427,6 +433,15 @@ export default function StaffProfile() {
             </div>
           </div>
         </div>
+      )}
+      {/* GPS Tracking Consent Modal — opened from the tracking settings card */}
+      {showConsentModal && (
+        <TrackingConsentModal
+          open={showConsentModal}
+          onClose={() => setShowConsentModal(false)}
+          onDecline={() => setShowConsentModal(false)}
+          staff={staff}
+        />
       )}
     </FieldPageShell>
   );

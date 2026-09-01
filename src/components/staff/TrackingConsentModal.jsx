@@ -18,9 +18,10 @@ const CONSENT_VERSION = 'v1_2026';
  * tracking_consent_signed_at, tracking_consent_version) and sets phone_gps_consent
  * to true.
  */
-export default function TrackingConsentModal({ open, onClose, staff }) {
+export default function TrackingConsentModal({ open, onClose, onDecline, staff }) {
   const [signature, setSignature] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [declining, setDeclining] = useState(false);
   const [error, setError] = useState('');
   const queryClient = useQueryClient();
 
@@ -33,7 +34,9 @@ export default function TrackingConsentModal({ open, onClose, staff }) {
         tracking_consent_signed_at: new Date().toISOString(),
         tracking_consent_signature_data_url: signature,
         tracking_consent_version: CONSENT_VERSION,
+        tracking_consent_declined_at: null,
         phone_gps_consent: true,
+        tracking_enabled: true,
       });
       queryClient.invalidateQueries({ queryKey: ['my-staff-profile'] });
       queryClient.invalidateQueries({ queryKey: ['staff', staff?.id] });
@@ -42,6 +45,25 @@ export default function TrackingConsentModal({ open, onClose, staff }) {
     } catch (e) {
       setError('Could not save consent. Please try again.');
       setSaving(false);
+    }
+  };
+
+  const handleDecline = async () => {
+    setDeclining(true);
+    setError('');
+    try {
+      await base44.functions.invoke('updateMyOnboarding', {
+        tracking_enabled: false,
+        tracking_consent_declined_at: new Date().toISOString(),
+      });
+      queryClient.invalidateQueries({ queryKey: ['my-staff-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['staff', staff?.id] });
+      setDeclining(false);
+      onClose();
+      if (onDecline) onDecline();
+    } catch (e) {
+      setError('Could not save your choice. Please try again.');
+      setDeclining(false);
     }
   };
 
@@ -147,16 +169,20 @@ export default function TrackingConsentModal({ open, onClose, staff }) {
 
             {/* Footer */}
             <div className="p-4 border-t border-slate-100 flex gap-2.5 flex-shrink-0 safe-area-bottom">
-              <button onClick={onClose} disabled={saving}
+              <button onClick={onClose} disabled={saving || declining}
                 className="px-5 py-3.5 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-sm font-semibold touch-manipulation">
                 Not now
               </button>
-              <button onClick={handleAccept} disabled={!signature || saving}
+              <button onClick={handleAccept} disabled={!signature || saving || declining}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 {saving ? 'Saving…' : 'I Consent & Sign'}
               </button>
             </div>
+            <button onClick={handleDecline} disabled={saving || declining}
+              className="w-full py-2.5 text-xs font-medium text-slate-400 hover:text-red-500 transition touch-manipulation">
+              {declining ? 'Saving…' : 'I don\'t consent — turn off tracking'}
+            </button>
           </motion.div>
         </motion.div>
       )}

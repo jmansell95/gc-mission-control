@@ -47,7 +47,7 @@ export default function MobileAppShell() {
     <div className="min-h-[100dvh] flex flex-col page-bg-vibrant">
       <RedAlertBanner />
       <main
-        className="flex-1 overflow-auto safe-area-top"
+        className="flex-1 overflow-auto"
         style={{ paddingBottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}
       >
         <Outlet />

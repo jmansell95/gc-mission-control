@@ -14,7 +14,7 @@ import { useArrivalGeofence } from '@/hooks/useArrivalGeofence';
  *
  * Auto-stamps arrived_on_site_at / left_site_at on the RotaAssignment.
  */
-export default function ArrivalPromptBanner({ assignment, job, staffId, homeLat, homeLng, shiftStartTime, allJobs = [], hotelLat = null, hotelLng = null, depotLat = null, depotLng = null }) {
+export default function ArrivalPromptBanner({ assignment, job, staffId, homeLat, homeLng, shiftStartTime, allJobs = [], hotelLat = null, hotelLng = null, depotLat = null, depotLng = null, trackingEnabled = true }) {
   const [showArrivedFlash, setShowArrivedFlash] = useState(false);
   const [showLeftToast, setShowLeftToast] = useState(false);
   const [showArriveHome, setShowArriveHome] = useState(false);
@@ -33,6 +33,7 @@ export default function ArrivalPromptBanner({ assignment, job, staffId, homeLat,
     depotLat,
     depotLng,
     enabled: !!assignment && !!job,
+    trackingEnabled,
   });
 
   const { distance, onSite, arrived, leftSite, radius, hasGPS, gpsError, arrivedHome, showHomeConfirmPrompt, confirmHome, confirmingHome } = geofence;

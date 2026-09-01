@@ -43,6 +43,7 @@ import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
+import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
 import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
@@ -116,12 +117,8 @@ export default function StaffDashboard() {
     };
   }, []);
 
-  // Auto-show tracking consent modal if staff hasn't signed
-  useEffect(() => {
-    if (staff && !staff?.is_admin && !staff?.phone_gps_consent && !staff?.no_staff_profile) {
-      setShowConsentModal(true);
-    }
-  }, [staff?.id, staff?.phone_gps_consent]);
+  // Tracking consent is handled by the non-blocking TrackingConsentCard
+  // rendered in the dashboard body — no auto-show blocking modal.
 
   // Real-time sync: reflect assignment changes (including deletions) immediately
   useEffect(() => {
@@ -618,6 +615,10 @@ export default function StaffDashboard() {
         <div className="max-w-6xl mx-auto px-4 md:px-6 pt-3 md:pt-4 space-y-3">
           <OfflineBanner />
           <SyncHUD />
+          <TrackingConsentCard
+            staff={staff}
+            onSignNow={() => setShowConsentModal(true)}
+          />
 
           {/* KeyLogBook afternoon prompt — drillers only */}
           <KeyLogBookPromptBanner staff={staff} />
@@ -632,6 +633,7 @@ export default function StaffDashboard() {
               homeLng={staff?.home_lng}
               shiftStartTime={nextTodayAssignment?.start_time}
               allJobs={jobs}
+              trackingEnabled={staff?.tracking_enabled !== false}
             />
           )}
 
@@ -1052,11 +1054,12 @@ export default function StaffDashboard() {
         />
       )}
 
-      {/* GPS Tracking Consent Modal — shown on first login if not signed */}
+      {/* GPS Tracking Consent Modal — opened from the consent card or profile */}
       {showConsentModal && (
         <TrackingConsentModal
           open={showConsentModal}
           onClose={() => setShowConsentModal(false)}
+          onDecline={() => setShowConsentModal(false)}
           staff={staff}
         />
       )}
