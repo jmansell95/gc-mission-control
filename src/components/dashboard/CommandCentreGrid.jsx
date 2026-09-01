@@ -76,11 +76,12 @@ function migrateOldLayout(saved) {
 /**
  * CommandCentreGrid — the unified customisable dashboard grid (Split Column).
  *
- * Renders two rails side-by-side: a narrower left rail (40%) stacking stat
- * tiles and compact insight widgets, and a wider right rail (60%) holding
- * the big visual widgets (Rigs on Site, Active Sites, Mission Control, AI
- * Insights). A thin vertical divider separates them on desktop; below
- * 1024px the rails collapse to a single stacked column.
+ * Renders a fixed strip of stat tiles across the full width at the top,
+ * then two rails side-by-side below: a narrower left rail (30%) holding
+ * compact insight widgets, and a wider right rail (70%) holding the big
+ * visual widgets (Rigs on Site, Active Sites, Mission Control). A thin
+ * vertical divider separates the rails on desktop; below 1024px the rails
+ * collapse to a single stacked column.
  *
  * Every block is drag-and-drop reorderable within and across rails,
  * resizable (S/M/L/XL), and hideable. The full layout persists to the
@@ -189,6 +190,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
   };
 
   const allBlocks = useMemo(() => [...sectionLayout.left, ...sectionLayout.right], [sectionLayout]);
+  const statBlockIds = useMemo(() => ALL_BLOCK_IDS.filter(id => id.startsWith('stat-')), []);
 
   return (
     <div className="mb-4">
@@ -235,15 +237,24 @@ export default function CommandCentreGrid({ blockRenderers }) {
         </div>
       )}
 
+      {/* ── Stat tiles strip — fixed at top, full width ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 mb-4">
+        {statBlockIds.filter(id => !hidden.includes(id)).map(id => {
+          const content = blockRenderers[id]?.();
+          if (!content) return null;
+          return <div key={id} className="h-full">{content}</div>;
+        })}
+      </div>
+
       {/* ── Two-rail split layout ── */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
           {SECTIONS.map(section => {
-            const railBlocks = sectionLayout[section.id].filter(id => !hidden.includes(id));
+            const railBlocks = sectionLayout[section.id].filter(id => !hidden.includes(id) && !id.startsWith('stat-'));
             const isCollapsed = collapsed[section.id];
 
             return (
-              <div key={section.id} className={`flex flex-col ${section.id === 'left' ? 'lg:w-[40%]' : 'lg:w-[60%] lg:border-l lg:border-slate-200 lg:pl-5'}`}>
+              <div key={section.id} className={`flex flex-col ${section.id === 'left' ? 'lg:w-[30%]' : 'lg:w-[70%] lg:border-l lg:border-slate-200 lg:pl-5'}`}>
                 <SectionHeader
                   title={section.title}
                   icon={section.icon}

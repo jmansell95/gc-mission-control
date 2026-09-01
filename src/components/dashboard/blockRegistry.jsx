@@ -5,8 +5,9 @@ import {
 
 // ═══════════════════════════════════════════════════════════════════
 //  COMMAND CENTRE BLOCK REGISTRY — Split Column Layout
-//  Two rails: left (40% — stat tiles + compact widgets) and
-//  right (60% — big visual widgets). Every block is drag-to-reorder,
+//  Two rails: left (30% — compact widgets) and
+//  right (70% — big visual widgets). Stat tiles render in a fixed
+//  strip above the rails. Every block is drag-to-reorder,
 //  resizable, and hideable. Layout persists to DashboardLayout.
 // ═══════════════════════════════════════════════════════════════════
 
@@ -16,7 +17,7 @@ export const SECTIONS = [
 ];
 
 export const BLOCK_REGISTRY = {
-  // ── Left rail — stat tiles + compact insight widgets ──
+  // ── Left rail — compact insight widgets (stat tiles render in the top strip) ──
   'stat-active-jobs':      { title: 'Active Jobs',           icon: Briefcase,      rail: 'left',  defaultSize: 'sm' },
   'stat-crew-util':       { title: 'Crew Utilisation',       icon: Percent,        rail: 'left',  defaultSize: 'sm' },
   'stat-timesheet-queue': { title: 'Timesheet Queue',       icon: ClipboardCheck, rail: 'left',  defaultSize: 'sm' },
@@ -34,12 +35,7 @@ export const BLOCK_REGISTRY = {
 };
 
 export const DEFAULT_SECTION_LAYOUT = {
-  left: [
-    'stat-active-jobs', 'stat-crew-util', 'stat-timesheet-queue',
-    'stat-outstanding', 'stat-burn-rate',
-    'stat-overdue-actions', 'stat-red-alerts', 'stat-fleet-compliance',
-    'field-priorities', 'exception-monitor',
-  ],
+  left: ['field-priorities', 'exception-monitor'],
   right: ['rigs-on-site', 'site-snapshot', 'mission-control'],
 };
 
