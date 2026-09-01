@@ -12,12 +12,13 @@ import {
 } from '@/components/dashboard/blockRegistry';
 import SectionHeader from '@/components/dashboard/SectionHeader';
 
-const LAYOUT_KEY = 'cc-section-layout-v1';
-const HIDDEN_KEY = 'cc-hidden-blocks-v1';
-const SIZES_KEY = 'cc-block-sizes-v1';
-const COLLAPSE_KEY = 'cc-section-collapsed-v1';
+const LAYOUT_KEY = 'cc-section-layout-v2';
+const HIDDEN_KEY = 'cc-hidden-blocks-v2';
+const SIZES_KEY = 'cc-block-sizes-v2';
+const COLLAPSE_KEY = 'cc-section-collapsed-v2';
 
-const SIZE_COLSPAN = { sm: 'lg:col-span-1', md: 'lg:col-span-2', lg: 'lg:col-span-3', xl: 'lg:col-span-4' };
+// Within each rail's 2-col grid: sm = half width, md/lg/xl = full width
+const SIZE_COLSPAN = { sm: 'col-span-1', md: 'col-span-2', lg: 'col-span-2', xl: 'col-span-2' };
 const SIZE_ICON = { sm: Minimize2, md: Square, lg: Maximize2, xl: Maximize2 };
 const SIZE_LABEL = { sm: 'S', md: 'M', lg: 'L', xl: 'XL' };
 const SIZE_NEXT = { sm: 'md', md: 'lg', lg: 'xl', xl: 'sm' };
@@ -28,31 +29,44 @@ function loadJSON(key, fallback) {
   return fallback;
 }
 
-// Ensure every known block appears in exactly one section
+// Ensure every known block appears in exactly one rail
 function normalizeLayout(layout) {
-  const result = { operations: [...(layout.operations || [])], financial: [...(layout.financial || [])], safety: [...(layout.safety || [])] };
-  const placed = new Set([...result.operations, ...result.financial, ...result.safety]);
+  const result = { left: [...(layout.left || [])], right: [...(layout.right || [])] };
+  const placed = new Set([...result.left, ...result.right]);
   for (const id of ALL_BLOCK_IDS) {
     if (!placed.has(id)) {
-      const section = BLOCK_REGISTRY[id].section;
-      result[section] = [...result[section], id];
+      const rail = BLOCK_REGISTRY[id].rail;
+      result[rail] = [...result[rail], id];
     }
   }
-  // Remove any unknown IDs
   for (const sec of Object.keys(result)) {
     result[sec] = result[sec].filter(id => BLOCK_REGISTRY[id]);
   }
   return result;
 }
 
-// Migrate old widget_order → section_layout
+// Migrate old operations/financial/safety layout → left/right rails
 function migrateOldLayout(saved) {
-  if (saved?.section_layout) return normalizeLayout(saved.section_layout);
+  if (saved?.section_layout) {
+    // Already in left/right format?
+    if (saved.section_layout.left || saved.section_layout.right) {
+      return normalizeLayout(saved.section_layout);
+    }
+    // Old operations/financial/safety format — remap each block to its new rail
+    const layout = { left: [], right: [] };
+    for (const sec of ['operations', 'financial', 'safety']) {
+      for (const id of (saved.section_layout[sec] || [])) {
+        const block = BLOCK_REGISTRY[id];
+        if (block) layout[block.rail].push(id);
+      }
+    }
+    return normalizeLayout(layout);
+  }
   if (saved?.widget_order) {
-    const layout = { operations: [], financial: [], safety: [] };
+    const layout = { left: [], right: [] };
     for (const id of saved.widget_order) {
       const block = BLOCK_REGISTRY[id];
-      if (block) layout[block.section].push(id);
+      if (block) layout[block.rail].push(id);
     }
     return normalizeLayout(layout);
   }
@@ -60,11 +74,15 @@ function migrateOldLayout(saved) {
 }
 
 /**
- * CommandCentreGrid — the unified customisable dashboard grid.
+ * CommandCentreGrid — the unified customisable dashboard grid (Split Column).
  *
- * Renders three collapsible sections (Operations, Financial, Safety &
- * Compliance). Every block — stat tiles, rig widget, site snapshot,
- * mission control, insight widgets — is drag-and-drop reorderable,
+ * Renders two rails side-by-side: a narrower left rail (40%) stacking stat
+ * tiles and compact insight widgets, and a wider right rail (60%) holding
+ * the big visual widgets (Rigs on Site, Active Sites, Mission Control, AI
+ * Insights). A thin vertical divider separates them on desktop; below
+ * 1024px the rails collapse to a single stacked column.
+ *
+ * Every block is drag-and-drop reorderable within and across rails,
  * resizable (S/M/L/XL), and hideable. The full layout persists to the
  * user's DashboardLayout entity and restores on next login.
  */
@@ -80,7 +98,6 @@ export default function CommandCentreGrid({ blockRenderers }) {
   const saveTimer = useRef(null);
   const hasAppliedServer = useRef(false);
 
-  // Track mobile breakpoint — drag-and-drop is desktop/tablet only
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)');
     const handler = (e) => setIsMobile(e.matches);
@@ -88,7 +105,6 @@ export default function CommandCentreGrid({ blockRenderers }) {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Load the user's saved layout from the server
   const { data: profile } = useQuery({
     queryKey: ['my-staff-profile'],
     queryFn: async () => { const res = await base44.functions.invoke('getMyStaffProfile'); return res.data; },
@@ -114,13 +130,11 @@ export default function CommandCentreGrid({ blockRenderers }) {
     if (savedLayout.id) setLayoutId(savedLayout.id);
   }, [savedLayout]);
 
-  // Persist to localStorage immediately
   useEffect(() => { localStorage.setItem(LAYOUT_KEY, JSON.stringify(sectionLayout)); }, [sectionLayout]);
   useEffect(() => { localStorage.setItem(HIDDEN_KEY, JSON.stringify(hidden)); }, [hidden]);
   useEffect(() => { localStorage.setItem(SIZES_KEY, JSON.stringify(sizes)); }, [sizes]);
   useEffect(() => { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed)); }, [collapsed]);
 
-  // Debounced save to DashboardLayout entity
   const saveToEntity = useCallback((newLayout, newHidden, newSizes) => {
     if (!profile?.id) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -132,8 +146,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
           section_layout: newLayout,
           hidden_blocks: newHidden,
           block_sizes: newSizes,
-          // Keep old fields for backward compat
-          widget_order: [...newLayout.operations, ...newLayout.financial, ...newLayout.safety],
+          widget_order: [...newLayout.left, ...newLayout.right],
           hidden_widgets: newHidden,
           widget_sizes: newSizes,
         };
@@ -150,19 +163,19 @@ export default function CommandCentreGrid({ blockRenderers }) {
   const onDragEnd = (result) => {
     const { source, destination } = result;
     if (!destination) return;
-    const srcSec = source.droppableId;
-    const dstSec = destination.droppableId;
-    if (srcSec === dstSec) {
-      const items = [...sectionLayout[srcSec]];
+    const srcRail = source.droppableId;
+    const dstRail = destination.droppableId;
+    if (srcRail === dstRail) {
+      const items = [...sectionLayout[srcRail]];
       const [moved] = items.splice(source.index, 1);
       items.splice(destination.index, 0, moved);
-      setSectionLayout(prev => ({ ...prev, [srcSec]: items }));
+      setSectionLayout(prev => ({ ...prev, [srcRail]: items }));
     } else {
-      const srcItems = [...sectionLayout[srcSec]];
-      const dstItems = [...sectionLayout[dstSec]];
+      const srcItems = [...sectionLayout[srcRail]];
+      const dstItems = [...sectionLayout[dstRail]];
       const [moved] = srcItems.splice(source.index, 1);
       dstItems.splice(destination.index, 0, moved);
-      setSectionLayout(prev => ({ ...prev, [srcSec]: srcItems, [dstSec]: dstItems }));
+      setSectionLayout(prev => ({ ...prev, [srcRail]: srcItems, [dstRail]: dstItems }));
     }
   };
 
@@ -175,8 +188,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
     setCollapsed({});
   };
 
-  // All blocks across all sections (for the visibility toggle bar)
-  const allBlocks = useMemo(() => [...sectionLayout.operations, ...sectionLayout.financial, ...sectionLayout.safety], [sectionLayout]);
+  const allBlocks = useMemo(() => [...sectionLayout.left, ...sectionLayout.right], [sectionLayout]);
 
   return (
     <div className="mb-4">
@@ -189,7 +201,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
             </span>
           ) : customise ? (
             <span className="text-[11px] text-slate-400 font-medium">
-              {isMobile ? 'Tap eye to show/hide blocks' : 'Drag blocks between sections · click size to resize'}
+              {isMobile ? 'Tap eye to show/hide blocks' : 'Drag blocks between rails · click size to resize'}
             </span>
           ) : <span />}
           {customise && (
@@ -223,91 +235,93 @@ export default function CommandCentreGrid({ blockRenderers }) {
         </div>
       )}
 
-      {/* ── Sections with DnD ── */}
+      {/* ── Two-rail split layout ── */}
       <DragDropContext onDragEnd={onDragEnd}>
-        {SECTIONS.map(section => {
-          const sectionBlocks = sectionLayout[section.id].filter(id => !hidden.includes(id));
-          const isCollapsed = collapsed[section.id];
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-5">
+          {SECTIONS.map(section => {
+            const railBlocks = sectionLayout[section.id].filter(id => !hidden.includes(id));
+            const isCollapsed = collapsed[section.id];
 
-          return (
-            <div key={section.id} className="mb-6">
-              <SectionHeader
-                title={section.title}
-                icon={section.icon}
-                accent={section.accent}
-                collapsed={isCollapsed}
-                onToggle={() => setCollapsed(prev => ({ ...prev, [section.id]: !prev[section.id] }))}
-                visibleCount={sectionBlocks.length}
-              />
+            return (
+              <div key={section.id} className={`flex flex-col ${section.id === 'left' ? 'lg:w-[40%]' : 'lg:w-[60%] lg:border-l lg:border-slate-200 lg:pl-5'}`}>
+                <SectionHeader
+                  title={section.title}
+                  icon={section.icon}
+                  accent={section.accent}
+                  collapsed={isCollapsed}
+                  onToggle={() => setCollapsed(prev => ({ ...prev, [section.id]: !prev[section.id] }))}
+                  visibleCount={railBlocks.length}
+                />
 
-              {!isCollapsed && (
-                <Droppable droppableId={section.id}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`grid grid-cols-1 lg:grid-cols-4 gap-4 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-[#2E5A1A]/5 border-2 border-dashed border-[#2E5A1A]/30 p-2' : ''}`}
-                    >
-                      {sectionBlocks.map((blockId, index) => {
-                        const content = blockRenderers[blockId]?.();
-                        if (!content) return null;
-                        const config = BLOCK_REGISTRY[blockId];
-                        const userSize = sizes[blockId] || config?.defaultSize || 'md';
-                        const colspanClass = SIZE_COLSPAN[userSize] || 'lg:col-span-2';
-                        const SizeIcon = SIZE_ICON[userSize] || Square;
-                        const canDrag = customise && !isMobile;
+                {!isCollapsed && (
+                  <Droppable droppableId={section.id}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`grid grid-cols-2 gap-3 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-[#2E5A1A]/5 border-2 border-dashed border-[#2E5A1A]/30 p-2' : ''}`}
+                      >
+                        {railBlocks.map((blockId, index) => {
+                          const content = blockRenderers[blockId]?.();
+                          if (!content) return null;
+                          const config = BLOCK_REGISTRY[blockId];
+                          const userSize = sizes[blockId] || config?.defaultSize || 'md';
+                          const colspanClass = SIZE_COLSPAN[userSize] || 'col-span-2';
+                          const SizeIcon = SIZE_ICON[userSize] || Square;
+                          const canDrag = customise && !isMobile;
 
-                        return (
-                          <Draggable key={blockId} draggableId={blockId} index={index} isDragDisabled={!canDrag}>
-                            {(prov, snap) => (
-                              <div
-                                ref={prov.innerRef}
-                                {...prov.draggableProps}
-                                className={`${colspanClass} relative ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
-                              >
-                                {customise && (
-                                  <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
-                                    {canDrag && (
-                                      <div {...prov.dragHandleProps}
-                                        className="bg-[#2E5A1A] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
-                                        <GripVertical className="w-3.5 h-3.5" /> Drag
-                                      </div>
-                                    )}
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); cycleSize(blockId); }}
-                                      className="bg-white text-[#2E5A1A] px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5 transition z-30 relative touch-manipulation"
-                                      title={`Size: ${SIZE_LABEL[userSize]} (click to change)`}
-                                    >
-                                      <SizeIcon className="w-3.5 h-3.5" /> {SIZE_LABEL[userSize]}
-                                    </button>
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); toggleHidden(blockId); }}
-                                      className="bg-white text-rose-500 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-rose-200 hover:bg-rose-50 transition z-30 relative touch-manipulation"
-                                      title="Hide block"
-                                    >
-                                      <X className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                )}
-                                {content}
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                      {provided.placeholder}
-                      {sectionBlocks.length === 0 && customise && (
-                        <div className="col-span-full text-center py-8 text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
-                          Drag blocks here from another section
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Droppable>
-              )}
-            </div>
-          );
-        })}
+                          return (
+                            <Draggable key={blockId} draggableId={blockId} index={index} isDragDisabled={!canDrag}>
+                              {(prov, snap) => (
+                                <div
+                                  ref={prov.innerRef}
+                                  {...prov.draggableProps}
+                                  className={`${colspanClass} relative ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
+                                >
+                                  {customise && (
+                                    <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
+                                      {canDrag && (
+                                        <div {...prov.dragHandleProps}
+                                          className="bg-[#2E5A1A] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
+                                          <GripVertical className="w-3.5 h-3.5" /> Drag
+                                        </div>
+                                      )}
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); cycleSize(blockId); }}
+                                        className="bg-white text-[#2E5A1A] px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5 transition z-30 relative touch-manipulation"
+                                        title={`Size: ${SIZE_LABEL[userSize]} (click to change)`}
+                                      >
+                                        <SizeIcon className="w-3.5 h-3.5" /> {SIZE_LABEL[userSize]}
+                                      </button>
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); toggleHidden(blockId); }}
+                                        className="bg-white text-rose-500 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-rose-200 hover:bg-rose-50 transition z-30 relative touch-manipulation"
+                                        title="Hide block"
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
+                                  {content}
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })}
+                        {provided.placeholder}
+                        {railBlocks.length === 0 && customise && (
+                          <div className="col-span-2 text-center py-8 text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                            Drag blocks here from the other rail
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Droppable>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </DragDropContext>
     </div>
   );

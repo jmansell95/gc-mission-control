@@ -4,50 +4,48 @@ import {
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════
-//  COMMAND CENTRE BLOCK REGISTRY
-//  Every block on the dashboard — stat tiles, rig widget, site snapshot,
-//  mission control, and insight widgets — is registered here so the
-//  CommandCentreGrid can drag/resize/hide them uniformly.
+//  COMMAND CENTRE BLOCK REGISTRY — Split Column Layout
+//  Two rails: left (40% — stat tiles + compact widgets) and
+//  right (60% — big visual widgets). Every block is drag-to-reorder,
+//  resizable, and hideable. Layout persists to DashboardLayout.
 // ═══════════════════════════════════════════════════════════════════
 
 export const SECTIONS = [
-  { id: 'operations', title: 'Operations', icon: Briefcase, accent: 'green' },
-  { id: 'financial', title: 'Financial', icon: PoundSterling, accent: 'blue' },
-  { id: 'safety', title: 'Safety & Compliance', icon: ShieldAlert, accent: 'rose' },
+  { id: 'left',  title: 'Metrics & Alerts',  icon: Gauge, accent: 'green' },
+  { id: 'right', title: 'Live Operations',  icon: Radar, accent: 'green' },
 ];
 
 export const BLOCK_REGISTRY = {
-  // ── Operations ──
-  'stat-active-jobs':    { title: 'Active Jobs',        icon: Briefcase,      section: 'operations', defaultSize: 'sm' },
-  'stat-crew-util':      { title: 'Crew Utilisation',    icon: Percent,        section: 'operations', defaultSize: 'sm' },
-  'stat-timesheet-queue':{ title: 'Timesheet Queue',    icon: ClipboardCheck, section: 'operations', defaultSize: 'sm' },
-  'rigs-on-site':        { title: 'Rigs on Site Today',  icon: Drill,          section: 'operations', defaultSize: 'xl' },
-  'site-snapshot':       { title: 'Active Sites',        icon: Radio,          section: 'operations', defaultSize: 'xl' },
-  'mission-control':    { title: 'Mission Control',     icon: Radar,          section: 'operations', defaultSize: 'xl' },
-  'field-priorities':    { title: 'Field Priorities',    icon: AlertTriangle,  section: 'operations', defaultSize: 'md' },
-  'exception-monitor':   { title: 'Needs Attention',     icon: AlertOctagon,   section: 'operations', defaultSize: 'md' },
-  'ai-insights':         { title: 'AI Weekly Insights',  icon: Sparkles,       section: 'operations', defaultSize: 'md' },
-  // ── Financial ──
-  'stat-outstanding':    { title: 'Outstanding Invoices', icon: PoundSterling, section: 'financial', defaultSize: 'sm' },
-  'stat-burn-rate':      { title: 'Burn Rate',            icon: Gauge,         section: 'financial', defaultSize: 'sm' },
-  // ── Safety & Compliance ──
-  'stat-overdue-actions':  { title: 'Overdue Actions',    icon: ShieldAlert,  section: 'safety', defaultSize: 'sm' },
-  'stat-red-alerts':       { title: 'Red Alerts',         icon: ShieldAlert,  section: 'safety', defaultSize: 'sm' },
-  'stat-fleet-compliance': { title: 'Fleet Compliance',   icon: ShieldCheck,  section: 'safety', defaultSize: 'sm' },
+  // ── Left rail — stat tiles + compact insight widgets ──
+  'stat-active-jobs':      { title: 'Active Jobs',           icon: Briefcase,      rail: 'left',  defaultSize: 'sm' },
+  'stat-crew-util':       { title: 'Crew Utilisation',       icon: Percent,        rail: 'left',  defaultSize: 'sm' },
+  'stat-timesheet-queue': { title: 'Timesheet Queue',       icon: ClipboardCheck, rail: 'left',  defaultSize: 'sm' },
+  'stat-outstanding':     { title: 'Outstanding Invoices',  icon: PoundSterling,  rail: 'left',  defaultSize: 'sm' },
+  'stat-burn-rate':       { title: 'Burn Rate',             icon: Gauge,          rail: 'left',  defaultSize: 'sm' },
+  'stat-overdue-actions':  { title: 'Overdue Actions',       icon: ShieldAlert,    rail: 'left',  defaultSize: 'sm' },
+  'stat-red-alerts':       { title: 'Red Alerts',            icon: ShieldAlert,    rail: 'left',  defaultSize: 'sm' },
+  'stat-fleet-compliance': { title: 'Fleet Compliance',      icon: ShieldCheck,    rail: 'left',  defaultSize: 'sm' },
+  'field-priorities':      { title: 'Field Priorities',      icon: AlertTriangle,  rail: 'left',  defaultSize: 'md' },
+  'exception-monitor':     { title: 'Needs Attention',       icon: AlertOctagon,   rail: 'left',  defaultSize: 'md' },
+  // ── Right rail — big visual widgets ──
+  'rigs-on-site':         { title: 'Rigs on Site Today',    icon: Drill,           rail: 'right', defaultSize: 'xl' },
+  'site-snapshot':        { title: 'Active Sites',          icon: Radio,           rail: 'right', defaultSize: 'xl' },
+  'mission-control':      { title: 'Mission Control',       icon: Radar,           rail: 'right', defaultSize: 'xl' },
+  'ai-insights':          { title: 'AI Weekly Insights',    icon: Sparkles,       rail: 'right', defaultSize: 'md' },
 };
 
 export const DEFAULT_SECTION_LAYOUT = {
-  operations: [
+  left: [
     'stat-active-jobs', 'stat-crew-util', 'stat-timesheet-queue',
-    'rigs-on-site', 'site-snapshot', 'mission-control',
-    'field-priorities', 'exception-monitor', 'ai-insights',
+    'stat-outstanding', 'stat-burn-rate',
+    'stat-overdue-actions', 'stat-red-alerts', 'stat-fleet-compliance',
+    'field-priorities', 'exception-monitor',
   ],
-  financial: ['stat-outstanding', 'stat-burn-rate'],
-  safety: ['stat-overdue-actions', 'stat-red-alerts', 'stat-fleet-compliance'],
+  right: ['rigs-on-site', 'site-snapshot', 'mission-control', 'ai-insights'],
 };
 
 export const DEFAULT_HIDDEN_BLOCKS = [];
 export const DEFAULT_BLOCK_SIZES = {};
 
-// All known block IDs — used to ensure every block appears in exactly one section
+// All known block IDs — used to ensure every block appears in exactly one rail
 export const ALL_BLOCK_IDS = Object.keys(BLOCK_REGISTRY);

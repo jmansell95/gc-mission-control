@@ -393,7 +393,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
       </div>
 
       {/* Rig cards — 2-column grid */}
-      <div className="p-2.5 grid grid-cols-2 gap-2.5">
+      <div className="p-2.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
         {rigStats.map((stat, i) => {
           const isScheduled = stat.state === 'scheduled';
           const isOnSite = stat.state === 'on_site';
