@@ -124,30 +124,10 @@
     "training_services": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "cscs_card",
-          "cpcs_card",
-          "npors_card",
-          "first_aid_cert",
-          "driver_license",
-          "dbs_certificate",
-          "forklift",
-          "confined_space",
-          "asbestos_awareness",
-          "manual_handling",
-          "working_at_height",
-          "sts_triple",
-          "nvq",
-          "ipaf",
-          "pasma",
-          "traffic_management",
-          "plant_training",
-          "other"
-        ]
+        "type": "string"
       },
       "default": [],
-      "description": "Training categories / qualifications this provider delivers (e.g. CSCS cards, NVQs, first aid, IPAF, confined space). Used to match courses to the right provider and filter the provider directory by what's needed."
+      "description": "Training categories / qualifications this provider delivers. Includes standard categories (cscs_card, cpcs_card, npors_card, first_aid_cert, driver_license, dbs_certificate, forklift, confined_space, asbestos_awareness, manual_handling, working_at_height, sts_triple, nvq, ipaf, pasma, traffic_management, plant_training, other) plus any custom training types added per-provider via the provider editor. Used to match courses to the right provider and filter the provider directory by what's needed."
     },
     "accreditations": {
       "type": "array",

@@ -8,6 +8,7 @@ import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Search, Users, Mail, Phone, HardHat, Wrench, UserCog, ShieldCheck,
   ShieldOff, ChevronRight, KeyRound, UserPlus, Loader2, AlertCircle, Trash2,
+  CopyX,
 } from 'lucide-react';
 import { formatWorkerType } from '@/utils/format';
 
@@ -23,6 +24,7 @@ export default function StaffListTab() {
   const [permissionStaff, setPermissionStaff] = useState(null);
   const [creating, setCreating] = useState(false);
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [deduping, setDeduping] = useState(false);
 
   const { data: staff = [], isLoading } = useQuery({
     queryKey: ['staff'],
@@ -66,6 +68,22 @@ export default function StaffListTab() {
     setFormModalOpen(true);
   };
 
+  const handleDeduplicate = async () => {
+    if (!window.confirm('Remove duplicate staff records?\n\nThis merges records that share the same name AND linked user account. The record with the most data is kept; all rota assignments, compliance items and timesheets from duplicates are re-pointed to the kept record, then the empty duplicates are deleted.')) return;
+    setDeduping(true);
+    try {
+      const res = await base44.functions.invoke('deduplicateStaff', {});
+      const d = res.data || {};
+      refresh();
+      qc.invalidateQueries({ queryKey: ['rotas'] });
+      qc.invalidateQueries({ queryKey: ['staff-assignments'] });
+      toast({ title: 'Deduplication complete', description: d.message || `Deleted ${d.recordsDeleted} duplicate record(s).` });
+    } catch (e) {
+      toast({ title: 'Deduplication failed', description: e?.message, variant: 'destructive' });
+    }
+    setDeduping(false);
+  };
+
   const handleDelete = async (staffId) => {
     if (!window.confirm('Delete this staff member? This cannot be undone.')) return;
     try {
@@ -90,6 +108,15 @@ export default function StaffListTab() {
             className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 shadow-sm transition"
           />
         </div>
+        <button
+          onClick={handleDeduplicate}
+          disabled={deduping}
+          title="Merge duplicate staff records (same name + user account)"
+          className="inline-flex items-center gap-1.5 h-11 px-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition disabled:opacity-50 shadow-sm flex-shrink-0"
+        >
+          {deduping ? <Loader2 className="w-4 h-4 animate-spin" /> : <CopyX className="w-4 h-4" />}
+          <span className="hidden sm:inline">Dedup</span>
+        </button>
         <button
           onClick={handleAdd}
           disabled={creating}

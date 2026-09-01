@@ -194,9 +194,24 @@ function ProviderFormModal({ editing, onClose, onSaved }) {
     notes: editing?.notes || '',
   });
   const [saving, setSaving] = useState(false);
+  const [customPill, setCustomPill] = useState('');
 
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
   const toggleArr = (k, v) => setForm(prev => ({ ...prev, [k]: prev[k].includes(v) ? prev[k].filter(x => x !== v) : [...prev[k], v] }));
+
+  // Values in training_services that aren't in the standard list (custom pills).
+  const standardValues = new Set(TRAINING_SERVICES.map(s => s.value));
+  const customServices = form.training_services.filter(v => !standardValues.has(v));
+
+  const addCustomPill = () => {
+    const val = customPill.trim();
+    if (!val) return;
+    // Use lowercase snake_case for consistency with standard values.
+    const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    if (!slug || form.training_services.includes(slug)) { setCustomPill(''); return; }
+    setForm(prev => ({ ...prev, training_services: [...prev.training_services, slug] }));
+    setCustomPill('');
+  };
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast({ title: 'Company name required', variant: 'destructive' }); return; }
@@ -277,6 +292,33 @@ function ProviderFormModal({ editing, onClose, onSaved }) {
                   {s.label}
                 </button>
               ))}
+            </div>
+            {/* Custom pills added per-provider (not in the standard list) */}
+            {customServices.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {customServices.map(v => (
+                  <span key={v} className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg bg-[#2E5A1A]/10 text-[#2E5A1A]">
+                    {v.replace(/_/g, ' ')}
+                    <button type="button" onClick={() => toggleArr('training_services', v)} className="hover:bg-[#2E5A1A]/20 rounded p-0.5 transition">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* Add a custom pill */}
+            <div className="flex gap-1.5 mt-2">
+              <input
+                value={customPill}
+                onChange={e => setCustomPill(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustomPill(); } }}
+                placeholder="Add custom training type…"
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              />
+              <button type="button" onClick={addCustomPill} disabled={!customPill.trim()}
+                className="px-3 py-2 rounded-lg text-sm font-semibold text-white bg-[#2E5A1A] hover:bg-[#1c4a12] disabled:opacity-40 transition">
+                Add
+              </button>
             </div>
           </div>
 

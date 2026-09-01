@@ -4,7 +4,7 @@
   "properties": {
     "course_id": {
       "type": "string",
-      "description": "The TrainingCourse this booking is for"
+      "description": "The TrainingCourse this booking is for. Optional \u2014 when recording completed training directly (via Add Completed Training), no course is linked and the booking stands alone with its own certificate/title."
     },
     "staff_id": {
       "type": "string",
@@ -68,7 +68,6 @@
     }
   },
   "required": [
-    "course_id",
     "staff_id",
     "status"
   ],
