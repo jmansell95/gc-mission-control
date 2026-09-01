@@ -29,6 +29,7 @@ import VirtualDepotCard from '@/components/rota/VirtualDepotCard';
 import DeliveryInFrontBanner from '@/components/rota/DeliveryInFrontBanner';
 import DepotDutyBadge from '@/components/rota/DepotDutyBadge';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
+import LiveDriverBadge from '@/components/rota/LiveDriverBadge';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -100,6 +101,16 @@ export default function WeeklyRotaBuilder() {
   const { data: staff = [], isLoading: staffLoading, isError: staffError, refetch: refetchStaff } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
   const { data: jobs = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: vehicles = [] } = useQuery({ queryKey: ['vehicles'], queryFn: () => base44.entities.Vehicle.list() });
+
+  // Real-time vehicle updates — keeps the live driver badge fresh on the
+  // rota without a manual reload. Invalidates the vehicles query so the
+  // current_operator / operator_updated_at fields stay current.
+  useEffect(() => {
+    const unsubscribe = base44.entities.Vehicle.subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    });
+    return unsubscribe;
+  }, [queryClient]);
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list() });
   const { data: absences = [] } = useQuery({ queryKey: ['absences'], queryFn: () => base44.entities.Absence.list() });
   const { data: recurring = [] } = useQuery({ queryKey: ['recurring-absences'], queryFn: () => base44.entities.RecurringAbsence.list() });
@@ -1085,7 +1096,7 @@ export default function WeeklyRotaBuilder() {
                               )}
                               {/* Delivery-in-front banner — active delivery surfaces above depot duty */}
                               {dif.deliveryInFront && (
-                                <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} />
+                                <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} vehicles={vehicles} />
                               )}
                               {/* Multi-job count badge — shows when 2+ jobs are assigned */}
                               {isMulti && !ls && (
@@ -1240,7 +1251,7 @@ export default function WeeklyRotaBuilder() {
                         {/* Delivery-in-front banner — active delivery surfaces above depot duty */}
                         {dif.deliveryInFront && (
                           <div className="mb-2">
-                            <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} />
+                            <DeliveryInFrontBanner deliveries={dif.activeDeliveries} jobs={jobs} vehicles={vehicles} />
                           </div>
                         )}
                         {/* Stacked job cards */}

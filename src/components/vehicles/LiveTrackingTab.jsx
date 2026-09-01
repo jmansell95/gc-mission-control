@@ -77,7 +77,7 @@ function VehicleMarker({ vehicle, onClick }) {
  * - Safety event overlays (speeding, harsh braking, etc.)
  * - Route comparison (actual vs Google optimal vs optimized stops)
  */
-export default function LiveTrackingTab() {
+export default function LiveTrackingTab({ initialVehicleId }) {
   const [selectedVehicle, setSelectedVehicle] = useState(null); // live vehicle object
   const [selectedVehicleId, setSelectedVehicleId] = useState(null); // for history queries
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
@@ -170,6 +170,15 @@ export default function LiveTrackingTab() {
   useEffect(() => {
     setPlaybackIndex(0);
   }, [selectedTripIndex, selectedVehicleId, selectedDate]);
+
+  // Auto-open the live dialog for a vehicle passed in from the rota's live
+  // driver badge (?vehicle=<id>). Fires once when the live data has loaded
+  // and the matching vehicle is found.
+  useEffect(() => {
+    if (!initialVehicleId || dialogVehicle || allVehicles.length === 0) return;
+    const match = allVehicles.find(v => v.vehicle_id === initialVehicleId || v.id === initialVehicleId);
+    if (match) setDialogVehicle(match);
+  }, [initialVehicleId, allVehicles, dialogVehicle]);
 
   // ── Map data ──
   const isLiveMode = !selectedVehicleId;

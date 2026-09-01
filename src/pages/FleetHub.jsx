@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { Truck, Satellite, Wrench } from 'lucide-react';
@@ -17,7 +18,9 @@ import VehicleMaintenanceManager from '@/components/VehicleMaintenanceManager';
  * Three top-level tabs: Live Tracking (default) · Fleet · Maintenance
  */
 export default function FleetHub() {
-  const [activeTab, setActiveTab] = useState('live');
+  const [searchParams] = useSearchParams();
+  const focusVehicleId = searchParams.get('vehicle');
+  const [activeTab, setActiveTab] = useState(focusVehicleId ? 'live' : 'live');
 
   const { data: vehicles = [] } = useScopedEntity('Vehicle', { queryKey: ['vehicles-fleet-hub'], sort: '-created_date', limit: 500 });
 
@@ -57,7 +60,7 @@ export default function FleetHub() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >
-      {activeTab === 'live' && <LiveTrackingTab />}
+      {activeTab === 'live' && <LiveTrackingTab initialVehicleId={focusVehicleId} />}
       {activeTab === 'fleet' && <Vehicles />}
       {activeTab === 'maintenance' && <VehicleMaintenanceManager />}
     </HubShell>
