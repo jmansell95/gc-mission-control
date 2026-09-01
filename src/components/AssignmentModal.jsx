@@ -790,7 +790,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                 <select value={formData.rig_asset_id} onChange={(e) => setFormData({ ...formData, rig_asset_id: e.target.value })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm bg-white">
                   <option value="">Select Rig</option>
-                  {sortAZ(rigs, 'name').map(r => <option key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</option>)}
+                  {sortAZ(rigs, 'name').map(r => <option key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</option>)}
                 </select>
                 {selectedRig && (
                   <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
@@ -799,6 +799,12 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                     )}
                     {selectedRig.serial_number && (
                       <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono">S/N: {selectedRig.serial_number}</span>
+                    )}
+                    {selectedRig.colour && (
+                      <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full border border-slate-300" style={{ backgroundColor: selectedRig.colour }} />
+                        {selectedRig.colour}
+                      </span>
                     )}
                     {selectedRig.compliance_status && (
                       <span className={`px-2 py-0.5 rounded-full font-medium ${selectedRig.compliance_status === 'compliant' ? 'bg-emerald-100 text-emerald-700' : selectedRig.compliance_status === 'expiring' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>{selectedRig.compliance_status}</span>
