@@ -12,11 +12,12 @@ const fmtGBP = (v) => {
 };
 
 const STATE_META = {
-  on_site:    { label: 'On Site',    dot: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
-  en_route:   { label: 'En Route',   dot: 'bg-amber-500',   text: 'text-amber-700',   bg: 'bg-amber-50' },
-  completed:  { label: 'Completed',  dot: 'bg-emerald-600', text: 'text-emerald-700', bg: 'bg-emerald-50' },
-  scheduled: { label: 'Scheduled',  dot: 'bg-slate-300',   text: 'text-slate-500',   bg: 'bg-slate-100' },
-  assigned:   { label: 'Assigned',   dot: 'bg-slate-200',   text: 'text-slate-400',   bg: 'bg-slate-50' },
+  on_site:            { label: 'On Site',            dot: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+  en_route:           { label: 'En Route',           dot: 'bg-amber-500',   text: 'text-amber-700',   bg: 'bg-amber-50' },
+  completed:          { label: 'Completed',          dot: 'bg-emerald-600', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+  delivered_no_rota:  { label: 'Delivered · no rota', dot: 'bg-amber-400',  text: 'text-amber-700',   bg: 'bg-amber-50' },
+  scheduled:          { label: 'Scheduled',           dot: 'bg-slate-300',   text: 'text-slate-500',   bg: 'bg-slate-100' },
+  assigned:           { label: 'Assigned',            dot: 'bg-slate-200',   text: 'text-slate-400',   bg: 'bg-slate-50' },
 };
 
 /**
@@ -100,6 +101,7 @@ export default function AllRigsModal({ rigs, onClose }) {
             if (isOnSite && stat.shiftStart) subtitle = `On site · ${Math.floor((Date.now() - stat.shiftStart) / 3600000)}h ${Math.floor(((Date.now() - stat.shiftStart) % 3600000) / 60000)}m`;
             else if (isEnRoute) subtitle = stat.gpsDistance != null ? `En route · ${stat.gpsDistance}m from site` : 'En route to site';
             else if (isCompleted) subtitle = 'Shift complete';
+            else if (stat.state === 'delivered_no_rota') subtitle = 'Delivered to site · no rig on rota';
             else if (stat.state === 'scheduled' && stat.firstAssignment?.start_time) subtitle = `Starts at ${stat.firstAssignment.start_time}`;
             else if (stat.state === 'assigned') subtitle = 'Assigned · not on site';
 

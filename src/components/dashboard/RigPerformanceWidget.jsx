@@ -146,7 +146,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
 
       // Delivery sign-off: does this rig have an active on_site JobAssetAssignment at the job?
       const hasOnSiteJAA = jobAssetAssignments.some(jaa =>
-        jaa.asset_id === rigId && jaa.job_id === job?.id && jaa.status === 'on_site'
+        (jaa.asset_id === rigId || jaa.site_asset_id === rigId) && jaa.job_id === job?.id && jaa.status === 'on_site'
       );
 
       // Resolve rig → vehicle from today's rota assignments
@@ -182,6 +182,9 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         else if (gpsState === 'en_route') state = 'en_route';
         else if (hasStarted) { state = 'on_site'; onSiteSource = 'manual'; } // manual crew tap fallback
         else state = 'scheduled';
+      } else if (hasOnSiteJAA) {
+        state = 'delivered_no_rota'; // delivery signed off but no rig on today's rota
+        onSiteSource = 'delivered';
       }
       data.onSiteSource = onSiteSource;
 
@@ -298,7 +301,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
       };
     }).sort((a, b) => {
       // Revenue-first ranking (leaderboard), state as tiebreaker
-      const stateOrder = { completed: 0, on_site: 1, en_route: 2, scheduled: 3, assigned: 4 };
+      const stateOrder = { completed: 0, on_site: 1, en_route: 2, delivered_no_rota: 3, scheduled: 4, assigned: 5 };
       return (b.revenue - a.revenue) || (stateOrder[a.state] - stateOrder[b.state]);
     });
   }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, allVehicles, rigCrewDayRate, now, liveVehicles]);
@@ -325,6 +328,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const onSiteCount = rigStats.filter(r => r.state === 'on_site').length;
   const enRouteCount = rigStats.filter(r => r.state === 'en_route').length;
   const scheduledCount = rigStats.filter(r => r.state === 'scheduled').length;
+  const deliveredNoRotaCount = rigStats.filter(r => r.state === 'delivered_no_rota').length;
   const gpsCount = rigStats.filter(r => r.hasGps).length;
 
   if (isLoading || rigsLoading) {
@@ -380,7 +384,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             <div>
               <h3 className="text-sm font-bold">Rigs on Site Today</h3>
               <p className="text-[11px] text-white/70 flex items-center gap-1.5">
-                {format(new Date(), 'EEE dd MMM')} · {onSiteCount} on site{enRouteCount > 0 ? ` · ${enRouteCount} en route` : ''}{scheduledCount > 0 ? ` · ${scheduledCount} scheduled` : ''}
+                {format(new Date(), 'EEE dd MMM')} · {onSiteCount} on site{enRouteCount > 0 ? ` · ${enRouteCount} en route` : ''}{deliveredNoRotaCount > 0 ? ` · ${deliveredNoRotaCount} delivered no rota` : ''}{scheduledCount > 0 ? ` · ${scheduledCount} scheduled` : ''}
                 {gpsCount > 0 && <span className="inline-flex items-center gap-0.5"><Satellite className="w-2.5 h-2.5" />GPS</span>}
               </p>
             </div>
@@ -403,7 +407,8 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             const isCompleted = stat.state === 'completed';
             const isScheduled = stat.state === 'scheduled';
 
-            const dotColor = isOnSite ? 'bg-emerald-500' : isEnRoute ? 'bg-amber-500' : isCompleted ? 'bg-emerald-600' : isScheduled ? 'bg-slate-300' : 'bg-slate-200';
+            const isDeliveredNoRota = stat.state === 'delivered_no_rota';
+            const dotColor = isOnSite ? 'bg-emerald-500' : isEnRoute ? 'bg-amber-500' : isCompleted ? 'bg-emerald-600' : isDeliveredNoRota ? 'bg-amber-400' : isScheduled ? 'bg-slate-300' : 'bg-slate-200';
             const revenueColor = (isOnSite || isCompleted) ? 'text-emerald-700' : 'text-slate-400';
             const progressBarWidth = Math.round(stat.progressFraction * 100);
 
@@ -412,6 +417,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             else if (isOnSite) subtitle = 'On site';
             else if (isEnRoute) subtitle = stat.gpsDistance != null ? `${stat.gpsDistance}m from site` : 'En route';
             else if (isCompleted) subtitle = 'Shift complete';
+            else if (isDeliveredNoRota) subtitle = 'Delivered · no rig on rota';
             else if (isScheduled && stat.firstAssignment?.start_time) subtitle = `Starts ${stat.firstAssignment.start_time}`;
             else if (stat.state === 'assigned') subtitle = 'Not on site';
 
