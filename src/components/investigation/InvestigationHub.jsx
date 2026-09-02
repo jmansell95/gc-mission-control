@@ -12,6 +12,7 @@ import InvestigationExportBar from '@/components/investigation/InvestigationExpo
 import InvestigationBulkReview from '@/components/investigation/InvestigationBulkReview';
 import BulkApproveBar from '@/components/investigation/BulkApproveBar';
 import LiveKeyLogFeed from '@/components/investigation/LiveKeyLogFeed';
+import AGSUploadButton from '@/components/investigation/AGSUploadButton';
 import { getInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import { logTypeConfig } from '@/components/investigation/shared';
 
@@ -137,6 +138,11 @@ export default function InvestigationHub({ onNavigate }) {
         jobFilter={jobFilter} setJobFilter={setJobFilter} jobs={jobs}
         typeFilter={typeFilter} setTypeFilter={setTypeFilter} logTypes={logTypeConfig}
       />
+
+      {/* Quick upload + live feed */}
+      <div className="flex items-center justify-end">
+        <AGSUploadButton jobs={jobs} />
+      </div>
 
       {/* Live KeyLogBook feed — today's incoming driller logs across all jobs */}
       <LiveKeyLogFeed jobs={jobs} />

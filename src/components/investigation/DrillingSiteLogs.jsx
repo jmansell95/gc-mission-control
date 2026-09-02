@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Activity, Clock, CalendarDays, CheckCircle2 } from 'lucide-react';
 import SiteLogReviewManager from '@/components/investigation/SiteLogReviewManager';
+import AGSUploadButton from '@/components/investigation/AGSUploadButton';
 
 /**
  * DrillingSiteLogs — the Site Logs tab content for drilling jobs.
@@ -51,6 +52,7 @@ export default function DrillingSiteLogs({ job, assignedStaff, selectedLogId }) 
           <Activity className="w-5 h-5" />
           <h2 className="text-lg font-bold">Site Activity Logs</h2>
           <span className="ml-auto text-xs bg-white/20 px-2.5 py-1 rounded-full font-medium">{logs.length} total entries</span>
+          <AGSUploadButton jobId={job.id} />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <HeroStat icon={CalendarDays} label="Days Logged" value={loggedDays} sub="unique dates" />

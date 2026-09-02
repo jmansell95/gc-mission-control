@@ -10,6 +10,7 @@ import { Skeleton, EmptyState } from '@/components/StateViews';
 import { titleCase } from '@/utils/format';
 import DrillingSiteLogs from '@/components/investigation/DrillingSiteLogs';
 import AutoBillingButton from '@/components/investigation/AutoBillingButton';
+import AGSUploadButton from '@/components/investigation/AGSUploadButton';
 import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import {
   strataConfig, serviceEncounterConfig, pitStabilityConfig, reviewStatusConfig,
@@ -84,6 +85,7 @@ export default function InvestigationLogManager({ job, isDrillingJob, assignedSt
             <XCircle className="w-3 h-3" /> {queried} queried
           </span>
         )}
+        <AGSUploadButton jobId={job.id} />
       </div>
 
       {/* KeyLogBook AGS data summary banner */}
