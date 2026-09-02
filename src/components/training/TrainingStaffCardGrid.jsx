@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   Search, CheckCircle2, AlertTriangle, Clock, Calendar, GraduationCap,
-  ArrowRight, Plus, ShieldCheck, Users, UserPlus,
+  ArrowRight, Plus, ShieldCheck, Users, UserPlus, HardHat, Briefcase,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { complianceDaysUntil, formatComplianceDate } from '@/utils/complianceDate';
@@ -27,7 +27,7 @@ const STATUS_META = {
  */
 export default function TrainingStaffCardGrid({ staff, teams, compliance, bookings, courses, requirements, getQualStatus, onBookTraining }) {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
+  const [searchByType, setSearchByType] = useState({ direct_employee: '', subcontractor: '', agency: '' });
   const [teamFilter, setTeamFilter] = useState('all');
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [showAddCompleted, setShowAddCompleted] = useState(null);
@@ -47,13 +47,12 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
     return p ? `${p.name} — ${t.name}` : t.name;
   };
 
-  const filtered = useMemo(() => staff.filter(m => {
-    const ms = !search || m.name.toLowerCase().includes(search.toLowerCase()) || (m.email || '').toLowerCase().includes(search.toLowerCase());
-    const mt = teamFilter === 'all' || m.team_id === teamFilter;
-    return ms && mt && m.is_active !== false;
-  }), [staff, search, teamFilter]);
+  // Apply team filter once to all staff (search is per-section)
+  const teamFiltered = useMemo(() => staff.filter(m =>
+    (teamFilter === 'all' || m.team_id === teamFilter) && m.is_active !== false
+  ), [staff, teamFilter]);
 
-  const staffWithStats = useMemo(() => filtered.map(m => {
+  const staffWithStats = useMemo(() => teamFiltered.map(m => {
     const gapCount = categories.filter(c => {
       const st = getQualStatus(m, c.qualification_type);
       return st === 'gap' || st === 'expired';
@@ -61,10 +60,7 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
     const expiringCount = categories.filter(c => getQualStatus(m, c.qualification_type) === 'expiring').length;
     const bookedCount = categories.filter(c => getQualStatus(m, c.qualification_type) === 'booked').length;
     return { member: m, gapCount, expiringCount, bookedCount, isFullyQualified: gapCount === 0 && expiringCount === 0 };
-  }), [filtered, categories, getQualStatus]);
-
-  const qualified = staffWithStats.filter(s => s.isFullyQualified);
-  const issues = staffWithStats.filter(s => !s.isFullyQualified);
+  }), [teamFiltered, categories, getQualStatus]);
 
   const stats = useMemo(() => {
     let gaps = 0, expiring = 0, booked = 0;
@@ -73,8 +69,27 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
       if (s.expiringCount > 0) expiring++;
       if (s.bookedCount > 0) booked++;
     });
-    return { total: staffWithStats.length, qualified: qualified.length, gaps, expiring, booked };
-  }, [staffWithStats, qualified]);
+    return { total: staffWithStats.length, qualified: staffWithStats.filter(s => s.isFullyQualified).length, gaps, expiring, booked };
+  }, [staffWithStats]);
+
+  // Group by worker type, then apply each section's own search query
+  const sections = useMemo(() => {
+    const groups = { direct_employee: [], subcontractor: [], agency: [] };
+    staffWithStats.forEach(s => {
+      const wt = s.member.worker_type;
+      if (groups[wt]) groups[wt].push(s);
+    });
+    const filterBySearch = (list, q) => {
+      if (!q) return list;
+      const lc = q.toLowerCase();
+      return list.filter(s => s.member.name.toLowerCase().includes(lc) || (s.member.email || '').toLowerCase().includes(lc));
+    };
+    return [
+      { type: 'direct_employee', label: 'Direct Employees', icon: Users, headerCls: 'from-[#2E5A1A] to-[#5A8C1E]', items: filterBySearch(groups.direct_employee, searchByType.direct_employee) },
+      { type: 'subcontractor', label: 'Subcontractors', icon: HardHat, headerCls: 'from-amber-500 to-orange-500', items: filterBySearch(groups.subcontractor, searchByType.subcontractor) },
+      { type: 'agency', label: 'Agency Staff', icon: Briefcase, headerCls: 'from-blue-500 to-indigo-600', items: filterBySearch(groups.agency, searchByType.agency) },
+    ];
+  }, [staffWithStats, searchByType]);
 
   return (
     <div className="space-y-4">
@@ -86,13 +101,8 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
         <StatTile icon={Clock} label="Expiring Soon" value={stats.expiring} gradient="stat-gradient-amber" />
       </div>
 
-      {/* Filters */}
+      {/* Team filter */}
       <div className="flex flex-col sm:flex-row gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search crew…"
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/10 focus:border-[#2E5A1A]" />
-        </div>
         <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}
           className="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/10 focus:border-[#2E5A1A]">
           <option value="all">All Crews</option>
@@ -100,51 +110,45 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
         </select>
       </div>
 
-      {/* Two-column grouped layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Fully Qualified */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-sm font-bold text-slate-700">Fully Qualified</h3>
-            <span className="text-xs text-slate-400">· {qualified.length}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-3">
-            {qualified.map(({ member: m, gapCount, expiringCount, bookedCount }) => (
-              <StaffCard key={m.id} m={m} teamName={teamName} categories={categories} getQualStatus={getQualStatus}
-                compliance={compliance} bookedCount={bookedCount} isFullyQualified onClick={() => setSelectedStaff(m)} />
-            ))}
-            {qualified.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white/40 p-8 text-center">
-                <CheckCircle2 className="w-8 h-8 text-slate-200 mx-auto mb-2" />
-                <p className="text-sm text-slate-400">No fully qualified crew yet.</p>
+      {/* Three worker-type sections, each with its own header + search */}
+      {sections.map(section => {
+        if (section.items.length === 0) return null;
+        const SectionIcon = section.icon;
+        return (
+          <div key={section.type} className="space-y-3">
+            <div className={`flex items-center gap-3 rounded-2xl bg-gradient-to-r ${section.headerCls} px-4 py-3 shadow-sm`}>
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                <SectionIcon className="w-5 h-5 text-white" />
               </div>
-            )}
+              <h3 className="text-sm font-bold text-white">{section.label}</h3>
+              <span className="text-xs font-bold text-white/80 bg-white/15 px-2 py-0.5 rounded-full">{section.items.length}</span>
+              <div className="relative flex-1 max-w-xs ml-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+                <input
+                  value={searchByType[section.type]}
+                  onChange={e => setSearchByType(prev => ({ ...prev, [section.type]: e.target.value }))}
+                  placeholder={`Search ${section.label.toLowerCase()}…`}
+                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/15 border border-white/20 text-white text-sm placeholder-white/60 focus:outline-none focus:bg-white/25 focus:ring-2 focus:ring-white/30"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {section.items.map(({ member: m, gapCount, expiringCount, bookedCount, isFullyQualified }) => (
+                <StaffCard key={m.id} m={m} teamName={teamName} categories={categories} getQualStatus={getQualStatus}
+                  compliance={compliance} bookedCount={bookedCount} isFullyQualified={isFullyQualified}
+                  gapCount={gapCount} expiringCount={expiringCount} onClick={() => setSelectedStaff(m)} />
+              ))}
+            </div>
           </div>
-        </div>
+        );
+      })}
 
-        {/* Issues to Review */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-bold text-slate-700">Issues to Review</h3>
-            <span className="text-xs text-slate-400">· {issues.length}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-3">
-            {issues.map(({ member: m, gapCount, expiringCount, bookedCount }) => (
-              <StaffCard key={m.id} m={m} teamName={teamName} categories={categories} getQualStatus={getQualStatus}
-                compliance={compliance} bookedCount={bookedCount} gapCount={gapCount} expiringCount={expiringCount}
-                onClick={() => setSelectedStaff(m)} />
-            ))}
-            {issues.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 p-8 text-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                <p className="text-sm text-emerald-700 font-medium">No issues — everyone's up to date.</p>
-              </div>
-            )}
-          </div>
+      {staffWithStats.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white/40 p-8 text-center">
+          <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No staff match the current team filter.</p>
         </div>
-      </div>
+      )}
 
       {/* Staff training detail drawer */}
       {selectedStaff && (
