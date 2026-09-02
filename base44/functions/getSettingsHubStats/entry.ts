@@ -25,8 +25,11 @@ const INTEGRATION_SETTING_KEYS = [
   'microsoft_365_config', 'zapier_config', 'openground_config',
   'integration_coming_soon',
 ];
+// Integrations whose connected check requires ALL listed fields to be present
+// (matching the "Configured" logic on their settings page), not just any one.
+const REQUIRES_ALL_FIELDS = new Set(['geotab_config']);
 const INTEGRATION_CONNECTED_FIELDS: Record<string, string[]> = {
-  geotab_config: ['username'], holman_config: ['api_key'], asset_panda_config: ['api_token'],
+  geotab_config: ['username', 'password', 'database'], holman_config: ['api_key'], asset_panda_config: ['api_token'],
   bob_hr_config: ['username'], concur_config: ['client_id'], safety_culture_config: ['api_token'],
   keylogbook_config: ['webhook_secret'], cis_config: ['api_key'], payroll_config: ['provider'],
   met_office_config: ['api_key'], google_maps_config: ['api_key'],
@@ -126,7 +129,11 @@ export default async function (req: Request): Promise<Response> {
     const hasAppSettingCredentials = (k: string) => {
       const fields = INTEGRATION_CONNECTED_FIELDS[k];
       if (!fields || !Array.isArray(fields)) return false;
-      return (settingsByKey[k] || []).some(v => !!(v && fields.some(f => v[f])));
+      const records = settingsByKey[k] || [];
+      if (REQUIRES_ALL_FIELDS.has(k)) {
+        return records.some(v => !!(v && fields.every(f => v[f])));
+      }
+      return records.some(v => !!(v && fields.some(f => v[f])));
     };
     const appSettingSyncStatus = (k: string) => resolveSyncStatus(settingsByKey[k] || []);
 
