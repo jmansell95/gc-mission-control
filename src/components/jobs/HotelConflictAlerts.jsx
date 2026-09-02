@@ -7,6 +7,23 @@ import { format, parseISO } from 'date-fns';
 // 2. Date conflicts — same crew member assigned to two different hotels on
 //    the same night (double-booked)
 // Returns an array of alert objects, rendered by the parent component.
+//
+// Each alert carries an `overlap` string — the exact nights where the two
+// bookings clash — so the warning banner can tell the manager where to look.
+const overlapNights = (aCi, aCo, bCi, bCo) => {
+  // Overlap window: latest check-in → earliest check-out. Check-out is the
+  // morning the guest leaves, so the last overlapping *night* is the day
+  // before the earliest check-out.
+  const start = aCi > bCi ? aCi : bCi;
+  const endCo = aCo < bCo ? aCo : bCo;
+  const lastNight = new Date(endCo);
+  lastNight.setDate(lastNight.getDate() - 1);
+  if (format(start, 'yyyy-MM') === format(lastNight, 'yyyy-MM')) {
+    return `${format(start, 'dd')}–${format(lastNight, 'dd MMM')}`;
+  }
+  return `${format(start, 'dd MMM')}–${format(lastNight, 'dd MMM')}`;
+};
+
 export function detectHotelConflicts(bookings) {
   const alerts = [];
 
@@ -27,6 +44,9 @@ export function detectHotelConflicts(bookings) {
           type: 'duplicate',
           hotel: a.hotel_name,
           dates: `${format(aCi, 'dd MMM')}–${format(aCo, 'dd MMM')} & ${format(bCi, 'dd MMM')}–${format(bCo, 'dd MMM')}`,
+          overlap: overlapNights(aCi, aCo, bCi, bCo),
+          refA: a.booking_reference,
+          refB: b.booking_reference,
         });
       }
     }
@@ -57,6 +77,11 @@ export function detectHotelConflicts(bookings) {
             staff: staffName || sid,
             hotels: `${a.hotel_name} & ${b.hotel_name}`,
             dates: `${format(aCi, 'dd MMM')}–${format(aCo, 'dd MMM')}`,
+            overlap: overlapNights(aCi, aCo, bCi, bCo),
+            bookingA: a.hotel_name,
+            bookingB: b.hotel_name,
+            spanA: `${format(aCi, 'dd MMM')}–${format(aCo, 'dd MMM')}`,
+            spanB: `${format(bCi, 'dd MMM')}–${format(bCo, 'dd MMM')}`,
           });
         }
       }
@@ -94,11 +119,18 @@ export default function HotelConflictAlerts({ bookings }) {
                 ? `Duplicate booking: ${alert.hotel}`
                 : `Double-booked crew: ${alert.staff}`}
             </p>
-            <p className={`text-xs ${alert.type === 'duplicate' ? 'text-violet-600' : 'text-rose-600'}`}>
-              {alert.type === 'duplicate'
-                ? `Overlapping dates — ${alert.dates}`
-                : `Assigned to ${alert.hotels} on ${alert.dates}`}
-            </p>
+            <div className={`text-xs ${alert.type === 'duplicate' ? 'text-violet-600' : 'text-rose-600'}`}>
+              <p>
+                {alert.type === 'duplicate'
+                  ? `Overlapping dates — ${alert.dates}`
+                  : `Assigned to ${alert.hotels} on ${alert.dates}`}
+              </p>
+              <p className="mt-0.5 font-medium">
+                {alert.type === 'duplicate'
+                  ? `↳ Clashing nights: ${alert.overlap}${alert.refA || alert.refB ? ` · refs ${alert.refA || '—'} & ${alert.refB || '—'}` : ''}`
+                  : `↳ Clashing nights: ${alert.overlap} · ${alert.bookingA} (${alert.spanA}) vs ${alert.bookingB} (${alert.spanB})`}
+              </p>
+            </div>
           </div>
         </div>
       ))}
