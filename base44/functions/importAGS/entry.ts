@@ -298,26 +298,20 @@ function normaliseDate(v: string): string {
   return '';
 }
 
-// Working-day helpers. Each diary fragment represents one shift day
-// (Mon–Fri, activities ~7:30–17:00). When an AGS file carries several
-// diary fragments for one borehole but no explicit per-row date, we
-// spread them across consecutive working days starting from the
-// borehole's start date so every shift becomes its own Site Log day
-// instead of all collapsing onto the single drilling date (which is
-// what made the other days vanish from the timeline).
-function addDays(iso: string, n: number): string {
-  const d = new Date(iso + 'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate() + n);
-  return d.toISOString().slice(0, 10);
-}
-function isWeekend(iso: string): boolean {
-  const day = new Date(iso + 'T00:00:00Z').getUTCDay(); // 0=Sun .. 6=Sat
-  return day === 0 || day === 6;
-}
-function nextWorkingDay(iso: string): string {
-  let d = iso;
-  while (isWeekend(d)) d = addDays(d, 1);
-  return d;
+// Split a full ISO datetime (e.g. "2026-08-20T08:00") into a date
+// (YYYY-MM-DD) and time (HH:MM). KeyLogBook's PTIM_DTIM, SHFT_STAR and
+// SHFT_ENDD fields are full datetimes — this splits them so each row
+// gets both a calendar date and a clock time from a single column.
+function splitDateTime(v: string): { date: string; time: string } {
+  if (!v) return { date: '', time: '' };
+  const s = String(v).trim();
+  // ISO: 2026-08-20T08:00 or 2026-08-20T08:00:00 or 2026-08-20 08:00
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{1,2}):(\d{2})/);
+  if (m) return { date: `${m[1]}-${m[2]}-${m[3]}`, time: `${m[4].padStart(2, '0')}:${m[5]}` };
+  // Date-only fallback
+  const d = normaliseDate(s);
+  if (d) return { date: d, time: '' };
+  return { date: '', time: '' };
 }
 
 // Collect time-stamped remark text from every *_REM / *_NOTE field and
@@ -390,38 +384,21 @@ function extractRemarkChunks(groups: Record<string, GroupData>): RemarkChunk[] {
   return chunks;
 }
 
-// Assign each chunk a calendar date. Chunks with an explicit DATE column keep
-// it (and consume that working day). Undated chunks for the same borehole are
-// spread across consecutive working days (Mon–Fri) starting from the
-// borehole's start date (LOCA_STAR via locaDates), then the job start date,
-// then today — skipping weekends and any day already taken by an explicit
-// chunk. This guarantees one diary fragment per shift day so no days vanish.
+// Assign each chunk a calendar date. Chunks with an explicit DATE column
+// keep it. Undated chunks fall back to the borehole's LOCA_STAR drilling
+// start date (via locaDates), then the job start date, then today. We do
+// NOT spread undated chunks across consecutive working days — that pushed
+// diary fragments months into the future (168 records dated 2027). When
+// the structured PTIM group is present it provides the real per-row
+// datetimes and these remark chunks are filtered out entirely (see
+// uncoveredChunks), so this fallback only fires for files with no PTIM.
 function assignChunkDates(rawChunks: RemarkChunk[], locaDates: Record<string, string>, jobStartDate: string, defaultDate: string): { text: string; date: string; borehole_ref: string; timed: boolean }[] {
-  const byBorehole: Record<string, RemarkChunk[]> = {};
-  const order: string[] = [];
+  const out: { text: string; date: string; borehole_ref: string; timed: boolean }[] = [];
   for (const c of rawChunks) {
-    const key = c.borehole_ref || '';
-    if (!byBorehole[key]) { byBorehole[key] = []; order.push(key); }
-    byBorehole[key].push(c);
-  }
-  const out: { text: string; date: string; borehole_ref: string }[] = [];
-  for (const ref of order) {
-    const list = byBorehole[ref];
-    const startRaw = normaliseDate(locaDates[ref] || '') || jobStartDate || defaultDate;
-    const used = new Set<string>();
-    let cursor = nextWorkingDay(startRaw);
-    for (const c of list) {
-      const explicit = c.explicitDate ? normaliseDate(c.explicitDate) : '';
-      if (explicit) {
-        used.add(explicit);
-        out.push({ text: c.text, date: explicit, borehole_ref: ref, timed: c.timed });
-        continue;
-      }
-      while (isWeekend(cursor) || used.has(cursor)) cursor = addDays(cursor, 1);
-      out.push({ text: c.text, date: cursor, borehole_ref: ref, timed: c.timed });
-      used.add(cursor);
-      cursor = addDays(cursor, 1);
-    }
+    const ref = c.borehole_ref || '';
+    const explicit = c.explicitDate ? normaliseDate(c.explicitDate) : '';
+    const fallback = (ref && locaDates[ref]) || jobStartDate || defaultDate;
+    out.push({ text: c.text, date: explicit || fallback, borehole_ref: ref, timed: c.timed });
   }
   return out;
 }
@@ -464,14 +441,45 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
     for (const row of g.rows) {
       const r = buildRow(g, row);
       const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
-      const date = normaliseDate(pick(r, 'DATE', 'DLOG_DATE', 'PTIM_DATE', 'DREM_DATE', 'SHFT_DATE', 'DAY', 'LOCA_DATE'));
-      const startTime = normaliseTime(pick(r, 'START', 'START_TIME', 'TIME_FROM', 'FROM', 'BEGIN', 'COMMENCE', 'DLOG_START', 'PTIM_START', 'SHFT_START', 'DREM_TIME', 'TIME'));
-      const endTime = normaliseTime(pick(r, 'END', 'END_TIME', 'TIME_TO', 'TO', 'FINISH', 'COMPLETE', 'DLOG_END', 'PTIM_END', 'SHFT_END', 'END_TIME'));
+
+      // KeyLogBook stores full ISO datetimes in PTIM_DTIM, SHFT_STAR and
+      // SHFT_ENDD (e.g. "2026-08-20T08:00"). Split each into date + time so
+      // every row gets a correct calendar date AND a clock time from a
+      // single column. DTIM is the primary source for PTIM rows; STAR/ENDD
+      // are the shift start/end datetimes for SHFT rows.
+      const dtim = pick(r, 'DTIM', 'PTIM_DTIM', 'DLOG_DTIM', 'DREM_DTIM');
+      const starDt = pick(r, 'STAR', 'SHFT_STAR', 'DLOG_STAR', 'START_DATETIME');
+      const enddDt = pick(r, 'ENDD', 'SHFT_ENDD', 'DLOG_ENDD', 'END_DATETIME');
+
+      let date = '';
+      let startTime = '';
+      let endTime = '';
+
+      if (dtim) {
+        const dt = splitDateTime(dtim);
+        date = dt.date;
+        startTime = dt.time;
+      } else {
+        date = normaliseDate(pick(r, 'DATE', 'DLOG_DATE', 'PTIM_DATE', 'DREM_DATE', 'SHFT_DATE', 'DAY', 'LOCA_DATE'));
+        if (starDt) {
+          const dt = splitDateTime(starDt);
+          if (!date) date = dt.date;
+          startTime = dt.time;
+        } else {
+          startTime = normaliseTime(pick(r, 'START', 'START_TIME', 'TIME_FROM', 'FROM', 'BEGIN', 'COMMENCE', 'DLOG_START', 'PTIM_START', 'SHFT_START', 'DREM_TIME', 'TIME'));
+        }
+        if (enddDt) {
+          endTime = splitDateTime(enddDt).time;
+        } else {
+          endTime = normaliseTime(pick(r, 'END', 'END_TIME', 'TIME_TO', 'TO', 'FINISH', 'COMPLETE', 'DLOG_END', 'PTIM_END', 'SHFT_END', 'END_TIME'));
+        }
+      }
+
       const durationHours = num(pick(r, 'DURATION', 'DURATION_HOURS', 'HOURS', 'HORN_HOURS', 'DLOG_HOURS', 'PTIM_HOURS', 'DUR', 'MINS', 'MINUTES'));
       const description = pick(r, 'DESC', 'DESCRIPTION', 'REM', 'REMARK', 'NOTE', 'NOTES', 'ACTIVITY', 'TASK', 'COMMENT', 'DLOG_DESC', 'PTIM_DESC', 'DREM_DESC', 'SHFT_DESC');
 
       // Skip rows with no time information at all
-      if (!startTime && !endTime && durationHours == null) continue;
+      if (!startTime && !endTime && durationHours == null && !dtim) continue;
 
       // Skip HORN and SHFT entries without a description — HORN is just a
       // total-hours summary and SHFT is just a shift boundary. Neither
