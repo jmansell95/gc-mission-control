@@ -25,6 +25,7 @@ const INTEGRATION_SETTING_KEYS = [
   'payroll_config', 'met_office_config', 'google_maps_config', 'whatsapp_config',
   'accounting_config', 'stripe_config',
   'microsoft_365_config', 'zapier_config', 'openground_config',
+  'weather_api_config',
   'integration_hidden', 'integration_coming_soon',
 ];
 
@@ -134,6 +135,12 @@ export default async function (req: Request): Promise<Response> {
       if (k === 'asset_panda_config') hasCredentials = assetPandaHasCreds;
       else if (k === 'safety_culture_config') hasCredentials = mittiHasCreds;
       else if (k === 'keylogbook_config') hasCredentials = klbHasCreds;
+      else if (k === 'met_office_config') {
+        // Weather: configured when a WeatherAPI.com key is saved (weather_api_config)
+        // OR a sync has run successfully via the free Open-Meteo fallback (last_sync_at).
+        hasCredentials = hasAppSettingCredentials('weather_api_config') ||
+          (settingsByKey['met_office_config'] || []).some(v => !!(v && v.last_sync_at));
+      }
       else hasCredentials = hasAppSettingCredentials(k);
       const status = hasCredentials ? 'configured' : 'not_configured';
       return { id: meta.id, label: meta.label, connected: hasCredentials, hasCredentials, status };
