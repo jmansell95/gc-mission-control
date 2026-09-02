@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Activity, Search, Maximize2, Minimize2, Loader2, CheckSquare } from 'lucide-react';
@@ -29,7 +29,18 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ driller: 'all', search: '', status: 'all', groupBy: 'chrono', activityType: 'all' });
-  const [dateRange, setDateRange] = useState({ preset: '7d', from: londonDateStr(-6), to: londonDateStr(0) });
+  // Default the date range to the job's full span so long-running jobs (e.g.
+  // East West Rail) show their data immediately instead of an empty 7-day
+  // window. Falls back to 'all time' when the job has no start/end dates.
+  const [dateRange, setDateRange] = useState(() => {
+    if (job?.start_date && job?.end_date) {
+      return { preset: 'all', from: job.start_date, to: job.end_date };
+    }
+    return { preset: 'all', from: null, to: null };
+  });
+  // Auto-default groupBy to 'borehole' when the majority of logs lack
+  // start_time — timeless strata/event logs read better grouped by borehole.
+  const autoGroupApplied = useRef(false);
   const [collapsedDays, setCollapsedDays] = useState(new Set());
   const [selectedActivityId, setSelectedActivityId] = useState(initialSelectedLogId || null);
   const [backfilling, setBackfilling] = useState(false);
@@ -43,6 +54,16 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   });
 
   const remarksLogs = logs.filter(l => l.source === 'keylogbook_remarks');
+
+  // Auto-default to borehole grouping when most logs lack time stamps
+  useEffect(() => {
+    if (autoGroupApplied.current || remarksLogs.length === 0) return;
+    autoGroupApplied.current = true;
+    const withoutTime = remarksLogs.filter(l => !l.start_time).length;
+    if (withoutTime > remarksLogs.length / 2) {
+      setFilters(f => ({ ...f, groupBy: 'borehole' }));
+    }
+  }, [remarksLogs]);
 
   // Distinct drillers
   const drillers = useMemo(() =>

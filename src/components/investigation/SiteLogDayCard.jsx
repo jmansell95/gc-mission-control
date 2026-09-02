@@ -17,10 +17,15 @@ function timeToMins(t) {
 function byClockOrder(a, b) {
   const av = timeToMins(a.start_time);
   const bv = timeToMins(b.start_time);
-  if (av == null && bv == null) return 0;
-  if (av == null) return 1;
-  if (bv == null) return -1;
-  return av - bv;
+  if (av != null && bv != null) return av - bv;
+  if (av != null) return -1;
+  if (bv != null) return 1;
+  // Both lack a time — fall back to borehole_ref then created_date so
+  // timeless strata/event logs are grouped and ordered deterministically
+  // instead of appearing in random database order.
+  const bhCompare = (a.borehole_ref || 'zzz').localeCompare(b.borehole_ref || 'zzz');
+  if (bhCompare !== 0) return bhCompare;
+  return new Date(a.created_date || 0).getTime() - new Date(b.created_date || 0).getTime();
 }
 
 function fmtDur(mins) {

@@ -1469,7 +1469,10 @@ Deno.serve(async (req) => {
       const av = at != null ? at : 9999;
       const bv = bt != null ? bt : 9999;
       if (av !== bv) return av - bv;
-      return (a.borehole_ref || '').localeCompare(b.borehole_ref || '');
+      const bhCompare = (a.borehole_ref || '').localeCompare(b.borehole_ref || '');
+      if (bhCompare !== 0) return bhCompare;
+      // Final tiebreaker for full determinism when borehole + date match
+      return (a.description || '').localeCompare(b.description || '');
     });
 
     // ---- Borehole-scoped overwrite ----
