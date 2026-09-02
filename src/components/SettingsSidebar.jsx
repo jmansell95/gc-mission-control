@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
@@ -9,9 +9,8 @@ import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
  * Settings Sidebar — persistent left navigation for the settings area.
  * Only shows items that have NOT migrated to operational hubs.
  *
- * Coming-soon integrations (flagged in the Coming Soon Manager) are rendered
- * with a muted/greyed style and a small Clock badge so the locked state is
- * visible right in the menu.
+ * Hidden integrations (flagged in the overview Manage mode) are filtered out
+ * of the sidebar entirely so they don't clutter navigation.
  *
  * `hideHeader` suppresses the internal "Settings Menu" card header — used
  * when the sidebar is embedded inside the mobile drawer (which provides its
@@ -23,23 +22,12 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
   });
-  const comingSoonMap = stats?.integrationComingSoon || {};
-  const integrationStatusById = React.useMemo(() => {
-    const m = {};
-    for (const i of (stats?.integrations || [])) m[i.id] = i;
-    return m;
-  }, [stats]);
-
-  const isComingSoon = (id) => {
-    if (!comingSoonMap[id]) return false;
-    // An active integration is never coming-soon (backend auto-cleans).
-    return integrationStatusById[id]?.status !== 'active';
-  };
+  const hiddenMap = stats?.integrationHidden || {};
 
   const itemMap = Object.fromEntries(items.map(i => [i.id, i]));
   const groups = settingsGroups
     .filter(g => g.label !== '_hidden_migrated')
-    .map(g => ({ ...g, items: g.items.filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id)) }))
+    .map(g => ({ ...g, items: g.items.filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id) && !hiddenMap[i.id]) }))
     .filter(g => g.items.length > 0);
 
   return (
@@ -57,7 +45,6 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
               {group.items.map(item => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
-                const cs = isComingSoon(item.id);
                 return (
                   <button
                     key={item.id}
@@ -65,21 +52,13 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
                     className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition text-left ${
                       isActive
                         ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]'
-                        : cs
-                          ? 'text-slate-400 hover:bg-slate-50'
-                          : 'text-slate-600 hover:bg-slate-50'
+                        : 'text-slate-600 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${cs ? 'text-slate-300' : ''}`} />
-                    <span className={`truncate flex-1 ${cs ? 'line-through decoration-slate-300' : ''}`}>{item.label}</span>
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate flex-1">{item.label}</span>
                     {item.external && (
                       <ExternalLink className="w-3 h-3 text-slate-300 flex-shrink-0" />
-                    )}
-                    {cs && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 text-[9px] font-bold flex-shrink-0">
-                        <Clock className="w-2.5 h-2.5" />
-                        Soon
-                      </span>
                     )}
                   </button>
                 );

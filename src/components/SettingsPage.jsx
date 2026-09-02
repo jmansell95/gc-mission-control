@@ -101,18 +101,12 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
   const [activeTab, setActiveTab] = useState(initialTab || 'hub');
   const [profile, setProfile] = useState(null);
 
-  // Coming Soon flags — used to lock integration pages that are flagged
-  // coming-soon (and not active). Single source of truth: getSettingsHubStats.
+  // Hub stats are no longer needed for coming-soon locking (hidden integrations
+  // are simply filtered out of the nav, not locked). Kept for any future use.
   const { data: hubStats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
   });
-  const comingSoonMap = hubStats?.integrationComingSoon || {};
-  const integrationStatusById = useMemo(() => {
-    const m = {};
-    for (const i of (hubStats?.integrations || [])) m[i.id] = i;
-    return m;
-  }, [hubStats]);
 
   useEffect(() => {
     (async () => {
@@ -150,17 +144,6 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       return <SettingsAccessGuard pageLabel={active.label} lockedBy={activeLockdown.lockedBy} lockedAt={activeLockdown.lockedAt} />;
     }
 
-    // Coming Soon enforcement — an integration flagged coming-soon (and not
-    // active) is locked: show the locked state instead of the config page.
-    if (INTEGRATION_IDS.has(activeTab)) {
-      const st = integrationStatusById[activeTab];
-      const isCs = !!comingSoonMap[activeTab] && st?.status !== 'active';
-      if (isCs) {
-        const label = active?.label || 'This integration';
-        return <ComingSoonLock label={label} onBack={() => setActiveTab('integrations')} />;
-      }
-    }
-   
     switch (activeTab) {
       case 'hub': return <SettingsHubOverview onNavigate={setActiveTab} items={items} />;
       case 'autopilot': return <AutopilotControlPanel />;

@@ -2,19 +2,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 
 // ---------------------------------------------------------------------------
 // getSettingsHubStats — single-call batched stats for the Settings Command Hub.
-// Returns every count and integration-status the overview needs in one round
-// trip, replacing the ~10 separate entity queries the overview used to fire.
 //
-// Integration status resolution (the single source of truth for the overview,
-// IntegrationsHub and ComingSoonManager):
-//   • not_configured  — no credentials saved (slate)
-//   • needs_attention — credentials saved but the last cached sync failed /
-//                       never ran (amber)
-//   • active          — credentials saved AND (no sync mechanism OR the last
-//                       cached sync succeeded) (emerald)
-// `connected` is kept as a boolean = hasCredentials for backward compatibility
-// with the ComingSoonManager toggle lock (you can't mark a configured
-// integration as coming-soon).
+// Integration status resolution (single source of truth for the overview):
+//   • configured     — credentials saved (green)
+//   • not_configured — no credentials saved (grey)
+//
+// Each integration's "configured" check uses the SAME credential fields its
+// own settings page checks, so the overview badge never disagrees with the
+// settings page header. Fields are matched per-integration with a mode:
+//   'all'  — every field must be present (e.g. Geotab: username + password + database)
+//   'any'  — at least one field must be present (e.g. Holman: api_key OR client_id)
+//   'custom' — handled by a dedicated function (e.g. Accounting: provider + xero OR sage)
+//
+// Hide/show: the 'integration_hidden' AppSetting key stores a map of
+// integration id → true. The overview filters hidden integrations out of the
+// normal grid; manage mode shows them greyed so they can be unhidden.
 // ---------------------------------------------------------------------------
 
 const INTEGRATION_SETTING_KEYS = [
@@ -23,21 +25,30 @@ const INTEGRATION_SETTING_KEYS = [
   'payroll_config', 'met_office_config', 'google_maps_config', 'whatsapp_config',
   'accounting_config', 'stripe_config',
   'microsoft_365_config', 'zapier_config', 'openground_config',
-  'integration_coming_soon',
+  'integration_hidden', 'integration_coming_soon',
 ];
-// Integrations whose connected check requires ALL listed fields to be present
-// (matching the "Configured" logic on their settings page), not just any one.
-const REQUIRES_ALL_FIELDS = new Set(['geotab_config']);
-const INTEGRATION_CONNECTED_FIELDS: Record<string, string[]> = {
-  geotab_config: ['username', 'password', 'database'], holman_config: ['api_key'], asset_panda_config: ['api_token'],
-  bob_hr_config: ['username'], concur_config: ['client_id'], safety_culture_config: ['api_token'],
-  keylogbook_config: ['webhook_secret'], cis_config: ['api_key'], payroll_config: ['provider'],
-  met_office_config: ['api_key'], google_maps_config: ['api_key'],
-  whatsapp_config: ['api_token', 'phone_number_id', 'webhook_secret'],
-  accounting_config: ['provider', 'xero_client_id', 'sage_client_id', 'xero_webhook_secret'],
-  stripe_config: ['secret_key'],
-  microsoft_365_config: ['client_id'], zapier_config: ['webhook_url'], openground_config: ['api_key'],
+
+// Per-integration credential definition. 'mode' controls how fields combine.
+const INTEGRATION_CONNECTED_FIELDS: Record<string, { fields: string[]; mode: 'all' | 'any' | 'custom' }> = {
+  geotab_config: { fields: ['username', 'password', 'database'], mode: 'all' },
+  holman_config: { fields: ['api_key', 'client_id'], mode: 'any' },
+  asset_panda_config: { fields: ['api_token'], mode: 'any' },
+  bob_hr_config: { fields: ['username'], mode: 'any' },
+  concur_config: { fields: ['client_id'], mode: 'any' },
+  safety_culture_config: { fields: ['api_token'], mode: 'any' },
+  keylogbook_config: { fields: ['webhook_secret'], mode: 'any' },
+  cis_config: { fields: ['api_key'], mode: 'any' },
+  payroll_config: { fields: ['provider'], mode: 'any' },
+  met_office_config: { fields: ['api_key'], mode: 'any' },
+  google_maps_config: { fields: ['api_key'], mode: 'any' },
+  whatsapp_config: { fields: ['api_token', 'phone_number_id', 'webhook_secret'], mode: 'all' },
+  accounting_config: { fields: ['provider', 'xero_client_id', 'sage_client_id'], mode: 'custom' },
+  stripe_config: { fields: ['secret_key'], mode: 'any' },
+  microsoft_365_config: { fields: ['client_id'], mode: 'any' },
+  zapier_config: { fields: ['webhook_url'], mode: 'any' },
+  openground_config: { fields: ['api_key'], mode: 'any' },
 };
+
 const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   geotab_config: { id: 'geotab-sync', label: 'Geotab' },
   holman_config: { id: 'holman-sync', label: 'Holman' },
@@ -57,37 +68,15 @@ const INTEGRATION_META: Record<string, { id: string; label: string }> = {
   zapier_config: { id: 'zapier-webhooks', label: 'Zapier' },
   openground_config: { id: 'openground-sync', label: 'OpenGround' },
 };
-// Fields on a config record/value that hold a cached sync outcome.
-const SYNC_STATUS_FIELDS = ['sync_status', 'last_sync_status', 'last_webhook_status', 'last_ags_sync_status', 'last_pull_sync_status'];
-// Fields that prove the integration has been active (received data / ran a sync).
-// Used to distinguish "not configured" from "working without credentials" (e.g.
-// free Open-Meteo weather, or webhook receivers getting data without outbound
-// API credentials saved).
-const SYNC_ACTIVITY_FIELDS = ['last_sync_at', 'last_webhook_at', 'last_ags_sync_at', 'last_pull_sync_at', 'last_sync_status', 'last_webhook_status', 'last_ags_sync_status', 'last_pull_sync_status', 'last_sync_summary', 'last_webhook_summary'];
-// Integrations that have no scheduled sync / connection test — for these,
-// "credentials saved" alone counts as a working connection (there is no cached
-// status to check). Everything else is expected to persist a sync status.
-const NO_SYNC_MECHANISM = new Set([
-  'cis_config', 'google_maps_config', 'whatsapp_config', 'stripe_config',
-  'microsoft_365_config', 'zapier_config', 'openground_config',
-]);
 
-function resolveSyncStatus(values: any[]): string | null {
-  for (const v of values) {
-    if (!v || typeof v !== 'object') continue;
-    for (const k of SYNC_STATUS_FIELDS) {
-      if (v[k]) return String(v[k]).toLowerCase();
-    }
-  }
-  return null;
-}
-
-function hasAnySyncActivity(values: any[]): boolean {
-  for (const v of values) {
-    if (!v || typeof v !== 'object') continue;
-    for (const k of SYNC_ACTIVITY_FIELDS) {
-      if (v[k]) return true;
-    }
+// Check whether a single config value object satisfies the credential def.
+function matchesDef(v: any, def: { fields: string[]; mode: 'all' | 'any' | 'custom' }): boolean {
+  if (!v || typeof v !== 'object') return false;
+  if (def.mode === 'all') return def.fields.every(f => !!v[f]);
+  if (def.mode === 'any') return def.fields.some(f => !!v[f]);
+  // custom: accounting — provider + (xero_client_id OR sage_client_id)
+  if (def.mode === 'custom') {
+    return !!v.provider && (!!v.xero_client_id || !!v.sage_client_id);
   }
   return false;
 }
@@ -126,82 +115,62 @@ export default async function (req: Request): Promise<Response> {
       if (!settingsByKey[k]) settingsByKey[k] = [];
       settingsByKey[k].push(s.value || {});
     }
+
     const hasAppSettingCredentials = (k: string) => {
-      const fields = INTEGRATION_CONNECTED_FIELDS[k];
-      if (!fields || !Array.isArray(fields)) return false;
+      const def = INTEGRATION_CONNECTED_FIELDS[k];
+      if (!def) return false;
       const records = settingsByKey[k] || [];
-      if (REQUIRES_ALL_FIELDS.has(k)) {
-        return records.some(v => !!(v && fields.every(f => v[f])));
-      }
-      return records.some(v => !!(v && fields.some(f => v[f])));
+      return records.some(v => matchesDef(v, def));
     };
-    const appSettingSyncStatus = (k: string) => resolveSyncStatus(settingsByKey[k] || []);
 
     // Dedicated config entities (not stored in AppSetting).
     const assetPandaHasCreds = (assetPandaConfigs || []).some(c => !!(c.email || c.api_token));
-    const assetPandaSync = (assetPandaConfigs || []).map(c => c.last_sync_status).find(Boolean) || null;
-    const assetPandaActivity = hasAnySyncActivity(assetPandaConfigs || []);
     const mittiHasCreds = (mittiConfigs || []).some(c => !!(c.enabled || c.webhook_secret || c.api_token));
-    const mittiSync = (mittiConfigs || []).map(c => c.last_webhook_status).find(Boolean) || null;
-    const mittiActivity = hasAnySyncActivity(mittiConfigs || []);
     const klbHasCreds = (klbConfigs || []).some(c => !!(c.enabled || c.ags_sync_enabled || c.webhook_secret || c.api_key));
-    // Pick the best status across all KLB sync methods (webhook, AGS, pull) —
-    // prefer success over never so a working AGS sync isn't masked by a
-    // never-used real-time webhook status.
-    const klbAllStatuses = (klbConfigs || []).flatMap(c =>
-      [c.last_webhook_status, c.last_ags_sync_status, c.last_pull_sync_status]
-        .filter(Boolean).map(s => String(s).toLowerCase()));
-    const klbSync = klbAllStatuses.find(s => s === 'success' || s === 'synced' || s === 'ok')
-      || klbAllStatuses.find(s => s === 'partial')
-      || klbAllStatuses.find(s => s === 'failed' || s === 'error')
-      || klbAllStatuses[0] || null;
-    const klbActivity = hasAnySyncActivity(klbConfigs || []);
 
-    const integrations = INTEGRATION_SETTING_KEYS.filter(k => k !== 'integration_coming_soon').map(k => {
+    const integrations = Object.keys(INTEGRATION_CONNECTED_FIELDS).map(k => {
       const meta = INTEGRATION_META[k];
       let hasCredentials = false;
-      let syncStatus: string | null = null;
-      let syncActivity = false;
-      if (k === 'asset_panda_config') { hasCredentials = assetPandaHasCreds; syncStatus = assetPandaSync; syncActivity = assetPandaActivity; }
-      else if (k === 'safety_culture_config') { hasCredentials = mittiHasCreds; syncStatus = mittiSync; syncActivity = mittiActivity; }
-      else if (k === 'keylogbook_config') { hasCredentials = klbHasCreds; syncStatus = klbSync; syncActivity = klbActivity; }
-      else { hasCredentials = hasAppSettingCredentials(k); syncStatus = appSettingSyncStatus(k); syncActivity = hasAnySyncActivity(settingsByKey[k] || []); }
-
-      // Binary status: active if there are credentials OR any sync activity
-      // (webhooks received, syncs completed), otherwise not_configured.
-      const isActive = hasCredentials || syncActivity;
-      const status = isActive ? 'active' : 'not_configured';
-      return { id: meta.id, label: meta.label, connected: isActive, hasCredentials, status };
+      if (k === 'asset_panda_config') hasCredentials = assetPandaHasCreds;
+      else if (k === 'safety_culture_config') hasCredentials = mittiHasCreds;
+      else if (k === 'keylogbook_config') hasCredentials = klbHasCreds;
+      else hasCredentials = hasAppSettingCredentials(k);
+      const status = hasCredentials ? 'configured' : 'not_configured';
+      return { id: meta.id, label: meta.label, connected: hasCredentials, hasCredentials, status };
     });
 
-    const activeStaff = (staff || []).filter(s => s.is_active !== false).length;
-    const activeJobs = (jobs || []).filter(j => (j.status || 'planning') === 'in_progress').length;
-    const planningJobs = (jobs || []).filter(j => (j.status || 'planning') === 'planning').length;
-    const integrationConnectedCount = integrations.filter(i => i.status === 'active').length;
-    const integrationNeedsAttention = integrations.filter(i => i.status === 'needs_attention').length;
+    const configuredCount = integrations.filter(i => i.status === 'configured').length;
+    const notConfiguredCount = integrations.filter(i => i.status === 'not_configured').length;
 
-    // Merge ALL integration_coming_soon records (there may be duplicates from
-    // old saves) so the flag is never lost due to a split-brain record.
-    const integrationComingSoon: Record<string, boolean> = {};
-    for (const recValue of (settingsByKey['integration_coming_soon'] || [])) {
+    // Merge ALL integration_hidden records (there may be duplicates from old
+    // saves) so the flag is never lost due to a split-brain record.
+    const integrationHidden: Record<string, boolean> = {};
+    for (const recValue of (settingsByKey['integration_hidden'] || [])) {
       if (recValue && typeof recValue === 'object') {
         for (const [id, val] of Object.entries(recValue)) {
-          if (val) integrationComingSoon[id] = true;
+          if (val) integrationHidden[id] = true;
         }
       }
     }
-    // Auto-clean: an active (working) integration is never "coming soon".
-    for (const int of integrations) {
-      if (int.status === 'active') delete integrationComingSoon[int.id];
+    // Backward compatibility: migrate any old 'integration_coming_soon' flags
+    // into integration_hidden on first load, then ignore the old key going
+    // forward.
+    for (const recValue of (settingsByKey['integration_coming_soon'] || [])) {
+      if (recValue && typeof recValue === 'object') {
+        for (const [id, val] of Object.entries(recValue)) {
+          if (val) integrationHidden[id] = true;
+        }
+      }
     }
+    const hiddenCount = Object.keys(integrationHidden).length;
 
     return Response.json({
       data: {
         staffCount: (staff || []).length,
-        activeStaff,
+        activeStaff: (staff || []).filter(s => s.is_active !== false).length,
         jobsCount: (jobs || []).length,
-        activeJobs,
-        planningJobs,
+        activeJobs: (jobs || []).filter(j => (j.status || 'planning') === 'in_progress').length,
+        planningJobs: (jobs || []).filter(j => (j.status || 'planning') === 'planning').length,
         vehiclesCount: (vehicles || []).length,
         clientsCount: (clients || []).length,
         rateItemsCount: (rateItems || []).length,
@@ -210,9 +179,10 @@ export default async function (req: Request): Promise<Response> {
         complianceItemsCount: (complianceItems || []).length,
         permissionGroupsCount: (permissionGroups || []).length,
         integrations,
-        integrationConnectedCount,
-        integrationNeedsAttention,
-        integrationComingSoon,
+        integrationConfiguredCount: configuredCount,
+        integrationNotConfiguredCount: notConfiguredCount,
+        integrationHidden,
+        integrationHiddenCount: hiddenCount,
       },
     });
   } catch (error) {

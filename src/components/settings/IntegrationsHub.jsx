@@ -5,7 +5,7 @@ import {
   Database, Satellite, Radio, Users, Landmark, ShieldAlert, FileUp,
   ShieldCheck, FileSpreadsheet, Cloud, MapPin, MessageCircle, CreditCard,
   Link2, Link2Off, ArrowRight, Webhook, Sparkles, X, CheckSquare,
-  Square, Loader2, Calendar, Lock, AlertTriangle, CheckCircle2,
+  Square, Loader2, Calendar, EyeOff, AlertTriangle, CheckCircle2,
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
@@ -14,14 +14,12 @@ import { useToast } from '@/components/ui/use-toast';
  * Integrations Hub — all external system connections in one place.
  *
  * Uses getSettingsHubStats as the SINGLE source of truth for each
- * integration's status (active / needs_attention / not_configured) and the
- * Coming Soon flags. This is the same store the Coming Soon Manager writes
- * to (AppSetting key `integration_coming_soon`), so the two surfaces always
- * agree.
+ * integration's status (configured / not_configured) and the hidden flags.
+ * This is the same store the overview Manage mode writes to (AppSetting key
+ * `integration_hidden`), so the two surfaces always agree.
  *
- * Coming Soon enforcement: a coming-soon integration is greyed out, shows a
- * lock + Coming Soon badge, and cannot be opened — clicking it does nothing.
- * Active integrations are never coming-soon (the backend auto-cleans).
+ * Hidden enforcement: a hidden integration is greyed out, shows an eye-off
+ * badge, and cannot be opened — clicking it does nothing.
  */
 const INTEGRATIONS = [
   { id: 'geotab-sync', name: 'Geotab GPS', category: 'Fleet & Vehicles', icon: Satellite, color: 'bg-blue-100 text-blue-600', desc: 'Live locations + vehicle specs via Geotab API + webhook' },
@@ -55,7 +53,7 @@ export default function IntegrationsHub({ onNavigate }) {
   });
 
   const integrationStats = stats?.integrations || [];
-  const comingSoonMap = stats?.integrationComingSoon || {};
+  const hiddenMap = stats?.integrationHidden || {};
 
   // Build a lookup of status by integration id.
   const statusById = useMemo(() => {
@@ -64,10 +62,10 @@ export default function IntegrationsHub({ onNavigate }) {
     return m;
   }, [integrationStats]);
 
-  const isComingSoon = (id) => !!comingSoonMap[id] && statusById[id]?.status !== 'active';
-  const comingSoonIds = useMemo(() => new Set(INTEGRATIONS.filter(i => isComingSoon(i.id)).map(i => i.id)), [comingSoonMap, statusById]);
+  const isHidden = (id) => !!hiddenMap[id];
+  const hiddenIds = useMemo(() => new Set(INTEGRATIONS.filter(i => isHidden(i.id)).map(i => i.id)), [hiddenMap]);
 
-  const activeCount = integrationStats.filter(i => i.status === 'active').length;
+  const configuredCount = integrationStats.filter(i => i.status === 'configured').length;
   const notConfiguredCount = integrationStats.filter(i => i.status === 'not_configured').length;
 
   const categories = [...new Set(INTEGRATIONS.map(i => i.category))];
@@ -84,24 +82,20 @@ export default function IntegrationsHub({ onNavigate }) {
     });
   };
 
-  const saveComingSoon = async (idsToMark) => {
+  const saveHidden = async (idsToMark) => {
     setSaving(true);
     try {
-      // Read existing coming-soon flags and MERGE with the selection so
-      // locks not in the current selection are preserved (not replaced).
-      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_hidden' });
       let map = {};
       for (const rec of existing) {
         if (rec.value && typeof rec.value === 'object') map = { ...map, ...rec.value };
       }
-      // Apply the selection: selected IDs are locked, unselected IDs are removed.
-      // (idsToMark is the full set the user wants locked — everything else unlocks.)
       const selectedSet = new Set(idsToMark);
       for (const id of Object.keys(map)) {
         if (!selectedSet.has(id)) delete map[id];
       }
       for (const id of idsToMark) map[id] = true;
-      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: map };
+      const payload = { key: 'integration_hidden', label: 'Hidden Integration Flags', value: map };
       if (existing[0]) {
         await base44.entities.AppSetting.update(existing[0].id, payload);
         for (let i = 1; i < existing.length; i++) {
@@ -112,8 +106,8 @@ export default function IntegrationsHub({ onNavigate }) {
       }
       await qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
       toast({
-        title: 'Coming Soon badges updated',
-        description: `${idsToMark.size} integration${idsToMark.size === 1 ? '' : 's'} marked as Coming Soon.`,
+        title: 'Hidden integrations updated',
+        description: `${idsToMark.size} integration${idsToMark.size === 1 ? '' : 's'} hidden.`,
       });
       setManageMode(false);
       setSelected(new Set());
@@ -124,22 +118,22 @@ export default function IntegrationsHub({ onNavigate }) {
     }
   };
 
-  const handleApply = () => saveComingSoon(new Set(selected));
-  const handleClearAll = () => saveComingSoon(new Set());
+  const handleApply = () => saveHidden(new Set(selected));
+  const handleClearAll = () => saveHidden(new Set());
 
   const statusBadge = (integ) => {
     const st = statusById[integ.id]?.status;
-    if (isComingSoon(integ.id)) {
+    if (isHidden(integ.id)) {
       return (
         <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-400">
-          <Lock className="w-3 h-3" /> Coming Soon
+          <EyeOff className="w-3 h-3" /> Hidden
         </span>
       );
     }
-    if (st === 'active') {
+    if (st === 'configured') {
       return (
         <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-          <Link2 className="w-3 h-3" /> Active
+          <Link2 className="w-3 h-3" /> Configured
         </span>
       );
     }
@@ -155,7 +149,7 @@ export default function IntegrationsHub({ onNavigate }) {
       <SettingsSectionHeader
         icon={Link2}
         title="Integrations Hub"
-        description={`All external system connections in one place. ${activeCount} of ${INTEGRATIONS.length} active, ${INTEGRATIONS.length - activeCount} not configured. An integration is Active when it has saved credentials or is receiving data.`}
+        description={`All external system connections in one place. ${configuredCount} of ${INTEGRATIONS.length} configured, ${INTEGRATIONS.length - configuredCount} not configured.`}
         actions={
           <button
             onClick={() => { setManageMode(m => !m); setSelected(new Set()); }}
@@ -166,7 +160,7 @@ export default function IntegrationsHub({ onNavigate }) {
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            {manageMode ? 'Exit Manage Mode' : 'Manage Coming Soon'}
+            {manageMode ? 'Exit Manage Mode' : 'Manage Hidden'}
           </button>
         }
       />
@@ -175,15 +169,15 @@ export default function IntegrationsHub({ onNavigate }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div>
-          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{activeCount}</p><p className="text-[10px] text-slate-500 font-semibold">Active</p></div>
+          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{configuredCount}</p><p className="text-[10px] text-slate-500 font-semibold">Configured</p></div>
         </div>
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Link2Off className="w-5 h-5 text-slate-500" /></div>
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{notConfiguredCount}</p><p className="text-[10px] text-slate-500 font-semibold">Not configured</p></div>
         </div>
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Lock className="w-5 h-5 text-slate-500" /></div>
-          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{comingSoonIds.size}</p><p className="text-[10px] text-slate-500 font-semibold">Coming soon</p></div>
+          <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center"><EyeOff className="w-5 h-5 text-amber-600" /></div>
+          <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{hiddenIds.size}</p><p className="text-[10px] text-slate-500 font-semibold">Hidden</p></div>
         </div>
         <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><Webhook className="w-5 h-5 text-blue-600" /></div>
@@ -197,13 +191,13 @@ export default function IntegrationsHub({ onNavigate }) {
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#2E5A1A]" />
             <p className="text-sm font-semibold text-slate-800">
-              Select integrations to mark as <span className="text-amber-600">Coming Soon</span> — they'll be greyed out and locked.
+              Select integrations to <span className="text-amber-600">Hide</span> — they'll be greyed out and unopenable.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={() => setSelected(new Set(comingSoonIds))}
+            <button onClick={() => setSelected(new Set(hiddenIds))}
               className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
-              Select current ({comingSoonIds.size})
+              Select current ({hiddenIds.size})
             </button>
             <button onClick={() => setSelected(new Set(INTEGRATIONS.map(i => i.id)))}
               className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
@@ -216,9 +210,9 @@ export default function IntegrationsHub({ onNavigate }) {
             <span className="text-xs text-slate-400 ml-1">{selected.size} selected</span>
             <div className="flex-1" />
             <button onClick={handleClearAll}
-              disabled={saving || comingSoonIds.size === 0}
+              disabled={saving || hiddenIds.size === 0}
               className="px-3 py-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition disabled:opacity-50">
-              Clear All Badges
+              Show All
             </button>
             <button onClick={handleApply}
               disabled={saving || selected.size === 0}
@@ -237,9 +231,9 @@ export default function IntegrationsHub({ onNavigate }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {group.items.map(integ => {
               const Icon = integ.icon;
-              const comingSoon = isComingSoon(integ.id);
+              const hidden = isHidden(integ.id);
               const isSelected = selected.has(integ.id);
-              const blocked = comingSoon && !manageMode;
+              const blocked = hidden && !manageMode;
               return (
                 <button
                   key={integ.id}
@@ -254,9 +248,9 @@ export default function IntegrationsHub({ onNavigate }) {
                         : 'border-slate-200 hover:border-[#2E5A1A] hover:shadow-md'
                   }`}
                 >
-                  {comingSoon && !manageMode && (
+                  {hidden && !manageMode && (
                     <span className="absolute top-2 right-2 z-10 inline-flex items-center gap-1 text-[9px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded-full uppercase">
-                      <Lock className="w-2.5 h-2.5" /> Coming Soon
+                      <EyeOff className="w-2.5 h-2.5" /> Hidden
                     </span>
                   )}
                   {manageMode && (

@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Settings as SettingsIcon, CheckCircle2, Clock, Webhook,
-  Search, X, ChevronRight, ExternalLink, Link2, Link2Off, Lock, Unlock,
-  Sparkles, Loader2,
+  Settings as SettingsIcon, CheckCircle2, EyeOff, Search, X,
+  ChevronRight, ExternalLink, Link2, Link2Off, Eye, Loader2, SlidersHorizontal,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
@@ -36,22 +35,23 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   });
 
   const integrations = stats?.integrations || [];
-  const activeCount = integrations.filter(i => i.status === 'active').length;
+  const hiddenMap = stats?.integrationHidden || {};
+  const configuredCount = integrations.filter(i => i.status === 'configured').length;
   const notConfiguredCount = integrations.filter(i => i.status === 'not_configured').length;
-  const comingSoonMap = stats?.integrationComingSoon || {};
-  const comingSoonCount = Object.keys(comingSoonMap).length;
+  const hiddenCount = Object.keys(hiddenMap).filter(k => INTEGRATION_IDS.has(k)).length;
 
-  const setComingSoon = async (id, lock) => {
+  // Persist hide/show instantly via the integration_hidden AppSetting key.
+  const setHidden = async (id, hide) => {
     if (busyId === id) return;
     setBusyId(id);
     try {
-      const existing = await base44.entities.AppSetting.filter({ key: 'integration_coming_soon' });
+      const existing = await base44.entities.AppSetting.filter({ key: 'integration_hidden' });
       let merged = {};
       for (const rec of existing) {
         if (rec.value && typeof rec.value === 'object') merged = { ...merged, ...rec.value };
       }
-      if (lock) merged[id] = true; else delete merged[id];
-      const payload = { key: 'integration_coming_soon', label: 'Integration Coming Soon Flags', value: merged };
+      if (hide) merged[id] = true; else delete merged[id];
+      const payload = { key: 'integration_hidden', label: 'Hidden Integration Flags', value: merged };
       if (existing.length > 0) {
         await base44.entities.AppSetting.update(existing[0].id, payload);
         for (let i = 1; i < existing.length; i++) {
@@ -61,12 +61,6 @@ export default function SettingsHubOverview({ onNavigate, items }) {
         await base44.entities.AppSetting.create(payload);
       }
       await qc.refetchQueries({ queryKey: ['settings-hub-stats'] });
-      toast({
-        title: lock ? 'Locked as Coming Soon' : 'Unlocked',
-        description: lock
-          ? 'This integration is now greyed out across the site.'
-          : 'This integration can now be opened and configured.',
-      });
     } catch (e) {
       toast({ title: 'Failed to update', description: e.message, variant: 'destructive' });
     } finally {
@@ -79,7 +73,6 @@ export default function SettingsHubOverview({ onNavigate, items }) {
     .flatMap(g => g.items)
     .filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id));
 
-  // Build a status lookup from the backend integration stats
   const integrationStatusById = useMemo(() => {
     const m = {};
     for (const i of (integrations || [])) m[i.id] = i;
@@ -95,15 +88,21 @@ export default function SettingsHubOverview({ onNavigate, items }) {
     );
   }, [query, allItems]);
 
-  const integrationItems = filtered.filter(i => INTEGRATION_IDS.has(i.id));
-  const planningItems = filtered.filter(i => PLANNING_IDS.has(i.id));
-  const systemItems = filtered.filter(i => !INTEGRATION_IDS.has(i.id) && !PLANNING_IDS.has(i.id));
+  // In normal mode, hidden integrations are filtered out of the grid entirely.
+  // In manage mode, they're shown (greyed) so they can be unhidden.
+  const visibleFiltered = manageMode
+    ? filtered
+    : filtered.filter(i => !(INTEGRATION_IDS.has(i.id) && hiddenMap[i.id]));
+
+  const integrationItems = visibleFiltered.filter(i => INTEGRATION_IDS.has(i.id));
+  const planningItems = visibleFiltered.filter(i => PLANNING_IDS.has(i.id));
+  const systemItems = visibleFiltered.filter(i => !INTEGRATION_IDS.has(i.id) && !PLANNING_IDS.has(i.id));
 
   const statsTiles = [
-    { icon: CheckCircle2, label: 'Active', value: activeCount, tone: 'emerald' },
+    { icon: CheckCircle2, label: 'Configured', value: configuredCount, tone: 'emerald' },
     { icon: Link2Off, label: 'Not configured', value: notConfiguredCount, tone: 'slate' },
-    { icon: Clock, label: 'Coming soon', value: comingSoonCount, tone: 'amber' },
-    { icon: Webhook, label: 'Integrations', value: integrations.length, tone: 'blue' },
+    { icon: EyeOff, label: 'Hidden', value: hiddenCount, tone: 'amber' },
+    { icon: SlidersHorizontal, label: 'Total settings', value: allItems.length, tone: 'blue' },
   ];
 
   const toneClasses = {
@@ -114,19 +113,11 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   };
 
   const renderStatusBadge = (item) => {
-    const isCs = !!comingSoonMap[item.id] && integrationStatusById[item.id]?.status !== 'active';
-    if (isCs) {
-      return (
-        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
-          <Lock className="w-2.5 h-2.5" /> Coming Soon
-        </span>
-      );
-    }
-    const st = integrationStatusById[item.id]?.status;
-    if (st === 'active') {
+    const isConfigured = integrationStatusById[item.id]?.status === 'configured';
+    if (isConfigured) {
       return (
         <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-600">
-          <Link2 className="w-2.5 h-2.5" /> Active
+          <Link2 className="w-2.5 h-2.5" /> Configured
         </span>
       );
     }
@@ -142,38 +133,33 @@ export default function SettingsHubOverview({ onNavigate, items }) {
 
   const renderItem = (item) => {
     const Icon = item.icon;
-    const isActive = integrationStatusById[item.id]?.status === 'active';
-    const isCs = !!comingSoonMap[item.id] && !isActive;
+    const isConfigured = integrationStatusById[item.id]?.status === 'configured';
+    const isHidden = !!hiddenMap[item.id];
     const isExternal = !!item.external;
     const isIntegration = INTEGRATION_IDS.has(item.id);
     const isBusy = busyId === item.id;
 
-    // In manage mode, integration items show lock/unlock buttons instead of
-    // navigation. Active integrations cannot be locked.
+    // Manage mode: integration items show Hide/Show buttons instead of navigation.
     if (manageMode && isIntegration) {
       return (
         <div
           key={item.id}
           className={`insight-card rounded-xl p-3.5 flex items-center gap-3 transition ${
-            isCs ? 'bg-amber-50/60 border-amber-200' : ''
-          } ${isActive ? 'opacity-60' : ''}`}
+            isHidden ? 'bg-amber-50/60 border-amber-200' : ''
+          }`}
         >
           <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-            isCs ? 'bg-amber-100' : 'bg-slate-100'
+            isHidden ? 'bg-amber-100' : isConfigured ? 'bg-emerald-50' : 'bg-slate-100'
           }`}>
-            <Icon className={`w-4 h-4 ${isCs ? 'text-amber-500' : 'text-slate-400'}`} />
+            <Icon className={`w-4 h-4 ${isHidden ? 'text-amber-500' : isConfigured ? 'text-emerald-600' : 'text-slate-400'}`} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-sm font-semibold truncate ${isCs ? 'text-slate-500' : 'text-slate-800'}`}>
+            <p className={`text-sm font-semibold truncate ${isHidden ? 'text-slate-500' : 'text-slate-800'}`}>
               {item.label}
             </p>
-            {isActive ? (
+            {isConfigured ? (
               <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-600">
-                <Link2 className="w-2.5 h-2.5" /> Active — cannot lock
-              </span>
-            ) : isCs ? (
-              <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
-                <Lock className="w-2.5 h-2.5" /> Coming Soon
+                <Link2 className="w-2.5 h-2.5" /> Configured
               </span>
             ) : (
               <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400">
@@ -182,25 +168,23 @@ export default function SettingsHubOverview({ onNavigate, items }) {
             )}
           </div>
           <div className="flex-shrink-0">
-            {isActive ? (
-              <span className="text-[10px] font-bold text-emerald-600 px-3">Live</span>
-            ) : isCs ? (
+            {isHidden ? (
               <button
-                onClick={() => setComingSoon(item.id, false)}
-                disabled={busyId === item.id}
+                onClick={() => setHidden(item.id, false)}
+                disabled={isBusy}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition disabled:opacity-50 active:scale-95"
               >
-                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Unlock className="w-3.5 h-3.5" />}
-                Unlock
+                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
+                Show
               </button>
             ) : (
               <button
-                onClick={() => setComingSoon(item.id, true)}
-                disabled={busyId === item.id}
+                onClick={() => setHidden(item.id, true)}
+                disabled={isBusy}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 transition disabled:opacity-50 active:scale-95"
               >
-                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
-                Lock
+                {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <EyeOff className="w-3.5 h-3.5" />}
+                Hide
               </button>
             )}
           </div>
@@ -219,20 +203,17 @@ export default function SettingsHubOverview({ onNavigate, items }) {
       <button
         key={item.id}
         onClick={handleClick}
-        disabled={isCs}
-        className={`insight-card rounded-xl p-3.5 flex items-center gap-3 text-left transition hover:shadow-md ${
-          isCs ? 'opacity-60 cursor-not-allowed' : ''
+        className={`insight-card rounded-xl p-3.5 flex items-center gap-3 text-left transition hover:shadow-md hover:-translate-y-0.5 ${
+          isHidden ? 'opacity-50' : ''
         }`}
       >
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isCs ? 'bg-slate-100' : 'bg-[#2E5A1A]/10'
+          isConfigured ? 'bg-emerald-50' : 'bg-[#2E5A1A]/10'
         }`}>
-          <Icon className={`w-4 h-4 ${isCs ? 'text-slate-400' : 'text-[#2E5A1A]'}`} />
+          <Icon className={`w-4 h-4 ${isConfigured ? 'text-emerald-600' : 'text-[#2E5A1A]'}`} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className={`text-sm font-semibold truncate ${isCs ? 'text-slate-400' : 'text-slate-800'}`}>
-            {item.label}
-          </p>
+          <p className="text-sm font-semibold truncate text-slate-800">{item.label}</p>
           {renderStatusBadge(item)}
         </div>
         {isExternal
@@ -262,19 +243,19 @@ export default function SettingsHubOverview({ onNavigate, items }) {
         subtitle="Full control of your site — manage everything from one place."
         actions={
           <button
-            onClick={() => { setManageMode(m => !m); }}
+            onClick={() => setManageMode(m => !m)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm ${
               manageMode
                 ? 'bg-[#2E5A1A] text-white hover:bg-[#244715]'
                 : 'bg-white border border-slate-200 text-slate-700 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
             }`}
           >
-            {manageMode ? <><Sparkles className="w-4 h-4" /> Done</> : <><Clock className="w-4 h-4" /> Manage Coming Soon</>}
+            {manageMode ? <><SlidersHorizontal className="w-4 h-4" /> Done</> : <><SlidersHorizontal className="w-4 h-4" /> Manage</>}
           </button>
         }
       />
 
-      {/* Single stat strip */}
+      {/* Stat strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {statsTiles.map((t) => {
           const Icon = t.icon;
@@ -296,12 +277,12 @@ export default function SettingsHubOverview({ onNavigate, items }) {
       {manageMode && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
           <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-            <Clock className="w-4 h-4 text-amber-600" />
+            <EyeOff className="w-4 h-4 text-amber-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-800">Manage Coming Soon</p>
+            <p className="text-sm font-semibold text-slate-800">Manage hidden integrations</p>
             <p className="text-xs text-slate-500 mt-0.5">
-              Click <strong>Lock</strong> to grey out an integration across the site — it cannot be opened until you click <strong>Unlock</strong>. Active integrations cannot be locked.
+              Click <strong>Hide</strong> to remove an integration from the grid — it won't appear until you click <strong>Show</strong>. Configured integrations can still be hidden if you don't use them.
             </p>
           </div>
         </div>
@@ -327,8 +308,8 @@ export default function SettingsHubOverview({ onNavigate, items }) {
         )}
       </div>
 
-      {/* Two sections */}
-      {query.trim() && filtered.length === 0 ? (
+      {/* Sections */}
+      {query.trim() && visibleFiltered.length === 0 ? (
         <div className="insight-card rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-500">No settings found for "{query}"</p>
         </div>
