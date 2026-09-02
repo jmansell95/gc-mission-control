@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { startOfWeek, addDays, format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import UnifiedRotaBuilder from '@/components/rota/UnifiedRotaBuilder';
 import CalendarView from '@/components/CalendarView';
@@ -38,9 +39,11 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
     }
   };
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const [selectedWeek, setSelectedWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const selectedWeekStartStr = format(selectedWeek, 'yyyy-MM-dd');
+  const selectedWeekEndStr = format(addDays(selectedWeek, 6), 'yyyy-MM-dd');
   const [leaveFilter, setLeaveFilter] = useState('all');
-  const { data: todayAssignments = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rota-today-scheduling', todayStr], filter: { assigned_date: todayStr }, sort: '-created_date', limit: 500 });
+  const { data: weekAssignments = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rota-week-scheduling', selectedWeekStartStr], filter: { week_start: selectedWeekStartStr }, sort: '-created_date', limit: 500 });
   const { data: absences = [] } = useQuery({ queryKey: ['absences-scheduling'], queryFn: () => base44.entities.Absence.list() });
 
   const leaveFilterOrder = ['all', 'annual', 'sick', 'training'];
@@ -51,32 +54,29 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
   };
 
   const schedStats = useMemo(() => {
-    const onJob = todayAssignments.filter(a => a.assignment_type === 'job').length;
-    const conflicts = todayAssignments.filter(a => a.has_conflict).length;
-    // Staff on leave today: approved absences + non-job rota assignments (annual_leave/sick/training)
+    const onJob = weekAssignments.filter(a => a.assignment_type === 'job').length;
+    const conflicts = weekAssignments.filter(a => a.has_conflict).length;
+    // Staff on leave during the selected week: approved absences overlapping
+    // the week + non-job rota assignments (annual_leave/sick/training) in that week
     const leaveByType = { annual: new Set(), sick: new Set(), training: new Set() };
     const allLeave = new Set();
     absences.forEach(a => {
-      if (a.status === 'approved' && a.start_date <= todayStr && a.end_date >= todayStr) {
+      if (a.status === 'approved' && a.start_date <= selectedWeekEndStr && a.end_date >= selectedWeekStartStr) {
         allLeave.add(a.staff_id);
         const type = a.reason === 'sick' ? 'sick' : a.reason === 'training' ? 'training' : 'annual';
         leaveByType[type].add(a.staff_id);
       }
     });
-    todayAssignments.forEach(a => {
+    weekAssignments.forEach(a => {
       if (a.assignment_type === 'annual_leave') { allLeave.add(a.staff_id); leaveByType.annual.add(a.staff_id); }
       else if (a.assignment_type === 'sick') { allLeave.add(a.staff_id); leaveByType.sick.add(a.staff_id); }
       else if (a.assignment_type === 'training') { allLeave.add(a.staff_id); leaveByType.training.add(a.staff_id); }
     });
     const onLeave = leaveFilter === 'all' ? allLeave.size : (leaveByType[leaveFilter]?.size || 0);
-    return { total: todayAssignments.length, onJob, onLeave, conflicts };
-  }, [todayAssignments, absences, todayStr, leaveFilter]);
+    return { total: weekAssignments.length, onJob, onLeave, conflicts };
+  }, [weekAssignments, absences, selectedWeekStartStr, selectedWeekEndStr, leaveFilter]);
 
-  const currentWeekStart = (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    return d.toISOString().slice(0, 10);
-  })();
+  const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 
   const tabs = [
     { id: 'rota', label: 'Rota Builder', icon: Calendar },
@@ -114,7 +114,7 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
           </button>
         </div>
       </div>
-      {tab === 'rota' && <UnifiedRotaBuilder />}
+      {tab === 'rota' && <UnifiedRotaBuilder selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} />}
       {tab === 'heatmap' && <AvailabilityHeatmap />}
       {tab === 'calendar' && <CalendarView />}
     </div>

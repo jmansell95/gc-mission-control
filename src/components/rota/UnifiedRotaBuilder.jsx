@@ -9,7 +9,7 @@ import { Plus, Drill } from 'lucide-react';
  * "Assign Crew to Rig" opens the Crew-Rig assignment flow (Lead Driller + Second
  * Man → pick rig + dates, with mid-job rig swap).
  */
-export default function UnifiedRotaBuilder() {
+export default function UnifiedRotaBuilder({ selectedWeek, setSelectedWeek }) {
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 
   const handleAddShift = () => {
@@ -36,7 +36,7 @@ export default function UnifiedRotaBuilder() {
           <Drill className="w-4 h-4" /> Assign Crew to Rig
         </button>
       </div>
-      <WeeklyRotaBuilder />
+      <WeeklyRotaBuilder selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} />
     </div>
   );
 }

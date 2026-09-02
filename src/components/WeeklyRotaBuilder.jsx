@@ -66,8 +66,10 @@ const crewSubLine = (member, crewsByParent) => {
   return lines.length > 0 ? lines.join('  |  ') : null;
 };
 
-export default function WeeklyRotaBuilder() {
-  const [selectedWeek, setSelectedWeek] = useState(new Date());
+export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setSelectedWeek: propSetSelectedWeek }) {
+  const [internalWeek, setInternalWeek] = useState(new Date());
+  const selectedWeek = propSelectedWeek ?? internalWeek;
+  const setSelectedWeek = propSetSelectedWeek ?? setInternalWeek;
   const [smartFillLoading, setSmartFillLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, assignment: null, defaultStaffId: '', defaultDate: '' });
 
