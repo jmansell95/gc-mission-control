@@ -130,8 +130,9 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const handler = (e) => {
-      const { section, job, settingsTab: tab } = e.detail || {};
+      const { section, job, settingsTab: tab, jobTab } = e.detail || {};
       if (job) setSelectedJob(job);
+      if (job) setJobInitialTab(jobTab || null);
       if (tab) setSettingsTab(tab);
       if (section) {
         if (profile && !canAccessSection(profile, section)) return;

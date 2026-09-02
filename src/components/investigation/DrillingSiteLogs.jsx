@@ -11,7 +11,7 @@ import SiteLogReviewManager from '@/components/investigation/SiteLogReviewManage
  * review and timesheet generation. Technical borehole data (strata, SPT,
  * core, samples) lives on the Boreholes tab, not here.
  */
-export default function DrillingSiteLogs({ job, assignedStaff }) {
+export default function DrillingSiteLogs({ job, assignedStaff, selectedLogId }) {
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ['investigation-logs', job.id],
     queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job.id }),
@@ -61,7 +61,7 @@ export default function DrillingSiteLogs({ job, assignedStaff }) {
       </div>
 
       {/* Driller activity review timeline */}
-      <SiteLogReviewManager job={job} assignedStaff={assignedStaff} />
+      <SiteLogReviewManager job={job} assignedStaff={assignedStaff} initialSelectedLogId={selectedLogId} />
     </div>
   );
 }

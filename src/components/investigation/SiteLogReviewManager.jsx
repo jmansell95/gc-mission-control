@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Activity, Search, Maximize2, Minimize2, Loader2, CheckSquare } from 'lucide-react';
@@ -25,13 +25,13 @@ function fmtDur(mins) {
  * filter, activity type tags + filter, group by borehole/chronological,
  * expand/collapse all, bulk approve/reject, and Excel/PDF export.
  */
-export default function SiteLogReviewManager({ job, assignedStaff }) {
+export default function SiteLogReviewManager({ job, assignedStaff, initialSelectedLogId }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState({ driller: 'all', search: '', status: 'all', groupBy: 'chrono', activityType: 'all' });
   const [dateRange, setDateRange] = useState({ preset: '7d', from: londonDateStr(-6), to: londonDateStr(0) });
   const [collapsedDays, setCollapsedDays] = useState(new Set());
-  const [selectedActivityId, setSelectedActivityId] = useState(null);
+  const [selectedActivityId, setSelectedActivityId] = useState(initialSelectedLogId || null);
   const [backfilling, setBackfilling] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -75,6 +75,17 @@ export default function SiteLogReviewManager({ job, assignedStaff }) {
   }, [filteredLogs]);
 
   const sortedDates = Object.keys(byDate).sort().reverse();
+
+  // Bidirectional deep-link: when arriving from the Investigation Hub, the
+  // target log id is passed in. Auto-expand the day that contains it so the
+  // manager lands on the right activity without having to hunt for it.
+  useEffect(() => {
+    if (!initialSelectedLogId) return;
+    const day = Object.keys(byDate).find(d => byDate[d].some(l => l.id === initialSelectedLogId));
+    if (day) {
+      setCollapsedDays(prev => { const next = new Set(prev); next.delete(day); return next; });
+    }
+  }, [initialSelectedLogId, byDate]);
 
   // Stats
   const pendingCount = filteredLogs.filter(l => (l.manager_review_status || 'pending') !== 'approved').length;

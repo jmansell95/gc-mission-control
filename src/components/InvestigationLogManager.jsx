@@ -4,19 +4,20 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import {
   FlaskConical, Layers, Ruler, TestTube, Wrench, MapPin, Package, ClipboardList, ArrowDownToLine,
-  Droplets, Calculator, Gauge, Waves, Undo2, ShieldAlert, Camera, CheckCircle2, AlertTriangle, XCircle, Ban, Beaker, Radar, Boxes,   ShieldCheck, Tablet, Mountain, Eye, EyeOff, ChevronDown, User, PoundSterling
+  Droplets, Calculator, Gauge, Waves, Undo2, ShieldAlert, Camera, CheckCircle2, AlertTriangle, XCircle, Ban, Beaker, Radar, Boxes,   ShieldCheck, Tablet, Mountain, Eye, EyeOff, ChevronDown, User, PoundSterling, ExternalLink
 } from 'lucide-react';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import { titleCase } from '@/utils/format';
 import DrillingSiteLogs from '@/components/investigation/DrillingSiteLogs';
 import AutoBillingButton from '@/components/investigation/AutoBillingButton';
+import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import {
   strataConfig, serviceEncounterConfig, pitStabilityConfig, reviewStatusConfig,
   fluidLossConfig, obstructionConfig, logTypeConfig,
   getMissingFields, getAnomalyFlags
 } from '@/components/investigation/shared';
 
-export default function InvestigationLogManager({ job, isDrillingJob, assignedStaff, allStaff, canSeeCosts, onViewBoreholes }) {
+export default function InvestigationLogManager({ job, isDrillingJob, assignedStaff, allStaff, canSeeCosts, onViewBoreholes, selectedLogId }) {
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ['investigation-logs', job.id],
     queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job.id }),
@@ -392,8 +393,14 @@ function LogEntryCard({ log }) {
         )}
 
         {/* Auto-detect billing from remarks */}
-        <div className="mt-1.5">
+        <div className="mt-1.5 flex items-center gap-2">
           <AutoBillingButton logId={log.id} />
+          <button
+            onClick={() => navigateToInvestigationHub(log.job_id, log.id)}
+            className="text-[11px] text-slate-400 hover:text-[#2E5A1A] flex items-center gap-1 font-medium transition"
+          >
+            <ExternalLink className="w-3 h-3" /> View in Investigation Hub
+          </button>
         </div>
       </div>
     </div>

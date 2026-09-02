@@ -1244,6 +1244,7 @@ Deno.serve(async (req) => {
                 staff_name: drillerName || importerName,
                 date: resolveDate(ref), log_type: 'other', borehole_ref: ref || null,
                 description: cleaned[i] || act.raw_description,
+                raw_remarks: act.raw_description,
                 source: 'keylogbook_remarks',
                 logged_by_role: 'driller',
                 start_time: act.start_time,
@@ -1259,6 +1260,7 @@ Deno.serve(async (req) => {
               job_id: job.id, staff_id: drillerStaffId || staffId, staff_name: drillerName || importerName,
               date: resolveDate(ref), log_type: 'other', borehole_ref: ref || null,
               description: tremDesc.trim(),
+              raw_remarks: tremDesc.trim(),
               source: 'keylogbook_remarks',
               logged_by_role: 'driller',
               completed_by_type: 'internal_staff', completed_by_name: drillerName || importerName,
@@ -1376,6 +1378,7 @@ Deno.serve(async (req) => {
           end_time: sa.end_time || undefined,
           duration_minutes: sa.duration_minutes || undefined,
           description: cleanDesc || sa.description || 'Driller activity',
+          raw_remarks: sa.description,
           completed_by_type: 'internal_staff',
           completed_by_name: drillerName || importerName,
           manager_review_status: 'pending',
@@ -1400,12 +1403,12 @@ Deno.serve(async (req) => {
           for (const a of acts) {
             activityIndexes.push(staged.length);
             activitiesToClean.push(a);
-            staged.push({ date: chunk.date, borehole_ref: ref, start_time: a.start_time, end_time: a.end_time, duration_minutes: a.duration_minutes, description: '' });
+            staged.push({ date: chunk.date, borehole_ref: ref, start_time: a.start_time, end_time: a.end_time, duration_minutes: a.duration_minutes, description: '', raw_remarks: a.raw_description });
           }
           // Edge: a timed chunk that parsed to zero activities — keep the raw text as a plain entry.
-          if (acts.length === 0) staged.push({ date: chunk.date, borehole_ref: ref, description: chunk.text });
+          if (acts.length === 0) staged.push({ date: chunk.date, borehole_ref: ref, description: chunk.text, raw_remarks: chunk.text });
         } else {
-          staged.push({ date: chunk.date, borehole_ref: ref, description: chunk.text });
+          staged.push({ date: chunk.date, borehole_ref: ref, description: chunk.text, raw_remarks: chunk.text });
         }
       }
 
@@ -1428,6 +1431,7 @@ Deno.serve(async (req) => {
           end_time: r.end_time,
           duration_minutes: r.duration_minutes,
           description: r.description,
+          raw_remarks: r.raw_remarks,
           completed_by_type: 'internal_staff',
           completed_by_name: drillerName || importerName,
           manager_review_status: 'pending',

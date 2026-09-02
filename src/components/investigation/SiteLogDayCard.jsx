@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Clock, CheckCircle2, ChevronDown, User, MapPin, Edit2, X, Save, Loader2, RotateCcw } from 'lucide-react';
+import { Clock, CheckCircle2, ChevronDown, User, MapPin, Edit2, X, Save, Loader2, RotateCcw, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import SiteLogTimelineBar from './SiteLogTimelineBar';
 import { detectActivityType, TAG_COLORS } from '@/utils/siteLogUtils';
+import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 
 function timeToMins(t) {
   if (!t) return null;
@@ -215,10 +216,17 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
               </span>
             )}
             {!selectMode && (
-              <button onClick={(e) => { e.stopPropagation(); handleEdit(log); }}
-                className="ml-auto text-[11px] text-slate-400 hover:text-emerald-700 flex items-center gap-1 font-medium transition">
-                <Edit2 className="w-3 h-3" /> Edit
-              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <button onClick={(e) => { e.stopPropagation(); navigateToInvestigationHub(log.job_id, log.id); }}
+                  title="View in Investigation Hub"
+                  className="text-[11px] text-slate-400 hover:text-[#2E5A1A] flex items-center gap-1 font-medium transition">
+                  <ExternalLink className="w-3 h-3" /> Hub
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); handleEdit(log); }}
+                  className="text-[11px] text-slate-400 hover:text-emerald-700 flex items-center gap-1 font-medium transition">
+                  <Edit2 className="w-3 h-3" /> Edit
+                </button>
+              </div>
             )}
           </div>
         </div>

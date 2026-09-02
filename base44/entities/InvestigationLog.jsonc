@@ -53,6 +53,10 @@
       "type": "string",
       "description": "External KeyLogBook record ID used for idempotent upsert during pull sync. Set to 'klb_bh_<id>' for borehole records and 'klb_rem_<id>_<index>' for parsed remark activities. When present, re-running the pull sync updates the existing record in place instead of creating a duplicate. Blank for manually-entered logs and webhook-imported logs (webhook data uses overwrite mode via job+date+source deletion instead)."
     },
+    "raw_remarks": {
+      "type": "string",
+      "description": "The original verbatim driller remark text exactly as entered in KeyLogBook, before AI professionalisation. Preserved so managers can audit what the driller actually wrote versus the cleaned report-ready description stored in 'description'. Only set on source='keylogbook_remarks' logs; blank for staff-entered and ags_import technical logs."
+    },
     "start_time": {
       "type": "string",
       "description": "Start time of this activity in HH:MM format"
@@ -155,7 +159,7 @@
     },
     "description": {
       "type": "string",
-      "description": "Description of the work carried out or observations"
+      "description": "Description of the work carried out or observations. For keylogbook_remarks logs this holds the AI-professionalised, report-ready English; the original verbatim driller text is preserved separately in raw_remarks."
     },
     "duration_minutes": {
       "type": "number",

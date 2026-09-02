@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
@@ -11,6 +11,8 @@ import InvestigationLogDrawer from '@/components/investigation/InvestigationLogD
 import InvestigationExportBar from '@/components/investigation/InvestigationExportBar';
 import InvestigationBulkReview from '@/components/investigation/InvestigationBulkReview';
 import BulkApproveBar from '@/components/investigation/BulkApproveBar';
+import LiveKeyLogFeed from '@/components/investigation/LiveKeyLogFeed';
+import { getInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import { logTypeConfig } from '@/components/investigation/shared';
 
 /**
@@ -30,6 +32,17 @@ export default function InvestigationHub({ onNavigate }) {
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState(new Set());
   const queryClient = useQueryClient();
+
+  // Bidirectional deep-link: when a manager clicks "View in Investigation Hub"
+  // from a job's Site Activity tab, the target job + log id are stashed in
+  // sessionStorage. On mount, read + clear it, pre-filter to that job, and
+  // open the log drawer so they land exactly on the log they came from.
+  useEffect(() => {
+    const link = getInvestigationHubDeepLink();
+    if (!link) return;
+    if (link.jobId) setJobFilter(link.jobId);
+    if (link.logId) setSelectedLogId(link.logId);
+  }, []);
 
   const { data: logs = [], isLoading } = useScopedEntity('InvestigationLog', { queryKey: ['investigation-hub-logs'], sort: '-created_date', limit: 300 });
   const { data: jobs = [] } = useScopedEntity('Job', { queryKey: ['investigation-hub-jobs'], limit: 500 });
@@ -124,6 +137,9 @@ export default function InvestigationHub({ onNavigate }) {
         jobFilter={jobFilter} setJobFilter={setJobFilter} jobs={jobs}
         typeFilter={typeFilter} setTypeFilter={setTypeFilter} logTypes={logTypeConfig}
       />
+
+      {/* Live KeyLogBook feed — today's incoming driller logs across all jobs */}
+      <LiveKeyLogFeed jobs={jobs} />
 
       {/* Bulk-select toggle — sits under the header */}
       {!hasNoLogs && (

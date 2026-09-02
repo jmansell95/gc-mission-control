@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Boxes, PoundSterling, FolderOpen, FileText, Eye, Download, Activity, Mountain,
   LayoutGrid, CalendarDays, ShieldCheck, Users, Truck, Hotel,
   Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList
 } from 'lucide-react';
+import { getSiteActivityDeepLink } from '@/utils/investigationDeepLink';
 import SubTabNav from '@/components/SubTabNav';
 import JobLogisticsHub from '@/components/logistics/JobLogisticsHub';
 import InvestigationLogManager from '@/components/InvestigationLogManager';
@@ -50,6 +51,20 @@ export default function JobDetailTabs({
   const [scheduleSub, setScheduleSub] = useState('daily');
   const [activitySub, setActivitySub] = useState('logs');
   const [docsSub, setDocsSub] = useState('photos');
+  const [siteActivitySelectedLogId, setSiteActivitySelectedLogId] = useState(null);
+
+  // Bidirectional deep-link: when a manager clicks "Open on Job Site Activity"
+  // from the Investigation Hub, the target log id is stashed in sessionStorage.
+  // On mount, read + clear it, land on the Site Activity tab → Activity Logs
+  // sub-tab, and pass the log id down so the timeline pre-selects/expands it.
+  useEffect(() => {
+    const link = getSiteActivityDeepLink();
+    if (!link) return;
+    if (link.jobId && job && link.jobId !== job.id) return; // safety: only for this job
+    setActiveTab('activity');
+    setActivitySub('logs');
+    if (link.logId) setSiteActivitySelectedLogId(link.logId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const assignedVehicleIds = [...new Set(rotas.map(r => r.vehicle_id).filter(Boolean))];
   const assignedVehicles = assignedVehicleIds.map(id => vehicles.find(v => v.id === id)).filter(Boolean);
@@ -189,7 +204,7 @@ export default function JobDetailTabs({
                 { icon: ShieldCheck, value: rotas.filter(r => r.briefing_signed).length, label: 'Briefings Signed', iconColor: 'text-amber-600' },
               ]}
             />
-            <InvestigationLogManager job={job} isDrillingJob={isDrillingJob} assignedStaff={assignedStaff} allStaff={allStaff} canSeeCosts={canSeeCosts} onViewBoreholes={() => setActivitySub('boreholes')} />
+            <InvestigationLogManager job={job} isDrillingJob={isDrillingJob} assignedStaff={assignedStaff} allStaff={allStaff} canSeeCosts={canSeeCosts} onViewBoreholes={() => setActivitySub('boreholes')} selectedLogId={siteActivitySelectedLogId} />
           </>
         ) : activitySub === 'hazards' ? (
           <JobHazardMap job={job} />

@@ -3,11 +3,12 @@ import { format } from 'date-fns';
 import {
   X, Ruler, Droplets, Gauge, Camera, CheckCircle2, AlertTriangle, XCircle, User,
   PoundSterling, Layers, TestTube, Wrench, MapPin, Beaker, Radar, Ban, Waves,
-  ShieldAlert, ShieldCheck, Undo2, Tablet, ChevronRight,
+  ShieldAlert, ShieldCheck, Undo2, Tablet, ChevronRight, ExternalLink,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { titleCase } from '@/utils/format';
+import { navigateToJobSiteActivity } from '@/utils/investigationDeepLink';
 import {
   strataConfig, serviceEncounterConfig, pitStabilityConfig, reviewStatusConfig,
   logTypeConfig, getMissingFields, getAnomalyFlags,
@@ -30,6 +31,16 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
   const { toast } = useToast();
   const [reviewNote, setReviewNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [job, setJob] = useState(null);
+
+  // Fetch the full job object so the "Open on Job Site Activity" deep-link
+  // can navigate directly to the job detail page.
+  useEffect(() => {
+    if (!log?.job_id) { setJob(null); return; }
+    let active = true;
+    base44.entities.Job.get(log.job_id).then(j => { if (active) setJob(j); }).catch(() => {});
+    return () => { active = false; };
+  }, [log?.job_id]);
 
   useEffect(() => { setReviewNote(log?.manager_review_note || ''); }, [log?.id]);
 
@@ -114,9 +125,19 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               ) : (log.staff_name || 'Staff member')}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition flex-shrink-0">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={() => job && navigateToJobSiteActivity(job, log.id)}
+              disabled={!job}
+              title="Open on Job Site Activity"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/5 hover:bg-[#2E5A1A]/10 rounded-lg transition disabled:opacity-40"
+            >
+              <ExternalLink className="w-3.5 h-3.5" /> Site Activity
+            </button>
+            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -157,6 +178,12 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
           )}
           {log.description && (
             <Section title="Description" text={log.description} />
+          )}
+          {log.raw_remarks && log.raw_remarks !== log.description && (
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 border-dashed">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Original Driller Remarks</p>
+              <p className="text-sm text-slate-600 italic">{log.raw_remarks}</p>
+            </div>
           )}
           {log.dimensions && <Section title="Dimensions" text={log.dimensions} />}
           {log.backfill_material && <Section title="Backfill" text={log.backfill_material} />}
