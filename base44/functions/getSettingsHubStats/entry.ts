@@ -165,25 +165,23 @@ export default async function (req: Request): Promise<Response> {
     const hiddenCount = Object.keys(integrationHidden).length;
 
     return Response.json({
-      data: {
-        staffCount: (staff || []).length,
-        activeStaff: (staff || []).filter(s => s.is_active !== false).length,
-        jobsCount: (jobs || []).length,
-        activeJobs: (jobs || []).filter(j => (j.status || 'planning') === 'in_progress').length,
-        planningJobs: (jobs || []).filter(j => (j.status || 'planning') === 'planning').length,
-        vehiclesCount: (vehicles || []).length,
-        clientsCount: (clients || []).length,
-        rateItemsCount: (rateItems || []).length,
-        teamsCount: (teams || []).length,
-        billingRulesCount: (billingRules || []).length,
-        complianceItemsCount: (complianceItems || []).length,
-        permissionGroupsCount: (permissionGroups || []).length,
-        integrations,
-        integrationConfiguredCount: configuredCount,
-        integrationNotConfiguredCount: notConfiguredCount,
-        integrationHidden,
-        integrationHiddenCount: hiddenCount,
-      },
+      staffCount: (staff || []).length,
+      activeStaff: (staff || []).filter(s => s.is_active !== false).length,
+      jobsCount: (jobs || []).length,
+      activeJobs: (jobs || []).filter(j => (j.status || 'planning') === 'in_progress').length,
+      planningJobs: (jobs || []).filter(j => (j.status || 'planning') === 'planning').length,
+      vehiclesCount: (vehicles || []).length,
+      clientsCount: (clients || []).length,
+      rateItemsCount: (rateItems || []).length,
+      teamsCount: (teams || []).length,
+      billingRulesCount: (billingRules || []).length,
+      complianceItemsCount: (complianceItems || []).length,
+      permissionGroupsCount: (permissionGroups || []).length,
+      integrations,
+      integrationConfiguredCount: configuredCount,
+      integrationNotConfiguredCount: notConfiguredCount,
+      integrationHidden,
+      integrationHiddenCount: hiddenCount,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
