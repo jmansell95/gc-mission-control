@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   Search, CheckCircle2, AlertTriangle, Clock, Calendar, GraduationCap,
-  ArrowRight, Plus, ShieldCheck, Users, UserPlus, HardHat, Briefcase,
+  ArrowRight, Plus, ShieldCheck, Users, UserPlus, HardHat, Briefcase, Pencil,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { complianceDaysUntil, formatComplianceDate } from '@/utils/complianceDate';
 import AddCompletedTrainingModal from '@/components/staff/AddCompletedTrainingModal';
+import EditTrainingInlineForm from '@/components/training/EditTrainingInlineForm';
 
 const STATUS_META = {
   valid: { label: 'Valid', cls: 'bg-emerald-500 text-white', dot: 'bg-emerald-500' },
@@ -245,12 +246,27 @@ function StaffCard({ m, teamName, categories, getQualStatus, compliance, bookedC
  * Training actions and a link to their full staff profile.
  */
 function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, courses, getQualStatus, onClose, onBookTraining, onOpenProfile, onAddCompleted }) {
+  const [editingQual, setEditingQual] = useState(null);
+  const [editingBooking, setEditingBooking] = useState(null);
+
   const teamName = (id) => {
     const t = teams.find(t => t.id === id);
     return t ? t.name : '—';
   };
 
   const myBookings = bookings.filter(b => b.staff_id === staff.id && b.status === 'booked');
+  const myCompletedBookings = bookings.filter(b => b.staff_id === staff.id && (b.status === 'passed' || b.status === 'attended' || b.status === 'failed'));
+
+  // Find the TrainingBooking linked to a ComplianceItem (best-effort match
+  // by issue_date + certificate title/url, since linked_compliance_id may
+  // not be set on legacy records).
+  const findLinkedBooking = (complianceItem) => {
+    if (!complianceItem) return null;
+    return myCompletedBookings.find(b =>
+      b.issue_date === complianceItem.issue_date &&
+      (b.certificate_title === complianceItem.title || b.certificate_url === complianceItem.document_url)
+    ) || myCompletedBookings.find(b => b.issue_date === complianceItem.issue_date) || null;
+  };
   const gapCategories = categories.filter(c => {
     const st = getQualStatus(staff, c.qualification_type);
     return st === 'gap' || st === 'expired' || st === 'expiring';
@@ -300,6 +316,19 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
                 const latest = items[0];
                 const expiry = latest?.expiry_date;
                 const days = expiry ? complianceDaysUntil(expiry) : null;
+                if (editingQual?.catId === cat.id && latest) {
+                  return (
+                    <EditTrainingInlineForm
+                      key={cat.id}
+                      complianceItem={latest}
+                      booking={findLinkedBooking(latest)}
+                      category={cat}
+                      staffId={staff.id}
+                      staffName={staff.name}
+                      onDone={() => setEditingQual(null)}
+                    />
+                  );
+                }
                 return (
                   <div key={cat.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50">
                     <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg text-[10px] font-bold ${meta.cls}`}>
@@ -313,6 +342,12 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
                         {days != null && days < 0 && ` · ${Math.abs(days)}d expired`}
                       </p>
                     </div>
+                    {latest && (
+                      <button onClick={() => setEditingQual({ catId: cat.id })}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 transition">
+                        <Pencil className="w-3 h-3" /> Edit
+                      </button>
+                    )}
                     {(st === 'gap' || st === 'expired' || st === 'expiring') && (
                       <button onClick={() => onBookTraining([staff.id], cat.qualification_type)}
                         className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition">
@@ -331,6 +366,19 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
               <div className="space-y-1.5">
                 {myBookings.map(b => {
                   const course = courses.find(c => c.id === b.course_id);
+                  if (editingBooking === b.id) {
+                    return (
+                      <EditTrainingInlineForm
+                        key={b.id}
+                        complianceItem={null}
+                        booking={b}
+                        category={null}
+                        staffId={staff.id}
+                        staffName={staff.name}
+                        onDone={() => setEditingBooking(null)}
+                      />
+                    );
+                  }
                   return (
                     <div key={b.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-blue-50 border border-blue-100">
                       <Calendar className="w-4 h-4 text-blue-600 flex-shrink-0" />
@@ -341,6 +389,10 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
                           {course?.venue ? ` · ${course.venue}` : ''}
                         </p>
                       </div>
+                      <button onClick={() => setEditingBooking(b.id)}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300 transition">
+                        <Pencil className="w-3 h-3" /> Edit
+                      </button>
                     </div>
                   );
                 })}

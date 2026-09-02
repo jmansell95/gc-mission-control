@@ -56,7 +56,7 @@ export default function TodayCrewPopup({ rotas, staff, jobs, teams, todayStr, on
       </button>
 
       <Dialog open={open} onOpenChange={(o) => setOpen(o)}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2.5 pr-8">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0">
@@ -83,7 +83,7 @@ export default function TodayCrewPopup({ rotas, staff, jobs, teams, todayStr, on
               No crew assigned for today — add shifts in the grid below.
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {jobGroups.map(([jid, group]) => {
                 const job = jobs.find(j => j.id === jid);
                 const colors = jobTypeColors[getJobPrimaryType(job, teams)] || jobTypeColors.depot;

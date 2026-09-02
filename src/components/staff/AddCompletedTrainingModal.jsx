@@ -33,8 +33,10 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
     expiry_date: '',
     certificate_url: '',
     certificate_name: '',
+    back_certificate_url: '',
+    back_certificate_name: '',
   });
-  const [uploading, setUploading] = useState(false);
+  const [uploadingSide, setUploadingSide] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const { data: requirements = [] } = useQuery({
@@ -59,24 +61,39 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
 
   const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
 
+  const selectedCat = categories.find(c => c.qualification_type === form.qualification_type);
+  const isCardType = !!(selectedCat?.requires_front_back || selectedCat?.is_card);
+
   const handleCategoryChange = (val) => {
     setForm(prev => {
       const matching = val ? providers.filter(p => p.training_services?.includes(val)) : providers;
       const providerStillValid = matching.some(p => p.id === prev.provider_id);
-      return { ...prev, qualification_type: val, provider_id: providerStillValid ? prev.provider_id : '' };
+      const newCat = val ? requirements.find(r => r.qualification_type === val) : null;
+      const newIsCard = !!(newCat?.requires_front_back || newCat?.is_card);
+      return {
+        ...prev,
+        qualification_type: val,
+        provider_id: providerStillValid ? prev.provider_id : '',
+        back_certificate_url: newIsCard ? prev.back_certificate_url : '',
+        back_certificate_name: newIsCard ? prev.back_certificate_name : '',
+      };
     });
   };
 
-  const handleFile = async (file) => {
+  const handleFile = async (file, side) => {
     if (!file) return;
-    setUploading(true);
+    setUploadingSide(side);
     try {
       const res = await base44.integrations.Core.UploadFile({ file });
-      setForm(prev => ({ ...prev, certificate_url: res.file_url, certificate_name: file.name }));
+      if (side === 'back') {
+        setForm(prev => ({ ...prev, back_certificate_url: res.file_url, back_certificate_name: file.name }));
+      } else {
+        setForm(prev => ({ ...prev, certificate_url: res.file_url, certificate_name: file.name }));
+      }
     } catch (e) {
       toast({ title: 'Upload failed', description: e.message, variant: 'destructive' });
     }
-    setUploading(false);
+    setUploadingSide(null);
   };
 
   const handleSave = async () => {
@@ -115,6 +132,8 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
         expiry_date: form.expiry_date || '',
         document_url: form.certificate_url || '',
         document_name: form.certificate_name || '',
+        back_document_url: form.back_certificate_url || '',
+        back_document_name: form.back_certificate_name || '',
         review_status: 'approved',
         status_override: 'auto',
         responsible_person: staffName || '',
@@ -211,24 +230,34 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
             <input type="date" value={form.expiry_date} onChange={e => set('expiry_date', e.target.value)} className={inputCls} />
           </div>
 
-          {/* Certificate upload */}
-          <div>
-            <label className={labelCls}>Certificate (optional)</label>
-            <label className="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
-              <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => handleFile(e.target.files?.[0])} />
-              {uploading ? <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" /> : <Upload className="w-5 h-5 text-slate-400" />}
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-slate-700 truncate">{form.certificate_name || 'Upload certificate / card photo'}</p>
-                <p className="text-[10px] text-slate-400">Image or PDF · auto-creates compliance record</p>
+          {/* Certificate / card upload */}
+          {isCardType ? (
+            <div>
+              <label className={labelCls}>Card Photos (front & back)</label>
+              <div className="grid grid-cols-2 gap-3">
+                <CardUploadTile label="Front of Card" fileUrl={form.certificate_url} fileName={form.certificate_name} uploading={uploadingSide === 'front'} onFile={(f) => handleFile(f, 'front')} />
+                <CardUploadTile label="Back of Card" fileUrl={form.back_certificate_url} fileName={form.back_certificate_name} uploading={uploadingSide === 'back'} onFile={(f) => handleFile(f, 'back')} />
               </div>
-              {form.certificate_url && <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
-            </label>
-          </div>
+            </div>
+          ) : (
+            <div>
+              <label className={labelCls}>Certificate (optional)</label>
+              <label className="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+                <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => handleFile(e.target.files?.[0], 'front')} />
+                {uploadingSide === 'front' ? <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" /> : <Upload className="w-5 h-5 text-slate-400" />}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-slate-700 truncate">{form.certificate_name || 'Upload certificate / card photo'}</p>
+                  <p className="text-[10px] text-slate-400">Image or PDF · auto-creates compliance record</p>
+                </div>
+                {form.certificate_url && <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />}
+              </label>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex gap-2 pt-2 border-t border-slate-100">
             <button onClick={onClose} className="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
-            <button onClick={handleSave} disabled={saving || uploading}
+            <button onClick={handleSave} disabled={saving || !!uploadingSide}
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               {saving ? 'Saving…' : 'Record Training'}
@@ -237,5 +266,29 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
         </div>
       </div>
     </div>
+  );
+}
+
+function CardUploadTile({ label, fileUrl, fileName, uploading, onFile }) {
+  return (
+    <label className="block">
+      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">{label}</span>
+      <label className="flex flex-col items-center gap-1.5 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition h-full min-h-[120px] justify-center">
+        <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => onFile(e.target.files?.[0])} />
+        {uploading ? (
+          <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+        ) : fileUrl ? (
+          fileUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
+            <img src={fileUrl} alt={fileName} className="w-full h-16 object-cover rounded-md" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+          )
+        ) : (
+          <Upload className="w-5 h-5 text-slate-300" />
+        )}
+        <p className="text-[10px] text-slate-500 truncate w-full text-center">{fileName || 'Upload'}</p>
+        {fileUrl && <span className="text-[9px] text-[#2E5A1A] font-semibold">Replace</span>}
+      </label>
+    </label>
   );
 }

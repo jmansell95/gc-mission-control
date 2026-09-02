@@ -7,9 +7,9 @@ import {
   AlertCircle, Wand2, Loader2, Home,
 } from 'lucide-react';
 import HotelEditor from '@/components/jobs/HotelEditor';
-import BookingSummaryCard from '@/components/jobs/BookingSummaryCard';
 import StaffHotelRow from '@/components/jobs/StaffHotelRow';
 import HotelCalendarView from '@/components/jobs/HotelCalendarView';
+import MonthlyBookingsAccordion from '@/components/jobs/MonthlyBookingsAccordion';
 import HotelConflictAlerts from '@/components/jobs/HotelConflictAlerts';
 import {
   nightsBetween, bookingType, bookingTotal, perPersonDayRate, fmtGBP,
@@ -108,8 +108,9 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
   return (
     <div className="space-y-4">
       {/* Summary stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatTile icon={Hotel} label="Hotels" value={hotelCount} sub={airbnbCount > 0 ? `${airbnbCount} Air B&B` : undefined} gradient="stat-gradient-brand" />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <StatTile icon={Hotel} label="Hotels" value={hotelCount} gradient="stat-gradient-brand" />
+        <StatTile icon={Home} label="Air B&B" value={airbnbCount} gradient="stat-gradient-blue" />
         <StatTile icon={UserCheck} label="Crew Covered" value={`${assignedToAnyBooking.size}/${assignedStaff.length}`} sub={`${unassignedStaff.length} unassigned`} gradient="stat-gradient-emerald" />
         <StatTile icon={BedDouble} label="Total Nights" value={totalNights} gradient="stat-gradient-violet" />
         <StatTile icon={PoundSterling} label="Total Cost" value={fmtGBP(totalCost, { decimals: 0 })} gradient="stat-gradient-amber" />
@@ -132,11 +133,7 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
               <Plus className="w-3.5 h-3.5" /> Add Booking
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {bookings.map(b => (
-              <BookingSummaryCard key={b.id} booking={b} onEdit={handleEdit} onDelete={handleDelete} />
-            ))}
-          </div>
+          <MonthlyBookingsAccordion bookings={bookings} onEdit={handleEdit} onDelete={handleDelete} />
         </div>
       )}
 
