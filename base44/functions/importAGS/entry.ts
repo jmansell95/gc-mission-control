@@ -936,48 +936,38 @@ Deno.serve(async (req) => {
     // attributed as the staff_id on the technical logs (the driller is).
     let importerName = (user?.full_name || user?.email || 'AGS Import (KeyLogBook)');
 
-    // --- Resolve the actual driller for this job ---
-    // Priority: 1) Driller / engineer name found in the AGS file itself
-    //           2) Staff assigned to the job (date-scoped) whose team is a
-    //              drilling crew (cp/rotary) — matching the webhook's date-
-    //              scoped rota lookup, with a fallback to job-level assignments
-    //           3) First assigned staff member
+    // --- Resolve the project engineer and actual driller for this job ---
+    // PROJ_ENG from the AGS file is the project engineer (NOT the driller) —
+    // stored in completed_by_name with a "Project Engineer" label so managers
+    // can see who engineered the borehole. The actual driller is resolved from
+    // the rota assignment for the borehole's work date, preferring a drilling-
+    // team staff member. If no rota assignment exists, staff_name is left blank
+    // and staff_id falls back to 'ags_import' so the manager can manually
+    // assign the driller during review.
     let drillerName = '';
     let drillerStaffId = '';
+    let drillerRole = 'ags_import';
+    let projectEngineerName = '';
 
-    // 1) Scan the AGS groups for any driller / engineer / logger name fields.
-    // The matched suffix also tells us the person's role, which we store as
-    // logged_by_role so the Site Logs tab can show "Driller", "Engineer", etc.
-    // instead of an unhelpful generic "AGS Import" label.
-    const agsNameSuffixes = ['DRILLER', 'DRILL', 'ENG', 'ENGINEER', 'LOGGER', 'LOG', 'OPER', 'OPERATOR', 'RCV', 'BY', 'REC_BY', 'RECORDED', 'INSPECT', 'RECORDED_BY', 'LOGGED_BY'];
-    const suffixToRole: Record<string, string> = {
-      DRILLER: 'driller', DRILL: 'driller', OPER: 'driller', OPERATOR: 'driller',
-      ENG: 'engineer', ENGINEER: 'engineer', LOGGER: 'engineer', LOG: 'engineer',
-      RECORDED_BY: 'engineer', LOGGED_BY: 'engineer', REC_BY: 'engineer', RECORDED: 'engineer',
-      INSPECT: 'engineer', RCV: 'engineer', BY: 'engineer',
-    };
-    let drillerRole = '';
-    for (const [name, g] of Object.entries(groups)) {
-      if (drillerName) break;
-      if (!g.headings || g.rows.length === 0) continue;
-      for (const row of g.rows) {
-        if (drillerName) break;
-        const r = buildRow(g, row);
-        for (const h of g.headings) {
-          const suffix = normalizeKey(h, name);
-          if (agsNameSuffixes.includes(suffix.toUpperCase())) {
-            const val = (r[h.toUpperCase()] || '').trim();
-            if (val) { drillerName = val; drillerRole = suffixToRole[suffix.toUpperCase()] || 'engineer'; break; }
-          }
+    // 1) Extract PROJ_ENG from the AGS PROJ group — this is the project
+    // engineer, NOT the driller. Stored separately so it can be labelled
+    // correctly in completed_by_name instead of being misattributed as the
+    // driller on every log entry.
+    if (groups.PROJ && groups.PROJ.rows.length) {
+      const projRow = buildRow(groups.PROJ, groups.PROJ.rows[0]);
+      for (const h of groups.PROJ.headings) {
+        const suffix = normalizeKey(h, 'PROJ');
+        if (suffix === 'ENG' || suffix === 'ENGINEER') {
+          const val = (projRow[h.toUpperCase()] || '').trim();
+          if (val) { projectEngineerName = val; break; }
         }
       }
     }
-    if (!drillerRole) drillerRole = 'ags_import';
 
-    // 2 & 3) Resolve from the rota — date-scoped to the earliest borehole date
-    // (matching the webhook's date-scoped approach), falling back to job-level
-    // assignments when no date-specific assignments exist. Prefer a staff member
-    // on a drilling team (cp/rotary).
+    // 2) Resolve the actual driller from the rota — date-scoped to the
+    // earliest borehole date, falling back to job-level assignments when no
+    // date-specific assignments exist. Prefer a staff member on a drilling
+    // team (cp/rotary). The driller's team job_type determines logged_by_role.
     const workDate = Object.values(locaDates).sort()[0] || job.start_date || today;
     try {
       let assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id, assigned_date: workDate });
@@ -994,16 +984,27 @@ Deno.serve(async (req) => {
         const chosen = drillerStaff || allStaff[0];
         const chosenAssignment = assignments.find(a => a.staff_id === chosen?.id) || assignments[0];
         drillerStaffId = chosenAssignment.staff_id || '';
-        if (!drillerName) drillerName = chosen?.name || '';
+        drillerName = chosen?.name || '';
+        // Derive logged_by_role from the resolved driller's team job_type
+        const chosenTeam = teams.find((t: any) => t.id === chosen?.team_id);
+        if (chosenTeam) {
+          if (drillingJobTypes.includes(chosenTeam.job_type)) drillerRole = 'driller';
+          else if (chosenTeam.job_type === 'groundworks') drillerRole = 'groundworker';
+          else if (chosenTeam.job_type === 'depot') drillerRole = 'groundworker';
+          else drillerRole = 'driller';
+        } else {
+          drillerRole = 'driller';
+        }
       }
     } catch (e) { /* skip */ }
 
-    // Technical logs (ags_import) use the resolved driller's staff_id — matching
-    // webhook behaviour where the driller is attributed, not the admin who
-    // uploaded. The admin's identity is preserved in completed_by_name for audit.
-    // A final placeholder keeps the required field non-empty when no crew is
-    // assigned at all.
+    // Technical logs (ags_import) use the resolved driller's staff_id. The
+    // project engineer's name is preserved in completed_by_name for audit.
+    // staff_name is blank when no rota assignment exists — the manager can
+    // manually assign the driller during review.
     const staffId = drillerStaffId || 'ags_import';
+    const staffName = drillerName || '';
+    const completedByName = projectEngineerName ? `Project Engineer: ${projectEngineerName}` : importerName;
 
     const logs: any[] = [];
     const samplesToCreate: any[] = [];
@@ -1045,13 +1046,13 @@ Deno.serve(async (req) => {
           locaX && locaY ? `, coordinates ${locaX}, ${locaY}` : '',
         ];
         if (addLog({
-          job_id: job.id, staff_id: staffId, date: locaDate,
+          job_id: job.id, staff_id: staffId, staff_name: staffName, date: locaDate,
           log_type: 'borehole_progress', borehole_ref: locaId,
           depth_to: num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null,
           groundwater_strike_depth: num(pick(r, 'LOCA_GND', 'LOCA_GW_DEPTH', 'LOCA_GWL', 'LOCA_WATER', 'GND', 'GW_DEPTH', 'GWL', 'WATER')) || null,
           description: `Imported from KeyLogBook AGS — ${descParts.join('')}.`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-          completed_by_name: importerName,
+          completed_by_name: completedByName,
           manager_review_status: 'approved', chargeable: false,
         })) counts.locations++;
       }
@@ -1080,25 +1081,25 @@ Deno.serve(async (req) => {
             const runNo = pick(r, 'GEOL_RUN', 'GEOL_RUN_NO', 'CORE_RUN', 'RUN_NO', 'RUN');
             const boxNo = pick(r, 'GEOL_BOX', 'GEOL_BOX_NO', 'CORE_BOX', 'BOX_NO', 'BOX');
             if (addLog({
-              job_id: job.id, staff_id: staffId, date: logDate,
+              job_id: job.id, staff_id: staffId, staff_name: staffName, date: logDate,
               log_type: 'core_inspection', borehole_ref: ref,
               core_run_number: runNo || null, core_box_number: boxNo || null,
               depth_from: dFrom || null, depth_to: dTo || null,
               coring_rqd: rqd, coring_recovery: recovery, strata_description_detail: desc,
               description: `Imported from KeyLogBook AGS — core run${runNo ? ` ${runNo}` : ''}${rqd != null ? ` (RQD ${rqd}%)` : ''}${recovery != null ? ` (recovery ${recovery}%)` : ''}.`,
               source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-              completed_by_name: importerName,
+              completed_by_name: completedByName,
               manager_review_status: 'approved', chargeable: false,
             })) counts.core++;
           } else {
             if (addLog({
-              job_id: job.id, staff_id: staffId, date: logDate,
+              job_id: job.id, staff_id: staffId, staff_name: staffName, date: logDate,
               log_type: 'borehole_progress', borehole_ref: ref,
               depth_from: dFrom || null, depth_to: dTo || null,
               strata_descriptor: mapStrataDescriptor(desc), strata_description_detail: desc,
               description: 'Imported from KeyLogBook AGS — strata.',
               source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-              completed_by_name: importerName,
+              completed_by_name: completedByName,
               manager_review_status: 'approved', chargeable: false,
             })) counts.strata++;
           }
@@ -1120,14 +1121,14 @@ Deno.serve(async (req) => {
         const dFrom = num(pick(r, 'CORE_TOP', 'CORE_FROM', 'CORE_DEPTH_FROM', 'CORE_TOP_DEPTH', 'TOP', 'FROM', 'DEPTH_FROM'));
         const dTo = num(pick(r, 'CORE_BASE', 'CORE_BOT', 'CORE_BOTTOM', 'CORE_TO', 'CORE_DEPTH_TO', 'CORE_BOT_DEPTH', 'BASE', 'BOT', 'TO', 'DEPTH_TO'));
         if (addLog({
-          job_id: job.id, staff_id: staffId, date: resolveDate(ref),
+          job_id: job.id, staff_id: staffId, staff_name: staffName, date: resolveDate(ref),
           log_type: 'core_inspection', borehole_ref: ref,
           core_run_number: runNo || coreId || null, core_box_number: boxNo || null,
           depth_from: dFrom || null, depth_to: dTo || null,
           coring_rqd: rqd, coring_recovery: recovery, strata_description_detail: coreDesc || null,
           description: `Imported from KeyLogBook AGS — core run${runNo || coreId ? ` ${runNo || coreId}` : ''}${rqd != null ? ` (RQD ${rqd}%)` : ''}${recovery != null ? ` (recovery ${recovery}%)` : ''}.${coreDesc ? ' ' + coreDesc : ''}`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-          completed_by_name: importerName,
+          completed_by_name: completedByName,
           manager_review_status: 'approved', chargeable: false,
         })) counts.core++;
       }
@@ -1147,13 +1148,13 @@ Deno.serve(async (req) => {
         const dTo = num(pick(r, 'SAMP_BOT', 'SAMP_BASE', 'SAMP_BOTTOM', 'BASE', 'BOT', 'TO', 'DEPTH_TO'));
         const collectionDate = resolveDate(ref);
         const logAdded = addLog({
-          job_id: job.id, staff_id: staffId, date: collectionDate,
+          job_id: job.id, staff_id: staffId, staff_name: staffName, date: collectionDate,
           log_type: 'sample_collection', borehole_ref: ref,
           sample_id: sampId, depth_from: dFrom || null,
           sample_type: mapSampleType(sampType),
           description: `Imported from KeyLogBook AGS — sample ${sampId} (${sampType}).`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-          completed_by_name: importerName,
+          completed_by_name: completedByName,
           manager_review_status: 'approved', chargeable: false,
         });
         if (logAdded) {
@@ -1197,13 +1198,13 @@ Deno.serve(async (req) => {
           const dFrom = num(pick(r, 'SPT_TOP', 'SPT_DEPTH', 'DENS_TOP', 'TOP', 'DEPTH_FROM', 'DEP', 'FROM'));
           const dTo = num(pick(r, 'SPT_BASE', 'SPT_BOT', 'DENS_BASE', 'DENS_BOT', 'BASE', 'BOT', 'DEPTH_TO', 'TO'));
           if (addLog({
-            job_id: job.id, staff_id: staffId, date: resolveDate(ref),
+            job_id: job.id, staff_id: staffId, staff_name: staffName, date: resolveDate(ref),
             log_type: 'borehole_progress', borehole_ref: ref,
             depth_from: dFrom || null, depth_to: dTo || null,
             spt_blows: blows, spt_n_value: nval,
             description: `Imported from KeyLogBook AGS — SPT (N=${nval != null ? nval : 'n/a'}).`,
             source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-            completed_by_name: importerName,
+            completed_by_name: completedByName,
             manager_review_status: 'approved', chargeable: false,
           })) counts.spt++;
         }
@@ -1274,12 +1275,12 @@ Deno.serve(async (req) => {
         const summary = parts.length > 0 ? parts.join(' · ') : 'Installation pipe';
         const detail = tremDesc ? `${summary} — ${tremDesc}` : summary;
         if (addLog({
-          job_id: job.id, staff_id: staffId, date: resolveDate(ref),
+          job_id: job.id, staff_id: staffId, staff_name: staffName, date: resolveDate(ref),
           log_type: 'installation', borehole_ref: ref, standpipe_ref: tremId || null,
           depth_from: dFrom || null, depth_to: dTo || null,
           description: `Imported from KeyLogBook AGS — installation pipe${tremId ? ` ${tremId}` : ''}: ${detail}.`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-          completed_by_name: importerName,
+          completed_by_name: completedByName,
           manager_review_status: 'approved', chargeable: false,
         })) counts.installations++;
       }
@@ -1306,24 +1307,24 @@ Deno.serve(async (req) => {
           const summary = parts.length > 0 ? parts.join(' · ') : 'Standpipe installation';
           const detail = wstgDesc ? `${summary} — ${wstgDesc}` : summary;
           if (addLog({
-            job_id: job.id, staff_id: staffId, date: logDate,
+            job_id: job.id, staff_id: staffId, staff_name: staffName, date: logDate,
             log_type: 'installation', borehole_ref: ref, standpipe_ref: wstgId || null,
             depth_from: dFrom, depth_to: dTo,
             description: `Imported from KeyLogBook AGS — standpipe${wstgId ? ` ${wstgId}` : ''}: ${detail}.`,
             source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-            completed_by_name: importerName,
+            completed_by_name: completedByName,
             manager_review_status: 'approved', chargeable: false,
           })) counts.installations++;
         }
 
         if (waterLevel != null) {
           if (addLog({
-            job_id: job.id, staff_id: staffId, date: readDate || logDate,
+            job_id: job.id, staff_id: staffId, staff_name: staffName, date: readDate || logDate,
             log_type: 'standpipe_reading', borehole_ref: ref, standpipe_ref: wstgId || null,
             standpipe_reading_m: waterLevel,
             description: `Imported from KeyLogBook AGS — groundwater monitoring reading: ${waterLevel}mBGL${wstgId ? ` on standpipe ${wstgId}` : ''}.`,
             source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
-            completed_by_name: importerName,
+            completed_by_name: completedByName,
             manager_review_status: 'approved', chargeable: false,
           })) counts.waterReadings++;
         }
