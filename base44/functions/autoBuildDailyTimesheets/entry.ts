@@ -105,6 +105,16 @@ Deno.serve(async (req) => {
           sources.add('rota');
         }
 
+        // Skip creating a summary when there is truly zero data — no
+        // fragments, no GPS arrival, no on-site minutes. These 0-minute
+        // rota-only drafts (confidence 0) just clutter the manager queue
+        // with useless entries. The daily summary email already nudges
+        // managers about staff with missing timesheets.
+        if (fragments.length === 0 && !assignment.arrived_on_site_at && !assignment.left_site_at) {
+          results.skipped++;
+          continue;
+        }
+
         // Calculate on-site duration from assignment timestamps
         let onSiteMinutes = 0;
         if (assignment.arrived_on_site_at && assignment.left_site_at) {
@@ -189,7 +199,12 @@ Deno.serve(async (req) => {
           break_minutes: breakMinutes,
           total_hours: Math.round((totalMinutes / 60) * 100) / 100,
           meterage: meterage || assignment.meterage || null,
-          source: 'keylogbook', // closest existing enum value for auto-built
+          // Source reflects the dominant data source that backed the auto-build,
+          // so the audit trail is accurate instead of always saying 'keylogbook'.
+          source: sources.has('gps') ? 'geotab_auto'
+            : sources.has('keylogbook') ? 'keylogbook'
+            : sources.has('delivery') ? 'geotab_auto'
+            : 'staff',
           status,
           approved_by_name: null,
           // New auto-build fields

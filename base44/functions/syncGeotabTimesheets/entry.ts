@@ -45,13 +45,16 @@ export default async function(req: Request): Promise<Response> {
     }
 
     const body = await req.json().catch(() => ({}));
-    // When called without an explicit date (e.g. by the nightly automation),
-    // default to yesterday — the automation runs at 1am so the full previous
-    // day's GPS logs are available for arrival/departure detection. Manual UI
-    // calls always pass an explicit date, so this default only affects automations.
+    // When called without an explicit date, use a time-aware default:
+    //   - Before 06:00 → process yesterday (the nightly 00:00 automation
+    //     catches the full previous day's GPS logs).
+    //   - After 06:00 → process today (the 30-minute daytime automation
+    //     builds entries in near-real-time for the current day).
+    // Manual UI calls always pass an explicit date, so this default only
+    // affects the two scheduled automations.
     const targetDate = body.date || (() => {
       const d = new Date();
-      d.setDate(d.getDate() - 1);
+      if (d.getHours() < 6) d.setDate(d.getDate() - 1);
       return d.toISOString().slice(0, 10);
     })();
     const GEOFENCE_RADIUS_M = Number(body.radius) || 200;

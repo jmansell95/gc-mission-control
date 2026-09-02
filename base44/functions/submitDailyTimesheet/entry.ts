@@ -51,6 +51,12 @@ Deno.serve(async (req) => {
     const onSiteTasks = drafts.filter(t => !t.is_break && (!t.task_type || t.task_type === 'on_site'));
     const travelTo = drafts.find(t => t.task_type === 'travel_to');
     const travelFrom = drafts.find(t => t.task_type === 'travel_from');
+    // Break entries — used to set break_minutes on the summary so the
+    // green-path auto-approval check (break_minutes >= 30) can pass.
+    // Without this, every staff-submitted summary has break_minutes: null
+    // and green-path auto-approval never fires.
+    const breakEntries = drafts.filter(t => t.is_break);
+    const breakMinutesTotal = breakEntries.reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
 
     if (onSiteTasks.length === 0 && !travelTo && !travelFrom) {
       return Response.json({ success: true, summaries: [], message: 'No tasks to submit' });
@@ -122,6 +128,7 @@ Deno.serve(async (req) => {
         task_duration_minutes: totalMins,
         total_hours: Math.round((totalMins / 60) * 100) / 100,
         on_site_minutes: onSiteMins,
+        break_minutes: breakMinutesTotal || 0,
         status: 'submitted',
         is_summary: true,
         summary_entry_ids: entryIds.join(','),
