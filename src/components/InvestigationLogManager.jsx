@@ -211,7 +211,7 @@ function DayGroup({ date, logs, isDrillingJob }) {
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className="text-sm font-bold text-slate-700">{format(d, 'EEEE, dd MMM yyyy')}</span>
           <span className="text-xs text-slate-400">{dayLogs.length} {dayLogs.length === 1 ? 'Entry' : 'Entries'}</span>
-          {(() => { const names = [...new Set(dayLogs.map(l => l.staff_name || l.completed_by_name).filter(Boolean))]; return names.length > 0 ? <span className="text-xs text-slate-400 inline-flex items-center gap-1"><User className="w-3 h-3" /> {names.join(', ')}</span> : null; })()}
+          {(() => { const names = [...new Set(dayLogs.map(l => l.staff_name).filter(Boolean))]; return names.length > 0 ? <span className="text-xs text-slate-400 inline-flex items-center gap-1"><User className="w-3 h-3" /> {names.join(', ')}</span> : null; })()}
         </div>
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
           {isDrillingJob && dayDepth > 0 && <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium">{dayDepth.toFixed(1)}m</span>}

@@ -370,7 +370,7 @@ function getBoreholeSummary(logs) {
   // field shows who recorded the data — the actual driller name when
   // available, falling back to the import source label.
   const drillerNames = [...new Set(
-    logs.map(l => l.staff_name || l.completed_by_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
+    logs.map(l => l.staff_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
   )];
   const primaryDriller = drillerNames[0] || null;
   const allDrillers = drillerNames.length > 0 ? drillerNames.join(', ') : null;

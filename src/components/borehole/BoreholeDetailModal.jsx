@@ -206,9 +206,11 @@ function getBoreholeSummary(logs) {
     ? (endDate !== startDate ? `${safeFormatDate(startDate, 'dd MMM yyyy')} → ${safeFormatDate(endDate, 'dd MMM yyyy')}` : safeFormatDate(startDate, 'dd MMM yyyy'))
     : '';
 
-  // Driller attribution — distinct names across all logs for this borehole
+  // Driller attribution — distinct staff names across all logs for this borehole.
+  // Only staff_name (resolved from the rota) is used — completed_by_name now
+  // holds the Project Engineer, not the driller, so it must not be included.
   const drillerNames = [...new Set(
-    logs.map(l => l.staff_name || l.completed_by_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
+    logs.map(l => l.staff_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
   )];
 
   return {

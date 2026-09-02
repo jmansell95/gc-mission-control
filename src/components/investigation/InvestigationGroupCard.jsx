@@ -125,7 +125,7 @@ export default function InvestigationGroupCard({
               key={log.id}
               log={log}
               jobName={jobMap[log.job_id]?.name || '—'}
-              staffName={staffMap[log.staff_id]?.name || log.staff_name || '—'}
+              staffName={staffMap[log.staff_id]?.name || log.staff_name || (log.source === 'ags_import' ? 'No name' : '—')}
               isSelected={log.id === selectedLogId}
               onClick={() => bulkMode ? toggleBulkSelect(log.id) : onSelectLog(log.id)}
               bulkMode={bulkMode}

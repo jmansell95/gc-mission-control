@@ -426,7 +426,7 @@ function ActivitySection({ approvedLogs, queriedLogs, pendingLogs }) {
               </div>
               <p className="text-xs text-slate-600 mt-0.5">{l.description || 'No description'}</p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                {l.date || '—'} · {l.staff_name || l.completed_by_name || '—'}
+                {l.date || '—'} · {l.staff_name || '—'}
                 {l.depth_from != null && l.depth_to != null && ` · ${l.depth_from}m–${l.depth_to}m`}
                 {l.spt_n_value != null && ` · SPT N=${l.spt_n_value}`}
                 {l.coring_rqd != null && ` · RQD ${l.coring_rqd}%`}

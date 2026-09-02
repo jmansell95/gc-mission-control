@@ -107,7 +107,7 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               {typeConfig && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeConfig.badge}`}>{typeConfig.label}</span>}
               {log.source === 'ags_import' && (
                 <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5">
-                  <Tablet className="w-3 h-3" /> KeyLogBook
+                  <Tablet className="w-3 h-3" /> Technical record (auto-approved)
                 </span>
               )}
               {log.borehole_ref && <span className="text-sm font-mono font-bold text-blue-700">{log.borehole_ref}</span>}
@@ -118,11 +118,20 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               <span>{log.date ? format(new Date(log.date), 'EEEE, dd MMM yyyy') : '—'}</span>
               {log.created_at && <><span>·</span><span>{format(new Date(log.created_at), 'HH:mm')}</span></>}
             </div>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500 flex-wrap">
               <User className="w-3.5 h-3.5" />
               {log.completed_by_type && log.completed_by_type !== 'internal_staff' ? (
                 <>{log.completed_by_name || 'Unknown'} <span className="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded-full font-medium">{log.completed_by_type === 'client' ? 'Client' : 'Contractor'}</span></>
-              ) : (log.staff_name || 'Staff member')}
+              ) : log.staff_name ? (
+                <span className="font-medium text-slate-700">{log.staff_name}</span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full font-medium">
+                  <AlertTriangle className="w-3 h-3" /> No name entered
+                </span>
+              )}
+              {log.completed_by_name && log.completed_by_name.startsWith('Project Engineer:') && (
+                <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full font-medium">{log.completed_by_name}</span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">

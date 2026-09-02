@@ -487,7 +487,7 @@ export async function generateJobPackPDF({ job, clientName, contractorName, data
       clean(l.log_type) || 'activity',
       l.borehole_ref || l.sample_id || '—',
       l.date || '—',
-      l.source === 'ags_import' ? 'AGS Import' : (l.staff_name || l.completed_by_name || '—'),
+      l.source === 'ags_import' ? 'AGS Import' : (l.staff_name || '—'),
       [
         l.depth_from != null && l.depth_to != null ? `${l.depth_from}m–${l.depth_to}m` : '',
         l.spt_n_value != null ? `SPT N=${l.spt_n_value}` : '',

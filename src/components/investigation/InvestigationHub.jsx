@@ -64,7 +64,7 @@ export default function InvestigationHub({ onNavigate }) {
   }, [logs, jobFilter]);
   const drillerOptions = useMemo(() => {
     const source = jobFilter !== 'all' ? logs.filter(l => l.job_id === jobFilter) : logs;
-    return [...new Set(source.map(l => l.staff_name || l.completed_by_name).filter(Boolean))].sort();
+    return [...new Set(source.map(l => l.staff_name).filter(Boolean))].sort();
   }, [logs, jobFilter]);
 
   // Apply filters
@@ -74,7 +74,7 @@ export default function InvestigationHub({ onNavigate }) {
       if (jobFilter !== 'all' && l.job_id !== jobFilter) return false;
       if (typeFilter !== 'all' && l.log_type !== typeFilter) return false;
       if (boreholeFilter !== 'all' && l.borehole_ref !== boreholeFilter) return false;
-      if (drillerFilter !== 'all' && (l.staff_name || l.completed_by_name) !== drillerFilter) return false;
+      if (drillerFilter !== 'all' && l.staff_name !== drillerFilter) return false;
       if (dateFrom && l.date && l.date < dateFrom) return false;
       if (dateTo && l.date && l.date > dateTo) return false;
       if (search) {

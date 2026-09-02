@@ -146,9 +146,13 @@ export default function KeyLogActivityCard({
           <p className="text-[11px] text-slate-400 italic mt-1 line-clamp-1">Original: "{log.raw_remarks}"</p>
         )}
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          {(log.staff_name || log.completed_by_name) && (
+          {log.staff_name ? (
             <span className="text-[10px] text-slate-400 inline-flex items-center gap-1">
-              <User className="w-2.5 h-2.5" /> {log.staff_name || log.completed_by_name}
+              <User className="w-2.5 h-2.5" /> {log.staff_name}
+            </span>
+          ) : (
+            <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-1">
+              <AlertTriangle className="w-2.5 h-2.5" /> No name entered
             </span>
           )}
           {log.date && (

@@ -66,8 +66,8 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
   const dayPending = dayLogs.filter(l => (l.manager_review_status || 'pending') !== 'approved').length;
   const dayTotalMins = dayLogs.reduce((s, l) => s + (l.duration_minutes || 0), 0);
   const d = new Date(date + 'T00:00:00');
-  const namedLog = dayLogs.find(l => l.staff_name || l.completed_by_name);
-  const drillerName = namedLog?.staff_name || namedLog?.completed_by_name || '';
+  const namedLog = dayLogs.find(l => l.staff_name);
+  const drillerName = namedLog?.staff_name || '';
   const allApproved = dayPending === 0;
   const selectedLog = dayLogs.find(l => l.id === selectedActivityId);
 
