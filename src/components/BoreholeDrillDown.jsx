@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Droplets, TestTube, Calculator, Layers, Mountain,
   ArrowDownToLine, ChevronRight, Tablet, Search, Boxes, Package, Gauge,
-  Activity, TrendingDown, User, ExternalLink, CalendarDays
+  Activity, TrendingDown, User, ExternalLink, CalendarDays, Clock
 } from 'lucide-react';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import { strataColors, strataConfig } from '@/components/investigation/shared';
@@ -60,6 +60,8 @@ export default function BoreholeDrillDown({ job, jobType }) {
     let totalInstallations = 0;
     let avgRecovery = null;
     const allRecoveries = [];
+    let totalDrillingMinutes = 0;
+    const allDrillingDates = new Set();
     boreholes.forEach(([, refLogs]) => {
       const s = getBoreholeSummary(refLogs);
       totalSamples += s.sampleCount;
@@ -67,9 +69,13 @@ export default function BoreholeDrillDown({ job, jobType }) {
       totalCores += s.coreCount;
       totalInstallations += s.installCount;
       if (s.avgRecovery != null) allRecoveries.push(s.avgRecovery);
+      totalDrillingMinutes += s.drillingMinutes || 0;
+      (s.drillingDates || []).forEach(d => allDrillingDates.add(d));
     });
     if (allRecoveries.length) avgRecovery = Math.round(allRecoveries.reduce((a, b) => a + b, 0) / allRecoveries.length);
-    return { totalMeters, totalSamples, totalSPTs, totalCores, totalInstallations, avgRecovery };
+    const totalDrillingHours = Math.round((totalDrillingMinutes / 60) * 10) / 10;
+    const totalDrillingDays = allDrillingDates.size;
+    return { totalMeters, totalSamples, totalSPTs, totalCores, totalInstallations, avgRecovery, totalDrillingHours, totalDrillingDays };
   }, [boreholes, logs]);
 
   const activeLogs = selectedRef ? boreholes.find(([ref]) => ref === selectedRef)?.[1] || [] : [];
@@ -161,6 +167,18 @@ export default function BoreholeDrillDown({ job, jobType }) {
               <SummaryStat icon={Activity} value={`${totals.avgRecovery}%`} label="Avg Recovery" color="text-fuchsia-700" />
             </>
           )}
+          {totals.totalDrillingHours > 0 && (
+            <>
+              <div className="h-9 w-px bg-slate-200 hidden sm:block" />
+              <SummaryStat icon={Clock} value={`${totals.totalDrillingHours}h`} label="Drilling Time" color="text-blue-700" />
+            </>
+          )}
+          {totals.totalDrillingDays > 0 && (
+            <>
+              <div className="h-9 w-px bg-slate-200 hidden md:block" />
+              <SummaryStat icon={CalendarDays} value={totals.totalDrillingDays} label="Drill Days" color="text-cyan-700" />
+            </>
+          )}
         </div>
       </div>
 
@@ -218,6 +236,13 @@ export default function BoreholeDrillDown({ job, jobType }) {
                       </span>
                     )}
                     <span className="text-slate-400">{s.totalLogs} {s.totalLogs === 1 ? 'record' : 'records'}</span>
+                    {s.drillingHours > 0 && (
+                      <span className="inline-flex items-center gap-0.5 font-medium text-blue-600">
+                        <Clock className="w-3 h-3 text-blue-500" />
+                        {s.drillingHours}h
+                        {s.drillingDays > 1 && <span className="text-slate-400">· {s.drillingDays}d</span>}
+                      </span>
+                    )}
                   </div>
 
                   {/* Mini strata visual bar */}
@@ -375,6 +400,17 @@ function getBoreholeSummary(logs) {
   const primaryDriller = drillerNames[0] || null;
   const allDrillers = drillerNames.length > 0 ? drillerNames.join(', ') : null;
 
+  // Drilling duration — sum of duration_minutes from driller activity logs
+  // (source keylogbook_remarks with PTIM/DLOG times). Each activity's
+  // duration_minutes is calculated from PTIM_DTIM start/end timestamps.
+  const drillerActivityLogs = logs.filter(l =>
+    l.source === 'keylogbook_remarks' && l.duration_minutes != null && l.duration_minutes > 0
+  );
+  const drillingMinutes = drillerActivityLogs.reduce((sum, l) => sum + l.duration_minutes, 0);
+  const drillingDates = [...new Set(drillerActivityLogs.map(l => l.date).filter(Boolean))];
+  const drillingHours = Math.round((drillingMinutes / 60) * 10) / 10;
+  const drillingDays = drillingDates.length;
+
   // Date range: earliest → latest log date for this borehole
   const dates = logs.map(l => l.date).filter(Boolean).sort();
   const firstDate = dates[0] || null;
@@ -400,5 +436,9 @@ function getBoreholeSummary(logs) {
     firstDate,
     lastDate,
     totalLogs: logs.length,
+    drillingMinutes,
+    drillingDates,
+    drillingHours,
+    drillingDays,
   };
 }
