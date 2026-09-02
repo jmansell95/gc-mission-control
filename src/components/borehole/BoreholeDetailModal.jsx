@@ -4,7 +4,7 @@ import {
   X, Mountain, Layers, TestTube, Calculator, Package, Droplets,
   Ruler, ArrowDownToLine, Activity, TrendingDown, Gauge,
   AlertTriangle, Ban, Waves, ClipboardList, Boxes,
-  Tablet
+  Tablet, ExternalLink, User
 } from 'lucide-react';
 import {
   strataConfig, logTypeConfig, reviewStatusConfig,
@@ -13,6 +13,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
+import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Mountain },
@@ -25,7 +26,7 @@ const TABS = [
   { key: 'other', label: 'Other Activity', icon: ClipboardList },
 ];
 
-export default function BoreholeDetailModal({ boreholeRef, logs, jobType, onClose }) {
+export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId, onClose }) {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Strata is not required from AGS import for drilling jobs:
@@ -85,6 +86,11 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, onClos
               {summary.dateRange}
               {summary.progressLog?.depth_to != null && ` · Final depth ${summary.progressLog.depth_to}m`}
             </p>
+            {summary.primaryDriller && (
+              <p className="text-xs text-white/60 mt-0.5 inline-flex items-center gap-1">
+                <User className="w-3 h-3" /> Logged by {summary.primaryDriller}{summary.drillerCount > 1 ? ` +${summary.drillerCount - 1} other${summary.drillerCount > 2 ? 's' : ''}` : ''}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -145,7 +151,17 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, onClos
           <span>
             {logs.filter(l => l.source === 'ags_import').length} of {logs.length} entries from KeyLogBook{summary.progressLog?.completed_by_name ? ` · imported by ${summary.progressLog.completed_by_name}` : ''}
           </span>
-          <span>{logs.length} total records</span>
+          <div className="flex items-center gap-3">
+            {jobId && (
+              <button
+                onClick={() => { onClose(); navigateToInvestigationHub(jobId, null, boreholeRef); }}
+                className="inline-flex items-center gap-1 text-[#2E5A1A] hover:text-[#1c4a12] font-medium transition"
+              >
+                <ExternalLink className="w-3 h-3" /> View in Investigation Hub
+              </button>
+            )}
+            <span>{logs.length} total records</span>
+          </div>
         </div>
       </div>
     </div>
@@ -190,6 +206,11 @@ function getBoreholeSummary(logs) {
     ? (endDate !== startDate ? `${safeFormatDate(startDate, 'dd MMM yyyy')} → ${safeFormatDate(endDate, 'dd MMM yyyy')}` : safeFormatDate(startDate, 'dd MMM yyyy'))
     : '';
 
+  // Driller attribution — distinct names across all logs for this borehole
+  const drillerNames = [...new Set(
+    logs.map(l => l.staff_name || l.completed_by_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
+  )];
+
   return {
     maxDepth: allDepths.length ? Math.max(...allDepths) : null,
     progressLog: progressLogs[0],
@@ -202,6 +223,8 @@ function getBoreholeSummary(logs) {
     waterReadingCount: waterReadingLogs.length,
     otherCount: otherLogs.length,
     dateRange,
+    primaryDriller: drillerNames[0] || null,
+    drillerCount: drillerNames.length,
   };
 }
 

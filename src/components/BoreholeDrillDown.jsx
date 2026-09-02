@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Droplets, TestTube, Calculator, Layers, Mountain,
   ArrowDownToLine, ChevronRight, Tablet, Search, Boxes, Package, Gauge,
-  Activity, TrendingDown
+  Activity, TrendingDown, User, ExternalLink, CalendarDays
 } from 'lucide-react';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import { strataColors, strataConfig } from '@/components/investigation/shared';
 import { getTotalMetres } from '@/utils/geotechBilling';
+import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import BoreholeDetailModal from '@/components/borehole/BoreholeDetailModal';
 
 export default function BoreholeDrillDown({ job, jobType }) {
@@ -172,37 +173,51 @@ export default function BoreholeDrillDown({ job, jobType }) {
             {filtered.map(([ref, refLogs]) => {
               const s = getBoreholeSummary(refLogs);
               return (
-                <button
+                <div
                   key={ref}
-                  onClick={() => setSelectedRef(ref)}
                   className="group text-left p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:shadow-md transition-all duration-200"
                 >
                   {/* Header row */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition flex-shrink-0">
-                      <Mountain className="w-4 h-4 text-emerald-700" />
+                  <button onClick={() => setSelectedRef(ref)} className="w-full text-left">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition flex-shrink-0">
+                        <Mountain className="w-4 h-4 text-emerald-700" />
+                      </div>
+                      <span className="font-mono font-bold text-slate-900 text-base truncate">{ref}</span>
+                      <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
                     </div>
-                    <span className="font-mono font-bold text-slate-900 text-base truncate">{ref}</span>
-                    <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
-                  </div>
+                  </button>
 
-                  {/* Key metrics row */}
-                  <div className="flex items-center gap-3 mb-2 text-xs">
+                  {/* Driller attribution — who logged/edited this borehole */}
+                  {s.primaryDriller && (
+                    <div className="flex items-center gap-1.5 mb-2 text-xs">
+                      <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <User className="w-3 h-3 text-emerald-700" />
+                      </div>
+                      <span className="font-semibold text-slate-700 truncate">{s.primaryDriller}</span>
+                      {s.drillerCount > 1 && (
+                        <span className="text-slate-400 text-[10px]">+{s.drillerCount - 1} other{s.drillerCount > 2 ? 's' : ''}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Brief summary line — depth, date range, log count */}
+                  <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-500 flex-wrap">
                     {s.maxDepth != null && (
-                      <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
-                        <ArrowDownToLine className="w-3 h-3 text-blue-600" />
+                      <span className="inline-flex items-center gap-0.5 font-medium text-slate-600">
+                        <ArrowDownToLine className="w-3 h-3 text-blue-500" />
                         {s.maxDepth}m
                       </span>
                     )}
-                    {s.groundwaterDepth != null && (
-                      <span className="inline-flex items-center gap-1 font-semibold text-cyan-700">
-                        <Droplets className="w-3 h-3" />
-                        {s.groundwaterDepth}m
+                    {s.firstDate && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <CalendarDays className="w-3 h-3 text-slate-400" />
+                        {s.lastDate && s.firstDate !== s.lastDate
+                          ? `${s.firstDate.slice(5)}–${s.lastDate.slice(5)}`
+                          : s.firstDate.slice(5)}
                       </span>
                     )}
-                    {s.imported_by && (
-                      <span className="text-slate-400 text-[10px] truncate inline-flex items-center gap-0.5"><Tablet className="w-2.5 h-2.5 flex-shrink-0" />{s.imported_by}</span>
-                    )}
+                    <span className="text-slate-400">{s.totalLogs} {s.totalLogs === 1 ? 'record' : 'records'}</span>
                   </div>
 
                   {/* Mini strata visual bar */}
@@ -227,7 +242,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
                   )}
 
                   {/* Data type chips */}
-                  <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                  <div className="flex items-center gap-1.5 flex-wrap text-[11px] mb-2">
                     {!hideStrata && s.strataCount > 0 && (
                       <Chip icon={Layers} count={s.strataCount} color="amber" />
                     )}
@@ -247,7 +262,15 @@ export default function BoreholeDrillDown({ job, jobType }) {
                       <Chip icon={Gauge} count={s.waterReadingCount} color="teal" />
                     )}
                   </div>
-                </button>
+
+                  {/* Link to Investigation Hub — deep-links pre-filtered to this job + borehole */}
+                  <button
+                    onClick={() => navigateToInvestigationHub(job.id, null, ref)}
+                    className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-[#2E5A1A] font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
+                  >
+                    <ExternalLink className="w-3 h-3" /> View in Investigation Hub
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -260,6 +283,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
           boreholeRef={selectedRef}
           logs={activeLogs}
           jobType={jobType}
+          jobId={job.id}
           onClose={() => setSelectedRef(null)}
         />
       )}
@@ -341,6 +365,21 @@ function getBoreholeSummary(logs) {
   const recoveries = coreLogs.map(l => l.coring_recovery).filter(r => r != null);
   const rqds = coreLogs.map(l => l.coring_rqd).filter(r => r != null);
 
+  // Driller attribution: collect all distinct names from staff_name and
+  // completed_by_name across every log for this borehole. The "logged by"
+  // field shows who recorded the data — the actual driller name when
+  // available, falling back to the import source label.
+  const drillerNames = [...new Set(
+    logs.map(l => l.staff_name || l.completed_by_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
+  )];
+  const primaryDriller = drillerNames[0] || null;
+  const allDrillers = drillerNames.length > 0 ? drillerNames.join(', ') : null;
+
+  // Date range: earliest → latest log date for this borehole
+  const dates = logs.map(l => l.date).filter(Boolean).sort();
+  const firstDate = dates[0] || null;
+  const lastDate = dates[dates.length - 1] || null;
+
   return {
     maxDepth: allDepths.length ? Math.max(...allDepths) : null,
     groundwaterDepth: progressLogs[0]?.groundwater_strike_depth,
@@ -355,5 +394,11 @@ function getBoreholeSummary(logs) {
     waterReadingCount: waterReadingLogs.length,
     avgRecovery: recoveries.length ? Math.round(recoveries.reduce((a, b) => a + b, 0) / recoveries.length) : null,
     avgRqd: rqds.length ? Math.round(rqds.reduce((a, b) => a + b, 0) / rqds.length) : null,
+    primaryDriller,
+    allDrillers,
+    drillerCount: drillerNames.length,
+    firstDate,
+    lastDate,
+    totalLogs: logs.length,
   };
 }

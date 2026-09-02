@@ -29,20 +29,25 @@ export default function InvestigationHub({ onNavigate }) {
   const [reviewFilter, setReviewFilter] = useState('all');
   const [jobFilter, setJobFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [boreholeFilter, setBoreholeFilter] = useState('all');
+  const [drillerFilter, setDrillerFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [groupBy, setGroupBy] = useState('borehole');
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState(new Set());
   const queryClient = useQueryClient();
 
   // Bidirectional deep-link: when a manager clicks "View in Investigation Hub"
-  // from a job's Site Activity tab, the target job + log id are stashed in
-  // sessionStorage. On mount, read + clear it, pre-filter to that job, and
-  // open the log drawer so they land exactly on the log they came from.
+  // from a job's Site Activity tab or Borehole Data tab, the target job + log
+  // id + borehole ref are stashed in sessionStorage. On mount, read + clear it,
+  // pre-filter to that job/borehole, and open the log drawer.
   useEffect(() => {
     const link = getInvestigationHubDeepLink();
     if (!link) return;
     if (link.jobId) setJobFilter(link.jobId);
     if (link.logId) setSelectedLogId(link.logId);
+    if (link.boreholeRef) { setBoreholeFilter(link.boreholeRef); setGroupBy('borehole'); }
   }, []);
 
   const { data: logs = [], isLoading } = useScopedEntity('InvestigationLog', { queryKey: ['investigation-hub-logs'], sort: '-created_date', limit: 300 });
@@ -52,12 +57,26 @@ export default function InvestigationHub({ onNavigate }) {
   const jobMap = useMemo(() => { const m = {}; jobs.forEach(j => { m[j.id] = j; }); return m; }, [jobs]);
   const staffMap = useMemo(() => { const m = {}; staff.forEach(s => { m[s.id] = s; }); return m; }, [staff]);
 
+  // Distinct borehole refs + drillers for the filter dropdowns
+  const boreholeOptions = useMemo(() => {
+    const source = jobFilter !== 'all' ? logs.filter(l => l.job_id === jobFilter) : logs;
+    return [...new Set(source.map(l => l.borehole_ref).filter(Boolean))].sort();
+  }, [logs, jobFilter]);
+  const drillerOptions = useMemo(() => {
+    const source = jobFilter !== 'all' ? logs.filter(l => l.job_id === jobFilter) : logs;
+    return [...new Set(source.map(l => l.staff_name || l.completed_by_name).filter(Boolean))].sort();
+  }, [logs, jobFilter]);
+
   // Apply filters
   const filtered = useMemo(() => {
     return logs.filter(l => {
       if (reviewFilter !== 'all' && (l.manager_review_status || 'pending') !== reviewFilter) return false;
       if (jobFilter !== 'all' && l.job_id !== jobFilter) return false;
       if (typeFilter !== 'all' && l.log_type !== typeFilter) return false;
+      if (boreholeFilter !== 'all' && l.borehole_ref !== boreholeFilter) return false;
+      if (drillerFilter !== 'all' && (l.staff_name || l.completed_by_name) !== drillerFilter) return false;
+      if (dateFrom && l.date && l.date < dateFrom) return false;
+      if (dateTo && l.date && l.date > dateTo) return false;
       if (search) {
         const q = search.toLowerCase();
         const haystack = `${l.borehole_ref || ''} ${l.sample_id || ''} ${l.description || ''} ${l.strata_description_detail || ''} ${l.staff_name || ''} ${l.completed_by_name || ''}`.toLowerCase();
@@ -65,7 +84,7 @@ export default function InvestigationHub({ onNavigate }) {
       }
       return true;
     });
-  }, [logs, reviewFilter, jobFilter, typeFilter, search]);
+  }, [logs, reviewFilter, jobFilter, typeFilter, boreholeFilter, drillerFilter, dateFrom, dateTo, search]);
 
   // Group the filtered logs by the selected dimension
   const groups = useMemo(() => {
@@ -137,6 +156,9 @@ export default function InvestigationHub({ onNavigate }) {
         reviewFilter={reviewFilter} setReviewFilter={setReviewFilter}
         jobFilter={jobFilter} setJobFilter={setJobFilter} jobs={jobs}
         typeFilter={typeFilter} setTypeFilter={setTypeFilter} logTypes={logTypeConfig}
+        boreholeFilter={boreholeFilter} setBoreholeFilter={setBoreholeFilter} boreholeOptions={boreholeOptions}
+        drillerFilter={drillerFilter} setDrillerFilter={setDrillerFilter} drillerOptions={drillerOptions}
+        dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
       />
 
       {/* Quick upload + live feed */}

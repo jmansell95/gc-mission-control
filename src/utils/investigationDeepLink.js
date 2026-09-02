@@ -66,8 +66,8 @@ export function navigateToJobSiteActivity(job, logId) {
   }));
 }
 
-export function navigateToInvestigationHub(jobId, logId) {
-  setInvestigationHubDeepLink({ jobId, logId });
+export function navigateToInvestigationHub(jobId, logId, boreholeRef) {
+  setInvestigationHubDeepLink({ jobId, logId, boreholeRef });
   window.dispatchEvent(new CustomEvent('app-navigate', {
     detail: { section: 'investigation' }
   }));

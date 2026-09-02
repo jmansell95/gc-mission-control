@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   FlaskConical, AlertTriangle, XCircle, Search, Layers, User, Briefcase, CalendarDays,
-  CheckCircle2, FileCheck2, Download,
+  CheckCircle2, FileCheck2, Download, Mountain, Filter, X,
 } from 'lucide-react';
 
 const REVIEW_FILTERS = [
@@ -30,6 +30,9 @@ export default function InvestigationHeader({
   reviewFilter, setReviewFilter,
   jobFilter, setJobFilter, jobs,
   typeFilter, setTypeFilter, logTypes,
+  boreholeFilter, setBoreholeFilter, boreholeOptions,
+  drillerFilter, setDrillerFilter, drillerOptions,
+  dateFrom, setDateFrom, dateTo, setDateTo,
 }) {
   const approvedCount = totalLogs - pendingCount - queriedCount;
   const approvalRate = totalLogs > 0 ? Math.round((approvedCount / totalLogs) * 100) : 0;
@@ -142,6 +145,54 @@ export default function InvestigationHeader({
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Advanced filters row — borehole, driller, date range */}
+        <div className="mt-2.5 flex flex-col sm:flex-row gap-2">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wide sm:self-center">
+            <Filter className="w-3.5 h-3.5" />
+          </div>
+          <select
+            value={boreholeFilter}
+            onChange={e => setBoreholeFilter(e.target.value)}
+            className="text-xs px-2 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 flex-1 sm:flex-none"
+          >
+            <option value="all">All Boreholes</option>
+            {boreholeOptions.map(bh => <option key={bh} value={bh}>{bh}</option>)}
+          </select>
+          <select
+            value={drillerFilter}
+            onChange={e => setDrillerFilter(e.target.value)}
+            className="text-xs px-2 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 flex-1 sm:flex-none"
+          >
+            <option value="all">All Drillers</option>
+            {drillerOptions.map(dr => <option key={dr} value={dr}>{dr}</option>)}
+          </select>
+          <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="text-xs px-2 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 w-full sm:w-auto"
+              placeholder="From"
+            />
+            <span className="text-slate-300 text-xs">→</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              className="text-xs px-2 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 w-full sm:w-auto"
+              placeholder="To"
+            />
+          </div>
+          {(boreholeFilter !== 'all' || drillerFilter !== 'all' || dateFrom || dateTo) && (
+            <button
+              onClick={() => { setBoreholeFilter('all'); setDrillerFilter('all'); setDateFrom(''); setDateTo(''); }}
+              className="text-xs px-2 py-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 font-medium inline-flex items-center gap-1 transition"
+            >
+              <X className="w-3 h-3" /> Clear
+            </button>
+          )}
         </div>
       </div>
     </div>
