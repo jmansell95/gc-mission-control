@@ -32,11 +32,11 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ skipped: true, reason: 'user_id not set yet' });
     }
 
-    // Avoid duplicate sends: check invite_sent flag
-    if (staff.invite_sent === true) {
-      // Still send — this is the welcome, not the invite. But guard against
-      // repeated triggers by checking old_data.user_id (only fire on the
-      // transition from empty -> set, which the automation conditions enforce).
+    // Only fire on the first link: skip if user_id was already set before
+    // this update (prevents duplicate sends on unrelated Staff updates).
+    const oldUserId = body?.old_data?.user_id;
+    if (oldUserId) {
+      return Response.json({ skipped: true, reason: 'user_id was already set — not a first link' });
     }
 
     // Load the staff_invitation email template

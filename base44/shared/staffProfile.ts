@@ -84,6 +84,19 @@ export async function buildMyProfile(base44, user) {
 
   const s = staff[0];
 
+  // Auto-link: if this Staff record was matched by email but has no user_id
+  // yet (e.g. an invited staff member just registered and logged in), link
+  // their platform user_id now. This triggers the "Welcome Email on
+  // Registration" entity automation so the branded welcome email is sent.
+  if (!s.user_id && user.id) {
+    try {
+      await base44.asServiceRole.entities.Staff.update(s.id, { user_id: user.id });
+      s.user_id = user.id;
+    } catch (_) {
+      // best-effort — profile still resolves without the link
+    }
+  }
+
   // Team lookup
   let team = null;
   if (s.team_id) {
