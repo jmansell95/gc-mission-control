@@ -230,27 +230,6 @@ function mapSampleEntityType(agsType: string): string {
   return 'disturbed';
 }
 
-// KeyLogBook sometimes stores the driller's shift diary ("Set up rig",
-// "Lunch", "Travelled home", "Left digs and travelled to site") inside the
-// TREM group as rows that carry no real installation attributes (no type,
-// material, diameter or depth). Detect those so they can be routed to the
-// Site Logs (source keylogbook_remarks) instead of becoming fake installation
-// records. Only matched when the row has NO installation attributes, so a
-// real pipe with a material/diameter is never mistaken for a diary entry.
-const DRILLER_ACTIVITY_KEYWORDS = [
-  'set up rig', 'set up', 'rig up', 'rig down', 'breakdown', 'break down',
-  'lunch', 'break', 'standby', 'stand by', 'stand down',
-  'travel', 'travelled', 'traveled', 'mobilise', 'mobilize', 'demobilise', 'demobilize',
-  'briefing', 'offload', 'offloaded', 'back to yard', 'left digs', 'arrived', 'depart',
-  'finished', 'waiting', 'delay', 'abandon', 'complete', 'ended',
-  'start of shift', 'end of shift', 'service rig', 'tripping', 'reinstat',
-];
-function isDrillerActivity(text: string): boolean {
-  if (!text) return false;
-  const t = text.toLowerCase();
-  return DRILLER_ACTIVITY_KEYWORDS.some(k => t.includes(k));
-}
-
 // ============================================================
 // Driller remarks extraction from AGS files
 // ============================================================
@@ -312,6 +291,20 @@ function splitDateTime(v: string): { date: string; time: string } {
   const d = normaliseDate(s);
   if (d) return { date: d, time: '' };
   return { date: '', time: '' };
+}
+
+// Parse a duration string into minutes. Handles the HH:MM:SS format
+// KeyLogBook uses for TREM_DURN (e.g. "01:00:00" = 60m, "00:20:00" = 20m,
+// "04:10:00" = 250m) and the simpler HH:MM format. Returns null for plain
+// numeric values so the existing hours-vs-minutes logic handles those.
+function parseDurationToMinutes(v: string | undefined | null): number | null {
+  if (v == null || v === '') return null;
+  const s = String(v).trim();
+  const m = s.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  const m2 = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (m2) return parseInt(m2[1], 10) * 60 + parseInt(m2[2], 10);
+  return null;
 }
 
 // Collect time-stamped remark text from every *_REM / *_NOTE field and
@@ -432,7 +425,11 @@ interface StructuredActivity {
 
 function parseStructuredTimeGroups(groups: Record<string, GroupData>): StructuredActivity[] {
   const activities: StructuredActivity[] = [];
-  const TIME_GROUP_NAMES = ['DLOG', 'PTIM', 'DREM', 'SHFT', 'HORN'];
+  // TREM carries the driller's daily diary with TREM_DTIM (start datetime),
+  // TREM_ETIM (end datetime), TREM_DURN (HH:MM:SS duration) and TREM_REM
+  // (description). Rows with installation attributes (type/material/diameter/
+  // depth) are skipped below and handled by the TREM section as installations.
+  const TIME_GROUP_NAMES = ['DLOG', 'PTIM', 'DREM', 'SHFT', 'HORN', 'TREM'];
 
   for (const groupName of TIME_GROUP_NAMES) {
     const g = groups[groupName];
@@ -449,7 +446,7 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
       // are the shift start/end datetimes for SHFT rows.
       const dtim = pick(r, 'DTIM', 'PTIM_DTIM', 'DLOG_DTIM', 'DREM_DTIM');
       const starDt = pick(r, 'STAR', 'SHFT_STAR', 'DLOG_STAR', 'START_DATETIME');
-      const enddDt = pick(r, 'ENDD', 'SHFT_ENDD', 'DLOG_ENDD', 'END_DATETIME');
+      const enddDt = pick(r, 'ENDD', 'ETIM', 'SHFT_ENDD', 'DLOG_ENDD', 'END_DATETIME');
 
       let date = '';
       let startTime = '';
@@ -475,7 +472,8 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
         }
       }
 
-      const durationHours = num(pick(r, 'DURATION', 'DURATION_HOURS', 'HOURS', 'HORN_HOURS', 'DLOG_HOURS', 'PTIM_HOURS', 'DUR', 'MINS', 'MINUTES'));
+      const durationRaw = pick(r, 'DURATION', 'DURATION_HOURS', 'HOURS', 'HORN_HOURS', 'DLOG_HOURS', 'PTIM_HOURS', 'DURN', 'DUR', 'MINS', 'MINUTES');
+      const durationHours = num(durationRaw);
       const description = pick(r, 'DESC', 'DESCRIPTION', 'REM', 'REMARK', 'NOTE', 'NOTES', 'ACTIVITY', 'TASK', 'COMMENT', 'DLOG_DESC', 'PTIM_DESC', 'DREM_DESC', 'SHFT_DESC');
 
       // Skip rows with no time information at all
@@ -488,9 +486,26 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
       // the actual activities with proper times).
       if ((groupName === 'HORN' || groupName === 'SHFT') && !description) continue;
 
+      // Skip TREM rows that have installation attributes (type/material/
+      // diameter/real depth range) — those are real installation records
+      // handled by the TREM section handler below. Only harvest diary rows
+      // (no installation attrs) as structured activities here.
+      if (groupName === 'TREM') {
+        const tType = pick(r, 'TREM_TYPE', 'TYPE');
+        const tMat = pick(r, 'TREM_MAT', 'TREM_MATERIAL', 'MAT', 'MATERIAL');
+        const tDiam = pick(r, 'TREM_DIAM', 'TREM_DIA', 'DIAM', 'DIAMETER', 'DIA');
+        const tFrom = num(pick(r, 'TREM_TOP', 'TOP', 'DEPTH_FROM', 'FROM'));
+        const tTo = num(pick(r, 'TREM_BASE', 'TREM_BOT', 'BASE', 'BOT', 'DEPTH_TO', 'TO'));
+        if (tType || tMat || tDiam || (tFrom != null && tTo != null && tTo > tFrom)) continue;
+      }
+
       // Calculate duration from start/end if not provided directly
       let durationMinutes = 0;
-      if (durationHours != null && durationHours > 0) {
+      const hhmmssMinutes = parseDurationToMinutes(durationRaw);
+      if (hhmmssMinutes != null && hhmmssMinutes > 0) {
+        // HH:MM:SS format (TREM_DURN) — already in minutes
+        durationMinutes = hhmmssMinutes;
+      } else if (durationHours != null && durationHours > 0) {
         // Values <= 24 are hours (you can't work > 24 hours in a day);
         // values > 24 are already in minutes (e.g. 90 = 1.5h).
         durationMinutes = durationHours <= 24 ? durationHours * 60 : durationHours;
@@ -1275,47 +1290,11 @@ Deno.serve(async (req) => {
         // installation attributes. Route those to the Site Logs instead of
         // creating fake installation records.
         const hasInstallAttrs = !!(tremType || tremMat || tremDiam || (dFrom != null && dTo != null && dTo > dFrom));
-        if (!hasInstallAttrs && isDrillerActivity(tremDesc)) {
-          // If the TREM description contains a time-stamped pattern
-          // ("7:30_8:45 = Start briefing..."), parse it into individual
-          // activities with proper start_time / end_time / duration so the
-          // Site Logs tab shows the driller's shift chronologically —
-          // matching the format the webhook produces.
-          const tremActs = parseRemarks(tremDesc);
-          if (tremActs.length > 0) {
-            const cleaned = await professionaliseActivities(base44, tremActs);
-            tremActs.forEach((act, i) => {
-              if (addLog({
-                job_id: job.id,
-                staff_id: drillerStaffId || staffId,
-                staff_name: drillerName || importerName,
-                date: resolveDate(ref), log_type: 'other', borehole_ref: ref || null,
-                description: cleaned[i] || act.raw_description,
-                raw_remarks: act.raw_description,
-                source: 'keylogbook_remarks',
-                logged_by_role: 'driller',
-                start_time: act.start_time,
-                end_time: act.end_time,
-                duration_minutes: act.duration_minutes,
-                completed_by_type: 'internal_staff', completed_by_name: drillerName || importerName,
-                manager_review_status: 'pending', chargeable: false, billing_status: 'no_charge',
-              })) counts.remarks++;
-            });
-          } else {
-            // No time pattern — save as a timeless activity (no start/end)
-            if (addLog({
-              job_id: job.id, staff_id: drillerStaffId || staffId, staff_name: drillerName || importerName,
-              date: resolveDate(ref), log_type: 'other', borehole_ref: ref || null,
-              description: tremDesc.trim(),
-              raw_remarks: tremDesc.trim(),
-              source: 'keylogbook_remarks',
-              logged_by_role: 'driller',
-              completed_by_type: 'internal_staff', completed_by_name: drillerName || importerName,
-              manager_review_status: 'pending', chargeable: false, billing_status: 'no_charge',
-            })) counts.remarks++;
-          }
-          continue;
-        }
+        // Diary rows (no installation attributes) are now handled by
+        // parseStructuredTimeGroups which reads TREM_DTIM/TREM_ETIM/
+        // TREM_DURN/TREM_REM directly. Skip them here so they don't
+        // create fake installation records in the Borehole Data tab.
+        if (!hasInstallAttrs) continue;
 
         const parts = [tremType, tremMat, tremDiam ? `${tremDiam}mm` : ''].filter(Boolean);
         const summary = parts.length > 0 ? parts.join(' · ') : 'Installation pipe';
