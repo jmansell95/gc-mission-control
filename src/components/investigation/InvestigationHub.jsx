@@ -51,7 +51,17 @@ export default function InvestigationHub({ onNavigate }) {
     if (link.boreholeRef) { setBoreholeFilter(link.boreholeRef); setGroupBy('borehole'); }
   }, []);
 
-  const { data: logs = [], isLoading } = useScopedEntity('InvestigationLog', { queryKey: ['investigation-hub-logs'], sort: '-created_date', limit: 300 });
+  // When a job filter is active, fetch that job's full log set (limit 2000)
+  // instead of relying on the 300-most-recent cross-division slice — older
+  // logs for the selected job would otherwise be cut off and the board would
+  // show "No logs match your filters". jobFilter is in the queryKey so the
+  // query re-fetches when the filter changes.
+  const { data: logs = [], isLoading } = useScopedEntity('InvestigationLog', {
+    queryKey: ['investigation-hub-logs', jobFilter],
+    sort: '-created_date',
+    filter: jobFilter !== 'all' ? { job_id: jobFilter } : {},
+    limit: jobFilter !== 'all' ? 2000 : 500,
+  });
   const { data: jobs = [] } = useScopedEntity('Job', { queryKey: ['investigation-hub-jobs'], limit: 500 });
   const { data: staff = [] } = useQuery({ queryKey: ['investigation-hub-staff'], queryFn: () => base44.entities.Staff.list() });
 

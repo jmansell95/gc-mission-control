@@ -21,7 +21,12 @@ export default function BoreholeDrillDown({ job, jobType }) {
 
   // Only show borehole data from KeyLogBook AGS imports — drillers record
   // borehole data in KeyLogBook, not manually in the app.
-  const logs = useMemo(() => allLogs.filter(l => l.source === 'ags_import'), [allLogs]);
+  // Include both AGS imports (borehole/strata/sample technical records) AND
+  // borehole-tagged KeyLogBook remarks (structured DLOG/PTIM time groups that
+  // carry duration_minutes + borehole_ref) so per-borehole drilling time is
+  // computed. Job-wide remarks-string activities (no borehole_ref) are summed
+  // separately in the totals block below.
+  const logs = useMemo(() => allLogs.filter(l => l.source === 'ags_import' || l.source === 'keylogbook_remarks'), [allLogs]);
 
   // Strata is not required from AGS import for drilling jobs:
   //  - Rotary drilling: no strata and no samples (coring only)
@@ -29,7 +34,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
   const hideStrata = jobType === 'rotary_drilling' || jobType === 'cp_drilling';
   const hideSamples = jobType === 'rotary_drilling';
 
-  // Group all AGS logs by borehole_ref
+  // Group borehole logs (AGS imports + borehole-tagged KeyLogBook remarks) by borehole_ref
   const boreholes = useMemo(() => {
     const map = {};
     logs.forEach(l => {
@@ -61,10 +66,17 @@ export default function BoreholeDrillDown({ job, jobType }) {
     let totalInstallations = 0;
     let avgRecovery = null;
     const allRecoveries = [];
-    let totalDrillingMinutes = 0;
     let sumDrillDepth = 0;
     let sumDrillHours = 0;
-    const allDrillingDates = new Set();
+    // Job-wide drilling time from ALL keylogbook_remarks logs — includes
+    // parsed remarks-string activities that carry duration_minutes but no
+    // borehole_ref, so they aren't in any borehole group and would be missed
+    // by a per-borehole-only sum.
+    const jobRemarksLogs = allLogs.filter(l =>
+      l.source === 'keylogbook_remarks' && l.duration_minutes != null && l.duration_minutes > 0
+    );
+    const totalDrillingMinutes = jobRemarksLogs.reduce((sum, l) => sum + l.duration_minutes, 0);
+    const allDrillingDates = new Set(jobRemarksLogs.map(l => l.date).filter(Boolean));
     boreholes.forEach(([, refLogs]) => {
       const s = getBoreholeSummary(refLogs);
       totalSamples += s.sampleCount;
@@ -72,8 +84,6 @@ export default function BoreholeDrillDown({ job, jobType }) {
       totalCores += s.coreCount;
       totalInstallations += s.installCount;
       if (s.avgRecovery != null) allRecoveries.push(s.avgRecovery);
-      totalDrillingMinutes += s.drillingMinutes || 0;
-      (s.drillingDates || []).forEach(d => allDrillingDates.add(d));
       if ((s.drillingHours || 0) > 0 && s.maxDepth != null) {
         sumDrillDepth += s.maxDepth;
         sumDrillHours += s.drillingHours;
@@ -84,7 +94,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
     const totalDrillingDays = allDrillingDates.size;
     const avgDrillRate = sumDrillHours > 0 ? Math.round((sumDrillDepth / sumDrillHours) * 10) / 10 : null;
     return { totalMeters, totalSamples, totalSPTs, totalCores, totalInstallations, avgRecovery, totalDrillingHours, totalDrillingDays, avgDrillRate };
-  }, [boreholes, logs]);
+  }, [boreholes, logs, allLogs]);
 
   const activeLogs = selectedRef ? boreholes.find(([ref]) => ref === selectedRef)?.[1] || [] : [];
 
