@@ -109,6 +109,14 @@
       "type": "string",
       "description": "Team/group assignment \u2014 determines which jobs this staff member can be assigned to AND which division they belong to (division is inherited from the team)."
     },
+    "training_category_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of TrainingRequirement records assigned to this staff member. This is the single source of truth for which training categories apply to this person \u2014 it replaces the old team-level required_qualifications model. When empty, the person has no training categories assigned (shown as 'not assigned', not as gaps). Add categories via the Training Hub card/drawer/bulk manager."
+    },
     "permission_group_id": {
       "type": "string",
       "description": "Direct permission group assignment \u2014 controls this staff member's access to every admin module and settings page. This is the single source of truth for access (no longer inherited from the team). Manage groups in Settings \u2192 Access Levels."
