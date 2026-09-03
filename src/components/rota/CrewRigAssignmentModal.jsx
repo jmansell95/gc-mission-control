@@ -154,7 +154,12 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
     return conflicts;
   }, [mode, rangeDays, leadId, secondId, existingRotas]);
 
-  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && rangeDays.length > 0 && conflictDates.length === 0;
+  const validDays = useMemo(() => {
+    const conflictSet = new Set(conflictDates.map(c => c.date));
+    return rangeDays.filter(d => !conflictSet.has(d));
+  }, [rangeDays, conflictDates]);
+
+  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && validDays.length > 0;
   const canSwap = pairingId && newRigId && swapFromDate && newRigId !== selectedPairing?.rig_id;
 
   if (!isOpen) return null;
@@ -167,7 +172,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
       const leadDivision = staff.find(s => s.id === leadId)?.division_id || '';
       const secondDivision = staff.find(s => s.id === secondId)?.division_id || '';
       const assignments = [];
-      rangeDays.forEach((dateStr, idx) => {
+      validDays.forEach((dateStr, idx) => {
         [{ id: leadId, role: 'lead_driller', div: leadDivision }, { id: secondId, role: 'second_man', div: secondDivision }].forEach(m => {
           assignments.push({
             job_id: jobId,
@@ -190,7 +195,8 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
       queryClient.invalidateQueries({ queryKey: ['rotas'] });
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['rig-perf-assignments'] });
-      toast({ title: 'Crew assigned to rig', description: `${rangeDays.length} day${rangeDays.length !== 1 ? 's' : ''} · ${staff.find(s => s.id === leadId)?.name} (Lead) + ${staff.find(s => s.id === secondId)?.name} (Second) on ${(rigs || []).find(r => r.id === rigId)?.name}.` });
+      const skipped = rangeDays.length - validDays.length;
+      toast({ title: 'Crew assigned to rig', description: `${validDays.length} day${validDays.length !== 1 ? 's' : ''} · ${staff.find(s => s.id === leadId)?.name} (Lead) + ${staff.find(s => s.id === secondId)?.name} (Second) on ${(rigs || []).find(r => r.id === rigId)?.name}${skipped > 0 ? ` · ${skipped} skipped (existing shifts)` : ''}.` });
       onClose();
     } catch (e) {
       console.error('Crew-rig assignment failed:', e);
@@ -363,7 +369,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                   <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium">Existing shifts found</p>
-                    <p className="text-amber-600 mt-0.5">{conflictDates.length} clash{conflictDates.length !== 1 ? 'es' : ''} — those dates will be skipped or pick different dates/crew.</p>
+                    <p className="text-amber-600 mt-0.5">{conflictDates.length} clash{conflictDates.length !== 1 ? 'es' : ''} — those dates will be skipped. {validDays.length > 0 ? `${validDays.length} day${validDays.length !== 1 ? 's' : ''} will be assigned.` : 'No free days remain — pick different dates or crew.'}</p>
                   </div>
                 </div>
               )}
