@@ -75,7 +75,7 @@ export function canEditModule(profile, isPlatformAdmin, sectionId) {
   // Fallback: role-based defaults
   const role = resolveRole(profile, isPlatformAdmin);
   if (role === 'management') {
-    if (moduleKey === 'settings' || moduleKey === 'teams') return false;
+    if (moduleKey === 'settings') return false;
     return true;
   }
   if (!moduleKey) return canEdit(profile, isPlatformAdmin);

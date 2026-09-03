@@ -3,21 +3,21 @@ import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   KeyRound, Crown, ShieldCheck, X, Loader2, Save, Plus, Lock, Eye,
-  AlertTriangle, Info,
+  AlertTriangle, Info, Sparkles,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import AccessSelect from '@/components/settings/access/AccessSelect';
 import AccessModuleGrid from '@/components/settings/access/AccessModuleGrid';
 import { SelectItem, SelectGroup, SelectLabel, SelectSeparator } from '@/components/ui/select';
-import { normalizePermissions, defaultPermissions } from '@/utils/permissions';
+import { normalizePermissions, defaultPermissions, PERMISSION_MODULES } from '@/utils/permissions';
 
 /**
  * StaffPermissionPopup — the single unified permission process.
  *
  * One popup does everything:
  *  1. Pick an existing permission group (or create a new one inline).
- *  2. Edit that group's per-module access matrix + read-only lockdown.
+ *  2. Edit that group's per-hub access matrix + read-only lockdown.
  *  3. Save — the group is updated and the staff member is assigned to it.
  *
  * Launched from the Access button on each person in the People directory
@@ -134,14 +134,18 @@ export default function StaffPermissionPopup({ staff, onClose }) {
       !!selectedGroup.is_read_only !== isReadOnly
     ));
 
+  // Access summary for the selected group
+  const writeCount = Object.values(permissions).filter(v => v === 'write').length;
+  const readCount = Object.values(permissions).filter(v => v === 'read').length;
+
   return createPortal(
     <div className="fixed inset-0 z-[70] bg-blue-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg flex flex-col overflow-hidden animate-slide-up max-h-[92dvh]"
+        className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl flex flex-col overflow-hidden animate-slide-up max-h-[92dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex-shrink-0 px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="flex-shrink-0 px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-[#2E5A1A]/[0.03] to-transparent">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md flex-shrink-0">
               <KeyRound className="w-4 h-4 text-white" />
@@ -157,61 +161,64 @@ export default function StaffPermissionPopup({ staff, onClose }) {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Staff identity */}
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-            <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
-              {staff.avatar_url ? <img src={staff.avatar_url} alt={staff.name} className="w-full h-full object-cover" /> : initials}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          {/* Staff identity + group selector side by side on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Staff identity */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                {staff.avatar_url ? <img src={staff.avatar_url} alt={staff.name} className="w-full h-full object-cover" /> : initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-slate-900 truncate">{staff.name}</p>
+                <p className="text-[11px] text-slate-400 truncate">{staff.job_title || 'Crew Member'}</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-slate-900 truncate">{staff.name}</p>
-              <p className="text-[11px] text-slate-400 truncate">{staff.job_title || 'Crew Member'}</p>
-            </div>
-          </div>
 
-          {/* Group selector */}
-          <div>
-            <label className="block text-xs font-bold text-slate-600 mb-2">Permission Group</label>
-            <AccessSelect
-              value={selectedGroupId}
-              onChange={setSelectedGroupId}
-              placeholder="Select group…"
-              triggerClassName="h-11 w-full rounded-xl text-sm font-medium"
-            >
-              <SelectItem value="__none">
-                <span className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-slate-200 flex-shrink-0" /> No group</span>
-              </SelectItem>
-              <SelectGroup>
-                <SelectLabel>System Groups</SelectLabel>
-                {groups.filter((g) => g.is_system).map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
-                    <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> {g.name}</span>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-              {groups.filter((g) => !g.is_system).length > 0 && (
-                <>
-                  <SelectSeparator />
-                  <SelectGroup>
-                    <SelectLabel>Custom Groups</SelectLabel>
-                    {groups.filter((g) => !g.is_system).map((g) => (
-                      <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                    ))}
-                  </SelectGroup>
-                </>
-              )}
-              <SelectSeparator />
-              <SelectItem value="__new">
-                <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" /> Create new group…</span>
-              </SelectItem>
-            </AccessSelect>
+            {/* Group selector */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Permission Group</label>
+              <AccessSelect
+                value={selectedGroupId}
+                onChange={setSelectedGroupId}
+                placeholder="Select group…"
+                triggerClassName="h-10 w-full rounded-xl text-sm font-medium"
+              >
+                <SelectItem value="__none">
+                  <span className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-slate-200 flex-shrink-0" /> No group</span>
+                </SelectItem>
+                <SelectGroup>
+                  <SelectLabel>System Groups</SelectLabel>
+                  {groups.filter((g) => g.is_system).map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      <span className="flex items-center gap-2"><Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> {g.name}</span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                {groups.filter((g) => !g.is_system).length > 0 && (
+                  <>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel>Custom Groups</SelectLabel>
+                      {groups.filter((g) => !g.is_system).map((g) => (
+                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </>
+                )}
+                <SelectSeparator />
+                <SelectItem value="__new">
+                  <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" /> Create new group…</span>
+                </SelectItem>
+              </AccessSelect>
+            </div>
           </div>
 
           {/* New group fields */}
           {isNew && (
             <div className="space-y-3 p-3 rounded-xl bg-[#2E5A1A]/[0.04] border border-[#2E5A1A]/15">
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1.5">Group Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Group Name</label>
                 <input
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
@@ -220,7 +227,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 mb-1.5">Description (optional)</label>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Description (optional)</label>
                 <input
                   value={newGroupDesc}
                   onChange={(e) => setNewGroupDesc(e.target.value)}
@@ -246,7 +253,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-slate-900">Read-Only Lockdown</p>
-                <p className="text-[11px] text-slate-500">Force every module to view-only — no create, edit or delete anywhere.</p>
+                <p className="text-[11px] text-slate-500">Force every hub to view-only — no create, edit or delete anywhere.</p>
               </div>
               <div className={`w-10 h-6 rounded-full flex items-center transition flex-shrink-0 ${isReadOnly ? 'bg-amber-500 justify-end' : 'bg-slate-300 justify-start'}`}>
                 <span className="w-5 h-5 bg-white rounded-full shadow-sm mx-0.5" />
@@ -258,7 +265,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
           {selectedGroupId && selectedGroupId !== '__none' && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-600">Module Access</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Hub Access</label>
                 {isSystem ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                     <Info className="w-3 h-3" /> System group — read only

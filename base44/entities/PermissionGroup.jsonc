@@ -46,7 +46,7 @@
     },
     "permissions": {
       "type": "object",
-      "description": "Per-module access level: 'none' (hidden), 'read' (view only, no edits), or 'write' (full create/update/delete). Teams assigned this group inherit these levels for every admin section.",
+      "description": "Per-hub access level: 'none' (hidden), 'read' (view only, no edits), or 'write' (full create/update/delete). The 12 keys below map 1:1 to the top-level navigation hubs in the admin sidebar. Staff assigned this group inherit these levels for every admin hub.",
       "properties": {
         "overview": {
           "type": "string",
@@ -55,7 +55,8 @@
             "read",
             "write"
           ],
-          "default": "read"
+          "default": "read",
+          "description": "Dashboard \u2014 the main command centre overview."
         },
         "jobs": {
           "type": "string",
@@ -64,25 +65,8 @@
             "read",
             "write"
           ],
-          "default": "none"
-        },
-        "rota": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "calendar": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "read"
+          "default": "none",
+          "description": "Projects Hub \u2014 all project management, job details and project financials."
         },
         "scheduling": {
           "type": "string",
@@ -91,62 +75,8 @@
             "read",
             "write"
           ],
-          "default": "none"
-        },
-        "timesheets": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "compliance": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "safety": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
           "default": "none",
-          "description": "Safety & Compliance Hub \u2014 audits, incidents, toolbox talks, environmental. Write = can report incidents and manage toolbox talks."
-        },
-        "log-qc": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "audit-trail": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "teams": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
+          "description": "Scheduling Hub \u2014 rota builder, calendar, shift planning and crew scheduling."
         },
         "staff": {
           "type": "string",
@@ -156,26 +86,7 @@
             "write"
           ],
           "default": "none",
-          "description": "Staff Management \u2014 directory, cost analytics, permission group assignments. Write = can add/edit staff and assign permission groups."
-        },
-        "billing": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none"
-        },
-        "assets": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
-          "default": "none",
-          "description": "Asset Hub \u2014 rigs, plant, vehicles, lifting gear, PAT testing, compliance passports. Write = can add/edit assets and log services."
+          "description": "Staff Hub \u2014 staff directory, crew types, timesheets and cost analytics."
         },
         "logistics": {
           "type": "string",
@@ -185,7 +96,67 @@
             "write"
           ],
           "default": "none",
-          "description": "Logistics & Deliveries \u2014 delivery dashboard, route optimisation, goods in, driver day planner. Write = can create/edit delivery tasks and routes."
+          "description": "Logistics Hub \u2014 delivery dashboard, route optimisation, goods in, driver day planner."
+        },
+        "assets": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Assets Hub \u2014 rigs, plant, lifting gear, PAT testing, compliance passports."
+        },
+        "fleet": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Fleet Hub \u2014 vehicles, live tracking, maintenance bookings, MOT history."
+        },
+        "investigation": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Investigation Hub \u2014 borehole data, site logs, geotech QC, AGS / KeyLogBook review."
+        },
+        "compliance": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Compliance Hub \u2014 audits, incidents, toolbox talks, environmental, safety, audit trail."
+        },
+        "billing": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Financial Hub \u2014 billing, AFP, CVR, invoicing, cost tracking, project financials."
+        },
+        "reports": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read",
+            "write"
+          ],
+          "default": "none",
+          "description": "Reports Hub \u2014 custom report builder, scheduled reports, Power BI exports."
         },
         "settings": {
           "type": "string",
@@ -194,17 +165,8 @@
             "read",
             "write"
           ],
-          "default": "none"
-        },
-        "ags_import": {
-          "type": "string",
-          "enum": [
-            "none",
-            "read",
-            "write"
-          ],
           "default": "none",
-          "description": "AGS / KeyLogBook upload & sync. Write = can upload AGS files and edit webhook config."
+          "description": "Settings \u2014 all system configuration, integrations, AGS / KeyLogBook webhook config, access levels."
         }
       }
     }
