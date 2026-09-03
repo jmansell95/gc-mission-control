@@ -206,8 +206,18 @@ export default function PeopleDirectory() {
     }
     setActioningId(s.id);
     try {
+      // Smart link: if this staff member's email matches an existing platform user
+      // who isn't yet linked to a Staff profile, link them silently instead of inviting.
+      const lc = s.email.toLowerCase();
+      const existingUser = unlinked.find((u) => (u.email || '').toLowerCase() === lc);
+      if (existingUser) {
+        await base44.entities.Staff.update(s.id, { user_id: existingUser.id, invite_sent: true });
+        toast({ title: 'Account linked', description: `${s.name} already has a login — profile connected.` });
+        refresh();
+        return;
+      }
+
       // Email 1: Platform invite — sends a registration link so they can set up their login.
-      // Works for non-registered users (the platform's own email pipeline, no custom domain needed).
       try {
         await base44.users.inviteUser(s.email, 'user');
       } catch (inviteErr) {
