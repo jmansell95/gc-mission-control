@@ -417,6 +417,13 @@
   }
   .animate-pop-in { animation: pop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
+  /* === Drawer slide-in from the right === */
+  @keyframes drawer-slide-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .animate-drawer-slide-in { animation: drawer-slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
   /* === Slow ping — for scan button halo === */
   @keyframes ping-slow {
     0% { transform: scale(1); opacity: 0.6; }

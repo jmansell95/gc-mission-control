@@ -1,21 +1,21 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   X, Truck, Gauge, CalendarClock, Wrench, Link2, Satellite,
   ShieldCheck, ShieldAlert, ShieldX, Hash, Fuel, Palette, Car, User, Users,
-  MapPin, Navigation, Clock, Activity, Zap, Radio, Database, FileText, Loader2, Route, CloudOff,
-  Weight, Ruler, Box,
+  MapPin, Navigation, Clock, Activity, Zap, Database, FileText, Loader2,
+  CloudOff, Weight, Ruler, Box, Route, LayoutDashboard,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { differenceInDays } from 'date-fns';
 import VehicleLocationMiniMap from '@/components/vehicles/VehicleLocationMiniMap';
-import TripTimelineEnhanced from '@/components/vehicles/TripTimelineEnhanced';
+import TripHistoryPanel from '@/components/vehicles/TripHistoryPanel';
 import TravelReconciliationReport from '@/components/vehicles/TravelReconciliationReport';
 import MaintenanceTimeline from '@/components/vehicles/MaintenanceTimeline';
 import MOTHistoryTimeline from '@/components/vehicles/MOTHistoryTimeline';
 import SafetyEventsDrillDown from '@/components/vehicles/SafetyEventsDrillDown';
 import { generateVehicleReport } from '@/utils/vehiclePdfReport';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function getVehicleStatus(v) {
   const today = new Date();
@@ -62,6 +62,16 @@ const COLOR_MAP = {
   slate: { bg: 'bg-slate-50', text: 'text-slate-500', border: 'border-slate-200' },
 };
 
+const SECTIONS = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'live', label: 'Live Position', icon: Satellite },
+  { id: 'trips', label: 'Trip History', icon: Route },
+  { id: 'spec', label: 'Specification', icon: Car },
+  { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+  { id: 'travel', label: 'Travel Reconciliation', icon: Navigation },
+  { id: 'safety', label: 'Safety', icon: ShieldAlert },
+];
+
 function SpecTile({ icon: Icon, label, value, source, color }) {
   const hasValue = value && value !== '—' && value !== 'Unknown';
   return (
@@ -72,21 +82,25 @@ function SpecTile({ icon: Icon, label, value, source, color }) {
           <span className="text-[10px] uppercase text-slate-400 font-semibold">{label}</span>
         </div>
         {source && (
-          <span className={`text-[8px] px-1 py-0.5 rounded-full font-bold ${source === 'VIN' ? 'bg-blue-100 text-blue-600' : 'bg-cyan-100 text-cyan-600'}`}>
-            {source}
-          </span>
+          <span className={`text-[8px] px-1 py-0.5 rounded-full font-bold ${source === 'VIN' ? 'bg-blue-100 text-blue-600' : 'bg-cyan-100 text-cyan-600'}`}>{source}</span>
         )}
       </div>
-      <p className={`text-sm font-bold truncate ${hasValue ? 'text-slate-800' : 'text-slate-300 italic'}`}>
-        {hasValue ? value : 'Not available'}
-      </p>
+      <p className={`text-sm font-bold truncate ${hasValue ? 'text-slate-800' : 'text-slate-300 italic'}`}>{hasValue ? value : 'Not available'}</p>
     </div>
   );
 }
 
 export default function VehicleDetailDrawer({ vehicle, onClose }) {
-  const [activeTab, setActiveTab] = useState('live');
+  const [activeSection, setActiveSection] = useState('overview');
   const [reportLoading, setReportLoading] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Close on Escape.
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   const handleDownloadReport = async () => {
     if (!vehicle) return;
@@ -111,14 +125,10 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   };
 
   const { data: staff = [] } = useQuery({
-    queryKey: ['staff'],
-    queryFn: () => base44.entities.Staff.list(),
-    enabled: !!vehicle,
+    queryKey: ['staff'], queryFn: () => base44.entities.Staff.list(), enabled: !!vehicle,
   });
   const { data: teams = [] } = useQuery({
-    queryKey: ['teams'],
-    queryFn: () => base44.entities.Team.list(),
-    enabled: !!vehicle,
+    queryKey: ['teams'], queryFn: () => base44.entities.Team.list(), enabled: !!vehicle,
   });
   const { data: liveLocations = [] } = useQuery({
     queryKey: ['geotab-live-locations-fleet'],
@@ -128,8 +138,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
       const arr = Array.isArray(data) ? data : (Array.isArray(data?.vehicles) ? data.vehicles : (Array.isArray(data?.locations) ? data.locations : []));
       return arr;
     },
-    enabled: !!vehicle,
-    refetchInterval: 15000,
+    enabled: !!vehicle, refetchInterval: 15000,
   });
 
   const latestLoc = useMemo(() => {
@@ -150,10 +159,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   const makeModel = [vehicle.make, vehicle.model].filter(Boolean).join(' ') || null;
   const geotabLive = vehicle.geotab_sync_status === 'synced';
 
-  const specSource = (field) => {
-    if (field) return geotabLive ? 'Geotab' : null;
-    return null;
-  };
+  const specSource = (field) => (field ? (geotabLive ? 'Geotab' : null) : null);
 
   const specFields = [vehicle.make, vehicle.model, vehicle.year, vehicle.fuel_type, vehicle.color, vehicle.vehicle_type, vehicle.vin];
   const filledSpecs = specFields.filter(Boolean).length;
@@ -169,11 +175,34 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   const motionLabel = !geotabLive ? 'Offline' : !latestLoc ? 'No Signal' : isMoving ? 'Moving' : latestLoc.ignition_on ? 'Engine On' : 'Stopped';
   const motionColor = isMoving ? 'emerald' : latestLoc?.ignition_on ? 'amber' : 'slate';
 
+  const SidebarNav = ({ horizontal = false }) => (
+    <nav className={horizontal ? 'flex gap-1.5 overflow-x-auto no-scrollbar pb-1' : 'space-y-1'}>
+      {SECTIONS.map(s => {
+        const Icon = s.icon;
+        const active = activeSection === s.id;
+        const disabled = s.id === 'safety' && vehicle.geotab_sync_status !== 'synced';
+        if (disabled) return null;
+        return (
+          <button key={s.id} onClick={() => setActiveSection(s.id)} disabled={disabled}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition flex-shrink-0 ${
+              active
+                ? 'bg-gradient-to-r from-[#2E5A1A] to-[#4d7c2a] text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-100'
+            }`}>
+            <Icon className="w-4 h-4 flex-shrink-0" />
+            <span className={horizontal ? 'whitespace-nowrap' : ''}>{s.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-5xl p-0 sm:p-0 overflow-hidden max-h-[calc(100dvh-2rem)] overflow-y-auto">
-        {/* ── Header ── */}
-        <div className="hero-gradient text-white px-5 py-4 sticky top-0 z-10">
+    <div className="fixed inset-0 z-50 flex">
+      <div className="absolute inset-0 bg-slate-950/60" onClick={onClose} />
+      <div className="relative ml-auto h-full w-full sm:max-w-[1100px] bg-slate-50 shadow-2xl flex flex-col animate-drawer-slide-in">
+        {/* ── Sticky summary header ── */}
+        <div className="hero-gradient text-white px-5 py-4 flex-shrink-0">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-12 h-12 rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
@@ -190,6 +219,9 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
                 {reportLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                 <span className="hidden sm:inline">PDF</span>
               </button>
+              <button onClick={onClose} className="p-2 hover:bg-white/15 rounded-lg transition">
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -198,8 +230,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
             </span>
             <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${
               motionColor === 'emerald' ? 'bg-emerald-500 text-white' :
-              motionColor === 'amber' ? 'bg-amber-500 text-white' :
-              'bg-slate-400 text-white'
+              motionColor === 'amber' ? 'bg-amber-500 text-white' : 'bg-slate-400 text-white'
             }`}>
               {isMoving && <span className="w-2 h-2 rounded-full bg-white animate-pulse" />}
               <Navigation className="w-3.5 h-3.5" /> {motionLabel}
@@ -228,273 +259,283 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
           </div>
         </div>
 
-        {/* ── Attention banner ── */}
-        {issues.length > 0 && (
-          <div className="mx-5 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 flex items-start gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-rose-700">Action Required</p>
-              <div className="flex flex-wrap gap-1.5 mt-1">
-                {issues.map((issue, i) => (
-                  <span key={i} className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${issue.severity === 'expired' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {issue.label} ({issue.days >= 0 ? `in ${issue.days}d` : `${Math.abs(issue.days)}d ago`})
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab switcher ── */}
-        <div className="mx-5 mt-4 flex p-1 bg-slate-100 rounded-lg">
-          <button onClick={() => setActiveTab('live')}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition ${activeTab === 'live' ? 'bg-white text-cyan-700 shadow-sm' : 'text-slate-500'}`}>
-            <Satellite className="w-3.5 h-3.5" /> Live Ops
-          </button>
-          <button onClick={() => setActiveTab('spec')}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition ${activeTab === 'spec' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500'}`}>
-            <Car className="w-3.5 h-3.5" /> Spec
-          </button>
-          <button onClick={() => setActiveTab('compliance')}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition ${activeTab === 'compliance' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500'}`}>
-            <Wrench className="w-3.5 h-3.5" /> Maintenance
-          </button>
-          <button onClick={() => setActiveTab('reconciliation')}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition ${activeTab === 'reconciliation' ? 'bg-white text-cyan-700 shadow-sm' : 'text-slate-500'}`}>
-            <Route className="w-3.5 h-3.5" /> Travel
-          </button>
-          {vehicle.geotab_sync_status === 'synced' && (
-            <button onClick={() => setActiveTab('safety')}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition ${activeTab === 'safety' ? 'bg-white text-red-700 shadow-sm' : 'text-slate-500'}`}>
-              <ShieldAlert className="w-3.5 h-3.5" /> Safety
-            </button>
+        {/* ── Body: sidebar + scrollable content ── */}
+        <div className="flex-1 flex min-h-0">
+          {!isMobile && (
+            <aside className="w-[200px] flex-shrink-0 bg-white border-r border-slate-200 p-3 overflow-y-auto">
+              <SidebarNav />
+            </aside>
           )}
-        </div>
-
-        {/* ═════════════ LIVE OPS TAB (Geotab) ═════════════ */}
-        {activeTab === 'live' && (
-          <div className="px-5 py-4 space-y-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-2.5 border border-blue-200">
-                <p className="text-[10px] uppercase text-blue-600 font-semibold flex items-center gap-1"><Clock className="w-3 h-3" /> Engine Hours</p>
-                <p className="text-base font-bold text-blue-700 tabular-nums mt-0.5">{vehicle.engine_hours != null ? Math.round(Number(vehicle.engine_hours)).toLocaleString() : '—'} <span className="text-[10px] font-normal">h</span></p>
-              </div>
-              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-2.5 border border-cyan-200">
-                <p className="text-[10px] uppercase text-cyan-600 font-semibold flex items-center gap-1"><Gauge className="w-3 h-3" /> Mileage</p>
-                <p className="text-base font-bold text-cyan-700 tabular-nums mt-0.5">{vehicle.current_mileage ? Number(vehicle.current_mileage).toLocaleString() : '—'} <span className="text-[10px] font-normal">mi</span></p>
-              </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-2.5 border border-emerald-200">
-                <p className="text-[10px] uppercase text-emerald-600 font-semibold flex items-center gap-1"><Zap className="w-3 h-3" /> Ignition</p>
-                <p className="text-base font-bold text-emerald-700 mt-0.5">{latestLoc?.ignition_on ? 'ON' : 'OFF'}</p>
-              </div>
-              <div className="bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg p-2.5 border border-violet-200">
-                <p className="text-[10px] uppercase text-violet-600 font-semibold flex items-center gap-1"><Navigation className="w-3 h-3" /> Speed</p>
-                <p className="text-base font-bold text-violet-700 tabular-nums mt-0.5">{latestLoc?.speed_kph ? Math.round(latestLoc.speed_kph * 0.621371) : 0} <span className="text-[10px] font-normal">mph</span></p>
-              </div>
-            </div>
-
-            {vehicle.geotab_sync_status === 'synced' && vehicle.safety_event_count != null && (
-              <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-slate-600" />
-                    <h3 className="text-sm font-bold text-slate-800">Driver Safety</h3>
-                  </div>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                    (vehicle.driver_risk_score || 100) >= 80 ? 'bg-emerald-100 text-emerald-700' :
-                    (vehicle.driver_risk_score || 100) >= 50 ? 'bg-amber-100 text-amber-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    Risk Score: {vehicle.driver_risk_score ?? 100}/100
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-red-50 rounded-lg p-2 border border-red-100">
-                    <p className="text-[10px] uppercase text-red-500 font-semibold">Harsh Braking</p>
-                    <p className="text-lg font-bold text-red-700 tabular-nums">{vehicle.safety_harsh_braking_count || 0}</p>
-                  </div>
-                  <div className="bg-amber-50 rounded-lg p-2 border border-amber-100">
-                    <p className="text-[10px] uppercase text-amber-500 font-semibold">Speeding</p>
-                    <p className="text-lg font-bold text-amber-700 tabular-nums">{vehicle.safety_speeding_count || 0}</p>
-                  </div>
-                  <div className="bg-orange-50 rounded-lg p-2 border border-orange-100">
-                    <p className="text-[10px] uppercase text-orange-500 font-semibold">Harsh Accel</p>
-                    <p className="text-lg font-bold text-orange-700 tabular-nums">{vehicle.safety_harsh_accel_count || 0}</p>
-                  </div>
-                  <div className="bg-violet-50 rounded-lg p-2 border border-violet-100">
-                    <p className="text-[10px] uppercase text-violet-500 font-semibold">Harsh Cornering</p>
-                    <p className="text-lg font-bold text-violet-700 tabular-nums">{vehicle.safety_harsh_cornering_count || 0}</p>
-                  </div>
-                </div>
-                {vehicle.geotab_driver_name && (
-                  <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                    <User className="w-3 h-3" /> Last detected driver: <span className="font-semibold text-slate-700">{vehicle.geotab_driver_name}</span>
-                  </div>
-                )}
-                <button onClick={() => setActiveTab('safety')}
-                  className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-bold text-red-700 transition">
-                  <ShieldAlert className="w-3.5 h-3.5" /> View Full Violation Log with Dates & Times
-                </button>
-                <p className="text-[10px] text-slate-400 mt-1.5">Events from the last 30 days · Click above to drill down</p>
+          <div className="flex-1 overflow-y-auto">
+            {isMobile && (
+              <div className="sticky top-0 bg-white border-b border-slate-200 px-3 py-2 z-10">
+                <SidebarNav horizontal />
               </div>
             )}
 
-            {latestLoc ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Navigation className="w-4 h-4 text-cyan-600" />
-                  <h3 className="text-sm font-bold text-slate-800">Live Position</h3>
-                  <span className="ml-auto text-[11px] text-slate-400 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {new Date(latestLoc.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                </div>
-                <VehicleLocationMiniMap {...latestLoc} />
-                {latestLoc.driver_name && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                    <User className="w-3 h-3" /> Driver: <span className="font-semibold text-slate-700">{latestLoc.driver_name}</span>
+            {issues.length > 0 && (
+              <div className="mx-5 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-rose-700">Action Required</p>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {issues.map((issue, i) => (
+                      <span key={i} className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${issue.severity === 'expired' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {issue.label} ({issue.days >= 0 ? `in ${issue.days}d` : `${Math.abs(issue.days)}d ago`})
+                      </span>
+                    ))}
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-6 bg-slate-50 rounded-xl">
-                <Satellite className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-xs text-slate-400">{geotabLive ? 'No live position data right now' : 'Not tracking via Geotab yet'}</p>
+                </div>
               </div>
             )}
 
-            <TripTimelineEnhanced vehicle={vehicle} />
-          </div>
-        )}
+            <div className="p-5 space-y-4">
+              {/* ═══ OVERVIEW ═══ */}
+              {activeSection === 'overview' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                      <p className="text-[10px] uppercase text-blue-600 font-semibold flex items-center gap-1"><Clock className="w-3 h-3" /> Engine Hours</p>
+                      <p className="text-lg font-bold text-blue-700 tabular-nums mt-0.5">{vehicle.engine_hours != null ? Math.round(Number(vehicle.engine_hours)).toLocaleString() : '—'} <span className="text-[10px] font-normal">h</span></p>
+                    </div>
+                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200">
+                      <p className="text-[10px] uppercase text-cyan-600 font-semibold flex items-center gap-1"><Gauge className="w-3 h-3" /> Mileage</p>
+                      <p className="text-lg font-bold text-cyan-700 tabular-nums mt-0.5">{vehicle.current_mileage ? Number(vehicle.current_mileage).toLocaleString() : '—'} <span className="text-[10px] font-normal">mi</span></p>
+                    </div>
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-3 border border-emerald-200">
+                      <p className="text-[10px] uppercase text-emerald-600 font-semibold flex items-center gap-1"><Zap className="w-3 h-3" /> Ignition</p>
+                      <p className="text-lg font-bold text-emerald-700 mt-0.5">{latestLoc?.ignition_on ? 'ON' : 'OFF'}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg p-3 border border-violet-200">
+                      <p className="text-[10px] uppercase text-violet-600 font-semibold flex items-center gap-1"><Navigation className="w-3 h-3" /> Speed</p>
+                      <p className="text-lg font-bold text-violet-700 tabular-nums mt-0.5">{latestLoc?.speed_kph ? Math.round(latestLoc.speed_kph * 0.621371) : 0} <span className="text-[10px] font-normal">mph</span></p>
+                    </div>
+                  </div>
 
-        {/* ═════════════ SPEC TAB ═════════════ */}
-        {activeTab === 'spec' && (
-          <div className="px-5 py-4 space-y-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Car className="w-4 h-4 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-800">Vehicle Specification</h3>
-                <span className={`ml-auto inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${confidenceMeta.cls}`}>
-                  <confidenceMeta.Icon className="w-3 h-3" /> {confidenceMeta.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <SpecTile icon={Car} label="Make" value={vehicle.make || '—'} source={specSource(vehicle.make)} color="bg-blue-50 border-blue-200" />
-                <SpecTile icon={Car} label="Model" value={vehicle.model || '—'} source={specSource(vehicle.model)} color="bg-blue-50 border-blue-200" />
-                <SpecTile icon={CalendarClock} label="Year" value={vehicle.year || '—'} source={vehicle.year ? 'VIN' : null} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Fuel} label="Fuel" value={FUEL_LABELS[vehicle.fuel_type] || '—'} source={specSource(vehicle.fuel_type && vehicle.fuel_type !== 'unknown')} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Palette} label="Colour" value={vehicle.color || '—'} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Truck} label="Type" value={vehicle.vehicle_type || '—'} source={specSource(vehicle.vehicle_type)} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Hash} label="VIN" value={vehicle.vin || '—'} source={specSource(vehicle.vin)} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={User} label="Driver" value={vehicle.geotab_keeper_name || assignedStaff?.name || 'Unassigned'} source={vehicle.geotab_keeper_name ? 'Geotab' : null} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Users} label="Team" value={team?.name || '—'} color="bg-slate-50 border-slate-200" />
-                <SpecTile icon={Weight} label="Max Payload" value={vehicle.max_weight_kg ? `${Math.round(vehicle.max_weight_kg)} kg` : '—'} color="bg-blue-50 border-blue-200" />
-                <SpecTile icon={Ruler} label="Height" value={vehicle.height_m ? `${vehicle.height_m} m` : '—'} color="bg-violet-50 border-violet-200" />
-                <SpecTile icon={Box} label="Max Volume" value={vehicle.max_volume_m3 ? `${vehicle.max_volume_m3} m³` : '—'} color="bg-slate-50 border-slate-200" />
-              </div>
-            </div>
-
-            <div className="bg-slate-50 rounded-xl border border-slate-200 p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <Database className="w-3.5 h-3.5 text-slate-500" />
-                <h4 className="text-xs font-bold text-slate-600">Data Sources</h4>
-              </div>
-              <div className="space-y-1.5 text-[11px]">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1.5"><Satellite className="w-3 h-3 text-cyan-500" /> Geotab (Live Telemetry)</span>
-                  <span className={`font-bold ${geotabLive ? 'text-emerald-600' : 'text-slate-400'}`}>{geotabLive ? 'Connected' : 'Not synced'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1.5"><Link2 className="w-3 h-3 text-blue-500" /> Holman (Compliance)</span>
-                  <span className={`font-bold ${vehicle.holman_sync_status === 'synced' ? 'text-emerald-600' : 'text-slate-400'}`}>{vehicle.holman_sync_status === 'synced' ? 'Connected' : 'Not synced'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1.5"><Radio className="w-3 h-3 text-violet-500" /> VIN Decode</span>
-                  <span className={`font-bold ${vehicle.vin ? 'text-emerald-600' : 'text-slate-400'}`}>{vehicle.vin ? 'Available' : 'No VIN'}</span>
-                </div>
-              </div>
-              {vehicle.last_geotab_sync && (
-                <p className="text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-200">
-                  Last Geotab sync: {new Date(vehicle.last_geotab_sync).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ═════════════ MAINTENANCE TAB (Holman) ═════════════ */}
-        {activeTab === 'compliance' && (
-          <div className="px-5 py-4 space-y-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-800">Key Compliance Dates</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                {[
-                  { label: 'MOT Due', date: vehicle.mot_expiry, icon: ShieldCheck },
-                  { label: 'Service Due', date: vehicle.service_due_date, icon: Wrench },
-                  { label: 'Last Service', date: vehicle.last_service_date, icon: Activity },
-                ].filter(d => d.date).map(d => {
-                  const date = new Date(d.date + 'T00:00:00');
-                  const days = differenceInDays(date, new Date());
-                  const tone = days < 0 ? 'rose' : days <= 30 ? 'amber' : 'emerald';
-                  const colors = COLOR_MAP[tone] || COLOR_MAP.slate;
-                  return (
-                    <div key={d.label} className={`flex items-center gap-3 p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
-                      <d.icon className={`w-4 h-4 ${colors.text}`} />
-                      <div className="flex-1">
-                        <p className="text-[10px] uppercase font-semibold text-slate-400">{d.label}</p>
-                        <p className={`text-sm font-bold ${colors.text}`}>
-                          {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </p>
+                  {latestLoc ? (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Navigation className="w-4 h-4 text-cyan-600" />
+                        <h3 className="text-sm font-bold text-slate-800">Live Position</h3>
+                        <span className="ml-auto text-[11px] text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(latestLoc.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <span className={`text-[11px] font-semibold ${colors.text}`}>
-                        {days < 0 ? `${Math.abs(days)}d ago` : `in ${days}d`}
+                      <VehicleLocationMiniMap {...latestLoc} />
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 bg-slate-50 rounded-xl">
+                      <Satellite className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">{geotabLive ? 'No live position data right now' : 'Not tracking via Geotab yet'}</p>
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-sm font-bold text-slate-800">Key Compliance Dates</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {[
+                        { label: 'MOT Due', date: vehicle.mot_expiry, icon: ShieldCheck },
+                        { label: 'Service Due', date: vehicle.service_due_date, icon: Wrench },
+                        { label: 'Last Service', date: vehicle.last_service_date, icon: Activity },
+                      ].filter(d => d.date).map(d => {
+                        const date = new Date(d.date + 'T00:00:00');
+                        const days = differenceInDays(date, new Date());
+                        const tone = days < 0 ? 'rose' : days <= 30 ? 'amber' : 'emerald';
+                        const colors = COLOR_MAP[tone] || COLOR_MAP.slate;
+                        return (
+                          <div key={d.label} className={`flex items-center gap-3 p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
+                            <d.icon className={`w-4 h-4 ${colors.text}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] uppercase font-semibold text-slate-400">{d.label}</p>
+                              <p className={`text-sm font-bold ${colors.text} truncate`}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                            <span className={`text-[11px] font-semibold ${colors.text} flex-shrink-0`}>{days < 0 ? `${Math.abs(days)}d ago` : `in ${days}d`}</span>
+                          </div>
+                        );
+                      })}
+                      {!vehicle.mot_expiry && !vehicle.service_due_date && !vehicle.last_service_date && (
+                        <p className="text-xs text-slate-400 px-3 py-2 col-span-full">No compliance dates on record. Sync Holman to populate.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Route className="w-4 h-4 text-emerald-700" />
+                      <h3 className="text-sm font-bold text-slate-800">Recent Trips</h3>
+                      <button onClick={() => setActiveSection('trips')} className="ml-auto text-xs font-semibold text-emerald-700 hover:underline">View full history →</button>
+                    </div>
+                    <TripHistoryPanel vehicle={vehicle} />
+                  </div>
+                </div>
+              )}
+
+              {/* ═══ LIVE POSITION ═══ */}
+              {activeSection === 'live' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
+                      <p className="text-[10px] uppercase text-blue-600 font-semibold flex items-center gap-1"><Clock className="w-3 h-3" /> Engine Hours</p>
+                      <p className="text-lg font-bold text-blue-700 tabular-nums mt-0.5">{vehicle.engine_hours != null ? Math.round(Number(vehicle.engine_hours)).toLocaleString() : '—'} <span className="text-[10px] font-normal">h</span></p>
+                    </div>
+                    <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200">
+                      <p className="text-[10px] uppercase text-cyan-600 font-semibold flex items-center gap-1"><Gauge className="w-3 h-3" /> Mileage</p>
+                      <p className="text-lg font-bold text-cyan-700 tabular-nums mt-0.5">{vehicle.current_mileage ? Number(vehicle.current_mileage).toLocaleString() : '—'} <span className="text-[10px] font-normal">mi</span></p>
+                    </div>
+                    <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-3 border border-emerald-200">
+                      <p className="text-[10px] uppercase text-emerald-600 font-semibold flex items-center gap-1"><Zap className="w-3 h-3" /> Ignition</p>
+                      <p className="text-lg font-bold text-emerald-700 mt-0.5">{latestLoc?.ignition_on ? 'ON' : 'OFF'}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg p-3 border border-violet-200">
+                      <p className="text-[10px] uppercase text-violet-600 font-semibold flex items-center gap-1"><Navigation className="w-3 h-3" /> Speed</p>
+                      <p className="text-lg font-bold text-violet-700 tabular-nums mt-0.5">{latestLoc?.speed_kph ? Math.round(latestLoc.speed_kph * 0.621371) : 0} <span className="text-[10px] font-normal">mph</span></p>
+                    </div>
+                  </div>
+                  {latestLoc ? (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Navigation className="w-4 h-4 text-cyan-600" />
+                        <h3 className="text-sm font-bold text-slate-800">Live Position</h3>
+                        <span className="ml-auto text-[11px] text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(latestLoc.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <VehicleLocationMiniMap {...latestLoc} />
+                      {latestLoc.driver_name && (
+                        <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                          <User className="w-3 h-3" /> Driver: <span className="font-semibold text-slate-700">{latestLoc.driver_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 bg-slate-50 rounded-xl">
+                      <Satellite className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">{geotabLive ? 'No live position data right now' : 'Not tracking via Geotab yet'}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ═══ TRIP HISTORY ═══ */}
+              {activeSection === 'trips' && <TripHistoryPanel vehicle={vehicle} />}
+
+              {/* ═══ SPECIFICATION ═══ */}
+              {activeSection === 'spec' && (
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Car className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-sm font-bold text-slate-800">Vehicle Specification</h3>
+                      <span className={`ml-auto inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${confidenceMeta.cls}`}>
+                        <confidenceMeta.Icon className="w-3 h-3" /> {confidenceMeta.label}
                       </span>
                     </div>
-                  );
-                })}
-                {!vehicle.mot_expiry && !vehicle.service_due_date && !vehicle.last_service_date && (
-                  <p className="text-xs text-slate-400 px-3 py-2">No compliance dates on record. Sync Holman to populate.</p>
-                )}
-              </div>
-            </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <SpecTile icon={Car} label="Make" value={vehicle.make || '—'} source={specSource(vehicle.make)} color="bg-blue-50 border-blue-200" />
+                      <SpecTile icon={Car} label="Model" value={vehicle.model || '—'} source={specSource(vehicle.model)} color="bg-blue-50 border-blue-200" />
+                      <SpecTile icon={CalendarClock} label="Year" value={vehicle.year || '—'} source={vehicle.year ? 'VIN' : null} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Fuel} label="Fuel" value={FUEL_LABELS[vehicle.fuel_type] || '—'} source={specSource(vehicle.fuel_type && vehicle.fuel_type !== 'unknown')} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Palette} label="Colour" value={vehicle.color || '—'} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Truck} label="Type" value={vehicle.vehicle_type || '—'} source={specSource(vehicle.vehicle_type)} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Hash} label="VIN" value={vehicle.vin || '—'} source={specSource(vehicle.vin)} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={User} label="Driver" value={vehicle.geotab_keeper_name || assignedStaff?.name || 'Unassigned'} source={vehicle.geotab_keeper_name ? 'Geotab' : null} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Users} label="Team" value={team?.name || '—'} color="bg-slate-50 border-slate-200" />
+                      <SpecTile icon={Weight} label="Max Payload" value={vehicle.max_weight_kg ? `${Math.round(vehicle.max_weight_kg)} kg` : '—'} color="bg-blue-50 border-blue-200" />
+                      <SpecTile icon={Ruler} label="Height" value={vehicle.height_m ? `${vehicle.height_m} m` : '—'} color="bg-violet-50 border-violet-200" />
+                      <SpecTile icon={Box} label="Max Volume" value={vehicle.max_volume_m3 ? `${vehicle.max_volume_m3} m³` : '—'} color="bg-slate-50 border-slate-200" />
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl border border-slate-200 p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Database className="w-3.5 h-3.5 text-slate-500" />
+                      <h4 className="text-xs font-bold text-slate-600">Data Sources</h4>
+                    </div>
+                    <div className="space-y-1.5 text-[11px]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 flex items-center gap-1.5"><Satellite className="w-3 h-3 text-cyan-500" /> Geotab (Live Telemetry)</span>
+                        <span className={`font-bold ${geotabLive ? 'text-emerald-600' : 'text-slate-400'}`}>{geotabLive ? 'Connected' : 'Not synced'}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-500 flex items-center gap-1.5"><Link2 className="w-3 h-3 text-blue-500" /> Holman (Compliance)</span>
+                        <span className={`font-bold ${vehicle.holman_sync_status === 'synced' ? 'text-emerald-600' : 'text-slate-400'}`}>{vehicle.holman_sync_status === 'synced' ? 'Connected' : 'Not synced'}</span>
+                      </div>
+                    </div>
+                    {vehicle.last_geotab_sync && (
+                      <p className="text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-200">
+                        Last Geotab sync: {new Date(vehicle.last_geotab_sync).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-sm font-bold text-slate-800">MOT History</h3>
-                <span className="ml-auto text-[10px] text-slate-400">Holman</span>
-              </div>
-              <MOTHistoryTimeline vehicleId={vehicle.id} vehicle={vehicle} />
-            </div>
+              {/* ═══ MAINTENANCE ═══ */}
+              {activeSection === 'maintenance' && (
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-sm font-bold text-slate-800">Key Compliance Dates</h3>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {[
+                        { label: 'MOT Due', date: vehicle.mot_expiry, icon: ShieldCheck },
+                        { label: 'Service Due', date: vehicle.service_due_date, icon: Wrench },
+                        { label: 'Last Service', date: vehicle.last_service_date, icon: Activity },
+                      ].filter(d => d.date).map(d => {
+                        const date = new Date(d.date + 'T00:00:00');
+                        const days = differenceInDays(date, new Date());
+                        const tone = days < 0 ? 'rose' : days <= 30 ? 'amber' : 'emerald';
+                        const colors = COLOR_MAP[tone] || COLOR_MAP.slate;
+                        return (
+                          <div key={d.label} className={`flex items-center gap-3 p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
+                            <d.icon className={`w-4 h-4 ${colors.text}`} />
+                            <div className="flex-1">
+                              <p className="text-[10px] uppercase font-semibold text-slate-400">{d.label}</p>
+                              <p className={`text-sm font-bold ${colors.text}`}>{date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                            <span className={`text-[11px] font-semibold ${colors.text}`}>{days < 0 ? `${Math.abs(days)}d ago` : `in ${days}d`}</span>
+                          </div>
+                        );
+                      })}
+                      {!vehicle.mot_expiry && !vehicle.service_due_date && !vehicle.last_service_date && (
+                        <p className="text-xs text-slate-400 px-3 py-2">No compliance dates on record. Sync Holman to populate.</p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <h3 className="text-sm font-bold text-slate-800">MOT History</h3>
+                      <span className="ml-auto text-[10px] text-slate-400">Holman</span>
+                    </div>
+                    <MOTHistoryTimeline vehicleId={vehicle.id} vehicle={vehicle} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Wrench className="w-4 h-4 text-blue-600" />
+                      <h3 className="text-sm font-bold text-slate-800">Maintenance History</h3>
+                      <span className="ml-auto text-[10px] text-slate-400">Holman</span>
+                    </div>
+                    <MaintenanceTimeline vehicleId={vehicle.id} />
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Wrench className="w-4 h-4 text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-800">Maintenance History</h3>
-                <span className="ml-auto text-[10px] text-slate-400">Holman</span>
-              </div>
-              <MaintenanceTimeline vehicleId={vehicle.id} />
+              {/* ═══ TRAVEL RECONCILIATION ═══ */}
+              {activeSection === 'travel' && <TravelReconciliationReport vehicle={vehicle} />}
+
+              {/* ═══ SAFETY ═══ */}
+              {activeSection === 'safety' && vehicle.geotab_sync_status === 'synced' && <SafetyEventsDrillDown vehicle={vehicle} />}
             </div>
           </div>
-        )}
-
-        {/* ═════════════ TRAVEL RECONCILIATION TAB ═════════════ */}
-        {activeTab === 'reconciliation' && (
-          <div className="px-5 py-4">
-            <TravelReconciliationReport vehicle={vehicle} />
-          </div>
-        )}
-
-        {/* ═════════════ SAFETY DRILL-DOWN TAB ═════════════ */}
-        {activeTab === 'safety' && (
-          <div className="px-5 py-4">
-            <SafetyEventsDrillDown vehicle={vehicle} />
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   );
 }
