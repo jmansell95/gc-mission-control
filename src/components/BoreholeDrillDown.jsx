@@ -13,6 +13,7 @@ import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import BoreholeDetailModal from '@/components/borehole/BoreholeDetailModal';
 import BoreholeSummaryPanel from '@/components/borehole/BoreholeSummaryPanel';
 import { BOREHOLE_STATUS_CONFIG, MISSING_DATA_GROUPS } from '@/components/investigation/boreholeStatusConfig';
+import { DRILLING_METHOD_CONFIG } from '@/components/investigation/boreholeStatusConfig';
 
 export default function BoreholeDrillDown({ job, jobType }) {
   const { data: allLogs = [], isLoading } = useQuery({
@@ -178,6 +179,16 @@ export default function BoreholeDrillDown({ job, jobType }) {
                             return <SIcon className="w-2.5 h-2.5" />;
                           })()}
                           {BOREHOLE_STATUS_CONFIG[s.boreholeStatus].short}
+                        </span>
+                      )}
+                      {/* Drilling method badge — CP or Rotary */}
+                      {s.drillingMethod && DRILLING_METHOD_CONFIG[s.drillingMethod] && (
+                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold border flex-shrink-0 ${DRILLING_METHOD_CONFIG[s.drillingMethod].badge}`} title={DRILLING_METHOD_CONFIG[s.drillingMethod].label}>
+                          {(() => {
+                            const DIcon = DRILLING_METHOD_CONFIG[s.drillingMethod].icon;
+                            return <DIcon className="w-2.5 h-2.5" />;
+                          })()}
+                          {DRILLING_METHOD_CONFIG[s.drillingMethod].short}
                         </span>
                       )}
                       <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
@@ -433,6 +444,11 @@ function getBoreholeSummary(logs) {
   const progressLog = logs.find(l => l.log_type === 'borehole_progress' && l.borehole_status);
   const boreholeStatus = progressLog?.borehole_status || null;
 
+  // Drilling method — from the borehole_progress log's drilling_method field
+  // (parsed from AGS LOCA_TYPE during import). Falls back to 'unknown' when
+  // not set (e.g. older imports before the field was added).
+  const drillingMethod = logs.find(l => l.log_type === 'borehole_progress' && l.drilling_method)?.drilling_method || 'unknown';
+
   // Missing data groups — which expected data is absent for this borehole.
   // Only meaningful for in-progress / unchecked boreholes (a completed hole
   // should have everything, but we still show it if data is genuinely missing).
@@ -479,6 +495,7 @@ function getBoreholeSummary(logs) {
     drillingHours,
     drillingDays,
     boreholeStatus,
+    drillingMethod,
     missingData,
     pendingCount,
     approvedCount,

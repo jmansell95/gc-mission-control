@@ -1,4 +1,4 @@
-import { CheckCircle2, Loader2, CircleDashed, Mountain } from 'lucide-react';
+import { CheckCircle2, Loader2, CircleDashed, Mountain, Drill, RotateCw, Layers } from 'lucide-react';
 
 // Borehole completion status config — shared across BoreholeDrillDown,
 // InvestigationHub, InvestigationGroupCard, and the dashboard widget.
@@ -43,3 +43,32 @@ export const MISSING_DATA_GROUPS = [
   { key: 'remarks', label: 'No remarks' },
   { key: 'finalDepth', label: 'No final depth' },
 ];
+
+// Drilling method config — parsed from the AGS LOCA_TYPE field.
+// 'cp' = Cable Percussion, 'rotary' = Rotary drilling, 'mixed' = both, 'unknown' = not specified.
+export const DRILLING_METHOD_CONFIG = {
+  cp: {
+    label: 'Cable Percussion',
+    short: 'CP',
+    icon: Drill,
+    badge: 'bg-orange-100 text-orange-700 border-orange-200',
+  },
+  rotary: {
+    label: 'Rotary',
+    short: 'Rotary',
+    icon: RotateCw,
+    badge: 'bg-blue-100 text-blue-700 border-blue-200',
+  },
+  mixed: {
+    label: 'Mixed (CP + Rotary)',
+    short: 'Mixed',
+    icon: Layers,
+    badge: 'bg-violet-100 text-violet-700 border-violet-200',
+  },
+  unknown: {
+    label: 'Method Unknown',
+    short: '—',
+    icon: CircleDashed,
+    badge: 'bg-slate-100 text-slate-500 border-slate-200',
+  },
+};

@@ -291,6 +291,14 @@ Deno.serve(async (req) => {
       else if (bhStatRaw === 'INPROG' || bhStatRaw === 'IN_PROGRESS' || bhStatRaw === 'IN-PROG' || bhStatRaw === 'I') bhStatus = 'in_progress';
       else if (bhStatRaw === 'UNCHECKED' || bhStatRaw === 'UNCK' || bhStatRaw === 'U') bhStatus = 'unchecked';
 
+      // Parse LOCA_TYPE → drilling_method (CP / Rotary / Mixed / Unknown)
+      const bhTypeRaw = str(bh.loca_type || bh.type || bh.method);
+      let bhMethod: string = 'unknown';
+      const btUpper = bhTypeRaw.toUpperCase().trim();
+      if (btUpper.includes('CP') || btUpper.includes('CABLE') || btUpper.includes('PERCUSSION')) bhMethod = 'cp';
+      else if (btUpper.includes('RC') || btUpper.includes('ROT') || btUpper.includes('CORE') || btUpper === 'R') bhMethod = 'rotary';
+      else if (btUpper.includes('MIX') || btUpper.includes('BOTH')) bhMethod = 'mixed';
+
       logs.push({
         job_id: job.id,
         staff_id: null,
@@ -299,6 +307,7 @@ Deno.serve(async (req) => {
         log_type: 'borehole_progress',
         borehole_ref: bhRef || null,
         borehole_status: bhStatus || undefined,
+        drilling_method: bhMethod !== 'unknown' ? bhMethod : undefined,
         depth_to: bhDepth || null,
         description: `Imported from KeyLogBook — borehole ${bhRef || '—'}${bhRemarks ? `: ${bhRemarks}` : ''}`,
         source: 'ags_import',

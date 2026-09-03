@@ -208,6 +208,21 @@ function mapStrataDescriptor(text: string): string {
   return 'other';
 }
 
+// Map AGS LOCA_TYPE to a drilling method enum. KeyLogBook / AGS uses various
+// codes: CP/Cable Percussion, RC/Rotary Core, R/Rotary, etc. Returns 'cp',
+// 'rotary', 'mixed', or 'unknown'.
+function mapDrillingMethod(locaType: string): string {
+  if (!locaType) return 'unknown';
+  const t = locaType.toUpperCase().trim();
+  // Cable Percussion variants
+  if (t.includes('CP') || t.includes('CABLE') || t.includes('PERCUSSION')) return 'cp';
+  // Rotary variants (RC = rotary core, R = rotary, ROT = rotary)
+  if (t.includes('RC') || t.includes('ROT') || t.includes('CORE') || t === 'R' || t.startsWith('R ')) return 'rotary';
+  // Mixed
+  if (t.includes('MIX') || t.includes('BOTH')) return 'mixed';
+  return 'unknown';
+}
+
 function mapSampleType(agsType: string): string {
   const t = String(agsType || '').toUpperCase().trim();
   if (t.startsWith('U')) return 'undisturbed';
@@ -670,6 +685,15 @@ async function logWebhookRequest(base44: any, entry: any) {
 }
 
 Deno.serve(async (req) => {
+  // Declare these outside the try block so the catch block can safely reference
+  // them when recording a failed-sync status. Without this, any error inside
+  // the try block triggers a secondary ReferenceError in the catch handler
+  // ("isExternalPush is not defined"), which masks the real error and surfaces
+  // to the user as a generic "user-exception".
+  let isExternalPush = false;
+  let agsSyncConfig: any = null;
+  let debugPayload = '';
+
   try {
     const base44 = createClientFromRequest(req);
 
@@ -691,8 +715,6 @@ Deno.serve(async (req) => {
     const authHeader = req.headers.get('authorization') || '';
     const sigHeader = req.headers.get('x-hole-signature') || '';
 
-    let isExternalPush = false;
-    let agsSyncConfig: any = null;
     try {
       const configs = await base44.asServiceRole.entities.KeyLogBookConfig.filter({ key: 'global' });
       agsSyncConfig = configs[0] || null;
@@ -911,7 +933,6 @@ Deno.serve(async (req) => {
     // be stripped to null by the entity field size limit. Stored in
     // debug_payload on the webhook log so we can identify the account name
     // field KeyLogBook sends alongside the AGS file.
-    let debugPayload = '';
     try {
       const activityGroupNames = ['SHFT', 'DLOG', 'HDIA', 'PTIM', 'HDPH', 'DREM', 'HORN', 'LOCA', 'PROJ'];
       const groupDebug: Record<string, any> = {};
@@ -1181,10 +1202,14 @@ Deno.serve(async (req) => {
         else if (locaStatRaw === 'INPROG' || locaStatRaw === 'IN_PROGRESS' || locaStatRaw === 'IN-PROG' || locaStatRaw === 'I') boreholeStatus = 'in_progress';
         else if (locaStatRaw === 'UNCHECKED' || locaStatRaw === 'UNCK' || locaStatRaw === 'U') boreholeStatus = 'unchecked';
 
+        // Parse LOCA_TYPE → drilling_method (CP / Rotary / Mixed / Unknown)
+        const drillingMethod = mapDrillingMethod(locaType);
+
         if (addLog({
           job_id: job.id, staff_id: staffId, staff_name: staffName, date: locaDate,
           log_type: 'borehole_progress', borehole_ref: locaId,
           borehole_status: boreholeStatus || undefined,
+          drilling_method: drillingMethod !== 'unknown' ? drillingMethod : undefined,
           depth_to: num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null,
           groundwater_strike_depth: num(pick(r, 'LOCA_GND', 'LOCA_GW_DEPTH', 'LOCA_GWL', 'LOCA_WATER', 'GND', 'GW_DEPTH', 'GWL', 'WATER')) || null,
           description: `Imported from KeyLogBook AGS — ${descParts.join('')}.`,

@@ -131,6 +131,16 @@
       ],
       "description": "Borehole completion status from the AGS LOCA_STAT field. 'complete' = borehole finished (LOCA_STAT=COMPLETE), 'in_progress' = still being drilled (LOCA_STAT=INPROG), 'unchecked' = status not yet confirmed (LOCA_STAT=UNCHECKED or blank). Only set on borehole_progress logs (source='ags_import'); blank for other log types. Drives the in-progress/completed badges on borehole cards and the dashboard widget."
     },
+    "drilling_method": {
+      "type": "string",
+      "enum": [
+        "cp",
+        "rotary",
+        "mixed",
+        "unknown"
+      ],
+      "description": "Drilling method used for this borehole, parsed from the AGS LOCA_TYPE field. 'cp' = Cable Percussion, 'rotary' = Rotary drilling (including rotary core), 'mixed' = both methods used, 'unknown' = method not specified in the AGS file. Only set on borehole_progress logs (source='ags_import'). Displayed as a badge on borehole cards so managers can see at a glance whether a hole was CP or Rotary."
+    },
     "depth_from": {
       "type": "number",
       "description": "Start depth in metres"
