@@ -47,3 +47,37 @@ export function londonDateStr(offsetDays = 0) {
     year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(d);
 }
+
+// Merge logs that share the same borehole_ref + start_time into a single
+// virtual row for display. Combines descriptions and raw_remarks, keeps the
+// longest duration / latest end time. Display-only — stored records are not
+// altered (the backend parser merge handles future imports cleanly).
+export function mergeDuplicateLogs(logs) {
+  if (!logs || logs.length <= 1) return logs;
+  const groups = new Map();
+  for (const l of logs) {
+    const key = `${l.borehole_ref || ''}|${l.start_time || ''}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(l);
+  }
+  const merged = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) { merged.push(group[0]); continue; }
+    const descs = [...new Set(group.map(l => (l.description || '').trim()).filter(Boolean))];
+    const raws = [...new Set(group.map(l => (l.raw_remarks || '').trim()).filter(Boolean))];
+    let bestDuration = 0, latestEnd = '';
+    for (const l of group) {
+      if ((l.duration_minutes || 0) > bestDuration) bestDuration = l.duration_minutes || 0;
+      if (l.end_time && (!latestEnd || l.end_time > latestEnd)) latestEnd = l.end_time;
+    }
+    merged.push({
+      ...group[0],
+      description: descs.join(' · '),
+      raw_remarks: raws.join(' · ') || descs.join(' · '),
+      end_time: latestEnd || group[0].end_time,
+      duration_minutes: bestDuration,
+      _mergedCount: group.length,
+    });
+  }
+  return merged;
+}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { Clock, CheckCircle2, ChevronDown, User, MapPin, Edit2, X, Save, Loader2, RotateCcw, ExternalLink } from 'lucide-react';
+import { Clock, CheckCircle2, ChevronDown, User, MapPin, Edit2, X, Save, Loader2, RotateCcw, ExternalLink, FileText, PenLine } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import SiteLogTimelineBar from './SiteLogTimelineBar';
 import { detectActivityType, TAG_COLORS } from '@/utils/siteLogUtils';
@@ -61,6 +61,7 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
   const [editForm, setEditForm] = useState({});
   const [savingId, setSavingId] = useState(null);
   const [approving, setApproving] = useState(false);
+  const [showRaw, setShowRaw] = useState(new Set());
 
   const dayLogs = [...logs].sort(byClockOrder);
   const dayPending = dayLogs.filter(l => (l.manager_review_status || 'pending') !== 'approved').length;
@@ -175,7 +176,7 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
     return (
       <div key={log.id}
         onClick={() => selectMode ? onToggleSelect?.(log.id) : onSelectActivity?.(log.id)}
-        className={`flex gap-3 p-3 rounded-xl border transition cursor-pointer ${isChecked ? 'border-emerald-400 bg-emerald-50' : isSelected ? 'border-slate-400 bg-slate-50' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50/50'}`}>
+        className={`flex gap-3 p-3.5 rounded-xl border transition cursor-pointer ${isChecked ? 'border-emerald-400 bg-emerald-50/60' : isSelected ? 'border-slate-300 bg-slate-50' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50/40'}`}>
         {/* Selection checkbox (select mode only) */}
         {selectMode && (
           <input
@@ -197,8 +198,26 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <ActivityTag description={log.description} />
+            {log.raw_remarks && log.raw_remarks.trim() && log.raw_remarks.trim() !== (log.description || '').trim() && !selectMode && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowRaw(prev => { const next = new Set(prev); if (next.has(log.id)) next.delete(log.id); else next.add(log.id); return next; });
+                }}
+                className={`ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full transition flex items-center gap-1 ${showRaw.has(log.id) ? 'bg-violet-100 text-violet-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >
+                {showRaw.has(log.id) ? <><PenLine className="w-2.5 h-2.5" /> AI</> : <><FileText className="w-2.5 h-2.5" /> Raw</>}
+              </button>
+            )}
           </div>
-          <p className="text-sm text-slate-700 leading-relaxed">{log.description}</p>
+          {showRaw.has(log.id) && log.raw_remarks ? (
+            <div>
+              <p className="text-[10px] font-bold text-violet-500 uppercase tracking-wide mb-0.5">Driller's entry</p>
+              <p className="text-sm text-slate-500 leading-relaxed italic">{log.raw_remarks}</p>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-700 leading-relaxed">{log.description}</p>
+          )}
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             {log.borehole_ref && (
               <span className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -240,10 +259,10 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="insight-card rounded-2xl overflow-hidden">
       {/* Day header */}
       <button onClick={() => onToggle(date)}
-        className="w-full px-4 py-3.5 flex items-center gap-3 text-left hover:bg-slate-50/80 transition border-b border-slate-100">
+        className="w-full px-4 py-4 flex items-center gap-3 text-left hover:bg-slate-50/50 transition border-b border-slate-100/80">
         <div className={`w-1 h-10 rounded-full flex-shrink-0 ${allApproved ? 'bg-emerald-500' : 'bg-amber-400'}`} />
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${isExpanded ? '' : '-rotate-90'}`} />

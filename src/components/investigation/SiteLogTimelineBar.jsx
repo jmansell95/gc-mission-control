@@ -28,10 +28,10 @@ const HOUR_MARKS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
 export default function SiteLogTimelineBar({ activities, selectedId, onSelect }) {
   return (
     <div className="overflow-x-auto no-scrollbar -mx-1 px-1">
-      <div className="relative min-w-[520px] h-20">
+      <div className="relative min-w-[520px] h-24">
         {/* Hour gridlines + labels */}
         {HOUR_MARKS.map(h => (
-          <div key={h} className="absolute top-5 bottom-0 border-l border-slate-100"
+          <div key={h} className="absolute top-6 bottom-0 border-l border-slate-100/80"
             style={{ left: `${(h / 24) * 100}%` }}>
             <span className="absolute -top-5 left-0 text-[9px] text-slate-300 font-mono select-none">
               {String(h).padStart(2, '0')}
@@ -39,7 +39,7 @@ export default function SiteLogTimelineBar({ activities, selectedId, onSelect })
           </div>
         ))}
         {/* End cap at 24h */}
-        <div className="absolute top-5 bottom-0 border-l border-slate-100" style={{ left: '100%' }}>
+        <div className="absolute top-6 bottom-0 border-l border-slate-100/80" style={{ left: '100%' }}>
           <span className="absolute -top-5 -translate-x-full left-0 text-[9px] text-slate-300 font-mono select-none">24</span>
         </div>
 
@@ -60,12 +60,12 @@ export default function SiteLogTimelineBar({ activities, selectedId, onSelect })
             <button
               key={log.id}
               onClick={() => onSelect?.(log.id)}
-              className={`absolute rounded-md transition-all ${isPending ? 'bg-amber-400 hover:bg-amber-500' : 'bg-emerald-500 hover:bg-emerald-600'} ${isSelected ? 'ring-2 ring-slate-700 ring-offset-1 z-10' : 'opacity-90'}`}
+              className={`absolute rounded-lg transition-all ${isPending ? 'bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600' : 'bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700'} ${isSelected ? 'ring-2 ring-slate-700 ring-offset-1 z-10 shadow-md' : 'opacity-90 hover:opacity-100 shadow-sm'}`}
               style={{
                 left: `${left}%`,
                 width: `${Math.max(width, 0.8)}%`,
-                top: '24px',
-                height: '32px',
+                top: '28px',
+                height: '36px',
               }}
               title={`${log.start_time}–${log.end_time} · ${fmtDur(dur)}`}
             />

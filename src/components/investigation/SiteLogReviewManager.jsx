@@ -8,7 +8,7 @@ import SiteLogDayCard from './SiteLogDayCard';
 import SiteLogDateRange from './SiteLogDateRange';
 import SiteLogBulkBar from './SiteLogBulkBar';
 import SiteLogExport from './SiteLogExport';
-import { detectActivityType, TAG_COLORS, ALL_TAG_TYPES, londonDateStr } from '@/utils/siteLogUtils';
+import { detectActivityType, TAG_COLORS, ALL_TAG_TYPES, londonDateStr, mergeDuplicateLogs } from '@/utils/siteLogUtils';
 
 function fmtDur(mins) {
   const m = Math.round(Number(mins) || 0);
@@ -41,7 +41,7 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   // Auto-default groupBy to 'borehole' when the majority of logs lack
   // start_time — timeless strata/event logs read better grouped by borehole.
   const autoGroupApplied = useRef(false);
-  const [collapsedDays, setCollapsedDays] = useState(new Set());
+  const [expandedDays, setExpandedDays] = useState(new Set());
   const [selectedActivityId, setSelectedActivityId] = useState(initialSelectedLogId || null);
   const [backfilling, setBackfilling] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -70,9 +70,14 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
     [...new Set(remarksLogs.map(l => l.staff_name).filter(Boolean))].sort(),
   [remarksLogs]);
 
+  // Merge duplicate-time activities (same borehole + start_time) into single
+  // virtual rows so existing stored duplicates display as one without needing
+  // a re-import. Display-only — stored records are not altered.
+  const mergedRemarks = useMemo(() => mergeDuplicateLogs(remarksLogs), [remarksLogs]);
+
   // Apply filters (including date range + activity type)
   const filteredLogs = useMemo(() =>
-    remarksLogs.filter(l => {
+    mergedRemarks.filter(l => {
       if (dateRange.from && l.date < dateRange.from) return false;
       if (dateRange.to && l.date > dateRange.to) return false;
       if (filters.driller !== 'all' && l.staff_name !== filters.driller) return false;
@@ -83,7 +88,7 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
       if (filters.activityType !== 'all' && detectActivityType(l.description).type !== filters.activityType) return false;
       return true;
     }),
-  [remarksLogs, filters, dateRange]);
+  [mergedRemarks, filters, dateRange]);
 
   // Group by date
   const byDate = useMemo(() => {
@@ -104,7 +109,7 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
     if (!initialSelectedLogId) return;
     const day = Object.keys(byDate).find(d => byDate[d].some(l => l.id === initialSelectedLogId));
     if (day) {
-      setCollapsedDays(prev => { const next = new Set(prev); next.delete(day); return next; });
+      setExpandedDays(prev => { const next = new Set(prev); next.add(day); return next; });
     }
   }, [initialSelectedLogId, byDate]);
 
@@ -113,21 +118,23 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   const approvedCount = filteredLogs.filter(l => l.manager_review_status === 'approved').length;
   const totalMinutes = filteredLogs.reduce((s, l) => s + (l.duration_minutes || 0), 0);
 
-  // Expand/collapse all
-  const allCollapsed = sortedDates.length > 0 && collapsedDays.size === sortedDates.length;
+  // Expand/collapse all — days default to collapsed; the manager opens
+  // individual days (or uses Expand all) as needed. The deep-link from the
+  // Investigation Hub auto-expands the target day.
+  const allCollapsed = expandedDays.size === 0;
   const toggleAll = () => {
-    if (allCollapsed) setCollapsedDays(new Set());
-    else setCollapsedDays(new Set(sortedDates));
+    if (allCollapsed) setExpandedDays(new Set(sortedDates));
+    else setExpandedDays(new Set());
   };
   const toggleDay = (date) => {
-    setCollapsedDays(prev => {
+    setExpandedDays(prev => {
       const next = new Set(prev);
       if (next.has(date)) next.delete(date);
       else next.add(date);
       return next;
     });
   };
-  const isDayExpanded = (date) => !collapsedDays.has(date);
+  const isDayExpanded = (date) => expandedDays.has(date);
 
   // Backfill durations
   const handleBackfill = async () => {

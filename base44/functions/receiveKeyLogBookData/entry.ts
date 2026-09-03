@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { parseRemarks, professionaliseActivities } from '../../shared/keylogbookRemarks.ts';
+import { parseRemarks, professionaliseActivities, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
 import { loadJobRateCardItems, resolveJobCharge } from '../../shared/jobRateMatcher.ts';
 import { generateKeyLogBookTimesheet } from '../../shared/keylogbookTimesheet.ts';
 
@@ -346,6 +346,17 @@ Deno.serve(async (req) => {
         chargeable: false,
         billing_status: 'no_charge',
       });
+    }
+
+    // Merge duplicate-time keylogbook_remarks activities (same borehole +
+    // start_time) into single entries — prevents overlapping records when
+    // the structured logs and parsed remarks produce entries at the same time.
+    const klbLogs = logs.filter(l => l.source === 'keylogbook_remarks');
+    if (klbLogs.length > 1) {
+      const nonKlb = logs.filter(l => l.source !== 'keylogbook_remarks');
+      const mergedKlb = mergeDuplicateLogs(klbLogs);
+      logs.length = 0;
+      logs.push(...nonKlb, ...mergedKlb);
     }
 
     let insertedLogs = 0;

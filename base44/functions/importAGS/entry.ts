@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { parseRemarks, professionaliseActivities, hasTimePattern, timeToMins, normaliseTime } from '../../shared/keylogbookRemarks.ts';
+import { parseRemarks, professionaliseActivities, hasTimePattern, timeToMins, normaliseTime, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
 
 // HMAC-SHA256 for KeyLogBook webhook request signing verification.
 // KLB sends X-Hole-Signature: sha256=<hex> when request signing is enabled.
@@ -1482,6 +1482,18 @@ Deno.serve(async (req) => {
       return Response.json({
         error: `No LOCA, GEOL, CORE, SAMP, SPT/ISPT, TREM or WSTG records were found in this AGS file. Groups found: ${found || '(none)'}.`
       }, { status: 422 });
+    }
+
+    // Merge duplicate-time keylogbook_remarks activities (same borehole +
+    // start_time) into single entries so structured-time groups and remark
+    // text never produce overlapping records. Keeps the longest duration and
+    // latest end_time so timesheet totals stay accurate.
+    const klbLogs = logs.filter(l => l.source === 'keylogbook_remarks');
+    if (klbLogs.length > 1) {
+      const nonKlb = logs.filter(l => l.source !== 'keylogbook_remarks');
+      const mergedKlb = mergeDuplicateLogs(klbLogs);
+      logs.length = 0;
+      logs.push(...nonKlb, ...mergedKlb);
     }
 
     // Organise: sort by date, then start time, then borehole ref so the

@@ -127,3 +127,39 @@ export function hasTimePattern(text: string): boolean {
   return /\d{1,2}:\d{2}\s*(?:[_\-]|to)\s*\d{1,2}:\d{2}/.test(normalised) ||
          /(^|[^\d:])(\d{2})(\d{2})\s*[_\-]\s*(\d{2})(\d{2})/.test(text);
 }
+
+// Merge activities/logs that share the same borehole_ref + start_time into a
+// single entry. Combines descriptions and raw_remarks (deduped, joined with
+// ' · '), keeps the longest duration_minutes and latest end_time so timesheet
+// totals stay accurate. Prevents duplicate-time records when the structured
+// time groups (DLOG/PTIM/TREM) and the remark-text harvest produce overlapping
+// entries for the same borehole at the same start time.
+export function mergeDuplicateLogs<T extends { borehole_ref?: string | null; start_time?: string; end_time?: string; duration_minutes?: number; description?: string; raw_remarks?: string }>(logs: T[]): T[] {
+  if (!logs || logs.length <= 1) return logs;
+  const groups = new Map<string, T[]>();
+  for (const l of logs) {
+    const key = `${l.borehole_ref || ''}|${l.start_time || ''}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(l);
+  }
+  const merged: T[] = [];
+  for (const group of groups.values()) {
+    if (group.length === 1) { merged.push(group[0]); continue; }
+    const descs = [...new Set(group.map(l => (l.description || '').trim()).filter(Boolean))];
+    const raws = [...new Set(group.map(l => (l.raw_remarks || '').trim()).filter(Boolean))];
+    let bestDuration = 0;
+    let latestEnd = '';
+    for (const l of group) {
+      if ((l.duration_minutes || 0) > bestDuration) bestDuration = l.duration_minutes || 0;
+      if (l.end_time && (!latestEnd || l.end_time > latestEnd)) latestEnd = l.end_time;
+    }
+    merged.push({
+      ...group[0],
+      description: descs.join(' · '),
+      raw_remarks: raws.join(' · ') || descs.join(' · '),
+      end_time: latestEnd || group[0].end_time,
+      duration_minutes: bestDuration,
+    });
+  }
+  return merged;
+}
