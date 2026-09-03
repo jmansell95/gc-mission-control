@@ -8,7 +8,7 @@ import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Search, Users, Mail, Phone, HardHat, Wrench, UserCog, ShieldCheck,
   ShieldOff, ChevronRight, KeyRound, UserPlus, Loader2, AlertCircle, Trash2,
-  CopyX,
+  CopyX, CheckCircle2,
 } from 'lucide-react';
 import { formatWorkerType } from '@/utils/format';
 
@@ -40,6 +40,58 @@ export default function StaffListTab() {
     queryKey: ['vehicles-staff-list'],
     queryFn: () => base44.entities.Vehicle.list(),
   });
+
+  const { data: unlinkedData } = useQuery({
+    queryKey: ['crew-profiles'],
+    queryFn: () => base44.functions.invoke('getUnlinkedUsers'),
+  });
+  const unlinked = unlinkedData?.data?.unlinked || [];
+
+  const [actioningId, setActioningId] = useState(null);
+
+  const handleSendInvite = async (s) => {
+    if (!s.email) {
+      toast({ title: 'No email address', description: 'Add an email to this crew member first.', variant: 'destructive' });
+      setEditing(s);
+      return;
+    }
+    setActioningId(s.id);
+    try {
+      // Smart link: if this staff member's email matches an existing platform user, link silently.
+      const lc = s.email.toLowerCase();
+      const existingUser = unlinked.find((u) => (u.email || '').toLowerCase() === lc);
+      if (existingUser) {
+        await base44.entities.Staff.update(s.id, { user_id: existingUser.id, invite_sent: true });
+        toast({ title: 'Account linked', description: `${s.name} already has a login — profile connected.` });
+        refresh();
+        return;
+      }
+
+      // Email 1: Platform invite — sends a registration link.
+      try {
+        await base44.users.inviteUser(s.email, 'user');
+      } catch (inviteErr) {
+        const msg = String(inviteErr?.message || '');
+        if (!msg.match(/already|exists/i)) throw inviteErr;
+      }
+
+      // Mark the staff record so the badge switches to "Invited".
+      await base44.entities.Staff.update(s.id, { invite_sent: true });
+
+      // Email 2 is sent automatically by the sendWelcomeEmail entity automation
+      // when the staff member registers and their user_id is linked.
+
+      toast({
+        title: 'Invite sent',
+        description: `${s.name} will receive an email with a link to set up their login. Once they register, a welcome email will guide them to complete their profile.`,
+      });
+      refresh();
+    } catch (e) {
+      toast({ title: 'Invite failed', description: e?.message, variant: 'destructive' });
+    } finally {
+      setActioningId(null);
+    }
+  };
 
   const teamMap = useMemo(() => {
     const m = {};
@@ -150,6 +202,8 @@ export default function StaffListTab() {
               onOpen={() => setEditing(s)}
               onPermissions={() => setPermissionStaff(s)}
               onDelete={() => handleDelete(s.id)}
+              onSendInvite={handleSendInvite}
+              actioningId={actioningId}
             />
           ))}
         </div>
@@ -180,8 +234,10 @@ export default function StaffListTab() {
   );
 }
 
-function StaffCard({ staff, team, onOpen, onPermissions, onDelete }) {
+function StaffCard({ staff, team, onOpen, onPermissions, onDelete, onSendInvite, actioningId }) {
   const linked = !!staff.user_id;
+  const inviteSent = !!staff.invite_sent;
+  const isInviting = actioningId === staff.id;
   const initials = (staff.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   const wtMeta = {
     direct_employee: { label: 'Direct', icon: HardHat, cls: 'bg-emerald-50 text-emerald-700' },
@@ -244,10 +300,25 @@ function StaffCard({ staff, team, onOpen, onPermissions, onDelete }) {
           <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
             <ShieldCheck className="w-3 h-3" /> Linked
           </span>
+        ) : inviteSent ? (
+          <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold" title="Invite sent — awaiting profile setup">
+            <CheckCircle2 className="w-3 h-3" /> Invited
+          </span>
         ) : (
           <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold">
             <ShieldOff className="w-3 h-3" /> No login
           </span>
+        )}
+        {!linked && onSendInvite && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onSendInvite(staff); }}
+            disabled={isInviting}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-[11px] font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50"
+            title={inviteSent ? 'Re-send invite and link account' : 'Send app invite so they can create their profile'}
+          >
+            {isInviting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+            {inviteSent ? 'Re-invite' : 'Invite'}
+          </button>
         )}
         <div className="flex-1" />
         <button
