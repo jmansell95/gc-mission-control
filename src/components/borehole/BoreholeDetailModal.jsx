@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   X, Mountain, Layers, TestTube, Calculator, Package, Droplets,
-  Ruler, ArrowDownToLine, Activity, TrendingDown, Gauge,
+  Ruler, ArrowDownToLine, Activity, TrendingDown, Gauge, TrendingUp, Clock,
   AlertTriangle, Ban, Waves, ClipboardList, Boxes,
   Tablet, ExternalLink, User
 } from 'lucide-react';
@@ -11,12 +11,13 @@ import {
   strataColors, sampleTypeConfig, getSptDensityLabel, safeFormatDate
 } from '@/components/investigation/shared';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Mountain },
+  { key: 'progress', label: 'Drilling Progress', icon: TrendingUp },
   { key: 'strata', label: 'Strata', icon: Layers },
   { key: 'core', label: 'Core Runs', icon: Boxes },
   { key: 'spt', label: 'SPT Tests', icon: Calculator },
@@ -52,6 +53,7 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId,
   // Count data per tab for badges
   const tabCounts = useMemo(() => ({
     overview: null,
+    progress: null,
     strata: summary.strataCount,
     core: summary.coreCount,
     spt: summary.sptCount,
@@ -137,6 +139,7 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId,
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           {activeTab === 'overview' && <OverviewTab summary={summary} logs={logs} hideStrata={hideStrata} hideSamples={hideSamples} />}
+          {activeTab === 'progress' && <DrillingProgressTab logs={logs} summary={summary} />}
           {activeTab === 'strata' && !hideStrata && <StrataTab logs={summary.strataLogs} maxDepth={summary.maxDepth} groundwaterDepth={summary.progressLog?.groundwater_strike_depth} />}
           {activeTab === 'core' && <CoreTab logs={summary.coreLogs} />}
           {activeTab === 'spt' && <SptTab logs={summary.sptLogs} />}
@@ -213,6 +216,15 @@ function getBoreholeSummary(logs) {
     logs.map(l => l.staff_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
   )];
 
+  // Drilling duration — sum of duration_minutes from driller activity logs
+  const drillerActivityLogs = logs.filter(l =>
+    l.source === 'keylogbook_remarks' && l.duration_minutes != null && l.duration_minutes > 0
+  );
+  const drillingMinutes = drillerActivityLogs.reduce((sum, l) => sum + l.duration_minutes, 0);
+  const drillingDates = [...new Set(drillerActivityLogs.map(l => l.date).filter(Boolean))];
+  const drillingHours = Math.round((drillingMinutes / 60) * 10) / 10;
+  const drillingDays = drillingDates.length;
+
   return {
     maxDepth: allDepths.length ? Math.max(...allDepths) : null,
     progressLog: progressLogs[0],
@@ -227,7 +239,70 @@ function getBoreholeSummary(logs) {
     dateRange,
     primaryDriller: drillerNames[0] || null,
     drillerCount: drillerNames.length,
+    drillingMinutes,
+    drillingHours,
+    drillingDays,
   };
+}
+
+// ===== Drilling Progress Tab =====
+function DrillingProgressTab({ logs, summary }) {
+  const chartData = useMemo(() => {
+    const timed = logs
+      .filter(l => l.source === 'keylogbook_remarks' && l.duration_minutes != null && l.duration_minutes > 0)
+      .sort((a, b) => {
+        const aKey = `${a.date || ''}${a.start_time || ''}`;
+        const bKey = `${b.date || ''}${b.start_time || ''}`;
+        return aKey.localeCompare(bKey);
+      });
+    if (timed.length === 0) return [];
+    let cumHours = 0;
+    let maxDepth = 0;
+    const points = [{ hours: 0, depth: 0 }];
+    timed.forEach(l => {
+      cumHours += l.duration_minutes / 60;
+      if (l.depth_to != null && l.depth_to > maxDepth) maxDepth = l.depth_to;
+      points.push({ hours: Math.round(cumHours * 10) / 10, depth: Math.round(maxDepth * 10) / 10 });
+    });
+    return points;
+  }, [logs]);
+
+  const drillingHours = summary.drillingHours || 0;
+  const maxDepth = summary.maxDepth;
+  const rate = drillingHours > 0 && maxDepth != null ? (maxDepth / drillingHours).toFixed(1) : null;
+
+  if (chartData.length === 0) {
+    return <EmptyTab icon={TrendingUp} message="No timed drilling activity recorded for this borehole. Drilling progress requires KeyLogBook remarks with duration data." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <KpiTile icon={ArrowDownToLine} label="Final Depth" value={maxDepth != null ? `${maxDepth}m` : '—'} color="bg-blue-50 text-blue-700" />
+        <KpiTile icon={Clock} label="Drilling Time" value={`${drillingHours}h`} color="bg-blue-50 text-blue-700" />
+        <KpiTile icon={TrendingUp} label="Drilling Rate" value={rate ? `${rate}m/h` : '—'} color="bg-emerald-50 text-emerald-700" />
+      </div>
+      <div className="rounded-xl border border-slate-200 overflow-hidden">
+        <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+          <p className="text-xs font-bold text-slate-600 uppercase tracking-wide inline-flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5" /> Depth vs Drilling Time
+          </p>
+        </div>
+        <div className="p-4">
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="hours" type="number" domain={[0, 'dataMax']} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" label={{ value: 'Cumulative Drilling Hours', position: 'insideBottom', offset: -10, fontSize: 11, fill: '#64748b' }} />
+              <YAxis type="number" domain={[0, 'dataMax']} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" label={{ value: 'Depth (m)', angle: -90, position: 'insideLeft', fontSize: 11, fill: '#64748b', dy: 40 }} />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }} formatter={(v, name) => name === 'depth' ? [`${v}m`, 'Depth'] : [`${v}h`, 'Hours']} labelFormatter={(h) => `${h}h drilling`} />
+              <Line type="monotone" dataKey="depth" stroke="#2E5A1A" strokeWidth={2.5} dot={{ r: 3, fill: '#2E5A1A' }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+          <p className="text-xs text-slate-400 text-center mt-2">Depth progression as drilling hours accumulate. A flattening curve indicates slow strata or delays.</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ===== Overview Tab =====

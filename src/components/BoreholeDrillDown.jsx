@@ -61,6 +61,8 @@ export default function BoreholeDrillDown({ job, jobType }) {
     let avgRecovery = null;
     const allRecoveries = [];
     let totalDrillingMinutes = 0;
+    let sumDrillDepth = 0;
+    let sumDrillHours = 0;
     const allDrillingDates = new Set();
     boreholes.forEach(([, refLogs]) => {
       const s = getBoreholeSummary(refLogs);
@@ -71,11 +73,16 @@ export default function BoreholeDrillDown({ job, jobType }) {
       if (s.avgRecovery != null) allRecoveries.push(s.avgRecovery);
       totalDrillingMinutes += s.drillingMinutes || 0;
       (s.drillingDates || []).forEach(d => allDrillingDates.add(d));
+      if ((s.drillingHours || 0) > 0 && s.maxDepth != null) {
+        sumDrillDepth += s.maxDepth;
+        sumDrillHours += s.drillingHours;
+      }
     });
     if (allRecoveries.length) avgRecovery = Math.round(allRecoveries.reduce((a, b) => a + b, 0) / allRecoveries.length);
     const totalDrillingHours = Math.round((totalDrillingMinutes / 60) * 10) / 10;
     const totalDrillingDays = allDrillingDates.size;
-    return { totalMeters, totalSamples, totalSPTs, totalCores, totalInstallations, avgRecovery, totalDrillingHours, totalDrillingDays };
+    const avgDrillRate = sumDrillHours > 0 ? Math.round((sumDrillDepth / sumDrillHours) * 10) / 10 : null;
+    return { totalMeters, totalSamples, totalSPTs, totalCores, totalInstallations, avgRecovery, totalDrillingHours, totalDrillingDays, avgDrillRate };
   }, [boreholes, logs]);
 
   const activeLogs = selectedRef ? boreholes.find(([ref]) => ref === selectedRef)?.[1] || [] : [];
@@ -179,6 +186,12 @@ export default function BoreholeDrillDown({ job, jobType }) {
               <SummaryStat icon={CalendarDays} value={totals.totalDrillingDays} label="Drill Days" color="text-cyan-700" />
             </>
           )}
+          {totals.avgDrillRate != null && (
+            <>
+              <div className="h-9 w-px bg-slate-200 hidden md:block" />
+              <SummaryStat icon={Gauge} value={`${totals.avgDrillRate}m/h`} label="Avg Drilling Rate" color="text-emerald-700" />
+            </>
+          )}
         </div>
       </div>
 
@@ -244,6 +257,14 @@ export default function BoreholeDrillDown({ job, jobType }) {
                       </span>
                     )}
                   </div>
+
+                  {/* Drilling rate — metres per hour */}
+                  {s.drillingHours > 0 && s.maxDepth != null && (
+                    <div className="flex items-center gap-1 text-[11px] text-emerald-700 font-medium mb-2">
+                      <Gauge className="w-3 h-3 text-emerald-600" />
+                      {s.maxDepth}m in {s.drillingHours}h · {(s.maxDepth / s.drillingHours).toFixed(1)}m/h
+                    </div>
+                  )}
 
                   {/* Mini strata visual bar */}
                   {!hideStrata && s.strataLogs.length > 0 && (
