@@ -69,15 +69,19 @@ Deno.serve(async (req) => {
         const staffId = assignment.staff_id;
         if (!staffId) { results.skipped++; continue; }
 
-        // Check if a summary already exists for this staff+date
+        // Check if a summary already exists for this staff+date — delete it
+        // so we can rebuild with the full-day picture (on-site + travel + break
+        // + overtime). The webhook may have created an on-site-only summary;
+        // the scheduled run enhances it with GPS travel and auto-detected breaks.
         const existing = await b.entities.Timesheet.filter({
           staff_id: staffId,
           date: targetDate,
           is_summary: true,
         });
         if (existing && existing.length > 0) {
-          results.skipped++;
-          continue;
+          for (const t of existing) {
+            await b.entities.Timesheet.delete(t.id);
+          }
         }
 
         // Collect all granular fragments for this staff+date
@@ -87,6 +91,22 @@ Deno.serve(async (req) => {
           is_summary: false,
           status: { $ne: 'deleted' },
         });
+
+        // Collect KeyLogBook site activity logs for this staff+date — these
+        // carry the driller's time-stamped on-site activities (the 8am–5pm
+        // block). Their summed duration_minutes is the on-site time.
+        let klbLogs: any[] = [];
+        try {
+          if (assignment.job_id) {
+            klbLogs = await b.entities.InvestigationLog.filter({
+              job_id: assignment.job_id,
+              date: targetDate,
+              source: 'keylogbook_remarks',
+            });
+          }
+        } catch (e) { /* skip */ }
+        const klbOnSiteMinutes = klbLogs.reduce((s: number, l: any) => s + (Number(l.duration_minutes) || 0), 0);
+        if (klbOnSiteMinutes > 0) sources.add('keylogbook');
 
         // Collect sources
         const sources = new Set<string>();
@@ -101,23 +121,24 @@ Deno.serve(async (req) => {
         if (assignment.mitti_vehicle_check_at) sources.add('mitti');
 
         // Rota-based fallback (depot staff or no fragments)
-        if (fragments.length === 0) {
+        if (fragments.length === 0 && klbLogs.length === 0) {
           sources.add('rota');
         }
 
         // Skip creating a summary when there is truly zero data — no
-        // fragments, no GPS arrival, no on-site minutes. These 0-minute
-        // rota-only drafts (confidence 0) just clutter the manager queue
-        // with useless entries. The daily summary email already nudges
-        // managers about staff with missing timesheets.
-        if (fragments.length === 0 && !assignment.arrived_on_site_at && !assignment.left_site_at) {
+        // fragments, no GPS arrival, no KLB logs, no on-site minutes.
+        if (fragments.length === 0 && klbLogs.length === 0 && !assignment.arrived_on_site_at && !assignment.left_site_at) {
           results.skipped++;
           continue;
         }
 
-        // Calculate on-site duration from assignment timestamps
+        // Calculate on-site duration — prefer KLB activity log durations (the
+        // driller's actual timed activities), then GPS assignment timestamps,
+        // then fragment durations as a last resort.
         let onSiteMinutes = 0;
-        if (assignment.arrived_on_site_at && assignment.left_site_at) {
+        if (klbOnSiteMinutes > 0) {
+          onSiteMinutes = klbOnSiteMinutes;
+        } else if (assignment.arrived_on_site_at && assignment.left_site_at) {
           onSiteMinutes = minutesBetween(assignment.arrived_on_site_at, assignment.left_site_at);
         } else if (assignment.arrived_on_site_at) {
           // Still on site — calculate to now

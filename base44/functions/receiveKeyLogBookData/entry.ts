@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
     let leadDrillerId = '';
 
     // 1) Scan the AGS / borehole / log payloads for a driller / engineer name
-    const agsNameFields = ['driller_name', 'driller', 'logged_by', 'engineer', 'operator', 'recorded_by', 'inspected_by'];
+    const agsNameFields = ['driller_name', 'driller', 'logged_by', 'engineer', 'operator', 'recorded_by', 'inspected_by', 'user', 'username', 'account', 'account_name', 'user_name'];
     const scanForDriller = (...arrs: any[][]) => {
       for (const arr of arrs) {
         if (!Array.isArray(arr)) continue;
@@ -190,7 +190,16 @@ Deno.serve(async (req) => {
       }
       return '';
     };
-    leadDrillerName = scanForDriller(body.boreholes, body.logs, body.remarks_data, body.ags_data);
+    leadDrillerName = scanForDriller(body.boreholes, body.logs, body.remarks_data, body.ags_data, body.data ? [body.data] : []);
+
+    // 1b) Scan the top-level webhook body for KLB user/account fields
+    if (!leadDrillerName) {
+      const bodyUserFields = ['lead_driller_name', 'driller_name', 'driller', 'user', 'username', 'account', 'account_name', 'user_name', 'operator', 'logged_by', 'recorded_by'];
+      for (const f of bodyUserFields) {
+        const val = str((body as any)[f]);
+        if (val && !/^(unknown|n\/?a|none|test)$/i.test(val)) { leadDrillerName = val; break; }
+      }
+    }
 
     // 2) Fall back to the webhook body's explicit lead_driller_name
     if (!leadDrillerName) leadDrillerName = str(body.lead_driller_name);

@@ -972,7 +972,37 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2) Resolve the actual driller from the rota — date-scoped to the
+    // 1b) Extract the actual driller name from the AGS file. KeyLogBook stores
+    // the driller/user who operated the rig in DREM, HDIA, LOCA, and SHFT
+    // groups. Field suffixes to look for: DRILLER, USER, OPERATOR, LOGGED_BY.
+    // The first non-empty value found wins. This is the KeyLogBook user — the
+    // person who actually drilled the borehole and wrote the remarks.
+    const DRILLER_FIELD_SUFFIXES = ['DRILLER', 'USER', 'OPERATOR', 'LOGGED_BY', 'RECORDED_BY', 'INSPECTED_BY', 'ACCOUNT', 'USERNAME', 'DRILL'];
+    const scanGroupsForDriller = (groupNames: string[]): string => {
+      for (const gn of groupNames) {
+        const g = groups[gn];
+        if (!g || !g.headings || g.rows.length === 0) continue;
+        for (const row of g.rows) {
+          const r = buildRow(g, row);
+          for (const h of g.headings) {
+            const suffix = normalizeKey(h, gn);
+            if (DRILLER_FIELD_SUFFIXES.includes(suffix)) {
+              const val = (r[h.toUpperCase()] || '').trim();
+              if (val && val.length > 1 && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) {
+                return val;
+              }
+            }
+          }
+        }
+      }
+      return '';
+    };
+    const agsDriller = scanGroupsForDriller(['DREM', 'HDIA', 'SHFT', 'DLOG', 'PTIM', 'LOCA']);
+
+    // 2) Resolve the actual driller — prefer the AGS-file driller name, then
+    // fall back to the rota assignment for that rig+date. Prefer a staff
+    // member on a drilling team (cp/rotary). The driller's team job_type
+    // determines logged_by_role.
     // earliest borehole date, falling back to job-level assignments when no
     // date-specific assignments exist. Prefer a staff member on a drilling
     // team (cp/rotary). The driller's team job_type determines logged_by_role.
@@ -992,7 +1022,10 @@ Deno.serve(async (req) => {
         const chosen = drillerStaff || allStaff[0];
         const chosenAssignment = assignments.find(a => a.staff_id === chosen?.id) || assignments[0];
         drillerStaffId = chosenAssignment.staff_id || '';
-        drillerName = chosen?.name || '';
+        // Use the AGS-file driller name when present (the actual KeyLogBook
+        // user who drilled the borehole). Fall back to the rota-resolved
+        // staff name only when the AGS file didn't carry a driller name.
+        if (!drillerName) drillerName = chosen?.name || '';
         // Derive logged_by_role from the resolved driller's team job_type
         const chosenTeam = teams.find((t: any) => t.id === chosen?.team_id);
         if (chosenTeam) {
@@ -1006,13 +1039,18 @@ Deno.serve(async (req) => {
       }
     } catch (e) { /* skip */ }
 
+    // The AGS-file driller name takes precedence over the rota-resolved name
+    // — it's the actual KeyLogBook user who drilled the borehole and wrote
+    // the remarks. The rota-resolved name is only a fallback.
+    if (agsDriller) drillerName = agsDriller;
+
     // Technical logs (ags_import) use the resolved driller's staff_id. The
-    // project engineer's name is preserved in completed_by_name for audit.
-    // staff_name is blank when no rota assignment exists — the manager can
-    // manually assign the driller during review.
+    // driller name (from the AGS file or rota) is the primary attribution —
+    // shown prominently as staff_name and completed_by_name. The project
+    // engineer is no longer misattributed as the driller.
     const staffId = drillerStaffId || 'ags_import';
     const staffName = drillerName || '';
-    const completedByName = projectEngineerName ? `Project Engineer: ${projectEngineerName}` : importerName;
+    const completedByName = drillerName || importerName;
 
     const logs: any[] = [];
     const samplesToCreate: any[] = [];
