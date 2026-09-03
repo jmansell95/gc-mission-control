@@ -558,14 +558,14 @@ function MemberRow({ member, onClick, onOpenPermissions, onSendInvite, actioning
           <ShieldOff className="w-3 h-3" /> No login
         </span>
       )}
-      {canInvite && !inviteSent && (
+      {canInvite && (
         <button
           onClick={(e) => { e.stopPropagation(); onSendInvite(member); }}
           disabled={isInviting}
           className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#2E5A1A] text-white hover:bg-[#1c4a12] text-[10px] font-semibold transition flex-shrink-0 disabled:opacity-50"
-          title="Send app invite so they can create their profile"
+          title={inviteSent ? 'Re-send invite and link account' : 'Send app invite so they can create their profile'}
         >
-          {isInviting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />} Invite
+          {isInviting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />} {inviteSent ? 'Re-invite' : 'Invite'}
         </button>
       )}
       {onOpenPermissions && (
