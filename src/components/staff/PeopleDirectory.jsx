@@ -201,31 +201,32 @@ export default function PeopleDirectory() {
   const handleSendInvite = async (s) => {
     if (!s.email) {
       toast({ title: 'No email address', description: 'Add an email to this crew member first.', variant: 'destructive' });
+      setEditing(s);
       return;
     }
     setActioningId(s.id);
     try {
-      const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
-      let registered = false;
+      // Email 1: Platform invite — sends a registration link so they can set up their login.
+      // Works for non-registered users (the platform's own email pipeline, no custom domain needed).
       try {
-        await base44.auth.register({ email: s.email, password: tempPassword });
-        registered = true;
-      } catch (regErr) {
-        if (!String(regErr?.message || '').match(/already|exists/i)) throw regErr;
-        registered = true;
-      }
-      let brandedSent = false;
-      if (registered) {
-        try {
-          const res = await base44.functions.invoke('sendBrandedInvite', { email: s.email, staff_name: s.name, temp_password: tempPassword });
-          brandedSent = (res.data || res)?.sent === true;
-        } catch (_) { /* fall back below */ }
-      }
-      if (!brandedSent) {
         await base44.users.inviteUser(s.email, 'user');
+      } catch (inviteErr) {
+        const msg = String(inviteErr?.message || '');
+        // If the user already exists, that's fine — they already have an account.
+        if (!msg.match(/already|exists/i)) throw inviteErr;
       }
+
+      // Mark the staff record so the badge switches to "Invited".
       await base44.entities.Staff.update(s.id, { invite_sent: true });
-      toast({ title: 'Invite sent', description: `${s.name} will receive an email to set up their profile.` });
+
+      // Email 2 is sent automatically by the "Welcome Email on Registration" entity
+      // automation (sendWelcomeEmail) when the staff member registers and their
+      // user_id is linked to this Staff record — no manual trigger needed here.
+
+      toast({
+        title: 'Invite sent',
+        description: `${s.name} will receive an email with a link to set up their login. Once they register, a welcome email will guide them to complete their profile.`,
+      });
       refresh();
     } catch (e) {
       toast({ title: 'Invite failed', description: e?.message, variant: 'destructive' });
