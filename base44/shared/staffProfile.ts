@@ -25,6 +25,7 @@ export async function buildMyProfile(base44, user) {
   // Auto-provision: no matching Staff record → create a minimal one.
   if (staff.length === 0) {
     let defaultTeamId = '';
+    let defaultTeamDivisionId = null;
     try {
       const teams = await base44.asServiceRole.entities.Team.list();
       if (teams.length === 0) {
@@ -37,7 +38,9 @@ export async function buildMyProfile(base44, user) {
         });
         defaultTeamId = t.id;
       } else {
-        defaultTeamId = (teams.find((t) => t.category === 'field_ops') || teams[0]).id;
+        const defaultTeam = teams.find((t) => t.category === 'field_ops') || teams[0];
+        defaultTeamId = defaultTeam.id;
+        defaultTeamDivisionId = defaultTeam.division_id || null;
       }
     } catch (_) {
       // team resolution is best-effort; create with blank team if it fails
@@ -50,6 +53,7 @@ export async function buildMyProfile(base44, user) {
         user_id: user.id,
         worker_type: 'direct_employee',
         team_id: defaultTeamId,
+        division_id: defaultTeamDivisionId,
         is_active: true,
         system_role: isAdmin ? 'admin' : 'field',
       });
@@ -106,14 +110,25 @@ export async function buildMyProfile(base44, user) {
     } catch (_) {}
   }
 
-  // Sync User.division_id from the team's division so RLS rules resolve correctly.
-  // Division is now inherited from the team — Staff no longer carries an
-  // independently editable division_id. This runs on every login to keep the
-  // User record in sync (e.g. after an admin moves a staff member to a new team).
-  if (team?.division_id && user.id && user.division_id !== team.division_id) {
-    try {
-      await base44.asServiceRole.entities.User.update(user.id, { division_id: team.division_id });
-    } catch (_) {}
+  // Sync division_id from the team's division so RLS rules resolve correctly.
+  // The Staff record carries a denormalized division_id cache (used by RLS
+  // rules that reference data.division_id), and the User record carries its
+  // own division_id for user-scoped RLS. Both must stay in sync with the team.
+  // This runs on every login so a staff member moved to a new team is picked
+  // up immediately — and so auto-provisioned records that started with null
+  // division_id are repaired on first login.
+  if (team?.division_id) {
+    if (user.id && user.division_id !== team.division_id) {
+      try {
+        await base44.asServiceRole.entities.User.update(user.id, { division_id: team.division_id });
+      } catch (_) {}
+    }
+    if (s.division_id !== team.division_id) {
+      try {
+        await base44.asServiceRole.entities.Staff.update(s.id, { division_id: team.division_id });
+        s.division_id = team.division_id;
+      } catch (_) {}
+    }
   }
 
   // Direct permission group
