@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Mountain, ArrowDownToLine, TestTube, Calculator, Boxes, Package, Gauge, Clock, CalendarDays, TrendingUp } from 'lucide-react';
+import { Mountain, ArrowDownToLine, TestTube, Calculator, Boxes, Package, Gauge, Clock, CalendarDays, TrendingUp, CheckCircle2, Loader2, CircleDashed } from 'lucide-react';
 import { strataColors, strataConfig } from '@/components/investigation/shared';
 
 /**
@@ -44,6 +44,17 @@ export default function BoreholeSummaryPanel({ boreholes, totals }) {
   const hasStrata = strataData.length > 0;
   const hasDepthChart = depthData.length > 0;
 
+  // Borehole completion status counts (from LOCA_STAT on borehole_progress logs)
+  const statusCounts = useMemo(() => {
+    const counts = { complete: 0, in_progress: 0, unchecked: 0 };
+    boreholes.forEach(([, logs]) => {
+      const progressLog = logs.find(l => l.log_type === 'borehole_progress' && l.borehole_status);
+      if (progressLog) counts[progressLog.borehole_status] = (counts[progressLog.borehole_status] || 0) + 1;
+      else counts.unchecked++;
+    });
+    return counts;
+  }, [boreholes]);
+
   return (
     <div className="space-y-4">
       {/* KPI ribbon */}
@@ -60,6 +71,12 @@ export default function BoreholeSummaryPanel({ boreholes, totals }) {
           <KpiTile icon={Calculator} label="SPTs" value={totals.totalSPTs} />
           <KpiTile icon={Boxes} label="Core Runs" value={totals.totalCores} />
           <KpiTile icon={Clock} label="Drill Time" value={`${totals.totalDrillingHours}h`} />
+        </div>
+        {/* Borehole status strip */}
+        <div className="grid grid-cols-3 gap-3 mt-3">
+          <KpiTile icon={CheckCircle2} label="Completed" value={statusCounts.complete} />
+          <KpiTile icon={Loader2} label="In Progress" value={statusCounts.in_progress} />
+          <KpiTile icon={CircleDashed} label="Unchecked" value={statusCounts.unchecked} />
         </div>
       </div>
 
