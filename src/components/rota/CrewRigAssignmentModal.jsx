@@ -79,6 +79,9 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
     const ids = new Set();
     (teams || []).forEach(t => {
       if (['drilling', 'cp_drilling', 'rotary_drilling'].includes(t.job_type)) ids.add(t.id);
+      // Also match teams whose name signals a drilling crew, even when the
+      // team's job_type field is blank (e.g. "Rotary Crew (Dynamic)").
+      if (/\b(drilling|driller|rotary|cable percussion|\bcp\b)\b/i.test(t.name || '')) ids.add(t.id);
     });
     return ids;
   }, [teams]);

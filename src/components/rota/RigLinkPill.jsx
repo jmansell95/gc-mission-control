@@ -16,6 +16,13 @@ export default function RigLinkPill({ assignment, rigs, allAssignments, staff, o
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
   if (!assignment?.rig_asset_id) return null;
   const rig = (rigs || []).find(r => r.id === assignment.rig_asset_id);
   if (!rig) return null;
@@ -41,13 +48,6 @@ export default function RigLinkPill({ assignment, rigs, allAssignments, staff, o
     ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
     : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100';
   const padCls = size === 'xs' ? 'px-1 py-0.5 text-[9px]' : 'px-1.5 py-0.5 text-[10px]';
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
 
   const titleParts = [rig.name];
   if (rig.serial_number) titleParts.push(rig.serial_number);
