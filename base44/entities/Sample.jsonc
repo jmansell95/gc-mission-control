@@ -59,6 +59,18 @@
       "type": "string",
       "description": "Name of the collector (denormalised for display)"
     },
+    "collected_by_crew_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Full list of ALL crew member names who collected this sample, parsed from the AGS HDPH_LOG/HDPH_CREW fields. Every name is kept so multi-person crews are fully attributed. Used by the Geotech tab to group samples by driller within each borehole."
+    },
+    "shift_id": {
+      "type": "string",
+      "description": "KeyLogBook shift ID (SHFT_ID) linking this sample to the specific drilling shift when it was collected. Used to group samples by driller per shift."
+    },
     "container_type": {
       "type": "string",
       "enum": [

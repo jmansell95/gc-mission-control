@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Droplets, TestTube, Calculator, Layers, Mountain,
   ArrowDownToLine, ChevronRight, Tablet, Search, Boxes, Package, Gauge,
-  Activity, TrendingDown, User, ExternalLink, CalendarDays, Clock
+  Activity, TrendingDown, User, ExternalLink, CalendarDays, Clock,
+  Users, Cpu, HardHat, Wrench
 } from 'lucide-react';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import { strataColors, strataConfig } from '@/components/investigation/shared';
@@ -195,16 +196,41 @@ export default function BoreholeDrillDown({ job, jobType }) {
                     </div>
                   </button>
 
-                  {/* Driller attribution — who logged/edited this borehole */}
-                  {s.primaryDriller && (
-                    <div className="flex items-center gap-1.5 mb-2 text-xs">
-                      <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <User className="w-3 h-3 text-emerald-700" />
+                  {/* Full crew attribution — all crew names as individual chips */}
+                  {s.allCrewNames.length > 0 && (
+                    <div className="mb-2">
+                      <div className="flex items-center gap-1 mb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                        <Users className="w-2.5 h-2.5" /> Crew ({s.crewCount})
                       </div>
-                      <span className="font-semibold text-slate-700 truncate">{s.primaryDriller}</span>
-                      {s.drillerCount > 1 && (
-                        <span className="text-slate-400 text-[10px]">+{s.drillerCount - 1} other{s.drillerCount > 2 ? 's' : ''}</span>
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {s.allCrewNames.map((name, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-100">
+                            <User className="w-2 h-2" />{name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Project engineer — distinct from the driller */}
+                  {s.projectEngineer && (
+                    <div className="flex items-center gap-1.5 mb-2 text-xs">
+                      <HardHat className="w-3 h-3 text-amber-600 flex-shrink-0" />
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Eng:</span>
+                      <span className="font-medium text-slate-600 truncate">{s.projectEngineer}</span>
+                    </div>
+                  )}
+
+                  {/* Device/rig name — from HDPH_EXC */}
+                  {s.deviceNames.length > 0 && (
+                    <div className="flex items-center gap-1.5 mb-2 text-xs">
+                      <Cpu className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Rig:</span>
+                      {s.deviceNames.map((dev, i) => (
+                        <span key={i} className="font-medium text-slate-600">
+                          {dev}{i < s.deviceNames.length - 1 ? ',' : ''}
+                        </span>
+                      ))}
                     </div>
                   )}
 
@@ -418,15 +444,45 @@ function getBoreholeSummary(logs) {
   const recoveries = coreLogs.map(l => l.coring_recovery).filter(r => r != null);
   const rqds = coreLogs.map(l => l.coring_rqd).filter(r => r != null);
 
-  // Driller attribution: collect all distinct names from staff_name and
-  // completed_by_name across every log for this borehole. The "logged by"
-  // field shows who recorded the data — the actual driller name when
-  // available, falling back to the import source label.
-  const drillerNames = [...new Set(
-    logs.map(l => l.staff_name).filter(n => n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import'))
-  )];
-  const primaryDriller = drillerNames[0] || null;
-  const allDrillers = drillerNames.length > 0 ? drillerNames.join(', ') : null;
+  // Driller attribution: collect ALL distinct crew names from crew_names
+  // arrays (the full per-shift crew parsed from HDPH_LOG/HDPH_CREW), plus
+  // staff_name and completed_by_name as fallbacks. Every name is kept so
+  // multi-person crews are fully attributed on the borehole card.
+  const crewNameSet = new Set();
+  logs.forEach(l => {
+    if (Array.isArray(l.crew_names)) {
+      l.crew_names.forEach(n => {
+        if (n && n !== 'KeyLogBook Webhook' && !n.startsWith('AGS Import')) crewNameSet.add(n);
+      });
+    }
+    if (l.staff_name && l.staff_name !== 'KeyLogBook Webhook' && !l.staff_name.startsWith('AGS Import')) {
+      crewNameSet.add(l.staff_name);
+    }
+    if (l.completed_by_name && l.completed_by_name !== 'KeyLogBook Webhook' && !l.completed_by_name.startsWith('AGS Import')) {
+      crewNameSet.add(l.completed_by_name);
+    }
+  });
+  const allCrewNames = [...crewNameSet];
+  const primaryDriller = allCrewNames[0] || null;
+
+  // Project engineer — from the project_engineer field (PROJ_ENG), distinct
+  // from the driller. Same across all logs for this borehole.
+  const projectEngineer = logs.find(l => l.project_engineer)?.project_engineer || null;
+
+  // Device/rig name — from device_name (HDPH_EXC). May vary per shift if the
+  // rig was swapped, so collect all distinct devices.
+  const deviceSet = new Set();
+  logs.forEach(l => { if (l.device_name) deviceSet.add(l.device_name); });
+  const deviceNames = [...deviceSet];
+
+  // Drill time per borehole — from shift durations (SHFT_ENDD - SHFT_STAR)
+  // stored on borehole_progress logs, plus duration_minutes from
+  // keylogbook_remarks activities.
+  const shiftDurationMinutes = logs.reduce((sum, l) => {
+    // Sum duration_minutes from keylogbook_remarks activities
+    if (l.source === 'keylogbook_remarks' && l.duration_minutes > 0) return sum + l.duration_minutes;
+    return sum;
+  }, 0);
 
   // Drilling duration — sum of duration_minutes from driller activity logs
   // (source keylogbook_remarks with PTIM/DLOG times). Each activity's
@@ -485,8 +541,11 @@ function getBoreholeSummary(logs) {
     avgRecovery: recoveries.length ? Math.round(recoveries.reduce((a, b) => a + b, 0) / recoveries.length) : null,
     avgRqd: rqds.length ? Math.round(rqds.reduce((a, b) => a + b, 0) / rqds.length) : null,
     primaryDriller,
-    allDrillers,
-    drillerCount: drillerNames.length,
+    allCrewNames,
+    crewCount: allCrewNames.length,
+    projectEngineer,
+    deviceNames,
+    shiftDurationMinutes,
     firstDate,
     lastDate,
     totalLogs: logs.length,

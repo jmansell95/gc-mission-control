@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { parseRemarks, professionaliseActivities, hasTimePattern, timeToMins, normaliseTime, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
+import { buildShiftCrewMap, buildBoreholeCrewMap, buildBoreholeDrillTimeMap, parseCrewNames } from '../../shared/agsCrewAttribution.ts';
 
 // HMAC-SHA256 for KeyLogBook webhook request signing verification.
 // KLB sends X-Hole-Signature: sha256=<hex> when request signing is enabled.
@@ -436,6 +437,7 @@ interface StructuredActivity {
   end_time: string;
   duration_minutes: number;
   description: string;
+  shift_id: string;
 }
 
 // Build a per-borehole-per-date shift window from the SHFT group.
@@ -519,6 +521,8 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>, shiftWindo
     for (const row of g.rows) {
       const r = buildRow(g, row);
       const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
+      // Extract SHFT_ID — links this activity to the specific shift (and its crew)
+      const shiftId = pick(r, 'SHFT_ID', 'SHIFT_ID', 'ID');
 
       // KeyLogBook stores full ISO datetimes in PTIM_DTIM, SHFT_STAR and
       // SHFT_ENDD (e.g. "2026-08-20T08:00"). Split each into date + time so
@@ -605,6 +609,7 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>, shiftWindo
         end_time: endTime || '',
         duration_minutes: durationMinutes,
         description: description || '',
+        shift_id: shiftId || '',
       });
     }
   }
@@ -1125,29 +1130,16 @@ Deno.serve(async (req) => {
     const staffName = drillerName || '';
     const completedByName = drillerName || importerName;
 
-    // Build a per-borehole Lead Driller map from HDPH_LOG. Each HDPH row
-    // belongs to a specific borehole (LOCA_ID). HDPH_LOG holds the KLB
-    // user(s) who logged that hole (e.g. "Kevin Price, Amir"). We take the
-    // first comma-separated name as the Lead Driller for that borehole so
-    // different boreholes drilled by different crews each show the correct
-    // person.
-    const boreholeDrillerMap: Record<string, string> = {};
-    if (groups.HDPH && groups.HDPH.headings && groups.HDPH.rows.length) {
-      for (const row of groups.HDPH.rows) {
-        const r = buildRow(groups.HDPH, row);
-        const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
-        if (!ref || boreholeDrillerMap[ref]) continue;
-        for (const h of groups.HDPH.headings) {
-          if (normalizeKey(h, 'HDPH') === 'LOG') {
-            const val = (r[h.toUpperCase()] || '').trim();
-            if (val && val.length > 1) {
-              boreholeDrillerMap[ref] = val.split(',')[0].trim();
-              break;
-            }
-          }
-        }
-      }
-    }
+    // Build per-shift and per-borehole crew maps from the SHFT and HDPH groups.
+    // The shift crew map (SHFT_ID → full crew + device + shift times) is used to
+    // attribute the correct crew to each DLOG/PTIM/HDIA activity via its SHFT_ID.
+    // The borehole crew map (boreholeRef → all crew across all shifts) is used for
+    // borehole-level technical logs (LOCA, GEOL, SAMP, SPT, etc.) that don't have
+    // a SHFT_ID. Both maps capture the FULL crew string (all names), not just the
+    // first comma-separated name, and process ALL HDPH rows per borehole.
+    const shiftCrewMap = buildShiftCrewMap(groups, buildRow, pick, splitDateTime);
+    const boreholeCrewMap = buildBoreholeCrewMap(groups, buildRow, pick);
+    const boreholeDrillTimeMap = buildBoreholeDrillTimeMap(groups, buildRow, pick, splitDateTime);
 
     const logs: any[] = [];
     const samplesToCreate: any[] = [];
@@ -1159,12 +1151,31 @@ Deno.serve(async (req) => {
       const sig = logSignature(log);
       if (seen.has(sig)) { counts.duplicates++; return false; }
       seen.add(sig);
-      // Stamp the per-borehole Lead Driller from HDPH_LOG (the actual KLB
-      // user who logged that hole), overriding the file-level default.
-      const refDriller = log.borehole_ref ? boreholeDrillerMap[log.borehole_ref] : null;
-      if (refDriller) {
-        log.staff_name = refDriller;
-        log.completed_by_name = refDriller;
+      // Stamp the full crew and device from the borehole crew map (aggregates
+      // ALL HDPH rows for that borehole across all shifts). This overrides the
+      // file-level default with the correct per-borehole crew. For per-shift
+      // activities (DLOG/PTIM/HDIA), the caller should already have set
+      // crew_names and device_name from the shift crew map — only fill in from
+      // the borehole map if the caller didn't set them.
+      if (log.borehole_ref) {
+        const bhCrew = boreholeCrewMap[log.borehole_ref];
+        if (bhCrew) {
+          if (!log.crew_names || log.crew_names.length === 0) {
+            log.crew_names = bhCrew.crew_names;
+          }
+          if (!log.device_name) {
+            log.device_name = bhCrew.device_name;
+          }
+          // Set staff_name to the first crew member (Lead Driller) for display
+          if (bhCrew.crew_names.length > 0 && (!log.staff_name || log.staff_name === importerName)) {
+            log.staff_name = bhCrew.crew_names[0];
+            log.completed_by_name = bhCrew.crew_names[0];
+          }
+        }
+      }
+      // Stamp the project engineer on every log from this file
+      if (projectEngineerName && !log.project_engineer) {
+        log.project_engineer = projectEngineerName;
       }
       logs.push(log);
       return true;
@@ -1190,6 +1201,9 @@ Deno.serve(async (req) => {
         const locaElev = num(pick(r, 'LOCA_GL', 'LOCA_ELEV', 'LOCA_LEVEL', 'LOCA_DATUM', 'GL', 'ELEV', 'LEVEL'));
         const locaX = pick(r, 'LOCA_NATE', 'LOCA_X', 'LOCA_EAST', 'NATE', 'EASTING', 'EAST', 'X');
         const locaY = pick(r, 'LOCA_NATN', 'LOCA_Y', 'LOCA_NORTH', 'NATN', 'NORTHING', 'NORTH', 'Y');
+        // Borehole start/end dates from LOCA_STAR / LOCA_ENDD
+        const locaStartDate = normaliseDate(pick(r, 'LOCA_STAR', 'LOCA_START', 'STAR'));
+        const locaEndDate = normaliseDate(pick(r, 'LOCA_ENDD', 'LOCA_END', 'ENDD'));
         const descParts = [
           `borehole ${locaId} (${locaType || 'borehole'})`,
           locaElev != null ? `, ground level ${locaElev}m` : '',
@@ -1210,6 +1224,9 @@ Deno.serve(async (req) => {
           log_type: 'borehole_progress', borehole_ref: locaId,
           borehole_status: boreholeStatus || undefined,
           drilling_method: drillingMethod !== 'unknown' ? drillingMethod : undefined,
+          project_engineer: projectEngineerName || undefined,
+          borehole_start_date: locaStartDate || undefined,
+          borehole_end_date: locaEndDate || undefined,
           depth_to: num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null,
           groundwater_strike_depth: num(pick(r, 'LOCA_GND', 'LOCA_GW_DEPTH', 'LOCA_GWL', 'LOCA_WATER', 'GND', 'GW_DEPTH', 'GWL', 'WATER')) || null,
           description: `Imported from KeyLogBook AGS — ${descParts.join('')}.`,
@@ -1322,6 +1339,9 @@ Deno.serve(async (req) => {
         if (logAdded) {
           counts.samples++;
           // Stage a Sample entity record — the driver's collection list is built from these.
+          // Stamp the full crew from the borehole crew map so the Geotech tab can
+          // group samples by driller within each borehole.
+          const bhCrew = ref ? boreholeCrewMap[ref] : null;
           const fallbackId = `${ref || 'BH'}-S-${dFrom != null ? dFrom.toFixed(1) : samplesToCreate.length + 1}`;
           samplesToCreate.push({
             job_id: job.id,
@@ -1332,7 +1352,8 @@ Deno.serve(async (req) => {
             depth_to: dTo || null,
             collection_date: collectionDate,
             collected_by_staff_id: staffId || null,
-            collected_by_name: importerName || null,
+            collected_by_name: (bhCrew?.crew_names?.[0]) || importerName || null,
+            collected_by_crew_names: bhCrew?.crew_names || [],
             container_type: 'bag',
             status: 'collected',
             status_changed_at: new Date().toISOString(),
@@ -1493,10 +1514,18 @@ Deno.serve(async (req) => {
 
       structuredActivities.forEach((sa, i) => {
         const cleanDesc = cleanedDescs[i] || sa.description;
+        // Look up the per-shift crew for this activity's SHFT_ID. Activities
+        // from different shifts on the same borehole get different drillers.
+        const shiftInfo = sa.shift_id ? shiftCrewMap[sa.shift_id] : null;
+        const shiftCrewNames = shiftInfo?.crew_names || [];
+        const shiftDevice = shiftInfo?.device_name || '';
+        const shiftStartTime = shiftInfo?.start_time || '';
+        const shiftEndTime = shiftInfo?.end_time || '';
+        const shiftDrillerName = shiftCrewNames.length > 0 ? shiftCrewNames[0] : (drillerName || importerName);
         if (addLog({
           job_id: job.id,
           staff_id: drillerStaffId || staffId,
-          staff_name: drillerName || importerName,
+          staff_name: shiftDrillerName,
           date: sa.date || today,
           log_type: 'other',
           borehole_ref: sa.borehole_ref || null,
@@ -1508,7 +1537,12 @@ Deno.serve(async (req) => {
           description: cleanDesc || sa.description || 'Driller activity',
           raw_remarks: sa.description,
           completed_by_type: 'internal_staff',
-          completed_by_name: drillerName || importerName,
+          completed_by_name: shiftDrillerName,
+          crew_names: shiftCrewNames,
+          device_name: shiftDevice,
+          shift_id: sa.shift_id || undefined,
+          shift_start_time: shiftStartTime || undefined,
+          shift_end_time: shiftEndTime || undefined,
           manager_review_status: 'pending',
           chargeable: false,
           billing_status: 'no_charge',

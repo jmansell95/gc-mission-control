@@ -2,6 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { parseRemarks, professionaliseActivities, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
 import { loadJobRateCardItems, resolveJobCharge } from '../../shared/jobRateMatcher.ts';
 import { generateKeyLogBookTimesheet } from '../../shared/keylogbookTimesheet.ts';
+import { parseCrewNames } from '../../shared/agsCrewAttribution.ts';
 
 // ============================================================
 // KeyLogBook Webhook Receiver — Professionalised Site Logs Pipeline
@@ -167,40 +168,55 @@ Deno.serve(async (req) => {
       }
     } catch (e) { /* continue */ }
 
-    // --- Identify the lead driller (for staff_name on remarks logs) ---
+    // --- Identify the lead driller and full crew (for staff_name on remarks logs) ---
     // Priority: 1) HDPH_LOG / driller name embedded in the payload (actual KLB user)
     //           2) lead_driller_name from the webhook body
     //           No rota fallback — only the real KeyLogBook user is shown.
+    // The FULL crew string is kept (not just the first comma-separated name) so
+    // multi-person crews are fully attributed. crew_names is parsed from the
+    // full string; leadDrillerName is the first name for staff_name display.
     let leadDrillerName = '';
     let leadDrillerId = '';
+    let crewNames: string[] = [];
 
     // 1) Scan the AGS / borehole / log payloads for the actual KeyLogBook user
     //    who logged the data. HDPH_LOG is the primary field (the KLB user who
     //    logged each hole phase, e.g. "Kevin Price, Amir"). HDPH_CREW is the
-    //    full crew. We take the first comma-separated name as the Lead Driller.
-    //    NO rota fallback — only the real KLB user is shown on the logs.
+    //    full crew. We keep the FULL string and parse all names — the first
+    //    name becomes the Lead Driller for staff_name, the rest are kept in
+    //    crew_names for full attribution.
     const agsNameFields = ['hdph_log', 'hdph_crew', 'driller_name', 'driller', 'logged_by', 'lead_driller', 'klb_user', 'logged_by_user', 'engineer', 'operator', 'recorded_by', 'inspected_by', 'user', 'username', 'account', 'account_name', 'user_name', 'log', 'crew'];
-    const scanForDriller = (...arrs: any[][]) => {
+    const scanForCrew = (...arrs: any[][]) => {
       for (const arr of arrs) {
         if (!Array.isArray(arr)) continue;
         for (const item of arr) {
           if (!item || typeof item !== 'object') continue;
           for (const f of agsNameFields) {
             const val = str(item[f]);
-            if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) return val.split(',')[0].trim();
+            if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) {
+              return val; // return the FULL string, not just the first name
+            }
           }
         }
       }
       return '';
     };
-    leadDrillerName = scanForDriller(body.boreholes, body.logs, body.remarks_data, body.ags_data, body.data ? [body.data] : []);
+    const fullCrewStr = scanForCrew(body.boreholes, body.logs, body.remarks_data, body.ags_data, body.data ? [body.data] : []);
+    if (fullCrewStr) {
+      crewNames = parseCrewNames(fullCrewStr);
+      leadDrillerName = crewNames[0] || '';
+    }
 
     // 1b) Scan the top-level webhook body for KLB user/account fields
     if (!leadDrillerName) {
       const bodyUserFields = ['lead_driller_name', 'hdph_log', 'hdph_crew', 'driller_name', 'driller', 'klb_user', 'user', 'username', 'account', 'account_name', 'user_name', 'operator', 'logged_by', 'recorded_by'];
       for (const f of bodyUserFields) {
         const val = str((body as any)[f]);
-        if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) { leadDrillerName = val.split(',')[0].trim(); break; }
+        if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) {
+          crewNames = parseCrewNames(val);
+          leadDrillerName = crewNames[0] || '';
+          break;
+        }
       }
     }
 
@@ -242,6 +258,7 @@ Deno.serve(async (req) => {
         raw_remarks: activity.raw_description,
         completed_by_type: 'internal_staff',
         completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
+        crew_names: crewNames,
         manager_review_status: dateUnconfirmed ? 'queried' : 'pending',
         chargeable: !!match,
         billing_status: match ? 'auto' : 'no_charge',
@@ -314,6 +331,7 @@ Deno.serve(async (req) => {
         logged_by_role: leadDrillerName ? 'driller' : undefined,
         completed_by_type: 'internal_staff',
         completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
+        crew_names: crewNames,
         manager_review_status: 'approved',
         chargeable: false,
       });

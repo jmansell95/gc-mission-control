@@ -141,6 +141,44 @@
       ],
       "description": "Drilling method used for this borehole, parsed from the AGS LOCA_TYPE field. 'cp' = Cable Percussion, 'rotary' = Rotary drilling (including rotary core), 'mixed' = both methods used, 'unknown' = method not specified in the AGS file. Only set on borehole_progress logs (source='ags_import'). Displayed as a badge on borehole cards so managers can see at a glance whether a hole was CP or Rotary."
     },
+    "project_engineer": {
+      "type": "string",
+      "description": "Project engineer from the AGS PROJ_ENG field \u2014 the engineer who designed/specified the borehole. Stored separately from staff_name (the driller) so both the engineer and the driller are visible on the borehole card."
+    },
+    "device_name": {
+      "type": "string",
+      "description": "Rig/device name from the AGS HDPH_EXC field (e.g. 'Dando 2000'). The specific drilling rig or device used for this borehole, parsed per-shift from the HDPH group so the correct device is shown for each drilling phase."
+    },
+    "crew_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Full list of ALL crew member names who worked on this borehole/activity, parsed from HDPH_LOG and HDPH_CREW. Every name is kept (not just the first comma-separated one) so multi-person crews are fully attributed. For per-shift activities (DLOG/PTIM/HDIA), only the crew for that specific shift is listed; for borehole-level technical logs, all crew across all shifts are aggregated."
+    },
+    "shift_id": {
+      "type": "string",
+      "description": "KeyLogBook shift ID (SHFT_ID) linking this log to a specific drilling shift. Used to attribute the correct crew to each activity \u2014 activities from different shifts on the same borehole show different drillers."
+    },
+    "shift_start_time": {
+      "type": "string",
+      "description": "Shift start time (HH:MM) from SHFT_STAR for the shift this activity belongs to."
+    },
+    "shift_end_time": {
+      "type": "string",
+      "description": "Shift end time (HH:MM) from SHFT_ENDD for the shift this activity belongs to."
+    },
+    "borehole_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Borehole drilling start date from AGS LOCA_STAR (when drilling began on this hole)."
+    },
+    "borehole_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Borehole drilling end date from AGS LOCA_ENDD (when drilling was completed on this hole)."
+    },
     "depth_from": {
       "type": "number",
       "description": "Start depth in metres"
