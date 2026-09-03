@@ -59,7 +59,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals }) {
           <KpiTile icon={TestTube} label="Samples" value={totals.totalSamples} />
           <KpiTile icon={Calculator} label="SPTs" value={totals.totalSPTs} />
           <KpiTile icon={Boxes} label="Core Runs" value={totals.totalCores} />
-          <KpiTile icon={Package} label="Installations" value={totals.totalInstallations} />
+          <KpiTile icon={Clock} label="Drill Time" value={`${totals.totalDrillingHours}h`} />
         </div>
       </div>
 

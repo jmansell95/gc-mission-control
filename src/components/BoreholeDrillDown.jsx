@@ -193,13 +193,11 @@ export default function BoreholeDrillDown({ job, jobType }) {
                       </span>
                     )}
                     <span className="text-slate-400">{s.totalLogs} {s.totalLogs === 1 ? 'record' : 'records'}</span>
-                    {s.drillingHours > 0 && (
-                      <span className="inline-flex items-center gap-0.5 font-medium text-blue-600">
-                        <Clock className="w-3 h-3 text-blue-500" />
-                        {s.drillingHours}h
-                        {s.drillingDays > 1 && <span className="text-slate-400">· {s.drillingDays}d</span>}
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-0.5 font-medium text-blue-600">
+                      <Clock className="w-3 h-3 text-blue-500" />
+                      {s.drillingHours > 0 ? `${s.drillingHours}h` : '—'}
+                      {s.drillingHours > 0 && s.drillingDays > 1 && <span className="text-slate-400">· {s.drillingDays}d</span>}
+                    </span>
                   </div>
 
                   {/* Drilling rate — metres per hour */}

@@ -2,19 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { FlaskConical, Plus, Truck, Loader2 } from 'lucide-react';
+import { FlaskConical, Plus, Truck, Mountain, TestTube, Clock } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import BoreholeCardGrid from '@/components/geotech/BoreholeCardGrid';
 import SampleFormModal from '@/components/geotech/SampleFormModal';
 import MonitoringWellManager from '@/components/geotech/MonitoringWellManager';
 import EquipmentCalibrationManager from '@/components/geotech/EquipmentCalibrationManager';
-
-const STAT_TILES = [
-  { key: 'total', label: 'Total Samples', gradient: 'linear-gradient(135deg, #2EFF7D 0%, #00A3FF 100%)', icon: FlaskConical },
-  { key: 'inTransit', label: 'In Transit/Testing', gradient: 'linear-gradient(135deg, #FFC300 0%, #FF5733 100%)', icon: FlaskConical },
-  { key: 'resultsBack', label: 'Results Returned', gradient: 'linear-gradient(135deg, #00F0FF 0%, #007DFF 100%)', icon: FlaskConical },
-  { key: 'needsCollection', label: 'Need Collection', gradient: 'linear-gradient(135deg, #00D4FF 0%, #008CFF 100%)', icon: Truck },
-];
 
 export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
   const { toast } = useToast();
@@ -130,72 +123,61 @@ export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
   };
 
   return (
-    <div className="bg-[#0B1A0B] rounded-2xl p-4 md:p-5 space-y-4">
-      {/* Mission-control header */}
-      <div>
-        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2EFF7D] to-[#00A3FF] flex items-center justify-center flex-shrink-0">
-              <FlaskConical className="w-5 h-5 text-[#0B1A0B]" />
-            </div>
-            <div>
-              <h3 className="font-bold text-[#E0E0E0] text-base">Geotechnical Data Management</h3>
-              <p className="text-xs text-[#A0A0A0] mt-0.5 max-w-md">
-                Sample chain of custody, laboratory test tracking, monitoring well installations, and field equipment calibration.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
+    <div className="space-y-4">
+      {/* KPI ribbon — matches the Borehole Data Summary panel */}
+      <div className="hero-gradient rounded-2xl p-5 text-white shadow-lg">
+        <div className="flex items-center gap-2 mb-4">
+          <FlaskConical className="w-5 h-5" />
+          <h2 className="text-lg font-bold">Geotechnical Data</h2>
+          <span className="ml-auto text-xs bg-white/20 px-2.5 py-1 rounded-full font-medium">{stats.total} samples</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <KpiTile icon={FlaskConical} label="Total Samples" value={stats.total} />
+          <KpiTile icon={TestTube} label="In Transit/Testing" value={stats.inTransit} />
+          <KpiTile icon={Clock} label="Results Returned" value={stats.resultsBack} />
+          <KpiTile icon={Truck} label="Need Collection" value={stats.needsCollection} />
+        </div>
+      </div>
+
+      {/* Sample management — insight-card matching the Borehole Data Explorer */}
+      <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+          <Mountain className="w-5 h-5 text-emerald-700" />
+          <h3 className="font-semibold text-slate-900 text-sm">Sample Management</h3>
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
+            {stats.total} sample{stats.total !== 1 ? 's' : ''}
+          </span>
+          <div className="ml-auto flex items-center gap-2">
             {stats.needsCollection > 0 && (
               <button onClick={() => handleScheduleRun()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#FF9F1C] text-[#1a1a1a] rounded-lg hover:brightness-110 transition text-xs font-semibold">
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold">
                 <Truck className="w-3.5 h-3.5" /> Schedule Run ({stats.needsCollection})
               </button>
             )}
             <button onClick={() => { setEditingSample(null); setShowForm(true); }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#1C201C] border border-[#2a3a2a] text-[#E0E0E0] rounded-lg hover:border-[#FF9F1C]/50 transition text-xs font-semibold">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Register Sample
             </button>
           </div>
         </div>
-
-        {/* Stat tiles */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {STAT_TILES.map(tile => {
-            const value = stats[tile.key];
-            const Icon = tile.icon;
-            return (
-              <div key={tile.key} className="relative rounded-xl p-3 overflow-hidden" style={{ background: tile.gradient }}>
-                <div className="absolute inset-0 bg-[#0B1A0B]/20" />
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
-                    <p className="text-[10px] font-medium text-white/80 uppercase tracking-wide mt-0.5">{tile.label}</p>
-                  </div>
-                  <Icon className="w-6 h-6 text-white/40" />
-                </div>
-              </div>
-            );
-          })}
+        <div className="p-4">
+          <BoreholeCardGrid
+            samples={samples}
+            allStaff={allStaff}
+            suppliers={suppliers}
+            job={job}
+            scheduledSampleIds={scheduledSampleIds}
+            sampleDeliveryStatus={sampleDeliveryStatus}
+            onAdvanceStatus={advanceStatus}
+            onRegister={handleSave}
+            onDelete={handleDelete}
+            onScheduleCollection={handleScheduleRun}
+            isLoading={isLoading}
+          />
         </div>
       </div>
 
-      {/* Borehole card grid */}
-      <BoreholeCardGrid
-        samples={samples}
-        allStaff={allStaff}
-        suppliers={suppliers}
-        job={job}
-        scheduledSampleIds={scheduledSampleIds}
-        sampleDeliveryStatus={sampleDeliveryStatus}
-        onAdvanceStatus={advanceStatus}
-        onRegister={handleSave}
-        onDelete={handleDelete}
-        onScheduleCollection={handleScheduleRun}
-        isLoading={isLoading}
-      />
-
-      {/* Monitoring wells + Equipment calibration (restyled dark) */}
+      {/* Monitoring wells + Equipment calibration (light insight-cards) */}
       <MonitoringWellManager job={job} allStaff={allStaff} />
       <EquipmentCalibrationManager job={job} assets={assets} />
 
@@ -212,6 +194,18 @@ export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
           onClose={() => { setShowForm(false); setEditingSample(null); }}
         />
       )}
+    </div>
+  );
+}
+
+function KpiTile({ icon: Icon, label, value }) {
+  return (
+    <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-3 border border-white/10">
+      <div className="flex items-center gap-1.5 mb-1">
+        <Icon className="w-3.5 h-3.5 text-white/70" />
+        <p className="text-[10px] uppercase font-medium text-white/70 tracking-wide">{label}</p>
+      </div>
+      <p className="text-xl font-bold text-white tabular-nums">{value}</p>
     </div>
   );
 }
