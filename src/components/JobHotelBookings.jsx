@@ -45,6 +45,11 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
   const [editingBooking, setEditingBooking] = useState(null);
   const [assignTargetStaff, setAssignTargetStaff] = useState(null);
 
+  // Only direct employees can be assigned to hotel/Air B&B accommodation —
+  // subcontractor field teams and agency workers arrange their own stays.
+  const directAssignedStaff = (assignedStaff || []).filter(s => s.worker_type === 'direct_employee');
+  const directAllStaff = (allStaff || []).filter(s => s.worker_type === 'direct_employee');
+
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['job-hotel-bookings', job.id],
     queryFn: () => base44.entities.HotelBooking.filter({ job_id: job.id })
@@ -60,7 +65,7 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
   });
 
   const assignedToAnyBooking = new Set(bookings.flatMap(b => b.assigned_staff_ids || []));
-  const unassignedStaff = assignedStaff.filter(s => !assignedToAnyBooking.has(s.id));
+  const unassignedStaff = directAssignedStaff.filter(s => !assignedToAnyBooking.has(s.id));
   const totalNights = bookings.reduce((sum, b) => sum + nightsBetween(b.check_in_date, b.check_out_date), 0);
   const totalCost = bookings.reduce((sum, b) => sum + bookingTotal(b), 0);
   const hotelCount = bookings.filter(b => bookingType(b) === 'hotel').length;
@@ -112,7 +117,7 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <StatTile icon={Hotel} label="Hotels" value={hotelCount} gradient="stat-gradient-brand" />
         <StatTile icon={Home} label="Air B&B" value={airbnbCount} gradient="stat-gradient-blue" />
-        <StatTile icon={UserCheck} label="Crew Covered" value={`${assignedToAnyBooking.size}/${assignedStaff.length}`} sub={`${unassignedStaff.length} unassigned`} gradient="stat-gradient-emerald" />
+        <StatTile icon={UserCheck} label="Crew Covered" value={`${assignedToAnyBooking.size}/${directAssignedStaff.length}`} sub={`${unassignedStaff.length} unassigned`} gradient="stat-gradient-emerald" />
         <StatTile icon={BedDouble} label="Total Nights" value={totalNights} gradient="stat-gradient-violet" />
         <StatTile icon={PoundSterling} label="Total Cost" value={fmtGBP(totalCost, { decimals: 0 })} gradient="stat-gradient-amber" />
       </div>
@@ -156,17 +161,17 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-slate-300" /></div>
-        ) : assignedStaff.length === 0 ? (
+        ) : directAssignedStaff.length === 0 ? (
           <div className="text-center py-8">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
               <Users className="w-6 h-6 text-slate-300" />
             </div>
-            <p className="text-sm font-semibold text-slate-600">No crew assigned to this job</p>
-            <p className="text-xs text-slate-400 mt-1">Assign crew from the Schedule tab first.</p>
+            <p className="text-sm font-semibold text-slate-600">No direct crew assigned to this job</p>
+            <p className="text-xs text-slate-400 mt-1">Only direct employees are booked into accommodation.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {assignedStaff.map((staff, i) => (
+            {directAssignedStaff.map((staff, i) => (
               <StaffHotelRow
                 key={staff.id}
                 staff={staff}
@@ -210,8 +215,8 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
         onClose={() => { setEditorOpen(false); setAssignTargetStaff(null); }}
         booking={editingBooking}
         job={job}
-        assignedStaff={assignedStaff}
-        allStaff={allStaff}
+        assignedStaff={directAssignedStaff}
+        allStaff={directAllStaff}
         onSave={invalidate}
         preselectStaffId={assignTargetStaff?.id}
       />
