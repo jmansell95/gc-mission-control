@@ -423,13 +423,79 @@ interface StructuredActivity {
   description: string;
 }
 
-function parseStructuredTimeGroups(groups: Record<string, GroupData>): StructuredActivity[] {
+// Build a per-borehole-per-date shift window from the SHFT group.
+// Each SHFT row has SHFT_STAR (start datetime) and SHFT_ENDD (end datetime).
+// This window bounds the PTIM activity chain so the full working day is
+// captured with real durations instead of zero-duration point markers.
+function buildShiftWindows(groups: Record<string, GroupData>): Record<string, { startTime: string; endTime: string }> {
+  const windows: Record<string, { startTime: string; endTime: string }> = {};
+  if (!groups.SHFT || !groups.SHFT.rows.length) return windows;
+  for (const row of groups.SHFT.rows) {
+    const r = buildRow(groups.SHFT, row);
+    const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
+    const starDt = pick(r, 'SHFT_STAR', 'STAR', 'SHFT_START', 'START_DATETIME');
+    const enddDt = pick(r, 'SHFT_ENDD', 'ENDD', 'ETIM', 'SHFT_END', 'END_DATETIME');
+    if (!starDt) continue;
+    const startSplit = splitDateTime(starDt);
+    const endSplit = enddDt ? splitDateTime(enddDt) : { date: startSplit.date, time: '' };
+    const date = startSplit.date || endSplit.date;
+    if (!date) continue;
+    const key = `${ref || ''}|${date}`;
+    if (!windows[key]) {
+      windows[key] = { startTime: startSplit.time, endTime: endSplit.time };
+    } else {
+      if (startSplit.time && (!windows[key].startTime || startSplit.time < windows[key].startTime)) windows[key].startTime = startSplit.time;
+      if (endSplit.time && (!windows[key].endTime || endSplit.time > windows[key].endTime)) windows[key].endTime = endSplit.time;
+    }
+  }
+  return windows;
+}
+
+// Chain consecutive PTIM-style activities (start time but no end time) into
+// contiguous time blocks. Each activity's end time becomes the next activity's
+// start time; the last activity's end time is capped by the SHFT shift end.
+function chainActivitiesWithShiftWindows(
+  activities: StructuredActivity[],
+  shiftWindows: Record<string, { startTime: string; endTime: string }>
+): void {
+  const grouped: Record<string, StructuredActivity[]> = {};
+  for (const a of activities) {
+    const key = `${a.borehole_ref || ''}|${a.date || ''}`;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(a);
+  }
+  for (const [key, group] of Object.entries(grouped)) {
+    const chainable = group.filter(a => a.start_time && !a.end_time);
+    if (chainable.length === 0) continue;
+    chainable.sort((a, b) => (timeToMins(a.start_time) || 0) - (timeToMins(b.start_time) || 0));
+    const window = shiftWindows[key];
+    for (let i = 0; i < chainable.length; i++) {
+      const act = chainable[i];
+      if (i < chainable.length - 1) {
+        act.end_time = chainable[i + 1].start_time;
+      } else if (window && window.endTime) {
+        act.end_time = window.endTime;
+      }
+      if (act.start_time && act.end_time) {
+        const startMins = timeToMins(act.start_time);
+        const endMins = timeToMins(act.end_time);
+        if (startMins != null && endMins != null) {
+          act.duration_minutes = endMins > startMins ? endMins - startMins : (endMins + 1440) - startMins;
+        }
+      }
+    }
+  }
+}
+
+function parseStructuredTimeGroups(groups: Record<string, GroupData>, shiftWindows: Record<string, { startTime: string; endTime: string }>): StructuredActivity[] {
   const activities: StructuredActivity[] = [];
   // TREM carries the driller's daily diary with TREM_DTIM (start datetime),
   // TREM_ETIM (end datetime), TREM_DURN (HH:MM:SS duration) and TREM_REM
   // (description). Rows with installation attributes (type/material/diameter/
   // depth) are skipped below and handled by the TREM section as installations.
-  const TIME_GROUP_NAMES = ['DLOG', 'PTIM', 'DREM', 'SHFT', 'HORN', 'TREM'];
+  // SHFT is no longer parsed as individual activities — it's consumed by
+  // buildShiftWindows above to bound the PTIM activity chain.
+  const TIME_GROUP_NAMES = ['DLOG', 'PTIM', 'DREM', 'HORN', 'TREM'];
 
   for (const groupName of TIME_GROUP_NAMES) {
     const g = groups[groupName];
@@ -527,6 +593,10 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>): Structure
       });
     }
   }
+
+  // Chain PTIM-style activities (start but no end) into contiguous blocks
+  // using the SHFT shift window so the full working day is captured.
+  chainActivitiesWithShiftWindows(activities, shiftWindows);
 
   return activities;
 }
@@ -992,8 +1062,11 @@ Deno.serve(async (req) => {
     // groups. Field suffixes to look for: DRILLER, USER, OPERATOR, LOGGED_BY.
     // The first non-empty value found wins. This is the KeyLogBook user — the
     // person who actually drilled the borehole and wrote the remarks.
-    const DRILLER_FIELD_SUFFIXES = ['DRILLER', 'USER', 'OPERATOR', 'LOGGED_BY', 'RECORDED_BY', 'INSPECTED_BY', 'ACCOUNT', 'USERNAME', 'DRILL'];
-    const scanGroupsForDriller = (groupNames: string[]): string => {
+    const DRILLER_FIELD_SUFFIXES = ['DRILLER', 'USER', 'OPERATOR', 'LOGGED_BY', 'RECORDED_BY', 'INSPECTED_BY', 'ACCOUNT', 'USERNAME', 'DRILL', 'LOG', 'CREW'];
+    // Scan for the Lead Driller name. HDPH_LOG holds the actual KeyLogBook
+    // user(s) who logged the hole (e.g. "Kevin Price, Amir"). We prefer LOG
+    // over CREW, and take the first comma-separated name as the Lead Driller.
+    const scanGroupsForDrillerSuffix = (groupNames: string[], suffixes: string[]): string => {
       for (const gn of groupNames) {
         const g = groups[gn];
         if (!g || !g.headings || g.rows.length === 0) continue;
@@ -1001,10 +1074,10 @@ Deno.serve(async (req) => {
           const r = buildRow(g, row);
           for (const h of g.headings) {
             const suffix = normalizeKey(h, gn);
-            if (DRILLER_FIELD_SUFFIXES.includes(suffix)) {
+            if (suffixes.includes(suffix)) {
               const val = (r[h.toUpperCase()] || '').trim();
               if (val && val.length > 1 && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) {
-                return val;
+                return val.split(',')[0].trim();
               }
             }
           }
@@ -1012,52 +1085,16 @@ Deno.serve(async (req) => {
       }
       return '';
     };
-    const agsDriller = scanGroupsForDriller(['DREM', 'HDIA', 'SHFT', 'DLOG', 'PTIM', 'LOCA']);
+    // Priority: HDPH_LOG (actual KLB logger) → HDPH_CREW (full crew) → other driller fields
+    let agsDriller = scanGroupsForDrillerSuffix(['HDPH'], ['LOG']);
+    if (!agsDriller) agsDriller = scanGroupsForDrillerSuffix(['HDPH'], ['CREW']);
+    if (!agsDriller) agsDriller = scanGroupsForDrillerSuffix(['HDPH', 'DREM', 'HDIA', 'SHFT', 'DLOG', 'PTIM', 'LOCA'], DRILLER_FIELD_SUFFIXES);
 
-    // 2) Resolve the actual driller — prefer the AGS-file driller name, then
-    // fall back to the rota assignment for that rig+date. Prefer a staff
-    // member on a drilling team (cp/rotary). The driller's team job_type
-    // determines logged_by_role.
-    // earliest borehole date, falling back to job-level assignments when no
-    // date-specific assignments exist. Prefer a staff member on a drilling
-    // team (cp/rotary). The driller's team job_type determines logged_by_role.
-    const workDate = Object.values(locaDates).sort()[0] || job.start_date || today;
-    try {
-      let assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id, assigned_date: workDate });
-      if (assignments.length === 0) {
-        assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id });
-      }
-      if (assignments.length > 0) {
-        const teams = await base44.asServiceRole.entities.Team.list('-created_date', 500);
-        const drillingJobTypes = ['cp_drilling', 'rotary_drilling'];
-        const drillingTeamIds = new Set(teams.filter((t: any) => drillingJobTypes.includes(t.job_type)).map((t: any) => t.id));
-        const staffIds = [...new Set(assignments.map(a => a.staff_id).filter(Boolean))];
-        const allStaff = (await Promise.all(staffIds.map(id => base44.asServiceRole.entities.Staff.get(id).catch(() => null)))).filter(Boolean) as any[];
-        const drillerStaff = allStaff.find(s => drillingTeamIds.has(s.team_id));
-        const chosen = drillerStaff || allStaff[0];
-        const chosenAssignment = assignments.find(a => a.staff_id === chosen?.id) || assignments[0];
-        drillerStaffId = chosenAssignment.staff_id || '';
-        // Use the AGS-file driller name when present (the actual KeyLogBook
-        // user who drilled the borehole). Fall back to the rota-resolved
-        // staff name only when the AGS file didn't carry a driller name.
-        if (!drillerName) drillerName = chosen?.name || '';
-        // Derive logged_by_role from the resolved driller's team job_type
-        const chosenTeam = teams.find((t: any) => t.id === chosen?.team_id);
-        if (chosenTeam) {
-          if (drillingJobTypes.includes(chosenTeam.job_type)) drillerRole = 'driller';
-          else if (chosenTeam.job_type === 'groundworks') drillerRole = 'groundworker';
-          else if (chosenTeam.job_type === 'depot') drillerRole = 'groundworker';
-          else drillerRole = 'driller';
-        } else {
-          drillerRole = 'driller';
-        }
-      }
-    } catch (e) { /* skip */ }
-
-    // The AGS-file driller name takes precedence over the rota-resolved name
-    // — it's the actual KeyLogBook user who drilled the borehole and wrote
-    // the remarks. The rota-resolved name is only a fallback.
+    // 2) The Lead Driller is the actual KeyLogBook user who logged the hole.
+    // The name comes from HDPH_LOG (resolved above). No rota-based fallback —
+    // only the real KLB logger is shown on the logs.
     if (agsDriller) drillerName = agsDriller;
+    drillerRole = 'driller';
 
     // Technical logs (ags_import) use the resolved driller's staff_id. The
     // driller name (from the AGS file or rota) is the primary attribution —
@@ -1066,6 +1103,30 @@ Deno.serve(async (req) => {
     const staffId = drillerStaffId || 'ags_import';
     const staffName = drillerName || '';
     const completedByName = drillerName || importerName;
+
+    // Build a per-borehole Lead Driller map from HDPH_LOG. Each HDPH row
+    // belongs to a specific borehole (LOCA_ID). HDPH_LOG holds the KLB
+    // user(s) who logged that hole (e.g. "Kevin Price, Amir"). We take the
+    // first comma-separated name as the Lead Driller for that borehole so
+    // different boreholes drilled by different crews each show the correct
+    // person.
+    const boreholeDrillerMap: Record<string, string> = {};
+    if (groups.HDPH && groups.HDPH.headings && groups.HDPH.rows.length) {
+      for (const row of groups.HDPH.rows) {
+        const r = buildRow(groups.HDPH, row);
+        const ref = pick(r, 'LOCA_ID', 'LOCA_REF', 'LOCA_NO', 'HOLE_ID', 'BH_ID', 'ID', 'REF');
+        if (!ref || boreholeDrillerMap[ref]) continue;
+        for (const h of groups.HDPH.headings) {
+          if (normalizeKey(h, 'HDPH') === 'LOG') {
+            const val = (r[h.toUpperCase()] || '').trim();
+            if (val && val.length > 1) {
+              boreholeDrillerMap[ref] = val.split(',')[0].trim();
+              break;
+            }
+          }
+        }
+      }
+    }
 
     const logs: any[] = [];
     const samplesToCreate: any[] = [];
@@ -1077,6 +1138,13 @@ Deno.serve(async (req) => {
       const sig = logSignature(log);
       if (seen.has(sig)) { counts.duplicates++; return false; }
       seen.add(sig);
+      // Stamp the per-borehole Lead Driller from HDPH_LOG (the actual KLB
+      // user who logged that hole), overriding the file-level default.
+      const refDriller = log.borehole_ref ? boreholeDrillerMap[log.borehole_ref] : null;
+      if (refDriller) {
+        log.staff_name = refDriller;
+        log.completed_by_name = refDriller;
+      }
       logs.push(log);
       return true;
     };
@@ -1365,7 +1433,8 @@ Deno.serve(async (req) => {
     //      HH:MM_HH:MM patterns. When the structured groups cover a borehole+
     //      date, we skip the remark text for that combination to avoid
     //      duplicates. Otherwise we fall back to remark text parsing.
-    const structuredActivities = parseStructuredTimeGroups(groups);
+    const shiftWindows = buildShiftWindows(groups);
+    const structuredActivities = parseStructuredTimeGroups(groups, shiftWindows);
     const { lookup: timeLookup, keys: structuredKeys } = buildTimeLookup(structuredActivities);
 
     const rawChunks = extractRemarkChunks(groups);
