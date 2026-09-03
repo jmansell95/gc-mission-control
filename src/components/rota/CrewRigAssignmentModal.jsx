@@ -365,12 +365,45 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
               </div>
 
               {conflictDates.length > 0 && (
-                <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Existing shifts found</p>
-                    <p className="text-amber-600 mt-0.5">{conflictDates.length} clash{conflictDates.length !== 1 ? 'es' : ''} — those dates will be skipped. {validDays.length > 0 ? `${validDays.length} day${validDays.length !== 1 ? 's' : ''} will be assigned.` : 'No free days remain — pick different dates or crew.'}</p>
+                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium">Existing shifts found — {conflictDates.length} date{conflictDates.length !== 1 ? 's' : ''} skipped</p>
+                      <p className="text-amber-600 mt-0.5">
+                        {validDays.length > 0
+                          ? `${validDays.length} day${validDays.length !== 1 ? 's' : ''} will be assigned. `
+                          : 'No free days remain — pick different dates or crew. '}
+                        These existing shifts keep their current job; the rig is assigned on the free days below.
+                      </p>
+                    </div>
                   </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {conflictDates.map(c => {
+                      const who = staff.find(s => s.id === c.staffId);
+                      return (
+                        <span key={`${c.date}-${c.staffId}`} className="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-md px-1.5 py-0.5 text-[10px] text-amber-800 font-medium">
+                          <CalendarClock className="w-2.5 h-2.5" />
+                          {format(new Date(c.date + 'T00:00:00'), 'dd MMM')}
+                          <span className="text-amber-500">·</span>
+                          {who?.name?.split(' ')[0] || 'Unknown'}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  {validDays.length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-amber-200/60">
+                      <p className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wide mb-1">Will be assigned ({validDays.length})</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {validDays.map(d => (
+                          <span key={d} className="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5 text-[10px] text-emerald-800 font-medium">
+                            <CheckCircle2 className="w-2.5 h-2.5" />
+                            {format(new Date(d + 'T00:00:00'), 'dd MMM')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
