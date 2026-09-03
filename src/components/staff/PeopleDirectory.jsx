@@ -7,7 +7,7 @@ import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Users, Search, ChevronDown, ChevronRight, Plus, ShieldCheck, ShieldOff,
   GitBranch, HardHat, UserCircle, Loader2, UserPlus, Link2, AlertTriangle,
-  Wrench, Truck, Layers, KeyRound,
+  Wrench, Truck, Layers, KeyRound, Mail, CheckCircle2,
 } from 'lucide-react';
 import { TEAM_CATEGORIES } from '@/utils/teamAccess';
 import { formatWorkerType } from '@/utils/format';
@@ -198,6 +198,42 @@ export default function PeopleDirectory() {
     return staff.find((s) => !s.user_id && s.email && s.email.toLowerCase() === lc);
   };
 
+  const handleSendInvite = async (s) => {
+    if (!s.email) {
+      toast({ title: 'No email address', description: 'Add an email to this crew member first.', variant: 'destructive' });
+      return;
+    }
+    setActioningId(s.id);
+    try {
+      const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
+      let registered = false;
+      try {
+        await base44.auth.register({ email: s.email, password: tempPassword });
+        registered = true;
+      } catch (regErr) {
+        if (!String(regErr?.message || '').match(/already|exists/i)) throw regErr;
+        registered = true;
+      }
+      let brandedSent = false;
+      if (registered) {
+        try {
+          const res = await base44.functions.invoke('sendBrandedInvite', { email: s.email, staff_name: s.name, temp_password: tempPassword });
+          brandedSent = (res.data || res)?.sent === true;
+        } catch (_) { /* fall back below */ }
+      }
+      if (!brandedSent) {
+        await base44.users.inviteUser(s.email, 'user');
+      }
+      await base44.entities.Staff.update(s.id, { invite_sent: true });
+      toast({ title: 'Invite sent', description: `${s.name} will receive an email to set up their profile.` });
+      refresh();
+    } catch (e) {
+      toast({ title: 'Invite failed', description: e?.message, variant: 'destructive' });
+    } finally {
+      setActioningId(null);
+    }
+  };
+
   const categoryIcon = (cat) => {
     if (cat === 'depot') return Wrench;
     if (cat === 'management') return ShieldCheck;
@@ -346,6 +382,8 @@ export default function PeopleDirectory() {
                           profile={profile}
                           onOpenMember={(s) => setEditing(s)}
                           onOpenPermissions={(s) => setPermissionStaff(s)}
+                          onSendInvite={handleSendInvite}
+                          actioningId={actioningId}
                         />
                       ))
                     )}
@@ -397,7 +435,7 @@ export default function PeopleDirectory() {
           {expandedType === '__unassigned' && (
             <div className="border-t border-slate-100 bg-slate-50/30 px-4 py-3 space-y-1.5">
               {staffByTeam['__unassigned'].map((s) => (
-                <MemberRow key={s.id} member={s} onClick={() => setEditing(s)} onOpenPermissions={() => setPermissionStaff(s)} />
+                <MemberRow key={s.id} member={s} onClick={() => setEditing(s)} onOpenPermissions={() => setPermissionStaff(s)} onSendInvite={handleSendInvite} actioningId={actioningId} />
               ))}
             </div>
           )}
@@ -422,7 +460,7 @@ export default function PeopleDirectory() {
 }
 
 /** Crew Profile card — Level 2, with members listed underneath (Level 3). */
-function CrewProfileCard({ profile, onOpenMember, onOpenPermissions }) {
+function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvite, actioningId }) {
   const [open, setOpen] = useState(true);
 
   const profileIcon = () => {
@@ -461,7 +499,7 @@ function CrewProfileCard({ profile, onOpenMember, onOpenPermissions }) {
       {open && (
         <div className="border-t border-slate-100 px-2 py-1.5 space-y-0.5">
           {profile.members.map((m) => (
-            <MemberRow key={m.id} member={m} onClick={() => onOpenMember(m)} onOpenPermissions={() => onOpenPermissions(m)} />
+            <MemberRow key={m.id} member={m} onClick={() => onOpenMember(m)} onOpenPermissions={() => onOpenPermissions(m)} onSendInvite={onSendInvite} actioningId={actioningId} />
           ))}
           {profile.members.length === 0 && (
             <p className="text-xs text-slate-400 text-center py-2">No members yet.</p>
@@ -473,8 +511,11 @@ function CrewProfileCard({ profile, onOpenMember, onOpenPermissions }) {
 }
 
 /** Single member row — Level 3. */
-function MemberRow({ member, onClick, onOpenPermissions }) {
+function MemberRow({ member, onClick, onOpenPermissions, onSendInvite, actioningId }) {
   const linked = !!member.user_id;
+  const inviteSent = !!member.invite_sent;
+  const canInvite = !linked && !!member.email && onSendInvite;
+  const isInviting = actioningId === member.id;
   const initials = (member.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   return (
     <div
@@ -497,10 +538,24 @@ function MemberRow({ member, onClick, onOpenPermissions }) {
         <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold flex-shrink-0">
           <ShieldCheck className="w-3 h-3" /> Linked
         </span>
+      ) : inviteSent ? (
+        <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold flex-shrink-0" title="Invite sent — awaiting profile setup">
+          <CheckCircle2 className="w-3 h-3" /> Invited
+        </span>
       ) : (
         <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold flex-shrink-0">
           <ShieldOff className="w-3 h-3" /> No login
         </span>
+      )}
+      {canInvite && !inviteSent && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onSendInvite(member); }}
+          disabled={isInviting}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#2E5A1A] text-white hover:bg-[#1c4a12] text-[10px] font-semibold transition flex-shrink-0 disabled:opacity-50"
+          title="Send app invite so they can create their profile"
+        >
+          {isInviting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />} Invite
+        </button>
       )}
       {onOpenPermissions && (
         <button
