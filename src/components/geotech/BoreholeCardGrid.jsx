@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { FlaskConical, Loader2, Layers, ChevronRight } from 'lucide-react';
+import { FlaskConical, Loader2, Layers, ChevronRight, User } from 'lucide-react';
 import BoreholeSampleDrawer from '@/components/geotech/BoreholeSampleDrawer';
 
 /**
@@ -69,6 +69,18 @@ export default function BoreholeCardGrid({
           const needsCollection = bhSamples.filter(s => s.status === 'collected' && !scheduledSampleIds.has(s.sample_id)).length;
           const other = total - needsCollection - inTransit - resultsBack;
 
+          // Distinct drillers for this borehole — from collected_by_crew_names
+          // (full crew array) or collected_by_name (single fallback).
+          const drillerSet = new Set();
+          bhSamples.forEach(s => {
+            if (Array.isArray(s.collected_by_crew_names)) {
+              s.collected_by_crew_names.forEach(n => { if (n) drillerSet.add(n); });
+            } else if (s.collected_by_name) {
+              drillerSet.add(s.collected_by_name);
+            }
+          });
+          const drillers = [...drillerSet];
+
           return (
             <button
               key={ref}
@@ -89,6 +101,22 @@ export default function BoreholeCardGrid({
                 <span className="ml-auto text-xs font-semibold text-slate-500 flex-shrink-0">{total}</span>
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
               </div>
+
+              {/* Driller attribution — distinct crew who collected samples */}
+              {drillers.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {drillers.slice(0, 3).map((name, i) => (
+                    <span key={i} className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-100">
+                      <User className="w-2 h-2" />{name}
+                    </span>
+                  ))}
+                  {drillers.length > 3 && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-slate-50 text-slate-500 text-[10px] font-medium border border-slate-200">
+                      +{drillers.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Status summary chips — light brand palette */}
               <div className="flex flex-wrap gap-1.5">
