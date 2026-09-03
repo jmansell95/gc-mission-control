@@ -12,11 +12,11 @@ import {
 } from '@/utils/permissions';
 
 const MODULE_CATEGORIES = [
-  { label: 'Operations', keys: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics'] },
-  { label: 'People & Compliance', keys: ['staff', 'teams', 'compliance', 'safety', 'timesheets'] },
-  { label: 'Financial', keys: ['billing'] },
-  { label: 'Assets & Fleet', keys: ['assets'] },
-  { label: 'Technical & Audit', keys: ['ags_import', 'log-qc', 'audit-trail'] },
+  { label: 'Operations', keys: ['overview', 'jobs', 'scheduling', 'logistics'] },
+  { label: 'People & Compliance', keys: ['staff', 'compliance'] },
+  { label: 'Financial', keys: ['billing', 'reports'] },
+  { label: 'Assets & Fleet', keys: ['assets', 'fleet'] },
+  { label: 'Technical', keys: ['investigation'] },
   { label: 'System', keys: ['settings'] },
 ];
 
@@ -28,14 +28,16 @@ const LEVEL_STYLES = {
 
 const PREVIEW_NAV_ITEMS = [
   { id: 'overview', label: 'Dashboard', icon: '📊' },
-  { id: 'jobs', label: 'Jobs', icon: '💼' },
-  { id: 'rota', label: 'Rota', icon: '📅' },
-  { id: 'scheduling', label: 'Scheduling', icon: '⏰' },
+  { id: 'jobs', label: 'Projects', icon: '💼' },
+  { id: 'scheduling', label: 'Scheduling', icon: '📅' },
   { id: 'staff', label: 'Staff', icon: '👥' },
-  { id: 'compliance', label: 'Compliance', icon: '🛡️' },
-  { id: 'billing', label: 'Billing', icon: '💰' },
-  { id: 'assets', label: 'Assets', icon: '📦' },
   { id: 'logistics', label: 'Logistics', icon: '🚚' },
+  { id: 'assets', label: 'Assets', icon: '📦' },
+  { id: 'fleet', label: 'Fleet', icon: '🚗' },
+  { id: 'investigation', label: 'Investigation', icon: '🔬' },
+  { id: 'compliance', label: 'Compliance', icon: '🛡️' },
+  { id: 'billing', label: 'Financial', icon: '💰' },
+  { id: 'reports', label: 'Reports', icon: '📈' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 

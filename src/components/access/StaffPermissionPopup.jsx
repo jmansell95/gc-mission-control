@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   KeyRound, Crown, ShieldCheck, X, Loader2, Save, Plus, Lock, Eye,
-  AlertTriangle, Info, Sparkles,
+  AlertTriangle, Info,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';

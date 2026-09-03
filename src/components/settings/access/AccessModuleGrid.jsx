@@ -2,7 +2,7 @@ import React from 'react';
 import {
   LayoutGrid, Briefcase, CalendarClock, Users, Truck, Boxes, Car,
   FlaskConical, ShieldCheck, PoundSterling, FileBarChart, Settings,
-  Lock, Eye, ShieldCheck as ShieldIcon, Sparkles,
+  Lock, Eye,
 } from 'lucide-react';
 import { PERMISSION_MODULES, ACCESS_LEVELS } from '@/utils/permissions';
 
@@ -12,7 +12,7 @@ const ICON_MAP = {
 };
 
 const LEVEL_STYLES = {
-  write: { active: 'bg-[#2E5A1A] text-white border-[#2E5A1A]', icon: ShieldIcon, dot: 'bg-[#2E5A1A]' },
+  write: { active: 'bg-[#2E5A1A] text-white border-[#2E5A1A]', icon: ShieldCheck, dot: 'bg-[#2E5A1A]' },
   read: { active: 'bg-amber-500 text-white border-amber-500', icon: Eye, dot: 'bg-amber-500' },
   none: { active: 'bg-slate-200 text-slate-500 border-slate-300', icon: Lock, dot: 'bg-slate-300' },
 };
@@ -29,7 +29,7 @@ export default function AccessModuleGrid({ permissions, isReadOnly, onChange, on
       <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Presets</span>
         <button onClick={() => onSetAll('write')} className="text-[11px] font-semibold px-2.5 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition flex items-center gap-1">
-          <ShieldIcon className="w-3 h-3" /> Full Access
+          <ShieldCheck className="w-3 h-3" /> Full Access
         </button>
         <button onClick={() => onSetAll('read')} className="text-[11px] font-semibold px-2.5 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition flex items-center gap-1">
           <Eye className="w-3 h-3" /> Read All
