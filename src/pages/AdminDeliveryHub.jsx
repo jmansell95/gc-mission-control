@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { Truck, Search, LayoutGrid, List, Filter, Clock, PlayCircle, CheckCircle2, AlertTriangle, ArrowRightLeft, Package, Store, Boxes, Navigation } from 'lucide-react';
@@ -13,6 +14,7 @@ import ConsumableInventoryManager from '@/components/settings/ConsumableInventor
 import DeliveryDetailDrawer from '@/components/logistics/DeliveryDetailDrawer';
 import DriverRunBoard from '@/components/admin/DriverRunBoard';
 import DriverDayPlan from '@/components/admin/DriverDayPlan';
+import SampleRunDrawer from '@/components/geotech/SampleRunDrawer';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
@@ -35,6 +37,7 @@ const dateFilters = [
 ];
 
 export default function AdminDeliveryHub() {
+  const location = useLocation();
   const [group, setGroup] = useState('operations');
   const [sub, setSub] = useState('board');
   const [view, setView] = useState('board');
@@ -43,6 +46,18 @@ export default function AdminDeliveryHub() {
   const [dateFilter, setDateFilter] = useState('all');
   const [driverFilter, setDriverFilter] = useState('all');
   const [selected, setSelected] = useState(null);
+  const [sampleRunPrefill, setSampleRunPrefill] = useState(null);
+
+  // Detect incoming sample-run prefill from the Geotech tab (router state).
+  // Consumes it once on mount, then clears the location state so it doesn't
+  // re-trigger on refresh.
+  useEffect(() => {
+    const prefill = location.state?.prefill;
+    if (prefill) {
+      setSampleRunPrefill(prefill);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const { data: deliveries = [], isLoading } = useScopedEntity('DeliveryLog', { queryKey: ['admin-all-deliveries'], sort: '-scheduled_date', limit: 500 });
   const { data: jobs = [] } = useScopedEntity('Job', { queryKey: ['admin-delivery-jobs'], limit: 500 });
@@ -240,6 +255,11 @@ export default function AdminDeliveryHub() {
       {/* Detail drawer — integrated day planner + chain view */}
       {selected && (
         <DeliveryDetailDrawer delivery={selected} jobs={jobs} staff={staff} onClose={() => setSelected(null)} />
+      )}
+
+      {/* Sample run drawer — pre-loaded from the Geotech tab */}
+      {sampleRunPrefill && (
+        <SampleRunDrawer prefill={sampleRunPrefill} onClose={() => setSampleRunPrefill(null)} />
       )}
     </HubShell>
   );

@@ -113,49 +113,69 @@ export default function EquipmentCalibrationManager({ job, assets: assetsProp })
     return 'Valid';
   };
 
+  const statusColorDark = (cal) => {
+    if (cal.calibration_result === 'fail') return { ring: '#F43F5E' };
+    if (!cal.next_calibration_date) return { ring: '#94A3B8' };
+    const daysUntil = Math.ceil((new Date(cal.next_calibration_date) - new Date(today)) / (1000 * 60 * 60 * 24));
+    if (daysUntil < 0) return { ring: '#F43F5E' };
+    if (daysUntil <= 30) return { ring: '#FFC300' };
+    return { ring: '#2EFF7D' };
+  };
+
+  const RESULT_DARK = {
+    pass: { label: 'Pass', ring: '#2EFF7D' },
+    conditional_pass: { label: 'Conditional', ring: '#FFC300' },
+    fail: { label: 'Fail', ring: '#F43F5E' },
+    out_of_tolerance: { label: 'Out of Tol.', ring: '#F43F5E' },
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-[#1C201C] rounded-xl border border-[#2a3a2a] overflow-hidden">
+      <div className="px-5 py-4 border-b border-[#2a3a2a] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
-            <Wrench className="w-4 h-4 text-violet-700" />
+          <div className="w-8 h-8 rounded-lg bg-[#0B1A0B] border border-[#2a3a2a] flex items-center justify-center">
+            <Wrench className="w-4 h-4 text-[#A78BFA]" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900 text-sm">Equipment Calibration</h3>
-            <p className="text-xs text-slate-500">{calibrations.length} records{expired.length > 0 && <span className="text-rose-600"> · {expired.length} expired</span>}{expiringSoon.length > 0 && <span className="text-amber-600"> · {expiringSoon.length} expiring</span>}</p>
+            <h3 className="font-semibold text-[#E0E0E0] text-sm">Equipment Calibration</h3>
+            <p className="text-xs text-[#A0A0A0]">{calibrations.length} records{expired.length > 0 && <span style={{ color: '#F43F5E' }}> · {expired.length} expired</span>}{expiringSoon.length > 0 && <span style={{ color: '#FFC300' }}> · {expiringSoon.length} expiring</span>}</p>
           </div>
         </div>
         <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-700 text-white rounded-lg hover:bg-violet-800 transition text-xs font-medium">
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF9F1C] text-[#1a1a1a] rounded-lg hover:brightness-110 transition text-xs font-semibold">
           <Plus className="w-3.5 h-3.5" /> Add Record
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-slate-400 animate-spin" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-[#2EFF7D] animate-spin" /></div>
       ) : calibrations.length === 0 ? (
         <div className="px-5 py-8 text-center">
-          <Wrench className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">No calibration records.</p>
-          <p className="text-xs text-slate-400 mt-1">Track calibration of shear vanes, SPT hammers, CPT cones, and other field testing equipment.</p>
+          <Wrench className="w-8 h-8 text-[#2a3a2a] mx-auto mb-2" />
+          <p className="text-sm text-[#A0A0A0]">No calibration records.</p>
+          <p className="text-xs text-[#5a6a5a] mt-1">Track calibration of shear vanes, SPT hammers, CPT cones, and other field testing equipment.</p>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-[#2a3a2a]">
           {calibrations.map(c => {
             const asset = assets?.find(a => a.id === c.asset_id);
+            const sc = statusColorDark(c);
+            const rc = RESULT_DARK[c.calibration_result] || RESULT_DARK.pass;
             return (
-              <div key={c.id} className="px-5 py-3 hover:bg-slate-50/60 transition">
+              <div key={c.id} className="px-5 py-3 hover:bg-[#1e241e] transition">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-semibold text-slate-900">{c.asset_name || EQUIPMENT_TYPES.find(t => t.value === c.equipment_type)?.label || c.equipment_type}</span>
-                      {c.serial_number && <span className="font-mono text-xs text-slate-500">SN: {c.serial_number}</span>}
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${statusColor(c)}`}>{statusLabel(c)}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${(CALIBRATION_RESULT_META[c.calibration_result] || CALIBRATION_RESULT_META.pass).color}`}>
-                        {(CALIBRATION_RESULT_META[c.calibration_result] || CALIBRATION_RESULT_META.pass).label}
+                      <span className="text-sm font-semibold text-[#E0E0E0]">{c.asset_name || EQUIPMENT_TYPES.find(t => t.value === c.equipment_type)?.label || c.equipment_type}</span>
+                      {c.serial_number && <span className="font-mono text-xs text-[#A0A0A0]">SN: {c.serial_number}</span>}
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                        style={{ backgroundColor: `${sc.ring}1a`, color: sc.ring, border: `1px solid ${sc.ring}40` }}>{statusLabel(c)}</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                        style={{ backgroundColor: `${rc.ring}1a`, color: rc.ring, border: `1px solid ${rc.ring}40` }}>
+                        {rc.label}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                    <div className="text-xs text-[#A0A0A0] mt-1 flex items-center gap-3">
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Calibrated {c.calibration_date}</span>
                       {c.next_calibration_date && <span className="flex items-center gap-1"><FileCheck className="w-3 h-3" /> Next: {c.next_calibration_date}</span>}
                       {c.calibrated_by_company && <span>· {c.calibrated_by_company}</span>}
@@ -163,16 +183,16 @@ export default function EquipmentCalibrationManager({ job, assets: assetsProp })
                     </div>
                     {c.calibration_certificate_url && (
                       <a href={c.calibration_certificate_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-1.5 text-xs text-violet-600 hover:text-violet-700 font-medium">
+                        className="inline-flex items-center gap-1 mt-1.5 text-xs font-medium" style={{ color: '#A78BFA' }}>
                         <FileCheck className="w-3 h-3" /> View certificate
                       </a>
                     )}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button onClick={() => { setEditing(c); setShowModal(true); }}
-                      className="p-1 text-slate-400 hover:text-slate-600 transition"><Edit2 className="w-3.5 h-3.5" /></button>
+                      className="p-1 text-[#5a6a5a] hover:text-[#E0E0E0] transition"><Edit2 className="w-3.5 h-3.5" /></button>
                     <button onClick={() => handleDelete(c)}
-                      className="p-1 text-slate-400 hover:text-rose-600 transition"><Trash2 className="w-3.5 h-3.5" /></button>
+                      className="p-1 text-[#5a6a5a] hover:text-[#F43F5E] transition"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               </div>

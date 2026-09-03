@@ -70,67 +70,76 @@ export default function MonitoringWellManager({ job, allStaff }) {
   const today = new Date().toISOString().slice(0, 10);
   const overdueWells = wells.filter(w => w.status === 'active' && w.next_reading_due && w.next_reading_due < today);
 
+  const WELL_STATUS_DARK = {
+    active: { label: 'Active', ring: '#2EFF7D' },
+    dormant: { label: 'Dormant', ring: '#94A3B8' },
+    decommissioned: { label: 'Decommissioned', ring: '#5a6a5a' },
+    damaged: { label: 'Damaged', ring: '#F43F5E' },
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-[#1C201C] rounded-xl border border-[#2a3a2a] overflow-hidden">
+      <div className="px-5 py-4 border-b border-[#2a3a2a] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-            <Waves className="w-4 h-4 text-blue-700" />
+          <div className="w-8 h-8 rounded-lg bg-[#0B1A0B] border border-[#2a3a2a] flex items-center justify-center">
+            <Waves className="w-4 h-4 text-[#00D4FF]" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900 text-sm">Monitoring Wells</h3>
-            <p className="text-xs text-slate-500">{wells.length} wells · {wells.filter(w => w.status === 'active').length} active{overdueWells.length > 0 && <span className="text-rose-600"> · {overdueWells.length} overdue</span>}</p>
+            <h3 className="font-semibold text-[#E0E0E0] text-sm">Monitoring Wells</h3>
+            <p className="text-xs text-[#A0A0A0]">{wells.length} wells · {wells.filter(w => w.status === 'active').length} active{overdueWells.length > 0 && <span style={{ color: '#F43F5E' }}> · {overdueWells.length} overdue</span>}</p>
           </div>
         </div>
         <button onClick={() => { setEditing(null); setShowModal(true); }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition text-xs font-medium">
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF9F1C] text-[#1a1a1a] rounded-lg hover:brightness-110 transition text-xs font-semibold">
           <Plus className="w-3.5 h-3.5" /> Add Well
         </button>
       </div>
 
       {overdueWells.length > 0 && (
-        <div className="px-5 py-2.5 bg-rose-50 border-b border-rose-100 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-          <p className="text-xs text-rose-700">
+        <div className="px-5 py-2.5 border-b border-[#2a3a2a] flex items-center gap-2" style={{ backgroundColor: '#F43F5E0d' }}>
+          <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#F43F5E' }} />
+          <p className="text-xs" style={{ color: '#F43F5E' }}>
             {overdueWells.length} well{overdueWells.length > 1 ? 's' : ''} overdue for reading: {overdueWells.map(w => w.well_reference).join(', ')}
           </p>
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-slate-400 animate-spin" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 text-[#2EFF7D] animate-spin" /></div>
       ) : wells.length === 0 ? (
         <div className="px-5 py-8 text-center">
-          <Waves className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">No monitoring wells installed.</p>
-          <p className="text-xs text-slate-400 mt-1">Add standpipe piezometers, gas monitoring points, or VWPs installed in boreholes.</p>
+          <Waves className="w-8 h-8 text-[#2a3a2a] mx-auto mb-2" />
+          <p className="text-sm text-[#A0A0A0]">No monitoring wells installed.</p>
+          <p className="text-xs text-[#5a6a5a] mt-1">Add standpipe piezometers, gas monitoring points, or VWPs installed in boreholes.</p>
         </div>
       ) : (
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-[#2a3a2a]">
           {wells.map(w => {
             const installer = allStaff.find(s => s.id === w.installed_by_staff_id);
-            const status = STATUS_META[w.status] || STATUS_META.active;
+            const status = WELL_STATUS_DARK[w.status] || WELL_STATUS_DARK.active;
             const isOverdue = w.status === 'active' && w.next_reading_due && w.next_reading_due < today;
             return (
-              <div key={w.id} className="px-5 py-3 hover:bg-slate-50/60 transition">
+              <div key={w.id} className="px-5 py-3 hover:bg-[#1e241e] transition">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-semibold text-slate-900">{w.well_reference}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${status.color}`}>{status.label}</span>
+                      <span className="font-mono text-sm font-semibold text-[#E0E0E0]">{w.well_reference}</span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                        style={{ backgroundColor: `${status.ring}1a`, color: status.ring, border: `1px solid ${status.ring}40` }}>{status.label}</span>
                       {isOverdue && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-100 text-rose-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
+                          style={{ backgroundColor: '#F43F5E1a', color: '#F43F5E', border: '1px solid #F43F5E40' }}>
                           <AlertTriangle className="w-2.5 h-2.5" /> Overdue
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-slate-500 mt-1">
+                    <div className="text-xs text-[#A0A0A0] mt-1">
                       {WELL_TYPES.find(t => t.value === w.well_type)?.label || w.well_type}
                       {w.borehole_ref && <span> · in {w.borehole_ref}</span>}
                       {w.tip_depth != null && <span> · tip {w.tip_depth}m</span>}
                       {w.screen_top != null && w.screen_bottom != null && <span> · screen {w.screen_top}–{w.screen_bottom}m</span>}
                     </div>
-                    <div className="flex items-center gap-3 mt-1.5 text-[11px] text-slate-400">
+                    <div className="flex items-center gap-3 mt-1.5 text-[11px] text-[#5a6a5a]">
                       {w.monitoring_type === 'groundwater' && <span className="flex items-center gap-1"><Droplets className="w-3 h-3" /> Groundwater</span>}
                       {w.monitoring_type === 'ground_gas' && <span className="flex items-center gap-1"><Gauge className="w-3 h-3" /> Gas</span>}
                       {w.monitoring_type === 'combined' && <span className="flex items-center gap-1"><Droplets className="w-3 h-3" /> GW + Gas</span>}
@@ -141,9 +150,9 @@ export default function MonitoringWellManager({ job, allStaff }) {
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button onClick={() => { setEditing(w); setShowModal(true); }}
-                      className="p-1 text-slate-400 hover:text-slate-600 transition"><Edit2 className="w-3.5 h-3.5" /></button>
+                      className="p-1 text-[#5a6a5a] hover:text-[#E0E0E0] transition"><Edit2 className="w-3.5 h-3.5" /></button>
                     <button onClick={() => handleDelete(w)}
-                      className="p-1 text-slate-400 hover:text-rose-600 transition"><Trash2 className="w-3.5 h-3.5" /></button>
+                      className="p-1 text-[#5a6a5a] hover:text-[#F43F5E] transition"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               </div>
