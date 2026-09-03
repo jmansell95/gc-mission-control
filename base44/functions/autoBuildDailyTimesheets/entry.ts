@@ -202,8 +202,14 @@ Deno.serve(async (req) => {
         else if (confidence >= 40) status = 'submitted';
         else status = 'draft';
 
+        // Inherit overtime from the rota assignment — weekend shifts or
+        // explicitly-flagged overtime shifts carry the rate_multiplier.
+        const isOvertime = !!assignment.is_overtime;
+        const rateMultiplier = assignment.rate_multiplier != null && assignment.rate_multiplier !== ''
+          ? Number(assignment.rate_multiplier) : null;
+
         // Create the summary entry
-        const summary = {
+        const summary: Record<string, any> = {
           staff_id: staffId,
           division_id: staff?.division_id || null,
           job_id: assignment.job_id || '',
@@ -233,6 +239,12 @@ Deno.serve(async (req) => {
           auto_built_sources: Array.from(sources).join(','),
           confidence_score: confidence,
         };
+
+        if (isOvertime) {
+          summary.is_overtime = true;
+          if (rateMultiplier != null) summary.rate_multiplier = rateMultiplier;
+          summary.overtime_pending = true;
+        }
 
         await b.entities.Timesheet.create(summary);
 
