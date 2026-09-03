@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   FlaskConical, AlertTriangle, XCircle, Search, Layers, User, Briefcase, CalendarDays,
-  CheckCircle2, FileCheck2, Download, Mountain, Filter, X,
+  CheckCircle2, FileCheck2, Download, Mountain, Filter, X, Loader2, CircleDashed,
 } from 'lucide-react';
 
 const REVIEW_FILTERS = [
@@ -9,6 +9,13 @@ const REVIEW_FILTERS = [
   { key: 'pending', label: 'Pending', cls: 'bg-amber-100 text-amber-700' },
   { key: 'queried', label: 'Queried', cls: 'bg-red-100 text-red-700' },
   { key: 'approved', label: 'Approved', cls: 'bg-emerald-100 text-emerald-700' },
+];
+
+const BOREHOLE_STATUS_FILTERS = [
+  { key: 'all', label: 'All Holes', icon: Mountain, cls: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+  { key: 'in_progress', label: 'In Progress', icon: Loader2, cls: 'bg-amber-100 text-amber-700' },
+  { key: 'unchecked', label: 'Unchecked', icon: CircleDashed, cls: 'bg-slate-100 text-slate-600' },
+  { key: 'complete', label: 'Completed', icon: CheckCircle2, cls: 'bg-emerald-100 text-emerald-700' },
 ];
 
 const GROUP_OPTIONS = [
@@ -31,6 +38,7 @@ export default function InvestigationHeader({
   jobFilter, setJobFilter, jobs,
   typeFilter, setTypeFilter, logTypes,
   boreholeFilter, setBoreholeFilter, boreholeOptions,
+  boreholeStatusFilter, setBoreholeStatusFilter,
   drillerFilter, setDrillerFilter, drillerOptions,
   dateFrom, setDateFrom, dateTo, setDateTo,
 }) {
@@ -146,6 +154,30 @@ export default function InvestigationHeader({
             </select>
           </div>
         </div>
+
+        {/* Borehole status filter pills */}
+        {boreholeStatusFilter !== undefined && (
+          <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide inline-flex items-center gap-1">
+              <Mountain className="w-3.5 h-3.5" /> Borehole Status
+            </span>
+            {BOREHOLE_STATUS_FILTERS.map(f => {
+              const Icon = f.icon;
+              const active = boreholeStatusFilter === f.key;
+              return (
+                <button
+                  key={f.key}
+                  onClick={() => setBoreholeStatusFilter(f.key)}
+                  className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition ${
+                    active ? 'bg-[#2E5A1A] text-white shadow-sm' : (f.cls || 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                  }`}
+                >
+                  <Icon className="w-3 h-3" /> {f.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Advanced filters row — borehole, driller, date range */}
         <div className="mt-2.5 flex flex-col sm:flex-row gap-2">

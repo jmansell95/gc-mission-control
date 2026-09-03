@@ -5,6 +5,7 @@ import {
   CheckCircle2, AlertTriangle, XCircle,
 } from 'lucide-react';
 import { strataConfig, reviewStatusConfig, logTypeConfig } from '@/components/investigation/shared';
+import { BOREHOLE_STATUS_CONFIG } from '@/components/investigation/boreholeStatusConfig';
 
 /**
  * Collapsible group card for the Investigation Hub master board.
@@ -38,6 +39,22 @@ export default function InvestigationGroupCard({
   const sampleCount = logs.filter(l => l.sample_id).length;
   const strataCount = logs.filter(l => l.strata_descriptor && l.strata_descriptor !== 'other').length;
 
+  // Borehole completion status — from the borehole_progress log
+  const progressLog = logs.find(l => l.log_type === 'borehole_progress' && l.borehole_status);
+  const boreholeStatus = progressLog?.borehole_status || null;
+  const statusConfig = boreholeStatus ? BOREHOLE_STATUS_CONFIG[boreholeStatus] : null;
+
+  // Missing data count — for in-progress / unchecked boreholes
+  const hasRemarks = logs.some(l => l.source === 'keylogbook_remarks');
+  const missingDataCount = [
+    logs.filter(l => l.strata_descriptor && l.strata_descriptor !== 'other').length === 0 && 'strata',
+    logs.filter(l => l.sample_id).length === 0 && 'samples',
+    logs.filter(l => l.spt_n_value != null || (l.spt_blows && l.spt_blows.length > 0)).length === 0 && 'spt',
+    logs.filter(l => l.log_type === 'installation').length === 0 && 'installations',
+    !hasRemarks && 'remarks',
+    (logs.reduce((m, l) => l.depth_to != null ? Math.max(m, l.depth_to) : m, 0) === 0) && 'finalDepth',
+  ].filter(Boolean).length;
+
   const latestDate = logs
     .map(l => l.date)
     .filter(Boolean)
@@ -52,6 +69,11 @@ export default function InvestigationGroupCard({
           <Stat icon={TestTube} label="Samples" value={sampleCount} />
           <Stat icon={Ruler} label="Max depth" value={maxDepth > 0 ? `${maxDepth.toFixed(1)}m` : '—'} />
           <Stat icon={Layers} label="Strata" value={strataCount} />
+          {boreholeStatus && boreholeStatus !== 'complete' && missingDataCount > 0 && (
+            <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 font-semibold">
+              <AlertTriangle className="w-3 h-3" /> {missingDataCount} data gap{missingDataCount !== 1 ? 's' : ''}
+            </span>
+          )}
         </>
       );
     }
@@ -102,9 +124,17 @@ export default function InvestigationGroupCard({
           {groupBy === 'date' && <CalendarDays className="w-5 h-5 text-violet-700" />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-slate-900 text-sm sm:text-base truncate">
-            {groupLabel}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-slate-900 text-sm sm:text-base truncate">
+              {groupLabel}
+            </p>
+            {statusConfig && (
+              <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold border flex-shrink-0 ${statusConfig.badge}`}>
+                {(() => { const SIcon = statusConfig.icon; return <SIcon className="w-2.5 h-2.5" />; })()}
+                {statusConfig.short}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2.5 flex-wrap mt-0.5">
             {renderSummary()}
           </div>

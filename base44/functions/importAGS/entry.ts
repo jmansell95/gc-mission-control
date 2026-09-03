@@ -1174,9 +1174,17 @@ Deno.serve(async (req) => {
           locaElev != null ? `, ground level ${locaElev}m` : '',
           locaX && locaY ? `, coordinates ${locaX}, ${locaY}` : '',
         ];
+        // Parse LOCA_STAT → borehole_status (COMPLETE / INPROG / UNCHECKED)
+        const locaStatRaw = pick(r, 'LOCA_STAT', 'STAT', 'STATUS').toUpperCase().trim();
+        let boreholeStatus: string = '';
+        if (locaStatRaw === 'COMPLETE' || locaStatRaw === 'COMPLETED' || locaStatRaw === 'C') boreholeStatus = 'complete';
+        else if (locaStatRaw === 'INPROG' || locaStatRaw === 'IN_PROGRESS' || locaStatRaw === 'IN-PROG' || locaStatRaw === 'I') boreholeStatus = 'in_progress';
+        else if (locaStatRaw === 'UNCHECKED' || locaStatRaw === 'UNCK' || locaStatRaw === 'U') boreholeStatus = 'unchecked';
+
         if (addLog({
           job_id: job.id, staff_id: staffId, staff_name: staffName, date: locaDate,
           log_type: 'borehole_progress', borehole_ref: locaId,
+          borehole_status: boreholeStatus || undefined,
           depth_to: num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null,
           groundwater_strike_depth: num(pick(r, 'LOCA_GND', 'LOCA_GW_DEPTH', 'LOCA_GWL', 'LOCA_WATER', 'GND', 'GW_DEPTH', 'GWL', 'WATER')) || null,
           description: `Imported from KeyLogBook AGS — ${descParts.join('')}.`,

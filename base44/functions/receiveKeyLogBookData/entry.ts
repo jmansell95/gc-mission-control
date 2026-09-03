@@ -284,6 +284,13 @@ Deno.serve(async (req) => {
       const bhRemarks = str(bh.remarks || bh.notes || bh.description);
       const bhDepth = num(bh.final_depth || bh.depth || bh.depth_to);
       const bhMeterage = num(bh.meterage);
+      // Parse LOCA_STAT → borehole_status (COMPLETE / INPROG / UNCHECKED)
+      const bhStatRaw = str(bh.loca_stat || bh.stat || bh.status).toUpperCase();
+      let bhStatus: string = '';
+      if (bhStatRaw === 'COMPLETE' || bhStatRaw === 'COMPLETED' || bhStatRaw === 'C') bhStatus = 'complete';
+      else if (bhStatRaw === 'INPROG' || bhStatRaw === 'IN_PROGRESS' || bhStatRaw === 'IN-PROG' || bhStatRaw === 'I') bhStatus = 'in_progress';
+      else if (bhStatRaw === 'UNCHECKED' || bhStatRaw === 'UNCK' || bhStatRaw === 'U') bhStatus = 'unchecked';
+
       logs.push({
         job_id: job.id,
         staff_id: null,
@@ -291,6 +298,7 @@ Deno.serve(async (req) => {
         date: londonDateFromInput(str(bh.date)) || workDate,
         log_type: 'borehole_progress',
         borehole_ref: bhRef || null,
+        borehole_status: bhStatus || undefined,
         depth_to: bhDepth || null,
         description: `Imported from KeyLogBook — borehole ${bhRef || '—'}${bhRemarks ? `: ${bhRemarks}` : ''}`,
         source: 'ags_import',

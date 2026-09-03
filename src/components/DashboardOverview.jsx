@@ -9,6 +9,7 @@ import FieldPrioritiesWidget from '@/components/dashboard/FieldPrioritiesWidget'
 import ExceptionMonitorWidget from '@/components/dashboard/ExceptionMonitorWidget';
 import RigPerformanceWidget from '@/components/dashboard/RigPerformanceWidget';
 import MissionControlStrip from '@/components/dashboard/MissionControlStrip';
+import BoreholesInProgressWidget from '@/components/dashboard/BoreholesInProgressWidget';
 import {
   ActiveJobsTile, CrewUtilisationTile, TimesheetQueueTile,
   OutstandingInvoicesTile, BurnRateTile,
@@ -91,6 +92,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
     'mission-control':    () => <MissionControlStrip onNavigate={onNavigate} />,
     'field-priorities':    () => <FieldPrioritiesWidget onNavigate={onNavigate} />,
     'exception-monitor':   () => <ExceptionMonitorWidget onNavigate={onNavigate} />,
+    'boreholes-progress': () => <BoreholesInProgressWidget onNavigate={onNavigate} />,
     'stat-outstanding':    () => <OutstandingInvoicesTile onNavigate={onNavigate} />,
     'stat-burn-rate':      () => <BurnRateTile onNavigate={onNavigate} />,
     'stat-overdue-actions':() => <OverdueActionsTile onNavigate={onNavigate} />,

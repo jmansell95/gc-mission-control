@@ -12,6 +12,7 @@ import { getTotalMetres } from '@/utils/geotechBilling';
 import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import BoreholeDetailModal from '@/components/borehole/BoreholeDetailModal';
 import BoreholeSummaryPanel from '@/components/borehole/BoreholeSummaryPanel';
+import { BOREHOLE_STATUS_CONFIG, MISSING_DATA_GROUPS } from '@/components/investigation/boreholeStatusConfig';
 
 export default function BoreholeDrillDown({ job, jobType }) {
   const { data: allLogs = [], isLoading } = useQuery({
@@ -169,6 +170,16 @@ export default function BoreholeDrillDown({ job, jobType }) {
                         <Mountain className="w-4 h-4 text-emerald-700" />
                       </div>
                       <span className="font-mono font-bold text-slate-900 text-base truncate">{ref}</span>
+                      {/* Status badge */}
+                      {s.boreholeStatus && BOREHOLE_STATUS_CONFIG[s.boreholeStatus] && (
+                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold border flex-shrink-0 ${BOREHOLE_STATUS_CONFIG[s.boreholeStatus].badge}`}>
+                          {(() => {
+                            const SIcon = BOREHOLE_STATUS_CONFIG[s.boreholeStatus].icon;
+                            return <SIcon className="w-2.5 h-2.5" />;
+                          })()}
+                          {BOREHOLE_STATUS_CONFIG[s.boreholeStatus].short}
+                        </span>
+                      )}
                       <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
                     </div>
                   </button>
@@ -260,6 +271,36 @@ export default function BoreholeDrillDown({ job, jobType }) {
                       <Chip icon={Gauge} count={s.waterReadingCount} color="teal" />
                     )}
                   </div>
+
+                  {/* Missing data chips — only for in-progress / unchecked boreholes */}
+                  {s.boreholeStatus && s.boreholeStatus !== 'complete' && s.missingData.length > 0 && (
+                    <div className="mb-2 flex items-center gap-1 flex-wrap">
+                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Missing:</span>
+                      {s.missingData.map(key => {
+                        const group = MISSING_DATA_GROUPS.find(g => g.key === key);
+                        if (!group) return null;
+                        return (
+                          <span key={key} className="text-[10px] px-1.5 py-0.5 rounded-md bg-rose-50 text-rose-600 font-medium border border-rose-100">
+                            {group.label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Review status chip — pending vs approved */}
+                  {s.pendingCount > 0 && (
+                    <div className="mb-2 flex items-center gap-1.5 text-[10px]">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold">
+                        {s.pendingCount} pending review
+                      </span>
+                      {s.approvedCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium">
+                          {s.approvedCount} approved
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Link to Investigation Hub — deep-links pre-filtered to this job + borehole */}
                   <button
@@ -387,6 +428,27 @@ function getBoreholeSummary(logs) {
   const drillingHours = Math.round((drillingMinutes / 60) * 10) / 10;
   const drillingDays = drillingDates.length;
 
+  // Borehole completion status — from the borehole_progress log's
+  // borehole_status field (parsed from AGS LOCA_STAT during import).
+  const progressLog = logs.find(l => l.log_type === 'borehole_progress' && l.borehole_status);
+  const boreholeStatus = progressLog?.borehole_status || null;
+
+  // Missing data groups — which expected data is absent for this borehole.
+  // Only meaningful for in-progress / unchecked boreholes (a completed hole
+  // should have everything, but we still show it if data is genuinely missing).
+  const hasRemarks = logs.some(l => l.source === 'keylogbook_remarks');
+  const missingData = [];
+  if (strataLogs.length === 0) missingData.push('strata');
+  if (sampleLogs.length === 0) missingData.push('samples');
+  if (sptLogs.length === 0) missingData.push('spt');
+  if (installLogs.length === 0) missingData.push('installations');
+  if (!hasRemarks) missingData.push('remarks');
+  if (allDepths.length === 0 || (progressLog && progressLog.depth_to == null)) missingData.push('finalDepth');
+
+  // Review status counts — how many logs are pending vs approved
+  const pendingCount = logs.filter(l => (l.manager_review_status || 'pending') === 'pending').length;
+  const approvedCount = logs.filter(l => l.manager_review_status === 'approved').length;
+
   // Date range: earliest → latest log date for this borehole
   const dates = logs.map(l => l.date).filter(Boolean).sort();
   const firstDate = dates[0] || null;
@@ -416,5 +478,9 @@ function getBoreholeSummary(logs) {
     drillingDates,
     drillingHours,
     drillingDays,
+    boreholeStatus,
+    missingData,
+    pendingCount,
+    approvedCount,
   };
 }

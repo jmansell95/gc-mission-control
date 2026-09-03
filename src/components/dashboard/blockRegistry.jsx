@@ -1,6 +1,6 @@
 import {
   Briefcase, Percent, ClipboardCheck, ShieldAlert, Drill, Radio,
-  Radar, AlertTriangle, AlertOctagon, PoundSterling, Gauge, ShieldCheck,
+  Radar, AlertTriangle, AlertOctagon, PoundSterling, Gauge, ShieldCheck, Mountain,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════
@@ -28,6 +28,7 @@ export const BLOCK_REGISTRY = {
   'stat-fleet-compliance': { title: 'Fleet Compliance',      icon: ShieldCheck,    rail: 'left',  defaultSize: 'sm' },
   'field-priorities':      { title: 'Field Priorities',      icon: AlertTriangle,  rail: 'left',  defaultSize: 'md' },
   'exception-monitor':     { title: 'Needs Attention',       icon: AlertOctagon,   rail: 'left',  defaultSize: 'md' },
+  'boreholes-progress':    { title: 'Boreholes in Progress', icon: Mountain,       rail: 'left',  defaultSize: 'md' },
   // ── Right rail — big visual widgets ──
   'rigs-on-site':         { title: 'Rigs on Site Today',    icon: Drill,           rail: 'right', defaultSize: 'xl' },
   'site-snapshot':        { title: 'Active Sites',          icon: Radio,           rail: 'right', defaultSize: 'xl' },
@@ -35,7 +36,7 @@ export const BLOCK_REGISTRY = {
 };
 
 export const DEFAULT_SECTION_LAYOUT = {
-  left: ['field-priorities', 'exception-monitor'],
+  left: ['field-priorities', 'exception-monitor', 'boreholes-progress'],
   right: ['rigs-on-site', 'site-snapshot', 'mission-control'],
 };
 

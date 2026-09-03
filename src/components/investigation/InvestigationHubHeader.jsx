@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlaskConical, Clock, CheckCircle2, AlertCircle, Mountain, Users, FileText } from 'lucide-react';
+import { FlaskConical, Clock, CheckCircle2, AlertCircle, Mountain, Users, FileText, Loader2 } from 'lucide-react';
 
 /**
  * InvestigationHubHeader — modern command-centre summary header for the
@@ -7,7 +7,7 @@ import { FlaskConical, Clock, CheckCircle2, AlertCircle, Mountain, Users, FileTe
  * boreholes covered, and total records in a hero-gradient banner with
  * glass KPI tiles.
  */
-export default function InvestigationHubHeader({ totalLogs, pendingCount, queriedCount, approvedCount, jobsCovered, boreholesCovered }) {
+export default function InvestigationHubHeader({ totalLogs, pendingCount, queriedCount, approvedCount, jobsCovered, boreholesCovered, inProgressCount, completedBoreholeCount }) {
   return (
     <div className="hero-gradient rounded-2xl p-5 text-white shadow-lg">
       <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -20,13 +20,15 @@ export default function InvestigationHubHeader({ totalLogs, pendingCount, querie
         </div>
         <span className="ml-auto text-xs bg-white/20 px-2.5 py-1 rounded-full font-medium">{totalLogs} total records</span>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <KpiTile icon={Loader2} label="In Progress" value={inProgressCount} tone="amber" />
+        <KpiTile icon={CheckCircle2} label="Completed" value={completedBoreholeCount} tone="emerald" />
+        <KpiTile icon={Mountain} label="Boreholes" value={boreholesCovered} tone="violet" />
         <KpiTile icon={Clock} label="Pending" value={pendingCount} tone="amber" />
         <KpiTile icon={CheckCircle2} label="Approved" value={approvedCount} tone="emerald" />
         <KpiTile icon={AlertCircle} label="Queried" value={queriedCount} tone="rose" />
         <KpiTile icon={FileText} label="Total Logs" value={totalLogs} tone="slate" />
         <KpiTile icon={Users} label="Jobs" value={jobsCovered} tone="blue" />
-        <KpiTile icon={Mountain} label="Boreholes" value={boreholesCovered} tone="violet" />
       </div>
     </div>
   );

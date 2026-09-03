@@ -122,6 +122,15 @@
       "type": "string",
       "description": "Borehole or pit reference (e.g. BH-01, CP-03, TP-02)"
     },
+    "borehole_status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "in_progress",
+        "unchecked"
+      ],
+      "description": "Borehole completion status from the AGS LOCA_STAT field. 'complete' = borehole finished (LOCA_STAT=COMPLETE), 'in_progress' = still being drilled (LOCA_STAT=INPROG), 'unchecked' = status not yet confirmed (LOCA_STAT=UNCHECKED or blank). Only set on borehole_progress logs (source='ags_import'); blank for other log types. Drives the in-progress/completed badges on borehole cards and the dashboard widget."
+    },
     "depth_from": {
       "type": "number",
       "description": "Start depth in metres"

@@ -31,6 +31,7 @@ export default function InvestigationHub({ onNavigate }) {
   const [jobFilter, setJobFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [boreholeFilter, setBoreholeFilter] = useState('all');
+  const [boreholeStatusFilter, setBoreholeStatusFilter] = useState('all');
   const [drillerFilter, setDrillerFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -49,6 +50,7 @@ export default function InvestigationHub({ onNavigate }) {
     if (link.jobId) setJobFilter(link.jobId);
     if (link.logId) setSelectedLogId(link.logId);
     if (link.boreholeRef) { setBoreholeFilter(link.boreholeRef); setGroupBy('borehole'); }
+    if (link.boreholeStatus) { setBoreholeStatusFilter(link.boreholeStatus); setGroupBy('borehole'); }
   }, []);
 
   // When a job filter is active, fetch that job's full log set (limit 2000)
@@ -78,6 +80,19 @@ export default function InvestigationHub({ onNavigate }) {
     return [...new Set(source.map(l => l.staff_name).filter(Boolean))].sort();
   }, [logs, jobFilter]);
 
+  // Map borehole_ref → borehole_status from borehole_progress logs.
+  // Used to filter non-progress logs (strata, samples, etc.) by the
+  // status of their parent borehole.
+  const boreholeRefStatusMap = useMemo(() => {
+    const map = {};
+    logs.forEach(l => {
+      if (l.log_type === 'borehole_progress' && l.borehole_ref && l.borehole_status) {
+        map[l.borehole_ref] = l.borehole_status;
+      }
+    });
+    return map;
+  }, [logs]);
+
   // Apply filters
   const filtered = useMemo(() => {
     return logs.filter(l => {
@@ -85,6 +100,16 @@ export default function InvestigationHub({ onNavigate }) {
       if (jobFilter !== 'all' && l.job_id !== jobFilter) return false;
       if (typeFilter !== 'all' && l.log_type !== typeFilter) return false;
       if (boreholeFilter !== 'all' && l.borehole_ref !== boreholeFilter) return false;
+      if (boreholeStatusFilter !== 'all') {
+        // Filter by borehole_status — only borehole_progress logs carry the
+        // status, so we match any log whose borehole_ref has a progress log
+        // with the selected status.
+        if (l.log_type !== 'borehole_progress' || l.borehole_status !== boreholeStatusFilter) {
+          // Also include non-progress logs if their borehole_ref matches a
+          // progress log with the selected status (checked via the ref map).
+          if (!boreholeRefStatusMap[l.borehole_ref] || boreholeRefStatusMap[l.borehole_ref] !== boreholeStatusFilter) return false;
+        }
+      }
       if (drillerFilter !== 'all' && l.staff_name !== drillerFilter) return false;
       if (dateFrom && l.date && l.date < dateFrom) return false;
       if (dateTo && l.date && l.date > dateTo) return false;
@@ -95,7 +120,7 @@ export default function InvestigationHub({ onNavigate }) {
       }
       return true;
     });
-  }, [logs, reviewFilter, jobFilter, typeFilter, boreholeFilter, drillerFilter, dateFrom, dateTo, search]);
+  }, [logs, reviewFilter, jobFilter, typeFilter, boreholeFilter, boreholeStatusFilter, drillerFilter, dateFrom, dateTo, search, boreholeRefStatusMap]);
 
   // Group the filtered logs by the selected dimension
   const groups = useMemo(() => {
@@ -142,6 +167,8 @@ export default function InvestigationHub({ onNavigate }) {
   const approvedCount = logs.filter(l => l.manager_review_status === 'approved').length;
   const jobsCovered = new Set(logs.map(l => l.job_id).filter(Boolean)).size;
   const boreholesCovered = new Set(logs.map(l => l.borehole_ref).filter(Boolean)).size;
+  const inProgressCount = Object.values(boreholeRefStatusMap).filter(s => s === 'in_progress').length;
+  const completedBoreholeCount = Object.values(boreholeRefStatusMap).filter(s => s === 'complete').length;
   const hasNoLogs = !isLoading && logs.length === 0;
 
   const toggleBulkSelect = useCallback((id) => {
@@ -169,6 +196,8 @@ export default function InvestigationHub({ onNavigate }) {
         approvedCount={approvedCount}
         jobsCovered={jobsCovered}
         boreholesCovered={boreholesCovered}
+        inProgressCount={inProgressCount}
+        completedBoreholeCount={completedBoreholeCount}
       />
 
       <InvestigationHeader
@@ -181,6 +210,7 @@ export default function InvestigationHub({ onNavigate }) {
         jobFilter={jobFilter} setJobFilter={setJobFilter} jobs={jobs}
         typeFilter={typeFilter} setTypeFilter={setTypeFilter} logTypes={logTypeConfig}
         boreholeFilter={boreholeFilter} setBoreholeFilter={setBoreholeFilter} boreholeOptions={boreholeOptions}
+        boreholeStatusFilter={boreholeStatusFilter} setBoreholeStatusFilter={setBoreholeStatusFilter}
         drillerFilter={drillerFilter} setDrillerFilter={setDrillerFilter} drillerOptions={drillerOptions}
         dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
       />
