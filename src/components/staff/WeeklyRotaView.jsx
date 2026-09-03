@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { ChevronLeft, ChevronRight, Clock, MapPin, Check } from 'lucide-react';
+import RigLinkPill from '@/components/rota/RigLinkPill';
 
 // WeeklyRotaView — responsive weekly schedule for field staff.
 // Mobile: a horizontal day picker + the selected day's shift cards.
@@ -12,6 +15,15 @@ export default function WeeklyRotaView({ assignments = [], jobs = [], vehicles =
   const [selectedDay, setSelectedDay] = useState(() => new Date());
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const weekStartStr = format(weekStart, 'yyyy-MM-dd');
+
+  // Fetch all rigs + all assignments for the week so the rig pill can resolve
+  // the crew partner (the other crew member on the same rig that day).
+  const { data: rigs = [] } = useQuery({ queryKey: ['rigs-field-rota'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
+  const { data: allWeekAssignments = [] } = useQuery({
+    queryKey: ['week-assignments-field', weekStartStr],
+    queryFn: () => base44.entities.RotaAssignment.filter({ week_start: weekStartStr }),
+  });
 
   const assignmentsByDate = useMemo(() => {
     const map = {};
@@ -82,6 +94,9 @@ export default function WeeklyRotaView({ assignments = [], jobs = [], vehicles =
           assignments={assignmentsByDate[format(selectedDay, 'yyyy-MM-dd')] || []}
           jobFor={jobFor}
           isToday={isSameDay(selectedDay, today)}
+          rigs={rigs}
+          allAssignments={allWeekAssignments}
+          staff={staff}
         />
       </div>
 
@@ -95,6 +110,9 @@ export default function WeeklyRotaView({ assignments = [], jobs = [], vehicles =
             jobFor={jobFor}
             isToday={isSameDay(d, today)}
             grid
+            rigs={rigs}
+            allAssignments={allWeekAssignments}
+            staff={staff}
           />
         ))}
       </div>
@@ -102,7 +120,7 @@ export default function WeeklyRotaView({ assignments = [], jobs = [], vehicles =
   );
 }
 
-function DayColumn({ date, assignments, jobFor, isToday, grid }) {
+function DayColumn({ date, assignments, jobFor, isToday, grid, rigs, allAssignments, staff }) {
   return (
     <div
       className={`rounded-2xl ${grid ? 'min-h-[220px]' : ''} ${
@@ -122,7 +140,7 @@ function DayColumn({ date, assignments, jobFor, isToday, grid }) {
           grid && <p className="text-[11px] text-slate-300 text-center py-4">No shifts</p>
         ) : (
           assignments.map((a) => (
-            <RotaShiftCard key={a.id} assignment={a} job={jobFor(a.job_id)} />
+            <RotaShiftCard key={a.id} assignment={a} job={jobFor(a.job_id)} rigs={rigs} allAssignments={allAssignments} staff={staff} />
           ))
         )}
       </div>
@@ -130,7 +148,7 @@ function DayColumn({ date, assignments, jobFor, isToday, grid }) {
   );
 }
 
-function RotaShiftCard({ assignment, job }) {
+function RotaShiftCard({ assignment, job, rigs, allAssignments, staff }) {
   return (
     <div className="rounded-xl p-2.5 bg-slate-50 border border-slate-200">
       <p className="text-xs font-bold text-slate-900 truncate">{assignment.assignment_type === 'yard_depot' ? 'Depot Duty' : (job?.name || 'Shift')}</p>
@@ -146,6 +164,11 @@ function RotaShiftCard({ assignment, job }) {
           </span>
         )}
       </div>
+      {assignment.rig_asset_id && (
+        <div className="mt-1.5">
+          <RigLinkPill assignment={assignment} rigs={rigs} allAssignments={allAssignments} staff={staff} size="sm" />
+        </div>
+      )}
       <p className="text-[10px] font-bold text-[#2E5A1A] mt-1.5 flex items-center gap-1">
         <Check className="w-3 h-3" /> Scheduled
       </p>

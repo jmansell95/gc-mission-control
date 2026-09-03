@@ -139,27 +139,37 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
   const selectedPairing = pairings.find(p => p.id === pairingId);
   const swapRig = activeRigs.find(r => r.id === newRigId);
 
-  // Conflict check: either crew member already has a shift on a date in range
-  const conflictDates = useMemo(() => {
-    if (mode !== 'create' || rangeDays.length === 0) return [];
-    const conflicts = [];
-    rangeDays.forEach(d => {
-      [leadId, secondId].forEach(sid => {
-        if (!sid) return;
-        if ((existingRotas || []).some(r => r.staff_id === sid && r.assigned_date === d)) {
-          conflicts.push({ date: d, staffId: sid });
-        }
-      });
-    });
-    return conflicts;
-  }, [mode, rangeDays, leadId, secondId, existingRotas]);
+  // Fetch both crew members' shifts so we can preview which dates are
+  // linkable (both have an existing shift on the selected job that day) vs
+  // skipped (no shift on that job). The rig is stamped ONTO existing shifts —
+  // no new records are created, so nothing conflicts with the rota.
+  const [previewShifts, setPreviewShifts] = useState({ lead: [], second: [] });
+  useEffect(() => {
+    if (mode !== 'create' || !leadId || !secondId) return;
+    let cancelled = false;
+    Promise.all([
+      base44.entities.RotaAssignment.filter({ staff_id: leadId }),
+      base44.entities.RotaAssignment.filter({ staff_id: secondId }),
+    ]).then(([l, s]) => { if (!cancelled) setPreviewShifts({ lead: l || [], second: s || [] }); })
+      .catch(() => { if (!cancelled) setPreviewShifts({ lead: [], second: [] }); });
+    return () => { cancelled = true; };
+  }, [mode, leadId, secondId]);
 
-  const validDays = useMemo(() => {
-    const conflictSet = new Set(conflictDates.map(c => c.date));
-    return rangeDays.filter(d => !conflictSet.has(d));
-  }, [rangeDays, conflictDates]);
+  const linkableDays = useMemo(() => {
+    if (mode !== 'create' || rangeDays.length === 0 || !jobId) return [];
+    const rangeSet = new Set(rangeDays);
+    const isJobShift = a => rangeSet.has(a.assigned_date) && a.job_id === jobId &&
+      (!a.assignment_type || a.assignment_type === 'job' || a.assignment_type === 'yard_depot');
+    const leadByDate = {};
+    previewShifts.lead.forEach(a => { if (isJobShift(a)) leadByDate[a.assigned_date] = a; });
+    const secondByDate = {};
+    previewShifts.second.forEach(a => { if (isJobShift(a)) secondByDate[a.assigned_date] = a; });
+    return rangeDays.filter(d => leadByDate[d] && secondByDate[d]);
+  }, [mode, rangeDays, jobId, previewShifts]);
 
-  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && validDays.length > 0;
+  const skippedDays = useMemo(() => rangeDays.filter(d => !linkableDays.includes(d)), [rangeDays, linkableDays]);
+
+  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && linkableDays.length > 0;
   const canSwap = pairingId && newRigId && swapFromDate && newRigId !== selectedPairing?.rig_id;
 
   if (!isOpen) return null;
@@ -169,38 +179,41 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
     setSaving(true);
     try {
       const newPairingId = genPairingId();
-      const leadDivision = staff.find(s => s.id === leadId)?.division_id || '';
-      const secondDivision = staff.find(s => s.id === secondId)?.division_id || '';
-      const assignments = [];
-      validDays.forEach((dateStr, idx) => {
-        [{ id: leadId, role: 'lead_driller', div: leadDivision }, { id: secondId, role: 'second_man', div: secondDivision }].forEach(m => {
-          assignments.push({
-            job_id: jobId,
-            assignment_type: 'job',
-            staff_id: m.id,
-            division_id: m.div,
-            assigned_date: dateStr,
-            rig_asset_id: rigId,
-            crew_pairing_id: newPairingId,
-            crew_role: m.role,
-            week_start: computeWeekStart(dateStr),
-            start_time: '08:00',
-            end_time: '17:00',
-            work_weekends: !!workWeekends,
-            status: 'assigned',
-          });
-        });
+      const rangeSet = new Set(rangeDays);
+      const isJobShift = a => rangeSet.has(a.assigned_date) && a.job_id === jobId &&
+        (!a.assignment_type || a.assignment_type === 'job' || a.assignment_type === 'yard_depot');
+      const leadByDate = {};
+      previewShifts.lead.forEach(a => { if (isJobShift(a)) leadByDate[a.assigned_date] = a; });
+      const secondByDate = {};
+      previewShifts.second.forEach(a => { if (isJobShift(a)) secondByDate[a.assigned_date] = a; });
+
+      const updates = [];
+      linkableDays.forEach(d => {
+        const leadShift = leadByDate[d];
+        const secondShift = secondByDate[d];
+        if (leadShift) updates.push({ id: leadShift.id, rig_asset_id: rigId, crew_pairing_id: newPairingId, crew_role: 'lead_driller' });
+        if (secondShift) updates.push({ id: secondShift.id, rig_asset_id: rigId, crew_pairing_id: newPairingId, crew_role: 'second_man' });
       });
-      await base44.entities.RotaAssignment.bulkCreate(assignments);
+      if (updates.length === 0) {
+        toast({ title: 'No shifts to link', description: 'Neither crew member has a shift on this job in the selected range.', variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
+      await base44.entities.RotaAssignment.bulkUpdate(updates);
       queryClient.invalidateQueries({ queryKey: ['rotas'] });
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['rig-perf-assignments'] });
-      const skipped = rangeDays.length - validDays.length;
-      toast({ title: 'Crew assigned to rig', description: `${validDays.length} day${validDays.length !== 1 ? 's' : ''} · ${staff.find(s => s.id === leadId)?.name} (Lead) + ${staff.find(s => s.id === secondId)?.name} (Second) on ${(rigs || []).find(r => r.id === rigId)?.name}${skipped > 0 ? ` · ${skipped} skipped (existing shifts)` : ''}.` });
+      const rigName = (rigs || []).find(r => r.id === rigId)?.name || 'rig';
+      const leadName = staff.find(s => s.id === leadId)?.name || 'Lead';
+      const secondName = staff.find(s => s.id === secondId)?.name || 'Second';
+      toast({
+        title: 'Rig linked to crew',
+        description: `${linkableDays.length} day${linkableDays.length !== 1 ? 's' : ''} · ${leadName} (Lead) + ${secondName} (Second) on ${rigName}${skippedDays.length > 0 ? ` · ${skippedDays.length} skipped (no shift on this job)` : ''}.`,
+      });
       onClose();
     } catch (e) {
-      console.error('Crew-rig assignment failed:', e);
-      toast({ title: 'Could not assign crew', description: e.message || 'Something went wrong.', variant: 'destructive' });
+      console.error('Crew-rig link failed:', e);
+      toast({ title: 'Could not link rig', description: e.message || 'Something went wrong.', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -277,7 +290,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white text-[10px] font-bold flex items-center justify-center">1</span>
-                  <p className="text-xs font-semibold text-slate-700">Choose the crew</p>
+                  <p className="text-xs font-semibold text-slate-700">Choose the crew <span className="font-normal text-slate-400">(must already have shifts on the job)</span></p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -364,38 +377,17 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                 )}
               </div>
 
-              {conflictDates.length > 0 && (
-                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium">Existing shifts found — {conflictDates.length} date{conflictDates.length !== 1 ? 's' : ''} skipped</p>
-                      <p className="text-amber-600 mt-0.5">
-                        {validDays.length > 0
-                          ? `${validDays.length} day${validDays.length !== 1 ? 's' : ''} will be assigned. `
-                          : 'No free days remain — pick different dates or crew. '}
-                        These existing shifts keep their current job; the rig is assigned on the free days below.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {conflictDates.map(c => {
-                      const who = staff.find(s => s.id === c.staffId);
-                      return (
-                        <span key={`${c.date}-${c.staffId}`} className="inline-flex items-center gap-1 bg-white border border-amber-200 rounded-md px-1.5 py-0.5 text-[10px] text-amber-800 font-medium">
-                          <CalendarClock className="w-2.5 h-2.5" />
-                          {format(new Date(c.date + 'T00:00:00'), 'dd MMM')}
-                          <span className="text-amber-500">·</span>
-                          {who?.name?.split(' ')[0] || 'Unknown'}
-                        </span>
-                      );
-                    })}
-                  </div>
-                  {validDays.length > 0 && (
-                    <div className="mt-2 pt-2 border-t border-amber-200/60">
-                      <p className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wide mb-1">Will be assigned ({validDays.length})</p>
+              {rangeDays.length > 0 && jobId && leadId && secondId && (
+                <div className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                  <p className="font-semibold text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    <Drill className="w-3.5 h-3.5 text-[#2E5A1A]" />
+                    The rig is stamped onto existing shifts — no new shifts are created.
+                  </p>
+                  {linkableDays.length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-[10px] text-emerald-700 font-semibold uppercase tracking-wide mb-1">Will be linked ({linkableDays.length})</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {validDays.map(d => (
+                        {linkableDays.map(d => (
                           <span key={d} className="inline-flex items-center gap-1 bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5 text-[10px] text-emerald-800 font-medium">
                             <CheckCircle2 className="w-2.5 h-2.5" />
                             {format(new Date(d + 'T00:00:00'), 'dd MMM')}
@@ -404,6 +396,26 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                       </div>
                     </div>
                   )}
+                  {skippedDays.length > 0 && (
+                    <div className="pt-2 border-t border-slate-200/70">
+                      <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide mb-1">Skipped — no shift on this job ({skippedDays.length})</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {skippedDays.map(d => (
+                          <span key={d} className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded-md px-1.5 py-0.5 text-[10px] text-slate-400 font-medium">
+                            <CalendarClock className="w-2.5 h-2.5" />
+                            {format(new Date(d + 'T00:00:00'), 'dd MMM')}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1.5">Assign these crew members to the job first, then link the rig.</p>
+                    </div>
+                  )}
+                  {linkableDays.length === 0 && (
+                    <p className="text-[11px] text-amber-700 mt-1 flex items-start gap-1">
+                      <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                      Neither crew member has a shift on this job in the selected range. Assign them to the job on the rota first.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -411,7 +423,7 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                 <button type="button" onClick={handleCreate} disabled={!canCreate || saving}
                   className="flex-1 px-4 py-2.5 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Assign Crew to Rig
+                  Link Rig to Crew
                 </button>
                 <button type="button" onClick={onClose} className="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
               </div>

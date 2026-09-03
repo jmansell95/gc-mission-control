@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { MapPin, ClipboardCheck, Clock, PlayCircle, CheckCircle2 } from 'lucide-react';
 import { getJobPrimaryType } from '@/utils/jobTeams';
 import { ErrorState, RotaSkeleton, Skeleton, SkeletonText } from '@/components/StateViews';
+import RigLinkPill from '@/components/rota/RigLinkPill';
 
 // Local copies of the parent's colour maps (kept in sync with WeeklyRotaBuilder).
 const jobTypeColors = {
@@ -39,7 +40,9 @@ export default function RotaDayCards({
   staff,
   jobs,
   teams,
+  rigs,
   onEditAssignment,
+  onRemoveRigLink,
   staffLoading,
   staffError,
   refetchStaff,
@@ -143,22 +146,26 @@ export default function RotaDayCards({
                           const status = statusConfig[a.status || 'assigned'] || statusConfig.assigned;
                           const StatusIcon = status.icon;
                           return (
-                            <button
-                              key={a.id}
-                              onClick={() => onEditAssignment(a)}
-                              className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full pl-1 pr-2.5 py-1 hover:shadow-sm hover:border-emerald-300 transition"
-                            >
-                              <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                <span className="text-emerald-700 font-bold text-[10px]">
-                                  {member?.name?.charAt(0) || '?'}
+                            <div key={a.id} className="flex flex-col items-start gap-1">
+                              <button
+                                onClick={() => onEditAssignment(a)}
+                                className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-full pl-1 pr-2.5 py-1 hover:shadow-sm hover:border-emerald-300 transition"
+                              >
+                                <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-emerald-700 font-bold text-[10px]">
+                                    {member?.name?.charAt(0) || '?'}
+                                  </span>
                                 </span>
-                              </span>
-                              <span className="text-xs font-medium text-slate-700 leading-none">
-                                {member?.name || 'Unknown'}
-                              </span>
-                              <StatusIcon className={`w-3 h-3 ${status.text}`} />
-                              {a.briefing_signed && <ClipboardCheck className="w-3 h-3 text-emerald-500" />}
-                            </button>
+                                <span className="text-xs font-medium text-slate-700 leading-none">
+                                  {member?.name || 'Unknown'}
+                                </span>
+                                <StatusIcon className={`w-3 h-3 ${status.text}`} />
+                                {a.briefing_signed && <ClipboardCheck className="w-3 h-3 text-emerald-500" />}
+                              </button>
+                              {a.rig_asset_id && (
+                                <RigLinkPill assignment={a} rigs={rigs} allAssignments={rotas} staff={staff} onRemove={onRemoveRigLink} size="xs" />
+                              )}
+                            </div>
                           );
                         })}
                       </div>

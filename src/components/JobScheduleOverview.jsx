@@ -1,8 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { Users, Calendar, User, Truck, ShieldCheck, PlayCircle, CheckCircle2, MessageSquare, ChevronDown, ChevronsUpDown, HardHat, Briefcase } from 'lucide-react';
 import { format, startOfWeek, addWeeks } from 'date-fns';
 import { getCrewLabel } from '@/utils/terminology';
 import SubcontractorCrewSection from '@/components/jobs/SubcontractorCrewSection';
+import RigLinkPill from '@/components/rota/RigLinkPill';
 
 const roleLabels = {
   groundworker: 'Groundworker', cp_driller: 'CP Driller', rotary_driller: 'Rotary Driller',
@@ -21,7 +24,7 @@ const SECTION_META = {
   agency: { label: 'Agency Staff', icon: Briefcase, badge: 'bg-blue-100 text-blue-700', iconBg: 'bg-blue-50', iconColor: 'text-blue-700' },
 };
 
-function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType }) {
+function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType, rigs, allStaff }) {
   const groups = {
     direct_employee: [],
     subcontractor: [],
@@ -72,6 +75,11 @@ function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType }) {
                               <span className="text-xs text-slate-500">{memberVehicles.map(v => v.registration_number).join(', ')}</span>
                             </div>
                           )}
+                          {memberRotas.filter(r => r.rig_asset_id).map(r => (
+                            <div key={r.id} className="mt-1.5">
+                              <RigLinkPill assignment={r} rigs={rigs} allAssignments={rotas} staff={allStaff} size="sm" />
+                            </div>
+                          ))}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -95,6 +103,7 @@ function AssignedStaffGroups({ assignedStaff, rotas, vehicles, primaryType }) {
 export default function JobScheduleOverview({ job, primaryType, assignedStaff, rotas, allStaff, vehicles, rotasByDate, sortedDates }) {
   const [expandedDays, setExpandedDays] = useState(() => new Set(sortedDates.length <= 3 ? sortedDates : []));
   const [expandedWeeks, setExpandedWeeks] = useState({});
+  const { data: rigs = [] } = useQuery({ queryKey: ['rigs-schedule'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true }) });
 
   const toggleDay = (date) => {
     setExpandedDays(prev => {
@@ -139,7 +148,7 @@ export default function JobScheduleOverview({ job, primaryType, assignedStaff, r
   return (
     <div className="space-y-6 mb-6">
       {/* Assigned Staff — split by worker type */}
-      <AssignedStaffGroups assignedStaff={assignedStaff} rotas={rotas} vehicles={vehicles} primaryType={primaryType} />
+      <AssignedStaffGroups assignedStaff={assignedStaff} rotas={rotas} vehicles={vehicles} primaryType={primaryType} rigs={rigs} allStaff={allStaff} />
 
       {/* Subcontractor crew names (from SubcontractorLog — free-text names not in Staff records) */}
       <SubcontractorCrewSection jobId={job?.id || ''} />
@@ -264,6 +273,11 @@ export default function JobScheduleOverview({ job, primaryType, assignedStaff, r
                                             </span>
                                           )}
                                         </div>
+                                        {rota.rig_asset_id && (
+                                          <div className="mt-1.5">
+                                            <RigLinkPill assignment={rota} rigs={rigs} allAssignments={rotas} staff={allStaff} size="sm" />
+                                          </div>
+                                        )}
                                         {rota.progress_notes && (
                                           <div className="flex items-start gap-1.5 mt-1.5 pl-5">
                                             <MessageSquare className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />

@@ -32,6 +32,9 @@ import LiveDriverBadge from '@/components/rota/LiveDriverBadge';
 import RotaDayCards from '@/components/rota/RotaDayCards';
 import TodayCrewPopup from '@/components/rota/TodayCrewPopup';
 import RotaSuggestionsPopup from '@/components/rota/RotaSuggestionsPopup';
+import RigLinkPill from '@/components/rota/RigLinkPill';
+import { removeRigLink } from '@/hooks/useRigLink';
+import { useToast } from '@/components/ui/use-toast';
 const jobTypeColors = {
   drilling: { bg: 'bg-amber-50', border: 'border-amber-400', text: 'text-amber-800', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
   groundworks: { bg: 'bg-emerald-50', border: 'border-emerald-400', text: 'text-emerald-800', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
@@ -97,6 +100,7 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
   const [crewRigOpen, setCrewRigOpen] = useState(false);
 
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const { activeDivisionId } = useDivision();
   const weekStart = startOfWeek(selectedWeek, { weekStartsOn: 1 });
   const weekStartStr = format(weekStart, 'yyyy-MM-dd');
@@ -313,6 +317,18 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
     } catch (error) {
       console.error('Error deleting assignment:', error);
+    }
+  };
+
+  // Remove a rig link from a shift (+ its partner) without deleting the shift.
+  const handleRemoveRigLink = async (assignment) => {
+    try {
+      await removeRigLink(assignment, rotas);
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+      toast({ title: 'Rig link removed', description: 'The shift stays assigned — only the rig was unlinked.' });
+    } catch (e) {
+      toast({ title: 'Could not remove rig link', description: e.message || 'Something went wrong.', variant: 'destructive' });
     }
   };
 
@@ -622,16 +638,21 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
             )}
           </div>
           <button onClick={(e) => { e.stopPropagation(); handleDeleteAssignment(assignment.id); }}
-            className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 rounded transition">
-            <X className="w-3 h-3" />
+          className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-red-500 rounded transition">
+          <X className="w-3 h-3" />
           </button>
-        </div>
-        {job?.location && (
-          <div className="flex items-center gap-1 text-slate-500 mb-1">
-            <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-            <span className="truncate">{job.location}</span>
           </div>
-        )}
+          {assignment.rig_asset_id && (
+          <div className="mb-1">
+          <RigLinkPill assignment={assignment} rigs={rigs} allAssignments={rotas} staff={staff} onRemove={handleRemoveRigLink} size="xs" />
+          </div>
+          )}
+          {job?.location && (
+          <div className="flex items-center gap-1 text-slate-500 mb-1">
+          <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+          <span className="truncate">{job.location}</span>
+          </div>
+          )}
         {vehicle && (
           <div className="flex items-center gap-1 text-slate-500 mb-1">
             <Truck className="w-2.5 h-2.5 flex-shrink-0" />
@@ -1111,7 +1132,9 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
           staff={staff}
           jobs={jobs}
           teams={teams}
+          rigs={rigs}
           onEditAssignment={handleEditAssignment}
+          onRemoveRigLink={handleRemoveRigLink}
           staffLoading={staffLoading}
           staffError={staffError}
           refetchStaff={refetchStaff}

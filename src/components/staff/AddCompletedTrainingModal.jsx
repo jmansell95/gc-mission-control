@@ -26,7 +26,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
   const [form, setForm] = useState({
     qualification_type: '',
     course_title: '',
-    completed_date: format(new Date(), 'yyyy-MM-dd'),
+    completed_date: '',
     venue: '',
     provider_id: '',
     result: 'passed',
@@ -97,8 +97,8 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
   };
 
   const handleSave = async () => {
-    if (!form.qualification_type || !form.completed_date) {
-      toast({ title: 'Category and date are required', variant: 'destructive' });
+    if (!form.qualification_type || !form.expiry_date) {
+      toast({ title: 'Category and expiry date are required', variant: 'destructive' });
       return;
     }
     setSaving(true);
@@ -192,7 +192,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
           {/* Date + Result */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className={labelCls}>Date Completed *</label>
+              <label className={labelCls}>Date Completed</label>
               <input type="date" value={form.completed_date} onChange={e => set('completed_date', e.target.value)} className={inputCls} />
             </div>
             <div>
@@ -226,7 +226,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
 
           {/* Expiry */}
           <div>
-            <label className={labelCls}>Expiry Date (optional)</label>
+            <label className={labelCls}>Expiry Date *</label>
             <input type="date" value={form.expiry_date} onChange={e => set('expiry_date', e.target.value)} className={inputCls} />
           </div>
 
