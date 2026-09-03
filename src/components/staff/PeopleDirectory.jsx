@@ -514,7 +514,7 @@ function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvit
 function MemberRow({ member, onClick, onOpenPermissions, onSendInvite, actioningId }) {
   const linked = !!member.user_id;
   const inviteSent = !!member.invite_sent;
-  const canInvite = !linked && !!member.email && onSendInvite;
+  const canInvite = !linked && !!onSendInvite;
   const isInviting = actioningId === member.id;
   const initials = (member.name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   return (
