@@ -5,6 +5,7 @@ import { Activity, Search, Maximize2, Minimize2, Loader2, CheckSquare } from 'lu
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import { useToast } from '@/components/ui/use-toast';
 import SiteLogDayCard from './SiteLogDayCard';
+import SiteLogMonthGroup from './SiteLogMonthGroup';
 import SiteLogDateRange from './SiteLogDateRange';
 import SiteLogBulkBar from './SiteLogBulkBar';
 import SiteLogExport from './SiteLogExport';
@@ -42,6 +43,8 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   // start_time — timeless strata/event logs read better grouped by borehole.
   const autoGroupApplied = useRef(false);
   const [expandedDays, setExpandedDays] = useState(new Set());
+  const [expandedMonths, setExpandedMonths] = useState(new Set());
+  const [expandedWeeks, setExpandedWeeks] = useState(new Set());
   const [selectedActivityId, setSelectedActivityId] = useState(initialSelectedLogId || null);
   const [backfilling, setBackfilling] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -103,12 +106,20 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   const sortedDates = Object.keys(byDate).sort().reverse();
 
   // Bidirectional deep-link: when arriving from the Investigation Hub, the
-  // target log id is passed in. Auto-expand the day that contains it so the
-  // manager lands on the right activity without having to hunt for it.
+  // target log id is passed in. Auto-expand the month → week → day that
+  // contains it so the manager lands on the right activity without hunting.
   useEffect(() => {
     if (!initialSelectedLogId) return;
     const day = Object.keys(byDate).find(d => byDate[d].some(l => l.id === initialSelectedLogId));
     if (day) {
+      const monthKey = day.slice(0, 7);
+      const d = new Date(day + 'T00:00:00');
+      const dow = d.getDay();
+      const diff = dow === 0 ? -6 : 1 - dow;
+      d.setDate(d.getDate() + diff);
+      const wc = d.toISOString().slice(0, 10);
+      setExpandedMonths(prev => { const next = new Set(prev); next.add(monthKey); return next; });
+      setExpandedWeeks(prev => { const next = new Set(prev); next.add(wc); return next; });
       setExpandedDays(prev => { const next = new Set(prev); next.add(day); return next; });
     }
   }, [initialSelectedLogId, byDate]);
@@ -118,13 +129,20 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
   const approvedCount = filteredLogs.filter(l => l.manager_review_status === 'approved').length;
   const totalMinutes = filteredLogs.reduce((s, l) => s + (l.duration_minutes || 0), 0);
 
-  // Expand/collapse all — days default to collapsed; the manager opens
-  // individual days (or uses Expand all) as needed. The deep-link from the
-  // Investigation Hub auto-expands the target day.
-  const allCollapsed = expandedDays.size === 0;
+  // Expand/collapse all — months and weeks default to collapsed; the manager
+  // opens individual months → weeks → days as needed. The deep-link from the
+  // Investigation Hub auto-expands the target day (and its parent month/week).
+  const allCollapsed = expandedMonths.size === 0;
   const toggleAll = () => {
-    if (allCollapsed) setExpandedDays(new Set(sortedDates));
-    else setExpandedDays(new Set());
+    if (allCollapsed) {
+      // Expand all months (weeks + days stay collapsed for progressive drill-down)
+      const allMonthKeys = new Set(sortedDates.map(d => d.slice(0, 7)));
+      setExpandedMonths(allMonthKeys);
+    } else {
+      setExpandedMonths(new Set());
+      setExpandedWeeks(new Set());
+      setExpandedDays(new Set());
+    }
   };
   const toggleDay = (date) => {
     setExpandedDays(prev => {
@@ -281,7 +299,7 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
               {/* Expand/collapse all */}
               <button onClick={toggleAll}
                 className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 transition">
-                {allCollapsed ? <><Maximize2 className="w-3.5 h-3.5" /> Expand all</> : <><Minimize2 className="w-3.5 h-3.5" /> Collapse all</>}
+                {allCollapsed ? <><Maximize2 className="w-3.5 h-3.5" /> Expand months</> : <><Minimize2 className="w-3.5 h-3.5" /> Collapse all</>}
               </button>
             </div>
 
@@ -320,30 +338,31 @@ export default function SiteLogReviewManager({ job, assignedStaff, initialSelect
             <MiniStat label="Total Time" value={fmtDur(totalMinutes)} tone="indigo" />
           </div>
 
-          {/* Day-by-day timeline */}
+          {/* Month → Week → Day drill-down timeline */}
           {sortedDates.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
               <p className="text-sm text-slate-400">No activities match your filters.</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {sortedDates.map(date => (
-                <SiteLogDayCard
-                  key={date}
-                  date={date}
-                  logs={byDate[date]}
-                  job={job}
-                  isExpanded={isDayExpanded(date)}
-                  onToggle={toggleDay}
-                  groupBy={filters.groupBy}
-                  selectedActivityId={selectedActivityId}
-                  onSelectActivity={setSelectedActivityId}
-                  selectMode={selectMode}
-                  selectedIds={selectedIds}
-                  onToggleSelect={toggleSelect}
-                />
-              ))}
-            </div>
+            <SiteLogMonthGroup
+              byDate={byDate}
+              sortedDates={sortedDates}
+              job={job}
+              groupBy={filters.groupBy}
+              selectedActivityId={selectedActivityId}
+              onSelectActivity={setSelectedActivityId}
+              selectMode={selectMode}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelect}
+              expandedMonths={expandedMonths}
+              setExpandedMonths={setExpandedMonths}
+              expandedWeeks={expandedWeeks}
+              setExpandedWeeks={setExpandedWeeks}
+              expandedDays={expandedDays}
+              toggleDay={toggleDay}
+              toggleAllMonths={toggleAll}
+              toggleAllWeeksInMonth={() => {}}
+            />
           )}
         </>
       )}

@@ -13,6 +13,7 @@ import InvestigationBulkReview from '@/components/investigation/InvestigationBul
 import BulkApproveBar from '@/components/investigation/BulkApproveBar';
 import LiveKeyLogFeed from '@/components/investigation/LiveKeyLogFeed';
 import AGSUploadButton from '@/components/investigation/AGSUploadButton';
+import InvestigationHubHeader from '@/components/investigation/InvestigationHubHeader';
 import { getInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import { logTypeConfig } from '@/components/investigation/shared';
 
@@ -128,6 +129,9 @@ export default function InvestigationHub({ onNavigate }) {
 
   const pendingCount = logs.filter(l => (l.manager_review_status || 'pending') === 'pending').length;
   const queriedCount = logs.filter(l => l.manager_review_status === 'queried').length;
+  const approvedCount = logs.filter(l => l.manager_review_status === 'approved').length;
+  const jobsCovered = new Set(logs.map(l => l.job_id).filter(Boolean)).size;
+  const boreholesCovered = new Set(logs.map(l => l.borehole_ref).filter(Boolean)).size;
   const hasNoLogs = !isLoading && logs.length === 0;
 
   const toggleBulkSelect = useCallback((id) => {
@@ -147,6 +151,16 @@ export default function InvestigationHub({ onNavigate }) {
 
   return (
     <div className="relative space-y-hub-gap-sm sm:space-y-hub-gap">
+      {/* Modern command-centre summary header */}
+      <InvestigationHubHeader
+        totalLogs={logs.length}
+        pendingCount={pendingCount}
+        queriedCount={queriedCount}
+        approvedCount={approvedCount}
+        jobsCovered={jobsCovered}
+        boreholesCovered={boreholesCovered}
+      />
+
       <InvestigationHeader
         totalLogs={logs.length}
         pendingCount={pendingCount}

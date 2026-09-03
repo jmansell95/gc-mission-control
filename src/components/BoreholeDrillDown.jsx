@@ -11,6 +11,7 @@ import { strataColors, strataConfig } from '@/components/investigation/shared';
 import { getTotalMetres } from '@/utils/geotechBilling';
 import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 import BoreholeDetailModal from '@/components/borehole/BoreholeDetailModal';
+import BoreholeSummaryPanel from '@/components/borehole/BoreholeSummaryPanel';
 
 export default function BoreholeDrillDown({ job, jobType }) {
   const { data: allLogs = [], isLoading } = useQuery({
@@ -113,7 +114,9 @@ export default function BoreholeDrillDown({ job, jobType }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="space-y-4">
+      <BoreholeSummaryPanel boreholes={boreholes} totals={totals} />
+      <div className="insight-card rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
         <Mountain className="w-5 h-5 text-emerald-700" />
@@ -136,65 +139,6 @@ export default function BoreholeDrillDown({ job, jobType }) {
         </div>
       </div>
 
-      {/* Summary stats banner */}
-      <div className="px-5 py-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-b border-slate-100">
-        <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-sm">
-              <ArrowDownToLine className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-xl font-bold text-slate-900 leading-none tabular-nums">
-                {totals.totalMeters}<span className="text-sm font-semibold text-slate-400 ml-0.5">m</span>
-              </p>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">Total Drilled</p>
-            </div>
-          </div>
-          <div className="h-9 w-px bg-slate-200" />
-          <SummaryStat icon={Mountain} value={boreholes.length} label="Boreholes" color="text-emerald-700" />
-          <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-          <SummaryStat icon={TestTube} value={totals.totalSamples} label="Samples" color="text-purple-700" />
-          <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-          <SummaryStat icon={Calculator} value={totals.totalSPTs} label="SPTs" color="text-violet-700" />
-          {totals.totalCores > 0 && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-              <SummaryStat icon={Boxes} value={totals.totalCores} label="Core Runs" color="text-fuchsia-700" />
-            </>
-          )}
-          {totals.totalInstallations > 0 && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-              <SummaryStat icon={Package} value={totals.totalInstallations} label="Installations" color="text-emerald-700" />
-            </>
-          )}
-          {totals.avgRecovery != null && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden md:block" />
-              <SummaryStat icon={Activity} value={`${totals.avgRecovery}%`} label="Avg Recovery" color="text-fuchsia-700" />
-            </>
-          )}
-          {totals.totalDrillingHours > 0 && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden sm:block" />
-              <SummaryStat icon={Clock} value={`${totals.totalDrillingHours}h`} label="Drilling Time" color="text-blue-700" />
-            </>
-          )}
-          {totals.totalDrillingDays > 0 && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden md:block" />
-              <SummaryStat icon={CalendarDays} value={totals.totalDrillingDays} label="Drill Days" color="text-cyan-700" />
-            </>
-          )}
-          {totals.avgDrillRate != null && (
-            <>
-              <div className="h-9 w-px bg-slate-200 hidden md:block" />
-              <SummaryStat icon={Gauge} value={`${totals.avgDrillRate}m/h`} label="Avg Drilling Rate" color="text-emerald-700" />
-            </>
-          )}
-        </div>
-      </div>
-
       {/* Card grid */}
       <div className="p-4">
         {filtered.length === 0 ? (
@@ -206,7 +150,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
               return (
                 <div
                   key={ref}
-                  className="group text-left p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:shadow-md transition-all duration-200"
+                  className="group text-left p-4 rounded-xl border border-slate-200 bg-white hover:border-emerald-400 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                 >
                   {/* Header row */}
                   <button onClick={() => setSelectedRef(ref)} className="w-full text-left">
@@ -330,9 +274,12 @@ export default function BoreholeDrillDown({ job, jobType }) {
           logs={activeLogs}
           jobType={jobType}
           jobId={job.id}
+          boreholeRefs={filtered.map(([ref]) => ref)}
           onClose={() => setSelectedRef(null)}
+          onNavigateRef={(ref) => setSelectedRef(ref)}
         />
       )}
+      </div>
     </div>
   );
 }

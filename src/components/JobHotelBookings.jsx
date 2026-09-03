@@ -11,6 +11,7 @@ import StaffHotelRow from '@/components/jobs/StaffHotelRow';
 import HotelCalendarView from '@/components/jobs/HotelCalendarView';
 import MonthlyBookingsAccordion from '@/components/jobs/MonthlyBookingsAccordion';
 import HotelConflictAlerts from '@/components/jobs/HotelConflictAlerts';
+import AccommodationPdfExport from '@/components/jobs/AccommodationPdfExport';
 import {
   nightsBetween, bookingType, bookingTotal, perPersonDayRate, fmtGBP,
 } from '@/components/jobs/hotelCost';
@@ -132,6 +133,7 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
             <button onClick={handleAdd} className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Add Booking
             </button>
+            <AccommodationPdfExport job={job} bookings={bookings} assignedStaff={assignedStaff} />
           </div>
           <MonthlyBookingsAccordion bookings={bookings} onEdit={handleEdit} onDelete={handleDelete} />
         </div>

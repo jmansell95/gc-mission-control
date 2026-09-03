@@ -4,7 +4,7 @@ import {
   X, Mountain, Layers, TestTube, Calculator, Package, Droplets,
   Ruler, ArrowDownToLine, Activity, TrendingDown, Gauge, TrendingUp, Clock,
   AlertTriangle, Ban, Waves, ClipboardList, Boxes,
-  Tablet, ExternalLink, User
+  Tablet, ExternalLink, User, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import {
   strataConfig, logTypeConfig, reviewStatusConfig,
@@ -27,8 +27,15 @@ const TABS = [
   { key: 'other', label: 'Other Activity', icon: ClipboardList },
 ];
 
-export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId, onClose }) {
+export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId, boreholeRefs, onClose, onNavigateRef }) {
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Prev/next borehole navigation within the filtered list
+  const navIndex = boreholeRefs ? boreholeRefs.indexOf(boreholeRef) : -1;
+  const hasPrev = navIndex > 0;
+  const hasNext = boreholeRefs && navIndex >= 0 && navIndex < boreholeRefs.length - 1;
+  const goPrev = () => hasPrev && onNavigateRef && onNavigateRef(boreholeRefs[navIndex - 1]);
+  const goNext = () => hasNext && onNavigateRef && onNavigateRef(boreholeRefs[navIndex + 1]);
 
   // Strata is not required from AGS import for drilling jobs:
   //  - Rotary drilling: no strata and no samples (coring only)
@@ -94,6 +101,27 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId,
               </p>
             )}
           </div>
+          {/* Prev / Next borehole navigation */}
+          {boreholeRefs && boreholeRefs.length > 1 && (
+            <div className="flex items-center gap-1 mr-1">
+              <button
+                onClick={goPrev}
+                disabled={!hasPrev}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed"
+                title={hasPrev ? `Previous: ${boreholeRefs[navIndex - 1]}` : 'No previous borehole'}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={goNext}
+                disabled={!hasNext}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transitiondisabled:opacity-30 disabled:cursor-not-allowed"
+                title={hasNext ? `Next: ${boreholeRefs[navIndex + 1]}` : 'No next borehole'}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition flex-shrink-0"
