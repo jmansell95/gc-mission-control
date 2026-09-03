@@ -67,27 +67,23 @@ export default function StaffListTab() {
         return;
       }
 
-      // Email 1: Platform invite — sends a registration link.
-      try {
-        await base44.users.inviteUser(s.email, 'user');
-      } catch (inviteErr) {
-        const msg = String(inviteErr?.message || '');
-        if (!msg.match(/already|exists/i)) throw inviteErr;
+      // Send the platform invite via the backend function so real errors
+      // are surfaced to the admin instead of being silently swallowed.
+      const res = await base44.functions.invoke('sendStaffInvite', { staff_id: s.id });
+      const data = res?.data || {};
+
+      if (data.sent === false || data.error) {
+        toast({ title: 'Invite failed', description: data.error || 'Unknown error', variant: 'destructive' });
+      } else {
+        toast({
+          title: 'Invite sent',
+          description: `${s.name} will receive an email with a link to set up their login. Once they register, a welcome email will guide them to complete their profile.`,
+        });
       }
-
-      // Mark the staff record so the badge switches to "Invited".
-      await base44.entities.Staff.update(s.id, { invite_sent: true });
-
-      // Email 2 is sent automatically by the sendWelcomeEmail entity automation
-      // when the staff member registers and their user_id is linked.
-
-      toast({
-        title: 'Invite sent',
-        description: `${s.name} will receive an email with a link to set up their login. Once they register, a welcome email will guide them to complete their profile.`,
-      });
       refresh();
     } catch (e) {
-      toast({ title: 'Invite failed', description: e?.message, variant: 'destructive' });
+      const errData = e?.data || e;
+      toast({ title: 'Invite failed', description: errData?.error || e?.message || 'Unknown error', variant: 'destructive' });
     } finally {
       setActioningId(null);
     }
