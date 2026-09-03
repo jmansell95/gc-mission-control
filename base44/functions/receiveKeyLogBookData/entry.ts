@@ -168,15 +168,18 @@ Deno.serve(async (req) => {
     } catch (e) { /* continue */ }
 
     // --- Identify the lead driller (for staff_name on remarks logs) ---
-    // Priority: 1) Driller name embedded in the AGS / borehole / log payload
+    // Priority: 1) HDPH_LOG / driller name embedded in the payload (actual KLB user)
     //           2) lead_driller_name from the webhook body
-    //           3) Staff assigned that day whose team is a drilling crew (cp/rotary)
-    //           4) First assigned staff member (last-resort fallback)
+    //           No rota fallback — only the real KeyLogBook user is shown.
     let leadDrillerName = '';
     let leadDrillerId = '';
 
-    // 1) Scan the AGS / borehole / log payloads for a driller / engineer name
-    const agsNameFields = ['driller_name', 'driller', 'logged_by', 'engineer', 'operator', 'recorded_by', 'inspected_by', 'user', 'username', 'account', 'account_name', 'user_name'];
+    // 1) Scan the AGS / borehole / log payloads for the actual KeyLogBook user
+    //    who logged the data. HDPH_LOG is the primary field (the KLB user who
+    //    logged each hole phase, e.g. "Kevin Price, Amir"). HDPH_CREW is the
+    //    full crew. We take the first comma-separated name as the Lead Driller.
+    //    NO rota fallback — only the real KLB user is shown on the logs.
+    const agsNameFields = ['hdph_log', 'hdph_crew', 'driller_name', 'driller', 'logged_by', 'lead_driller', 'klb_user', 'logged_by_user', 'engineer', 'operator', 'recorded_by', 'inspected_by', 'user', 'username', 'account', 'account_name', 'user_name', 'log', 'crew'];
     const scanForDriller = (...arrs: any[][]) => {
       for (const arr of arrs) {
         if (!Array.isArray(arr)) continue;
@@ -184,7 +187,7 @@ Deno.serve(async (req) => {
           if (!item || typeof item !== 'object') continue;
           for (const f of agsNameFields) {
             const val = str(item[f]);
-            if (val) return val;
+            if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) return val.split(',')[0].trim();
           }
         }
       }
@@ -194,35 +197,20 @@ Deno.serve(async (req) => {
 
     // 1b) Scan the top-level webhook body for KLB user/account fields
     if (!leadDrillerName) {
-      const bodyUserFields = ['lead_driller_name', 'driller_name', 'driller', 'user', 'username', 'account', 'account_name', 'user_name', 'operator', 'logged_by', 'recorded_by'];
+      const bodyUserFields = ['lead_driller_name', 'hdph_log', 'hdph_crew', 'driller_name', 'driller', 'klb_user', 'user', 'username', 'account', 'account_name', 'user_name', 'operator', 'logged_by', 'recorded_by'];
       for (const f of bodyUserFields) {
         const val = str((body as any)[f]);
-        if (val && !/^(unknown|n\/?a|none|test)$/i.test(val)) { leadDrillerName = val; break; }
+        if (val && !/^(unknown|n\/?a|none|test|null)$/i.test(val)) { leadDrillerName = val.split(',')[0].trim(); break; }
       }
     }
 
     // 2) Fall back to the webhook body's explicit lead_driller_name
     if (!leadDrillerName) leadDrillerName = str(body.lead_driller_name);
 
-    // 3 & 4) Resolve from the rota — prefer a staff member on a drilling team
-    try {
-      const assignments = await base44.asServiceRole.entities.RotaAssignment.filter({ job_id: job.id, assigned_date: workDate });
-      if (assignments.length > 0) {
-        const teams = await base44.asServiceRole.entities.Team.list('-created_date', 500);
-        const drillingJobTypes = ['cp_drilling', 'rotary_drilling'];
-        const drillingTeamIds = new Set(teams.filter((t: any) => drillingJobTypes.includes(t.job_type)).map((t: any) => t.id));
-
-        const staffIds = [...new Set(assignments.map(a => a.staff_id).filter(Boolean))];
-        const allStaff = (await Promise.all(staffIds.map(id => base44.asServiceRole.entities.Staff.get(id).catch(() => null)))).filter(Boolean) as any[];
-
-        const drillerStaff = allStaff.find(s => drillingTeamIds.has(s.team_id));
-        const chosen = drillerStaff || allStaff[0];
-        const chosenAssignment = assignments.find(a => a.staff_id === chosen?.id) || assignments[0];
-
-        leadDrillerId = chosenAssignment.staff_id || '';
-        if (!leadDrillerName) leadDrillerName = chosen?.name || '';
-      }
-    } catch (e) { /* skip */ }
+    // NO rota fallback — per project preference, log attribution must use the
+    // actual KeyLogBook user account name, ignoring rota-based defaults. If no
+    // driller name is found in the payload, staff_name stays blank and the
+    // manager can assign the correct driller during review.
 
     const logs: any[] = [];
 
@@ -299,14 +287,16 @@ Deno.serve(async (req) => {
       logs.push({
         job_id: job.id,
         staff_id: null,
+        staff_name: leadDrillerName || '',
         date: londonDateFromInput(str(bh.date)) || workDate,
         log_type: 'borehole_progress',
         borehole_ref: bhRef || null,
         depth_to: bhDepth || null,
         description: `Imported from KeyLogBook — borehole ${bhRef || '—'}${bhRemarks ? `: ${bhRemarks}` : ''}`,
         source: 'ags_import',
+        logged_by_role: leadDrillerName ? 'driller' : undefined,
         completed_by_type: 'internal_staff',
-        completed_by_name: 'KeyLogBook Webhook',
+        completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
         manager_review_status: 'approved',
         chargeable: false,
       });
@@ -341,7 +331,7 @@ Deno.serve(async (req) => {
         source: isRemarkLog ? 'keylogbook_remarks' : 'ags_import',
         logged_by_role: isRemarkLog ? 'driller' : undefined,
         completed_by_type: 'internal_staff',
-        completed_by_name: isRemarkLog ? (leadDrillerName || 'KeyLogBook Webhook') : 'KeyLogBook Webhook',
+        completed_by_name: leadDrillerName || 'KeyLogBook Webhook',
         manager_review_status: isRemarkLog ? (dateUnconfirmed ? 'queried' : 'pending') : 'approved',
         chargeable: false,
         billing_status: 'no_charge',
