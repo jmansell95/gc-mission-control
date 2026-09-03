@@ -80,6 +80,41 @@ function useTrainingData() {
     }
   }, [requirementsFetched, requirements.length]);
 
+  // Backfill: copy team.required_qualifications → Staff.training_category_ids
+  // for staff who don't have any categories assigned yet. Runs once on first
+  // load after the per-staff model is deployed, so no one loses their existing
+  // team-level assignments.
+  const backfillRef = useRef(false);
+  useEffect(() => {
+    if (backfillRef.current || !requirementsFetched || staff.length === 0 || requirements.length === 0) return;
+    const needsBackfill = staff.filter(s =>
+      (!s.training_category_ids || s.training_category_ids.length === 0)
+    );
+    if (needsBackfill.length === 0) return;
+
+    backfillRef.current = true;
+    (async () => {
+      const qualToReq = {};
+      requirements.forEach(r => {
+        if (r.is_active !== false && !qualToReq[r.qualification_type]) qualToReq[r.qualification_type] = r.id;
+      });
+      const updates = [];
+      for (const s of needsBackfill) {
+        const team = teams.find(t => t.id === s.team_id);
+        const teamQuals = team?.required_qualifications || [];
+        if (teamQuals.length === 0) continue;
+        const reqIds = teamQuals.map(qt => qualToReq[qt]).filter(Boolean);
+        if (reqIds.length > 0) updates.push({ id: s.id, training_category_ids: reqIds });
+      }
+      if (updates.length > 0) {
+        try {
+          await base44.entities.Staff.bulkUpdate(updates);
+          queryClient.invalidateQueries({ queryKey: ['staff'] });
+        } catch (e) { /* ignore — best effort */ }
+      }
+    })();
+  }, [requirementsFetched, staff, requirements, teams]);
+
   const categories = useMemo(() => {
     const seen = new Set();
     return requirements
@@ -92,14 +127,23 @@ function useTrainingData() {
     const m = {}; courses.forEach(c => { m[c.id] = c.category; }); return m;
   }, [courses]);
 
-  // Aligned with the staff profile TrainingTab logic: a category is only
-  // 'not_required' when the team HAS required qualifications AND this one
-  // isn't in them. When the team has no required quals, every category shows
-  // its real status — so a person with no training shows as gaps, not OK.
+  // Map qualification_type → TrainingRequirement ID (first match wins).
+  // Used by getQualStatus to check per-staff category assignments.
+  const qualTypeToReqId = useMemo(() => {
+    const m = {};
+    requirements.forEach(r => {
+      if (r.is_active !== false && !m[r.qualification_type]) m[r.qualification_type] = r.id;
+    });
+    return m;
+  }, [requirements]);
+
+  // Per-staff category model: a category is only relevant if it's in the
+  // staff member's training_category_ids. If not assigned, return 'not_assigned'
+  // (visually distinct from 'gap'). If assigned, check compliance items as before.
   const getQualStatus = (staffMember, qualType) => {
-    const team = teams.find(t => t.id === staffMember.team_id);
-    const required = team?.required_qualifications || [];
-    if (required.length > 0 && !required.includes(qualType)) return 'not_required';
+    const reqId = qualTypeToReqId[qualType];
+    const assignedIds = staffMember.training_category_ids || [];
+    if (!reqId || !assignedIds.includes(reqId)) return 'not_assigned';
     const items = compliance.filter(c =>
       (c.reference_id === staffMember.id || c.reference_name === staffMember.name) &&
       c.qualification_type === qualType &&
