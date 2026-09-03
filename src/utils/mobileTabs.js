@@ -61,9 +61,11 @@ export function resolveMobileTabs(profile, isPlatformAdmin) {
   }
 
   // Office staff (admin, management, user, read_only)
+  // "Schedule" goes to the Scheduling Hub (rota builder) via /admin with
+  // section state — the AdminDashboard's location.state effect picks it up.
   return [
-    { id: 'home', label: 'Home', icon: Grid3x3, path: '/admin' },
-    { id: 'schedule', label: 'Schedule', icon: CalendarDays, path: '/staff-schedule' },
+    { id: 'home', label: 'Home', icon: Grid3x3, path: '/admin', state: { section: 'overview' } },
+    { id: 'schedule', label: 'Rota', icon: CalendarDays, path: '/admin', state: { section: 'scheduling' } },
     { id: 'fleet', label: 'Fleet', icon: Car, path: '/fleet' },
     { id: 'more', label: 'More', icon: Menu, isMore: true },
   ];
@@ -71,10 +73,26 @@ export function resolveMobileTabs(profile, isPlatformAdmin) {
 
 /**
  * Returns true if the given tab is the active one for the current route.
+ * Tabs with a `state` property (e.g. { section: 'scheduling' }) are only
+ * active when both the path AND the location state section match.
  */
-export function isTabActive(tab, pathname) {
+export function isTabActive(tab, pathname, state) {
   if (tab.isMore) return false;
   if (!tab.path) return false;
+  // State-aware tabs: match path AND state.section.
+  // The "overview" (Home) tab is also active when there's no state at all
+  // (initial load / fresh navigation to /admin with no section state).
+  if (tab.state) {
+    if (tab.state.section === 'overview') {
+      return pathname === tab.path && (!state?.section || state.section === 'overview');
+    }
+    return pathname === tab.path && state?.section === tab.state.section;
+  }
+  // Non-state tabs: if multiple non-state tabs share the same path (e.g. both
+  // point to /admin), only match when no state-specific tab is active.
+  if (tab.path === '/admin') {
+    return pathname === '/admin' && !state?.section;
+  }
   // Exact match, or prefix match for nested routes (e.g. /fleet/123)
   return pathname === tab.path || pathname.startsWith(tab.path + '/');
 }
@@ -83,6 +101,6 @@ export function isTabActive(tab, pathname) {
  * Returns true if the current route belongs to the "More" sheet (i.e. none
  * of the primary tabs match). Used to highlight the More tab.
  */
-export function isActiveInMore(tabs, pathname) {
-  return !tabs.some((t) => !t.isMore && isTabActive(t, pathname));
+export function isActiveInMore(tabs, pathname, state) {
+  return !tabs.some((t) => !t.isMore && isTabActive(t, pathname, state));
 }

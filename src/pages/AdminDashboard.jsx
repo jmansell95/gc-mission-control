@@ -66,21 +66,29 @@ export default function AdminDashboard() {
   const { isComingSoon, isLocked } = useReadiness();
   const goToSettings = () => { setSettingsTab('hub'); setActiveSection('settings'); };
 
-  // Read navigation state passed from other pages (e.g. Vehicles → Manage Records).
+  // Read navigation state passed from other pages (e.g. More sheet → Scheduling Hub).
   // Standalone sections are redirected immediately so the dashboard never
   // tries to render a panel it doesn't have (which caused blank screens).
+  // Depends on location.state so re-navigating to /admin with new state
+  // (e.g. from the mobile More sheet while already on /admin) is picked up.
   useEffect(() => {
     const navState = location.state;
-    if (navState?.section && STANDALONE_ROUTES[navState.section]) {
+    if (!navState || Object.keys(navState).length === 0) return;
+    if (navState.section && STANDALONE_ROUTES[navState.section]) {
       navigate(STANDALONE_ROUTES[navState.section], { replace: true });
-    } else if (navState?.section) {
-      setActiveSection(navState.section);
+      return;
     }
-    if (navState?.settingsTab) setSettingsTab(navState.settingsTab);
-    if (navState?.job) setSelectedJob(navState.job);
-    // Clear state so a refresh doesn't re-trigger the section switch
-    if (navState) window.history.replaceState({}, document.title);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (navState.section) {
+      setActiveSection(navState.section);
+      if (navState.section === 'scheduling' || navState.section === 'rota') {
+        setSchedulingTab('rota');
+      } else if (navState.section === 'calendar') {
+        setSchedulingTab('calendar');
+      }
+    }
+    if (navState.settingsTab) setSettingsTab(navState.settingsTab);
+    if (navState.job) { setSelectedJob(navState.job); if (navState.jobTab) setJobInitialTab(navState.jobTab); }
+  }, [location.state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Wrapper that sends standalone sections (Staff, Contacts, Price List, etc.)
   // straight to their own routes — avoids the blank-flash round-trip through

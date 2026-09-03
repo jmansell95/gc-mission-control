@@ -11,7 +11,7 @@ export default function MobileTabBar({ tabs, onMore }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const moreActive = isActiveInMore(tabs, location.pathname);
+  const moreActive = isActiveInMore(tabs, location.pathname, location.state);
 
   return (
     <nav
@@ -21,14 +21,14 @@ export default function MobileTabBar({ tabs, onMore }) {
       <div className="flex items-stretch justify-around max-w-md mx-auto px-1">
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const active = tab.isMore ? moreActive : isTabActive(tab, location.pathname);
+          const active = tab.isMore ? moreActive : isTabActive(tab, location.pathname, location.state);
 
           const handleClick = () => {
             if (tab.isMore) {
               onMore();
               return;
             }
-            if (tab.path) navigate(tab.path);
+            if (tab.path) navigate(tab.path, { state: tab.state });
           };
 
           return (
