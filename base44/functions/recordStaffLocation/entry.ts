@@ -49,6 +49,18 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: "Tracking consent not granted" }, { status: 403 });
     }
 
+    // Error payload — the crew member's phone reported a capture failure
+    // (permission denied, position unavailable, no fix timeout). Stamp it on
+    // the Staff record so the Tracking Hub can show "consented but no GPS"
+    // with the reason. No location logs are created for error-only payloads.
+    if (body?.error && points.length === 0) {
+      await base44.entities.Staff.update(staff.id, {
+        last_capture_error: String(body.error).slice(0, 100),
+        last_capture_error_at: new Date().toISOString(),
+      });
+      return Response.json({ status: "error_recorded", error: body.error });
+    }
+
     // Validate the assignment exists and belongs to this staff member
     let assignment: any = null;
     if (assignmentId) {

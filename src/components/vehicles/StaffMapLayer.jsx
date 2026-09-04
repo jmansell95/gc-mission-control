@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Marker, Popup } from 'react-leaflet';
-import { Navigation, Clock, Briefcase, MapPin } from 'lucide-react';
+import { Navigation, Clock, Briefcase, MapPin, Truck } from 'lucide-react';
 import { useLiveStaffLocations } from '@/hooks/useLiveStaffLocations';
 
 // Shift state → colour + label
@@ -12,20 +12,24 @@ const SHIFT_STYLES = {
   off_shift: { colour: '#94a3b8', label: 'Off shift' },
 };
 
+const PERSON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/></svg>';
+const TRUCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M3 6h13v9H3z"/><path d="M16 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>';
+
 function StaffMarker({ staff, onClick }) {
   const pos = [staff.lat, staff.lng];
   if (staff.lat == null || staff.lng == null) return null;
   const style = SHIFT_STYLES[staff.shiftState] || SHIFT_STYLES.off_shift;
   const colour = style.colour;
-  const initials = staff.staffName.split(' ').map(n => n[0]).slice(0, 2).join('');
+  const isProxy = staff.source === 'vehicle_proxy';
 
   const icon = window.L?.divIcon({
     html: `<div style="position:relative">
-      <div style="background:${colour};width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/></svg>
+      <div style="background:${colour};width:30px;height:30px;border-radius:50%;border:3px solid white;${isProxy ? 'border-style:dashed;' : ''}box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
+        ${isProxy ? TRUCK_SVG : PERSON_SVG}
       </div>
       ${staff.isMoving ? '<div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ' + colour + ';opacity:0.35;animation:pulse 2s infinite"></div>' : ''}
       <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:${colour};color:white;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis">${staff.staffName}</div>
+      ${isProxy ? '<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:#1e293b;color:#94a3b8;font-size:7px;font-weight:600;padding:1px 4px;border-radius:3px;white-space:nowrap">via vehicle</div>' : ''}
     </div>`,
     className: 'hazard-map-marker',
     iconSize: [30, 30],
@@ -43,6 +47,11 @@ function StaffMarker({ staff, onClick }) {
       <Popup>
         <div className="text-xs space-y-1">
           <p className="font-bold text-sm">{staff.staffName}</p>
+          {isProxy && (
+            <p className="flex items-center gap-1 text-indigo-600 font-medium">
+              <Truck className="w-3 h-3" /> Via vehicle{staff.vehicleName ? ` · ${staff.vehicleName}` : ''}
+            </p>
+          )}
           <p className="flex items-center gap-1" style={{ color: colour }}>
             <span className="w-2 h-2 rounded-full" style={{ background: colour }} />
             {style.label}
@@ -63,6 +72,10 @@ function StaffMarker({ staff, onClick }) {
  * StaffMapLayer — overlays live staff GPS pins on a Leaflet map.
  * Render inside a <MapContainer>. Pass a divisionId to scope the query.
  *
+ * Phone-GPS pins use a solid border; vehicle-proxy pins use a dashed
+ * border + a small "via vehicle" label so managers can distinguish them
+ * at a glance.
+ *
  * Props:
  *   - divisionId: string — which division's crew to show
  *   - show: boolean — whether to render the layer (toggle on/off)
@@ -81,7 +94,7 @@ export default function StaffMapLayer({ divisionId, show = true, onStaffClick })
   return (
     <>
       {visible.map(s => (
-        <StaffMarker key={s.staffId} staff={s} onClick={onStaffClick || (() => {})} />
+        <StaffMarker key={s.staffId + (s.source || 'phone')} staff={s} onClick={onStaffClick || (() => {})} />
       ))}
     </>
   );

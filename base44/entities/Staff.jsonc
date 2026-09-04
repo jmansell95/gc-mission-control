@@ -248,6 +248,14 @@
     "tracking_consent_declined_at": {
       "type": "string",
       "description": "ISO timestamp of when the staff member explicitly declined the GPS tracking consent. When set, tracking_enabled is flipped to false and the consent reminders stop. Cleared if the staff member later signs the consent form."
+    },
+    "last_capture_error": {
+      "type": "string",
+      "description": "The last GPS capture error reported by the staff member's phone (e.g. 'permission_denied', 'position_unavailable', 'no_fix_timeout', 'permanently_denied'). Set by the recordStaffLocation function when it receives an error payload. Lets the Tracking Hub show 'consented but no GPS' with the reason so managers can help the crew member enable location on their phone."
+    },
+    "last_capture_error_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the last GPS capture error was reported. Cleared when tracking starts successfully (a real GPS fix is received)."
     }
   },
   "required": [
