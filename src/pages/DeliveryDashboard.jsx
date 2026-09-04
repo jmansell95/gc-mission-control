@@ -324,22 +324,22 @@ export default function DeliveryDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen page-bg-vibrant">
+        <div className="w-12 h-12 border-4 border-slate-200/80 border-t-[#2E5A1A] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!staff) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 px-6">
-        <div className="text-center max-w-sm">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <Truck className="w-7 h-7 text-slate-400" />
+      <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
+        <div className="text-center max-w-sm insight-card rounded-3xl p-8">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center mx-auto mb-4">
+            <Truck className="w-8 h-8 text-slate-400" />
           </div>
-          <p className="text-slate-700 font-semibold">No driver profile found</p>
+          <p className="text-slate-700 font-bold text-lg">No driver profile found</p>
           <p className="text-slate-400 text-sm mt-1">Contact your supervisor to get set up.</p>
-          <button onClick={() => navigate('/staff-schedule')} className="mt-4 px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-medium hover:bg-emerald-800 transition">
+          <button onClick={() => navigate('/staff-schedule')} className="mt-4 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95">
             Back to Schedule
           </button>
         </div>
@@ -415,7 +415,7 @@ export default function DeliveryDashboard() {
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div key={i} className="insight-card rounded-2xl p-5">
                 <Skeleton className="h-1.5 w-full mb-4 rounded-full" />
                 <Skeleton className="h-4 w-1/3 mb-3" />
                 <SkeletonText lines={3} />
@@ -423,7 +423,7 @@ export default function DeliveryDashboard() {
             ))}
           </div>
         ) : todaysSorted.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200">
+          <div className="insight-card rounded-2xl">
             <EmptyState icon={Clock} title="No deliveries scheduled yet" message="Check back later — your supervisor will assign delivery tasks to you." />
           </div>
         ) : (

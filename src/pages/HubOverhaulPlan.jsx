@@ -145,6 +145,7 @@ const HUBS = [
       { done: true, text: 'Hub-level KPI strip (AFP claimed, agreed, outstanding, overdue) — this overhaul' },
       { done: true, text: 'POA price lock expiry warnings (badge + stat tile) — this overhaul' },
       { done: true, text: 'Draft invoice approval queue with expandable line items — this overhaul' },
+      { done: true, text: 'Spot-check auto-matched view — toggle between pending review and auto-matched logs — this round' },
       { done: false, text: 'Financial figure discrepancies — fragile rate-card matching' },
       { done: true, text: 'MPL / markup rules — now persists to AppSetting + Admin Only badge — this round' },
       ],
@@ -261,7 +262,8 @@ export default function HubOverhaulPlan() {
           <ol className="space-y-2 text-sm text-slate-600">
             <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 1.</span> <span className="line-through opacity-70">Tracking Hub — fix live map filter bug</span> — DONE (off-shift crew now visible)</li>
             <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 2.</span> <span className="line-through opacity-70">Compliance Hub — RLS + mobile nav parity</span> — DONE (MittiConfig RLS + mobile nav expanded)</li>
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">3.</span> Billing Hub — fix rate-card matching discrepancies + invoice approval gate</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 3a.</span> <span className="line-through opacity-70">Billing Hub — spot-check auto-matched pricing review</span> — DONE (toggle + re-price/reject)</li>
+            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">3b.</span> Billing Hub — fix rate-card matching discrepancies + invoice approval gate</li>
             <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">4.</span> Assets Hub — build certification/recertification upload & tracking</li>
             <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 5.</span> <span className="line-through opacity-70">Settings — search/grouping</span> — DONE (search + groups already in sidebar)</li>
             <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 6.</span> <span className="line-through opacity-70">Staff Hub — concurrent leave bug</span> — DONE (overlap detection in both modals)</li>
