@@ -282,7 +282,12 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
 
           {/* Equipment & Certificates */}
           {jobAssets.length > 0 && (() => {
-            const assets = jobAssets.map(a => assetMap[a.asset_id] || a).filter(Boolean);
+            // Deduplicate by asset_id so the same rig doesn't appear twice
+            // when multiple JobAssetAssignment rows point to one SiteAsset.
+            const seen = new Set();
+            const assets = jobAssets.map(a => assetMap[a.asset_id] || a)
+              .filter(Boolean)
+              .filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
             return (
               <div className="bg-slate-50/60 rounded-xl border border-slate-200 p-3.5">
                 <div className="flex items-center gap-1.5 mb-2">

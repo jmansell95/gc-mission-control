@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
-    const { delay_log_id, action } = body;
+    const { delay_log_id, action, manager_note } = body;
     if (!delay_log_id) return Response.json({ error: 'delay_log_id required' }, { status: 400 });
     if (action !== 'approve' && action !== 'reject') {
       return Response.json({ error: 'action must be approve or reject' }, { status: 400 });
@@ -65,6 +65,7 @@ Deno.serve(async (req) => {
         manager_review_status: 'rejected',
         manager_reviewed_by: reviewer,
         manager_reviewed_at: new Date().toISOString(),
+        manager_note: manager_note || '',
       });
       return Response.json({ status: 'rejected' });
     }
@@ -104,6 +105,7 @@ Deno.serve(async (req) => {
       manager_reviewed_by: reviewer,
       manager_reviewed_at: new Date().toISOString(),
       rota_adjusted: days > 0,
+      manager_note: manager_note || '',
     });
 
     return Response.json({ status: 'approved', days, shifted, new_end_date: newEndDate });

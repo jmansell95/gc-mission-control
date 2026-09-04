@@ -3,13 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Clock, AlertTriangle, CheckCircle2, XCircle, Loader2, Plus, CalendarClock,
-  Sparkles, HardHat, Filter, ChevronDown,
+  Sparkles, HardHat, Filter, ChevronDown, ShieldCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import DelayLogForm from '@/components/DelayLogForm';
 import DelayCauseChart from '@/components/jobs/DelayCauseChart';
 import DelayScheduleImpact from '@/components/jobs/DelayScheduleImpact';
+import DelayReasonModal from '@/components/jobs/DelayReasonModal';
 
 const DELAY_LABELS = {
   ground_conditions: 'Ground Conditions', utility_clash: 'Utility Clash', weather: 'Weather',
@@ -41,6 +42,7 @@ export default function DelayLogManager({ job }) {
   const [scanning, setScanning] = useState(false);
   const [causeFilter, setCauseFilter] = useState('all');
   const [showImpact, setShowImpact] = useState(false);
+  const [reasonModal, setReasonModal] = useState({ open: false, log: null, action: 'approve' });
 
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ['job-delay-logs', job.id],
@@ -80,10 +82,10 @@ export default function DelayLogManager({ job }) {
     queryClient.invalidateQueries({ queryKey: ['job-rotas', job.id] });
   };
 
-  const approve = async (log) => {
+  const approve = async (log, reason) => {
     setBusyId(log.id);
     try {
-      const res = await base44.functions.invoke('approveDelayLog', { delay_log_id: log.id, action: 'approve' });
+      const res = await base44.functions.invoke('approveDelayLog', { delay_log_id: log.id, action: 'approve', manager_note: reason });
       const d = res.data || {};
       toast({
         title: 'Delay approved — rota shifted',
@@ -96,13 +98,14 @@ export default function DelayLogManager({ job }) {
     setBusyId(null);
   };
 
-  const reject = async (log) => {
+  const reject = async (log, reason) => {
     setBusyId(log.id);
     try {
       await base44.entities.JobDelayLog.update(log.id, {
         manager_review_status: 'rejected',
         manager_reviewed_by: profile?.name || '',
         manager_reviewed_at: new Date().toISOString(),
+        manager_note: reason,
       });
       toast({ title: 'Delay rejected' });
       invalidate();
@@ -110,6 +113,15 @@ export default function DelayLogManager({ job }) {
       toast({ title: 'Could not reject', variant: 'destructive' });
     }
     setBusyId(null);
+  };
+
+  const openReasonModal = (log, action) => setReasonModal({ open: true, log, action });
+  const closeReasonModal = () => setReasonModal({ open: false, log: null, action: 'approve' });
+  const confirmReason = async (reason) => {
+    const { log, action } = reasonModal;
+    if (action === 'approve') await approve(log, reason);
+    else await reject(log, reason);
+    closeReasonModal();
   };
 
   const scanRemarks = async () => {
@@ -239,7 +251,7 @@ export default function DelayLogManager({ job }) {
         ) : (
           <div className="divide-y divide-slate-100">
             {filtered.map(log => (
-              <DelayRow key={log.id} log={log} onApprove={() => approve(log)} onReject={() => reject(log)} busy={busyId === log.id} />
+              <DelayRow key={log.id} log={log} onApprove={() => openReasonModal(log, 'approve')} onReject={() => openReasonModal(log, 'reject')} busy={busyId === log.id} />
             ))}
           </div>
         )}
@@ -253,6 +265,14 @@ export default function DelayLogManager({ job }) {
         staffId={profile?.id || ''}
         staffName={profile?.name || ''}
         onSaved={invalidate}
+      />
+
+      <DelayReasonModal
+        open={reasonModal.open}
+        log={reasonModal.log}
+        action={reasonModal.action}
+        onClose={closeReasonModal}
+        onConfirm={confirmReason}
       />
     </div>
   );
@@ -289,6 +309,12 @@ function DelayRow({ log, onApprove, onReject, busy }) {
             {' · '}by {log.reported_by_role === 'subcontractor' ? (log.subcontractor_name || 'Subcontractor') : (log.staff_name || 'Staff')}
             {' · '}Impact: <b className="text-amber-700">+{impactStr}</b>
           </p>
+          {log.manager_note && (
+            <div className="mt-1.5 flex items-start gap-1.5 text-[11px] text-slate-500 bg-slate-50 rounded-lg px-2 py-1.5">
+              <ShieldCheck className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" />
+              <span><b className="text-slate-600">Manager note:</b> {log.manager_note}</span>
+            </div>
+          )}
         </div>
         {(log.manager_review_status || 'pending') === 'pending' && onApprove && (
           <div className="flex gap-1.5 flex-shrink-0">

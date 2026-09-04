@@ -13,7 +13,7 @@ import EquipmentComplianceSection from '@/components/staff/EquipmentComplianceSe
 import JobDocumentViewer from '@/components/staff/JobDocumentViewer';
 import PredictiveHazardAlerts from '@/components/jobs/PredictiveHazardAlerts';
 import WeatherLeaveSiteAlert from '@/components/weather/WeatherLeaveSiteAlert';
-import StaffWeatherCard from '@/components/weather/StaffWeatherCard';
+import WeatherToggleButton from '@/components/weather/WeatherToggleButton';
 
 const statusConfig = {
   assigned: { label: 'Assigned', icon: Clock, color: 'text-slate-600', bg: 'bg-gradient-to-r from-slate-50 to-slate-100/50' },
@@ -215,8 +215,8 @@ export default function ActiveJobCard({
             className="overflow-hidden border-t border-slate-100"
           >
             <div className="p-4 space-y-4">
-              {/* Live weather — severity indicator + safety note */}
-              <StaffWeatherCard
+              {/* Live weather — on-demand popup button (replaces always-on weather card) */}
+              <WeatherToggleButton
                 lat={job.site_lat}
                 lng={job.site_lng}
                 locationName={job.location}
@@ -328,7 +328,12 @@ export default function ActiveJobCard({
 
               {/* Equipment & certificates */}
               {jobAssets.length > 0 && (() => {
-                const assets = jobAssets.map(a => assetMap[a.asset_id] || a).filter(Boolean);
+                // Deduplicate by asset_id so the same rig doesn't appear twice
+                // when multiple JobAssetAssignment rows point to one SiteAsset.
+                const seen = new Set();
+                const assets = jobAssets.map(a => assetMap[a.asset_id] || a)
+                  .filter(Boolean)
+                  .filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
                 return (
                   <div className="bg-slate-50/60 rounded-xl border border-slate-200 p-3.5">
                     <div className="flex items-center gap-1.5 mb-2">

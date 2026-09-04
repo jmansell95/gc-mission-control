@@ -91,7 +91,7 @@ export default function JobDetailTabs({
       </div>
 
       {/* ── Overview ── */}
-      <TabsContent value="overview" className="mt-0 space-y-3">
+      <TabsContent value="overview" className="mt-0 space-y-4">
         <div className="flex items-center justify-end gap-2 flex-wrap">
           <HubDeepLink to="/staff" jobId={job.id} label="Staff Hub" icon={Users} />
           <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
@@ -155,7 +155,12 @@ export default function JobDetailTabs({
       </TabsContent>
 
       {/* ── Schedule & Crew ── */}
-      <TabsContent value="schedule" className="space-y-3 mt-0">
+      <TabsContent value="schedule" className="space-y-4 mt-0">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
+          <HubDeepLink to="/staff" jobId={job.id} label="Staff Hub" icon={Users} />
+          <HubDeepLink to="/scheduling" jobId={job.id} label="Rota Builder" icon={CalendarDays} />
+          <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
+        </div>
         <SubTabNav
           tabs={[
             { id: 'daily', label: 'Daily Schedule', icon: CalendarDays },
@@ -188,7 +193,7 @@ export default function JobDetailTabs({
       </TabsContent>
 
       {/* ── Site Activity ── */}
-      <TabsContent value="activity" className="space-y-3 mt-0">
+      <TabsContent value="activity" className="space-y-4 mt-0">
         <div className="flex items-center justify-end gap-2 flex-wrap">
           <HubDeepLink to="/compliance" jobId={job.id} label="Compliance Hub" icon={ShieldCheck} />
           <HubDeepLink to="/reports" jobId={job.id} label="Reports Hub" icon={FileBarChart} />
@@ -237,7 +242,7 @@ export default function JobDetailTabs({
       </TabsContent>
 
       {/* ── Equipment ── */}
-      <TabsContent value="equipment" className="space-y-3 mt-0">
+      <TabsContent value="equipment" className="space-y-4 mt-0">
         <div className="flex items-center justify-end gap-2 flex-wrap">
           <HubDeepLink to="/admin/logistics" jobId={job.id} label="Logistics Hub" icon={Truck} />
           <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
@@ -256,7 +261,7 @@ export default function JobDetailTabs({
 
       {/* ── Financials ── */}
       {canSeeCosts && (
-        <TabsContent value="financials" className="space-y-3 mt-0">
+        <TabsContent value="financials" className="space-y-4 mt-0">
           <div className="flex items-center justify-end gap-2 flex-wrap">
             <HubDeepLink to="/billing" jobId={job.id} label="Billing Hub" icon={PoundSterling} />
           </div>
@@ -265,7 +270,7 @@ export default function JobDetailTabs({
       )}
 
       {/* ── Documents ── */}
-      <TabsContent value="documents" className="space-y-3 mt-0">
+      <TabsContent value="documents" className="space-y-4 mt-0">
         <div className="flex items-center justify-end gap-2 flex-wrap">
           <HubDeepLink to="/reports" jobId={job.id} label="Reports Hub" icon={FileBarChart} />
         </div>
