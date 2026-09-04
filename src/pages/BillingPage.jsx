@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   PoundSterling, FileBarChart, Download, Tag, TrendingUp,
-  LayoutDashboard, Shield, ScrollText,
+  LayoutDashboard, Shield, ScrollText, FileText,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
@@ -19,6 +20,7 @@ import ContractsAndOrdersTab from '@/components/billing/ContractsAndOrdersTab';
 import RunReportButton from '@/components/reports/RunReportButton';
 import PerformanceTab from '@/components/billing/PerformanceTab';
 import BillingStatsBar from '@/components/billing/BillingStatsBar';
+import DraftApprovalQueue from '@/components/billing/DraftApprovalQueue';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 
@@ -36,8 +38,15 @@ export default function BillingPage() {
   const { activeDivision } = useDivision();
   const isGeotechnical = activeDivision?.division_type === 'geotechnical';
 
+  const { data: draftInvoices = [] } = useQuery({
+    queryKey: ['draft-invoice-count'],
+    queryFn: () => base44.entities.Invoice.filter({ status: 'draft' }, '-created_date', 200),
+  });
+  const draftCount = draftInvoices.length;
+
   const tabs = [
     { id: 'insights', label: 'Insights', icon: LayoutDashboard },
+    { id: 'drafts', label: 'Drafts', icon: FileText, badge: draftCount },
     { id: 'afp-portfolio', label: 'AFP Portfolio', icon: FileBarChart },
     { id: 'margin-guard', label: 'Margin Guard', icon: Shield },
     { id: 'aged-debtors', label: 'Aged Debtors', icon: TrendingUp },
@@ -73,6 +82,9 @@ export default function BillingPage() {
 
       {/* ── Insights: portfolio-wide financial health dashboard ── */}
       {tab === 'insights' && <BillingInsightsTab />}
+
+      {/* ── Drafts: approval queue for auto-generated draft invoices ── */}
+      {tab === 'drafts' && <DraftApprovalQueue />}
 
       {/* ── AFP Portfolio: all jobs' AFPs in one place ── */}
       {tab === 'afp-portfolio' && (

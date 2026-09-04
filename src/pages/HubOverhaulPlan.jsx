@@ -142,10 +142,10 @@ const HUBS = [
       { done: true, text: 'Aged debtors and margin guard' },
       { done: true, text: 'Hub-level KPI strip (AFP claimed, agreed, outstanding, overdue) — this overhaul' },
       { done: true, text: 'POA price lock expiry warnings (badge + stat tile) — this overhaul' },
+      { done: true, text: 'Draft invoice approval queue with expandable line items — this overhaul' },
       { done: false, text: 'Financial figure discrepancies — fragile rate-card matching' },
       { done: false, text: 'MPL / markup rules — lockable to admin but UX unclear' },
-      { done: false, text: 'Auto-invoice — no approval gate before sending to client' },
-    ],
+      ],
   },
   {
     name: 'Reports Hub',
