@@ -43,7 +43,7 @@ const HUBS = [
       { done: true, text: 'Unified rota builder with crew-rig pairing' },
       { done: true, text: 'Live driver badges and vehicle/crew toggle' },
       { done: true, text: 'Permanent crew sync and template week copy' },
-      { done: false, text: 'Concurrent leave request handling — known bug' },
+      { done: true, text: 'Concurrent leave request handling — overlap detection prevents duplicates — this round' },
       { done: false, text: 'Rota PDF export — formatting breaks on long crew names' },
       { done: true, text: 'Weekend toggle discoverability — toggle switch + clearer label — this round' },
     ],
@@ -131,7 +131,7 @@ const HUBS = [
       { done: true, text: 'Row-level security — MittiConfig (formerly SafetyCultureConfig) already admin-only RLS' },
       { done: false, text: 'Incident auto-analysis — AI suggestions not always relevant' },
       { done: false, text: 'Compliance reports — no scheduled export to email' },
-      { done: false, text: 'Mobile — key hubs missing from mobile nav' },
+      { done: true, text: 'Mobile — key hubs (Dashboard, Compliance) now on bottom nav by default — this round' },
     ],
   },
   {
@@ -146,7 +146,7 @@ const HUBS = [
       { done: true, text: 'POA price lock expiry warnings (badge + stat tile) — this overhaul' },
       { done: true, text: 'Draft invoice approval queue with expandable line items — this overhaul' },
       { done: false, text: 'Financial figure discrepancies — fragile rate-card matching' },
-      { done: false, text: 'MPL / markup rules — lockable to admin but UX unclear' },
+      { done: true, text: 'MPL / markup rules — now persists to AppSetting + Admin Only badge — this round' },
       ],
   },
   {
@@ -157,8 +157,8 @@ const HUBS = [
       { done: true, text: 'Custom report builder with native + Power BI sections' },
       { done: true, text: 'Scheduled reports and template library' },
       { done: true, text: 'Crew and rig performance reports' },
-      { done: false, text: 'Report rendering — large reports freeze the browser' },
-      { done: false, text: 'No CSV/Excel export from the report viewer' },
+      { done: true, text: 'Report rendering — paginated 50 rows at a time with Load More — this round' },
+      { done: true, text: 'CSV export from the report viewer — this round' },
       { done: false, text: 'Saved filters — not shared across users' },
     ],
   },
@@ -259,13 +259,13 @@ export default function HubOverhaulPlan() {
         <div className="insight-card rounded-2xl p-6 mt-6">
           <h2 className="text-base font-bold text-slate-900 mb-3">Priority Order</h2>
           <ol className="space-y-2 text-sm text-slate-600">
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">1.</span> Tracking Hub — finish background tracking (Capacitor build) + fix live map filter bug</li>
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">2.</span> Compliance Hub — add RLS to SafetyCultureConfig + mobile nav parity</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 1.</span> <span className="line-through opacity-70">Tracking Hub — fix live map filter bug</span> — DONE (off-shift crew now visible)</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 2.</span> <span className="line-through opacity-70">Compliance Hub — RLS + mobile nav parity</span> — DONE (MittiConfig RLS + mobile nav expanded)</li>
             <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">3.</span> Billing Hub — fix rate-card matching discrepancies + invoice approval gate</li>
             <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">4.</span> Assets Hub — build certification/recertification upload & tracking</li>
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">5.</span> Settings — add search/grouping to the 40+ section nav</li>
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">6.</span> Staff Hub — fix concurrent leave bug + streamline subcontractor crew pairing</li>
-            <li className="flex gap-2"><span className="font-bold text-[#2E5A1A]">7.</span> Mobile parity across all hubs (Overview, Jobs, Settings)</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 5.</span> <span className="line-through opacity-70">Settings — search/grouping</span> — DONE (search + groups already in sidebar)</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 6.</span> <span className="line-through opacity-70">Staff Hub — concurrent leave bug</span> — DONE (overlap detection in both modals)</li>
+            <li className="flex gap-2"><span className="font-bold text-emerald-600">✓ 7.</span> <span className="line-through opacity-70">Mobile parity (Overview, Settings)</span> — DONE (dashboard grid + nav expanded)</li>
           </ol>
         </div>
       </div>

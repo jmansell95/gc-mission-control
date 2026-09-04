@@ -65,15 +65,31 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
 
   const validRows = rows.filter(r => r.start_date && r.end_date && r.end_date >= r.start_date);
 
+  // Prevents duplicate leave records: a new row that overlaps an existing
+  // approved absence for this staff member is skipped (the concurrent-leave bug).
+  const overlapsExisting = (row) =>
+    existingAbsences.some(a =>
+      a.staff_id === staffId &&
+      a.status === 'approved' &&
+      a.start_date && a.end_date &&
+      a.start_date <= row.end_date && a.end_date >= row.start_date
+    );
+
   const handleSave = async () => {
-    if (validRows.length === 0) {
+    const nonOverlapping = validRows.filter(r => !overlapsExisting(r));
+    const skipped = validRows.length - nonOverlapping.length;
+
+    if (nonOverlapping.length === 0) {
+      if (skipped > 0) {
+        toast({ title: 'Leave already exists', description: `${skipped} row${skipped === 1 ? '' : 's'} already covered by existing leave — no duplicates created.` });
+      }
       onClose();
       return;
     }
     setSaving(true);
     try {
       await base44.entities.Absence.bulkCreate(
-        validRows.map(r => ({
+        nonOverlapping.map(r => ({
           staff_id: staffId,
           start_date: r.start_date,
           end_date: r.end_date,
@@ -84,7 +100,7 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
         }))
       );
       // Delete existing job/depot shifts on the leave dates so leave replaces the shift
-      for (const r of validRows) {
+      for (const r of nonOverlapping) {
         try {
           await base44.functions.invoke('replaceShiftsWithLeave', {
             staff_id: staffId,
@@ -98,7 +114,7 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
       queryClient.invalidateQueries({ queryKey: ['absences'] });
       queryClient.invalidateQueries({ queryKey: ['rotas'] });
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-      toast({ title: `${validRows.length} leave range${validRows.length === 1 ? '' : 's'} saved`, description: `${staffName}'s rota will show ON LEAVE on those dates.` });
+      toast({ title: `${nonOverlapping.length} leave range${nonOverlapping.length === 1 ? '' : 's'} saved${skipped > 0 ? ` · ${skipped} skipped (already on leave)` : ''}`, description: `${staffName}'s rota will show ON LEAVE on those dates.` });
       onClose();
     } catch (e) {
       toast({ title: 'Failed to save leave', description: e.message, variant: 'destructive' });

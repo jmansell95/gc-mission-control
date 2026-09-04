@@ -65,21 +65,32 @@ export default function AbsenceManager() {
   };
 
   const handleApprove = async (id) => {
+    const absence = absences.find(a => a.id === id);
+    if (!absence) return;
+    // Prevent approving a request that overlaps an existing approved absence
+    // for the same staff member (the concurrent-leave bug).
+    const overlap = absences.find(a =>
+      a.id !== id &&
+      a.staff_id === absence.staff_id &&
+      a.status === 'approved' &&
+      a.start_date && a.end_date &&
+      a.start_date <= absence.end_date && a.end_date >= absence.start_date
+    );
+    if (overlap) {
+      if (!confirm(`This leave overlaps an existing approved absence (${overlap.start_date} → ${overlap.end_date}). Approve anyway? The overlapping dates will have duplicate leave records.`)) return;
+    }
     await base44.entities.Absence.update(id, { status: 'approved' });
     // Replace existing shifts with leave so the absence fully replaces any scheduled shifts
-    const absence = absences.find(a => a.id === id);
-    if (absence) {
-      try {
-        await base44.functions.invoke('replaceShiftsWithLeave', {
-          staff_id: absence.staff_id,
-          start_date: absence.start_date,
-          end_date: absence.end_date,
-        });
-        queryClient.invalidateQueries({ queryKey: ['rotas'] });
-        queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-      } catch (e) {
-        console.error('Failed to replace shifts with leave:', e);
-      }
+    try {
+      await base44.functions.invoke('replaceShiftsWithLeave', {
+        staff_id: absence.staff_id,
+        start_date: absence.start_date,
+        end_date: absence.end_date,
+      });
+      queryClient.invalidateQueries({ queryKey: ['rotas'] });
+      queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
+    } catch (e) {
+      console.error('Failed to replace shifts with leave:', e);
     }
     queryClient.invalidateQueries({ queryKey: ['absences'] });
     recalcAccruals();

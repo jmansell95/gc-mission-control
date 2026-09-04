@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   TrendingUp, Save, Loader2, Check, AlertTriangle, Shield, Percent,
-  HardHat, Wrench, Truck, Package, Users,
+  HardHat, Wrench, Truck, Package, Users, Lock,
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
@@ -18,32 +18,65 @@ const WORK_TYPES = [
   { key: 'other', label: 'All Other Work', icon: HardHat, desc: 'Default for any uncategorised sub-con work' },
 ];
 
+const DEFAULT_RULES = {
+  global_default_markup: 15,
+  minimum_markup: 5,
+  zero_margin_blocked: true,
+  per_work_type: {
+    drilling: 15, coring: 15, groundworks: 20, equipment_hire: 10, supervision: 25, other: 15,
+  },
+};
+
+const SETTING_KEY = 'subcon_markup_rules';
+
 /**
  * SubconMarkupRules — default markup % for subcontractor costs.
  * Sets guardrails: minimum markup to prevent zero-margin billing.
  * Per-contractor overrides are set on the Contractor entity; per-job
  * overrides are on the JobBillingContract. This is the system default.
+ *
+ * Admin-only: these financial guardrails are locked to admin role (enforced
+ * by RLS on the AppSetting entity). A lock badge is shown so managers know
+ * why non-admins can't see this page.
  */
 export default function SubconMarkupRules() {
   const queryClient = useQueryClient();
-  const [rules, setRules] = useState({
-    global_default_markup: 15,
-    minimum_markup: 5,
-    zero_margin_blocked: true,
-    per_work_type: {
-      drilling: 15, coring: 15, groundworks: 20, equipment_hire: 10, supervision: 25, other: 15,
-    },
-  });
+  const [rules, setRules] = useState(DEFAULT_RULES);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSave = () => {
+  // Load existing rules from AppSetting on mount
+  const { data: existing } = useQuery({
+    queryKey: ['app-setting', SETTING_KEY],
+    queryFn: async () => {
+      const list = await base44.entities.AppSetting.filter({ key: SETTING_KEY });
+      return list[0] || null;
+    },
+  });
+
+  useEffect(() => {
+    if (existing?.value) {
+      setRules({ ...DEFAULT_RULES, ...existing.value });
+    }
+  }, [existing]);
+
+  const handleSave = async () => {
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      if (existing?.id) {
+        await base44.entities.AppSetting.update(existing.id, { value: rules });
+      } else {
+        await base44.entities.AppSetting.create({ key: SETTING_KEY, label: 'Subcon Markup Rules', value: rules });
+      }
+      queryClient.invalidateQueries({ queryKey: ['app-setting', SETTING_KEY] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    }, 500);
+    } catch (e) {
+      console.error('Failed to save markup rules:', e);
+      alert('Failed to save: ' + (e.message || 'Unknown error'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -52,6 +85,7 @@ export default function SubconMarkupRules() {
         icon={TrendingUp}
         title="Subcontractor Markup Rules"
         description="Default markup percentages applied to subcontractor costs when billing clients. Guardrails prevent zero-margin billing — individual jobs and contractors can override these defaults."
+        actions={<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wide"><Lock className="w-3 h-3" /> Admin Only</span>}
       />
 
       {/* Global defaults */}
