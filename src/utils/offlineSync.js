@@ -105,9 +105,9 @@ async function syncBriefingQueue() {
         synced_from_offline: true
       });
 
-      await base44.entities.RotaAssignment.update(item.assignment_id, {
-        briefing_signed: true,
-        briefing_signed_at: item.signed_at
+      await base44.functions.invoke('updateMyAssignment', {
+        assignmentId: item.assignment_id,
+        updates: { briefing_signed: true, briefing_signed_at: item.signed_at },
       });
 
       try {

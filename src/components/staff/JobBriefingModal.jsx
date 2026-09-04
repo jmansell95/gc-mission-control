@@ -74,7 +74,7 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
       const ts = new Date().toISOString();
       setBriefingStartAt(ts);
       setPhase(briefingDocs.length > 0 ? 'documents' : 'induction');
-      try { base44.entities.RotaAssignment.update(assignment.id, { briefing_start_at: ts }); } catch (e) {}
+      try { base44.functions.invoke('updateMyAssignment', { assignmentId: assignment.id, updates: { briefing_start_at: ts } }); } catch (e) {}
       return;
     }
     if (assignment.briefing_start_at) {
@@ -96,7 +96,7 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
     setBriefingStartAt(ts);
     setSavingStart(true);
     try {
-      await base44.entities.RotaAssignment.update(assignment.id, { briefing_start_at: ts });
+      await base44.functions.invoke('updateMyAssignment', { assignmentId: assignment.id, updates: { briefing_start_at: ts } });
     } catch (err) {
       console.error('Error recording briefing start:', err);
     }
@@ -110,7 +110,7 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
       const ts = new Date().toISOString();
       setBriefingStartAt(ts);
       setPhase(briefingDocs.length > 0 ? 'documents' : 'induction');
-      try { base44.entities.RotaAssignment.update(assignment.id, { briefing_start_at: ts }); } catch (e) {}
+      try { base44.functions.invoke('updateMyAssignment', { assignmentId: assignment.id, updates: { briefing_start_at: ts } }); } catch (e) {}
     } else if (assignment.briefing_start_at) {
       setPhase('documents');
     } else {
@@ -123,7 +123,7 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
     setBriefingStartAt(ts);
     setSavingStart(true);
     try {
-      await base44.entities.RotaAssignment.update(assignment.id, { briefing_start_at: ts });
+      await base44.functions.invoke('updateMyAssignment', { assignmentId: assignment.id, updates: { briefing_start_at: ts } });
     } catch (err) {
       console.error('Error updating briefing start:', err);
     }
