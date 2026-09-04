@@ -6,10 +6,6 @@
       "type": "string",
       "description": "Singleton key \u2014 always 'global'. Used to fetch the single config record."
     },
-    "webhook_secret": {
-      "type": "string",
-      "description": "Shared secret that KeyLogBook sends with each real-time log webhook payload to authenticate it. Enter this same value in your KeyLogBook webhook configuration. The receiveKeyLogBookData webhook receiver validates every incoming request against this secret."
-    },
     "api_base_url": {
       "type": "string",
       "description": "KeyLogBook REST API base URL (for pull-based synchronisation). Used by the syncKeyLogBook backend function to fetch all projects, boreholes, and driller remarks. Leave blank if using webhooks only."
@@ -18,42 +14,14 @@
       "type": "string",
       "description": "KeyLogBook API key / bearer token (for pull-based synchronisation). Sent as Authorization: Bearer <token> with each API request. Leave blank if using webhooks only."
     },
-    "auto_generate_timesheets": {
-      "type": "boolean",
-      "default": true,
-      "description": "When true, incoming KeyLogBook webhook data automatically creates draft timesheet entries for the lead driller and second man assigned to the job that day. The crew then reviews and submits them at the end of their shift."
-    },
-    "enabled": {
-      "type": "boolean",
-      "default": false,
-      "description": "Master toggle for the KeyLogBook real-time log sync. When false, incoming real-time log webhooks are rejected even if the secret matches."
-    },
-    "last_webhook_at": {
-      "type": "string",
-      "description": "ISO timestamp of the last real-time log webhook payload received from KeyLogBook."
-    },
-    "last_webhook_status": {
-      "type": "string",
-      "enum": [
-        "success",
-        "failed",
-        "never"
-      ],
-      "default": "never",
-      "description": "Outcome of the last real-time log webhook received \u2014 'success' = payload processed, 'failed' = validation or processing error, 'never' = no webhook received yet."
-    },
-    "last_webhook_summary": {
-      "type": "string",
-      "description": "Short human-readable summary of the last real-time log webhook result (e.g. 'Processed 14 log entries \u00b7 2 timesheets drafted for BH-01 job')."
-    },
     "ags_sync_enabled": {
       "type": "boolean",
       "default": false,
-      "description": "Master toggle for the KeyLogBook AGS webhook sync. When true, KeyLogBook can push AGS files via event-based webhooks (hole_created, hole_updated, hole_deleted). All auth methods and HMAC signing are validated against the stored credentials when enabled."
+      "description": "Master toggle for the single KeyLogBook webhook (the AGS event endpoint, importAGS). When true, KeyLogBook can push AGS files via event-based webhooks (hole_created, hole_updated, hole_deleted). This one endpoint handles borehole data AND driller remarks/diary. All auth methods and HMAC signing are validated against the stored credentials when enabled."
     },
     "ags_sync_secret": {
       "type": "string",
-      "description": "Bearer token that KeyLogBook sends in the Authorization header (Authorization: Bearer <token>) with each AGS webhook request. Enter this same value in your KeyLogBook webhook authentication settings when using Bearer Token auth."
+      "description": "Bearer token that KeyLogBook sends in the Authorization header (Authorization: Bearer <token>) with each webhook request. Enter this same value in your KeyLogBook webhook authentication settings when using Bearer Token auth."
     },
     "ags_webhook_auth_method": {
       "type": "string",
@@ -64,7 +32,7 @@
         "off"
       ],
       "default": "bearer",
-      "description": "Authentication method KeyLogBook uses for AGS webhooks. 'bearer' = Bearer token in Authorization header (uses ags_sync_secret), 'basic' = Basic Auth (uses ags_webhook_basic_user/pass), 'custom_header' = custom HTTP header (uses ags_webhook_custom_header_name/value), 'off' = no authentication (not recommended)."
+      "description": "Authentication method KeyLogBook uses for webhooks. 'bearer' = Bearer token in Authorization header (uses ags_sync_secret), 'basic' = Basic Auth (uses ags_webhook_basic_user/pass), 'custom_header' = custom HTTP header (uses ags_webhook_custom_header_name/value), 'off' = no authentication (not recommended)."
     },
     "ags_webhook_basic_user": {
       "type": "string",
@@ -98,7 +66,7 @@
     },
     "last_ags_sync_at": {
       "type": "string",
-      "description": "ISO timestamp of the last AGS webhook received from KeyLogBook (either event-based or scheduled push)."
+      "description": "ISO timestamp of the last webhook received from KeyLogBook (either event-based or scheduled push)."
     },
     "last_ags_sync_status": {
       "type": "string",
@@ -108,11 +76,11 @@
         "never"
       ],
       "default": "never",
-      "description": "Outcome of the last AGS webhook \u2014 'success' = file processed, 'failed' = auth or processing error, 'never' = no webhook received yet."
+      "description": "Outcome of the last webhook \u2014 'success' = file processed, 'failed' = auth or processing error, 'never' = no webhook received yet."
     },
     "last_ags_sync_summary": {
       "type": "string",
-      "description": "Short human-readable summary of the last AGS webhook result (e.g. 'Imported 42 log entries into Cambridge North job' or 'Hole BH-03 deleted \u2014 removed 12 log entries')."
+      "description": "Short human-readable summary of the last webhook result (e.g. 'Imported 42 log entries into Cambridge North job \u00b7 1 timesheet auto-generated' or 'Hole BH-03 deleted \u2014 removed 12 log entries')."
     },
     "last_pull_sync_at": {
       "type": "string",

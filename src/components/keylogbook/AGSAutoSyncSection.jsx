@@ -108,9 +108,9 @@ export default function AGSAutoSyncSection() {
           <Webhook className="w-5 h-5 text-white" />
         </div>
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-slate-900">KeyLogBook AGS Webhook</h3>
+          <h3 className="text-sm font-bold text-slate-900">KeyLogBook Webhook</h3>
           <p className="text-xs text-slate-500">
-            KeyLogBook pushes AGS files automatically whenever a borehole is created, updated, or deleted — no manual uploads needed.
+            The single KeyLogBook endpoint — handles borehole data AND the driller's daily diary/remarks. KeyLogBook pushes an AGS file whenever a hole is created, updated, or deleted; remarks are auto-priced and a draft timesheet is generated on receipt.
           </p>
         </div>
       </div>

@@ -2,6 +2,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { parseRemarks, professionaliseActivities, hasTimePattern, timeToMins, normaliseTime, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
 import { buildShiftCrewMap, buildBoreholeCrewMap, buildBoreholeDrillTimeMap, parseCrewNames } from '../../shared/agsCrewAttribution.ts';
 import { inferBoreholeStatus } from '../../shared/boreholeStatus.ts';
+import { loadJobRateCardItems, resolveJobCharge } from '../../shared/jobRateMatcher.ts';
+import { generateKeyLogBookTimesheet } from '../../shared/keylogbookTimesheet.ts';
 
 // HMAC-SHA256 for KeyLogBook webhook request signing verification.
 // KLB sends X-Hole-Signature: sha256=<hex> when request signing is enabled.
@@ -1131,6 +1133,35 @@ Deno.serve(async (req) => {
     const staffName = drillerName || '';
     const completedByName = drillerName || importerName;
 
+    // --- Load the job rate card so driller remarks can be auto-priced ---
+    // (job-scoped rate cards take precedence over the Master Price List).
+    // Loaded once per import; used to auto-price each keylogbook_remarks
+    // activity at ingest, mirroring the old receiveKeyLogBookData behaviour.
+    const rateCardItems = await loadJobRateCardItems(base44, job.id);
+
+    // Auto-price a remark activity against the job rate card. Tries the
+    // cleaned (AI-professionalised) description first, then the raw driller
+    // wording (which often matches the rate card terminology more closely,
+    // e.g. "bagging spoil"). Returns the billing fields to spread onto the log.
+    const priceRemark = (cleanDesc: string, rawDesc: string) => {
+      const match = resolveJobCharge(cleanDesc, rateCardItems, 1) ||
+        resolveJobCharge(rawDesc, rateCardItems, 1);
+      if (!match) return { chargeable: false, billing_status: 'no_charge', charge_amount: null, charge_breakdown: null };
+      return {
+        chargeable: true,
+        billing_status: 'auto',
+        charge_amount: match.total,
+        charge_breakdown: JSON.stringify({
+          source: 'job_rate_card',
+          rate_card_item_id: match.rateCardItem.id,
+          rate_card_item: match.rateCardItem.description,
+          unit_price: match.unitPrice,
+          quantity: match.quantity,
+          total: match.total,
+        }),
+      };
+    };
+
     // Build per-shift and per-borehole crew maps from the SHFT and HDPH groups.
     // The shift crew map (SHFT_ID → full crew + device + shift times) is used to
     // attribute the correct crew to each DLOG/PTIM/HDIA activity via its SHFT_ID.
@@ -1556,8 +1587,7 @@ Deno.serve(async (req) => {
           shift_start_time: shiftStartTime || undefined,
           shift_end_time: shiftEndTime || undefined,
           manager_review_status: 'pending',
-          chargeable: false,
-          billing_status: 'no_charge',
+          ...priceRemark(cleanDesc || sa.description || '', sa.description || ''),
         })) counts.remarks++;
       });
     }
@@ -1609,8 +1639,7 @@ Deno.serve(async (req) => {
           completed_by_type: 'internal_staff',
           completed_by_name: drillerName || importerName,
           manager_review_status: 'pending',
-          chargeable: false,
-          billing_status: 'no_charge',
+          ...priceRemark(r.description || '', r.raw_remarks || ''),
         })) counts.remarks++;
       });
     }
@@ -1782,13 +1811,36 @@ Deno.serve(async (req) => {
       if (g.headings && g.headings.length > 0) groupDebug[name] = g.headings;
     }
 
+    // --- Auto-generate draft daily timesheets from KLB remark activities ---
+    // For automated KLB pushes (event webhooks + scheduled pushes), aggregate
+    // the imported keylogbook_remarks logs into submitted daily summary
+    // timesheets per work date. This mirrors the old receiveKeyLogBookData
+    // behaviour: remark logs are auto-approved and a timesheet is generated
+    // immediately. Manual uploads keep logs pending for manager review.
+    let timesheetResults: any[] = [];
+    if (isExternalPush && counts.remarks > 0) {
+      const remarkDates = [...new Set(logs.filter(l => l.source === 'keylogbook_remarks').map(l => l.date).filter(Boolean))];
+      for (const remarkDate of remarkDates) {
+        try {
+          const tsResult = await generateKeyLogBookTimesheet(base44, job.id, remarkDate, drillerStaffId || undefined);
+          timesheetResults.push({ date: remarkDate, ...tsResult });
+        } catch (e) {
+          timesheetResults.push({ date: remarkDate, status: 'error', message: String(e.message || e) });
+        }
+      }
+    }
+    const tsSuccessCount = timesheetResults.filter(t => t.status === 'success').length;
+    const tsSummary = tsSuccessCount > 0
+      ? ` · ${tsSuccessCount} timesheet${tsSuccessCount === 1 ? '' : 's'} auto-generated`
+      : (timesheetResults.some(t => t.status === 'error') ? ' · timesheet generation failed' : '');
+
     // --- Record the sync status for automated pushes ---
     if (isExternalPush && agsSyncConfig?.id) {
       try {
         await base44.asServiceRole.entities.KeyLogBookConfig.update(agsSyncConfig.id, {
           last_ags_sync_at: new Date().toISOString(),
           last_ags_sync_status: 'success',
-          last_ags_sync_summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.`,
+          last_ags_sync_summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.${tsSummary}`,
         });
       } catch (e) { /* best-effort status update */ }
     }
@@ -1799,7 +1851,7 @@ Deno.serve(async (req) => {
       group_summary: groupSummary, matched_job_id: job.id, matched_job_name: job.name,
       matched_job_reference: job.job_reference || '', created_job: createdJob,
       outcome: 'success', log_count: inserted,
-      summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.`,
+      summary: `Imported ${inserted} log entries into ${job.name}${refsInFile.length > 0 ? ` (${refListLabel})` : ''}.${tsSummary}`,
       debug_payload: debugPayload,
     });
     return Response.json({
@@ -1807,6 +1859,8 @@ Deno.serve(async (req) => {
       job_reference: job.job_reference, created_job: createdJob,
       deleted: deletedCount, inserted, scoped_boreholes: refsInFile,
       duplicates: counts.duplicates, counts, samples_created: counts.samplesCreated, groups: groupDebug,
+      driller: drillerName || '',
+      timesheets: timesheetResults,
     });
   } catch (error) {
     // Record failed sync for automated pushes

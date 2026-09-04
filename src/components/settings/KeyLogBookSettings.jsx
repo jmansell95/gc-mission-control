@@ -7,7 +7,6 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 import AGSAutoSyncSection from '@/components/keylogbook/AGSAutoSyncSection';
-import KeyLogBookRemarksWebhookSection from '@/components/keylogbook/KeyLogBookRemarksWebhookSection';
 
 const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
 
@@ -54,14 +53,11 @@ export default function KeyLogBookSettings() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-5">
       <SettingsSectionHeader
         title="KeyLogBook"
-        description="AGS borehole data sync — webhook config, auto-sync, and manual upload for this business stream."
+        description="One webhook handles borehole data AND driller remarks/diary. Configure the endpoint, auth, and signing below."
         icon={FileUp}
       />
 
-      {/* Real-time remarks webhook config + connection test */}
-      <KeyLogBookRemarksWebhookSection />
-
-      {/* Auto-sync / AGS webhook config */}
+      {/* KeyLogBook webhook — borehole data AND driller remarks/diary via one endpoint */}
       <AGSAutoSyncSection />
 
       {/* Manual AGS upload */}
