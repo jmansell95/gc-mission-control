@@ -184,6 +184,11 @@
       "default": false,
       "description": "True when this line item was manually added by the billing team (not auto-populated from field data). Manual items are preserved when 'Refresh from Field Data' is run."
     },
+    "is_variation_breakdown": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this line is a component breakdown line inside a variation's per-ref tab (not the variation summary line itself). Summary lines (is_variation_breakdown=false) appear in the Variation Summary list; breakdown lines (true) appear only in the per-ref breakdown tab. Set by the AFP parser for historical AFPs and by the live field-data populator for current AFPs."
+    },
     "dispute_status": {
       "type": "string",
       "enum": [
