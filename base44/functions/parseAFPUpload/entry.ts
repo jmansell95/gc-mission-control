@@ -298,10 +298,9 @@ export default async function(req: Request): Promise<Response> {
           if (!row) continue;
           const desc = descCol >= 0 ? String(row[descCol] || '').trim() : '';
           const voRef = voRefCol >= 0 ? String(row[voRefCol] || '').trim() : '';
-          if (!desc && !voRef) continue;
-          const qty = qtyCol >= 0 ? toNum(row[qtyCol]) : 0;
-          const rate = rateCol >= 0 ? toNum(row[rateCol]) : 0;
-          if (!desc && !voRef && qty === 0 && rate === 0) continue;
+          // Only pull a variation line if it has a description — rows with just
+          // a VO Ref (or label-only rows) are skipped to avoid empty variations.
+          if (!desc) continue;
 
           const timeImpactRaw = timeImpactCol >= 0 ? String(row[timeImpactCol] || '').toLowerCase().trim() : '';
           preview.variations.push({

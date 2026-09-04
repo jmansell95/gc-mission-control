@@ -708,23 +708,49 @@ export default function AFPBuilder({ job }) {
             </div>
           </div>
 
-          {/* Prominent stat tiles — Claimed / Assessed / Balance */}
+          {/* Visual stat pills — premium header with AnimatedNumber count-up */}
           <div className="px-4 py-4 space-y-3">
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               <div className="relative overflow-hidden rounded-xl stat-gradient-brand text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Claimed</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.claimed)}</p>
-                {totals.disputed > 0 && <p className="text-[10px] text-amber-200 font-medium mt-0.5">{fmt(totals.disputed)} disputed</p>}
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Contracted</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={selectedAfp.contract_value || 0} format={(v) => fmt(v)} />
+                </p>
               </div>
               <div className="relative overflow-hidden rounded-xl stat-gradient-blue text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Claimed</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={totals.claimed} format={(v) => fmt(v)} />
+                </p>
+                {totals.disputed > 0 && <p className="text-[10px] text-amber-200 font-medium mt-0.5">{fmt(totals.disputed)} disputed</p>}
+              </div>
+              <div className="relative overflow-hidden rounded-xl stat-gradient-cyan text-white px-3 py-3 shadow-sm">
                 <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Assessed</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.assessed)}</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={totals.assessed} format={(v) => fmt(v)} />
+                </p>
                 <p className="text-[10px] text-white/60 font-medium mt-0.5">client valuation</p>
               </div>
               <div className="relative overflow-hidden rounded-xl stat-gradient-emerald text-white px-3 py-3 shadow-sm">
                 <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Balance</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">{fmt(totals.balance)}</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={totals.balance} format={(v) => fmt(v)} />
+                </p>
                 <p className="text-[10px] text-white/60 font-medium mt-0.5">remaining</p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl stat-gradient-violet text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Variations</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={variationsTotal} format={(v) => fmt(v)} />
+                </p>
+                <p className="text-[10px] text-white/60 font-medium mt-0.5">{variationSummaryItems.length} VOs</p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl stat-gradient-amber text-white px-3 py-3 shadow-sm">
+                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">% Complete</p>
+                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                  <AnimatedNumber value={selectedAfp.contract_value > 0 ? Math.min(100, Math.round((totals.agreed / selectedAfp.contract_value) * 100)) : 0} format={(v) => Math.round(v) + '%'} />
+                </p>
+                <p className="text-[10px] text-white/60 font-medium mt-0.5">of contract</p>
               </div>
             </div>
             {selectedAfp.contract_value > 0 && (() => {
@@ -1481,6 +1507,16 @@ export default function AFPBuilder({ job }) {
       )}
 
       {showUpload && <AFPUploadModal job={job} onClose={() => setShowUpload(false)} />}
+
+      {showAddVariation && (
+        <AddVariationModal
+          afp={selectedAfp}
+          job={job}
+          existingRefs={variationRefs}
+          onClose={() => setShowAddVariation(false)}
+          onCreated={(ref) => { setActiveTab(`vo-${ref}`); invalidate(); }}
+        />
+      )}
     </div>
   );
 }
