@@ -753,6 +753,25 @@ export default async function(req: Request): Promise<Response> {
         source: 'afp_upload', is_manual: false, dispute_status: v.cost_agreed_date ? 'agreed' : 'none',
         sort_order: sortOrder++,
       });
+      // Persist breakdown component lines for this variation
+      const ref = (v.vo_ref || '').toUpperCase().replace(/\s+/g, '');
+      if (ref) {
+        const breakdown = variationBreakdowns.find((b: any) => b.ref === ref);
+        if (breakdown) {
+          for (const bl of breakdown.lines) {
+            allItems.push({
+              sheet_name: 'variations', category: bl.category || 'other',
+              item: bl.description, unit: bl.unit || 'nr',
+              qty: toNum(bl.qty), rate: toNum(bl.rate), amount: toNum(bl.amount),
+              unit_price: toNum(bl.rate), vo_ref: v.vo_ref || '', vo_date: v.vo_date || '',
+              is_variation_breakdown: true, applied_in_period: toNum(bl.amount),
+              source: 'afp_upload', is_manual: false, dispute_status: 'none',
+              original_amount: toNum(bl.amount), agreed_amount: toNum(bl.amount),
+              sort_order: sortOrder++,
+            });
+          }
+        }
+      }
     }
     for (const m of materials) {
       const qty = toNum(m.qty), cost = toNum(m.cost);
