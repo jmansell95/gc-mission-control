@@ -9,6 +9,7 @@ import {
 import UsefulNumbersModal from '@/components/UsefulNumbersModal';
 import MaintenanceBookingModal from '@/components/vehicles/MaintenanceBookingModal';
 import MaintenanceProviderDirectory from '@/components/vehicles/MaintenanceProviderDirectory';
+import MaintenanceMatrixPlanner from '@/components/vehicles/MaintenanceMatrixPlanner';
 import { format, differenceInDays, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton, EmptyState } from '@/components/StateViews';
@@ -469,7 +470,7 @@ export default function VehicleMaintenanceManager() {
         );
       })()}
 
-      {/* Bookings list */}
+      {/* Maintenance planner matrix */}
       {isLoading ? (
         <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 w-full rounded-xl" />)}</div>
       ) : statusFiltered.length === 0 ? (
@@ -477,24 +478,13 @@ export default function VehicleMaintenanceManager() {
           <EmptyState icon={Wrench} title={selectedVehicleId ? "No bookings for this vehicle" : "No maintenance bookings yet"} message={selectedVehicleId ? "Book MOTs, services and repairs for this vehicle using the button above." : "Book MOTs, services and repairs here. Staff will be notified by email when assigned."} />
         </div>
       ) : (
-        <div className="space-y-6">
-          {upcomingSorted.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <CalendarClock className="w-4 h-4 text-violet-600" /> Upcoming ({upcomingSorted.length})
-              </h3>
-              <div className="space-y-3">{upcomingSorted.map(renderBookingCard)}</div>
-            </div>
-          )}
-          {pastSorted.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <History className="w-4 h-4" /> History ({pastSorted.length})
-              </h3>
-              <div className="space-y-3 opacity-80">{pastSorted.map(renderBookingCard)}</div>
-            </div>
-          )}
-        </div>
+        <MaintenanceMatrixPlanner
+          bookings={statusFiltered}
+          vehicles={vehicles}
+          staff={staff}
+          onEditBooking={handleEdit}
+          onAddBooking={(preselect) => { setEditingBooking(preselect || null); setShowModal(true); }}
+        />
       )}
 
       <UsefulNumbersModal open={showNumbers} onClose={() => setShowNumbers(false)}

@@ -3,14 +3,10 @@ import { Marker, Popup } from 'react-leaflet';
 import { Navigation, Clock, Briefcase, MapPin, Truck } from 'lucide-react';
 import { useLiveStaffLocations } from '@/hooks/useLiveStaffLocations';
 
-// Shift state → colour + label
-const SHIFT_STYLES = {
-  travelling_to_site: { colour: '#f59e0b', label: 'Travelling to site' },
-  on_site: { colour: '#10b981', label: 'On site' },
-  travelling_home: { colour: '#3b82f6', label: 'Travelling home' },
-  home: { colour: '#64748b', label: 'Home' },
-  off_shift: { colour: '#94a3b8', label: 'Off shift' },
-};
+// Staff phone pins = blue, vehicle-proxy pins = dashed blue.
+// (Vehicles on the map use green/grey — see VehicleMarker in LiveTrackingTab.)
+const PHONE_COLOUR = '#3b82f6';
+const PROXY_COLOUR = '#3b82f6';
 
 const PERSON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/></svg>';
 const TRUCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M3 6h13v9H3z"/><path d="M16 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>';
@@ -18,9 +14,8 @@ const TRUCK_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="white">
 function StaffMarker({ staff, onClick }) {
   const pos = [staff.lat, staff.lng];
   if (staff.lat == null || staff.lng == null) return null;
-  const style = SHIFT_STYLES[staff.shiftState] || SHIFT_STYLES.off_shift;
-  const colour = style.colour;
   const isProxy = staff.source === 'vehicle_proxy';
+  const colour = isProxy ? PROXY_COLOUR : PHONE_COLOUR;
 
   const icon = window.L?.divIcon({
     html: `<div style="position:relative">
@@ -48,14 +43,15 @@ function StaffMarker({ staff, onClick }) {
         <div className="text-xs space-y-1">
           <p className="font-bold text-sm">{staff.staffName}</p>
           {isProxy && (
-            <p className="flex items-center gap-1 text-indigo-600 font-medium">
+            <p className="flex items-center gap-1 text-blue-600 font-medium">
               <Truck className="w-3 h-3" /> Via vehicle{staff.vehicleName ? ` · ${staff.vehicleName}` : ''}
             </p>
           )}
-          <p className="flex items-center gap-1" style={{ color: colour }}>
-            <span className="w-2 h-2 rounded-full" style={{ background: colour }} />
-            {style.label}
-          </p>
+          {!isProxy && (
+            <p className="flex items-center gap-1 text-blue-600 font-medium">
+              <span className="w-2 h-2 rounded-full bg-blue-500" /> Phone GPS · streaming
+            </p>
+          )}
           {staff.jobName && <p className="flex items-center gap-1 text-slate-600"><Briefcase className="w-3 h-3" /> {staff.jobName}</p>}
           <p className="flex items-center gap-1 text-slate-500">
             {staff.isMoving ? <Navigation className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
@@ -72,14 +68,9 @@ function StaffMarker({ staff, onClick }) {
  * StaffMapLayer — overlays live staff GPS pins on a Leaflet map.
  * Render inside a <MapContainer>. Pass a divisionId to scope the query.
  *
- * Phone-GPS pins use a solid border; vehicle-proxy pins use a dashed
- * border + a small "via vehicle" label so managers can distinguish them
- * at a glance.
- *
- * Props:
- *   - divisionId: string — which division's crew to show
- *   - show: boolean — whether to render the layer (toggle on/off)
- *   - onStaffClick: (staff) => void — called when a staff pin is clicked
+ * Phone-GPS pins = solid blue circles with a person icon.
+ * Vehicle-proxy pins = dashed blue circles with a truck icon + "via vehicle".
+ * This makes them visually distinct from vehicle pins (green/grey circles).
  */
 export default function StaffMapLayer({ divisionId, show = true, onStaffClick }) {
   const { liveStaff } = useLiveStaffLocations(divisionId);

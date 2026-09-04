@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { Truck, Satellite, Wrench } from 'lucide-react';
+import { Truck, Satellite, Wrench, ClipboardList } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import RunReportButton from '@/components/reports/RunReportButton';
 import FleetCommandHeader from '@/components/vehicles/FleetCommandHeader';
@@ -46,7 +46,7 @@ export default function FleetHub() {
 
   const tabs = [
     { id: 'live', label: 'Live Tracking', icon: Satellite },
-    { id: 'fleet', label: 'Fleet', icon: Truck },
+    { id: 'fleet', label: 'Vehicles', icon: Truck },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
   ];
 
@@ -55,7 +55,14 @@ export default function FleetHub() {
       icon={Truck}
       title="Tracking"
       subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
-      actions={<RunReportButton hub="fleet" />}
+      actions={
+        <div className="flex items-center gap-2">
+          <Link to="/hub-overhaul-plan" className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
+            <ClipboardList className="w-3.5 h-3.5" /> Hub Overhaul Plan
+          </Link>
+          <RunReportButton hub="fleet" />
+        </div>
+      }
       kpiStrip={<FleetCommandHeader vehicles={vehicles} liveByVehicle={liveByVehicle} />}
       tabs={tabs}
       activeTab={activeTab}

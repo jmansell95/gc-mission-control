@@ -11,6 +11,7 @@ import SafetyEventsLayer from './SafetyEventsLayer';
 import VehicleLiveDialog from './VehicleLiveDialog';
 import RouteComparisonDialog from './RouteComparisonDialog';
 import StaffMapLayer from './StaffMapLayer';
+import TrackingPresenceStrip from './TrackingPresenceStrip';
 import { useDivision } from '@/contexts/DivisionContext';
 
 const UK_CENTER = [52.3, -1.5];
@@ -260,6 +261,9 @@ export default function LiveTrackingTab({ initialVehicleId }) {
 
   return (
     <div className="space-y-3">
+      {/* ── Crew tracking presence (who has the app open) ── */}
+      {isLiveMode && <TrackingPresenceStrip divisionId={activeDivision?.id} />}
+
       {/* ── Controls bar ── */}
       <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
@@ -399,7 +403,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   <span className="ml-auto text-xs text-slate-400">{liveVehicles.length} vehicles</span>
                 )}
               </div>
-              <div style={{ height: 560 }} className="rounded-b-2xl">
+              <div style={{ height: 560 }} className="relative rounded-b-2xl">
                 <MapContainer center={UK_CENTER} zoom={6} style={{ height: '100%', width: '100%' }} scrollWheelZoom zoomControl dragging>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
                   <MapBoundsFitter points={boundsPoints} />
@@ -443,6 +447,32 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   {/* Safety events overlay */}
                   {!isLiveMode && showEvents && <SafetyEventsLayer events={safetyEvents} />}
                 </MapContainer>
+                {/* ── Map legend (vehicle vs staff) ── */}
+                {isLiveMode && (
+                  <div className="absolute bottom-3 left-3 z-[1000] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-slate-200 px-3 py-2 text-[10px] space-y-1 pointer-events-none">
+                    <p className="font-bold text-slate-700 text-[11px] mb-1">Legend</p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-[#2E5A1A] border-2 border-white flex items-center justify-center">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><path d="M3 6h13v9H3z"/><path d="M16 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+                      </div>
+                      <span className="text-slate-600">Vehicle (engine on)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-slate-400 border-2 border-white" />
+                      <span className="text-slate-600">Vehicle (engine off)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
+                        <svg width="7" height="7" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/></svg>
+                      </div>
+                      <span className="text-slate-600">Staff (phone GPS)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-dashed border-white" />
+                      <span className="text-slate-600">Staff (via vehicle)</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}

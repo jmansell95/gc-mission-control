@@ -49,6 +49,7 @@ import CompliancePage from './pages/CompliancePage';
 import BillingPage from './pages/BillingPage';
 import AzureMigrationPlan from './pages/AzureMigrationPlan';
 import BackgroundTrackingSetup from './pages/BackgroundTrackingSetup';
+import HubOverhaulPlan from './pages/HubOverhaulPlan';
 import DepotPickLists from './pages/DepotPickLists';
 
 
@@ -169,6 +170,7 @@ const AuthenticatedApp = () => {
             <Route path="/roadmap" element={<RouteGuard><ImprovementRoadmap /></RouteGuard>} />
             <Route path="/azure-migration-plan" element={<RouteGuard><AzureMigrationPlan /></RouteGuard>} />
             <Route path="/background-tracking-setup" element={<RouteGuard><BackgroundTrackingSetup /></RouteGuard>} />
+            <Route path="/hub-overhaul-plan" element={<RouteGuard><HubOverhaulPlan /></RouteGuard>} />
             <Route path="/m365-setup-guide" element={<RouteGuard><Microsoft365SetupGuide /></RouteGuard>} />
             <Route path="/prehistoric-import" element={<RouteGuard><PrehistoricImportPage /></RouteGuard>} />
           </Route>
