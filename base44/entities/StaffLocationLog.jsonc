@@ -1,0 +1,95 @@
+{
+  "name": "StaffLocationLog",
+  "type": "object",
+  "properties": {
+    "staff_id": {
+      "type": "string",
+      "description": "Staff member this location reading belongs to."
+    },
+    "assignment_id": {
+      "type": "string",
+      "description": "The RotaAssignment (shift) this location was captured during. Links the breadcrumb to the day's shift so travel time can be attributed."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this staff member belongs to (inherited from the Staff record). Drives division-scoped RLS so managers only see their own division's crew locations."
+    },
+    "lat": {
+      "type": "number",
+      "description": "GPS latitude at the time of reading."
+    },
+    "lng": {
+      "type": "number",
+      "description": "GPS longitude at the time of reading."
+    },
+    "accuracy_m": {
+      "type": "number",
+      "description": "GPS accuracy in metres (from the browser Geolocation API coords.accuracy). Points with poor accuracy (>100m) are flagged but still stored."
+    },
+    "speed_mps": {
+      "type": "number",
+      "description": "Speed in metres per second (from the browser Geolocation API coords.speed). Used to determine if the crew member is moving (drives the adaptive polling interval)."
+    },
+    "heading": {
+      "type": "number",
+      "description": "Direction of travel in degrees (from the browser Geolocation API coords.heading). Used for the live map arrow rotation."
+    },
+    "recorded_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the GPS reading was taken on the device (from the browser Geolocation API coords.timestamp). This is the device's clock, not the server's."
+    },
+    "is_moving": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the staff member was moving at the time of this reading (speed > 1 m/s or significant distance from previous point). Used by the live map to colour-code moving vs stationary crew pins."
+    }
+  },
+  "required": [
+    "staff_id",
+    "lat",
+    "lng",
+    "recorded_at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

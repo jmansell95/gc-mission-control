@@ -1,0 +1,121 @@
+{
+  "name": "StaffGeofenceEvent",
+  "type": "object",
+  "properties": {
+    "staff_id": {
+      "type": "string",
+      "description": "Staff member who triggered this geofence event."
+    },
+    "staff_name": {
+      "type": "string",
+      "description": "Staff member name (denormalised for display on the live map and timeline without joining)."
+    },
+    "assignment_id": {
+      "type": "string",
+      "description": "The RotaAssignment (shift) this geofence event belongs to. Links the event to the day's shift so travel time can be calculated and the shift pipeline can advance."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this staff member belongs to (inherited from the Staff record). Drives division-scoped RLS."
+    },
+    "geofence_type": {
+      "type": "string",
+      "enum": [
+        "home",
+        "site",
+        "supplier",
+        "inter_site"
+      ],
+      "description": "What the geofence is around. 'home' = the staff member's learned home location (Staff.home_lat/home_lng), 'site' = today's job site (Job.site_lat/site_lng), 'supplier' = a supplier yard/depot (Supplier.lat/lng), 'inter_site' = travel between two different job sites."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "arrive",
+        "depart"
+      ],
+      "description": "'arrive' = staff member entered the geofence radius, 'depart' = staff member left the geofence radius. Generated automatically by the staff geofence engine when a StaffLocationLog point crosses a geofence boundary."
+    },
+    "lat": {
+      "type": "number",
+      "description": "Staff member's latitude at the time of the event."
+    },
+    "lng": {
+      "type": "number",
+      "description": "Staff member's longitude at the time of the event."
+    },
+    "at": {
+      "type": "string",
+      "description": "ISO timestamp of the GPS reading that triggered this event."
+    },
+    "duration_on_site_minutes": {
+      "type": "number",
+      "description": "For departure events from a site geofence: how long the staff member was on site (minutes between the matching arrival and this departure). Blank for arrivals and home events."
+    },
+    "linked_geofence_ref": {
+      "type": "string",
+      "description": "ID of the Job, Supplier, or 'home' that this geofence event is around. For site geofences this is the job_id; for supplier geofences the supplier_id; for home geofences the literal 'home'."
+    },
+    "linked_geofence_name": {
+      "type": "string",
+      "description": "Name of the geofence target (job name, supplier name, or 'Home') denormalised for display."
+    },
+    "travel_minutes": {
+      "type": "number",
+      "description": "For site-arrival events: travel time in minutes from the preceding home-departure. For home-arrival events: travel time in minutes from the preceding site-departure. Used to auto-create travel timesheet entries."
+    },
+    "timesheet_created": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a draft travel Timesheet entry has been auto-created from this geofence event (travel_to for site arrivals, travel_from for home arrivals). Prevents duplicate timesheet creation on repeated events."
+    }
+  },
+  "required": [
+    "staff_id",
+    "geofence_type",
+    "event_type",
+    "at"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
