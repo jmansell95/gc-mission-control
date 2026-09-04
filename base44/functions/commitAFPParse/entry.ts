@@ -33,6 +33,84 @@ const defaultFinalPaymentNotice = (end: string) => addDays(end, 30);
  * Output: { afps_created, total_line_items, total_claimed, variation_count }
  */
 
+// Seed the job's BOQ (JobBillOfQuantities) from the AFP Measured Works tab.
+// Only runs when the job has NO existing BOQ lines — so re-uploading a later
+// AFP never overwrites an already-established agreed scope.
+async function seedBOQFromMeasuredWorks(base44, job, measuredWorks) {
+  if (!measuredWorks || measuredWorks.length === 0) return { seeded: 0, skipped: false };
+
+  // Skip if BOQ already exists for this job
+  const existing = await base44.asServiceRole.entities.JobBillOfQuantities.filter(
+    { job_id: job.id }, undefined, 1
+  );
+  if (existing.length > 0) return { seeded: 0, skipped: true };
+
+  // Load global rate card items for auto-matching rate_card_item_id
+  let rateItems: any[] = [];
+  try {
+    rateItems = await base44.asServiceRole.entities.RateCardItem.filter(
+      { rate_card_source: 'our_company', is_active: true }, 'sort_order', 500
+    );
+  } catch (_) { /* non-fatal — BOQ lines created without rate link */ }
+
+  const payload: any[] = [];
+  let sortOrder = 0;
+
+  for (const mw of measuredWorks) {
+    const description = String(mw.item || '').trim();
+    const qty = toNum(mw.qty);
+    const rate = toNum(mw.rate);
+    if (!description || qty <= 0) continue;
+
+    // Match against rate card by description (exact first, then contains)
+    let matchedRateId: string | null = null;
+    if (description && rateItems.length > 0) {
+      const descLower = description.toLowerCase().trim();
+      const exact = rateItems.find((r: any) =>
+        String(r.description || '').toLowerCase().trim() === descLower
+      );
+      if (exact) {
+        matchedRateId = exact.id;
+      } else {
+        const contains = rateItems.find((r: any) => {
+          const rDesc = String(r.description || '').toLowerCase().trim();
+          return rDesc && (rDesc.includes(descLower) || descLower.includes(rDesc));
+        });
+        if (contains) matchedRateId = contains.id;
+      }
+    }
+
+    payload.push({
+      job_id: job.id,
+      project_id: null,
+      rate_card_item_id: matchedRateId,
+      sor_ref: String(mw.item_ref || '').trim(),
+      description,
+      unit: String(mw.unit || '').trim() || 'nr',
+      agreed_quantity: qty,
+      agreed_unit_price: rate,
+      agreed_line_total: Math.round(qty * rate * 100) / 100,
+      actual_quantity: 0,
+      remaining_quantity: qty,
+      variation_quantity: 0,
+      status: 'not_started',
+      is_variation: false,
+      sort_order: sortOrder++,
+    });
+  }
+
+  if (payload.length === 0) return { seeded: 0, skipped: false };
+
+  const created = await base44.asServiceRole.entities.JobBillOfQuantities.bulkCreate(payload);
+
+  // Run variation check to populate actuals
+  try {
+    await base44.asServiceRole.functions.invoke('checkBOQVariations', { job_id: job.id });
+  } catch (_) { /* non-fatal */ }
+
+  return { seeded: created.length, skipped: false };
+}
+
 function matchActivityToMeasuredWork(activity, measuredWorks) {
   const desc = (activity.description || activity.activity || '').toLowerCase().trim();
   const itemRef = (activity.item || '').toLowerCase().trim();
@@ -594,12 +672,17 @@ export default async function(req: Request): Promise<Response> {
         actor_name: userName,
       });
 
+      // Seed BOQ from Measured Works if the job has no existing BOQ lines
+      const boqResult = await seedBOQFromMeasuredWorks(base44, job, measuredWorks);
+
       return Response.json({
         afps_created: createdAfpIds.length,
         afp_ids: createdAfpIds,
         total_line_items: totalLineItems,
         total_claimed: Math.round(totalClaimed * 100) / 100,
         variation_count: variationCount,
+        boq_seeded: boqResult.seeded,
+        boq_skipped: boqResult.skipped,
       });
     }
 
@@ -683,12 +766,17 @@ export default async function(req: Request): Promise<Response> {
       actor_user_id: user.id, actor_name: userName,
     });
 
+    // Seed BOQ from Measured Works if the job has no existing BOQ lines
+    const boqResult = await seedBOQFromMeasuredWorks(base44, job, measuredWorks);
+
     return Response.json({
       afps_created: 1,
       afp_id: afpId,
       line_item_count: allItems.length,
       total_claimed: Math.round(totalClaimed * 100) / 100,
       variation_count: variations.length,
+      boq_seeded: boqResult.seeded,
+      boq_skipped: boqResult.skipped,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
