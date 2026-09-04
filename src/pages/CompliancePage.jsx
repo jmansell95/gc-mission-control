@@ -18,6 +18,7 @@ import ComplianceCalendar from '@/components/compliance/ComplianceCalendar';
 import SiteReadinessGateWidget from '@/components/dashboard/SiteReadinessGateWidget';
 import CrewCertificationPulseWidget from '@/components/dashboard/CrewCertificationPulseWidget';
 import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget';
+import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
 import RunReportButton from '@/components/reports/RunReportButton';
 import { resolveRole } from '@/utils/access';
@@ -28,6 +29,7 @@ const SC_URL = 'https://app.safetyculture.com';
 const TABS = [
   {
     id: 'safety', label: 'Safety', icon: ShieldAlert, sub: [
+      { id: 'crew-shift', label: 'Crew Shift Status', icon: Users },
       { id: 'safety-hub', label: 'Safety Hub', icon: ShieldAlert },
       { id: 'incidents', label: 'Incidents', icon: Siren },
       { id: 'stats', label: 'H&S Stats', icon: BarChart3 },
@@ -50,7 +52,7 @@ const TABS = [
 export default function CompliancePage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('safety');
-  const [subTab, setSubTab] = useState('safety-hub');
+  const [subTab, setSubTab] = useState('crew-shift');
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
@@ -151,6 +153,9 @@ export default function CompliancePage() {
       {/* ── Tab Content — all gated by SafetyCulture connection status ── */}
       {tab === 'safety' && (
         <>
+          {subTab === 'crew-shift' && (
+            <CrewShiftStatusWidget />
+          )}
           {subTab === 'safety-hub' && (
             <SafetyCultureGate onConfigure={() => navToAdmin('settings')}>
               <SafetyCultureCheckHub onNavigate={navToAdmin} />

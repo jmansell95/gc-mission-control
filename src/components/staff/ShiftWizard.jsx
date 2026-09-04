@@ -484,14 +484,22 @@ export default function ShiftWizard({
                     if (!el || el.value !== '1') return;
                     setSaving(true);
                     try {
-                      await base44.entities.RotaAssignment.update(assignment.id, {
-                        daily_checks_completed: true,
-                        daily_checks_completed_at: new Date().toISOString(),
+                      const res = await base44.functions.invoke('updateMyAssignment', {
+                        assignmentId: assignment.id,
+                        updates: {
+                          daily_checks_completed: true,
+                          daily_checks_completed_at: new Date().toISOString(),
+                        },
                       });
+                      if (res.data?.error) throw new Error(res.data.error);
                       setSaving(false);
                       setStep('arrive');
                     } catch (e) {
                       setSaving(false);
+                      // Show error toast — previously this silently failed
+                      import('@/components/ui/use-toast').then(({ toast }) => {
+                        toast({ title: 'Could not save checks', description: e.message || 'Please try again.', variant: 'destructive' });
+                      });
                     }
                   }}
                   disabled={saving}

@@ -1,9 +1,12 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { MapPin, ClipboardCheck, Clock, PlayCircle, CheckCircle2 } from 'lucide-react';
+import { MapPin, ClipboardCheck, Clock, PlayCircle, CheckCircle2, MapPin as MapPinIcon, ShieldCheck, Briefcase } from 'lucide-react';
 import { getJobPrimaryType } from '@/utils/jobTeams';
 import { ErrorState, RotaSkeleton, Skeleton, SkeletonText } from '@/components/StateViews';
 import RigLinkPill from '@/components/rota/RigLinkPill';
+import { getShiftPipeline } from '@/utils/shiftStatus';
+
+const STAGE_ICONS = { checks: ClipboardCheck, arrive: MapPinIcon, briefing: ShieldCheck, working: Briefcase };
 
 // Local copies of the parent's colour maps (kept in sync with WeeklyRotaBuilder).
 const jobTypeColors = {
@@ -145,6 +148,7 @@ export default function RotaDayCards({
                           const member = staff.find((s) => s.id === a.staff_id);
                           const status = statusConfig[a.status || 'assigned'] || statusConfig.assigned;
                           const StatusIcon = status.icon;
+                          const { stages, completedCount } = getShiftPipeline(a);
                           return (
                             <div key={a.id} className="flex flex-col items-start gap-1">
                               <button
@@ -162,6 +166,31 @@ export default function RotaDayCards({
                                 <StatusIcon className={`w-3 h-3 ${status.text}`} />
                                 {a.briefing_signed && <ClipboardCheck className="w-3 h-3 text-emerald-500" />}
                               </button>
+                              {/* Mini shift pipeline — 4 dots showing checks → arrive → briefing → working */}
+                              {completedCount > 0 && (
+                                <div className="flex items-center gap-0.5 pl-1">
+                                  {stages.map((stage, si) => {
+                                    const StageIcon = STAGE_ICONS[stage.id];
+                                    return (
+                                      <React.Fragment key={stage.id}>
+                                        <div
+                                          className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${stage.done ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                                          title={stage.done && stage.timestamp ? `${stage.label}: ${format(new Date(stage.timestamp), 'HH:mm')}` : stage.label}
+                                        >
+                                          {stage.done ? (
+                                            <CheckCircle2 className="w-2 h-2 text-white" />
+                                          ) : (
+                                            <StageIcon className="w-2 h-2 text-slate-400" />
+                                          )}
+                                        </div>
+                                        {si < stages.length - 1 && (
+                                          <div className={`w-2 h-px ${stages[si].done ? 'bg-emerald-400' : 'bg-slate-200'}`} />
+                                        )}
+                                      </React.Fragment>
+                                    );
+                                  })}
+                                </div>
+                              )}
                               {a.rig_asset_id && (
                                 <RigLinkPill assignment={a} rigs={rigs} allAssignments={rotas} staff={staff} onRemove={onRemoveRigLink} size="xs" />
                               )}

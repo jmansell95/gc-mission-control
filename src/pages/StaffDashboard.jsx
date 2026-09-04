@@ -182,13 +182,15 @@ export default function StaffDashboard() {
 
   const handleStartJob = async (assignmentId) => {
     try {
-      await base44.entities.RotaAssignment.update(assignmentId, {
-        status: 'started',
-        started_at: new Date().toISOString()
+      const res = await base44.functions.invoke('updateMyAssignment', {
+        assignmentId,
+        updates: { status: 'started', started_at: new Date().toISOString() },
       });
+      if (res.data?.error) throw new Error(res.data.error);
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
     } catch (error) {
       console.error('Error starting job:', error);
+      toast({ title: 'Could not start job', description: error.message || 'Please try again.', variant: 'destructive' });
     }
   };
 
@@ -233,7 +235,11 @@ export default function StaffDashboard() {
           });
         }
       }
-      await base44.entities.RotaAssignment.update(assignment.id, { arrived_on_site_at: arrivedAt });
+      const res = await base44.functions.invoke('updateMyAssignment', {
+        assignmentId: assignment.id,
+        updates: { arrived_on_site_at: arrivedAt },
+      });
+      if (res.data?.error) throw new Error(res.data.error);
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
       queryClient.invalidateQueries({ queryKey: ['daily-tasks'] });
     } catch (error) {
@@ -258,11 +264,15 @@ export default function StaffDashboard() {
     if (!assignment) return;
     setEarlyLeaveAssignment(null);
     try {
-      await base44.entities.RotaAssignment.update(assignment.id, {
-        early_leave_reason: reason,
-        early_leave_note: note,
-        left_site_at: new Date().toISOString()
+      const res = await base44.functions.invoke('updateMyAssignment', {
+        assignmentId: assignment.id,
+        updates: {
+          early_leave_reason: reason,
+          early_leave_note: note,
+          left_site_at: new Date().toISOString(),
+        },
       });
+      if (res.data?.error) throw new Error(res.data.error);
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
 
       // When the departure is weather-related, create a delay log so the

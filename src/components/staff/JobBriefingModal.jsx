@@ -236,9 +236,9 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
         synced_from_offline: false
       });
 
-      await base44.entities.RotaAssignment.update(assignment.id, {
-        briefing_signed: true,
-        briefing_signed_at: signedAt
+      await base44.functions.invoke('updateMyAssignment', {
+        assignmentId: assignment.id,
+        updates: { briefing_signed: true, briefing_signed_at: signedAt },
       });
 
       // Log briefing (and optional travel) as the first daily task entries
