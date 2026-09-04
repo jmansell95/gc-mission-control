@@ -536,9 +536,14 @@ function MemberRow({ member, onClick, onOpenPermissions, onSendInvite, actioning
           <p className="text-sm font-medium text-slate-800 truncate group-hover:text-[#2E5A1A] transition">{member.name}</p>
           {!member.is_active && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-500 font-medium">Inactive</span>}
         </div>
-        <p className="text-[11px] text-slate-400 truncate">
-          {member.job_title || formatWorkerType(member.worker_type) || 'Crew Member'}
-        </p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="text-[11px] text-slate-400 truncate">
+            {member.job_title || formatWorkerType(member.worker_type) || 'Crew Member'}
+          </p>
+          {member.tracking_enabled && member.tracking_consent_signed_at && (
+            <StaffTrackingBadge staffId={member.id} compact />
+          )}
+        </div>
       </div>
       {linked ? (
         <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold flex-shrink-0">
