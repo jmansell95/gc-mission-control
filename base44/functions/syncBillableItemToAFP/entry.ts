@@ -39,7 +39,18 @@ export default async function (req: Request): Promise<Response> {
     const sourceType = SOURCE_MAP[entityName];
     if (!sourceType) return Response.json({ skipped: 'unknown_entity' });
 
+    // Always re-fetch the latest record by ID so we see any charge stamped
+    // by stampBillingCharge (which fires on the same create event). Without
+    // this, the AFP line item would be built from the pre-stamp payload and
+    // land with rate=0, amount=0.
     let record = data;
+    if (entityId) {
+      try {
+        record = await b.entities[entityName].get(entityId);
+      } catch (_) {
+        // Fall back to the payload data if the fetch fails
+      }
+    }
     if (!record && payload_too_large && entityId) {
       try {
         record = await b.entities[entityName].get(entityId);
