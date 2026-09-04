@@ -100,33 +100,95 @@ export default async function(req: Request): Promise<Response> {
     if (vsName) {
       const rows = XLSX.utils.sheet_to_json(workbook.Sheets[vsName], { header: 1, raw: true, defval: null, blankrows: false });
       const details: any = {};
-      for (const row of rows) {
+
+      // A cell is "label-like" (not a real value) if it ends with ':' or is a
+      // bracketed placeholder like "[Owner Name]". Used to filter out label
+      // cells that the look-ahead would otherwise pick up as values.
+      const isLabelLike = (val: any): boolean => {
+        if (val == null) return true;
+        const s = String(val).toLowerCase().trim();
+        if (!s) return true;
+        if (s.endsWith(':')) return true;
+        if (s.startsWith('[') && s.endsWith(']')) return true;
+        return false;
+      };
+
+      // Find a value cell for a label at (rowIdx, col).
+      // First scans the same row (next 3 cols), then falls back to the NEXT row
+      // at the same column + following 3 cols — the Valuation Summary sheet
+      // places values in the row below their label (e.g. "Client:" in row 2,
+      // "Card Geotechnical Ltd" in row 3 col 0). Label-like cells are skipped.
+      const findValCell = (rowIdx: number, col: number): any => {
+        // Same row: scan next 3 cols, but STOP if we hit another label
+        // (the value belongs to that label, not ours).
+        const row = rows[rowIdx];
+        if (row) {
+          for (let c2 = col + 1; c2 < Math.min(row.length, col + 4); c2++) {
+            if (row[c2] == null || row[c2] === '') continue;
+            if (isLabelLike(row[c2])) break;
+            return row[c2];
+          }
+        }
+        // Next row: scan ONLY the same column (label-below-value pattern).
+        const nextRow = rows[rowIdx + 1];
+        if (nextRow && col < nextRow.length && nextRow[col] != null && nextRow[col] !== '' && !isLabelLike(nextRow[col])) {
+          return nextRow[col];
+        }
+        return null;
+      };
+
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
         if (!row) continue;
         for (let c = 0; c < row.length; c++) {
           const cellVal = row[c];
           if (cellVal == null || cellVal === '') continue;
-          const l = String(cellVal).toLowerCase().trim();
-          let valCell = null;
-          for (let c2 = c + 1; c2 < Math.min(row.length, c + 4); c2++) {
-            if (row[c2] != null && row[c2] !== '') { valCell = row[c2]; break; }
-          }
-          if (l.includes('project name') && valCell) details.project_name = String(valCell).trim();
-          else if ((l.includes('gcl') || l.includes('job no')) && valCell) {
-            // The job number is often in the row BELOW the label (not the next cell).
-            // Only accept the look-ahead value if it doesn't look like another label.
+          // Normalise label: strip trailing colons so "Client:" matches "client"
+          const l = String(cellVal).toLowerCase().trim().replace(/:$/, '').trim();
+          const valCell = findValCell(r, c);
+          if (!valCell) continue;
+          if (l.includes('project name')) details.project_name = String(valCell).trim();
+          else if (l.includes('gcl') || l.includes('job no')) {
             const vc = String(valCell).trim();
             if (!vc.includes(':') && !vc.toLowerCase().includes('project') && !vc.toLowerCase().includes('works')) {
               details.gc_job_number = vc;
             }
           }
-          else if (l === 'client' && valCell) details.client = String(valCell).trim();
-          else if ((l.includes('order no') || l.includes('purchase order')) && valCell) details.client_purchase_order = String(valCell).trim();
-          else if (l.includes('contact address') && valCell) details.contact_address = String(valCell).trim();
-          else if (l.includes('payment due') && valCell) details.payment_due_date = toDateStr(valCell);
-          else if ((l.includes('contract award') || l.includes('contract value')) && valCell) details.contract_award_value = toNum(valCell);
-          else if (l.includes('date') && !l.includes('payment') && valCell) details.date = toDateStr(valCell);
+          else if (l === 'client') details.client = String(valCell).trim();
+          else if (l.includes('order no') || l.includes('purchase order')) details.client_purchase_order = String(valCell).trim();
+          else if (l.includes('contact address')) details.contact_address = String(valCell).trim();
+          else if (l.includes('payment due')) details.payment_due_date = toDateStr(valCell);
+          else if (l.includes('contract award') || l.includes('contract value')) details.contract_award_value = toNum(valCell);
+          else if (l.includes('date') && !l.includes('payment')) {
+            const d = toDateStr(valCell);
+            if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) details.date = d;
+          }
         }
         if (row[0] && /^PRJ-/i.test(String(row[0]).trim())) details.gc_job_number = String(row[0]).trim();
+      }
+
+      // Parse the Contract Sum table (row with "Contract Sum" header, then
+      // "Measured Works" data row below it). The contract award value is the
+      // Contract Sum column value for the Measured Works row.
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row) continue;
+        const contractSumCol = row.findIndex((cell: any) =>
+          cell != null && String(cell).toLowerCase().trim().includes('contract sum')
+        );
+        if (contractSumCol < 0) continue;
+        // Find the "Measured Works" data row in the next few rows
+        for (let r2 = r + 1; r2 < Math.min(rows.length, r + 6); r2++) {
+          const dataRow = rows[r2];
+          if (!dataRow || !dataRow[0]) continue;
+          const rowLabel = String(dataRow[0]).toLowerCase().trim();
+          if (rowLabel.includes('measured works')) {
+            const val = toNum(dataRow[contractSumCol]);
+            if (val > 0) details.contract_award_value = val;
+            break;
+          }
+        }
+        break;
       }
       // Fallback: scan for a GCL/I-prefixed job number in col 0 (e.g. "I260219")
       if (!details.gc_job_number || details.gc_job_number.includes(':')) {
