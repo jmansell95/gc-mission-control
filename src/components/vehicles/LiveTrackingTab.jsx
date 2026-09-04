@@ -86,11 +86,13 @@ export default function LiveTrackingTab({ initialVehicleId }) {
   const [selectedTripIndex, setSelectedTripIndex] = useState(0);
   const [playbackIndex, setPlaybackIndex] = useState(0);
   const [showEvents, setShowEvents] = useState(true);
+  const [showCrew, setShowCrew] = useState(true); // staff GPS overlay on live map
   const [filterMoving, setFilterMoving] = useState('all');
   const [dialogVehicle, setDialogVehicle] = useState(null);
   const [routeComparisonTrip, setRouteComparisonTrip] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
+  const { activeDivision } = useDivision();
 
   // ── Live locations ──
   const { data: liveData, isLoading: liveLoading, refetch: refetchLive, dataUpdatedAt, isFetching } = useQuery({
@@ -295,6 +297,17 @@ export default function LiveTrackingTab({ initialVehicleId }) {
           </div>
         )}
 
+        {/* Show crew toggle (live mode only) — overlays staff GPS pins on the map */}
+        {isLiveMode && (
+          <button
+            onClick={() => setShowCrew(s => !s)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition ${showCrew ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            {showCrew ? 'Crew On' : 'Crew Off'}
+          </button>
+        )}
+
         {/* Date picker (history mode) */}
         {!isLiveMode && (
           <div className="flex items-center gap-2">
@@ -394,6 +407,10 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   {isLiveMode && mapMarkers.map(v => (
                     <VehicleMarker key={v.vehicle_id || v.registration_number} vehicle={v} onClick={handleVehicleClick} />
                   ))}
+                  {/* Live staff GPS overlay */}
+                  {isLiveMode && (
+                    <StaffMapLayer divisionId={activeDivision?.id} show={showCrew} />
+                  )}
                   {/* Breadcrumb trail */}
                   {!isLiveMode && breadcrumbPath.length > 1 && (
                     <Polyline positions={breadcrumbPath} pathOptions={{ color: '#2E5A1A', weight: 4, opacity: 0.7 }} />

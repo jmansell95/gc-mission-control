@@ -53,8 +53,8 @@ export default function FleetHub() {
   return (
     <HubShell
       icon={Truck}
-      title="Fleet Hub"
-      subtitle="Drilling group vehicles — live GPS tracking, full specs, engine hours & mileage"
+      title="Tracking"
+      subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
       actions={<RunReportButton hub="fleet" />}
       kpiStrip={<FleetCommandHeader vehicles={vehicles} liveByVehicle={liveByVehicle} />}
       tabs={tabs}

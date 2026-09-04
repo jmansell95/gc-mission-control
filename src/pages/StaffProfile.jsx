@@ -30,6 +30,7 @@ import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
 import AutoTimesheetStatus from '@/components/staff/AutoTimesheetStatus';
 import TrackingSettings from '@/components/staff/TrackingSettings';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
+import StaffMovementTimeline from '@/components/staff/StaffMovementTimeline';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
@@ -261,6 +262,13 @@ export default function StaffProfile() {
         {!viewingOther && staff?.id && (
           <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
             <AutoTimesheetStatus staffId={staff.id} />
+          </div>
+        )}
+
+        {/* Today's GPS movements — geofence timeline + breadcrumb trail */}
+        {staff?.id && (
+          <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
+            <StaffMovementTimeline staffId={staff.id} staffName={staff.name} />
           </div>
         )}
 

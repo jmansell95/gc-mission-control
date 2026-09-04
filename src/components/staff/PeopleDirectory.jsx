@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { TEAM_CATEGORIES } from '@/utils/teamAccess';
 import { formatWorkerType } from '@/utils/format';
+import StaffTrackingBadge from '@/components/staff/StaffTrackingBadge';
 
 /**
  * PeopleDirectory — the unified People tab.
