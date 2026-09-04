@@ -167,20 +167,20 @@ export default function StaffProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: '#f8faf9' }}>
-        <div className="w-12 h-12 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center min-h-screen page-bg-vibrant">
+        <div className="w-12 h-12 border-4 border-slate-200/80 border-t-[#2E5A1A] rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!staff) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-6" style={{ background: '#f8faf9' }}>
-        <div className="text-center max-w-sm bg-white rounded-3xl shadow-sm p-8">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <HardHat className="w-7 h-7 text-slate-400" />
+      <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
+        <div className="text-center max-w-sm insight-card rounded-3xl p-8">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center mx-auto mb-4">
+            <HardHat className="w-8 h-8 text-slate-400" />
           </div>
-          <p className="text-slate-700 font-semibold">No crew profile found</p>
+          <p className="text-slate-700 font-bold text-lg">No crew profile found</p>
           <p className="text-slate-400 text-sm mt-1">Contact your supervisor to get set up.</p>
         </div>
       </div>
@@ -209,11 +209,11 @@ export default function StaffProfile() {
       <DivisionIdentityBar />
       <RedAlertBanner />
 
-      {/* ── Clean Canvas: soft off-white background, white cards ── */}
-      <div style={{ background: '#f8faf9' }}>
-        {/* Compact white hero card */}
+      {/* ── Premium card stack on vibrant background (matches StaffDashboard) ── */}
+      <div>
+        {/* Hero card */}
         <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4">
-          <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+          <div className="insight-card rounded-2xl p-5 md:p-6">
             <div className="flex items-center gap-4">
               <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={64} />
               <div className="min-w-0 flex-1">
@@ -300,34 +300,34 @@ export default function StaffProfile() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
           {activeTab === 'performance' && (staff.id
             ? <div className="space-y-4">
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <StaffPerformanceCard staffId={staff.id} />
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <StaffPerformanceCharts staffId={staff.id} staffName={staff.name} />
                 </div>
               </div>
             : <NoCrewProfileState tab="performance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'earnings' && (staff.id
             ? <div className="space-y-4">
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <IncentiveDashboard staffId={staff.id} staffName={staff.name} teamId={staff.team_id} />
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <RewardsCatalogue staffId={staff.id} staffName={staff.name} />
                 </div>
               </div>
             : <NoCrewProfileState tab="earnings" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'timesheets' && (staff.id ? (
             <div className="space-y-4">
-              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
-                <StaffWeeklySignCard staffId={staff.id} staffName={staff.name} />
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
-                <TimesheetHistory staffId={staff.id} />
-              </div>
+              <div className="insight-card rounded-2xl p-5 md:p-6">
+                  <StaffWeeklySignCard staffId={staff.id} staffName={staff.name} />
+                </div>
+                <div className="insight-card rounded-2xl p-5 md:p-6">
+                  <TimesheetHistory staffId={staff.id} />
+                </div>
               {upcomingAbsences.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                       <Clock className="w-4 h-4 text-amber-600" />
@@ -351,10 +351,10 @@ export default function StaffProfile() {
                   </div>
                 </div>
               )}
-              <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                    <Wrench className="w-4 h-4 text-amber-600" />
+              <div className="insight-card rounded-2xl p-5 md:p-6">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                      <Wrench className="w-4 h-4 text-amber-600" />
                   </div>
                   <h2 className="text-sm font-bold text-slate-900">Bookings History</h2>
                 </div>
@@ -364,10 +364,10 @@ export default function StaffProfile() {
           ) : <NoCrewProfileState tab="timesheets" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'compliance' && (staff.id
             ? <div className="space-y-4">
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin || isPlatformAdmin} />
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-5 md:p-6">
                   <ComplianceWallet staffId={staff.id} staffName={staff.name} />
                 </div>
                 {!viewingOther && (
@@ -376,7 +376,7 @@ export default function StaffProfile() {
               </div>
             : <NoCrewProfileState tab="compliance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'crew' && (staff.team_id
-            ? <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
+            ? <div className="insight-card rounded-2xl p-5 md:p-6">
                 <TeamMiniFeed teamId={staff.team_id} currentStaffId={staff.id} />
               </div>
             : <NoCrewProfileState tab="crew" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
