@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { rollupCompliance, derivedComplianceStatus, COMPLIANCE_META, ASSET_TYPE_META, findParentRig, daysUntil } from '@/utils/rigRollup';
 import RigUtilizationSparkline from '@/components/righub/RigUtilizationSparkline';
+import AssetColourDot from '@/components/assethub/AssetColourDot';
 
 
 const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
@@ -312,12 +313,15 @@ export default function AssetInventoryGrid({
                   <div className="p-3.5">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{rig.name}</p>
-                        <p className="text-[11px] text-slate-500 truncate font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <AssetColourDot colour={rig.colour} size={12} />
+                          <p className="font-semibold text-slate-900 truncate">{rig.name}</p>
+                        </div>
+                        <p className="text-[11px] text-slate-500 truncate font-medium mt-0.5">
                           {[rig.make, rig.model].filter(Boolean).join(' · ') || (rig.rig_type && rig.rig_type !== 'n/a' ? `${rig.rig_type.toUpperCase()} Rig` : 'Rig')}
                         </p>
-                        <p className="text-[11px] text-slate-400 font-mono truncate">
-                          {rig.fleet_number ? `FAA ${rig.fleet_number}` : rig.serial_number || ''}
+                        <p className="text-[11px] text-slate-500 font-mono truncate mt-0.5">
+                          {rig.fleet_number ? `FAA ${rig.fleet_number}` : ''}{rig.serial_number ? `${rig.fleet_number ? ' · ' : ''}S/N ${rig.serial_number}` : ''}
                         </p>
                       </div>
                       <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0" />
@@ -361,6 +365,31 @@ export default function AssetInventoryGrid({
                         </span>
                       ))}
                     </div>
+                    {/* Linked equipment preview — colour-coded chips with serial numbers */}
+                    {linked.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1 flex items-center gap-1">
+                          <Link2 className="w-3 h-3" /> Linked Gear ({linked.length})
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {linked.slice(0, 6).map(item => {
+                            const TIcon = TYPE_ICON[item.asset_type] || Wrench;
+                            return (
+                              <span key={item.id} className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600" title={item.name}>
+                                <AssetColourDot colour={item.colour} size={8} />
+                                <TIcon className="w-2.5 h-2.5 text-slate-400" />
+                                <span className="truncate max-w-[70px]">{item.serial_number || item.fleet_number || item.name}</span>
+                              </span>
+                            );
+                          })}
+                          {linked.length > 6 && (
+                            <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                              +{linked.length - 6} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     {/* Financial + lifecycle + utilization strip */}
                     <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
                       <FinancialChip asset={rig} />
@@ -466,11 +495,24 @@ export default function AssetInventoryGrid({
                     </span>
                   )}
                   <div className="p-3.5">
+                    {/* Parent rig badge — prominent at the top so you see the link immediately */}
+                    {parentRig && !selectionMode && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onOpenRig?.(parentRig); }}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition mb-2"
+                        title={`Linked to ${parentRig.name} — click to view rig`}
+                      >
+                        <Link2 className="w-3 h-3" /> {parentRig.name}
+                      </button>
+                    )}
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{equip.name}</p>
-                        <p className="text-[11px] text-slate-400 font-mono truncate">
-                          {equip.fleet_number ? `FAA ${equip.fleet_number}` : equip.serial_number || ''}
+                        <div className="flex items-center gap-1.5">
+                          <AssetColourDot colour={equip.colour} size={12} />
+                          <p className="font-semibold text-slate-900 truncate">{equip.name}</p>
+                        </div>
+                        <p className="text-[11px] text-slate-500 font-mono truncate mt-0.5">
+                          {equip.fleet_number ? `FAA ${equip.fleet_number}` : ''}{equip.serial_number ? `${equip.fleet_number ? ' · ' : ''}S/N ${equip.serial_number}` : ''}
                         </p>
                       </div>
                       {!selectionMode && <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0" />}
@@ -529,7 +571,7 @@ export default function AssetInventoryGrid({
                           <Boxes className="w-2.5 h-2.5 flex-shrink-0" /> {equip.panda_group_label}
                         </span>
                       )}
-                      {parentRig && <span className="text-[10px] text-emerald-700 font-medium flex items-center gap-0.5"><Link2 className="w-3 h-3" /> {parentRig.name}</span>}
+
                     </div>
                     {d !== null && (
                       <p className={`text-[10px] font-medium mt-1.5 flex items-center gap-1 ${d < 0 ? 'text-red-600' : d <= 30 ? 'text-amber-600' : 'text-slate-400'}`}>

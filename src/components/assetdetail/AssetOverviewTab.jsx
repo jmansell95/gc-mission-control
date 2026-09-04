@@ -10,6 +10,7 @@ import MaintenanceGauge from './MaintenanceGauge';
 import AssetPandaInfoPanel from '@/components/righub/AssetPandaInfoPanel';
 import RawPandaDataPanel from './RawPandaDataPanel';
 import AssetPandaImageGallery from './AssetPandaImageGallery';
+import AssetColourDot from '@/components/assethub/AssetColourDot';
 
 function InfoRow({ icon: Icon, label, value, mono }) {
   if (!value && value !== 0) return null;
@@ -48,7 +49,7 @@ function SpecTile({ icon: Icon, label, value, tone }) {
  * Overview tab — identity card, compliance ring, maintenance gauge,
  * current deployment, linked equipment, and Asset Panda info.
  */
-export default function AssetOverviewTab({ asset, linkedItems = [], currentDeployment, currentJob, onOpenLinked }) {
+export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, currentDeployment, currentJob, onOpenLinked, onOpenRig }) {
   const showHoursGauge = (asset.asset_type === 'rig' || asset.asset_type === 'machinery') && asset.service_interval_hours;
 
   return (
@@ -56,6 +57,34 @@ export default function AssetOverviewTab({ asset, linkedItems = [], currentDeplo
       {/* Asset Panda photos */}
       {asset.panda_asset_id && (
         <AssetPandaImageGallery asset={asset} />
+      )}
+
+      {/* Linked to Rig — prominent card for equipment, shows the parent rig immediately */}
+      {asset.asset_type !== 'rig' && parentRig && (
+        <div className="insight-card rounded-2xl p-4 border-l-4 border-l-emerald-500">
+          <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
+            <Link2 className="w-4 h-4 text-emerald-600" /> Linked to Rig
+          </h3>
+          <button
+            onClick={() => onOpenRig?.(parentRig)}
+            className="w-full flex items-center gap-3 p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition text-left border border-emerald-200"
+          >
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Cog className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <AssetColourDot colour={parentRig.colour} size={12} />
+                <p className="text-sm font-bold text-slate-900 truncate">{parentRig.name}</p>
+              </div>
+              <p className="text-[11px] text-slate-500 truncate font-mono mt-0.5">
+                {parentRig.fleet_number ? `FAA ${parentRig.fleet_number}` : ''}{parentRig.serial_number ? `${parentRig.fleet_number ? ' · ' : ''}S/N ${parentRig.serial_number}` : ''}
+                {parentRig.rig_type && parentRig.rig_type !== 'n/a' ? ` · ${parentRig.rig_type.toUpperCase()}` : ''}
+              </p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+          </button>
+        </div>
       )}
 
       {/* Identity + Compliance ring side by side */}
@@ -67,7 +96,17 @@ export default function AssetOverviewTab({ asset, linkedItems = [], currentDeplo
           </h3>
           {asset.fleet_number && <InfoRow icon={Hash} label="FAA / Fleet No." value={asset.fleet_number} mono />}
           <InfoRow icon={Hash} label="Serial / Tag" value={asset.serial_number} mono />
-          <InfoRow icon={Palette} label="Colour" value={asset.colour} />
+          {asset.colour && (
+            <div className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+              <span className="text-xs text-slate-500 flex items-center gap-2">
+                <Palette className="w-3.5 h-3.5 text-slate-400" /> Colour
+              </span>
+              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                <AssetColourDot colour={asset.colour} size={14} />
+                {asset.colour}
+              </span>
+            </div>
+          )}
           <InfoRow icon={Warehouse} label="Storage Location" value={asset.storage_location} />
           <InfoRow icon={User} label="Responsible Person" value={asset.responsible_person} />
           <InfoRow icon={Wrench} label="Equipment Type" value={asset.equipment_type} />
@@ -160,25 +199,30 @@ export default function AssetOverviewTab({ asset, linkedItems = [], currentDeplo
             <Link2 className="w-4 h-4 text-[#2E5A1A]" /> Linked Equipment ({linkedItems.length})
           </h3>
           <div className="space-y-2">
-            {linkedItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => onOpenLinked?.(item.id)}
-                className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition text-left"
-              >
-                <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                  {(() => {
-                    const TIcon = { machinery: Wrench, trailer: Package, lifting: Anchor, portable_appliance: Plug }[item.asset_type] || Cog;
-                    return <TIcon className="w-4 h-4 text-slate-500" />;
-                  })()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
-                  <p className="text-[11px] text-slate-400 truncate">{item.equipment_type || item.asset_type}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-              </button>
-            ))}
+            {linkedItems.map(item => {
+              const TIcon = { machinery: Wrench, trailer: Package, lifting: Anchor, portable_appliance: Plug }[item.asset_type] || Cog;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onOpenLinked?.(item.id)}
+                  className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 transition text-left"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
+                    <TIcon className="w-4 h-4 text-slate-500" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <AssetColourDot colour={item.colour} size={10} />
+                      <p className="text-sm font-semibold text-slate-800 truncate">{item.name}</p>
+                    </div>
+                    <p className="text-[11px] text-slate-400 truncate font-mono">
+                      {item.fleet_number ? `FAA ${item.fleet_number}` : ''}{item.serial_number ? `${item.fleet_number ? ' · ' : ''}S/N ${item.serial_number}` : (item.equipment_type || item.asset_type || '')}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

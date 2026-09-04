@@ -83,6 +83,12 @@ export default function AssetDetailPage() {
     [asset, allAssets]
   );
 
+  // For equipment (non-rig): find the parent rig this item is linked to
+  const parentRig = useMemo(
+    () => asset?.asset_type !== 'rig' ? allAssets.find(r => r.asset_type === 'rig' && (r.linked_equipment_ids || []).includes(asset.id)) : null,
+    [asset, allAssets]
+  );
+
   const rollup = useMemo(() => asset ? rollupCompliance(asset, linkedItems) : null, [asset, linkedItems]);
 
   const currentDeployment = useMemo(
@@ -243,9 +249,11 @@ export default function AssetDetailPage() {
               <AssetOverviewTab
                 asset={asset}
                 linkedItems={linkedItems}
+                parentRig={parentRig}
                 currentDeployment={currentDeployment}
                 currentJob={currentJob}
                 onOpenLinked={(linkedId) => navigate(`/assets/${linkedId}`)}
+                onOpenRig={(rig) => navigate(`/assets/${rig.id}`)}
               />
             )}
 

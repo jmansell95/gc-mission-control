@@ -5,6 +5,7 @@ import {
   ArrowLeft, Pencil, RefreshCw, QrCode, Hash, Weight, Upload,
 } from 'lucide-react';
 import { COMPLIANCE_META, ASSET_TYPE_META } from '@/utils/rigRollup';
+import AssetColourDot from '@/components/assethub/AssetColourDot';
 
 const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
 const TYPE_GRADIENT = {
@@ -110,10 +111,16 @@ export default function AssetDetailHero({ asset, onBack, onEdit, onRecert, onQR,
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
+            <AssetColourDot colour={asset.colour} size={16} />
             <h1 className="font-extrabold text-slate-900 text-lg lg:text-xl truncate leading-tight">{asset.name}</h1>
             {asset.fleet_number && (
               <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap">
                 <Hash className="w-3 h-3" /> FAA {asset.fleet_number}
+              </span>
+            )}
+            {asset.serial_number && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap font-mono">
+                <Hash className="w-3 h-3" /> S/N {asset.serial_number}
               </span>
             )}
           </div>
@@ -122,9 +129,6 @@ export default function AssetDetailHero({ asset, onBack, onEdit, onRecert, onQR,
             {asset.equipment_type ? ` · ${asset.equipment_type}` : ''}
             {asset.rig_type && asset.rig_type !== 'n/a' ? ` · ${asset.rig_type.toUpperCase()}` : ''}
           </p>
-          {asset.serial_number && (
-            <p className="text-[11px] text-slate-400 font-mono truncate mt-0.5">Serial: {asset.serial_number}</p>
-          )}
         </div>
       </div>
 
