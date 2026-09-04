@@ -18,6 +18,7 @@ import AgedDebtorsDashboard from '@/components/billing/AgedDebtorsDashboard';
 import ContractsAndOrdersTab from '@/components/billing/ContractsAndOrdersTab';
 import RunReportButton from '@/components/reports/RunReportButton';
 import PerformanceTab from '@/components/billing/PerformanceTab';
+import BillingStatsBar from '@/components/billing/BillingStatsBar';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 
@@ -63,6 +64,7 @@ export default function BillingPage() {
           <RunReportButton hub="billing" />
         </div>
       }
+      kpiStrip={<BillingStatsBar />}
       tabs={tabs}
       activeTab={tab}
       onTabChange={setTab}
