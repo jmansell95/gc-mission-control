@@ -21,7 +21,7 @@ const ALL_HUBS = [
   { id: 'staff', label: 'Staff Hub', icon: Users },
   { id: 'logistics', label: 'Logistics Hub', icon: Truck },
   { id: 'assets', label: 'Assets Hub', icon: Boxes },
-  { id: 'fleet', label: 'Fleet Hub', icon: Car },
+  { id: 'fleet', label: 'Tracking', icon: Car },
   { id: 'investigation', label: 'Investigation Hub', icon: FlaskConical },
   { id: 'compliance', label: 'Compliance Hub', icon: ShieldCheck },
   { id: 'billing', label: 'Financial Hub', icon: PoundSterling },

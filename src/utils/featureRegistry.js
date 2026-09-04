@@ -48,7 +48,7 @@ export const FEATURE_REGISTRY = {
   staff:          { label: 'Staff Hub',        type: 'hub', icon: Users,       dependsOn: null,           defaultState: 'active' },
   logistics:      { label: 'Deliveries Hub',   type: 'hub', icon: Truck,       dependsOn: null,           defaultState: 'active' },
   assets:         { label: 'Assets Hub',       type: 'hub', icon: Boxes,       dependsOn: null,           defaultState: 'active' },
-  fleet:          { label: 'Fleet Hub',        type: 'hub', icon: Car,         dependsOn: null,           defaultState: 'active' },
+  fleet:          { label: 'Tracking',         type: 'hub', icon: Car,         dependsOn: null,           defaultState: 'active' },
   investigation:  { label: 'Investigation Hub',type: 'hub', icon: FlaskConical,dependsOn: null,           defaultState: 'active' },
   compliance:     { label: 'Compliance Hub',   type: 'hub', icon: ShieldCheck, dependsOn: null,           defaultState: 'active' },
   billing:        { label: 'Financial Hub',   type: 'hub', icon: PoundSterling,dependsOn: null,          defaultState: 'active' },
