@@ -17,6 +17,10 @@ import AFPUploadModal from '@/components/cvr/AFPUploadModal';
 import AFPDualSideTable from './AFPDualSideTable';
 import AFPVariationLifecycle from './AFPVariationLifecycle';
 import AFPCompensationItems from './AFPCompensationItems';
+import FieldSheetBOQVsActual from './FieldSheetBOQVsActual';
+import VariationBreakdownTab from './VariationBreakdownTab';
+import AddVariationModal from './AddVariationModal';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -90,6 +94,7 @@ export default function AFPBuilder({ job }) {
   const [confirmDeleteAfpId, setConfirmDeleteAfpId] = useState(null);
   const [deletingAfp, setDeletingAfp] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showAddVariation, setShowAddVariation] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [approving, setApproving] = useState(false);
 
@@ -191,6 +196,35 @@ export default function AFPBuilder({ job }) {
     }
     return counts;
   }, [lineItems]);
+
+  // Variation refs — unique vo_refs from variation SUMMARY lines (not breakdowns).
+  // Each ref gets its own dynamic tab in the tab bar.
+  const variationRefs = useMemo(() => {
+    const refs = [];
+    const seen = new Set();
+    for (const li of lineItems) {
+      if (li.sheet_name !== 'variations' || !li.vo_ref) continue;
+      if (li.is_variation_breakdown) continue;
+      const ref = li.vo_ref;
+      if (!seen.has(ref)) {
+        seen.add(ref);
+        refs.push(ref);
+      }
+    }
+    return refs;
+  }, [lineItems]);
+
+  // Variation summary lines only (exclude breakdowns)
+  const variationSummaryItems = useMemo(
+    () => lineItems.filter(li => li.sheet_name === 'variations' && !li.is_variation_breakdown),
+    [lineItems]
+  );
+
+  // Variations total value (from summary lines)
+  const variationsTotal = useMemo(
+    () => variationSummaryItems.reduce((s, li) => s + (Number(li.amount) || 0), 0),
+    [variationSummaryItems]
+  );
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['afp', job.id] });
@@ -747,7 +781,9 @@ export default function AFPBuilder({ job }) {
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
           {[
             { id: 'measured-works', label: 'Measured Works', icon: FileText, count: lineItems.filter(li => li.sheet_name === 'measured_works').length },
-            { id: 'variations', label: 'Variations', icon: GitBranch, count: lineItems.filter(li => li.sheet_name === 'variations').length },
+            { id: 'field-sheet', label: 'Field Sheet', icon: Layers, count: lineItems.filter(li => li.sheet_name === 'measured_works').length },
+            { id: 'variations', label: 'Variations', icon: GitBranch, count: variationSummaryItems.length },
+            ...variationRefs.map(ref => ({ id: `vo-${ref}`, label: ref, icon: GitBranch, count: lineItems.filter(li => li.sheet_name === 'variations' && li.vo_ref === ref && li.is_variation_breakdown).length, isRef: true })),
             { id: 'compensation', label: 'Compensation', icon: Package, count: lineItems.filter(li => li.sheet_name === 'compensation_item').length },
             { id: 'materials', label: 'Materials', icon: Package, count: lineItems.filter(li => li.sheet_name === 'materials').length },
             { id: 'all-lines', label: 'All Lines', icon: Layers, count: lineItems.length },
@@ -759,13 +795,15 @@ export default function AFPBuilder({ job }) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 ${
-                  isActive ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100'
+                  isActive
+                    ? tab.isRef ? 'bg-violet-600 text-white shadow-sm' : 'bg-[#2E5A1A] text-white shadow-sm'
+                    : tab.isRef ? 'text-violet-600 hover:bg-violet-50' : 'text-slate-500 hover:bg-slate-100'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : 'bg-slate-100'}`}>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-white/20' : tab.isRef ? 'bg-violet-100' : 'bg-slate-100'}`}>
                     {tab.count}
                   </span>
                 )}
@@ -1023,34 +1061,109 @@ export default function AFPBuilder({ job }) {
         <AFPDualSideTable key={selectedAfp?.id} afp={selectedAfp} lineItems={lineItems} canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'} onAutoSave={scheduleSave} />
       )}
 
+      {/* ── Field Sheet tab (BOQ vs Actual side-by-side) ── */}
+      {activeTab === 'field-sheet' && (
+        <FieldSheetBOQVsActual afp={selectedAfp} lineItems={lineItems} />
+      )}
+
+      {/* ── Variation breakdown tabs (one per ref) ── */}
+      {variationRefs.map(ref => {
+        const tabId = `vo-${ref}`;
+        if (activeTab !== tabId) return null;
+        return (
+          <VariationBreakdownTab
+            key={ref}
+            afp={selectedAfp}
+            job={job}
+            voRef={ref}
+            lineItems={lineItems}
+            canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'}
+            onAutoSave={scheduleSave}
+          />
+        );
+      })}
+
       {/* ── Variations tab ── */}
       {activeTab === 'variations' && (
         <div className="space-y-3">
-          {lineItems.filter(li => li.sheet_name === 'variations').length === 0 ? (
+          {/* Stat pills */}
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="relative overflow-hidden rounded-xl stat-gradient-violet text-white px-3 py-3 shadow-sm">
+              <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Total Value</p>
+              <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                <AnimatedNumber value={variationsTotal} format={(v) => fmt(v)} />
+              </p>
+            </div>
+            <div className="relative overflow-hidden rounded-xl stat-gradient-blue text-white px-3 py-3 shadow-sm">
+              <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Variations</p>
+              <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                <AnimatedNumber value={variationSummaryItems.length} />
+              </p>
+            </div>
+            <div className="relative overflow-hidden rounded-xl stat-gradient-amber text-white px-3 py-3 shadow-sm">
+              <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Without Breakdown</p>
+              <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
+                <AnimatedNumber value={variationRefs.filter(ref => !lineItems.some(li => li.vo_ref === ref && li.is_variation_breakdown)).length} />
+              </p>
+            </div>
+          </div>
+
+          {/* Add Variation button */}
+          {(selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review') && (
+            <button
+              onClick={() => setShowAddVariation(true)}
+              className="w-full insight-card rounded-2xl p-3 flex items-center justify-center gap-2 bg-violet-50 border-violet-200 hover:bg-violet-100/80 transition active:scale-[0.99]"
+            >
+              <Plus className="w-4 h-4 text-violet-600" />
+              <span className="text-sm font-bold text-violet-700">Add Variation</span>
+              <span className="text-[11px] text-violet-400">— client instructed extra work</span>
+            </button>
+          )}
+
+          {variationSummaryItems.length === 0 ? (
             <div className="insight-card rounded-2xl p-6 text-center">
               <GitBranch className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-400">No variations in this AFP</p>
+              <p className="text-[11px] text-slate-400 mt-1">Click "Add Variation" above when the client instructs extra work.</p>
             </div>
           ) : (
             <div className="insight-card rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
                 <GitBranch className="w-4 h-4 text-violet-600" />
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Variations</h3>
-                <span className="text-[10px] text-slate-400">({lineItems.filter(li => li.sheet_name === 'variations').length} lines)</span>
+                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Variation Summary</h3>
+                <span className="text-[10px] text-slate-400">({variationSummaryItems.length} lines)</span>
               </div>
               <div className="divide-y divide-slate-100">
-                {lineItems.filter(li => li.sheet_name === 'variations').map((li) => (
-                  <div key={li.id}>
-                    <div className="px-3 py-2 flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {li.vo_ref && <span className="px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded text-[10px] font-mono font-bold flex-shrink-0">{li.vo_ref}</span>}
-                        <span className="text-xs font-medium text-slate-700 truncate">{li.item}</span>
+                {variationSummaryItems.map((li) => {
+                  const hasBreakdown = lineItems.some(b => b.vo_ref === li.vo_ref && b.is_variation_breakdown);
+                  return (
+                    <div key={li.id}>
+                      <div className="px-3 py-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {li.vo_ref && (
+                            <button
+                              onClick={() => setActiveTab(`vo-${li.vo_ref}`)}
+                              className="px-1.5 py-0.5 bg-violet-100 text-violet-700 rounded text-[10px] font-mono font-bold flex-shrink-0 hover:bg-violet-200 transition"
+                              title="Open breakdown tab"
+                            >
+                              {li.vo_ref}
+                            </button>
+                          )}
+                          <span className="text-xs font-medium text-slate-700 truncate">{li.item}</span>
+                          {hasBreakdown ? (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold flex-shrink-0">
+                              <CheckCircle2 className="w-2.5 h-2.5" /> Breakdown
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded text-[9px] font-bold flex-shrink-0">No breakdown</span>
+                          )}
+                        </div>
+                        <span className="text-xs font-bold text-slate-700 tabular-nums flex-shrink-0">{fmt(li.amount)}</span>
                       </div>
-                      <span className="text-xs font-bold text-slate-700 tabular-nums flex-shrink-0">{fmt(li.amount)}</span>
+                      <AFPVariationLifecycle item={li} canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'} onAutoSave={scheduleSave} />
                     </div>
-                    <AFPVariationLifecycle item={li} canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'} onAutoSave={scheduleSave} />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
