@@ -1,27 +1,23 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Users, Briefcase, Grid3x3, Calendar, MapPin } from 'lucide-react';
-import { format, startOfWeek, addDays } from 'date-fns';
+import { Grid3x3, Briefcase } from 'lucide-react';
+import { format } from 'date-fns';
 import CommandCentreGrid from '@/components/dashboard/CommandCentreGrid';
 import FieldPrioritiesWidget from '@/components/dashboard/FieldPrioritiesWidget';
 import ExceptionMonitorWidget from '@/components/dashboard/ExceptionMonitorWidget';
 import RigPerformanceWidget from '@/components/dashboard/RigPerformanceWidget';
 import MissionControlStrip from '@/components/dashboard/MissionControlStrip';
 import BoreholesInProgressWidget from '@/components/dashboard/BoreholesInProgressWidget';
-import {
-  ActiveJobsTile, CrewUtilisationTile, TimesheetQueueTile,
-  OutstandingInvoicesTile, BurnRateTile,
-  OverdueActionsTile, RedAlertsTile, FleetComplianceTile,
-} from '@/components/dashboard/DashboardStatTiles';
 import { useJobFilter } from '@/components/dashboard/JobFilterContext';
 import JobSelectorBar from '@/components/dashboard/JobSelectorBar';
 import QuickActionBar from '@/components/dashboard/QuickActionBar';
 import SiteSnapshotGrid from '@/components/dashboard/SiteSnapshotGrid';
 import JobQuickDrawer from '@/components/dashboard/JobQuickDrawer';
 import CommandJobModal from '@/components/dashboard/CommandJobModal';
-import { useMittiStatus } from '@/hooks/useSafetyCultureStatus';
+import DashboardStatsBar from '@/components/dashboard/DashboardStatsBar';
+import PageHeader from '@/components/PageHeader';
+import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 
 export default function DashboardOverview({ onNavigate, onSelectJob }) {
@@ -29,22 +25,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
   const [modalJob, setModalJob] = useState(null);
   const { selectedJobId } = useJobFilter();
   const isAllJobs = selectedJobId === 'all';
-  const { data: staff = [] } = useScopedEntity('Staff', { queryKey: ['staff'], limit: 500 });
-  const { data: vehicles = [] } = useScopedEntity('Vehicle', { queryKey: ['vehicles'], limit: 500 });
   const { data: jobs = [] } = useScopedEntity('Job', { queryKey: ['jobs'], limit: 500 });
-  const { data: timesheets = [] } = useScopedEntity('Timesheet', { queryKey: ['timesheets'], sort: '-created_date', limit: 100 });
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const { data: deliveries = [] } = useScopedEntity('DeliveryLog', { queryKey: ['deliveries', todayStr], filter: { scheduled_date: todayStr }, limit: 500 });
-  const { data: safetyReports = [] } = useQuery({ queryKey: ['safety-reports-open'], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }) });
-  const { isConnected: scConnected } = useMittiStatus();
-
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const weekStartStr = format(weekStart, 'yyyy-MM-dd');
-  const weekDays = Array.from({ length: 7 }, (_, i) => format(addDays(weekStart, i), 'yyyy-MM-dd'));
-
-  const { data: thisWeekRotas = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rotas-this-week', weekStartStr], filter: { week_start: weekStartStr }, limit: 500 });
-
-  const { data: todayRotasRaw = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rotas-today', todayStr], filter: { assigned_date: todayStr }, limit: 500 });
 
   const { data: profile } = useQuery({
     queryKey: ['my-staff-profile'],
@@ -58,188 +39,76 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
   const titleCase = (s) => s ? s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : s;
   const gbp = (n) => (n != null && !isNaN(n)) ? '£' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
 
-  // Apply job filter to all dashboard data
-  const scopedJobs = isAllJobs ? jobs : jobs.filter(j => j.id === selectedJobId);
-  const scopedTimesheets = isAllJobs ? timesheets : timesheets.filter(t => t.job_id === selectedJobId);
-  const scopedDeliveries = isAllJobs ? deliveries : deliveries.filter(d => d.job_id === selectedJobId);
-  const scopedRotas = isAllJobs ? thisWeekRotas : thisWeekRotas.filter(r => r.job_id === selectedJobId);
-  const scopedTodayRotas = isAllJobs ? todayRotasRaw : todayRotasRaw.filter(r => r.job_id === selectedJobId);
-
-  const activeJobs = scopedJobs.filter(j => (j.status || 'planning') === 'in_progress');
-  const todaysRotas = scopedTodayRotas.filter(r => (r.assigned_date || '').slice(0, 10) === todayStr);
-  const staffToday = [...new Set(todaysRotas.map(r => r.staff_id))].length;
-  const pendingTs = scopedTimesheets.filter(t => t.status === 'submitted').length;
-  const activeStaff = staff.filter(s => s.is_active !== false).length;
-
-  const utilizationPct = activeStaff > 0 ? Math.round((staffToday / activeStaff) * 100) : 0;
-  const nowMs = Date.now();
-  const overdueSubmittedTs = scopedTimesheets.filter(t => t.status === 'submitted' && t.created_date && (nowMs - new Date(t.created_date).getTime()) > 48 * 3600 * 1000).length;
-  const overdueActions = scConnected ? safetyReports.flatMap(r => (r.action_items || [])).filter(a => a && a.due_date && new Date(a.due_date) < new Date()).length : 0;
-
-  const openJobDrawer = (job) => setDrawerJob(job);
-
   const selectedJob = !isAllJobs ? jobs.find(j => j.id === selectedJobId) : null;
 
   // Block renderers — each block ID maps to its component. All blocks are
   // self-contained (fetch their own data) so the CommandCentreGrid can
   // drag/resize/hide them without any data plumbing from this page.
   const blockRenderers = {
-    'stat-active-jobs':    () => <ActiveJobsTile onNavigate={onNavigate} />,
-    'stat-crew-util':      () => <CrewUtilisationTile onNavigate={onNavigate} />,
-    'stat-timesheet-queue':() => <TimesheetQueueTile onNavigate={onNavigate} />,
     'rigs-on-site':        () => <RigPerformanceWidget onJobBreakdown={(job) => onSelectJob?.(job, 'financials')} />,
     'site-snapshot':       () => <SiteSnapshotGrid onSelectJob={openJobDrawer} onNavigate={onNavigate} />,
     'mission-control':    () => <MissionControlStrip onNavigate={onNavigate} />,
     'field-priorities':    () => <FieldPrioritiesWidget onNavigate={onNavigate} />,
     'exception-monitor':   () => <ExceptionMonitorWidget onNavigate={onNavigate} />,
     'boreholes-progress': () => <BoreholesInProgressWidget onNavigate={onNavigate} />,
-    'stat-outstanding':    () => <OutstandingInvoicesTile onNavigate={onNavigate} />,
-    'stat-burn-rate':      () => <BurnRateTile onNavigate={onNavigate} />,
-    'stat-overdue-actions':() => <OverdueActionsTile onNavigate={onNavigate} />,
-    'stat-red-alerts':     () => <RedAlertsTile onNavigate={onNavigate} />,
-    'stat-fleet-compliance':() => <FleetComplianceTile onNavigate={onNavigate} />,
   };
+
+  const openJobDrawer = (job) => setDrawerJob(job);
+
+  // ── Header content depends on whether we're in All Jobs or Selected Job mode ──
+  const headerIcon = isAllJobs ? Grid3x3 : Briefcase;
+  const headerTitle = isAllJobs
+    ? `${greeting}${firstName ? `, ${firstName}` : ''}`
+    : (selectedJob?.name || 'Job');
+  const headerSubtitle = isAllJobs
+    ? format(new Date(), 'EEEE do MMMM yyyy')
+    : [selectedJob?.location, selectedJob?.start_date && selectedJob?.end_date
+        ? `${format(new Date(selectedJob.start_date), 'dd MMM')} – ${format(new Date(selectedJob.end_date), 'dd MMM yyyy')}`
+        : null].filter(Boolean).join(' · ');
 
   return (
     <div>
-      {/* Hero header — context-aware, responsive across mobile / tablet / desktop */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4 mt-0">
-        <div className="bg-white relative overflow-hidden rounded-t-none rounded-b-2xl md:rounded-2xl shadow-sm border border-slate-200/80 px-3 py-2.5 sm:px-5 sm:py-4 lg:px-6">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#2E5A1A] to-[#8DC63F]" />
-          <div className="relative z-10 pl-2">
-        {isAllJobs ? (
-          /* ===== All Jobs mode ===== */
-          <>
-            {/* Mobile (<640px) — stacked rows, everything visible */}
-            <div className="flex items-center gap-2.5 sm:hidden">
-              <div className="p-1.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] rounded-lg flex-shrink-0 shadow-sm">
-                <Grid3x3 className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-base font-bold text-slate-900 tracking-tight truncate flex-1">
-                {greeting}{firstName ? `, ${firstName}` : ''}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 mt-2 sm:hidden">
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 flex-1 min-w-0">
-                <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                <span className="text-xs font-semibold text-slate-700 truncate">{format(new Date(), 'EEEE do MMMM')}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-br from-[#2E5A1A]/8 to-[#8DC63F]/8 border border-[#2E5A1A]/15 flex-shrink-0">
-                <Calendar className="w-3.5 h-3.5 text-[#2E5A1A]" />
-                <span className="text-sm font-bold text-[#2E5A1A] tabular-nums">{thisWeekRotas.length}</span>
-                <span className="text-[10px] text-slate-500 font-semibold uppercase">{thisWeekRotas.length === 1 ? 'Shift' : 'Shifts'}</span>
-              </div>
-            </div>
-
-            {/* Tablet (640px+) & Desktop (1024px+) — two-column inline */}
-            <div className="hidden sm:flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="p-2 lg:p-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] rounded-xl flex-shrink-0 shadow-sm">
-                  <Grid3x3 className="w-6 h-6 text-white" />
-                </div>
-                <h1 className="text-lg lg:text-xl xl:text-2xl font-bold text-slate-900 tracking-tight truncate">
-                  {greeting}{firstName ? `, ${firstName}` : ''}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
-                <div className="flex flex-col items-end leading-tight">
-                  <span className="text-sm font-bold text-slate-900">{format(new Date(), 'EEEE')}</span>
-                  <span className="text-[11px] text-slate-500 font-medium">{format(new Date(), 'do MMMM yyyy')}</span>
-                </div>
-                <div className="h-9 w-px bg-slate-200" />
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-br from-[#2E5A1A]/8 to-[#8DC63F]/8 border border-[#2E5A1A]/15">
-                  <Calendar className="w-4 h-4 text-[#2E5A1A]" />
-                  <div className="flex flex-col leading-tight">
-                    <span className="text-lg font-bold text-[#2E5A1A] tabular-nums">{thisWeekRotas.length}</span>
-                    <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wide">{thisWeekRotas.length === 1 ? 'Shift' : 'Shifts'} This Week</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          /* ===== Selected Job mode ===== */
-          <>
-            {/* Mobile (<640px) — stacked */}
-            <div className="sm:hidden">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] rounded-lg flex-shrink-0 shadow-sm">
-                  <Briefcase className="w-5 h-5 text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-base font-bold text-slate-900 tracking-tight truncate">{selectedJob?.name || 'Job'}</h1>
-                  <p className="text-slate-600 text-xs mt-0.5 flex items-center gap-1.5 flex-wrap">
-                    {selectedJob?.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{selectedJob.location}</span>}
-                    {selectedJob?.start_date && selectedJob?.end_date && (
-                      <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(selectedJob.start_date), 'dd MMM')} – {format(new Date(selectedJob.end_date), 'dd MMM')}</span>
-                    )}
-                  </p>
-                </div>
-                {selectedJob?.status && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20 flex-shrink-0">
-                    {titleCase(selectedJob.status.replace(/_/g, ' '))}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1.5 mt-2">
-                {gbp(selectedJob?.budget_amount) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[10px] text-slate-500 font-medium">Budget</span>
-                    <span className="text-xs font-bold text-slate-900 tabular-nums">{gbp(selectedJob.budget_amount)}</span>
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 border border-slate-200">
-                  <Users className="w-3 h-3 text-[#2E5A1A]" />
-                  <span className="text-xs font-bold text-slate-900 tabular-nums">{staffToday}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">Crew</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Tablet (640px+) & Desktop (1024px+) — two-column */}
-            <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="p-2 lg:p-2.5 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] rounded-xl flex-shrink-0 shadow-sm">
-                  <Briefcase className="w-6 h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-lg lg:text-xl xl:text-2xl font-bold text-slate-900 tracking-tight truncate">{selectedJob?.name || 'Job'}</h1>
-                    {selectedJob?.status && (
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
-                        {titleCase(selectedJob.status.replace(/_/g, ' '))}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-slate-600 text-sm mt-1 flex items-center gap-1.5 flex-wrap">
-                    {selectedJob?.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{selectedJob.location}</span>}
-                    {selectedJob?.start_date && selectedJob?.end_date && (
-                      <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{format(new Date(selectedJob.start_date), 'dd MMM')} – {format(new Date(selectedJob.end_date), 'dd MMM yyyy')}</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0">
-                {gbp(selectedJob?.budget_amount) && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[11px] text-slate-500 font-medium">Budget</span>
-                    <span className="text-sm font-bold text-slate-900 tabular-nums">{gbp(selectedJob.budget_amount)}</span>
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-                  <Users className="w-3.5 h-3.5 text-[#2E5A1A]" />
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">{staffToday}</span>
-                  <span className="text-[11px] text-slate-500 font-medium">Crew Today</span>
-                </span>
-              </div>
-            </div>
-          </>
-        )}
+      {/* ── Standardized PageHeader ── */}
+      <PageHeader
+        icon={headerIcon}
+        title={headerTitle}
+        subtitle={headerSubtitle}
+        actions={isAllJobs ? (
+          <div className="flex items-center gap-2">
+            {selectedJob?.status && (
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
+                {titleCase(selectedJob.status.replace(/_/g, ' '))}
+              </span>
+            )}
           </div>
-        </div>
-      </motion.div>
+        ) : selectedJob ? (
+          <div className="flex items-center gap-2">
+            {selectedJob?.status && (
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
+                {titleCase(selectedJob.status.replace(/_/g, ' '))}
+              </span>
+            )}
+            {gbp(selectedJob?.budget_amount) && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+                <span className="text-[11px] text-slate-500 font-medium">Budget</span>
+                <span className="text-sm font-bold text-slate-900 tabular-nums">{gbp(selectedJob.budget_amount)}</span>
+              </span>
+            )}
+          </div>
+        ) : null}
+      />
 
-      {/* Quick Action Bar — one-click shortcuts for power users */}
+      {/* ── Cross-hub quick links ── */}
+      {isAllJobs && <div className="mb-4"><HubQuickLinks /></div>}
+
+      {/* ── Standardized KPI strip ── */}
+      {isAllJobs && (
+        <div className="mb-4">
+          <DashboardStatsBar onNavigate={onNavigate} />
+        </div>
+      )}
+
+      {/* ── Quick Action Bar ── */}
       {isAllJobs && (
         <div className="mb-4">
           <QuickActionBar onAction={(action) => {
@@ -255,10 +124,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
 
       <JobSelectorBar onSelectJob={onSelectJob} />
 
-      {/* Command Centre — unified customisable grid with three sections.
-          Every block (stat tiles, rigs on site, site snapshot, mission
-          control, insight widgets) is drag-to-reorder, resizable, and
-          hideable. Layout persists to the user's DashboardLayout record. */}
+      {/* ── Command Centre — customisable widget grid ── */}
       {isAllJobs && (
         <CommandCentreGrid blockRenderers={blockRenderers} />
       )}

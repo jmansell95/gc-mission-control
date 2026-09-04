@@ -15,6 +15,8 @@ const HUBS = [
     items: [
       { done: true, text: 'Customisable widget grid with drag-and-drop sections' },
       { done: true, text: 'Division-scoped KPI tiles and live data' },
+      { done: true, text: 'Standardized PageHeader + HubQuickLinks + KPI strip — this overhaul' },
+      { done: true, text: 'Stat tiles replaced with HubStatsBar format (matches all hubs) — this overhaul' },
       { done: false, text: 'Mobile layout — key widgets missing or cramped on phones' },
       { done: false, text: 'Widget load performance — some widgets fire redundant queries' },
       { done: false, text: 'Consistent empty/loading states across all widgets' },

@@ -15,6 +15,14 @@ import {
  */
 
 const HUB_RELATIONSHIPS = {
+  '/admin': [
+    { to: '/billing', label: 'Billing', icon: PoundSterling },
+    { to: '/staff', label: 'Staff', icon: Users },
+    { to: '/fleet', label: 'Fleet', icon: Truck },
+    { to: '/assets', label: 'Assets', icon: Boxes },
+    { to: '/compliance', label: 'Compliance', icon: ShieldCheck },
+    { to: '/reports', label: 'Reports', icon: FileBarChart },
+  ],
   '/billing': [
     { to: '/reports', label: 'Reports', icon: FileBarChart },
     { to: '/staff', label: 'Staff Costs', icon: Users },

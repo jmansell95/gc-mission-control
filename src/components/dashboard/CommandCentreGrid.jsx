@@ -189,8 +189,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
     setCollapsed({});
   };
 
-  const allBlocks = useMemo(() => [...sectionLayout.left, ...sectionLayout.right], [sectionLayout]);
-  const statBlockIds = useMemo(() => ALL_BLOCK_IDS.filter(id => id.startsWith('stat-')), []);
+  const allBlocks = useMemo(() => [...sectionLayout.left, ...sectionLayout.right].filter(id => !id.startsWith('stat-')), [sectionLayout]);
 
   return (
     <div className="mb-4">
@@ -236,15 +235,6 @@ export default function CommandCentreGrid({ blockRenderers }) {
           })}
         </div>
       )}
-
-      {/* ── Stat tiles strip — fixed at top, full width ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 mb-4">
-        {statBlockIds.filter(id => !hidden.includes(id)).map(id => {
-          const content = blockRenderers[id]?.();
-          if (!content) return null;
-          return <div key={id} className="h-full">{content}</div>;
-        })}
-      </div>
 
       {/* ── Two-rail split layout ── */}
       <DragDropContext onDragEnd={onDragEnd}>
