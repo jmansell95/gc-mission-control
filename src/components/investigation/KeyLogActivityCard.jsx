@@ -13,6 +13,25 @@ function fmtDur(mins) {
   return m > 0 ? `${r}m` : '—';
 }
 
+// Format the system submission timestamp (created_date) as HH:MM in Europe/London
+function loggedAtTime(createdDate) {
+  if (!createdDate) return null;
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(createdDate));
+  } catch { return null; }
+}
+
+// Synced-by chip config per log source
+const SOURCE_CHIP = {
+  keylogbook_remarks: { label: 'KeyLogBook', cls: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+  ags_import: { label: 'KeyLogBook AGS', cls: 'bg-blue-50 text-blue-700 border-blue-100' },
+  staff: { label: null, cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+};
+
 /**
  * KeyLogActivityCard — the single shared activity-card used by BOTH the
  * Job Site Activity timeline and the Investigation Hub live feed so the
@@ -41,6 +60,10 @@ export default function KeyLogActivityCard({
   const c = TAG_COLORS[tag.color] || TAG_COLORS.slate;
   const hasTimes = !!(log.start_time || log.end_time);
   const isPending = reviewStatus !== 'approved';
+  const src = log.source || 'staff';
+  const chip = SOURCE_CHIP[src] || SOURCE_CHIP.staff;
+  const chipLabel = src === 'staff' ? (log.staff_name || 'Manual') : chip.label;
+  const loggedAt = loggedAtTime(log.created_date || log.created_at);
 
   const handleDeepLink = (e) => {
     e.stopPropagation();
@@ -63,6 +86,7 @@ export default function KeyLogActivityCard({
         <div className="flex-shrink-0 w-16 text-right">
           <p className="text-xs font-mono font-bold text-slate-700 leading-tight">{log.start_time || '—'}</p>
           <p className="text-xs font-mono font-bold text-slate-400 leading-tight">{log.end_time || '—'}</p>
+          {loggedAt && <p className="text-[9px] text-slate-400 leading-tight mt-0.5" title={`Logged at ${loggedAt}`}>·{loggedAt}</p>}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
@@ -72,6 +96,7 @@ export default function KeyLogActivityCard({
             {showJobName && jobName && (
               <span className="text-[10px] text-slate-500 font-medium truncate max-w-[140px]">{jobName}</span>
             )}
+            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium border ${chip.cls}`}>{chipLabel}</span>
           </div>
           <p className="text-xs text-slate-700 leading-snug line-clamp-2">{log.description || '—'}</p>
         </div>
@@ -113,6 +138,11 @@ export default function KeyLogActivityCard({
         <p className="text-[10px] text-slate-400 mt-1 flex items-center justify-end gap-0.5">
           <Clock className="w-2.5 h-2.5" /> {fmtDur(log.duration_minutes)}
         </p>
+        {loggedAt && (
+          <p className="text-[10px] text-slate-400 mt-1 flex items-center justify-end gap-0.5" title={`Logged at ${loggedAt}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" /> {loggedAt}
+          </p>
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
@@ -155,6 +185,7 @@ export default function KeyLogActivityCard({
               <AlertTriangle className="w-2.5 h-2.5" /> No name entered
             </span>
           )}
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium border ${chip.cls}`}>{chipLabel}</span>
           {log.date && (
             <span className="text-[10px] text-slate-400">{format(new Date(log.date), 'dd MMM yyyy')}</span>
           )}
