@@ -4,13 +4,32 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Search, Lock, Loader2, AlertCircle, CheckCircle2, FileQuestion,
   Users, Wrench, Package, Building2, Globe, FolderKanban, Briefcase,
-  TrendingUp, PoundSterling,
+  TrendingUp, PoundSterling, Clock, AlertTriangle,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import POAPriceLockModal from '@/components/billing/POAPriceLockModal';
 
 const fmt = (n) => n != null && !isNaN(n) ? '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+
+const EXPIRY_WARN_DAYS = 30;
+
+/**
+ * Returns 'expired', 'expiring_soon', or 'active' based on the lock's expiry_date.
+ * Withdrawn locks are treated as inactive (not shown with warning styling).
+ */
+function getExpiryStatus(lock) {
+  if (lock.status === 'withdrawn') return 'inactive';
+  if (!lock.expiry_date) return 'active';
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const expiry = new Date(lock.expiry_date + 'T00:00:00');
+  const daysLeft = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+  if (daysLeft < 0) return 'expired';
+  if (daysLeft <= EXPIRY_WARN_DAYS) return 'expiring_soon';
+  return 'active';
+}
+
+const fmtExpiry = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
 
 const CATEGORY_META = {
   labour: { label: 'Labour', icon: Users, color: 'text-emerald-700 bg-emerald-50' },
@@ -108,7 +127,9 @@ export default function POAWorklist() {
     const locked = poaItems.filter((i) => locksByItem[i.id]?.length > 0).length;
     const unlocked = total - locked;
     const lockedValue = locks.reduce((sum, l) => sum + (Number(l.stamped_value_gbp) || 0), 0);
-    return { total, locked, unlocked, lockedValue };
+    const expired = locks.filter(l => getExpiryStatus(l) === 'expired').length;
+    const expiringSoon = locks.filter(l => getExpiryStatus(l) === 'expiring_soon').length;
+    return { total, locked, unlocked, lockedValue, expired, expiringSoon };
   }, [poaItems, locks, locksByItem]);
 
   const getProjectName = (id) => projects.find((p) => p.id === id)?.name || 'Unknown Project';
@@ -151,6 +172,17 @@ export default function POAWorklist() {
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Value Stamped</p>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-blue-700 tabular-nums">{fmt(stats.lockedValue)}</p>
+        </div>
+        <div className={`insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4 ${(stats.expired > 0 || stats.expiringSoon > 0) ? 'ring-2 ring-amber-200' : ''}`}>
+          <div className="flex items-center gap-1.5 mb-1">
+            <AlertTriangle className={`w-3.5 h-3.5 ${stats.expired > 0 ? 'text-red-500' : 'text-amber-500'}`} />
+            <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Expiring ≤30d / Expired</p>
+          </div>
+          <p className="text-lg sm:text-2xl font-bold tabular-nums">
+            <span className={stats.expiringSoon > 0 ? 'text-amber-600' : 'text-slate-400'}>{stats.expiringSoon}</span>
+            <span className="text-slate-300 mx-1">/</span>
+            <span className={stats.expired > 0 ? 'text-red-600' : 'text-slate-400'}>{stats.expired}</span>
+          </p>
         </div>
       </div>
 
@@ -256,19 +288,40 @@ export default function POAWorklist() {
                               : lock.scope === 'project'
                                 ? getProjectName(lock.project_id)
                                 : getJobName(lock.job_id);
+                            const expiry = getExpiryStatus(lock);
+                            const badgeClass = expiry === 'expired'
+                              ? 'bg-red-50 text-red-700 border-red-200'
+                              : expiry === 'expiring_soon'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+                            const dotClass = expiry === 'expired'
+                              ? 'bg-red-500'
+                              : expiry === 'expiring_soon'
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-500';
                             return (
                               <span
                                 key={lock.id}
-                                className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                title={`Locked by ${lock.agreed_by_name} on ${new Date(lock.agreed_at).toLocaleDateString('en-GB')}${lock.client_reference ? ` — Ref: ${lock.client_reference}` : ''}`}
+                                className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeClass}`}
+                                title={`Locked by ${lock.agreed_by_name} on ${new Date(lock.agreed_at).toLocaleDateString('en-GB')}${lock.client_reference ? ` — Ref: ${lock.client_reference}` : ''}${lock.expiry_date ? ` — Expires ${fmtExpiry(lock.expiry_date)}` : ''}`}
                               >
                                 <Lock className="w-2.5 h-2.5" />
                                 {fmt(lock.agreed_price)}
-                                <span className="text-emerald-500 font-normal">·</span>
+                                <span className="opacity-40 font-normal">·</span>
                                 <ScopeIcon className="w-2.5 h-2.5" />
                                 {scopeLabel}
                                 {lock.stamped_records > 0 && (
-                                  <span className="text-emerald-400 font-normal">({lock.stamped_records} stamped)</span>
+                                  <span className="opacity-60 font-normal">({lock.stamped_records} stamped)</span>
+                                )}
+                                {expiry === 'expired' && (
+                                  <span className="inline-flex items-center gap-0.5 font-bold">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />Expired
+                                  </span>
+                                )}
+                                {expiry === 'expiring_soon' && (
+                                  <span className="inline-flex items-center gap-0.5 font-bold">
+                                    <Clock className="w-2.5 h-2.5" />Exp {fmtExpiry(lock.expiry_date)}
+                                  </span>
                                 )}
                               </span>
                             );
