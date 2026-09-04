@@ -54,7 +54,12 @@ function mapGeolocationError(err) {
 async function loadBackgroundPlugin() {
   try {
     if (typeof window === 'undefined' || !window.Capacitor?.isNative) return null;
-    const mod = await import(/* @vite-ignore */ '@transistorsoft/capacitor-background-geolocation');
+    // Hide the import from the bundler — the plugin only exists in the
+    // Capacitor native build, not the Base44 web build. Using a Function
+    // constructor prevents Rollup/Vite from statically analysing the import
+    // and failing the build when the package isn't installed.
+    const dynamicImport = new Function('s', 'return import(s)');
+    const mod = await dynamicImport('@transistorsoft/capacitor-background-geolocation');
     return mod.BackgroundGeolocation || mod.default?.BackgroundGeolocation || null;
   } catch {
     return null;

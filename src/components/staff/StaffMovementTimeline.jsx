@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { MapPin, Home, Briefcase, Navigation, Clock, ArrowRight, Loader2, Route } from 'lucide-react';
+import { MapPin, Home, Briefcase, Navigation, Clock, ArrowRight, Loader2, Route, Truck } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, Popup } from 'react-leaflet';
 
 const EVENT_META = {
@@ -20,6 +20,11 @@ function timeStr(iso) {
  * StaffMovementTimeline — shows a staff member's geofence events for today
  * as a vertical timeline (departed home → arrived site → departed site →
  * arrived home) with travel durations, plus a mini breadcrumb trail map.
+ *
+ * Vehicle proxy: when no phone GPS breadcrumbs exist for today, falls back
+ * to the assigned vehicle's Geotab GPS trail so driving time is visible
+ * even before phone tracking is working. Vehicle-derived breadcrumbs are
+ * shown in indigo with a "via vehicle" note.
  *
  * Used on the Staff Profile page for self-transparency and manager audit.
  */
@@ -41,15 +46,46 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
     enabled: !!staffId,
   });
 
+  // Vehicle proxy: fetch today's assignment to get the vehicle_id, then fetch
+  // the vehicle's GPS trail for today as a fallback when phone GPS is empty.
+  const { data: todayAssignment } = useQuery({
+    queryKey: ['staff-today-assignment-for-timeline', staffId, today],
+    queryFn: async () => {
+      const all = await base44.entities.RotaAssignment.filter({ staff_id: staffId, assigned_date: today });
+      return all[0] || null;
+    },
+    enabled: !!staffId,
+  });
+
+  const vehicleId = todayAssignment?.vehicle_id || null;
+
+  const { data: vehicleBreadcrumbs = [] } = useQuery({
+    queryKey: ['vehicle-breadcrumbs-for-staff-timeline', vehicleId, today],
+    queryFn: async () => {
+      if (!vehicleId) return [];
+      const all = await base44.entities.VehicleLocationLog.filter({ vehicle_id: vehicleId, timestamp: today });
+      return all.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    },
+    enabled: !!vehicleId,
+  });
+
   const sortedEvents = useMemo(
     () => [...events].sort((a, b) => new Date(a.at) - new Date(b.at)),
     [events],
   );
 
+  // Use phone breadcrumbs if available; otherwise fall back to vehicle GPS
+  const usingVehicleProxy = breadcrumbs.length === 0 && vehicleBreadcrumbs.length > 0;
+  const breadcrumbData = usingVehicleProxy
+    ? vehicleBreadcrumbs.filter(b => b.lat && b.lng)
+    : breadcrumbs.filter(b => b.lat && b.lng);
+
   const breadcrumbPath = useMemo(
-    () => breadcrumbs.filter(b => b.lat && b.lng).map(b => [b.lat, b.lng]),
-    [breadcrumbs],
+    () => breadcrumbData.map(b => [b.lat, b.lng]),
+    [breadcrumbData],
   );
+
+  const polylineColour = usingVehicleProxy ? '#6366f1' : '#2E5A1A';
 
   if (isLoading) {
     return (
@@ -76,6 +112,15 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
         <h3 className="text-sm font-bold text-slate-900">Today's Movements</h3>
         <span className="text-xs text-slate-400 ml-auto">{sortedEvents.length} events · {breadcrumbPath.length} GPS points</span>
       </div>
+
+      {usingVehicleProxy && (
+        <div className="px-4 py-2 bg-indigo-50 border-b border-indigo-100 flex items-center gap-2">
+          <Truck className="w-3.5 h-3.5 text-indigo-600" />
+          <p className="text-xs text-indigo-700 font-medium">
+            Showing vehicle GPS trail (no phone GPS yet today) · {vehicleBreadcrumbs[0]?.vehicle_name || 'assigned vehicle'}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
         {/* Timeline */}
@@ -142,7 +187,7 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
               {breadcrumbPath.length > 1 && (
-                <Polyline positions={breadcrumbPath} pathOptions={{ color: '#2E5A1A', weight: 3, opacity: 0.7 }} />
+                <Polyline positions={breadcrumbPath} pathOptions={{ color: polylineColour, weight: 3, opacity: 0.7, dashArray: usingVehicleProxy ? '8 6' : undefined }} />
               )}
               {breadcrumbPath.length > 0 && (
                 <CircleMarker center={breadcrumbPath[0]} radius={6} pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.9, weight: 2 }}>

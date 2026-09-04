@@ -33,7 +33,8 @@ export default async function(req: Request): Promise<Response> {
     const assignmentId: string = body?.assignment_id || "";
     const staffName: string = body?.staff_name || user.full_name || "";
 
-    if (points.length === 0) {
+    // Allow error-only payloads (no points) through to the error handler below
+    if (points.length === 0 && !body?.error) {
       return Response.json({ error: "No points provided" }, { status: 400 });
     }
 

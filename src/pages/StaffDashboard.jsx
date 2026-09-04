@@ -188,7 +188,7 @@ export default function StaffDashboard() {
   // geolocation polling, batching, and flushing to recordStaffLocation.
   const todayStrForTracking = format(new Date(), 'yyyy-MM-dd');
   const activeTrackingAssignment = assignments.find(a => a.assigned_date === todayStrForTracking && (a.status || 'assigned') !== 'completed' && a.assignment_type !== 'yard_depot') || null;
-  const { isTracking: gpsTracking, pointsQueued: gpsPointsQueued } = useStaffTracking({
+  const { isTracking: gpsTracking, hasFix: gpsHasFix, pointsQueued: gpsPointsQueued, errorType: gpsErrorType } = useStaffTracking({
     staff,
     activeAssignment: activeTrackingAssignment,
     enabled: !!staff?.id && !staff?.is_admin,
@@ -629,7 +629,7 @@ export default function StaffDashboard() {
       icon={Calendar}
       actions={(
         <div className="flex items-center gap-2">
-          <TrackingIndicator isTracking={gpsTracking} pointsQueued={gpsPointsQueued} />
+          <TrackingIndicator isTracking={gpsTracking} hasFix={gpsHasFix} pointsQueued={gpsPointsQueued} errorType={gpsErrorType} onRetry={() => window.location.reload()} />
           <StaffHeaderActions staff={staff} />
         </div>
       )}
