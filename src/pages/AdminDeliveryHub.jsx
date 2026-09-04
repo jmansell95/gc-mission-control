@@ -17,6 +17,7 @@ import DriverDayPlan from '@/components/admin/DriverDayPlan';
 import SampleRunDrawer from '@/components/geotech/SampleRunDrawer';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import HubShell from '@/components/HubShell';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
 
@@ -120,6 +121,7 @@ export default function AdminDeliveryHub() {
         { icon: ArrowRightLeft, label: 'Handovers', value: stats.handovers, color: 'violet' },
       ]} />}
     >
+      <HubJobBreadcrumb />
       <SubPills active={sub} onChange={setSub} pills={
         group === 'operations'
           ? [{ id: 'board', label: 'Delivery Board', icon: LayoutGrid }, { id: 'day-plan', label: 'Day Plan', icon: Clock }, { id: 'reconcile', label: 'Reconcile', icon: CheckCircle2 }]

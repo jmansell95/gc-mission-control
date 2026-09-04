@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat, KeyRound, BarChart3, ClipboardList, UserCog, CalendarClock, CalendarX, Package } from 'lucide-react';
 import HubShell from '@/components/HubShell';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
 import HubStatsBar from '@/components/dashboard/HubStatsBar';
@@ -115,6 +116,7 @@ export default function StaffPage() {
         ]} />
       ) : null}
     >
+      <HubJobBreadcrumb />
       <MissingRatesBanner />
 
       {hasSub && <SubPills active={renderTab} onChange={setSubTab} pills={activeTab.sub} />}

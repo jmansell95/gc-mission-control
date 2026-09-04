@@ -5,6 +5,8 @@ import { downloadStructuredCsv } from '@/utils/csvExport';
 import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
 import { useToast } from '@/components/ui/use-toast';
 import ReportHeroHeader from '@/components/reports/ReportHeroHeader';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
+import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 import ReportStatTiles from '@/components/reports/ReportStatTiles';
 import UniversalReportFilters from '@/components/reports/UniversalReportFilters';
 import ReportSidebar, { REPORT_CATEGORIES } from '@/components/reports/ReportSidebar';
@@ -149,6 +151,8 @@ export default function ReportingHub() {
 
   return (
     <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
+      <HubJobBreadcrumb />
+      <HubQuickLinks />
       <ReportHeroHeader onBuildCustom={() => setShowCustom(true)} />
 
       {/* Summary stat tiles — hidden on special tabs */}

@@ -38,6 +38,8 @@ import PredictiveInsightsWidget from '@/components/dashboard/PredictiveInsightsW
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/StateViews';
 import PageHeader from '@/components/PageHeader';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
+import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 import RunReportButton from '@/components/reports/RunReportButton';
 import TabBar from '@/components/TabBar';
 import SubPills from '@/components/SubPills';
@@ -182,6 +184,8 @@ export default function AssetHub() {
             </div>
         }
       />
+      <HubJobBreadcrumb />
+      <HubQuickLinks />
       <TabBar
         tabs={TAB_GROUPS.map(g => ({ id: g.id, label: g.label, icon: g.icon, badge: g.id === 'compliance' ? recertCount : undefined, count: g.id === 'inventory' ? assets.length : undefined }))}
         activeTab={group}

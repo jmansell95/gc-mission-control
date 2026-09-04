@@ -8,6 +8,7 @@ import {
   TrendingUp, FileX, Clock, Users, Siren, Leaf,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
 import SafetyCultureGate from '@/components/safety/SafetyCultureGate';
 import SafetyCultureCheckHub from '@/components/safety/SafetyCultureCheckHub';
@@ -147,6 +148,8 @@ export default function CompliancePage() {
       activeTab={tab}
       onTabChange={handleTabChange}
     >
+      <HubJobBreadcrumb />
+
       {/* ── Sub-pills for the active tab ── */}
       <SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} />
 

@@ -1,8 +1,11 @@
 import React from 'react';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
 
 /**
  * Reusable KPI stats bar for hub pages.
  * Renders a responsive grid of insight-card tiles with icon, label, value, and optional sublabel.
+ * KPI values animate (count up) on mount for a premium feel, and tiles
+ * stagger in with a subtle slide-up entrance.
  *
  * Props:
  *  - tiles: [{ icon, label, value, sublabel, color, onClick }]
@@ -43,7 +46,8 @@ export default function HubStatsBar({ tiles = [], columns }) {
           <Wrapper
             key={i}
             onClick={tile.onClick}
-            className={`insight-card rounded-hub p-hub-card-pad-sm text-left transition ${tile.onClick ? 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}
+            style={{ animationDelay: `${i * 60}ms` }}
+            className={`insight-card rounded-hub p-hub-card-pad-sm text-left animate-slide-up transition ${tile.onClick ? 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer' : ''}`}
           >
             <div className="flex items-center gap-2 mb-1">
               {Icon && (
@@ -53,7 +57,9 @@ export default function HubStatsBar({ tiles = [], columns }) {
               )}
               <p className="text-hub-caption text-slate-500 font-medium uppercase tracking-wide truncate">{tile.label}</p>
             </div>
-            <p className={`text-hub-title font-bold tabular-nums ${c.value} truncate`}>{tile.value}</p>
+            <p className={`text-hub-title font-bold tabular-nums ${c.value} truncate`}>
+              <AnimatedNumber value={tile.value} />
+            </p>
             {tile.sublabel && <p className="text-hub-caption text-slate-400 mt-0.5 truncate">{tile.sublabel}</p>}
           </Wrapper>
         );

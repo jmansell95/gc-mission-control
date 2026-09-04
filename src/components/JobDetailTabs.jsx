@@ -3,9 +3,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Boxes, PoundSterling, FolderOpen, FileText, Eye, Download, Activity, Mountain,
   LayoutGrid, CalendarDays, ShieldCheck, Users, Truck, Hotel,
-  Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList
+  Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList, FileBarChart, ArrowUpRight
 } from 'lucide-react';
 import { getSiteActivityDeepLink } from '@/utils/investigationDeepLink';
+import HubDeepLink from '@/components/hubs/HubDeepLink';
 import SubTabNav from '@/components/SubTabNav';
 import JobLogisticsHub from '@/components/logistics/JobLogisticsHub';
 import InvestigationLogManager from '@/components/InvestigationLogManager';
@@ -91,6 +92,11 @@ export default function JobDetailTabs({
 
       {/* ── Overview ── */}
       <TabsContent value="overview" className="mt-0 space-y-3">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
+          <HubDeepLink to="/staff" jobId={job.id} label="Staff Hub" icon={Users} />
+          <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
+          <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
+        </div>
         <SubTabNav
           tabs={[
             { id: 'overview', label: 'Overview', icon: LayoutGrid },
@@ -183,6 +189,10 @@ export default function JobDetailTabs({
 
       {/* ── Site Activity ── */}
       <TabsContent value="activity" className="space-y-3 mt-0">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
+          <HubDeepLink to="/compliance" jobId={job.id} label="Compliance Hub" icon={ShieldCheck} />
+          <HubDeepLink to="/reports" jobId={job.id} label="Reports Hub" icon={FileBarChart} />
+        </div>
         <SubTabNav
           tabs={[
             { id: 'logs', label: 'Activity Logs', icon: Activity },
@@ -228,6 +238,10 @@ export default function JobDetailTabs({
 
       {/* ── Equipment ── */}
       <TabsContent value="equipment" className="space-y-3 mt-0">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
+          <HubDeepLink to="/admin/logistics" jobId={job.id} label="Logistics Hub" icon={Truck} />
+          <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
+        </div>
         <TabStatRibbon
           icon={Boxes}
           title="Equipment & Logistics"
@@ -243,12 +257,18 @@ export default function JobDetailTabs({
       {/* ── Financials ── */}
       {canSeeCosts && (
         <TabsContent value="financials" className="space-y-3 mt-0">
+          <div className="flex items-center justify-end gap-2 flex-wrap">
+            <HubDeepLink to="/billing" jobId={job.id} label="Billing Hub" icon={PoundSterling} />
+          </div>
           <JobFinancialsTab job={job} canSeeCosts={canSeeCosts} />
         </TabsContent>
       )}
 
       {/* ── Documents ── */}
       <TabsContent value="documents" className="space-y-3 mt-0">
+        <div className="flex items-center justify-end gap-2 flex-wrap">
+          <HubDeepLink to="/reports" jobId={job.id} label="Reports Hub" icon={FileBarChart} />
+        </div>
         <SubTabNav
           tabs={[
             { id: 'photos', label: 'Photos', icon: Camera },

@@ -2,6 +2,7 @@ import React from 'react';
 import PageHeader from '@/components/PageHeader';
 import TabBar from '@/components/TabBar';
 import BackButton from '@/components/BackButton';
+import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 
 /**
  * HubShell — shared hybrid layout for every enterprise hub.
@@ -38,6 +39,8 @@ export default function HubShell({
       )}
 
       <PageHeader icon={icon} title={title} subtitle={subtitle} actions={actions} />
+
+      <HubQuickLinks />
 
       {kpiStrip ? (
         <div className="animate-slide-up">{kpiStrip}</div>

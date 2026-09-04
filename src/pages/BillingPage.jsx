@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Shield, ScrollText,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import CVRExportTab from '@/components/billing/CVRExportTab';
 import AFPPortfolioOverview from '@/components/afp/AFPPortfolioOverview';
 import AFPTemplateUploader from '@/components/afp/AFPTemplateUploader';
@@ -66,6 +67,8 @@ export default function BillingPage() {
       activeTab={tab}
       onTabChange={setTab}
     >
+      <HubJobBreadcrumb />
+
       {/* ── Insights: portfolio-wide financial health dashboard ── */}
       {tab === 'insights' && <BillingInsightsTab />}
 

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Search, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
@@ -18,6 +18,7 @@ import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
  */
 export default function SettingsSidebar({ activeTab, onNavigate, items, hideHeader }) {
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
   const { data: stats } = useQuery({
     queryKey: ['settings-hub-stats'],
     queryFn: () => base44.functions.invoke('getSettingsHubStats').then(r => r.data),
@@ -25,10 +26,22 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
   const hiddenMap = stats?.integrationHidden || {};
 
   const itemMap = Object.fromEntries(items.map(i => [i.id, i]));
-  const groups = settingsGroups
+  const allGroups = settingsGroups
     .filter(g => g.label !== '_hidden_migrated')
     .map(g => ({ ...g, items: g.items.filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id) && !hiddenMap[i.id]) }))
     .filter(g => g.items.length > 0);
+
+  // Filter groups by search query — matches item label or group label
+  const groups = useMemo(() => {
+    if (!search.trim()) return allGroups;
+    const q = search.toLowerCase();
+    return allGroups
+      .map(g => ({
+        ...g,
+        items: g.items.filter(i => (i.label || '').toLowerCase().includes(q)),
+      }))
+      .filter(g => g.items.length > 0 || g.label.toLowerCase().includes(q));
+  }, [allGroups, search]);
 
   return (
     <div className={hideHeader ? '' : 'sticky top-4'}>
@@ -39,6 +52,25 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
           </div>
         )}
         <div className="p-2 max-h-[calc(100vh-180px)] overflow-y-auto">
+          {/* Search filter — lets users find any of the 40+ settings sections */}
+          <div className="relative mb-2">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search settings..."
+              className="w-full pl-8 pr-7 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]/30 focus:bg-white transition"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          {groups.length === 0 && (
+            <p className="px-2 py-4 text-xs text-slate-400 text-center">No settings match "{search}"</p>
+          )}
           {groups.map(group => (
             <div key={group.label} className="mb-1.5">
               <p className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{group.label}</p>

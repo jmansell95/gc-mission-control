@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { Truck, Satellite, Wrench, ClipboardList } from 'lucide-react';
 import HubShell from '@/components/HubShell';
+import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import RunReportButton from '@/components/reports/RunReportButton';
 import FleetCommandHeader from '@/components/vehicles/FleetCommandHeader';
 import LiveTrackingTab from '@/components/vehicles/LiveTrackingTab';
@@ -68,6 +69,7 @@ export default function FleetHub() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >
+      <HubJobBreadcrumb />
       {activeTab === 'live' && <LiveTrackingTab initialVehicleId={liveVehicleId} />}
       {activeTab === 'fleet' && <Vehicles focusVehicleId={focusVehicleId} />}
       {activeTab === 'maintenance' && <VehicleMaintenanceManager />}
