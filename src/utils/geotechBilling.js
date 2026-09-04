@@ -3,6 +3,25 @@
 // and matches depth bands against the InvestigationSOR schedule of rates so the
 // billing team can see exactly what was drilled and what it costs.
 
+// Infer borehole status when LOCA_STAT is missing or blank.
+// Priority: explicit LOCA_STAT → end date + final depth → data coverage fallback.
+// Mirrors the logic in base44/shared/boreholeStatus.ts (used by the importAGS backend function).
+export function inferBoreholeStatus({ locaStatRaw, finalDepth, endDate, startDate, strataCount, sampleCount, coreCount }) {
+  const raw = (locaStatRaw || '').toUpperCase().trim();
+  if (raw === 'COMPLETE' || raw === 'COMPLETED' || raw === 'C') return 'complete';
+  if (raw === 'INPROG' || raw === 'IN_PROGRESS' || raw === 'IN-PROG' || raw === 'I') return 'in_progress';
+  if (raw === 'UNCHECKED' || raw === 'UNCK' || raw === 'U') return 'unchecked';
+
+  const hasFinalDepth = finalDepth != null && finalDepth > 0;
+  const hasEndDate = !!endDate;
+  if (hasFinalDepth && hasEndDate) return 'complete';
+  if (startDate && !hasEndDate) return 'in_progress';
+
+  const dataCount = (strataCount || 0) + (sampleCount || 0) + (coreCount || 0);
+  if (dataCount === 0) return 'unchecked';
+  return 'in_progress';
+}
+
 // Sum the final drilled depth per borehole (max depth_to across all AGS logs for that ref).
 export function getTotalMetres(invLogs) {
   const byRef = {};

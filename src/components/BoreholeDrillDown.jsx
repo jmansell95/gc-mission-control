@@ -22,6 +22,12 @@ export default function BoreholeDrillDown({ job, jobType }) {
     queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job.id }),
   });
 
+  // Fetch InvestigationSOR depth-band rates for per-rig earnings calculation.
+  const { data: sorItems = [] } = useQuery({
+    queryKey: ['investigation-sor', job.id],
+    queryFn: () => base44.entities.InvestigationSOR.list('-created_date', 500),
+  });
+
   // Only show borehole data from KeyLogBook AGS imports — drillers record
   // borehole data in KeyLogBook, not manually in the app.
   // Include both AGS imports (borehole/strata/sample technical records) AND
@@ -128,7 +134,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
 
   return (
     <div className="space-y-4">
-      <BoreholeSummaryPanel boreholes={boreholes} totals={totals} />
+      <BoreholeSummaryPanel boreholes={boreholes} totals={totals} sorItems={sorItems} />
       <div className="insight-card rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">

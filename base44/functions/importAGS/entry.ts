@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { parseRemarks, professionaliseActivities, hasTimePattern, timeToMins, normaliseTime, mergeDuplicateLogs } from '../../shared/keylogbookRemarks.ts';
 import { buildShiftCrewMap, buildBoreholeCrewMap, buildBoreholeDrillTimeMap, parseCrewNames } from '../../shared/agsCrewAttribution.ts';
+import { inferBoreholeStatus } from '../../shared/boreholeStatus.ts';
 
 // HMAC-SHA256 for KeyLogBook webhook request signing verification.
 // KLB sends X-Hole-Signature: sha256=<hex> when request signing is enabled.
@@ -1209,12 +1210,23 @@ Deno.serve(async (req) => {
           locaElev != null ? `, ground level ${locaElev}m` : '',
           locaX && locaY ? `, coordinates ${locaX}, ${locaY}` : '',
         ];
-        // Parse LOCA_STAT → borehole_status (COMPLETE / INPROG / UNCHECKED)
-        const locaStatRaw = pick(r, 'LOCA_STAT', 'STAT', 'STATUS').toUpperCase().trim();
-        let boreholeStatus: string = '';
-        if (locaStatRaw === 'COMPLETE' || locaStatRaw === 'COMPLETED' || locaStatRaw === 'C') boreholeStatus = 'complete';
-        else if (locaStatRaw === 'INPROG' || locaStatRaw === 'IN_PROGRESS' || locaStatRaw === 'IN-PROG' || locaStatRaw === 'I') boreholeStatus = 'in_progress';
-        else if (locaStatRaw === 'UNCHECKED' || locaStatRaw === 'UNCK' || locaStatRaw === 'U') boreholeStatus = 'unchecked';
+        // Parse LOCA_STAT → borehole_status (COMPLETE / INPROG / UNCHECKED).
+        // When LOCA_STAT is missing/blank, infer from dates + data coverage
+        // using the shared inferBoreholeStatus helper (dates first, coverage fallback).
+        const locaStatRaw = pick(r, 'LOCA_STAT', 'STAT', 'STATUS');
+        const locaFdep = num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null;
+        // Data coverage counts for this borehole will be filled after GEOL/SAMP/CORE
+        // parsing — for now, pass 0 and the client-side fallback will refine later.
+        // The import sets the best available status here; the client re-infers if still blank.
+        let boreholeStatus: string = inferBoreholeStatus({
+          locaStatRaw,
+          finalDepth: locaFdep,
+          endDate: locaEndDate,
+          startDate: locaStartDate,
+          strataCount: 0,
+          sampleCount: 0,
+          coreCount: 0,
+        });
 
         // Parse LOCA_TYPE → drilling_method (CP / Rotary / Mixed / Unknown)
         const drillingMethod = mapDrillingMethod(locaType);
@@ -1227,7 +1239,7 @@ Deno.serve(async (req) => {
           project_engineer: projectEngineerName || undefined,
           borehole_start_date: locaStartDate || undefined,
           borehole_end_date: locaEndDate || undefined,
-          depth_to: num(pick(r, 'LOCA_FDEP', 'LOCA_FDEPTH', 'LOCA_DEPTH', 'LOCA_FINAL_DEPTH', 'LOCA_TD', 'FDEP', 'FDEPTH', 'DEPTH', 'TD')) || null,
+          depth_to: locaFdep,
           groundwater_strike_depth: num(pick(r, 'LOCA_GND', 'LOCA_GW_DEPTH', 'LOCA_GWL', 'LOCA_WATER', 'GND', 'GW_DEPTH', 'GWL', 'WATER')) || null,
           description: `Imported from KeyLogBook AGS — ${descParts.join('')}.`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
