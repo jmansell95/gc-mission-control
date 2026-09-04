@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  AlertCircle, Loader2, X, Check, Trash2, Search,
+  AlertCircle, Loader2, X, Check, Trash2, Search, ShieldCheck, Eye,
 } from 'lucide-react';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 2 });

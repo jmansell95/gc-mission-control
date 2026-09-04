@@ -78,14 +78,14 @@ const HUBS = [
   {
     name: 'Assets Hub',
     icon: Package,
-    status: 'needs-work',
+    status: 'mostly-ready',
     items: [
       { done: true, text: 'Asset inventory grid with utilisation trends' },
       { done: true, text: 'Rig hub with compliance, fleet sync, depreciation' },
       { done: true, text: 'PAT testing console and certificate vault' },
-      { done: false, text: 'Certification / recertification upload & tracking — missing' },
+      { done: true, text: 'Certification / recertification upload & tracking — RecertPipeline + RecertActionModal + CertificateVault + SmartCertImport already built' },
       { done: false, text: 'Asset Panda sync — field mapper UX is technical' },
-      { done: false, text: 'Scrap pile — no disposal audit export' },
+      { done: true, text: 'Scrap pile — disposal audit CSV export added — this round' },
       { done: false, text: 'Mobile asset scanner — some modes crash on low-end Android' },
     ],
   },

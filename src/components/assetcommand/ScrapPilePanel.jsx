@@ -3,10 +3,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   Trash2, Truck, Scale, X, Loader2, CheckCircle2, Package, Weight,
-  Calendar, MapPin, User, AlertCircle, RefreshCw,
+  Calendar, MapPin, User, AlertCircle, RefreshCw, FileDown,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { safeFormat } from '@/utils/format';
+import { downloadStructuredCsv } from '@/utils/csvExport';
 
 const STATUS_META = {
   scrapped: { label: 'In Scrap Pile', tone: 'bg-red-50 text-red-700 border-red-200', dot: 'bg-red-500' },
@@ -39,6 +40,29 @@ export default function ScrapPilePanel() {
   const loaded = scraps.filter(s => s.status === 'loaded_for_weigh_in');
   const weighed = scraps.filter(s => s.status === 'weighed_in' || s.status === 'disposed');
 
+  const handleExportAudit = () => {
+    if (!scraps.length) { toast({ title: 'No scrap records to export', variant: 'destructive' }); return; }
+    const columns = [
+      { key: 'asset_name', label: 'Asset' },
+      { key: 'serial_number', label: 'Serial / Reg' },
+      { key: 'asset_type', label: 'Type' },
+      { key: 'scrap_category', label: 'Category' },
+      { key: 'scrapped_date', label: 'Scrapped Date' },
+      { key: 'scrapped_by_name', label: 'Scrapped By' },
+      { key: 'reason', label: 'Reason' },
+      { key: 'estimated_weight_kg', label: 'Est. Weight (kg)' },
+      { key: 'actual_weight_kg', label: 'Actual Weight (kg)' },
+      { key: 'scrap_yard_name', label: 'Scrap Yard' },
+      { key: 'weigh_in_date', label: 'Weigh-In Date' },
+      { key: 'weigh_in_ticket_ref', label: 'Ticket Ref' },
+      { key: 'weigh_in_value_gbp', label: 'Value (£)' },
+      { key: 'status', label: 'Status' },
+      { key: 'notes', label: 'Notes' },
+    ];
+    downloadStructuredCsv(`scrap-disposal-audit-${new Date().toISOString().slice(0, 10)}.csv`, columns, scraps);
+    toast({ title: 'Disposal audit exported', description: `${scraps.length} scrap records exported to CSV.` });
+  };
+
   return (
     <div className="space-y-4">
       {/* Summary stats */}
@@ -59,6 +83,11 @@ export default function ScrapPilePanel() {
           <p className="text-[10px] text-slate-400">£{weighed.reduce((sum, s) => sum + (s.weigh_in_value_gbp || 0), 0).toFixed(0)} recovered</p>
         </div>
       </div>
+      {scraps.length > 0 && (
+        <button onClick={handleExportAudit} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition shadow-sm">
+          <FileDown className="w-3.5 h-3.5" /> Export Disposal Audit
+        </button>
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
