@@ -260,7 +260,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`grid grid-cols-2 gap-3 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-[#2E5A1A]/5 border-2 border-dashed border-[#2E5A1A]/30 p-2' : ''}`}
+                        className={`grid grid-cols-1 sm:grid-cols-2 gap-3 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-[#2E5A1A]/5 border-2 border-dashed border-[#2E5A1A]/30 p-2' : ''}`}
                       >
                         {railBlocks.map((blockId, index) => {
                           const content = blockRenderers[blockId]?.();
@@ -311,7 +311,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
                         })}
                         {provided.placeholder}
                         {railBlocks.length === 0 && customise && (
-                          <div className="col-span-2 text-center py-8 text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
+                          <div className="col-span-1 sm:col-span-2 text-center py-8 text-sm text-slate-400 border-2 border-dashed border-slate-200 rounded-xl">
                             Drag blocks here from the other rail
                           </div>
                         )}

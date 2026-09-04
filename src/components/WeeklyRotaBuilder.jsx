@@ -875,9 +875,15 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
               </select>
             </div>
             <button onClick={() => setShowWeekends(v => !v)}
-              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm font-medium transition ${showWeekends ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}>
+              title={showWeekends ? 'Click to hide weekend columns' : 'Click to show weekend columns (Sat & Sun)'}
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm font-semibold transition ${showWeekends ? 'bg-amber-50 border-amber-300 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:border-amber-300'}`}>
               <CalendarDays className="w-3.5 h-3.5" />
-              {showWeekends ? 'Mon–Sun' : 'Mon–Fri'}
+              <span className="hidden sm:inline">{showWeekends ? 'Weekends On' : 'Show Weekends'}</span>
+              <span className="sm:hidden">{showWeekends ? '7-day' : '5-day'}</span>
+              {/* Toggle switch visual — makes it obvious this is clickable */}
+              <span className={`relative inline-flex h-4 w-7 items-center rounded-full transition ${showWeekends ? 'bg-amber-500' : 'bg-slate-300'}`}>
+                <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition ${showWeekends ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
+              </span>
             </button>
             <div className="hidden lg:flex items-center gap-1 bg-slate-50 rounded-lg border border-slate-200 px-1.5 py-1">
               <button

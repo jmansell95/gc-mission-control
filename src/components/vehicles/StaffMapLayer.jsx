@@ -15,16 +15,18 @@ function StaffMarker({ staff, onClick }) {
   const pos = [staff.lat, staff.lng];
   if (staff.lat == null || staff.lng == null) return null;
   const isProxy = staff.source === 'vehicle_proxy';
-  const colour = isProxy ? PROXY_COLOUR : PHONE_COLOUR;
+  const isOffShift = staff.shiftState === 'off_shift' || staff.shiftState === 'home';
+  const colour = isOffShift ? '#94a3b8' : (isProxy ? PROXY_COLOUR : PHONE_COLOUR);
 
   const icon = window.L?.divIcon({
-    html: `<div style="position:relative">
-      <div style="background:${colour};width:30px;height:30px;border-radius:50%;border:3px solid white;${isProxy ? 'border-style:dashed;' : ''}box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
+    html: `<div style="position:relative;opacity:${isOffShift ? 0.65 : 1}">
+      <div style="background:${colour};width:30px;height:30px;border-radius:50%;border:3px solid white;${isProxy || isOffShift ? 'border-style:dashed;' : ''}box-shadow:0 2px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center">
         ${isProxy ? TRUCK_SVG : PERSON_SVG}
       </div>
-      ${staff.isMoving ? '<div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ' + colour + ';opacity:0.35;animation:pulse 2s infinite"></div>' : ''}
+      ${staff.isMoving && !isOffShift ? '<div style="position:absolute;inset:-6px;border-radius:50%;border:2px solid ' + colour + ';opacity:0.35;animation:pulse 2s infinite"></div>' : ''}
       <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);background:${colour};color:white;font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis">${staff.staffName}</div>
       ${isProxy ? '<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:#1e293b;color:#94a3b8;font-size:7px;font-weight:600;padding:1px 4px;border-radius:3px;white-space:nowrap">via vehicle</div>' : ''}
+      ${isOffShift ? '<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:#475569;color:white;font-size:7px;font-weight:600;padding:1px 4px;border-radius:3px;white-space:nowrap">off shift</div>' : ''}
     </div>`,
     className: 'hazard-map-marker',
     iconSize: [30, 30],
@@ -53,6 +55,11 @@ function StaffMarker({ staff, onClick }) {
             </p>
           )}
           {staff.jobName && <p className="flex items-center gap-1 text-slate-600"><Briefcase className="w-3 h-3" /> {staff.jobName}</p>}
+          {isOffShift && (
+            <p className="flex items-center gap-1 text-slate-400 font-medium">
+              <span className="w-2 h-2 rounded-full bg-slate-400" /> Off shift (not on today's rota)
+            </p>
+          )}
           <p className="flex items-center gap-1 text-slate-500">
             {staff.isMoving ? <Navigation className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
             {staff.isMoving ? 'Moving' : 'Stationary'}
@@ -75,8 +82,13 @@ function StaffMarker({ staff, onClick }) {
 export default function StaffMapLayer({ divisionId, show = true, onStaffClick }) {
   const { liveStaff } = useLiveStaffLocations(divisionId);
 
+  // Show ALL staff with a recent GPS position — do NOT filter by shift state.
+  // Crew who aren't on today's rota still appear if they have an active GPS
+  // ping (phone or vehicle proxy). The shiftState is shown in the popup for
+  // context, and off-shift pins get a muted ring so managers can distinguish
+  // on-shift (solid ring) from off-shift (dashed grey ring) at a glance.
   const visible = useMemo(
-    () => liveStaff.filter(s => s.shiftState !== 'home' && s.shiftState !== 'off_shift'),
+    () => liveStaff.filter(s => s.lat != null && s.lng != null),
     [liveStaff],
   );
 
