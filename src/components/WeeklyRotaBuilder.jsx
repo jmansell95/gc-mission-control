@@ -162,20 +162,12 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
 
   const days = Array.from({ length: showWeekends ? 7 : 5 }, (_, i) => addDays(weekStart, i));
 
-  // Parent subcontractor / agency company records are containers for
-  // individual crew members (their crew_parent_id points to the parent).
-  // They should NOT appear as rows on the rota — only the crew members do.
-  const parentCompanyIds = useMemo(() => {
-    const ids = new Set();
-    for (const s of staff) {
-      if (s.crew_parent_id) ids.add(s.crew_parent_id);
-    }
-    return ids;
-  }, [staff]);
-
-  // Filter staff by team and search, hiding parent company records
+  // Filter staff by team and search, hiding parent subcontractor / agency
+  // company records. Only individual crew members (which have a crew_parent_id
+  // pointing to their parent company) should appear as rows on the rota —
+  // the parent company records themselves are containers, not workers.
   const filteredStaff = staff.filter(s => {
-    if (parentCompanyIds.has(s.id)) return false;
+    if ((s.worker_type === 'subcontractor' || s.worker_type === 'agency') && !s.crew_parent_id) return false;
     if (teamFilter && s.team_id !== teamFilter) return false;
     if (staffSearch && !s.name.toLowerCase().includes(staffSearch.toLowerCase())) return false;
     return true;
