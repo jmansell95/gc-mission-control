@@ -47,6 +47,8 @@ import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
 import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
+import { useStaffTracking } from '@/hooks/useStaffTracking';
+import TrackingIndicator from '@/components/staff/TrackingIndicator';
 
 
 export default function StaffDashboard() {
@@ -179,6 +181,18 @@ export default function StaffDashboard() {
   const { data: rigs = [] } = useQuery({ queryKey: ['rigs-active-staff'], queryFn: () => base44.entities.SiteAsset.filter({ is_rig: true, is_active: true }) });
   const { data: jobTypes = [] } = useJobTypes();
   const { data: myDeliveries = [] } = useQuery({ queryKey: ['my-deliveries-today', staff?.id], queryFn: () => base44.entities.DeliveryLog.filter({ driver_staff_id: staff.id }), enabled: !!staff?.id });
+
+  // ── Staff GPS tracking ──
+  // Active only when the crew member has consented (tracking_consent_signed_at)
+  // and has an active job assignment for today. The hook handles all the
+  // geolocation polling, batching, and flushing to recordStaffLocation.
+  const todayStrForTracking = format(new Date(), 'yyyy-MM-dd');
+  const activeTrackingAssignment = assignments.find(a => a.assigned_date === todayStrForTracking && (a.status || 'assigned') !== 'completed' && a.assignment_type !== 'yard_depot') || null;
+  const { isTracking: gpsTracking, pointsQueued: gpsPointsQueued } = useStaffTracking({
+    staff,
+    activeAssignment: activeTrackingAssignment,
+    enabled: !!staff?.id && !staff?.is_admin,
+  });
 
   const handleStartJob = async (assignmentId) => {
     try {
@@ -613,7 +627,12 @@ export default function StaffDashboard() {
       subtitle={`${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, ${staff?.name?.split(' ')[0] || 'Team'} · ${format(new Date(), 'EEE dd MMM')}`}
       meta={format(new Date(), 'HH:mm')}
       icon={Calendar}
-      actions={<StaffHeaderActions staff={staff} />}
+      actions={(
+        <div className="flex items-center gap-2">
+          <TrackingIndicator isTracking={gpsTracking} pointsQueued={gpsPointsQueued} />
+          <StaffHeaderActions staff={staff} />
+        </div>
+      )}
       contentClassName="pb-20"
       accentColor={activeDivision?.color}
     >

@@ -10,6 +10,8 @@ import TripPlaybackScrubber from './TripPlaybackScrubber';
 import SafetyEventsLayer from './SafetyEventsLayer';
 import VehicleLiveDialog from './VehicleLiveDialog';
 import RouteComparisonDialog from './RouteComparisonDialog';
+import StaffMapLayer from './StaffMapLayer';
+import { useDivision } from '@/contexts/DivisionContext';
 
 const UK_CENTER = [52.3, -1.5];
 const KM_TO_MI = 0.621371;
