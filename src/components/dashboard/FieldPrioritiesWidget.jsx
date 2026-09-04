@@ -5,6 +5,7 @@ import { AlertTriangle, ClipboardCheck, Truck, Clock, ShieldAlert, ChevronRight 
 import WidgetShell from '@/components/dashboard/WidgetShell';
 import ModernBadge from '@/components/ui/ModernBadge';
 import { useMittiStatus } from '@/hooks/useSafetyCultureStatus';
+import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 
 /**
  * Phase 3 — Field Tools: Field Priorities widget.
@@ -47,13 +48,7 @@ export default function FieldPrioritiesWidget({ onNavigate }) {
   return (
     <WidgetShell icon={AlertTriangle} title="Field Priorities" subtitle="Today's action items for field crews">
       {totalActions === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
-            <ClipboardCheck className="w-6 h-6 text-emerald-600" />
-          </div>
-          <p className="text-sm font-semibold text-slate-700">All clear</p>
-          <p className="text-xs text-slate-400 mt-0.5">No outstanding field actions for today</p>
-        </div>
+        <WidgetEmptyState icon={ClipboardCheck} title="All clear" message="No outstanding field actions for today" />
       ) : (
         <div className="space-y-2">
           {priorities.map(p => {

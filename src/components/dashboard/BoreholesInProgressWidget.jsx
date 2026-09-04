@@ -1,9 +1,10 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Mountain, CheckCircle2, Loader2, CircleDashed, ArrowRight } from 'lucide-react';
-import { Skeleton } from '@/components/StateViews';
+import { Mountain, CheckCircle2, CircleDashed, ArrowRight } from 'lucide-react';
 import { setInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
+import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
+import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 
 /**
  * Boreholes in Progress — Command Centre dashboard widget.
@@ -55,8 +56,7 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
   if (isLoading) {
     return (
       <div className="insight-card rounded-2xl p-4 h-full">
-        <Skeleton className="h-5 w-32 mb-3" />
-        <Skeleton className="h-20 w-full rounded-xl" />
+        <WidgetLoadingState rows={3} />
       </div>
     );
   }
@@ -70,7 +70,7 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
           </div>
           <h3 className="text-sm font-bold text-slate-900">Boreholes</h3>
         </div>
-        <p className="text-xs text-slate-400 py-4 text-center">No borehole data synced yet.</p>
+        <WidgetEmptyState icon={Mountain} title="No borehole data" message="No borehole data synced yet." />
       </div>
     );
   }

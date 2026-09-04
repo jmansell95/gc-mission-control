@@ -19,7 +19,7 @@ const HUBS = [
       { done: true, text: 'Stat tiles replaced with HubStatsBar format (matches all hubs) — this overhaul' },
       { done: false, text: 'Mobile layout — key widgets missing or cramped on phones' },
       { done: false, text: 'Widget load performance — some widgets fire redundant queries' },
-      { done: false, text: 'Consistent empty/loading states across all widgets' },
+      { done: true, text: 'Consistent empty/loading states across all widgets — this overhaul' },
     ],
   },
   {

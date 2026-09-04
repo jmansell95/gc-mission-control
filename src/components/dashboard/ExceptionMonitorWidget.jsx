@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import WidgetShell from '@/components/dashboard/WidgetShell';
 import { useToast } from '@/components/ui/use-toast';
+import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
+import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 
 const SEVERITY = {
   critical: { label: 'Critical', dot: 'bg-rose-500', text: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' },
@@ -222,17 +224,9 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
 
       {/* Exception list */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-5 h-5 text-slate-300 animate-spin" />
-        </div>
+        <WidgetLoadingState rows={4} />
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center mb-2">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
-          </div>
-          <p className="text-sm font-semibold text-slate-700">All clear</p>
-          <p className="text-xs text-slate-400 mt-1">No exceptions detected. Everything is on track.</p>
-        </div>
+        <WidgetEmptyState icon={CheckCircle2} title="All clear" message="No exceptions detected. Everything is on track." />
       ) : (
         <div className="space-y-2 max-h-[420px] overflow-y-auto">
           {filtered.map((item) => {

@@ -8,6 +8,8 @@ import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
+import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
+import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 
 // Haversine distance between two lat/lng points, in metres
 function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -333,8 +335,8 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
 
   if (isLoading || rigsLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5 flex items-center justify-center min-h-[280px]">
-        <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+      <div className="insight-card rounded-2xl p-5 min-h-[280px]">
+        <WidgetLoadingState rows={4} />
       </div>
     );
   }
@@ -353,19 +355,13 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
             </div>
           </div>
         </div>
-        <div className="p-5 text-center flex-1 flex flex-col items-center justify-center">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-2">
-            <Wrench className="w-6 h-6 text-slate-300" />
-          </div>
-          <p className="text-sm font-semibold text-slate-700">No rigs deployed today</p>
-          {drillingCrewsOut > 0 ? (
-            <p className="text-xs text-slate-500 mt-1">
-              {drillingCrewsOut} drilling crew{drillingCrewsOut !== 1 ? 's' : ''} out — assign a rig via the Rota Builder to track earnings.
-            </p>
-          ) : (
-            <p className="text-xs text-slate-400 mt-1">No drilling crews are out today.</p>
-          )}
-        </div>
+        <WidgetEmptyState
+          icon={Wrench}
+          title="No rigs deployed today"
+          message={drillingCrewsOut > 0
+            ? `${drillingCrewsOut} drilling crew${drillingCrewsOut !== 1 ? 's' : ''} out — assign a rig via the Rota Builder to track earnings.`
+            : 'No drilling crews are out today.'}
+        />
       </div>
     );
   }

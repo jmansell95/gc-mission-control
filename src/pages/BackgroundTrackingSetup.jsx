@@ -5,6 +5,7 @@ import {
   Package, Rocket, FileText, ChevronRight,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import PhoneGpsTrackingSetup from '@/components/settings/PhoneGpsTrackingSetup';
 
 function CodeBlock({ children, language }) {
   const [copied, setCopied] = useState(false);
@@ -80,6 +81,23 @@ export default function BackgroundTrackingSetup() {
       />
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+        {/* ── FREE OPTION: External GPS apps (GPSLogger / OwnTracks) ── */}
+        <PhoneGpsTrackingSetup />
+
+        {/* ── ALTERNATIVE: Capacitor native build ── */}
+        <div className="insight-card rounded-2xl p-5 bg-amber-50/30 border-amber-200/50">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-slate-800">Alternative: Capacitor Native Build</p>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                The free GPS app approach above is recommended for most teams. The Capacitor approach below is an alternative
+                for teams who want tracking built into their own app rather than a separate GPS app.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Overview */}
         <div className="insight-card rounded-2xl p-6">

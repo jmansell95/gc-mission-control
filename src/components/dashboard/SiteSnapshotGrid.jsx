@@ -12,6 +12,7 @@ import { getJobPrimaryType, getJobTypeLabel, getJobTypeColor } from '@/utils/job
 import { hasDiscipline, getJobDisciplines, getDisciplineConfig } from '@/utils/jobDisciplines';
 import DisciplinePills from '@/components/disciplines/DisciplinePills';
 import { Skeleton } from '@/components/StateViews';
+import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import { WEATHER_CODE_MAP, LEVEL_STYLES, assessConditions, fetchWeather } from '@/utils/siteWeather';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -327,10 +328,8 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
     return (
       <div className="mb-6">
         <SectionHeader />
-        <div className="insight-card rounded-2xl p-10 text-center">
-          <Radio className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm font-medium">No active sites right now</p>
-          <p className="text-slate-300 text-xs mt-1">Sites will appear here when jobs move to In Progress</p>
+        <div className="insight-card rounded-2xl">
+          <WidgetEmptyState icon={Radio} title="No active sites right now" message="Sites will appear here when jobs move to In Progress" />
         </div>
       </div>
     );

@@ -5,6 +5,7 @@ import {
   Radar, AlertTriangle, Activity, Gauge, PoundSterling, ShieldCheck, TrendingUp,
 } from 'lucide-react';
 import { useMittiStatus } from '@/hooks/useSafetyCultureStatus';
+import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 
 const gbp = (n) => (n != null && !isNaN(n)) ? '£' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—';
 
@@ -15,7 +16,7 @@ const gbp = (n) => (n != null && !isNaN(n)) ? '£' + Number(n).toLocaleString(un
  * project health). Now a draggable block in the Command Centre grid.
  */
 export default function MissionControlStrip({ onNavigate }) {
-  const { data: jobs = [] } = useQuery({ queryKey: ['mc-jobs'], queryFn: () => base44.entities.Job.list('-updated_date', 200) });
+  const { data: jobs = [], isLoading: jobsLoading } = useQuery({ queryKey: ['mc-jobs'], queryFn: () => base44.entities.Job.list('-updated_date', 200) });
   const { data: invoices = [] } = useQuery({ queryKey: ['mc-invoices'], queryFn: () => base44.entities.Invoice.list('-issue_date', 200) });
   const { data: timesheets = [] } = useQuery({ queryKey: ['mc-timesheets'], queryFn: () => base44.entities.Timesheet.list('-created_date', 50) });
   const { data: safetyReports = [] } = useQuery({ queryKey: ['mc-safety'], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }) });
@@ -75,6 +76,14 @@ export default function MissionControlStrip({ onNavigate }) {
     red: { label: 'At Risk', color: 'text-rose-600', bg: 'bg-rose-50' },
   };
   const ph = phMeta[m.projectHealth];
+
+  if (jobsLoading) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm h-full flex flex-col min-h-[200px] p-4">
+        <WidgetLoadingState rows={4} />
+      </div>
+    );
+  }
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm h-full flex flex-col min-h-[200px]">
