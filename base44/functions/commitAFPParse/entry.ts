@@ -153,6 +153,7 @@ export default async function(req: Request): Promise<Response> {
     const cd = preview.contract_details || {};
     const measuredWorks = preview.measured_works || [];
     const variations = preview.variations || [];
+    const variationBreakdowns = preview.variation_breakdowns || [];
     const materials = preview.materials || [];
     const fieldActivities = preview.field_sheet_activities || [];
     const compensationItems = preview.compensation_items || [];
@@ -539,6 +540,43 @@ export default async function(req: Request): Promise<Response> {
             sort_order: sortOrder++,
           });
           variationCount++;
+        }
+
+        // ── Variation breakdown lines (component items per VO ref) ──
+        // For each variation assigned to this period, find its breakdown sheet
+        // and persist each component line as is_variation_breakdown=true so it
+        // renders in the per-ref tab but not the Variation Summary list.
+        for (const v of variations) {
+          if (!v.vo_date || v.vo_date.slice(0, 7) !== periodMonth) continue;
+          const ref = (v.vo_ref || '').toUpperCase().replace(/\s+/g, '');
+          if (!ref) continue;
+          const breakdown = variationBreakdowns.find((b: any) => b.ref === ref);
+          if (!breakdown) continue;
+          for (const bl of breakdown.lines) {
+            lineItems.push({
+              afp_id: afpId,
+              job_id,
+              sheet_name: 'variations',
+              category: bl.category || 'other',
+              item: bl.description,
+              unit: bl.unit || 'nr',
+              qty: toNum(bl.qty),
+              rate: toNum(bl.rate),
+              amount: toNum(bl.amount),
+              unit_price: toNum(bl.rate),
+              vo_ref: v.vo_ref || '',
+              vo_date: v.vo_date || '',
+              is_variation_breakdown: true,
+              applied_in_period: toNum(bl.amount),
+              source: 'afp_upload',
+              source_date: v.vo_date || periodStart,
+              is_manual: false,
+              dispute_status: 'none',
+              original_amount: toNum(bl.amount),
+              agreed_amount: toNum(bl.amount),
+              sort_order: sortOrder++,
+            });
+          }
         }
 
         // ── Compensation item lines assigned to this period ──

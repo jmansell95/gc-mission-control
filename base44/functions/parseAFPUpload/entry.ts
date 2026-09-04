@@ -89,6 +89,7 @@ export default async function(req: Request): Promise<Response> {
       contract_details: {},
       measured_works: [],
       variations: [],
+      variation_breakdowns: [],
       materials: [],
       compensation_items: [],
       field_sheet_activities: [],
@@ -323,6 +324,56 @@ export default async function(req: Request): Promise<Response> {
             comments: commentsCol >= 0 ? String(row[commentsCol] || '').trim() : '',
           });
         }
+      }
+    }
+
+    // ── Variation Breakdown sheets (VO-ref-named sheets like 'VO-01', 'VO-04') ──
+    // Each variation with a Ref gets its own sheet in the AFP Excel containing the
+    // component line items (labour, plant, materials, subcontractor) that make up
+    // the variation's total cost. We detect sheets whose names match a VO ref
+    // pattern and parse their line items into variation_breakdowns, keyed by ref.
+    const voRefPattern = /^VO[-_]?\d+/i;
+    for (const sheetName of workbook.SheetNames) {
+      const trimmed = sheetName.trim();
+      if (!voRefPattern.test(trimmed)) continue;
+      const ref = trimmed.toUpperCase().replace(/\s+/g, '');
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, raw: true, defval: null, blankrows: false });
+      const headerIdx = findHeaderRow(rows, ['description', 'item', 'activity'], 0);
+      if (headerIdx < 0) continue;
+      const headerRow = rows[headerIdx];
+      const descCol = colIdx(headerRow, ['description'], ['description']);
+      const itemCol = colIdx(headerRow, ['item', 'item:'], ['item']);
+      const activityCol = colIdx(headerRow, ['activity'], ['activity']);
+      const qtyCol = colIdx(headerRow, ['qty', 'quantity'], ['qty', 'quantity']);
+      const unitCol = colIdx(headerRow, ['unit'], ['unit']);
+      const rateCol = colIdx(headerRow, ['rate'], ['rate']);
+      const amountCol = colIdx(headerRow, ['amount', 'total', 'total cost', 'cost'], ['amount', 'total', 'cost']);
+      const categoryCol = colIdx(headerRow, ['category', 'type'], ['category', 'type']);
+
+      const lines: any[] = [];
+      for (let r = headerIdx + 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row) continue;
+        const desc = descCol >= 0 ? String(row[descCol] || '').trim() : '';
+        const item = itemCol >= 0 ? String(row[itemCol] || '').trim() : '';
+        const activity = activityCol >= 0 ? String(row[activityCol] || '').trim() : '';
+        const label = desc || item || activity;
+        if (!label) continue;
+        const qty = qtyCol >= 0 ? toNum(row[qtyCol]) : 0;
+        const rate = rateCol >= 0 ? toNum(row[rateCol]) : 0;
+        const amount = amountCol >= 0 ? toNum(row[amountCol]) : qty * rate;
+        if (amount === 0 && qty === 0 && rate === 0) continue;
+        lines.push({
+          description: label,
+          category: categoryCol >= 0 ? String(row[categoryCol] || '').trim().toLowerCase() : 'other',
+          unit: unitCol >= 0 ? String(row[unitCol] || '').trim() : 'nr',
+          qty,
+          rate,
+          amount,
+        });
+      }
+      if (lines.length > 0) {
+        preview.variation_breakdowns.push({ ref, lines });
       }
     }
 
