@@ -5,32 +5,51 @@ import { useNavigate } from 'react-router-dom';
 import HelpGuideDesktop from '@/components/help/HelpGuideDesktop';
 import HelpGuideMobile from '@/components/help/HelpGuideMobile';
 
-export default function HelpGuide() {
+/**
+ * Help Guide — split by audience.
+ *
+ * audience="office" → Office Staff Help Guide (/help) — admin hubs, billing,
+ *   compliance, reports, settings, permissions, rig earnings, AFP.
+ * audience="field"  → Field Crew Help Guide (/help-field) — schedule, scanner,
+ *   deliveries, shift wizard, safety forms, profile, SSO login.
+ *
+ * Topics are filtered by their `audience` field: a topic shows in a guide when
+ * its audience is 'both', matches the requested audience, or is unset (legacy
+ * topics default to both).
+ */
+export default function HelpGuide({ audience = 'office' }) {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedTopic, setSelectedTopic] = useState(null);
 
+  const isField = audience === 'field';
+  const guideTitle = isField ? 'Field Crew Help & Guides' : 'Office Staff Help & Guides';
+
   const { data: topics = [], isLoading } = useQuery({
-    queryKey: ['help-topics'],
+    queryKey: ['help-topics', audience],
     queryFn: async () => {
       const list = await base44.entities.HelpTopic.filter({ is_active: true });
-      return list.sort((a, b) => (a.order || 0) - (b.order || 0));
-    }
+      const filtered = list.filter(
+        (t) => !t.audience || t.audience === 'both' || t.audience === audience
+      );
+      return filtered.sort((a, b) => (a.order || 0) - (b.order || 0));
+    },
   });
 
   const filtered = useMemo(() => {
     let result = topics;
     if (activeCategory !== 'all') {
-      result = result.filter(t => t.category === activeCategory);
+      result = result.filter((t) => t.category === activeCategory);
     }
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter(t =>
-        t.title?.toLowerCase().includes(q) ||
-        t.summary?.toLowerCase().includes(q) ||
-        t.content?.toLowerCase().includes(q) ||
-        t.tags?.toLowerCase().includes(q)
+      result = result.filter(
+        (t) =>
+          t.title?.toLowerCase().includes(q) ||
+          t.summary?.toLowerCase().includes(q) ||
+          t.content?.toLowerCase().includes(q) ||
+          t.tags?.toLowerCase().includes(q)
       );
     }
     return result;
@@ -38,7 +57,7 @@ export default function HelpGuide() {
 
   const groupedByCategory = useMemo(() => {
     const groups = {};
-    filtered.forEach(t => {
+    filtered.forEach((t) => {
       if (!groups[t.category]) groups[t.category] = [];
       groups[t.category].push(t);
     });
@@ -57,7 +76,7 @@ export default function HelpGuide() {
     const html = `
       <html>
       <head>
-        <title>GC Mission Control — Help Guides</title>
+        <title>GC Mission Control — ${guideTitle}</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1e293b; }
           h1 { color: #2E5A1A; border-bottom: 2px solid #d1fae5; padding-bottom: 10px; }
@@ -73,9 +92,9 @@ export default function HelpGuide() {
         </style>
       </head>
       <body>
-        <h1>GC Mission Control — Help Guides</h1>
+        <h1>GC Mission Control — ${guideTitle}</h1>
         <p>Generated on ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-        ${filtered.map(t => `
+        ${filtered.map((t) => `
           <div class="topic">
             <p class="category-label">${categoryLabels[t.category] || t.category}</p>
             <h2>${t.title}</h2>
@@ -95,6 +114,7 @@ export default function HelpGuide() {
   const sharedProps = {
     topics, isLoading, search, setSearch, activeCategory, setActiveCategory,
     selectedTopic, setSelectedTopic, filtered, groupedByCategory, handleExportPDF,
+    guideTitle,
   };
 
   return (

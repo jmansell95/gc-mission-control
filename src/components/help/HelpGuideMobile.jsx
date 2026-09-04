@@ -18,6 +18,7 @@ const categoryConfig = {
 export default function HelpGuideMobile({
   topics, isLoading, search, setSearch, activeCategory, setActiveCategory,
   selectedTopic, setSelectedTopic, filtered, groupedByCategory, handleExportPDF, onBack,
+  guideTitle,
 }) {
   const categories = Object.keys(groupedByCategory);
 
@@ -34,7 +35,7 @@ export default function HelpGuideMobile({
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm">
                 <BookOpen className="w-4 h-4 text-white" />
               </div>
-              <h1 className="text-base font-bold text-slate-900">Help & Guides</h1>
+              <h1 className="text-base font-bold text-slate-900">{guideTitle || 'Help & Guides'}</h1>
             </div>
           </div>
           <button onClick={handleExportPDF} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition flex-shrink-0">

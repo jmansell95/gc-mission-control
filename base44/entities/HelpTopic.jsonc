@@ -20,6 +20,16 @@
       "default": "general",
       "description": "Category for filtering and grouping topics. 'financial' covers AFP, CVR, subcontractor margin and other billing/financial workflows."
     },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "office",
+        "field",
+        "both"
+      ],
+      "default": "both",
+      "description": "Which audience this help topic is for. 'office' = office/admin staff only (shows in the Office Help Guide at /help), 'field' = field crew only (shows in the Field Crew Help Guide at /help-field), 'both' = shown in both guides. Default is 'both' so existing topics appear in both until re-categorised."
+    },
     "content": {
       "type": "string",
       "description": "Markdown content of the help topic"

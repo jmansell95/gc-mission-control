@@ -229,8 +229,8 @@ export default function StaffManager() {
   };
 
   const activeCount = staff.filter(s => getUserForStaff(s)).length;
-  const awaitingCount = staff.filter(s => !getUserForStaff(s) && s.invite_sent).length;
-  const pendingCount = staff.filter(s => !getUserForStaff(s) && !s.invite_sent).length;
+  const readySsoCount = staff.filter(s => !getUserForStaff(s) && s.email).length;
+  const noEmailCount = staff.filter(s => !s.email).length;
 
   const filteredStaff = staff.filter(member => {
     const matchesSearch = !searchQuery ||
@@ -296,12 +296,12 @@ export default function StaffManager() {
           <p className="text-2xl font-bold text-emerald-700 mt-1">{activeCount}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">Awaiting Confirmation</p>
-          <p className="text-2xl font-bold text-blue-600 mt-1">{awaitingCount}</p>
+          <p className="text-xs text-slate-500 font-medium">Ready for SSO</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">{readySsoCount}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 font-medium">Needs Invite</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{pendingCount}</p>
+          <p className="text-xs text-slate-500 font-medium">No Email</p>
+          <p className="text-2xl font-bold text-amber-600 mt-1">{noEmailCount}</p>
         </div>
       </div>
 
@@ -355,15 +355,14 @@ export default function StaffManager() {
 
                   <div className="mb-3 flex items-center gap-2 flex-wrap">
                     {!linkedUser && (
-                      member.invite_sent ? (
+                      member.email ? (
                         <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 font-medium border border-blue-200">
-                          <Mail className="w-3 h-3" /> Awaiting Confirmation
+                          <Mail className="w-3 h-3" /> Ready — log in with Microsoft
                         </span>
                       ) : (
-                        <button onClick={() => handleInvite(member)} disabled={inviteLoading === member.id}
-                          className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 font-medium border border-amber-200 hover:bg-amber-100 transition disabled:opacity-50">
-                          <UserPlus className="w-3 h-3" /> {inviteLoading === member.id ? 'Sending...' : 'Send app invite'}
-                        </button>
+                        <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-red-50 text-red-700 font-medium border border-red-200">
+                          <Mail className="w-3 h-3" /> No email — add one to enable login
+                        </span>
                       )
                     )}
                     {linkedUser && !member.user_id && (
@@ -438,7 +437,6 @@ export default function StaffManager() {
                   <div className="flex gap-1 justify-end mt-auto items-center">
                     <ICalFeedButton staffId={member.id} staffName={member.name} className="mr-1" />
                     <button onClick={() => handleToggleDelivery(member)} className={`p-2 rounded-lg transition ${member.delivery_dashboard_enabled ? 'text-blue-600 bg-blue-50' : 'text-slate-400 hover:bg-slate-100'}`} title="Delivery dashboard access"><Truck className="w-4 h-4" /></button>
-                    <button onClick={() => handlePasswordReset(member)} disabled={resetLoading === member.id} className="p-2 rounded-lg transition text-amber-600 hover:bg-amber-50 disabled:opacity-50" title="Send password reset link"><KeyRound className="w-4 h-4" /></button>
                     <button onClick={() => setHotelStaff(member)} className="p-2 rounded-lg transition text-blue-600 hover:bg-blue-50" title="Hotel bookings"><Hotel className="w-4 h-4" /></button>
                     <button onClick={() => setComplianceStaff(member)} className="p-2 rounded-lg transition text-emerald-600 hover:bg-emerald-50" title="Compliance"><ShieldCheck className="w-4 h-4" /></button>
                     <button onClick={() => setShiftOpenId(shiftOpenId === member.id ? null : member.id)} className={`p-2 rounded-lg transition ${shiftOpenId === member.id ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 hover:bg-slate-100'}`} title="Shift times"><Clock className="w-4 h-4" /></button>

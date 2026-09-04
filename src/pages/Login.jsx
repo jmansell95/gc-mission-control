@@ -1,6 +1,6 @@
 import React from "react";
 import { base44 } from "@/api/base44Client";
-import { LogIn, ShieldCheck, Loader2 } from "lucide-react";
+import { LogIn, ShieldCheck } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
 import MicrosoftIcon from "@/components/MicrosoftIcon";
 import { safeReturnTo } from "@/lib/authReturnTo";

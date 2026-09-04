@@ -131,7 +131,8 @@ const AuthenticatedApp = () => {
             <Route path="/m/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
             <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
           </Route>
-          <Route path="/help" element={<HelpGuide />} />
+          <Route path="/help" element={<HelpGuide audience="office" />} />
+          <Route path="/help-field" element={<HelpGuide audience="field" />} />
           <Route path="/enterprise" element={<RouteGuard><EnterpriseDashboard /></RouteGuard>} />
           <Route path="/enterprise/business-unit/:id" element={<RouteGuard><BusinessUnitPage /></RouteGuard>} />
           <Route path="/enterprise/settings" element={<RouteGuard><EnterpriseSettings /></RouteGuard>} />

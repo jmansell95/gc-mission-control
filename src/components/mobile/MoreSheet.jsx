@@ -205,7 +205,7 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
                 <MoreRow icon={Truck} label="Driver Hub" onClick={() => { onClose(); navigate('/deliveries'); }} />
               )}
               <MoreRow icon={ScanLine} label="Scan Asset" onClick={() => { onClose(); navigate('/scanner'); }} />
-              <MoreRow icon={HelpCircle} label="Help Guides" onClick={() => { onClose(); navigate('/help'); }} />
+              <MoreRow icon={HelpCircle} label="Help Guides" onClick={() => { onClose(); navigate(isPlatformAdmin || (profile?.system_role && profile.system_role !== 'field') ? '/help' : '/help-field'); }} />
             </div>
           </div>
         </div>

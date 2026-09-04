@@ -17,6 +17,7 @@ const categoryConfig = {
 export default function HelpGuideDesktop({
   topics, isLoading, search, setSearch, activeCategory, setActiveCategory,
   selectedTopic, setSelectedTopic, filtered, groupedByCategory, handleExportPDF, onBack,
+  guideTitle,
 }) {
   const categories = Object.keys(groupedByCategory);
 
@@ -35,7 +36,7 @@ export default function HelpGuideDesktop({
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-slate-900 leading-tight">Help & Guides</h1>
+              <h1 className="text-base font-bold text-slate-900 leading-tight">{guideTitle || 'Help & Guides'}</h1>
               <p className="text-[11px] text-slate-500 leading-tight">{topics.length} articles</p>
             </div>
           </div>
