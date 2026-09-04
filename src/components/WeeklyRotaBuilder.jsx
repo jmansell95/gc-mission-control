@@ -29,6 +29,7 @@ import DeliveryInFrontBanner from '@/components/rota/DeliveryInFrontBanner';
 import DepotDutyBadge from '@/components/rota/DepotDutyBadge';
 import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 import LiveDriverBadge from '@/components/rota/LiveDriverBadge';
+import StaffTrackingBadge from '@/components/staff/StaffTrackingBadge';
 import RotaDayCards from '@/components/rota/RotaDayCards';
 import TodayCrewPopup from '@/components/rota/TodayCrewPopup';
 import RotaSuggestionsPopup from '@/components/rota/RotaSuggestionsPopup';
@@ -94,6 +95,7 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
   const [savingDraft, setSavingDraft] = useState(false);
   const [notice, setNotice] = useState(null);
   const [showWeekends, setShowWeekends] = useState(false);
+  const [trackMode, setTrackMode] = useState('vehicles'); // 'vehicles' | 'crew'
   const [complianceViolations, setComplianceViolations] = useState(null);
   const [swapAssignment, setSwapAssignment] = useState(null);
   const [rotaManagerStaff, setRotaManagerStaff] = useState(null);
@@ -653,7 +655,11 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
           <span className="truncate">{job.location}</span>
           </div>
           )}
-        {vehicle && (
+        {trackMode === 'crew' ? (
+          <div className="mb-1">
+            <StaffTrackingBadge staffId={assignment.staff_id} compact />
+          </div>
+        ) : vehicle && (
           <div className="flex items-center gap-1 text-slate-500 mb-1">
             <Truck className="w-2.5 h-2.5 flex-shrink-0" />
             <span className="font-mono truncate">{vehicle.registration_number}</span>
@@ -873,6 +879,20 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
               <CalendarDays className="w-3.5 h-3.5" />
               {showWeekends ? 'Mon–Sun' : 'Mon–Fri'}
             </button>
+            <div className="hidden lg:flex items-center gap-1 bg-slate-50 rounded-lg border border-slate-200 px-1.5 py-1">
+              <button
+                onClick={() => setTrackMode('vehicles')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition ${trackMode === 'vehicles' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <Truck className="w-3.5 h-3.5" /> Vehicles
+              </button>
+              <button
+                onClick={() => setTrackMode('crew')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold transition ${trackMode === 'crew' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                <MapPin className="w-3.5 h-3.5" /> Crew GPS
+              </button>
+            </div>
             {(teamFilter || staffSearch) && (
               <span className="text-xs text-slate-500 self-center">
                 {filteredStaff.length} of {staff.length} staff
