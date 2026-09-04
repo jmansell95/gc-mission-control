@@ -1,7 +1,12 @@
-import React, { useMemo } from 'react';
-import { Cog, Mountain, ArrowDownToLine, PoundSterling } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import {
+  Cog, Mountain, ArrowDownToLine, PoundSterling, ChevronRight, AlertCircle,
+} from 'lucide-react';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
-import { allocateDepthBands, getSorDepthBands } from '@/utils/geotechBilling';
+import { computeRigEarnings } from '@/utils/rigEarnings';
+import RigDrillDownModal from '@/components/borehole/RigDrillDownModal';
 
 const RIG_COLORS = [
   { tile: 'bg-emerald-50', icon: 'bg-emerald-100 text-emerald-700', bar: '#10b981', accent: 'text-emerald-700' },
@@ -14,82 +19,89 @@ const RIG_COLORS = [
 ];
 
 /**
- * RigEarningsStrip — horizontal row of rig tiles showing each rig's borehole
- * count, total metres, and earnings (metres × SOR depth-band rates).
+ * RigEarningsStrip — horizontal row of clickable rig tiles showing each rig's
+ * borehole count, total metres, and earnings (metres × rate cards). Clicking a
+ * tile opens the RigDrillDownModal with the rig's boreholes, activity timeline,
+ * and the KeyLogBook logger.
  *
  * Props:
  *  - boreholes: [[ref, logs], ...] — the grouped borehole array from BoreholeDrillDown
- *  - sorItems: InvestigationSOR records for the job (or all — filtered client-side)
+ *  - sorItems: InvestigationSOR records for the job
+ *  - job: the Job record (for meterage_rate)
  */
-export default function RigEarningsStrip({ boreholes = [], sorItems = [] }) {
-  const rigData = useMemo(() => {
-    const sorDepthBands = getSorDepthBands(sorItems);
-    const rigs = {};
+export default function RigEarningsStrip({ boreholes = [], sorItems = [], job = null }) {
+  const [selectedRig, setSelectedRig] = useState(null);
 
+  // Staff list for logger → Staff resolution in the drill-down modal
+  const { data: staffList = [] } = useQuery({
+    queryKey: ['staff-rig-earnings'],
+    queryFn: () => base44.entities.Staff.list(),
+    staleTime: 60000,
+  });
+
+  // Flatten the grouped boreholes into a single log array (deduped by id)
+  const allLogs = useMemo(() => {
+    const seen = new Set();
+    const out = [];
     boreholes.forEach(([, logs]) => {
-      // Get the rig name from device_name on borehole_progress logs
-      const progressLog = logs.find(l => l.log_type === 'borehole_progress');
-      const rigName = progressLog?.device_name || 'Unassigned';
-
-      if (!rigs[rigName]) rigs[rigName] = { name: rigName, boreholes: new Set(), totalMetres: 0, depths: [] };
-
-      rigs[rigName].boreholes.add(progressLog?.borehole_ref || logs[0]?.borehole_ref);
-
-      // Sum max depth per borehole
-      const depths = logs.map(l => l.depth_to).filter(d => d != null);
-      if (depths.length) {
-        const maxDepth = Math.max(...depths);
-        rigs[rigName].totalMetres += maxDepth;
-        rigs[rigName].depths.push(maxDepth);
-      }
-    });
-
-    // Calculate earnings per rig using SOR depth-band rates
-    return Object.values(rigs).map(rig => {
-      // Allocate all borehole depths across 10m bands, then match to SOR rates
-      let earnings = 0;
-      rig.depths.forEach(depth => {
-        const bands = allocateDepthBands(depth);
-        bands.forEach(band => {
-          const sor = sorDepthBands.find(s => s.from === band.from && s.to === band.to);
-          if (sor?.price != null) {
-            earnings += band.metres * sor.price;
-          }
-        });
+      logs.forEach((l) => {
+        if (l.id && !seen.has(l.id)) { seen.add(l.id); out.push(l); }
+        else if (!l.id) out.push(l);
       });
-      return {
-        name: rig.name,
-        boreholeCount: rig.boreholes.size,
-        totalMetres: Math.round(rig.totalMetres * 100) / 100,
-        earnings: Math.round(earnings * 100) / 100,
-        hasRate: earnings > 0,
-      };
-    }).sort((a, b) => b.earnings - a.earnings);
-  }, [boreholes, sorItems]);
+    });
+    return out;
+  }, [boreholes]);
 
-  if (rigData.length === 0) return null;
+  const { perRig, totals } = useMemo(
+    () => computeRigEarnings({ logs: allLogs, sorItems, job }),
+    [allLogs, sorItems, job]
+  );
+
+  if (perRig.length === 0) return null;
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
         <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
           <Cog className="w-4 h-4 text-emerald-700" />
         </div>
         <h3 className="font-bold text-slate-900 text-sm">Rig Earnings</h3>
         <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
-          {rigData.length} rig{rigData.length !== 1 ? 's' : ''}
+          {perRig.length} rig{perRig.length !== 1 ? 's' : ''}
         </span>
+        <div className="ml-auto flex items-center gap-3 text-xs">
+          <span className="inline-flex items-center gap-1 text-slate-500">
+            <ArrowDownToLine className="w-3 h-3 text-blue-500" />
+            <AnimatedNumber value={totals.metres} format={(v) => `${Math.round(v)}m`} />
+          </span>
+          <span className="inline-flex items-center gap-1 font-bold text-emerald-700">
+            <PoundSterling className="w-3 h-3" />
+            <AnimatedNumber value={totals.earnings} format={(v) => `£${Math.round(v).toLocaleString('en-GB')}`} />
+          </span>
+        </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {rigData.map((rig, i) => {
+        {perRig.map((rig, i) => {
           const c = RIG_COLORS[i % RIG_COLORS.length];
           return (
-            <div key={rig.name} className={`insight-card rounded-xl p-4 ${c.tile}`}>
+            <button
+              key={rig.key}
+              onClick={() => setSelectedRig(rig)}
+              className={`insight-card rounded-xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg ${c.tile} group`}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.icon}`}>
                   <Cog className="w-4 h-4" />
                 </div>
-                <p className="text-sm font-bold text-slate-800 truncate">{rig.name}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-800 truncate">{rig.name}</p>
+                  {rig.isDrillerFallback && (
+                    <p className="text-[9px] text-amber-600 font-medium inline-flex items-center gap-0.5">
+                      <AlertCircle className="w-2.5 h-2.5" /> rig not tagged
+                    </p>
+                  )}
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition flex-shrink-0" />
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
@@ -119,10 +131,25 @@ export default function RigEarningsStrip({ boreholes = [], sorItems = [] }) {
                   </span>
                 </div>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
+
+      {selectedRig && (
+        <RigDrillDownModal
+          rigName={selectedRig.name}
+          isDrillerFallback={selectedRig.isDrillerFallback}
+          logs={selectedRig.logs}
+          sorItems={sorItems}
+          job={job}
+          staffList={staffList}
+          boreholeCount={selectedRig.boreholeCount}
+          totalMetres={selectedRig.totalMetres}
+          earnings={selectedRig.earnings}
+          onClose={() => setSelectedRig(null)}
+        />
+      )}
     </div>
   );
 }

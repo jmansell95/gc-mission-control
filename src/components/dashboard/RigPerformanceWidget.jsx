@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Drill, Loader2, Wrench, Satellite, ChevronRight, Briefcase,
+  Drill, Loader2, Wrench, Satellite, ChevronRight, Briefcase, Cog,
+  Mountain, ArrowDownToLine, PoundSterling, BarChart3,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -10,6 +11,9 @@ import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
+import { useJobFilter } from '@/components/dashboard/JobFilterContext';
+import { computeRigEarnings } from '@/utils/rigEarnings';
+import RunReportButton from '@/components/reports/RunReportButton';
 
 // Haversine distance between two lat/lng points, in metres
 function haversineMeters(lat1, lng1, lat2, lng2) {
@@ -53,6 +57,64 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
     const id = setInterval(() => setNow(Date.now()), 60000);
     return () => clearInterval(id);
   }, []);
+
+  const queryClient = useQueryClient();
+  const { selectedJobId } = useJobFilter();
+  const isAllJobs = selectedJobId === 'all';
+  const [showFullFigures, setShowFullFigures] = useState(false);
+
+  // Auto-refresh — silently re-pull live logs every 4 minutes so an open
+  // dashboard stays current with the latest KeyLogBook webhook data.
+  useEffect(() => {
+    const id = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['rig-earnings-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['rig-earnings-sor'] });
+    }, 4 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [queryClient]);
+
+  // Live drilling logs — today (for the headline) and all-time (for "full figures").
+  // Scoped to the selected job when the dashboard is focused on one.
+  const { data: jobsForScope = [] } = useQuery({ queryKey: ['jobs'], queryFn: () => base44.entities.Job.list() });
+  const scopedJobIds = useMemo(() => {
+    if (isAllJobs) return null;
+    return [selectedJobId];
+  }, [isAllJobs, selectedJobId]);
+  const selectedJob = !isAllJobs ? jobsForScope.find((j) => j.id === selectedJobId) || null : null;
+
+  const { data: todayLogs = [] } = useQuery({
+    queryKey: ['rig-earnings-logs', 'today', scopedJobIds || 'all'],
+    queryFn: async () => {
+      // Pull today's AGS + KeyLogBook logs. Filter client-side by date + job.
+      const filter = { source: { $in: ['ags_import', 'keylogbook_remarks'] } };
+      const logs = await base44.entities.InvestigationLog.filter(filter, '-created_date', 500);
+      return logs.filter((l) => l.date === todayStr && (!scopedJobIds || scopedJobIds.includes(l.job_id)));
+    },
+  });
+  const { data: allLogs = [] } = useQuery({
+    queryKey: ['rig-earnings-logs', 'all', scopedJobIds || 'all'],
+    queryFn: async () => {
+      const filter = { source: { $in: ['ags_import', 'keylogbook_remarks'] } };
+      const logs = await base44.entities.InvestigationLog.filter(filter, '-created_date', 2000);
+      return logs.filter((l) => (!scopedJobIds || scopedJobIds.includes(l.job_id)));
+    },
+  });
+  const { data: sorItems = [] } = useQuery({
+    queryKey: ['rig-earnings-sor'],
+    queryFn: () => base44.entities.InvestigationSOR.list('-created_date', 500),
+    staleTime: 60000,
+  });
+
+  // Live earnings from actual metres drilled × rate cards (today + all-time).
+  // Uses the job's meterage_rate + auto-priced remark charges + SOR depth bands.
+  const liveToday = useMemo(
+    () => computeRigEarnings({ logs: todayLogs, sorItems, job: selectedJob }),
+    [todayLogs, sorItems, selectedJob]
+  );
+  const liveAll = useMemo(
+    () => computeRigEarnings({ logs: allLogs, sorItems, job: selectedJob }),
+    [allLogs, sorItems, selectedJob]
+  );
 
   const { data: assignments = [], isLoading } = useQuery({
     queryKey: ['rig-perf-assignments', todayStr],
@@ -385,10 +447,23 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] text-white/60 uppercase font-semibold tracking-wide">Earned today</p>
-            <p className="text-lg font-bold tabular-nums leading-none">{fmtGBP(totalRevenue)}</p>
-            {totalMeterage > 0 && <p className="text-[10px] text-white/70 mt-0.5">{totalMeterage.toFixed(1)}m drilled</p>}
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-[10px] text-white/60 uppercase font-semibold tracking-wide">Drilled today</p>
+              <p className="text-lg font-bold tabular-nums leading-none">{liveToday.totals.metres.toFixed(1)}m</p>
+              <p className="text-[10px] text-white/70 mt-0.5">{fmtGBP(liveToday.totals.earnings)} earned</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowFullFigures((v) => !v)}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-bold transition ${
+                showFullFigures ? 'bg-white text-[#2E5A1A]' : 'bg-white/15 hover:bg-white/25 text-white ring-1 ring-white/20'
+              }`}
+              title="Toggle full all-time figures"
+            >
+              <BarChart3 className="w-3.5 h-3.5" /> Full figures
+            </button>
+            <RunReportButton hub="rigs" />
           </div>
         </div>
       </div>
@@ -476,6 +551,41 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
           View All Rigs ({activeRigCount})
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
+
+        {/* Full figures — all-time per-rig live earnings from metres × rate cards */}
+        {showFullFigures && (
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="w-3.5 h-3.5 text-[#2E5A1A]" />
+              <p className="text-xs font-bold text-slate-700">Full Figures — all-time per rig</p>
+              <span className="ml-auto text-[10px] text-slate-400">
+                {liveAll.totals.metres.toFixed(1)}m · {fmtGBP(liveAll.totals.earnings)} · {liveAll.totals.rigs} rig{liveAll.totals.rigs !== 1 ? 's' : ''}
+              </span>
+            </div>
+            {liveAll.perRig.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-4">No drilling logs yet.</p>
+            ) : (
+              <div className="space-y-1 max-h-56 overflow-y-auto">
+                {liveAll.perRig.map((r) => (
+                  <div key={r.key} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-white transition">
+                    <Cog className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-800 truncate">{r.name}</p>
+                      <p className="text-[10px] text-slate-400">{r.boreholeCount} boreholes · {r.totalMetres.toFixed(1)}m</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      {r.hasRate ? (
+                        <p className="text-xs font-bold text-emerald-700 tabular-nums">{fmtGBP(r.earnings)}</p>
+                      ) : (
+                        <p className="text-[10px] text-slate-400">No rate</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* All Rigs Modal */}

@@ -20,7 +20,7 @@ import { inferBoreholeStatus } from '@/utils/geotechBilling';
  *  - totals: aggregated totals object from BoreholeDrillDown
  *  - sorItems: InvestigationSOR records for rig earnings calculation
  */
-export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [] }) {
+export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [], job = null }) {
   // Strata distribution data for the donut chart
   const strataData = useMemo(() => {
     const byType = {};
@@ -130,7 +130,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [] 
 
       {/* Rig earnings strip — always visible if boreholes exist */}
       {boreholes.length > 0 && (
-        <RigEarningsStrip boreholes={boreholes} sorItems={sorItems} />
+        <RigEarningsStrip boreholes={boreholes} sorItems={sorItems} job={job} />
       )}
 
       {/* Charts row — strata donut + depth bar when data exists,

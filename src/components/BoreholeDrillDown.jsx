@@ -134,7 +134,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
 
   return (
     <div className="space-y-4">
-      <BoreholeSummaryPanel boreholes={boreholes} totals={totals} sorItems={sorItems} />
+      <BoreholeSummaryPanel boreholes={boreholes} totals={totals} sorItems={sorItems} job={job} />
       <div className="insight-card rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
