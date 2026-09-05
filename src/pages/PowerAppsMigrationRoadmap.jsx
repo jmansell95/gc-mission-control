@@ -288,31 +288,31 @@ export default function PowerAppsMigrationRoadmap() {
     const el = document.querySelector('.powerapps-roadmap-print-area');
     if (!el || generating) return;
     setGenerating(true);
-    // Clone into an off-screen 1170px container so the lg: (desktop / A3 landscape)
-    // layout applies regardless of the real viewport width.
+    // Clone into an off-screen 800px container (A4 portrait booklet width) so the
+    // single-column booklet layout renders regardless of the real viewport width.
     const holder = document.createElement('div');
-    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:1170px;background:#f1f5f9;z-index:-1;';
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;background:#ffffff;z-index:-1;';
     const clone = el.cloneNode(true);
-    clone.style.cssText = 'width:1170px;max-width:1170px;padding:0;margin:0;';
+    clone.style.cssText = 'width:800px;max-width:800px;padding:0;margin:0;';
     holder.appendChild(clone);
     document.body.appendChild(holder);
     try {
       await new Promise((r) => setTimeout(r, 200));
       const pageEls = Array.from(holder.querySelectorAll('.print-page'));
-      const pdf = new jsPDF('l', 'mm', 'a3'); // A3 landscape: 420 x 297 mm
+      const pdf = new jsPDF('p', 'mm', 'a4'); // A4 portrait: 210 x 297 mm
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const margin = 8;
+      const margin = 6;
       const availW = pageW - margin * 2;
       const availH = pageH - margin * 2;
       let first = true;
       for (const pageEl of pageEls) {
         const canvas = await html2canvas(pageEl, {
           scale: 2,
-          backgroundColor: '#f1f5f9',
+          backgroundColor: '#ffffff',
           useCORS: true,
-          windowWidth: 1170,
-          width: 1170,
+          windowWidth: 800,
+          width: 800,
         });
         const imgData = canvas.toDataURL('image/png');
         const ratio = Math.min(availW / canvas.width, availH / canvas.height);
@@ -517,58 +517,56 @@ export default function PowerAppsMigrationRoadmap() {
           </div>
         </section>
 
-        {/* === PAGES 2-N: Phase detail pages (stacked on mobile, 2 per A3 page on print) === */}
-        {PHASES.map((p, idx) => {
-          const showOnPage = idx % 2 === 0;
-          if (!showOnPage) return null;
-          const p1 = p;
-          const p2 = PHASES[idx + 1];
+        {/* === Phase detail pages — one phase per A4 page === */}
+        {PHASES.map((p) => {
+          const Icon = p.icon;
           return (
-            <section key={p.n} className="print-page mb-6 sm:mb-0 print:page-break-before" style={{ printBreakBefore: idx > 0 ? 'always' : 'auto' }}>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-                {[p1, p2].filter(Boolean).map(phase => {
-                  const Icon = phase.icon;
-                  return (
-                    <div key={phase.n} className="flex flex-col">
-                      {/* Phase banner */}
-                      <div className="rounded-xl overflow-hidden mb-3 shadow-sm" style={{ background: `linear-gradient(135deg, ${phase.color}, ${phase.color}cc)` }}>
-                        <div className="px-3 sm:px-4 py-2.5 text-white flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-lg bg-white/25 flex items-center justify-center flex-shrink-0">
-                            <Icon className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs sm:text-[10px] uppercase tracking-wide text-white/80 font-semibold">Phase {phase.n} · {phase.weeks} weeks</p>
-                            <h3 className="text-sm sm:text-sm font-bold truncate">{phase.name}</h3>
-                          </div>
-                          {phase.deps.length > 0 && (
-                            <span className="text-xs sm:text-[9px] bg-white/25 px-1.5 py-0.5 rounded flex-shrink-0">Depends on P{phase.deps.join(', P')}</span>
-                          )}
-                        </div>
-                      </div>
-
-                      <p className="text-sm sm:text-[11px] text-slate-600 mb-3 leading-relaxed">{phase.summary}</p>
-
-                      {/* Step checklist */}
-                      <div className="space-y-2 sm:space-y-1.5 flex-1">
-                        {phase.steps.map((step, si) => {
-                          const key = `${phase.n}-${si}`;
-                          const isChecked = !!checked[key];
-                          return (
-                            <label key={si} className="flex items-start gap-2.5 sm:gap-2 cursor-pointer group">
-                              <span
-                                onClick={(e) => { e.preventDefault(); toggle(key); }}
-                                className={`mt-0.5 w-6 h-6 sm:w-4 sm:h-4 rounded border flex-shrink-0 flex items-center justify-center transition ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300 group-hover:border-emerald-400'}`}
-                              >
-                                {isChecked && <CheckCircle2 className="w-4 h-4 sm:w-3 sm:h-3 text-white" />}
-                              </span>
-                              <span className={`text-sm sm:text-[10.5px] leading-snug ${isChecked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
-                                {step}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
+            <section key={p.n} className="print-page booklet-phase mb-6 sm:mb-0">
+              {/* Phase hero header */}
+              <div className="rounded-2xl overflow-hidden mb-4 shadow-sm relative" style={{ background: `linear-gradient(135deg, ${p.color} 0%, ${p.color}cc 60%, ${p.color}99 100%)` }}>
+                <div className="absolute top-0 right-0 w-28 h-28 rounded-full opacity-10" style={{ background: 'white', transform: 'translate(30px,-30px)' }} />
+                <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full opacity-10" style={{ background: 'white', transform: 'translate(-20px,20px)' }} />
+                <div className="px-4 sm:px-5 py-4 text-white relative flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
+                      <span className="text-[11px] uppercase tracking-[0.18em] text-white/85 font-bold">Phase {p.n}</span>
+                      <span className="text-[11px] text-white/50">•</span>
+                      <span className="text-[11px] text-white/85 font-semibold">{p.weeks} weeks</span>
+                      {p.deps.length > 0 && (
+                        <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Depends on P{p.deps.join(', P')}</span>
+                      )}
                     </div>
+                    <h3 className="text-lg sm:text-xl font-extrabold leading-tight">{p.name}</h3>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary callout */}
+              <div className="rounded-xl p-3.5 mb-4 bg-slate-50 border-l-4" style={{ borderLeftColor: p.color }}>
+                <p className="text-[12px] sm:text-[13px] text-slate-700 leading-relaxed">{p.summary}</p>
+              </div>
+
+              {/* Numbered steps */}
+              <div className="space-y-2.5">
+                {p.steps.map((step, si) => {
+                  const key = `${p.n}-${si}`;
+                  const isChecked = !!checked[key];
+                  return (
+                    <label key={si} className="flex items-start gap-3 cursor-pointer group">
+                      <span
+                        onClick={(e) => { e.preventDefault(); toggle(key); }}
+                        className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition ${isChecked ? 'text-white border-transparent' : 'text-slate-400 border-slate-200 bg-white group-hover:border-emerald-400'}`}
+                        style={isChecked ? { background: p.color } : {}}
+                      >
+                        {isChecked ? <CheckCircle2 className="w-4 h-4" /> : si + 1}
+                      </span>
+                      <span className={`text-[12px] sm:text-[13px] leading-relaxed pt-0.5 ${isChecked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                        {step}
+                      </span>
+                    </label>
                   );
                 })}
               </div>
@@ -736,58 +734,29 @@ export default function PowerAppsMigrationRoadmap() {
           </div>
 
           <div className="mt-4 rounded-xl px-4 py-3 text-white text-center" style={{ background: `linear-gradient(135deg, ${BRAND_DARK}, #1c4a12 50%, ${BRAND_LEAF})` }}>
-            <p className="text-xs sm:text-[10px] font-semibold">GC Mission Control · Microsoft Power Apps Migration Roadmap · Generated {new Date().toLocaleDateString('en-GB')} · Print on A3 landscape</p>
+            <p className="text-xs sm:text-[10px] font-semibold">GC Mission Control · Microsoft Power Apps Migration Roadmap · Generated {new Date().toLocaleDateString('en-GB')} · A4 Booklet</p>
           </div>
         </section>
       </div>
 
-      {/* Print styles — A3 landscape with original fixed-width layout */}
+      {/* Print styles — A4 portrait booklet */}
       <style>{`
         @media print {
-          @page { size: A3 landscape; margin: 8mm; }
+          @page { size: A4 portrait; margin: 10mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-          body { background: white !important; }
+          html, body { background: white !important; }
           .print-hide { display: none !important; }
           .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; position: static !important; width: auto !important; }
           .print-page {
-            width: 1170px !important;
-            min-height: 827px !important;
-            padding: 1.5rem 2rem !important;
+            width: 794px !important;
+            min-height: 1123px !important;
+            padding: 0 !important;
             margin-bottom: 0 !important;
             page-break-after: always;
             break-after: page;
           }
           .print-page:last-child { page-break-after: auto; }
-          .print-page .grid { display: grid !important; }
-          .print-page table { display: table !important; }
-          .print-page .block.lg\\:hidden { display: none !important; }
-          .print-page .hidden.lg\\:table { display: table !important; }
-          .print-page .hidden.lg\\:block { display: block !important; }
-          .print-page .grid-cols-1 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-          .print-page .text-sm { font-size: 10.5px !important; }
-          .print-page .text-xs { font-size: 10px !important; }
-          .print-page .text-base { font-size: 14px !important; }
-          .print-page .text-xl { font-size: 24px !important; }
-          .print-page .text-2xl { font-size: 28px !important; }
-          .print-page .text-3xl { font-size: 30px !important; }
-          .print-page h1 { font-size: 30px !important; }
-          .print-page h2 { font-size: 14px !important; }
-          .print-page h3 { font-size: 13px !important; }
-          .print-page .w-6 { width: 16px !important; height: 16px !important; }
-          .print-page .w-4 { width: 12px !important; height: 12px !important; }
-          .print-page .h-6 { height: 16px !important; }
-          .print-page .h-5 { height: 20px !important; }
-          .print-page .space-y-2 > * + * { margin-top: 6px !important; }
-          .print-page .gap-3 { gap: 12px !important; }
-          .print-page .gap-4 { gap: 16px !important; }
-          .print-page .gap-5 { gap: 20px !important; }
-          .print-page .p-3 { padding: 12px !important; }
-          .print-page .px-3 { padding-left: 12px !important; padding-right: 12px !important; }
-          .print-page .py-2\\.5 { padding-top: 10px !important; padding-bottom: 10px !important; }
-          .print-page .mb-3 { margin-bottom: 12px !important; }
-          .print-page .mb-4 { margin-bottom: 16px !important; }
-          .print-page .mb-5 { margin-bottom: 20px !important; }
-          .print-page .mb-6 { margin-bottom: 0 !important; }
+          .booklet-phase { padding: 0 4px !important; }
         }
       `}</style>
     </div>
