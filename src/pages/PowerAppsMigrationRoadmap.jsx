@@ -303,7 +303,7 @@ export default function PowerAppsMigrationRoadmap() {
       </div>
 
       {/* Print area — responsive on screen, A3 landscape on print */}
-      <div className="powerapps-roadmap-print-area mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-5xl">
+      <div className="print-area powerapps-roadmap-print-area mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-5xl">
         {/* === PAGE 1: Executive Summary + Architecture + Gantt === */}
         <section className="print-page mb-6 sm:mb-0">
           {/* Title banner */}
@@ -647,7 +647,7 @@ export default function PowerAppsMigrationRoadmap() {
           @page { size: A3 landscape; margin: 8mm; }
           body { background: white !important; }
           .print-hide { display: none !important; }
-          .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+          .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; position: static !important; width: auto !important; }
           .print-page {
             width: 1170px !important;
             min-height: 827px !important;
