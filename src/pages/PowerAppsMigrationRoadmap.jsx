@@ -275,7 +275,7 @@ export default function PowerAppsMigrationRoadmap() {
   const pct = Math.round((doneSteps / totalSteps) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 overflow-x-auto">
       {/* Screen header — hidden on print */}
       <div className="print:hidden sticky top-0 z-20 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
