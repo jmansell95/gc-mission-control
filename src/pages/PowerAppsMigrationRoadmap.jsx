@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Printer, CheckCircle2, AlertTriangle, Database, Users, LayoutGrid, Smartphone, Receipt, Calendar, FlaskConical, Workflow, BarChart3, Bell, GitMerge, ShieldCheck, Layers, Clock, DollarSign, Zap, Globe } from 'lucide-react';
+import { ArrowLeft, Printer, Download, CheckCircle2, AlertTriangle, Database, Users, LayoutGrid, Smartphone, Receipt, Calendar, FlaskConical, Workflow, BarChart3, Bell, GitMerge, ShieldCheck, Layers, Clock, DollarSign, Zap, Globe } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const BRAND_DARK = '#2E5A1A';
 const BRAND_LEAF = '#8DC63F';
@@ -280,6 +282,53 @@ export default function PowerAppsMigrationRoadmap() {
   const totalSteps = PHASES.reduce((s, p) => s + p.steps.length, 0);
   const doneSteps = Object.values(checked).filter(Boolean).length;
   const pct = Math.round((doneSteps / totalSteps) * 100);
+  const [generating, setGenerating] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    const el = document.querySelector('.powerapps-roadmap-print-area');
+    if (!el || generating) return;
+    setGenerating(true);
+    const prev = { width: el.style.width, maxWidth: el.style.maxWidth, padding: el.style.padding };
+    try {
+      // Force the A3 landscape (desktop) layout so the capture matches the print design
+      el.style.width = '1170px';
+      el.style.maxWidth = '1170px';
+      el.style.padding = '0';
+      await new Promise((r) => setTimeout(r, 120));
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: '#f1f5f9',
+        useCORS: true,
+        windowWidth: 1170,
+        width: 1170,
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a3'); // A3 landscape = 420 x 297 mm
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position -= pageH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+        heightLeft -= pageH;
+      }
+      pdf.save('GC-Mission-Control-PowerApps-Migration-Roadmap.pdf');
+    } catch (e) {
+      console.error('PDF generation failed', e);
+      window.print();
+    } finally {
+      el.style.width = prev.width;
+      el.style.maxWidth = prev.maxWidth;
+      el.style.padding = prev.padding;
+      setGenerating(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -293,8 +342,20 @@ export default function PowerAppsMigrationRoadmap() {
           <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Power Apps Migration Roadmap</h1>
           <span className="hidden sm:inline text-xs text-slate-500 flex-shrink-0">{pct}% complete ({doneSteps}/{totalSteps} steps)</span>
         </div>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-[#1c4a12] transition flex-shrink-0">
-          <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Print / Save as PDF</span>
+        <button onClick={handleDownloadPDF} disabled={generating} className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-[#1c4a12] transition flex-shrink-0 disabled:opacity-60">
+          {generating ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+              <span className="hidden sm:inline">Generating PDF…</span>
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4" /> <span className="hidden sm:inline">Download PDF</span>
+            </>
+          )}
+        </button>
+        <button onClick={() => window.print()} className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-50 transition flex-shrink-0" title="Open browser print dialog">
+          <Printer className="w-4 h-4" />
         </button>
       </div>
 
