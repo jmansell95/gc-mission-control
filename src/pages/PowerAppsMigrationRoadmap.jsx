@@ -288,44 +288,48 @@ export default function PowerAppsMigrationRoadmap() {
     const el = document.querySelector('.powerapps-roadmap-print-area');
     if (!el || generating) return;
     setGenerating(true);
-    const prev = { width: el.style.width, maxWidth: el.style.maxWidth, padding: el.style.padding };
+    // Clone into an off-screen 1170px container so the lg: (desktop / A3 landscape)
+    // layout applies regardless of the real viewport width.
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:1170px;background:#f1f5f9;z-index:-1;';
+    const clone = el.cloneNode(true);
+    clone.style.cssText = 'width:1170px;max-width:1170px;padding:0;margin:0;';
+    holder.appendChild(clone);
+    document.body.appendChild(holder);
     try {
-      // Force the A3 landscape (desktop) layout so the capture matches the print design
-      el.style.width = '1170px';
-      el.style.maxWidth = '1170px';
-      el.style.padding = '0';
-      await new Promise((r) => setTimeout(r, 120));
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        backgroundColor: '#f1f5f9',
-        useCORS: true,
-        windowWidth: 1170,
-        width: 1170,
-      });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a3'); // A3 landscape = 420 x 297 mm
+      await new Promise((r) => setTimeout(r, 200));
+      const pageEls = Array.from(holder.querySelectorAll('.print-page'));
+      const pdf = new jsPDF('l', 'mm', 'a3'); // A3 landscape: 420 x 297 mm
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position -= pageH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-        heightLeft -= pageH;
+      const margin = 8;
+      const availW = pageW - margin * 2;
+      const availH = pageH - margin * 2;
+      let first = true;
+      for (const pageEl of pageEls) {
+        const canvas = await html2canvas(pageEl, {
+          scale: 2,
+          backgroundColor: '#f1f5f9',
+          useCORS: true,
+          windowWidth: 1170,
+          width: 1170,
+        });
+        const imgData = canvas.toDataURL('image/png');
+        const ratio = Math.min(availW / canvas.width, availH / canvas.height);
+        const w = canvas.width * ratio;
+        const h = canvas.height * ratio;
+        const x = (pageW - w) / 2;
+        const y = (pageH - h) / 2;
+        if (!first) pdf.addPage();
+        first = false;
+        pdf.addImage(imgData, 'PNG', x, y, w, h);
       }
       pdf.save('GC-Mission-Control-PowerApps-Migration-Roadmap.pdf');
     } catch (e) {
       console.error('PDF generation failed', e);
       window.print();
     } finally {
-      el.style.width = prev.width;
-      el.style.maxWidth = prev.maxWidth;
-      el.style.padding = prev.padding;
+      document.body.removeChild(holder);
       setGenerating(false);
     }
   };
