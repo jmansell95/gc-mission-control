@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Printer, Download, CheckCircle2, AlertTriangle, Database, Users, LayoutGrid, Smartphone, Receipt, Calendar, FlaskConical, Workflow, BarChart3, Bell, GitMerge, ShieldCheck, Layers, Clock, DollarSign, Zap, Globe } from 'lucide-react';
+import { ArrowLeft, Printer, Download, CheckCircle2, AlertTriangle, Database, Users, LayoutGrid, Smartphone, Receipt, Calendar, FlaskConical, Workflow, BarChart3, Bell, GitMerge, ShieldCheck, Layers, Clock, DollarSign, Zap, Globe, Code, Lightbulb } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import CodeSnippetBlock from '@/components/powerapps/CodeSnippetBlock';
+import DeveloperPackPage from '@/components/powerapps/DeveloperPackPage';
+import { PHASE_SNIPPETS, getCompactFlow } from '@/utils/powerapps/phaseSnippets';
 
 const BRAND_DARK = '#2E5A1A';
 const BRAND_LEAF = '#8DC63F';
@@ -295,6 +298,10 @@ export default function PowerAppsMigrationRoadmap() {
     const clone = el.cloneNode(true);
     clone.style.cssText = 'width:800px;max-width:800px;padding:0;margin:0;';
     holder.appendChild(clone);
+    // Force each print-page to A4 height so short pages fill the whole frame
+    const minHStyle = document.createElement('style');
+    minHStyle.textContent = '.print-page{min-height:1123px!important;}';
+    holder.appendChild(minHStyle);
     document.body.appendChild(holder);
     try {
       await new Promise((r) => setTimeout(r, 200));
@@ -314,15 +321,36 @@ export default function PowerAppsMigrationRoadmap() {
           windowWidth: 800,
           width: 800,
         });
-        const imgData = canvas.toDataURL('image/png');
-        const ratio = Math.min(availW / canvas.width, availH / canvas.height);
-        const w = canvas.width * ratio;
-        const h = canvas.height * ratio;
-        const x = (pageW - w) / 2;
-        const y = (pageH - h) / 2;
-        if (!first) pdf.addPage();
-        first = false;
-        pdf.addImage(imgData, 'PNG', x, y, w, h);
+        const ratio = availW / canvas.width; // fill the full page width
+        const renderedH = canvas.height * ratio;
+        if (renderedH <= availH) {
+          // Fits on one A4 page — center vertically so the page looks balanced
+          const imgData = canvas.toDataURL('image/png');
+          const w = canvas.width * ratio;
+          const h = canvas.height * ratio;
+          if (!first) pdf.addPage();
+          first = false;
+          pdf.addImage(imgData, 'PNG', margin, (pageH - h) / 2, w, h);
+        } else {
+          // Taller than one page — slice into A4-height chunks at full width
+          const pxPermm = canvas.width / availW;
+          const pageHpx = Math.floor(availH * pxPermm);
+          let y = 0;
+          while (y < canvas.height) {
+            const sliceH = Math.min(pageHpx, canvas.height - y);
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = canvas.width;
+            sliceCanvas.height = sliceH;
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, sliceCanvas.width, sliceH);
+            ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+            if (!first) pdf.addPage();
+            first = false;
+            pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, availW, sliceH * ratio);
+            y += sliceH;
+          }
+        }
       }
       pdf.save('GC-Mission-Control-PowerApps-Migration-Roadmap.pdf');
     } catch (e) {
@@ -570,6 +598,33 @@ export default function PowerAppsMigrationRoadmap() {
                   );
                 })}
               </div>
+
+              {/* Code snippets — Power Fx, Dataverse schema, Power Automate flow */}
+              <div className="mt-4 space-y-2.5">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                  <Code className="w-3.5 h-3.5" /> Code Snippets
+                </div>
+                <CodeSnippetBlock language="Power Fx" title={p.name} code={PHASE_SNIPPETS[p.n]?.powerFx || ''} />
+                <CodeSnippetBlock language="Dataverse" title={PHASE_SNIPPETS[p.n]?.dataverseTable} code={PHASE_SNIPPETS[p.n]?.dataverse || ''} />
+                <CodeSnippetBlock language="Power Automate" title={PHASE_SNIPPETS[p.n]?.flowName} code={getCompactFlow(PHASE_SNIPPETS[p.n]?.flowName)} />
+              </div>
+
+              {/* Build tips — pad short phases so every page fills the A4 frame */}
+              {PHASE_SNIPPETS[p.n]?.tips?.length > 0 && (
+                <div className="mt-3 rounded-xl border border-slate-200 p-3 bg-slate-50">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-2">
+                    <Lightbulb className="w-3.5 h-3.5" /> Build Tips
+                  </div>
+                  <ul className="space-y-1">
+                    {PHASE_SNIPPETS[p.n].tips.map((t, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[11px] text-slate-600 leading-relaxed">
+                        <span className="text-emerald-500 font-bold mt-0.5">→</span>
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           );
         })}
@@ -736,6 +791,11 @@ export default function PowerAppsMigrationRoadmap() {
           <div className="mt-4 rounded-xl px-4 py-3 text-white text-center" style={{ background: `linear-gradient(135deg, ${BRAND_DARK}, #1c4a12 50%, ${BRAND_LEAF})` }}>
             <p className="text-xs sm:text-[10px] font-semibold">GC Mission Control · Microsoft Power Apps Migration Roadmap · Generated {new Date().toLocaleDateString('en-GB')} · A4 Booklet</p>
           </div>
+        </section>
+
+        {/* === Developer Pack page — generate & download the full importable pack === */}
+        <section className="print-page mb-6 sm:mb-0">
+          <DeveloperPackPage />
         </section>
       </div>
 
