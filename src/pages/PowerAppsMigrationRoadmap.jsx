@@ -275,38 +275,49 @@ export default function PowerAppsMigrationRoadmap() {
   const pct = Math.round((doneSteps / totalSteps) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-100 overflow-x-auto">
+    <div className="min-h-screen bg-slate-100">
       {/* Screen header — hidden on print */}
-      <div className="print:hidden sticky top-0 z-20 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <Link to="/admin" className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" /> Back
+      <div className="print-hide sticky top-0 z-20 bg-white border-b border-slate-200 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Link to="/admin" className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-xs sm:text-sm font-medium flex-shrink-0">
+            <ArrowLeft className="w-4 h-4" /> <span className="hidden sm:inline">Back</span>
           </Link>
-          <div className="h-5 w-px bg-slate-200" />
-          <h1 className="text-base font-bold text-slate-900">Power Apps Migration Roadmap</h1>
-          <span className="hidden sm:inline text-xs text-slate-500">{pct}% complete ({doneSteps}/{totalSteps} steps)</span>
+          <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
+          <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Power Apps Migration Roadmap</h1>
+          <span className="hidden sm:inline text-xs text-slate-500 flex-shrink-0">{pct}% complete ({doneSteps}/{totalSteps} steps)</span>
         </div>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
-          <Printer className="w-4 h-4" /> Print / Save as PDF
+        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-[#1c4a12] transition flex-shrink-0">
+          <Printer className="w-4 h-4" /> <span className="hidden sm:inline">Print / Save as PDF</span>
         </button>
       </div>
 
-      {/* A3 landscape print area */}
-      <div className="powerapps-roadmap-print-area bg-white mx-auto" style={{ maxWidth: '1170px' }}>
+      {/* Mobile progress bar (visible on mobile only) */}
+      <div className="print:hidden sm:hidden px-3 py-2 bg-white border-b border-slate-200">
+        <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
+          <span className="font-semibold">Progress</span>
+          <span>{pct}% · {doneSteps}/{totalSteps} steps</span>
+        </div>
+        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+
+      {/* Print area — responsive on screen, A3 landscape on print */}
+      <div className="powerapps-roadmap-print-area mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-5xl">
         {/* === PAGE 1: Executive Summary + Architecture + Gantt === */}
-        <section className="print-page px-8 py-6" style={{ width: '1170px', minHeight: '827px' }}>
+        <section className="print-page mb-6 sm:mb-0">
           {/* Title banner */}
-          <div className="rounded-2xl overflow-hidden mb-5" style={{ background: `linear-gradient(135deg, ${BRAND_DARK} 0%, #1c4a12 55%, ${BRAND_LEAF} 100%)` }}>
-            <div className="px-7 py-5 text-white">
-              <div className="flex items-center justify-between">
+          <div className="rounded-2xl overflow-hidden mb-4 sm:mb-5" style={{ background: `linear-gradient(135deg, ${BRAND_DARK} 0%, #1c4a12 55%, ${BRAND_LEAF} 100%)` }}>
+            <div className="px-4 sm:px-7 py-4 sm:py-5 text-white">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-semibold">GC Mission Control</p>
-                  <h1 className="text-3xl font-extrabold tracking-tight mt-0.5">Microsoft Power Apps Migration Roadmap</h1>
-                  <p className="text-sm text-white/80 mt-1">Like-for-like capability parity · Hybrid (model-driven + canvas) · Native equivalents · A3 landscape</p>
+                  <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight mt-0.5">Microsoft Power Apps Migration Roadmap</h1>
+                  <p className="text-xs sm:text-sm text-white/80 mt-1">Like-for-like capability parity · Hybrid (model-driven + canvas) · Native equivalents</p>
                 </div>
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-xs text-white/60">Estimated duration</p>
-                  <p className="text-2xl font-extrabold">{TOTAL_WEEKS} weeks</p>
+                  <p className="text-xl sm:text-2xl font-extrabold">{TOTAL_WEEKS} weeks</p>
                   <p className="text-xs text-white/60 mt-0.5">{PHASES.length} phases · {totalSteps} steps</p>
                 </div>
               </div>
@@ -314,97 +325,99 @@ export default function PowerAppsMigrationRoadmap() {
           </div>
 
           {/* Executive summary */}
-          <div className="grid grid-cols-2 gap-4 mb-5">
-            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <h2 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Layers className="w-4 h-4" style={{ color: BRAND_DARK }} /> Hybrid Architecture</h2>
-              <p className="text-xs text-slate-600 leading-relaxed">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-5">
+            <div className="rounded-xl border border-slate-200 p-3 sm:p-4 bg-slate-50">
+              <h2 className="text-sm sm:text-base font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Layers className="w-4 h-4" style={{ color: BRAND_DARK }} /> Hybrid Architecture</h2>
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed">
                 <strong>Model-driven apps</strong> for the data-heavy admin CRUD screens (Staff, Jobs, Assets, Fleet, Compliance, Settings) — auto-generated forms and views over Dataverse tables, fast to build, standardised UI.
               </p>
-              <p className="text-xs text-slate-600 leading-relaxed mt-2">
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed mt-2">
                 <strong>Canvas apps</strong> for the custom-UX field crew mobile experience (Shift Wizard, Scanner, Deliveries) and the complex builders (Rota, AFP, CVR) — hand-built screens with Power Fx, full control over layout.
               </p>
-              <p className="text-xs text-slate-600 leading-relaxed mt-2">
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed mt-2">
                 <strong>Power Automate</strong> replaces all 200+ Base44 backend functions. <strong>Power BI</strong> replaces the custom React dashboards. <strong>Power Pages</strong> hosts the client portal.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <h2 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Zap className="w-4 h-4" style={{ color: BRAND_DARK }} /> Sequencing Strategy</h2>
-              <p className="text-xs text-slate-600 leading-relaxed">
+            <div className="rounded-xl border border-slate-200 p-3 sm:p-4 bg-slate-50">
+              <h2 className="text-sm sm:text-base font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Zap className="w-4 h-4" style={{ color: BRAND_DARK }} /> Sequencing Strategy</h2>
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed">
                 Phases are sequenced to <strong>prove parity on the hardest modules first</strong> (AFP in Phase 5, Rota in Phase 6) so that if a gap is found early, the plan can adapt before the easier modules are built.
               </p>
-              <p className="text-xs text-slate-600 leading-relaxed mt-2">
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed mt-2">
                 The foundation (Phases 0-2) and the canvas field app (Phase 4) run in parallel with the admin hubs (Phase 3) to compress the timeline. Integrations (Phase 8) run alongside the module builds.
               </p>
-              <p className="text-xs text-slate-600 leading-relaxed mt-2">
+              <p className="text-sm sm:text-xs text-slate-600 leading-relaxed mt-2">
                 <strong>Goal:</strong> zero dependency on Base44. Everything inside the Microsoft Power Platform.
               </p>
             </div>
           </div>
 
           {/* Architecture diagram (CSS) */}
-          <div className="rounded-xl border border-slate-200 p-4 mb-5">
-            <h2 className="text-sm font-bold text-slate-800 mb-3">Architecture Map</h2>
-            <div className="grid grid-cols-5 gap-2 text-center text-[10px]">
-              <div className="rounded-lg p-2 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_DARK }}>
+          <div className="rounded-xl border border-slate-200 p-3 sm:p-4 mb-4 sm:mb-5">
+            <h2 className="text-sm sm:text-base font-bold text-slate-800 mb-3">Architecture Map</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs sm:text-[10px]">
+              <div className="rounded-lg p-2 sm:p-2.5 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_DARK }}>
                 <Users className="w-4 h-4 mb-1" /> Entra ID SSO
               </div>
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <Database className="w-4 h-4 mb-1" /> Dataverse
               </div>
-              <div className="rounded-lg p-2 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_LEAF, color: '#1c4a12' }}>
+              <div className="rounded-lg p-2 sm:p-2.5 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_LEAF, color: '#1c4a12' }}>
                 <LayoutGrid className="w-4 h-4 mb-1" /> Model-Driven Apps
               </div>
-              <div className="rounded-lg p-2 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_LEAF, color: '#1c4a12' }}>
+              <div className="rounded-lg p-2 sm:p-2.5 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_LEAF, color: '#1c4a12' }}>
                 <Smartphone className="w-4 h-4 mb-1" /> Canvas Apps
               </div>
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <Workflow className="w-4 h-4 mb-1" /> Power Automate
               </div>
             </div>
-            <div className="grid grid-cols-5 gap-2 text-center text-[10px] mt-2">
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs sm:text-[10px] mt-2">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <BarChart3 className="w-4 h-4 mb-1" /> Power BI
               </div>
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <Globe className="w-4 h-4 mb-1" /> Power Pages
               </div>
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <FlaskConical className="w-4 h-4 mb-1" /> AI Builder
               </div>
-              <div className="rounded-lg p-2 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
+              <div className="rounded-lg p-2 sm:p-2.5 bg-slate-700 text-white font-bold flex flex-col items-center justify-center">
                 <Bell className="w-4 h-4 mb-1" /> Outlook / Teams
               </div>
-              <div className="rounded-lg p-2 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_DARK }}>
+              <div className="rounded-lg p-2 sm:p-2.5 text-white font-bold flex flex-col items-center justify-center" style={{ background: BRAND_DARK }}>
                 <Workflow className="w-4 h-4 mb-1" /> 200+ Flows
               </div>
             </div>
           </div>
 
-          {/* Gantt chart */}
-          <div className="rounded-xl border border-slate-200 p-4">
-            <h2 className="text-sm font-bold text-slate-800 mb-3">Phased Timeline (Gantt)</h2>
-            <div className="space-y-1.5">
-              {PHASES.map(p => {
-                const startWeek = p.deps.length ? Math.max(...p.deps.map(d => {
-                  const dep = PHASES.find(x => x.n === d);
-                  return dep ? dep.weeks + (dep.deps.length ? Math.max(...dep.deps.map(dd => PHASES.find(x => x.n === dd)?.weeks || 0)) : 0) : 0;
-                })) : 0;
-                return (
-                  <div key={p.n} className="flex items-center gap-2">
-                    <div className="w-48 flex-shrink-0 text-[10px] font-semibold text-slate-700 truncate">
-                      P{p.n} · {p.name}
-                    </div>
-                    <div className="flex-1 relative h-5 bg-slate-100 rounded">
-                      <div className="absolute top-0 bottom-0 rounded flex items-center px-2 text-[9px] font-bold text-white"
-                        style={{ left: `${(startWeek / TOTAL_WEEKS) * 100}%`, width: `${(p.weeks / TOTAL_WEEKS) * 100}%`, background: p.color }}>
-                        {p.weeks}w
+          {/* Gantt chart — horizontal scroll on mobile */}
+          <div className="rounded-xl border border-slate-200 p-3 sm:p-4">
+            <h2 className="text-sm sm:text-base font-bold text-slate-800 mb-3">Phased Timeline (Gantt)</h2>
+            <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+              <div className="space-y-1.5" style={{ minWidth: '500px' }}>
+                {PHASES.map(p => {
+                  const startWeek = p.deps.length ? Math.max(...p.deps.map(d => {
+                    const dep = PHASES.find(x => x.n === d);
+                    return dep ? dep.weeks + (dep.deps.length ? Math.max(...dep.deps.map(dd => PHASES.find(x => x.n === dd)?.weeks || 0)) : 0) : 0;
+                  })) : 0;
+                  return (
+                    <div key={p.n} className="flex items-center gap-2">
+                      <div className="w-32 sm:w-48 flex-shrink-0 text-xs sm:text-[10px] font-semibold text-slate-700 truncate">
+                        P{p.n} · {p.name}
+                      </div>
+                      <div className="flex-1 relative h-5 sm:h-6 bg-slate-100 rounded">
+                        <div className="absolute top-0 bottom-0 rounded flex items-center px-2 text-xs sm:text-[9px] font-bold text-white"
+                          style={{ left: `${(startWeek / TOTAL_WEEKS) * 100}%`, width: `${(p.weeks / TOTAL_WEEKS) * 100}%`, background: p.color }}>
+                          {p.weeks}w
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex justify-between mt-2 text-[9px] text-slate-400 px-48">
+            <div className="flex justify-between mt-2 text-xs sm:text-[9px] text-slate-400 pl-32 sm:pl-48 pr-2">
               {Array.from({ length: Math.ceil(TOTAL_WEEKS / 4) + 1 }).map((_, i) => (
                 <span key={i}>{i * 4}w</span>
               ))}
@@ -412,51 +425,51 @@ export default function PowerAppsMigrationRoadmap() {
           </div>
         </section>
 
-        {/* === PAGES 2-N: Phase detail pages (2 phases per A3 page) === */}
+        {/* === PAGES 2-N: Phase detail pages (stacked on mobile, 2 per A3 page on print) === */}
         {PHASES.map((p, idx) => {
           const showOnPage = idx % 2 === 0;
           if (!showOnPage) return null;
           const p1 = p;
           const p2 = PHASES[idx + 1];
           return (
-            <section key={p.n} className="print-page px-8 py-6" style={{ width: '1170px', minHeight: '827px', pageBreakBefore: idx > 0 }}>
-              <div className="grid grid-cols-2 gap-5 h-full">
+            <section key={p.n} className="print-page mb-6 sm:mb-0 print:page-break-before" style={{ printBreakBefore: idx > 0 ? 'always' : 'auto' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
                 {[p1, p2].filter(Boolean).map(phase => {
                   const Icon = phase.icon;
                   return (
                     <div key={phase.n} className="flex flex-col">
                       {/* Phase banner */}
                       <div className="rounded-xl overflow-hidden mb-3" style={{ background: phase.color }}>
-                        <div className="px-4 py-2.5 text-white flex items-center gap-2.5">
+                        <div className="px-3 sm:px-4 py-2.5 text-white flex items-center gap-2.5">
                           <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
                             <Icon className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] uppercase tracking-wide text-white/70 font-semibold">Phase {phase.n} · {phase.weeks} weeks</p>
-                            <h3 className="text-sm font-bold truncate">{phase.name}</h3>
+                            <p className="text-xs sm:text-[10px] uppercase tracking-wide text-white/70 font-semibold">Phase {phase.n} · {phase.weeks} weeks</p>
+                            <h3 className="text-sm sm:text-sm font-bold truncate">{phase.name}</h3>
                           </div>
                           {phase.deps.length > 0 && (
-                            <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded">Depends on P{phase.deps.join(', P')}</span>
+                            <span className="text-xs sm:text-[9px] bg-white/20 px-1.5 py-0.5 rounded flex-shrink-0">Depends on P{phase.deps.join(', P')}</span>
                           )}
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">{phase.summary}</p>
+                      <p className="text-sm sm:text-[11px] text-slate-600 mb-3 leading-relaxed">{phase.summary}</p>
 
                       {/* Step checklist */}
-                      <div className="space-y-1.5 flex-1">
+                      <div className="space-y-2 sm:space-y-1.5 flex-1">
                         {phase.steps.map((step, si) => {
                           const key = `${phase.n}-${si}`;
                           const isChecked = !!checked[key];
                           return (
-                            <label key={si} className="flex items-start gap-2 cursor-pointer group">
+                            <label key={si} className="flex items-start gap-2.5 sm:gap-2 cursor-pointer group">
                               <span
                                 onClick={(e) => { e.preventDefault(); toggle(key); }}
-                                className={`mt-0.5 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300 group-hover:border-emerald-400'}`}
+                                className={`mt-0.5 w-6 h-6 sm:w-4 sm:h-4 rounded border flex-shrink-0 flex items-center justify-center transition ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-slate-300 group-hover:border-emerald-400'}`}
                               >
-                                {isChecked && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                {isChecked && <CheckCircle2 className="w-4 h-4 sm:w-3 sm:h-3 text-white" />}
                               </span>
-                              <span className={`text-[10.5px] leading-snug ${isChecked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                              <span className={`text-sm sm:text-[10.5px] leading-snug ${isChecked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
                                 {step}
                               </span>
                             </label>
@@ -472,12 +485,25 @@ export default function PowerAppsMigrationRoadmap() {
         })}
 
         {/* === Parity Matrix page === */}
-        <section className="print-page px-8 py-6" style={{ width: '1170px', minHeight: '827px', pageBreakBefore: true }}>
+        <section className="print-page mb-6 sm:mb-0 print:page-break-before" style={{ printBreakBefore: 'always' }}>
           <div className="rounded-xl px-4 py-2.5 mb-4 text-white" style={{ background: BRAND_DARK }}>
-            <h2 className="text-base font-bold">Feature Parity Matrix</h2>
-            <p className="text-xs text-white/70">Every current Base44 feature → its Power Apps replacement → native-equivalent note → phase</p>
+            <h2 className="text-base sm:text-base font-bold">Feature Parity Matrix</h2>
+            <p className="text-sm sm:text-xs text-white/70">Every current Base44 feature → its Power Apps replacement → native-equivalent note → phase</p>
           </div>
-          <table className="w-full text-[10px] border-collapse">
+          {/* Mobile: card list; Desktop/print: table */}
+          <div className="block lg:hidden space-y-2">
+            {PARITY_MATRIX.map((row, i) => (
+              <div key={i} className="rounded-lg border border-slate-200 p-3 bg-white">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="text-sm font-bold text-slate-800">{row[0]}</h3>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0">P{row[3]}</span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1"><span className="font-semibold text-slate-500">Replacement:</span> {row[1]}</p>
+                <p className="text-xs text-slate-500 mt-1">{row[2]}</p>
+              </div>
+            ))}
+          </div>
+          <table className="hidden lg:table w-full text-[10px] border-collapse">
             <thead>
               <tr className="bg-slate-100 text-slate-700">
                 <th className="text-left px-2 py-1.5 font-bold border border-slate-200 w-1/4">Current Feature (Base44)</th>
@@ -500,33 +526,33 @@ export default function PowerAppsMigrationRoadmap() {
         </section>
 
         {/* === Risk Register page === */}
-        <section className="print-page px-8 py-6" style={{ width: '1170px', minHeight: '827px', pageBreakBefore: true }}>
+        <section className="print-page mb-6 sm:mb-0 print:page-break-before" style={{ printBreakBefore: 'always' }}>
           <div className="rounded-xl px-4 py-2.5 mb-4 text-white" style={{ background: '#dc2626' }}>
-            <h2 className="text-base font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Risk Register</h2>
-            <p className="text-xs text-white/70">Features that will work differently under Power Apps native equivalents — read before starting</p>
+            <h2 className="text-base sm:text-base font-bold flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Risk Register</h2>
+            <p className="text-sm sm:text-xs text-white/70">Features that will work differently under Power Apps native equivalents — read before starting</p>
           </div>
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 sm:space-y-2.5">
             {RISKS.map((r, i) => (
-              <div key={i} className="rounded-lg border border-slate-200 p-3">
+              <div key={i} className="rounded-lg border border-slate-200 p-3 sm:p-3">
                 <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <h3 className="text-sm font-bold text-slate-800">{r.feature}</h3>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${r.impact === 'High' ? 'bg-red-100 text-red-700' : r.impact === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  <h3 className="text-sm sm:text-sm font-bold text-slate-800">{r.feature}</h3>
+                  <span className={`text-xs sm:text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${r.impact === 'High' ? 'bg-red-100 text-red-700' : r.impact === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                     {r.impact} impact
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-[10.5px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-sm sm:text-[10.5px]">
                   <div>
-                    <p className="font-semibold text-slate-500 uppercase text-[9px] tracking-wide mb-0.5">Current (Base44)</p>
+                    <p className="font-semibold text-slate-500 uppercase text-xs sm:text-[9px] tracking-wide mb-0.5">Current (Base44)</p>
                     <p className="text-slate-700">{r.current}</p>
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-500 uppercase text-[9px] tracking-wide mb-0.5">Power Apps</p>
+                    <p className="font-semibold text-slate-500 uppercase text-xs sm:text-[9px] tracking-wide mb-0.5">Power Apps</p>
                     <p className="text-slate-700">{r.powerApps}</p>
                   </div>
                 </div>
                 <div className="mt-2 pt-2 border-t border-slate-100">
-                  <p className="font-semibold text-slate-500 uppercase text-[9px] tracking-wide mb-0.5">Mitigation</p>
-                  <p className="text-[10.5px] text-slate-700">{r.mitigation}</p>
+                  <p className="font-semibold text-slate-500 uppercase text-xs sm:text-[9px] tracking-wide mb-0.5">Mitigation</p>
+                  <p className="text-sm sm:text-[10.5px] text-slate-700">{r.mitigation}</p>
                 </div>
               </div>
             ))}
@@ -534,12 +560,31 @@ export default function PowerAppsMigrationRoadmap() {
         </section>
 
         {/* === Licensing page === */}
-        <section className="print-page px-8 py-6" style={{ width: '1170px', minHeight: '827px', pageBreakBefore: true }}>
+        <section className="print-page print:page-break-before" style={{ printBreakBefore: 'always' }}>
           <div className="rounded-xl px-4 py-2.5 mb-4 text-white" style={{ background: BRAND_DARK }}>
-            <h2 className="text-base font-bold flex items-center gap-2"><DollarSign className="w-5 h-5" /> Resource & Licensing Estimate</h2>
-            <p className="text-xs text-white/70">Indicative monthly cost for 50 users (30 office + 20 field) — confirm with your Microsoft reseller</p>
+            <h2 className="text-base sm:text-base font-bold flex items-center gap-2"><DollarSign className="w-5 h-5" /> Resource & Licensing Estimate</h2>
+            <p className="text-sm sm:text-xs text-white/70">Indicative monthly cost for 50 users (30 office + 20 field) — confirm with your Microsoft reseller</p>
           </div>
-          <table className="w-full text-[11px] border-collapse mb-4">
+          {/* Mobile: card list; Desktop/print: table */}
+          <div className="block lg:hidden space-y-2 mb-4">
+            {LICENSING.map((l, i) => (
+              <div key={i} className="rounded-lg border border-slate-200 p-3 bg-white">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800">{l.item}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{l.qty}</p>
+                    <p className="text-xs text-slate-400">{l.unit}</p>
+                  </div>
+                  <span className="text-sm font-bold text-slate-900 flex-shrink-0">{l.total}</span>
+                </div>
+              </div>
+            ))}
+            <div className="rounded-lg bg-slate-100 p-3 flex items-center justify-between">
+              <span className="text-sm font-bold text-slate-700">Estimated total (core stack)</span>
+              <span className="text-sm font-bold text-slate-900">~£4,275/mo</span>
+            </div>
+          </div>
+          <table className="hidden lg:table w-full text-[11px] border-collapse mb-4">
             <thead>
               <tr className="bg-slate-100 text-slate-700">
                 <th className="text-left px-3 py-2 font-bold border border-slate-200">Item</th>
@@ -566,10 +611,10 @@ export default function PowerAppsMigrationRoadmap() {
             </tfoot>
           </table>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <h3 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Clock className="w-4 h-4" style={{ color: BRAND_DARK }} /> Effort Estimate</h3>
-              <ul className="text-[11px] text-slate-600 space-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-xl border border-slate-200 p-3 sm:p-4 bg-slate-50">
+              <h3 className="text-sm sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><Clock className="w-4 h-4" style={{ color: BRAND_DARK }} /> Effort Estimate</h3>
+              <ul className="text-sm sm:text-[11px] text-slate-600 space-y-1">
                 <li>• Total duration: <strong>{TOTAL_WEEKS} weeks</strong> (~{Math.ceil(TOTAL_WEEKS / 4)} months)</li>
                 <li>• {PHASES.length} phases · {totalSteps} steps</li>
                 <li>• Team: 1 Power Platform lead + 2 makers + 1 Power BI developer</li>
@@ -577,9 +622,9 @@ export default function PowerAppsMigrationRoadmap() {
                 <li>• Hypercare: 2 weeks post go-live</li>
               </ul>
             </div>
-            <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
-              <h3 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" style={{ color: BRAND_DARK }} /> Acceptance Criteria</h3>
-              <ul className="text-[11px] text-slate-600 space-y-1">
+            <div className="rounded-xl border border-slate-200 p-3 sm:p-4 bg-slate-50">
+              <h3 className="text-sm sm:text-sm font-bold text-slate-800 mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" style={{ color: BRAND_DARK }} /> Acceptance Criteria</h3>
+              <ul className="text-sm sm:text-[11px] text-slate-600 space-y-1">
                 <li>• All {PHASES.length} phases signed off</li>
                 <li>• Record counts match Base44 source</li>
                 <li>• Financial totals reconcile to the penny</li>
@@ -590,21 +635,58 @@ export default function PowerAppsMigrationRoadmap() {
             </div>
           </div>
 
-          <div className="mt-4 text-center text-[10px] text-slate-400">
+          <div className="mt-4 text-center text-xs sm:text-[10px] text-slate-400">
             GC Mission Control · Microsoft Power Apps Migration Roadmap · Generated {new Date().toLocaleDateString('en-GB')} · Print on A3 landscape
           </div>
         </section>
       </div>
 
-      {/* Print styles */}
+      {/* Print styles — A3 landscape with original fixed-width layout */}
       <style>{`
         @media print {
           @page { size: A3 landscape; margin: 8mm; }
           body { background: white !important; }
-          .print:hidden { display: none !important; }
-          .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; }
-          .print-page { page-break-after: always; break-after: page; width: 100% !important; min-height: auto !important; padding: 4mm !important; }
+          .print-hide { display: none !important; }
+          .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+          .print-page {
+            width: 1170px !important;
+            min-height: 827px !important;
+            padding: 1.5rem 2rem !important;
+            margin-bottom: 0 !important;
+            page-break-after: always;
+            break-after: page;
+          }
           .print-page:last-child { page-break-after: auto; }
+          .print-page .grid { display: grid !important; }
+          .print-page table { display: table !important; }
+          .print-page .block.lg\\:hidden { display: none !important; }
+          .print-page .hidden.lg\\:table { display: table !important; }
+          .print-page .hidden.lg\\:block { display: block !important; }
+          .print-page .grid-cols-1 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .print-page .text-sm { font-size: 10.5px !important; }
+          .print-page .text-xs { font-size: 10px !important; }
+          .print-page .text-base { font-size: 14px !important; }
+          .print-page .text-xl { font-size: 24px !important; }
+          .print-page .text-2xl { font-size: 28px !important; }
+          .print-page .text-3xl { font-size: 30px !important; }
+          .print-page h1 { font-size: 30px !important; }
+          .print-page h2 { font-size: 14px !important; }
+          .print-page h3 { font-size: 13px !important; }
+          .print-page .w-6 { width: 16px !important; height: 16px !important; }
+          .print-page .w-4 { width: 12px !important; height: 12px !important; }
+          .print-page .h-6 { height: 16px !important; }
+          .print-page .h-5 { height: 20px !important; }
+          .print-page .space-y-2 > * + * { margin-top: 6px !important; }
+          .print-page .gap-3 { gap: 12px !important; }
+          .print-page .gap-4 { gap: 16px !important; }
+          .print-page .gap-5 { gap: 20px !important; }
+          .print-page .p-3 { padding: 12px !important; }
+          .print-page .px-3 { padding-left: 12px !important; padding-right: 12px !important; }
+          .print-page .py-2\\.5 { padding-top: 10px !important; padding-bottom: 10px !important; }
+          .print-page .mb-3 { margin-bottom: 12px !important; }
+          .print-page .mb-4 { margin-bottom: 16px !important; }
+          .print-page .mb-5 { margin-bottom: 20px !important; }
+          .print-page .mb-6 { margin-bottom: 0 !important; }
         }
       `}</style>
     </div>
