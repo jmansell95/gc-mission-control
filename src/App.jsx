@@ -52,6 +52,7 @@ import BackgroundTrackingSetup from './pages/BackgroundTrackingSetup';
 import HubOverhaulPlan from './pages/HubOverhaulPlan';
 import DepotPickLists from './pages/DepotPickLists';
 import PowerAppsMigrationRoadmap from './pages/PowerAppsMigrationRoadmap';
+import PowerAppsBuildHub from './pages/PowerAppsBuildHub';
 
 
 import StaffPage from './pages/StaffPage';
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
             <Route path="/hub-overhaul-plan" element={<RouteGuard><HubOverhaulPlan /></RouteGuard>} />
             <Route path="/m365-setup-guide" element={<RouteGuard><Microsoft365SetupGuide /></RouteGuard>} />
             <Route path="/powerapps-migration-roadmap" element={<RouteGuard><PowerAppsMigrationRoadmap /></RouteGuard>} />
+            <Route path="/powerapps-build-hub" element={<RouteGuard><PowerAppsBuildHub /></RouteGuard>} />
             <Route path="/prehistoric-import" element={<RouteGuard><PrehistoricImportPage /></RouteGuard>} />
           </Route>
           <Route path="/rig-hub" element={<Navigate to="/assets" replace />} />
