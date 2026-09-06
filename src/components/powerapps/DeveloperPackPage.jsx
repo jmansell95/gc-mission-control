@@ -7,11 +7,12 @@ import { generateAllFlowsDocument, generateAllFlowJSONs } from '@/utils/powerapp
 import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
+import { generateClaudeBuildBrief } from '@/utils/powerapps/claudeBuildBrief';
 import { downloadMarkdown, downloadJSON } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Database, Workflow, Smartphone, Plug, Code, Download, Loader2,
-  CheckCircle2, Boxes, ArrowRight, FileDown,
+  CheckCircle2, Boxes, ArrowRight, FileDown, Sparkles,
 } from 'lucide-react';
 
 const BRAND_DARK = '#2E5A1A';
@@ -21,6 +22,7 @@ const VOLUMES = [
   {
     id: 'dataverse',
     title: 'Dataverse Schema Pack',
+    subtitle: 'Build manual — paste into Dataverse (make.powerapps.com → Tables)',
     filename: 'GC-Mission-Control-Dataverse-Schema-Pack.md',
     icon: Database,
     color: 'from-blue-600 to-indigo-700',
@@ -31,6 +33,7 @@ const VOLUMES = [
   {
     id: 'flows-doc',
     title: 'Power Automate Flow Pack',
+    subtitle: 'Build manual — paste each flow into Power Automate',
     filename: 'GC-Mission-Control-PowerAutomate-Flow-Pack.md',
     icon: Workflow,
     color: 'from-emerald-600 to-teal-700',
@@ -41,6 +44,7 @@ const VOLUMES = [
   {
     id: 'flows-json',
     title: 'Flow Definitions (JSON)',
+    subtitle: 'Machine-readable flow specs — import into Power Automate',
     filename: 'GC-Mission-Control-Flow-Definitions.json',
     icon: Code,
     color: 'from-teal-600 to-cyan-700',
@@ -51,6 +55,7 @@ const VOLUMES = [
   {
     id: 'powerfx',
     title: 'Canvas App Power Fx Source',
+    subtitle: 'Build manual — paste into Power Apps Studio (canvas app)',
     filename: 'GC-Mission-Control-Canvas-App-PowerFx-Source.md',
     icon: Smartphone,
     color: 'from-violet-600 to-purple-700',
@@ -61,6 +66,7 @@ const VOLUMES = [
   {
     id: 'integrations',
     title: 'Integration & Connector Guide',
+    subtitle: 'Build manual — configure connectors in Power Automate',
     filename: 'GC-Mission-Control-Integration-Setup-Guide.md',
     icon: Plug,
     color: 'from-amber-600 to-orange-700',
@@ -81,6 +87,7 @@ export default function DeveloperPackPage() {
   const [genState, setGenState] = useState('idle'); // idle | generating | done | error
   const [genStep, setGenStep] = useState(0);
   const [files, setFiles] = useState([]);
+  const [briefBusy, setBriefBusy] = useState(false);
 
   // Fetch all entity schemas in parallel batches (same pattern as the Build Hub)
   useEffect(() => {
@@ -151,6 +158,35 @@ export default function DeveloperPackPage() {
     }
   };
 
+  const handleClaudeBrief = async () => {
+    if (schemaLoading) {
+      toast({
+        title: 'Schemas still loading',
+        description: 'Please wait for the database schemas to finish loading first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setBriefBusy(true);
+    try {
+      const schemaList = UNIQUE_ENTITY_NAMES.map((name) => ({ name, schema: schemas[name] }));
+      const content = generateClaudeBuildBrief(schemaList);
+      downloadMarkdown('GC-Mission-Control-Claude-Build-Brief.md', content);
+      toast({
+        title: 'Claude Build Brief downloaded',
+        description: 'One file — hand it to Claude to build the whole platform.',
+      });
+    } catch (e) {
+      toast({
+        title: 'Brief generation failed',
+        description: e.message || 'An error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBriefBusy(false);
+    }
+  };
+
   const downloadOne = (file) => {
     try {
       file.download(file.content);
@@ -201,11 +237,53 @@ export default function DeveloperPackPage() {
       {/* Intro */}
       <div className="rounded-xl p-3.5 mb-4 bg-slate-50 border-l-4" style={{ borderLeftColor: BRAND_DARK }}>
         <p className="text-[12px] sm:text-[13px] text-slate-700 leading-relaxed">
-          Generate the complete importable build pack — Dataverse table schemas, all{' '}
-          <strong>{FLOW_COUNT}</strong> Power Automate flow definitions, the canvas app Power Fx
-          source, and the integration setup guide. Download the files and hand them to your
-          Power Platform developer, or import them yourself to stand up the whole platform.
+          These are <strong>build manuals</strong> — structured documents you paste into Power Apps
+          Studio, Dataverse, and Power Automate. Power Platform has no single "upload and build
+          everything" import, so each volume gives the exact schema, flow JSON, and Power Fx to
+          copy in. Generate the pack, download the files, and hand them to your Power Platform
+          developer — or paste them in yourself.
         </p>
+      </div>
+
+      {/* === Claude Build Brief — single file to hand to an AI builder === */}
+      <div
+        className="rounded-2xl p-4 mb-4 text-white shadow-md relative overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${BRAND_DARK} 0%, #1c4a12 45%, ${BRAND_LEAF} 100%)` }}
+      >
+        <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10" style={{ background: 'white', transform: 'translate(30px,-30px)' }} />
+        <div className="relative flex items-start gap-3">
+          <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg font-extrabold leading-tight">Claude Build Brief</h3>
+            <p className="text-[11px] sm:text-[12px] text-white/85 mt-1 leading-relaxed">
+              One file containing the full build order + all schemas + all flows + all Power Fx +
+              the integration guide. Hand it to Claude and it can build the whole platform
+              end-to-end from this single document.
+            </p>
+            <button
+              onClick={handleClaudeBrief}
+              disabled={briefBusy || schemaLoading}
+              className="mt-3 inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl font-bold text-xs hover:bg-white/90 transition shadow disabled:opacity-60"
+              style={{ color: BRAND_DARK }}
+            >
+              {briefBusy ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Generating brief…
+                </>
+              ) : schemaLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading schemas {schemaProgress}/{ENTITY_COUNT}…
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" /> Download Claude Build Brief
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Stat strip */}
@@ -253,7 +331,10 @@ export default function DeveloperPackPage() {
                     {i + 1}
                   </span>
                   <Icon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                  <span className="font-medium truncate">{vol.title}</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium truncate block">{vol.title}</span>
+                    <span className="text-[9px] text-slate-400 truncate block">{vol.subtitle}</span>
+                  </div>
                 </div>
               );
             })}
