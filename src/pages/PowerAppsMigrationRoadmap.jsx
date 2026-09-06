@@ -298,13 +298,9 @@ export default function PowerAppsMigrationRoadmap() {
     const clone = el.cloneNode(true);
     clone.style.cssText = 'width:800px;max-width:800px;padding:0;margin:0;';
     holder.appendChild(clone);
-    // Force each print-page to A4 height so short pages fill the whole frame
-    const minHStyle = document.createElement('style');
-    minHStyle.textContent = '.print-page{min-height:1123px!important;}';
-    holder.appendChild(minHStyle);
     document.body.appendChild(holder);
     try {
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 250));
       const pageEls = Array.from(holder.querySelectorAll('.print-page'));
       const pdf = new jsPDF('p', 'mm', 'a4'); // A4 portrait: 210 x 297 mm
       const pageW = pdf.internal.pageSize.getWidth();
@@ -313,6 +309,23 @@ export default function PowerAppsMigrationRoadmap() {
       const availW = pageW - margin * 2;
       const availH = pageH - margin * 2;
       let first = true;
+
+      // Crop the rendered canvas to a y-range and drop it onto a fresh A4 page.
+      const addRange = (canvas, startY, endY) => {
+        const sliceH = Math.max(1, endY - startY);
+        const sc = document.createElement('canvas');
+        sc.width = canvas.width;
+        sc.height = sliceH;
+        const ctx = sc.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, sc.width, sc.height);
+        ctx.drawImage(canvas, 0, startY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        if (!first) pdf.addPage();
+        first = false;
+        const ratio = availW / canvas.width;
+        pdf.addImage(sc.toDataURL('image/png'), 'PNG', margin, margin, availW, sliceH * ratio);
+      };
+
       for (const pageEl of pageEls) {
         const canvas = await html2canvas(pageEl, {
           scale: 2,
@@ -321,36 +334,61 @@ export default function PowerAppsMigrationRoadmap() {
           windowWidth: 800,
           width: 800,
         });
-        const ratio = availW / canvas.width; // fill the full page width
-        const renderedH = canvas.height * ratio;
-        if (renderedH <= availH) {
-          // Fits on one A4 page — center vertically so the page looks balanced
-          const imgData = canvas.toDataURL('image/png');
-          const w = canvas.width * ratio;
-          const h = canvas.height * ratio;
-          if (!first) pdf.addPage();
-          first = false;
-          pdf.addImage(imgData, 'PNG', margin, (pageH - h) / 2, w, h);
+        const pxPermm = canvas.width / availW;
+        const pageHpx = Math.floor(availH * pxPermm); // one A4 page in canvas-px
+        const scale = canvas.width / 800; // CSS-px → canvas-px
+        const pageRect = pageEl.getBoundingClientRect();
+
+        // Build a list of "atomic" y-ranges (in canvas-px) that should not be
+        // split across pages. When a block is taller than a page, recurse one
+        // level into its children so individual cards / code blocks stay intact
+        // instead of being cut mid-way.
+        const collectAtoms = (nodeEl) => {
+          const r = nodeEl.getBoundingClientRect();
+          const top = (r.top - pageRect.top) * scale;
+          const bottom = (r.bottom - pageRect.top) * scale;
+          if (bottom - top <= pageHpx) return [{ top, bottom }];
+          const kids = Array.from(nodeEl.children).filter((c) => c.getBoundingClientRect().height > 0);
+          if (kids.length === 0) return [{ top, bottom }];
+          let atoms = [];
+          for (const k of kids) atoms = atoms.concat(collectAtoms(k));
+          return atoms;
+        };
+
+        let atoms = [];
+        const topKids = Array.from(pageEl.children).filter((c) => c.getBoundingClientRect().height > 0);
+        if (topKids.length === 0) {
+          atoms = [{ top: 0, bottom: canvas.height }];
         } else {
-          // Taller than one page — slice into A4-height chunks at full width
-          const pxPermm = canvas.width / availW;
-          const pageHpx = Math.floor(availH * pxPermm);
-          let y = 0;
-          while (y < canvas.height) {
-            const sliceH = Math.min(pageHpx, canvas.height - y);
-            const sliceCanvas = document.createElement('canvas');
-            sliceCanvas.width = canvas.width;
-            sliceCanvas.height = sliceH;
-            const ctx = sliceCanvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, sliceCanvas.width, sliceH);
-            ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-            if (!first) pdf.addPage();
-            first = false;
-            pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, availW, sliceH * ratio);
-            y += sliceH;
+          for (const k of topKids) atoms = atoms.concat(collectAtoms(k));
+        }
+
+        // Pack atoms into page-height groups; raw-slice any single oversize atom.
+        let curTop = null, curBottom = 0;
+        const flush = () => {
+          if (curTop === null) return;
+          if (curBottom - curTop > pageHpx) {
+            let y = curTop;
+            while (y < curBottom) {
+              const h = Math.min(pageHpx, curBottom - y);
+              addRange(canvas, y, y + h);
+              y += h;
+            }
+          } else {
+            addRange(canvas, curTop, curBottom);
+          }
+          curTop = null;
+        };
+        for (const a of atoms) {
+          if (curTop === null) { curTop = a.top; curBottom = a.bottom; continue; }
+          if (a.bottom - curTop <= pageHpx) {
+            curBottom = a.bottom;
+          } else {
+            flush();
+            curTop = a.top; curBottom = a.bottom;
           }
         }
+        flush();
       }
       pdf.save('GC-Mission-Control-PowerApps-Migration-Roadmap.pdf');
     } catch (e) {
@@ -808,15 +846,34 @@ export default function PowerAppsMigrationRoadmap() {
           .print-hide { display: none !important; }
           .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; position: static !important; width: auto !important; }
           .print-page {
-            width: 794px !important;
-            min-height: 1123px !important;
+            width: 100% !important;
             padding: 0 !important;
-            margin-bottom: 0 !important;
+            margin: 0 !important;
             page-break-after: always;
             break-after: page;
           }
           .print-page:last-child { page-break-after: auto; }
-          .booklet-phase { padding: 0 4px !important; }
+          .booklet-phase { padding: 0 2px !important; }
+          /* keep cards, code blocks & table rows intact across page breaks */
+          .print-page .rounded-xl,
+          .print-page .rounded-2xl,
+          .print-page .rounded-lg,
+          .print-page pre,
+          .print-page table,
+          .print-page tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          /* tighter spacing in print so more content fits per page */
+          .print-page .mb-4, .print-page .mb-5, .print-page .mb-6 { margin-bottom: 0.5rem !important; }
+          .print-page .mt-4 { margin-top: 0.5rem !important; }
+          .print-page .space-y-2\\.5 > * + * { margin-top: 0.35rem !important; }
+          .print-page .space-y-2 > * + * { margin-top: 0.3rem !important; }
+          .print-page .space-y-3 > * + * { margin-top: 0.4rem !important; }
+          .print-page pre { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 8px !important; }
+          .print-page .py-4 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+          .print-page .p-4 { padding: 0.6rem !important; }
+          .print-page .p-3 { padding: 0.45rem !important; }
         }
       `}</style>
     </div>
