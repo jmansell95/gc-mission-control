@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { UNIQUE_ENTITY_NAMES, ENTITY_COUNT } from '@/utils/powerapps/entityManifest';
-import { generateDataverseSchemaDocument } from '@/utils/powerapps/dataverseConverter';
-import { generateAllFlowsDocument, generateAllFlowJSONs } from '@/utils/powerapps/flowGenerator';
+import { generateDataverseSchemaDocument, generateDataverseCSV, generateRelationshipsCSV } from '@/utils/powerapps/dataverseConverter';
+import { generateAllFlowsDocument, generateFlowBundles } from '@/utils/powerapps/flowGenerator';
 import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
-import { downloadMarkdown, downloadJSON } from '@/utils/powerapps/download';
+import { downloadMarkdown, downloadJSON, downloadCSV } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Database, Workflow, Smartphone, Plug, FileDown, Loader2, CheckCircle2,
@@ -40,6 +40,26 @@ export default function PowerAppsBuildHub() {
       requiresSchemas: true,
     },
     {
+      id: 'dataverse-csv',
+      title: 'Dataverse Schema Workbook (CSV)',
+      filename: 'GC-Mission-Control-Dataverse-Schema-Workbook.csv',
+      icon: Database,
+      color: 'blue',
+      generate: (schemaList) => generateDataverseCSV(schemaList),
+      download: (content) => downloadCSV('GC-Mission-Control-Dataverse-Schema-Workbook.csv', content),
+      requiresSchemas: true,
+    },
+    {
+      id: 'relationships-csv',
+      title: 'Dataverse Relationships (CSV)',
+      filename: 'GC-Mission-Control-Dataverse-Relationships.csv',
+      icon: Database,
+      color: 'teal',
+      generate: (schemaList) => generateRelationshipsCSV(schemaList),
+      download: (content) => downloadCSV('GC-Mission-Control-Dataverse-Relationships.csv', content),
+      requiresSchemas: true,
+    },
+    {
       id: 'flows-doc',
       title: 'Power Automate Flow Pack',
       filename: 'GC-Mission-Control-PowerAutomate-Flow-Pack.md',
@@ -51,12 +71,12 @@ export default function PowerAppsBuildHub() {
     },
     {
       id: 'flows-json',
-      title: 'Flow Definitions (JSON)',
-      filename: 'GC-Mission-Control-Flow-Definitions.json',
+      title: 'Flow Bundles (JSON, grouped)',
+      filename: 'GC-Mission-Control-Flow-Bundles.json',
       icon: Code,
       color: 'teal',
-      generate: () => generateAllFlowJSONs(),
-      download: (content) => downloadJSON('GC-Mission-Control-Flow-Definitions.json', content),
+      generate: () => generateFlowBundles(),
+      download: (content) => downloadJSON('GC-Mission-Control-Flow-Bundles.json', content),
       requiresSchemas: false,
     },
     {
@@ -372,7 +392,7 @@ export default function PowerAppsBuildHub() {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">Build pack ready</h2>
-                  <p className="text-sm text-slate-500">5 files generated. Download each one and hand them to your developer.</p>
+                  <p className="text-sm text-slate-500">{VOLUMES.length} files generated. Download each one and hand them to your developer.</p>
                 </div>
               </div>
 
@@ -446,8 +466,9 @@ export default function PowerAppsBuildHub() {
         <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <strong>What you get:</strong> Five files covering the complete Power Platform migration —
-            Dataverse table schemas (reads your live database), Power Automate flow definitions for all {FLOW_COUNT} backend functions,
+            <strong>What you get:</strong> {VOLUMES.length} files covering the complete Power Platform migration —
+            Dataverse table schemas (reads your live database), Dataverse CSV workbook + relationships (importable into Excel),
+            Power Automate flow bundles grouped by trigger type for all {FLOW_COUNT} backend functions,
             Canvas app Power Fx source for every screen, and integration setup guides for all 16 connectors.
             Hand these to a Power Platform developer and they can follow them step by step.
           </div>

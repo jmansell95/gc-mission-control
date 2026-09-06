@@ -13,15 +13,30 @@ Generated: ${new Date().toISOString()}
 This document contains the complete Power Fx source for every screen in the canvas app.
 Copy each section into the corresponding screen in Power Apps Studio.
 
+## Setup Checklist — Do This Before Pasting Any Power Fx
+
+1. **Create the canvas app** in Power Apps Studio (make.powerapps.com → Create → Canvas app → Phone layout). Name it "GC Field Crew".
+2. **Connect the Dataverse data source** — Data → Add data → Dataverse → select all tables from Volume 1 (Staffs, Jobs, RotaAssignments, InvestigationLogs, DeliveryLogs, SiteAssets, Vehicles, ComplianceItems, AFPs, AFPLineItems, etc.).
+3. **Add these connectors** — Data → Add data → search and add each:
+   - **Office 365 Users** (for User().Email lookups)
+   - **Office 365 Outlook** (for email flows)
+   - **Power Apps Notifications** (for push notifications)
+4. **Add all Power Automate flows as data sources** — Data → Add data → search for each flow by name (e.g. updateMyAssignment, publishRotaWeek, resolveAssetByQR, commitBasketSignOut, populateAFPFromFieldData, submitAFPToClient). Every flowName.Run(...) reference in the Power Fx below requires the flow to be added here first.
+5. **Set App.OnStart** — paste the App.OnStart block below into the App object OnStart property. Set varClientId and varRedirectUri to your Entra ID app registration values.
+6. **Create the screens** listed below in order. Each screen section tells you exactly which controls to create and which property to paste each Power Fx block into.
+
 ## How to Use This Document
 
-1. Create a new canvas app in Power Apps Studio (Phone layout).
-2. Connect to the Dataverse solution (all tables from Volume 1).
-3. Add the Office 365 Users, Office 365 Outlook connectors.
-4. Create each screen listed below and paste the Power Fx into the corresponding properties.
-5. For each flow reference (e.g. \`'publishRotaWeek'.Run(...)\`), add the corresponding Power Automate flow from Volume 2 as a data source.
-6. Set up the App.OnStart to load the current user and navigate to the landing page.
-7. Test on mobile using the Power Apps mobile app.
+Each screen section below has this structure:
+- **Screen name** — the screen to create in Power Apps Studio
+- **Paste Target** — which control property to paste the Power Fx into (e.g. OnVisible, OnSelect, Text, Items)
+- **Power Fx block** — the exact code to paste
+
+1. Create each screen listed below.
+2. For each control mentioned in the Power Fx, create that control on the screen (Button, Label, Gallery, TextInput, etc.) and name it exactly as written (e.g. btnStartShift, lblJobName, galDays).
+3. Paste each Power Fx block into the matching control property.
+4. For each flow reference (e.g. publishRotaWeek.Run(...)), the flow must already be added as a data source (see Setup Checklist step 4).
+5. Test on mobile using the Power Apps mobile app.
 
 ## Naming Conventions
 
@@ -37,6 +52,8 @@ Copy each section into the corresponding screen in Power Apps Studio.
 ---
 
 ## App (App object — global variables and startup)
+
+**Paste Target:** Select the **App** object in the tree view → **OnStart** property.
 
 \`\`\`powerapps
 App.OnStart =
@@ -81,6 +98,8 @@ App.OnStart =
 
 ## Screen: LoginScreen
 
+**Paste Target:** Create a screen named **LoginScreen**. Add a button named **btnMicrosoftSignIn**. Paste into the screen **OnVisible** and the button **OnSelect** / property fields.
+
 \`\`\`powerapps
 LoginScreen.OnVisible =
     // Auto-redirect if already logged in
@@ -109,6 +128,8 @@ btnMicrosoftSignIn.RadiusTopRight: 12
 ---
 
 ## Screen: ScheduleScreen (Field crew weekly schedule)
+
+**Paste Target:** Create a screen named **ScheduleScreen**. Add galleries **galDays** and **galAssignments**, buttons **btnPrevWeek**, **btnNextWeek**, **btnStartShift**, **btnAcknowledge**, labels **lblWeekLabel**, **lblJobName**, **lblLocation**, **lblStatus**. Paste each block into the matching control property.
 
 \`\`\`powerapps
 ScheduleScreen.OnVisible =
@@ -234,6 +255,8 @@ btnAcknowledge.Color: ColorValue("#1c4a12")
 ---
 
 ## Screen: ShiftWizardScreen (Daily workflow — checks, arrive, briefing, work, leave)
+
+**Paste Target:** Create a screen named **ShiftWizardScreen**. Add groups **grpChecks**, **grpArrive**, **grpBriefing**, **grpWorking**, **grpLeave**, buttons **btnCompleteChecks**, **btnArriveOnSite**, **btnPowra**, **btnSignBriefing**, **btnLogActivity**, **btnLeaveSite**, signature control **sigBriefing**, labels **lblStep1**–**lblStep5**, **lblMittiVerified**, icon **icnMittiVerified**. Paste each block into the matching control property.
 
 \`\`\`powerapps
 ShiftWizardScreen.OnVisible =

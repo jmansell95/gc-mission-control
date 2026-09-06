@@ -870,11 +870,20 @@ export default function PowerAppsMigrationRoadmap() {
           .print-page .space-y-2\\.5 > * + * { margin-top: 0.35rem !important; }
           .print-page .space-y-2 > * + * { margin-top: 0.3rem !important; }
           .print-page .space-y-3 > * + * { margin-top: 0.4rem !important; }
-          .print-page pre { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 8px !important; }
+          .print-page pre { font-size: 8px !important; line-height: 1.3 !important; padding: 6px 8px !important; max-width: 100% !important; overflow: hidden !important; word-break: break-all !important; overflow-wrap: anywhere !important; }
+          .print-page pre code { word-break: break-all !important; }
           .print-page .py-4 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
           .print-page .p-4 { padding: 0.6rem !important; }
           .print-page .p-3 { padding: 0.45rem !important; }
+          /* Force mobile card layout for tables in print (print width < lg breakpoint) */
+          .print-page .hidden.lg\\:table { display: none !important; }
+          .print-page .block.lg\\:hidden { display: block !important; }
+          /* Developer Pack interactive states — show a static print snapshot */
+          .print-page .print-hide-interactive { display: none !important; }
+          .print-page .print-static-only { display: block !important; }
         }
+        /* Screen-only: hide the print-static snapshot */
+        .print-static-only { display: none; }
       `}</style>
     </div>
   );

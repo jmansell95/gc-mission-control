@@ -274,3 +274,103 @@ export function generateDataverseSchemaDocument(schemas) {
 
   return doc;
 }
+
+// === CSV Workbook export ===
+// Generates a single CSV file with all tables — opens in Excel, filterable by
+// the Table column. Used as the table-creation reference and as a Power Query
+// seed for option-set lookup tables.
+
+function csvEscape(value) {
+  if (value === null || value === undefined) return '';
+  const s = String(value);
+  if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+export function generateDataverseCSV(schemaList) {
+  const header = ['Table', 'Column Name', 'Schema Name', 'Data Type', 'Required', 'Option Set Values', 'Description'];
+  const rows = [header.map(csvEscape).join(',')];
+
+  for (const { name, schema } of schemaList) {
+    if (!schema) {
+      rows.push([csvEscape(name), csvEscape('(schema unavailable)'), '', '', '', '', ''].join(','));
+      continue;
+    }
+    const props = schema.properties || {};
+    const required = schema.required || [];
+    for (const [fieldName, fieldSchema] of Object.entries(props)) {
+      if (BUILT_IN_FIELDS.includes(fieldName)) continue;
+      const mapped = mapFieldType(fieldName, fieldSchema);
+      const isRequired = required.includes(fieldName) ? 'Yes' : 'No';
+      const optionValues = mapped.options ? mapped.options.join('; ') : '';
+      const desc = (fieldSchema.description || '').replace(/\n/g, ' ').replace(/,/g, ';');
+      rows.push([
+        csvEscape(name),
+        csvEscape(fieldName),
+        csvEscape(mapped.schemaName),
+        csvEscape(mapped.dataverseType),
+        csvEscape(isRequired),
+        csvEscape(optionValues),
+        csvEscape(desc),
+      ].join(','));
+    }
+  }
+
+  return rows.join('\n');
+}
+
+export function generateRelationshipsCSV(schemaList) {
+  const header = ['Source Table', 'Source Field', 'Schema Name', 'Relationship Type', 'Target Table', 'Notes'];
+  const rows = [header.map(csvEscape).join(',')];
+
+  for (const { name, schema } of schemaList) {
+    if (!schema) continue;
+    const props = schema.properties || {};
+    for (const [fieldName, fieldSchema] of Object.entries(props)) {
+      if (BUILT_IN_FIELDS.includes(fieldName)) continue;
+
+      // N:1 Lookup
+      if (fieldName.endsWith('_id') && fieldSchema.type === 'string' && !fieldName.endsWith('_ids')) {
+        const target = capitalize(fieldName.replace(/_id$/, ''));
+        rows.push([
+          csvEscape(name),
+          csvEscape(fieldName),
+          csvEscape('gc_' + fieldName),
+          csvEscape('N:1 Lookup'),
+          csvEscape(target),
+          csvEscape('Create 1:' + target + ' → N:' + name + ' relationship in Dataverse'),
+        ].join(','));
+      }
+
+      // N:N (stored as comma-separated)
+      if (fieldName.endsWith('_ids') && fieldSchema.type === 'string') {
+        const target = capitalize(fieldName.replace(/_ids$/, ''));
+        rows.push([
+          csvEscape(name),
+          csvEscape(fieldName),
+          csvEscape('gc_' + fieldName),
+          csvEscape('N:N'),
+          csvEscape(target),
+          csvEscape('Migrate from comma-separated to a Dataverse N:N relationship'),
+        ].join(','));
+      }
+
+      // Child table (1:N)
+      if (fieldSchema.type === 'array' && fieldSchema.items && fieldSchema.items.type === 'object') {
+        const childTable = 'gc_' + name.toLowerCase() + '_' + fieldName;
+        rows.push([
+          csvEscape(name),
+          csvEscape(fieldName),
+          csvEscape(childTable),
+          csvEscape('1:N Child Table'),
+          csvEscape(childTable),
+          csvEscape('Create child table with Lookup gc_parent_id → ' + name),
+        ].join(','));
+      }
+    }
+  }
+
+  return rows.join('\n');
+}

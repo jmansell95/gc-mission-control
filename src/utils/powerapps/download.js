@@ -15,6 +15,12 @@ export function downloadMarkdown(filename, content) {
   downloadText(filename, content, 'text/markdown');
 }
 
+export function downloadCSV(filename, content) {
+  // Prepend BOM so Excel reads UTF-8 correctly
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8' });
+  triggerDownload(blob, filename);
+}
+
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

@@ -8,11 +8,13 @@ const BRAND_LEAF = '#8DC63F';
 // Where each generated volume gets pasted — mirrors the subtitle on each
 // volume card so the cheat-sheet is self-contained.
 const VOLUME_TARGETS = [
-  { icon: Database, title: 'Dataverse Schema Pack', target: 'make.powerapps.com → Solutions → New table' },
-  { icon: Workflow, title: 'Power Automate Flow Pack', target: 'make.powerautomate.com → Create flow' },
-  { icon: Code, title: 'Flow Definitions (JSON)', target: 'Power Automate → Import (or paste into each flow)' },
-  { icon: Smartphone, title: 'Canvas App Power Fx Source', target: 'Power Apps Studio → canvas app screen' },
-  { icon: Plug, title: 'Integration & Connector Guide', target: 'Power Automate → Connections + provider dashboards' },
+  { icon: Database, title: 'Dataverse Schema Pack (MD)', target: 'make.powerapps.com → Solutions → New table' },
+  { icon: Database, title: 'Dataverse Schema Workbook (CSV)', target: 'Excel — filter by Table column, or Power Query seed' },
+  { icon: Database, title: 'Dataverse Relationships (CSV)', target: 'Excel — all 1:N, N:N, child-table links' },
+  { icon: Workflow, title: 'Power Automate Flow Pack (MD)', target: 'make.powerautomate.com → Create flow' },
+  { icon: Code, title: 'Flow Bundles (JSON, grouped)', target: 'Power Automate — scheduled / instant / webhook bundles' },
+  { icon: Smartphone, title: 'Canvas App Power Fx Source (MD)', target: 'Power Apps Studio → canvas app screen' },
+  { icon: Plug, title: 'Integration & Connector Guide (MD)', target: 'Power Automate → Connections + provider dashboards' },
 ];
 
 export default function ClaudeBuildCheatSheet() {

@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { UNIQUE_ENTITY_NAMES, ENTITY_COUNT } from '@/utils/powerapps/entityManifest';
-import { generateDataverseSchemaDocument } from '@/utils/powerapps/dataverseConverter';
-import { generateAllFlowsDocument, generateAllFlowJSONs } from '@/utils/powerapps/flowGenerator';
+import { generateDataverseSchemaDocument, generateDataverseCSV, generateRelationshipsCSV } from '@/utils/powerapps/dataverseConverter';
+import { generateAllFlowsDocument, generateFlowBundles } from '@/utils/powerapps/flowGenerator';
 import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
 import { generateClaudeBuildBrief } from '@/utils/powerapps/claudeBuildBrief';
 import ClaudeBuildCheatSheet from '@/components/powerapps/ClaudeBuildCheatSheet';
-import { downloadMarkdown, downloadJSON } from '@/utils/powerapps/download';
+import { downloadMarkdown, downloadJSON, downloadCSV } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Database, Workflow, Smartphone, Plug, Code, Download, Loader2,
@@ -32,6 +32,28 @@ const VOLUMES = [
     requiresSchemas: true,
   },
   {
+    id: 'dataverse-csv',
+    title: 'Dataverse Schema Workbook (CSV)',
+    subtitle: 'Importable into Excel — one row per column, filterable by table',
+    filename: 'GC-Mission-Control-Dataverse-Schema-Workbook.csv',
+    icon: Database,
+    color: 'from-blue-500 to-cyan-600',
+    generate: (schemaList) => generateDataverseCSV(schemaList),
+    download: (c) => downloadCSV('GC-Mission-Control-Dataverse-Schema-Workbook.csv', c),
+    requiresSchemas: true,
+  },
+  {
+    id: 'relationships-csv',
+    title: 'Dataverse Relationships (CSV)',
+    subtitle: 'All 1:N, N:N, and child-table relationships — importable into Excel',
+    filename: 'GC-Mission-Control-Dataverse-Relationships.csv',
+    icon: Database,
+    color: 'from-cyan-600 to-teal-700',
+    generate: (schemaList) => generateRelationshipsCSV(schemaList),
+    download: (c) => downloadCSV('GC-Mission-Control-Dataverse-Relationships.csv', c),
+    requiresSchemas: true,
+  },
+  {
     id: 'flows-doc',
     title: 'Power Automate Flow Pack',
     subtitle: 'Build manual — paste each flow into Power Automate',
@@ -44,13 +66,13 @@ const VOLUMES = [
   },
   {
     id: 'flows-json',
-    title: 'Flow Definitions (JSON)',
-    subtitle: 'Machine-readable flow specs — import into Power Automate',
-    filename: 'GC-Mission-Control-Flow-Definitions.json',
+    title: 'Flow Bundles (JSON, grouped by trigger)',
+    subtitle: 'Structured flow specs — scheduled / instant / webhook bundles for Power Automate',
+    filename: 'GC-Mission-Control-Flow-Bundles.json',
     icon: Code,
     color: 'from-teal-600 to-cyan-700',
-    generate: () => generateAllFlowJSONs(),
-    download: (c) => downloadJSON('GC-Mission-Control-Flow-Definitions.json', c),
+    generate: () => generateFlowBundles(),
+    download: (c) => downloadJSON('GC-Mission-Control-Flow-Bundles.json', c),
     requiresSchemas: false,
   },
   {
@@ -303,14 +325,39 @@ export default function DeveloperPackPage() {
           <div className="text-[9px] uppercase tracking-wide text-slate-500">Power Automate Flows</div>
         </div>
         <div className="rounded-lg bg-slate-50 border border-slate-200 p-2 text-center">
-          <div className="text-lg font-extrabold text-slate-800 tabular-nums">5</div>
+          <div className="text-lg font-extrabold text-slate-800 tabular-nums">7</div>
           <div className="text-[9px] uppercase tracking-wide text-slate-500">Build Volumes</div>
         </div>
       </div>
 
-      {/* === Idle: generate button + volume list === */}
+      {/* === Print-only static snapshot — shows in PDF, hidden on screen === */}
+      <div className="print-static-only rounded-xl border border-slate-200 p-4 bg-white">
+        <h4 className="text-sm font-bold text-slate-900 mb-2">Developer Pack Contents (7 volumes)</h4>
+        <p className="text-[11px] text-slate-600 mb-3">
+          Generate the pack on screen to download all 7 files. Each volume is a build manual — paste
+          into the named Power Platform tool, or hand the Claude Build Brief to Claude for end-to-end
+          execution.
+        </p>
+        <div className="grid grid-cols-1 gap-1.5">
+          {VOLUMES.map((vol, i) => {
+            const Icon = vol.icon;
+            return (
+              <div key={vol.id} className="flex items-center gap-2.5 text-[11px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2">
+                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px] flex items-center justify-center">{i + 1}</span>
+                <Icon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium truncate block">{vol.title}</span>
+                  <span className="text-[9px] text-slate-400 truncate block">{vol.subtitle}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* === Idle: generate button + volume list — hidden in print === */}
       {genState === 'idle' && (
-        <div className="rounded-xl border border-slate-200 p-4 bg-white text-center">
+        <div className="print:hidden rounded-xl border border-slate-200 p-4 bg-white text-center">
           {schemaLoading ? (
             <div className="inline-flex items-center gap-2 text-xs text-amber-600 font-semibold mb-3">
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -348,9 +395,9 @@ export default function DeveloperPackPage() {
         </div>
       )}
 
-      {/* === Generating progress === */}
+      {/* === Generating progress — hidden in print === */}
       {genState === 'generating' && (
-        <div className="rounded-xl border border-slate-200 p-4 bg-white">
+        <div className="print:hidden rounded-xl border border-slate-200 p-4 bg-white">
           <div className="flex items-center gap-3 mb-3">
             <Loader2 className="w-5 h-5 animate-spin" style={{ color: BRAND_DARK }} />
             <div>
@@ -395,9 +442,9 @@ export default function DeveloperPackPage() {
         </div>
       )}
 
-      {/* === Done: download files === */}
+      {/* === Done: download files — hidden in print === */}
       {genState === 'done' && (
-        <div className="space-y-3">
+        <div className="print:hidden space-y-3">
           <div className="rounded-xl border border-slate-200 p-4 bg-white">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -448,9 +495,9 @@ export default function DeveloperPackPage() {
         </div>
       )}
 
-      {/* === Error === */}
+      {/* === Error — hidden in print === */}
       {genState === 'error' && (
-        <div className="rounded-xl border border-red-200 p-4 bg-red-50 text-center">
+        <div className="print:hidden rounded-xl border border-red-200 p-4 bg-red-50 text-center">
           <p className="text-sm font-bold text-red-700 mb-2">Generation failed</p>
           <p className="text-[11px] text-red-500 mb-3">Something went wrong. Please try again.</p>
           <button

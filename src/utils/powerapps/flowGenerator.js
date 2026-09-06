@@ -586,3 +586,96 @@ export function generateAllFlowJSONs() {
   }
   return all;
 }
+
+// === Structured flow JSON — closer to the Power Automate definition shape ===
+// Produces action objects with connector, operation, and parameters so Claude
+// (or a maker) can follow the structure when building in the Power Automate
+// designer. Grouped by trigger type for separate import bundles.
+
+function generateStructuredFlowJSON(name) {
+  const cat = flowCategory(name);
+  const logicCat = logicCategory(name);
+  const table = inferTable(name);
+  const trigger = triggerConfig(name);
+  const filter = odataFilter(name);
+  const mappings = columnMappings(name);
+  const endpoint = httpEndpointInfo(name);
+  const email = emailTemplate(name);
+
+  // Build the trigger definition
+  const triggerDef = cat === 'scheduled'
+    ? { type: 'Recurrence', frequency: 'Day', interval: 1, startTime: '2026-01-01T06:00:00Z' }
+    : cat === 'webhook'
+    ? { type: 'Request', kind: 'Http', method: 'POST' }
+    : { type: 'PowerAppV2', inputs: '(define input parameters per function signature)' };
+
+  // Build structured action objects (not just step descriptions)
+  const actions = [];
+  const steps = actionSteps(name);
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    // Infer the connector + operation from the step text
+    let connector = 'Dataverse';
+    let operation = 'Generic';
+    if (step.includes('List rows')) { connector = 'Dataverse'; operation = 'List rows'; }
+    else if (step.includes('Get a row by ID')) { connector = 'Dataverse'; operation = 'Get a row by ID'; }
+    else if (step.includes('Add a new row')) { connector = 'Dataverse'; operation = 'Add a new row'; }
+    else if (step.includes('Update a row')) { connector = 'Dataverse'; operation = 'Update a row'; }
+    else if (step.includes('Delete a row')) { connector = 'Dataverse'; operation = 'Delete a row'; }
+    else if (step.includes('Send an email')) { connector = 'Office 365 Outlook'; operation = 'Send an email (V2)'; }
+    else if (step.includes('HTTP')) { connector = 'HTTP'; operation = 'HTTP'; }
+    else if (step.includes('Parse JSON')) { connector = 'Data Operations'; operation = 'Parse JSON'; }
+    else if (step.includes('Compose')) { connector = 'Data Operations'; operation = 'Compose'; }
+    else if (step.includes('Condition')) { connector = 'Control'; operation = 'Condition'; }
+    else if (step.includes('Apply to each')) { connector = 'Control'; operation = 'Apply to each'; }
+    else if (step.includes('Switch')) { connector = 'Control'; operation = 'Switch'; }
+    else if (step.includes('Create file')) { connector = 'OneDrive/SharePoint'; operation = 'Create file'; }
+    else if (step.includes('Respond')) { connector = 'Power Automate'; operation = 'Respond'; }
+    else if (step.includes('Launch')) { connector = 'Power Apps'; operation = 'Launch'; }
+
+    actions.push({
+      step: i + 1,
+      name: step.split('.')[0].replace(/^\d+\.\s\*?\*?/, '').trim().replace(/\*+/g, '').substring(0, 60),
+      connector,
+      operation,
+      description: step.replace(/\*+/g, ''),
+      parameters: {
+        ...(table ? { entityName: 'gc_' + table.toLowerCase() } : {}),
+        ...(step.includes('List rows') ? { filter: filter } : {}),
+        ...(step.includes('Update a row') || step.includes('Add a new row') ? { columnMappings: mappings } : {}),
+        ...(step.includes('HTTP') && endpoint ? { method: endpoint.method, uri: endpoint.url, auth: endpoint.auth } : {}),
+        ...(step.includes('Send an email') && email ? { subject: email.subject, body: email.body } : {}),
+      },
+    });
+  }
+
+  return {
+    name: 'GC_' + name,
+    originalFunction: name,
+    category: cat,
+    logicCategory: logicCat,
+    description: flowDescription(name),
+    primaryTable: table,
+    trigger: triggerDef,
+    actions,
+    importInstructions: cat === 'scheduled'
+      ? 'Create as Scheduled cloud flow in make.powerautomate.com. Set Recurrence per the trigger config.'
+      : cat === 'webhook'
+      ? 'Create as Automated cloud flow with "When an HTTP request is received" trigger. After saving, copy the URL into the external service webhook config.'
+      : 'Create as Instant cloud flow with Power Apps (V2) trigger. Add input parameters per the function signature.',
+  };
+}
+
+export function generateFlowBundles() {
+  return {
+    scheduled: SCHEDULED_FLOWS.map(generateStructuredFlowJSON),
+    instant: INSTANT_FLOWS.map(generateStructuredFlowJSON),
+    webhook: WEBHOOK_FLOWS.map(generateStructuredFlowJSON),
+    summary: {
+      scheduled: SCHEDULED_FLOWS.length,
+      instant: INSTANT_FLOWS.length,
+      webhook: WEBHOOK_FLOWS.length,
+      total: ALL_FLOWS.length,
+    },
+  };
+}
