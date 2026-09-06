@@ -8,6 +8,7 @@ import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
 import { generateClaudeBuildBrief } from '@/utils/powerapps/claudeBuildBrief';
+import ClaudeBuildCheatSheet from '@/components/powerapps/ClaudeBuildCheatSheet';
 import { downloadMarkdown, downloadJSON } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -284,6 +285,11 @@ export default function DeveloperPackPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* === How to run this with Claude — handoff + paste targets + time === */}
+      <div className="mb-4">
+        <ClaudeBuildCheatSheet />
       </div>
 
       {/* Stat strip */}
