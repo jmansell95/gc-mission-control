@@ -76,10 +76,38 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
     );
 
   const handleSave = async () => {
-    const nonOverlapping = validRows.filter(r => !overlapsExisting(r));
-    const skipped = validRows.length - nonOverlapping.length;
+    // Re-fetch absences fresh to avoid stale-cache race conditions when
+    // multiple managers submit leave concurrently for the same staff member.
+    let freshAbsences = [];
+    try {
+      freshAbsences = await base44.entities.Absence.filter({ staff_id: staffId, status: 'approved' });
+    } catch (e) {
+      // Fallback to cached data if the fresh fetch fails
+      freshAbsences = existingAbsences;
+    }
+    const freshOverlap = (row) =>
+      freshAbsences.some(a =>
+        a.staff_id === staffId &&
+        a.status === 'approved' &&
+        a.start_date && a.end_date &&
+        a.start_date <= row.end_date && a.end_date >= row.start_date
+      );
 
-    if (nonOverlapping.length === 0) {
+    // Filter out rows that overlap existing approved absences, then
+    // deduplicate intra-batch: sort by start_date and skip any row that
+    // overlaps an already-kept row (prevents duplicate leave within one save).
+    const sortedValid = [...validRows].sort((a, b) => a.start_date.localeCompare(b.start_date));
+    const kept = [];
+    for (const row of sortedValid) {
+      if (freshOverlap(row)) continue;
+      const overlapsKept = kept.some(k =>
+        k.start_date <= row.end_date && k.end_date >= row.start_date
+      );
+      if (!overlapsKept) kept.push(row);
+    }
+    const skipped = validRows.length - kept.length;
+
+    if (kept.length === 0) {
       if (skipped > 0) {
         toast({ title: 'Leave already exists', description: `${skipped} row${skipped === 1 ? '' : 's'} already covered by existing leave — no duplicates created.` });
       }
@@ -89,7 +117,7 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
     setSaving(true);
     try {
       await base44.entities.Absence.bulkCreate(
-        nonOverlapping.map(r => ({
+        kept.map(r => ({
           staff_id: staffId,
           start_date: r.start_date,
           end_date: r.end_date,
@@ -99,22 +127,21 @@ export default function LeaveCaptureModal({ open, onClose, staffId, staffName, j
           source: 'manual',
         }))
       );
-      // Delete existing job/depot shifts on the leave dates so leave replaces the shift
-      for (const r of nonOverlapping) {
-        try {
-          await base44.functions.invoke('replaceShiftsWithLeave', {
+      // Delete existing job/depot shifts on the leave dates in parallel
+      // (replaceShiftsWithLeave is idempotent — safe to run concurrently).
+      await Promise.all(
+        kept.map(r =>
+          base44.functions.invoke('replaceShiftsWithLeave', {
             staff_id: staffId,
             start_date: r.start_date,
             end_date: r.end_date,
-          });
-        } catch (e) {
-          console.error('Failed to replace shifts with leave:', e);
-        }
-      }
+          }).catch(e => console.error('Failed to replace shifts with leave:', e))
+        )
+      );
       queryClient.invalidateQueries({ queryKey: ['absences'] });
       queryClient.invalidateQueries({ queryKey: ['rotas'] });
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
-      toast({ title: `${nonOverlapping.length} leave range${nonOverlapping.length === 1 ? '' : 's'} saved${skipped > 0 ? ` · ${skipped} skipped (already on leave)` : ''}`, description: `${staffName}'s rota will show ON LEAVE on those dates.` });
+      toast({ title: `${kept.length} leave range${kept.length === 1 ? '' : 's'} saved${skipped > 0 ? ` · ${skipped} skipped (already on leave)` : ''}`, description: `${staffName}'s rota will show ON LEAVE on those dates.` });
       onClose();
     } catch (e) {
       toast({ title: 'Failed to save leave', description: e.message, variant: 'destructive' });

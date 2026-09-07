@@ -106,11 +106,13 @@ export default async function(req: Request): Promise<Response> {
     // --- Load config ---
     const configs = await base44.asServiceRole.entities.KeyLogBookConfig.filter({ key: 'global' });
     const config = configs?.[0];
-    if (!config) {
-      return Response.json({ error: 'KeyLogBook config not found — configure it in Settings first' }, { status: 503 });
-    }
-    if (!config.api_base_url || !config.api_key) {
-      return Response.json({ error: 'KeyLogBook API base URL and API key not configured — set them in Settings → KeyLogBook → API details' }, { status: 503 });
+    if (!config || !config.api_base_url || !config.api_key) {
+      // Graceful skip — don't rack up consecutive failures while credentials
+      // are unconfigured. Returns 200 so the scheduled automation stays healthy.
+      const reason = !config
+        ? 'KeyLogBook config not found — configure it in Settings first'
+        : 'KeyLogBook API base URL and API key not configured — set them in Settings → KeyLogBook → API details';
+      return Response.json({ status: 'skipped', reason }, { status: 200 });
     }
 
     const baseUrl: string = config.api_base_url;
