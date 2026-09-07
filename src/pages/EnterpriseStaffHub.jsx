@@ -1,16 +1,14 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
-import EnterpriseHeader from '@/components/EnterpriseHeader';
+import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
 import {
-  Users, ArrowLeft, Search, Mail, Phone, Wrench, Building2,
+  Users, Search, Mail, Phone, Wrench, Building2,
   UserCheck, AlertCircle, ShieldCheck, HardHat, UserCog,
 } from 'lucide-react';
 
 export default function EnterpriseStaffHub() {
-  const navigate = useNavigate();
   const { divisions, permittedDivisionIds } = useDivision();
   const [search, setSearch] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('all');
@@ -92,81 +90,53 @@ export default function EnterpriseStaffHub() {
   }, [filtered]);
 
   return (
-    <div className="min-h-screen page-bg-vibrant">
-      <EnterpriseHeader />
-
-      {/* Hero */}
-      <div className="relative">
-        <div className="hero-vibrant absolute inset-0 overflow-hidden" />
-        <div className="relative px-4 pt-5 xl:px-6 xl:pt-8 pb-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between gap-3 mb-5">
-              <div className="flex items-center gap-3 min-w-0">
-                <button
-                  onClick={() => navigate(-1)}
-                  className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center flex-shrink-0 shadow-lg hover:bg-white/20 transition"
-                >
-                  <ArrowLeft className="w-5 h-5 text-white" />
-                </button>
-                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg ring-1 ring-white/20">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-none truncate">
-                    Enterprise Staff Hub
-                  </h1>
-                  <p className="text-xs sm:text-sm text-white/70 font-semibold mt-1 truncate">All crew members across every division</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Hero metrics */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="stat-gradient-brand rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Total Staff</p>
-                  <p className="text-lg font-extrabold text-white tabular-nums truncate">{totalStaff}</p>
-                </div>
-              </div>
-              <div className="stat-gradient-blue rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Building2 className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Business Streams</p>
-                  <p className="text-lg font-extrabold text-white tabular-nums truncate">{divisionStats.length}</p>
-                </div>
-              </div>
-              <div className="stat-gradient-emerald rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <UserCheck className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Active</p>
-                  <p className="text-lg font-extrabold text-white tabular-nums truncate">{staff.filter(s => s.is_active !== false).length}</p>
-                </div>
-              </div>
-              <div className="stat-gradient-violet rounded-2xl p-3 flex items-center gap-2.5 shadow-lg">
-                <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Wrench className="w-4 h-4 text-white" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Subcontractors</p>
-                  <p className="text-lg font-extrabold text-white tabular-nums truncate">{staff.filter(s => s.worker_type === 'subcontractor').length}</p>
-                </div>
-              </div>
-            </div>
+    <EnterpriseHubShell
+      title="Enterprise Staff Hub"
+      subtitle="All crew members across every division"
+      icon={Users}
+      accent="#3b82f6"
+    >
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+        <div className="stat-gradient-brand rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
+          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Users className="w-4 h-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Total Staff</p>
+            <p className="text-lg font-extrabold text-white tabular-nums truncate">{totalStaff}</p>
+          </div>
+        </div>
+        <div className="stat-gradient-blue rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
+          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Building2 className="w-4 h-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Business Streams</p>
+            <p className="text-lg font-extrabold text-white tabular-nums truncate">{divisionStats.length}</p>
+          </div>
+        </div>
+        <div className="stat-gradient-emerald rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
+          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <UserCheck className="w-4 h-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Active</p>
+            <p className="text-lg font-extrabold text-white tabular-nums truncate">{staff.filter(s => s.is_active !== false).length}</p>
+          </div>
+        </div>
+        <div className="stat-gradient-violet rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
+          <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Wrench className="w-4 h-4 text-white" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide truncate">Subcontractors</p>
+            <p className="text-lg font-extrabold text-white tabular-nums truncate">{staff.filter(s => s.worker_type === 'subcontractor').length}</p>
           </div>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="px-4 xl:px-6 pb-24 xl:pb-6 space-y-4 max-w-7xl mx-auto">
-
-        <div className="space-y-4">
+      <div className="space-y-4">
         {/* Search + Division filters */}
         <div className="insight-card rounded-2xl p-4 space-y-3">
           <div className="relative">
@@ -310,8 +280,7 @@ export default function EnterpriseStaffHub() {
             })}
           </div>
         )}
-        </div>
       </div>
-    </div>
+    </EnterpriseHubShell>
   );
 }
