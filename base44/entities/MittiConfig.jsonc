@@ -90,6 +90,48 @@
       "default": [],
       "description": "Admin-configurable list of safety/Mitti form URLs surfaced as big tappable buttons in the Shift Wizard. Each entry appears at the matching step (checks/arrive/briefing) so crew complete the right form at the right moment. When empty, the fixed vehicle_check_url / powra_url / equipment_check_url fields are used as before."
     },
+    "synced_templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "description": "Mitti template ID (the form number/reference, e.g. 'template_BB29F82814B64F559A33BF7CAA519787')."
+          },
+          "name": {
+            "type": "string",
+            "description": "Template/form name (e.g. 'Daily Vehicle Check', 'Site Risk Assessment')."
+          },
+          "modified_at": {
+            "type": "string",
+            "description": "ISO timestamp of when the template was last modified in Mitti."
+          },
+          "created_at": {
+            "type": "string",
+            "description": "ISO timestamp of when the template was created in Mitti."
+          }
+        },
+        "required": [
+          "template_id"
+        ]
+      },
+      "default": [],
+      "description": "All audit templates/forms synced from the Mitti API (GET /templates/search). Refreshed on every syncMitti run so the form list stays current. Each entry has the template ID (form number), name, and timestamps. Used by the compliance UI to show the full list of available Mitti forms."
+    },
+    "last_templates_sync_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last time templates were pulled from the Mitti API."
+    },
+    "sync_window_days": {
+      "type": "number",
+      "default": 90,
+      "description": "How many days back to pull audits on the initial sync (when no last_pull_sync_at exists). Default 90 days. Subsequent runs use incremental sync (modified_after = last_pull_sync_at) so only new/modified audits are fetched."
+    },
+    "last_pull_sync_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last successful pull sync. Used as the modified_after cursor for incremental sync \u2014 each run fetches only audits modified after this timestamp. Set to the newest modified_at from the fetched batch. Blank on first run (falls back to now - sync_window_days)."
+    },
     "last_webhook_at": {
       "type": "string",
       "description": "ISO timestamp of the last webhook payload received from Mitti."

@@ -41,7 +41,8 @@ export function classifyAudit(templateName: string, auditTitle: string): string 
 // Returns a partial SafetyReport record (without raw_payload, which the
 // caller should add separately to control size).
 export function extractAuditFields(audit: any): any {
-  const templateName = String(deepGet(audit, 'template_data.metadata.name', 'template_data.name', 'template_id', 'template.name', 'template_name') || '');
+  const templateId = String(deepGet(audit, 'template_id') || '');
+  const templateName = String(deepGet(audit, 'template_data.metadata.name', 'template_data.name', 'template.name', 'template_name') || '');
   const auditTitle = String(deepGet(audit, 'audit_data.name', 'name', 'audit.name', 'audit.title') || '');
   const auditorName = String(deepGet(audit, 'audit_data.authorship.author', 'authorship.author', 'audit_data.authorship.owner', 'authorship.owner', 'audit.author.name', 'author.name') || '');
   const auditorEmail = String(deepGet(audit, 'audit_data.authorship.email', 'authorship.email', 'owner.email', 'audit.author.email', 'author.email') || '');
@@ -78,6 +79,7 @@ export function extractAuditFields(audit: any): any {
 
   return {
     audit_category: auditCategory,
+    template_id: templateId,
     audit_template_name: templateName,
     audit_title: auditTitle,
     auditor_name: auditorName,
@@ -128,6 +130,7 @@ export async function processAndStoreAudit(
   config: any,
   jobs: any[],
   allStaff: any[],
+  divisionId?: string | null,
 ): Promise<any> {
   const auditId = String(audit.audit_id || audit.id || '');
   if (!auditId) return { stored: false, updated: false, error: 'No audit ID' };
@@ -162,6 +165,7 @@ export async function processAndStoreAudit(
     safetyculture_audit_id: auditId,
     ...fields,
     auditor_staff_id: auditorStaffId,
+    division_id: divisionId || null,
     job_id: jobId || null,
     job_name: jobName,
     contractor_id: contractorId,

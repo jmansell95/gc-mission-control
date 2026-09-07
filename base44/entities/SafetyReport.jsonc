@@ -30,6 +30,10 @@
       "type": "string",
       "description": "Name of the SafetyCulture template the audit was built from (e.g. 'Site Risk Assessment', 'Daily Plant Inspection', 'Permit to Dig')."
     },
+    "template_id": {
+      "type": "string",
+      "description": "Mitti template/form reference ID (e.g. 'template_BB29F82814B64F559A33BF7CAA519787'). The unique identifier for the form template this audit was built from. Stored so audits can be grouped and filtered by form type, and so the form list can be cross-referenced with MittiConfig.synced_templates."
+    },
     "audit_title": {
       "type": "string",
       "description": "Title of the individual audit instance"
@@ -45,6 +49,10 @@
     "auditor_staff_id": {
       "type": "string",
       "description": "The Staff record matched by the auditor's email. Used to stamp the matching RotaAssignment's Mitti check timestamps so the ShiftWizard shows live verification."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this audit belongs to, auto-tagged from the auditor's Staff record (Staff.division_id). Enables division-scoped filtering of safety audits \u2014 e.g. 'Land & Water' or 'Geotechnical Site Investigation' teams can see only their own audits."
     },
     "job_id": {
       "type": "string",
