@@ -5,6 +5,7 @@ import AdminNav from '@/components/AdminNav';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { STANDALONE_ROUTES, ROUTE_TO_SECTION } from '@/utils/standaloneRoutes';
 
 // Maps standalone routes to the closest AdminNav section so the
@@ -64,11 +65,14 @@ export default function AppLayout() {
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
           <DivisionIdentityBar />
-          <div className="px-4 pb-8 md:px-6 lg:pb-6 lg:pt-6 w-full">
+          {/* Responsive hub canvas: phone = stacked + bottom-nav clearance,
+              tablet = condensed gutters, desktop = breathable + sidebar. */}
+          <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-3 lg:pt-6 pb-24 xl:pb-8 w-full max-w-[1600px] mx-auto">
             <Breadcrumbs />
             <Outlet />
           </div>
         </main>
+        <MobileBottomNav />
       </div>
     </div>
   );

@@ -53,9 +53,25 @@ export default function FleetHub() {
 
   return (
     <HubShell
+      hubKey="fleet"
       icon={Truck}
+      eyebrow="Fleet Hub"
       title="Tracking"
       subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
+      breadcrumbs={[{ label: 'Fleet Hub' }]}
+      help={{
+        title: 'Fleet Hub — how it works',
+        topics: [
+          { title: 'Live Tracking', summary: 'Where every vehicle and crew phone is right now.', body: 'Solid pins are vehicles from Geotab. Dashed blue pins are crew shown **via their vehicle** — the driver is the Geotab keeper, their rota vehicle, or their default vehicle. Phone GPS always takes priority when available.' },
+          { title: 'Vehicles', summary: 'Specs, mileage, engine hours and keeper links.', body: 'Open a vehicle to see its Geotab keeper, MOT/service history and live status. Link a keeper so that driver appears on the live map automatically.' },
+          { title: 'Maintenance', summary: 'Bookings, MOT and service planning.', body: 'Book maintenance with a provider, track the matrix of upcoming work, and receive alerts before anything falls due.' },
+        ],
+      }}
+      onboarding={{
+        title: 'Welcome to the Fleet Hub',
+        description: 'One place for live tracking, vehicle records and maintenance.',
+        steps: ['Sync Geotab in Settings → Integrations', 'Link a keeper to each vehicle', 'Watch crew appear on the live map'],
+      }}
       actions={
         <div className="flex items-center gap-2">
           <Link to="/hub-overhaul-plan" className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">

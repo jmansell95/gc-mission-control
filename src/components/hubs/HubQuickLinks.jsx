@@ -60,16 +60,24 @@ const HUB_RELATIONSHIPS = {
   ],
 };
 
-export default function HubQuickLinks() {
+export default function HubQuickLinks({ hubKey, links }) {
   const location = useLocation();
-  const related = HUB_RELATIONSHIPS[location.pathname];
+  // Match exact path first, then the longest prefix (e.g. /assets/:id → /assets)
+  // hubKey may be a route ('/fleet'), a bare key ('fleet'), or a nested key ('logistics' → '/admin/logistics')
+  const keyFromHub = hubKey
+    ? Object.keys(HUB_RELATIONSHIPS).find(k => k === hubKey || k === `/${hubKey}` || k.endsWith(`/${hubKey}`))
+    : undefined;
+  const matchedKey = keyFromHub
+    || (HUB_RELATIONSHIPS[location.pathname] ? location.pathname
+      : Object.keys(HUB_RELATIONSHIPS).filter(k => k !== '/admin' && location.pathname.startsWith(k + '/')).sort((a, b) => b.length - a.length)[0]);
+  const related = links || HUB_RELATIONSHIPS[matchedKey];
 
   if (!related || related.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap animate-slide-up">
-      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-        <ArrowRight className="w-3 h-3" /> Related Hubs
+    <div className="flex items-center gap-2 flex-nowrap overflow-x-auto no-scrollbar -mx-1 px-1 sm:flex-wrap sm:overflow-visible animate-slide-up">
+      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
+        <ArrowRight className="w-3 h-3" /> Related
       </span>
       {related.map(hub => {
         const Icon = hub.icon;
@@ -77,7 +85,7 @@ export default function HubQuickLinks() {
           <Link
             key={hub.to}
             to={hub.to}
-            className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-slate-200 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#2E5A1A] transition-all duration-200 shadow-sm"
+            className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 flex-shrink-0 bg-white/80 backdrop-blur border border-slate-200 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#2E5A1A] transition-all duration-200 shadow-sm active:scale-[0.97]"
           >
             <Icon className="w-3.5 h-3.5" />
             {hub.label}
