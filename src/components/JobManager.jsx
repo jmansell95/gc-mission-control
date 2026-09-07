@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { Plus, Trash2, Edit2, Briefcase, FileText, Eye, Search, MapPin, FolderOpen, Copy, LayoutGrid, BarChart3, Users, Truck, PoundSterling, Calendar, GitBranch } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
-import { EmptyState, ErrorState, CardGridSkeleton } from '@/components/StateViews';
+import { Plus, Briefcase, Search, LayoutGrid, BarChart3, GitBranch } from 'lucide-react';
+import HubShell from '@/components/HubShell';
+import HubEmptyState from '@/components/hubs/HubEmptyState';
+import HubLoadingState from '@/components/hubs/HubLoadingState';
+import HubErrorState from '@/components/hubs/HubErrorState';
+import JobStatusFilterBar from '@/components/jobs/JobStatusFilterBar';
+import useJobPortfolioStats from '@/components/jobs/useJobPortfolioStats';
+import { JOBS_HELP_TOPICS, JOBS_ONBOARDING, JOBS_QUICK_LINKS } from '@/components/jobs/jobsHubContent';
 import JobDetail from '@/components/JobDetail';
 import JobWizardModal from '@/components/JobWizardModal';
 import SplitMultiSiteProjectsModal from '@/components/jobs/SplitMultiSiteProjectsModal';
@@ -16,8 +21,7 @@ import { getJobPrimaryType, getJobTypeColor, getJobTypeLabel } from '@/utils/job
 import DisciplinePills from '@/components/disciplines/DisciplinePills';
 import JobSummaryCard from '@/components/jobs/JobSummaryCard';
 import WorkloadOwnershipPanel from '@/components/jobs/WorkloadOwnershipPanel';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
-import { format, parseISO, differenceInCalendarDays, addDays } from 'date-fns';
+import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 
 const fmtDate = (d) => {
   try { return d ? format(parseISO(d), 'dd MMM yyyy') : '—'; } catch { return d || '—'; }
@@ -135,6 +139,8 @@ export default function JobManager({ onNavigateRota }) {
     return out;
   }, [costItems, siteAssets]);
 
+  const stats = useJobPortfolioStats(jobs, crewCountByJob, rigCountByJob);
+
   const handleEdit = (job) => {
     setEditingJob(job);
     setShowWizard(true);
@@ -210,41 +216,50 @@ export default function JobManager({ onNavigateRota }) {
     return <JobDetail job={selectedJob} onBack={() => setSelectedJob(null)} />;
   }
 
-  return (
-    <div>
-      <PageHeader
-        title="Manage Projects"
-        icon={Briefcase}
-        subtitle={`${jobs.length} project${jobs.length === 1 ? '' : 's'} in total`}
-        actions={
-          <>
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-              <button onClick={() => setLayoutView('grid')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition ${layoutView === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                <LayoutGrid className="w-3.5 h-3.5" /> Grid
-              </button>
-              <button onClick={() => setLayoutView('kanban')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm font-medium transition ${layoutView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-                <BarChart3 className="w-3.5 h-3.5" /> Kanban
-              </button>
-            </div>
-            <PrintReportButton buildHtml={buildJobsPrintHtml} label="Print Projects List" />
-            <ReGeocodeJobsButton />
-            <button
-              onClick={() => setShowSplitModal(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-white text-violet-600 border border-violet-200 rounded-lg hover:bg-violet-50 transition text-sm font-semibold shadow-sm"
-              title="Split existing multi-site jobs into standalone projects"
-            >
-              <GitBranch className="w-4 h-4" /> Split Multi-Site
-            </button>
-            <button
-              onClick={() => { setEditingJob(null); setShowWizard(true); }}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-white text-[#2E5A1A] rounded-lg hover:bg-[#2E5A1A] hover:text-white transition text-sm font-semibold shadow-sm"
-            >
-              <Plus className="w-4 h-4" /> Add Project
-            </button>
-          </>
-        }
-      />
+  const openWizard = () => { setEditingJob(null); setShowWizard(true); };
 
+  return (
+    <HubShell
+      hubKey="jobs"
+      icon={Briefcase}
+      eyebrow="Projects Hub"
+      title="Manage Projects"
+      subtitle={`${jobs.length} project${jobs.length === 1 ? '' : 's'} in total`}
+      breadcrumbs={[{ label: 'Projects Hub' }]}
+      stats={stats}
+      help={{ title: 'Projects Hub — how it works', topics: JOBS_HELP_TOPICS }}
+      onboarding={JOBS_ONBOARDING}
+      quickLinks={JOBS_QUICK_LINKS}
+      actions={
+        <>
+          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <button type="button" onClick={() => setLayoutView('grid')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${layoutView === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              <LayoutGrid className="w-3.5 h-3.5" /> Grid
+            </button>
+            <button type="button" onClick={() => setLayoutView('kanban')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${layoutView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              <BarChart3 className="w-3.5 h-3.5" /> Kanban
+            </button>
+          </div>
+          <PrintReportButton buildHtml={buildJobsPrintHtml} label="Print Projects List" />
+          <ReGeocodeJobsButton />
+          <button
+            type="button"
+            onClick={() => setShowSplitModal(true)}
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-white text-violet-600 border border-violet-200 rounded-xl hover:bg-violet-50 transition text-xs font-semibold shadow-sm"
+            title="Split existing multi-site jobs into standalone projects"
+          >
+            <GitBranch className="w-4 h-4" /> <span className="hidden sm:inline">Split Multi-Site</span>
+          </button>
+          <button
+            type="button"
+            onClick={openWizard}
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#244715] active:scale-[0.97] transition text-xs font-semibold shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> Add Project
+          </button>
+        </>
+      }
+    >
       {showWizard && (
         <JobWizardModal
           open={showWizard}
@@ -266,79 +281,15 @@ export default function JobManager({ onNavigateRota }) {
         <WorkloadOwnershipPanel />
       )}
 
-      {/* Jobs KPI Stats Bar — quick overview of job portfolio health */}
-      {jobs.length > 0 && (() => {
-        const active = jobs.filter(j => ['planning', 'in_progress', 'decommissioning'].includes(j.status || 'planning')).length;
-        const inProgress = jobs.filter(j => (j.status || 'planning') === 'in_progress').length;
-        const totalCrew = Object.values(crewCountByJob).reduce((s, n) => s + n, 0);
-        const totalRigs = Object.values(rigCountByJob).reduce((s, n) => s + n, 0);
-        const totalBudget = jobs.reduce((s, j) => s + (Number(j.budget_amount) || 0), 0);
-        const startingThisWeek = jobs.filter(j => {
-          if (!j.start_date) return false;
-          try {
-            const d = parseISO(j.start_date);
-            const now = new Date();
-            const weekEnd = addDays(now, 7);
-            return d >= now && d <= weekEnd;
-          } catch { return false; }
-        }).length;
-        return (
-          <div className="mb-4">
-            <HubStatsBar tiles={[
-              { icon: Briefcase, label: 'Total Projects', value: jobs.length, sublabel: `${active} active`, color: 'brand' },
-              { icon: BarChart3, label: 'In Progress', value: inProgress, sublabel: 'On site now', color: 'emerald' },
-              { icon: Users, label: 'Crew Deployed', value: totalCrew, sublabel: 'Across all jobs', color: 'blue' },
-              { icon: Truck, label: 'Rigs In Use', value: totalRigs, sublabel: 'Active drilling', color: 'amber' },
-              { icon: PoundSterling, label: 'Total Budget', value: totalBudget > 0 ? '£' + totalBudget.toLocaleString('en-GB', { maximumFractionDigits: 0 }) : '—', sublabel: 'Portfolio value', color: 'violet' },
-              { icon: Calendar, label: 'Starting Soon', value: startingThisWeek, sublabel: 'Next 7 days', color: 'teal' },
-            ]} />
-          </div>
-        );
-      })()}
-
       {/* Status buttons + search */}
       {jobs.length > 0 && (
-        <div className="mb-5 space-y-3">
-          {/* Status buttons */}
-          <div className="flex flex-wrap items-center gap-2">
-            {[
-              { value: 'all', label: 'All', count: jobs.length },
-              { value: 'planning', label: 'Planning', count: jobs.filter(j => (j.status || 'planning') === 'planning').length },
-              { value: 'in_progress', label: 'In Progress', count: jobs.filter(j => (j.status || 'planning') === 'in_progress').length },
-              { value: 'decommissioning', label: 'Decommissioning', count: jobs.filter(j => j.status === 'decommissioning').length },
-              { value: 'completed', label: 'Completed', count: jobs.filter(j => j.status === 'completed').length },
-              { value: 'on_hold', label: 'On Hold', count: jobs.filter(j => j.status === 'on_hold').length },
-              { value: 'cancelled', label: 'Cancelled', count: jobs.filter(j => j.status === 'cancelled').length },
-            ].map(btn => {
-              const active = statusFilter === btn.value;
-              return (
-                <button
-                  key={btn.value}
-                  onClick={() => setStatusFilter(btn.value)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition ${
-                    active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2E5A1A]/30 hover:text-slate-900'
-                  }`}
-                >
-                  {btn.label}
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${active ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>
-                    {btn.count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search jobs by name, location or reference..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
-            />
-          </div>
-        </div>
+        <JobStatusFilterBar
+          jobs={jobs}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
       )}
 
       {/* Jobs Grid/Kanban */}
@@ -349,15 +300,15 @@ export default function JobManager({ onNavigateRota }) {
           ) : (
           <>
           {isLoading ? (
-            <CardGridSkeleton count={6} />
+            <HubLoadingState variant="cards" count={6} />
           ) : isError ? (
-            <ErrorState message="Couldn't load jobs" onRetry={refetch} />
+            <HubErrorState title="Couldn't load projects" onRetry={refetch} />
           ) : jobs.length === 0 ? (
-            <EmptyState icon={Briefcase} title="No jobs yet" message="Add your first job to start scheduling crews and shifts." actionLabel="Add Job" onAction={() => { setEditingJob(null); setShowWizard(true); }} />
+            <HubEmptyState icon={Briefcase} title="No projects yet" description="Add your first project to start scheduling crews and shifts." action={{ label: 'Add Project', onClick: openWizard }} />
           ) : filteredJobs.length === 0 ? (
-            <EmptyState icon={Search} title="No jobs match your search" message="Try a different name, location, or status filter." />
+            <HubEmptyState icon={Search} title="No projects match your search" description="Try a different name, location, or status filter." compact secondaryAction={{ label: 'Clear filters', onClick: () => { setSearchQuery(''); setStatusFilter('all'); } }} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
               {filteredJobs.map((job) => {
                 const client = clients.find(c => c.id === job.client_id);
                 const parentClient = client?.parent_client_id ? clients.find(c => c.id === client.parent_client_id) : null;
@@ -395,6 +346,6 @@ export default function JobManager({ onNavigateRota }) {
           onClose={() => setCreatedJob(null)}
         />
       )}
-    </div>
+    </HubShell>
   );
 }

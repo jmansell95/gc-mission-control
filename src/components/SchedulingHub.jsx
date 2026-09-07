@@ -10,8 +10,8 @@ import { useSchedulingAssistant } from '@/components/SchedulingAssistantChat';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useToast } from '@/components/ui/use-toast';
-import TabBar from '@/components/TabBar';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
+import HubShell from '@/components/HubShell';
+import { SCHEDULING_HELP_TOPICS, SCHEDULING_ONBOARDING, SCHEDULING_QUICK_LINKS } from '@/components/scheduling/schedulingHubContent';
 
 // Unified scheduling hub — combines the weekly rota builder and the calendar
 // view behind a single sidebar entry. `initialTab` lets legacy "rota" /
@@ -84,39 +84,49 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
     { id: 'calendar', label: 'Calendar', icon: CalendarDays },
   ];
 
-  return (
-    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
-      {/* Scheduling KPI Bar — today's deployment snapshot */}
-      {schedStats.total > 0 && (
-        <HubStatsBar tiles={[
-          { icon: Users, label: 'Assigned Today', value: schedStats.total, sublabel: 'Total shifts', color: 'brand' },
-          { icon: CheckCircle2, label: 'On Jobs', value: schedStats.onJob, sublabel: 'Field deployments', color: 'emerald' },
-          { icon: Coffee, label: 'On Leave', value: schedStats.onLeave, sublabel: leaveFilterLabels[leaveFilter], color: 'amber', onClick: cycleLeaveFilter },
-          { icon: AlertTriangle, label: 'Conflicts', value: schedStats.conflicts, sublabel: 'Double-booked', color: schedStats.conflicts > 0 ? 'rose' : 'slate' },
-        ]} />
-      )}
+  const stats = schedStats.total > 0 ? [
+    { icon: Users, label: 'Assigned This Week', value: schedStats.total, sublabel: `w/c ${format(selectedWeek, 'dd MMM')}`, color: 'brand' },
+    { icon: CheckCircle2, label: 'On Jobs', value: schedStats.onJob, sublabel: 'Field deployments', color: 'emerald' },
+    { icon: Coffee, label: 'On Leave', value: schedStats.onLeave, sublabel: leaveFilterLabels[leaveFilter], color: 'amber', onClick: cycleLeaveFilter },
+    { icon: AlertTriangle, label: 'Conflicts', value: schedStats.conflicts, sublabel: 'Double-booked', color: schedStats.conflicts > 0 ? 'rose' : 'slate' },
+  ] : [];
 
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <TabBar tabs={tabs} activeTab={tab} onChange={setTab} />
-        <div className="flex items-center gap-2 flex-wrap">
+  return (
+    <HubShell
+      hubKey="scheduling"
+      icon={CalendarClock}
+      eyebrow="Scheduling Hub"
+      title="Scheduling"
+      subtitle="Weekly rota, crew availability and the month calendar"
+      breadcrumbs={[{ label: 'Scheduling Hub' }]}
+      stats={stats}
+      help={{ title: 'Scheduling Hub — how it works', topics: SCHEDULING_HELP_TOPICS }}
+      onboarding={SCHEDULING_ONBOARDING}
+      quickLinks={SCHEDULING_QUICK_LINKS}
+      tabs={tabs}
+      activeTab={tab}
+      onTabChange={setTab}
+      actions={
+        <>
           <TemplateWeekCopy targetWeekStart={currentWeekStart} />
           <button onClick={handleGeotabSync} disabled={syncing} type="button"
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 active:scale-[0.98] transition shadow-sm touch-manipulation select-none disabled:opacity-60">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 active:scale-[0.97] transition shadow-sm disabled:opacity-60">
             {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation2 className="w-4 h-4" />}
             <span className="hidden sm:inline">Sync GPS Timesheets</span>
             <span className="sm:hidden">GPS</span>
           </button>
           <button onClick={openChat} type="button"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-medium hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-sm touch-manipulation select-none">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
             <CalendarClock className="w-4 h-4" />
             <span className="hidden sm:inline">Schedule Assistant</span>
             <span className="sm:hidden">Assistant</span>
           </button>
-        </div>
-      </div>
+        </>
+      }
+    >
       {tab === 'rota' && <UnifiedRotaBuilder selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} />}
       {tab === 'heatmap' && <AvailabilityHeatmap />}
       {tab === 'calendar' && <CalendarView />}
-    </div>
+    </HubShell>
   );
 }

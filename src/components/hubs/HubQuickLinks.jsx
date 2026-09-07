@@ -83,8 +83,9 @@ export default function HubQuickLinks({ hubKey, links }) {
         const Icon = hub.icon;
         return (
           <Link
-            key={hub.to}
+            key={hub.to + (hub.label || '')}
             to={hub.to}
+            state={hub.state}
             className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 flex-shrink-0 bg-white/80 backdrop-blur border border-slate-200 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 rounded-xl text-xs font-semibold text-slate-600 hover:text-[#2E5A1A] transition-all duration-200 shadow-sm active:scale-[0.97]"
           >
             <Icon className="w-3.5 h-3.5" />
