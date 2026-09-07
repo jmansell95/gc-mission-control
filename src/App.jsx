@@ -53,7 +53,6 @@ import ReportingHub from './pages/ReportingHub';
 import CompliancePage from './pages/CompliancePage';
 import BillingPage from './pages/BillingPage';
 import AzureMigrationPlan from './pages/AzureMigrationPlan';
-import HubOverhaulPlan from './pages/HubOverhaulPlan';
 import DepotPickLists from './pages/DepotPickLists';
 import PowerAppsMigrationRoadmap from './pages/PowerAppsMigrationRoadmap';
 import PowerAppsBuildHub from './pages/PowerAppsBuildHub';
@@ -185,7 +184,6 @@ const AuthenticatedApp = () => {
             <Route path="/keylogbook-docs" element={<RouteGuard><KeyLogBookDocs /></RouteGuard>} />
             <Route path="/roadmap" element={<RouteGuard><ImprovementRoadmap /></RouteGuard>} />
             <Route path="/azure-migration-plan" element={<RouteGuard><AzureMigrationPlan /></RouteGuard>} />
-            <Route path="/hub-overhaul-plan" element={<RouteGuard><HubOverhaulPlan /></RouteGuard>} />
             <Route path="/m365-setup-guide" element={<RouteGuard><Microsoft365SetupGuide /></RouteGuard>} />
             <Route path="/powerapps-migration-roadmap" element={<RouteGuard><PowerAppsMigrationRoadmap /></RouteGuard>} />
             <Route path="/powerapps-build-hub" element={<RouteGuard><PowerAppsBuildHub /></RouteGuard>} />

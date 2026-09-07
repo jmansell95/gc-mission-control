@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { Truck, Satellite, Wrench, ClipboardList } from 'lucide-react';
+import { Truck, Satellite, Wrench } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import RunReportButton from '@/components/reports/RunReportButton';
@@ -55,10 +55,10 @@ export default function FleetHub() {
     <HubShell
       hubKey="fleet"
       icon={Truck}
-      eyebrow="Fleet Hub"
+      eyebrow="Tracking Hub"
       title="Tracking Hub"
       subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
-      breadcrumbs={[{ label: 'Fleet Hub' }]}
+      breadcrumbs={[{ label: 'Tracking Hub' }]}
       help={{
         title: 'Fleet Hub — how it works',
         topics: [
@@ -74,9 +74,6 @@ export default function FleetHub() {
       }}
       actions={
         <div className="flex items-center gap-2">
-          <Link to="/hub-overhaul-plan" className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 transition">
-            <ClipboardList className="w-3.5 h-3.5" /> Hub Overhaul Plan
-          </Link>
           <RunReportButton hub="fleet" />
         </div>
       }
