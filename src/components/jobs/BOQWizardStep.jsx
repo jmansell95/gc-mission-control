@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  ClipboardList, Search, Plus, Trash2, PoundSterling, Loader2, ShoppingBag,
+  ClipboardList, Search, Plus, Trash2, PoundSterling, Loader2, ShoppingBag, Upload, FileSpreadsheet,
 } from 'lucide-react';
 
 const fmt = (n) => '£' + (Math.round((n || 0) * 100) / 100).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -27,6 +27,8 @@ export default function BOQWizardStep({ boqLines = [], onChange }) {
   const [selectedRateId, setSelectedRateId] = useState('');
   const [qty, setQty] = useState('');
   const [priceOverride, setPriceOverride] = useState('');
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Company rate card (no job/project exists yet in the wizard)
   const { data: rateItems = [], isLoading } = useQuery({
@@ -86,6 +88,59 @@ export default function BOQWizardStep({ boqLines = [], onChange }) {
     onChange(boqLines.filter((_, i) => i !== idx));
   };
 
+  const handleImportExcel = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url,
+        json_schema: {
+          type: "object",
+          properties: {
+            lines: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  sor_ref: { type: "string" },
+                  description: { type: "string" },
+                  unit: { type: "string" },
+                  agreed_quantity: { type: "number" },
+                  agreed_unit_price: { type: "number" },
+                  category: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      });
+      const extracted = result?.output?.lines || (Array.isArray(result?.output) ? result.output : []);
+      const newLines = extracted
+        .filter((l) => l.description || l.sor_ref)
+        .map((l, i) => ({
+          rate_card_item_id: '',
+          sor_ref: l.sor_ref || '',
+          description: l.description || '',
+          category: l.category || 'labour',
+          subcategory: '',
+          unit: l.unit || 'nr',
+          agreed_quantity: Number(l.agreed_quantity) || 0,
+          agreed_unit_price: Number(l.agreed_unit_price) || 0,
+          agreed_line_total: Math.round((Number(l.agreed_quantity) || 0) * (Number(l.agreed_unit_price) || 0) * 100) / 100,
+          sort_order: boqLines.length + i,
+        }));
+      if (newLines.length > 0) {
+        onChange([...boqLines, ...newLines]);
+      }
+    } catch (err) {
+      console.error('BOQ import failed:', err);
+    }
+    setImporting(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className="space-y-3">
       {/* Intro / running total */}
@@ -106,6 +161,23 @@ export default function BOQWizardStep({ boqLines = [], onChange }) {
             <p className="text-sm font-bold text-[#2E5A1A] tabular-nums leading-tight">{fmt(contractValue)}</p>
           </div>
         </div>
+      </div>
+
+      {/* Import from Excel */}
+      <div className="flex items-center gap-2">
+        <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleImportExcel} className="hidden" />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={importing}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold hover:bg-blue-100 transition disabled:opacity-50"
+        >
+          {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+          {importing ? 'Importing…' : 'Import from Excel'}
+        </button>
+        <span className="text-[11px] text-slate-400 flex items-center gap-1">
+          <FileSpreadsheet className="w-3 h-3" /> Upload a BOQ spreadsheet to auto-fill line items
+        </span>
       </div>
 
       {/* Rate card search + pick */}

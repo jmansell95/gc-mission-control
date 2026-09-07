@@ -39,7 +39,8 @@ const STATUSES = [
 const DRILLING_METHODS = [
   { val: 'cp', label: 'CP', desc: 'Cable Percussion' },
   { val: 'rotary', label: 'Rotary', desc: 'Rotary Core' },
-  { val: 'mixed', label: 'Mixed', desc: 'CP + Rotary' },
+  { val: 'window_sampling', label: 'Window Sampling', desc: 'Window Sampler' },
+  { val: 'mixed', label: 'Mixed', desc: 'Multiple Methods' },
 ];
 
 function getTone(type) {

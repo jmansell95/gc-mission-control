@@ -74,7 +74,7 @@
               "groundworks",
               "depot"
             ],
-            "description": "Discipline type key. Simplified to three tracks: 'drilling' (with a CP/Rotary sub-choice via drilling_method), 'groundworks' (covers all groundworks crews \u2014 enabling, coring, trial pit, etc.), and 'depot' (for projects based at the yard). Legacy types (enabling, enabling_works, supervisor, coring, trial_pit) are migrated to drilling or groundworks."
+            "description": "Discipline type key. Simplified to three tracks: 'drilling' (with a CP/Rotary/Window Sampling sub-choice via drilling_method), 'groundworks' (covers all groundworks crews \u2014 enabling, coring, trial pit, etc.), and 'depot' (for projects based at the yard). Legacy types (enabling, enabling_works, supervisor, coring, trial_pit) are migrated to drilling or groundworks."
           },
           "status": {
             "type": "string",
@@ -92,11 +92,12 @@
             "enum": [
               "cp",
               "rotary",
+              "window_sampling",
               "mixed",
               "not_applicable"
             ],
             "default": "not_applicable",
-            "description": "Drilling method for drilling disciplines only. 'cp' = cable percussion, 'rotary' = rotary drilling, 'mixed' = both, 'not_applicable' = non-drilling."
+            "description": "Drilling method for drilling disciplines only. 'cp' = cable percussion, 'rotary' = rotary drilling, 'window_sampling' = window sampler, 'mixed' = multiple methods, 'not_applicable' = non-drilling."
           },
           "start_date": {
             "type": "string",
@@ -352,6 +353,7 @@
       "enum": [
         "cp",
         "rotary",
+        "window_sampling",
         "mixed",
         "not_applicable"
       ],

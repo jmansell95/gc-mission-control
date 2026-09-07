@@ -164,7 +164,6 @@ export default function JobDetailTabs({
         <SubTabNav
           tabs={[
             { id: 'daily', label: 'Daily Schedule', icon: CalendarDays },
-            { id: 'delays', label: 'Delays', icon: AlertTriangle },
             { id: 'accommodation', label: 'Accommodation', icon: Hotel },
           ]}
           activeTab={scheduleSub}
@@ -185,8 +184,6 @@ export default function JobDetailTabs({
             <PermanentCrewCard job={job} />
             <JobScheduleOverview job={job} primaryType={primaryType} assignedStaff={assignedStaff} rotas={rotas} allStaff={allStaff} vehicles={vehicles} rotasByDate={rotasByDate} sortedDates={sortedDates} />
           </>
-        ) : scheduleSub === 'delays' ? (
-          <DelayLogManager job={job} />
         ) : (
           <JobHotelBookings job={job} assignedStaff={assignedStaff} allStaff={allStaff} />
         )}
@@ -201,6 +198,7 @@ export default function JobDetailTabs({
         <SubTabNav
           tabs={[
             { id: 'logs', label: 'Activity Logs', icon: Activity },
+            { id: 'delays', label: 'Delays', icon: AlertTriangle },
             { id: 'hazards', label: 'Hazard Map', icon: ShieldCheck },
             ...(isDrillingJob ? [{ id: 'boreholes', label: 'Boreholes', icon: Mountain }] : []),
             ...(isDrillingJob ? [{ id: 'geotech', label: 'Geotech', icon: FlaskConical }] : []),
@@ -221,6 +219,8 @@ export default function JobDetailTabs({
             />
             <InvestigationLogManager job={job} isDrillingJob={isDrillingJob} assignedStaff={assignedStaff} allStaff={allStaff} canSeeCosts={canSeeCosts} onViewBoreholes={() => setActivitySub('boreholes')} selectedLogId={siteActivitySelectedLogId} />
           </>
+        ) : activitySub === 'delays' ? (
+          <DelayLogManager job={job} />
         ) : activitySub === 'hazards' ? (
           <JobHazardMap job={job} />
         ) : activitySub === 'boreholes' && isDrillingJob ? (

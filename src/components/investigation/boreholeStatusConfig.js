@@ -1,4 +1,4 @@
-import { CheckCircle2, Loader2, CircleDashed, Mountain, Drill, RotateCw, Layers } from 'lucide-react';
+import { CheckCircle2, Loader2, CircleDashed, Mountain, Drill, RotateCw, Layers, Frame } from 'lucide-react';
 
 // Borehole completion status config — shared across BoreholeDrillDown,
 // InvestigationHub, InvestigationGroupCard, and the dashboard widget.
@@ -58,6 +58,12 @@ export const DRILLING_METHOD_CONFIG = {
     short: 'Rotary',
     icon: RotateCw,
     badge: 'bg-blue-100 text-blue-700 border-blue-200',
+  },
+  window_sampling: {
+    label: 'Window Sampling',
+    short: 'WS',
+    icon: Frame,
+    badge: 'bg-cyan-100 text-cyan-700 border-cyan-200',
   },
   mixed: {
     label: 'Mixed (CP + Rotary)',

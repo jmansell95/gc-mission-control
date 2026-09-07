@@ -136,10 +136,11 @@
       "enum": [
         "cp",
         "rotary",
+        "window_sampling",
         "mixed",
         "unknown"
       ],
-      "description": "Drilling method used for this borehole, parsed from the AGS LOCA_TYPE field. 'cp' = Cable Percussion, 'rotary' = Rotary drilling (including rotary core), 'mixed' = both methods used, 'unknown' = method not specified in the AGS file. Only set on borehole_progress logs (source='ags_import'). Displayed as a badge on borehole cards so managers can see at a glance whether a hole was CP or Rotary."
+      "description": "Drilling method used for this borehole, parsed from the AGS LOCA_TYPE field. 'cp' = Cable Percussion, 'rotary' = Rotary drilling (including rotary core), 'window_sampling' = window sampler, 'mixed' = multiple methods used, 'unknown' = method not specified in the AGS file. Only set on borehole_progress logs (source='ags_import'). Displayed as a badge on borehole cards so managers can see at a glance whether a hole was CP, Rotary or Window Sampling."
     },
     "project_engineer": {
       "type": "string",

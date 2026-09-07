@@ -37,7 +37,8 @@ const REVENUE_METHODS = [
 const DRILLING_METHODS = [
   { val: 'cp', label: 'CP', desc: 'Cable Percussion' },
   { val: 'rotary', label: 'Rotary', desc: 'Rotary Core' },
-  { val: 'mixed', label: 'Mixed', desc: 'Both CP + Rotary' },
+  { val: 'window_sampling', label: 'Window Sampling', desc: 'Window Sampler' },
+  { val: 'mixed', label: 'Mixed', desc: 'Multiple Methods' },
   { val: 'not_applicable', label: 'N/A', desc: 'Non-drilling' },
 ];
 

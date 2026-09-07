@@ -50,6 +50,7 @@ export const DISCIPLINE_SUBCATEGORIES = {
   drilling: [
     { val: 'cp_crew', label: 'CP Crew' },
     { val: 'rotary_crew', label: 'Rotary Crew' },
+    { val: 'window_sampling_crew', label: 'Window Sampling Crew' },
     { val: 'mixed_crew', label: 'Mixed Crew' },
   ],
   groundworks: [
