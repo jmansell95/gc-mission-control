@@ -136,16 +136,16 @@ export function useLiveStaffLocations(divisionId) {
     };
   });
 
-  // Vehicle proxy: for staff with no recent phone GPS, synthesize a pin from
-  // the vehicle's latest Geotab position. Vehicle resolved in priority:
+  // Vehicle proxy: synthesize a pin from the vehicle's latest Geotab position
+  // for every staff member with a linked vehicle. Vehicle resolved in priority:
   //   1. Today's rota assignment vehicle_id
   //   2. Staff default_vehicle_id
   //   3. Geotab keeper link (Vehicle.geotab_keeper_staff_id → this staff member)
   // The keeper fallback (3) works even without a rota assignment, so all
   // tracked drivers appear — Geotab already knows who drives each vehicle.
-  const staffWithPhoneGps = new Set(Object.keys(latestByStaff));
+  // Staff with BOTH phone GPS and vehicle tracking get two entries (one
+  // source='phone', one source='vehicle_proxy') so consumers can show dual pills.
   for (const staff of staffList) {
-    if (staffWithPhoneGps.has(staff.id)) continue;
     const assignment = todayAssignments.find(a => a.staff_id === staff.id);
     const vehicleId = assignment?.vehicle_id || staff.default_vehicle_id || keeperStaffToVehicleId[staff.id];
     if (!vehicleId) continue;
