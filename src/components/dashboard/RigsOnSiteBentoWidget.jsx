@@ -4,30 +4,42 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
   Drill, Satellite, ChevronRight, Cog, Wrench,
-  MapPin, Truck,
+  Truck, HardHat, Ruler, Clock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
+import { computeRigEarnings } from '@/utils/rigEarnings';
 
 const fmtGBP = (v) => {
   if (v == null || isNaN(v)) return '£0';
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(v);
 };
 
+const shiftDuration = (start) => {
+  const ms = Date.now() - new Date(start).getTime();
+  if (ms < 0) return '0m';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+};
+
+const METHOD_LABEL = { cp: 'CP', rotary: 'Rotary', window_sampling: 'Window', mixed: 'Mixed' };
+
 /**
- * RigsOnSiteBentoWidget — the rebuilt "Rigs on Site Today" hero tile.
+ * RigsOnSiteBentoWidget — the "Rigs on Site Today" hero tile.
+ *
+ * Now pulls LIVE drilling logs + earnings from InvestigationLog records via
+ * the shared computeRigEarnings engine, so each rig row shows real revenue,
+ * meterage, lead driller, shift duration and drilling method at a glance.
  *
  * On-site detection (per PRD):
  *  - 'on_site'    = rota today AND delivery sign-off (JAA status='on_site' OR rota arrived_on_site_at/started_at)
  *  - 'deployed'   = rota today AND active JAA but no sign-off yet
  *  - 'scheduled'  = rota today, no JAA, no sign-off
  *  - 'completed'  = rota completed
- *
- * Shows a "No GPS Data" badge when no live Geotab vehicle data is available,
- * indicating rig trackers aren't fitted yet.
  */
 export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const navigate = useNavigate();
@@ -39,6 +51,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   useEffect(() => {
     const id = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ['rig-bento-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['rig-bento-today-logs'] });
     }, 4 * 60 * 1000);
     return () => clearInterval(id);
   }, [queryClient]);
@@ -57,6 +70,21 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   });
   const { data: jobs = [] } = useQuery({ queryKey: ['rig-bento-jobs'], queryFn: () => base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['rig-bento-staff'], queryFn: () => base44.entities.Staff.list() });
+
+  // LIVE today's drilling logs — server-side date filter so we always get today's records
+  const { data: todayLogs = [] } = useQuery({
+    queryKey: ['rig-bento-today-logs', todayStr],
+    queryFn: () => base44.entities.InvestigationLog.filter({
+      date: todayStr,
+      source: { $in: ['ags_import', 'keylogbook_remarks'] },
+    }, '-created_date', 500),
+    staleTime: 60000,
+  });
+  const { data: sorItems = [] } = useQuery({
+    queryKey: ['rig-bento-sor'],
+    queryFn: () => base44.entities.InvestigationSOR.list('-created_date', 500),
+    staleTime: 120000,
+  });
 
   // Live Geotab vehicle positions
   const { data: liveData } = useQuery({
@@ -96,6 +124,15 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
       if (!byRig[a.rig_asset_id].job) byRig[a.rig_asset_id].job = job;
     });
 
+    // Group today's logs by device_name (rig name) for per-rig earnings
+    const logsByDevice = {};
+    todayLogs.forEach(l => {
+      const dev = (l.device_name || '').trim();
+      if (!dev) return;
+      if (!logsByDevice[dev]) logsByDevice[dev] = [];
+      logsByDevice[dev].push(l);
+    });
+
     // Calculate per-rig state
     Object.entries(byRig).forEach(([rigId, data]) => {
       const job = data.job;
@@ -125,6 +162,24 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
       const rig = rigs.find(r => r.id === rigId);
       const lead = data.rotaAssignments.find(a => a.crew_role === 'lead_driller');
       const leadDriller = lead ? allStaff.find(s => s.id === lead.staff_id) : null;
+
+      // Per-rig earnings from today's live logs
+      const rigName = (rig?.name || '').trim();
+      const rigLogs = logsByDevice[rigName] || [];
+      let revenue = 0, meterage = 0, boreholeCount = 0;
+      if (rigLogs.length) {
+        const { perRig } = computeRigEarnings({ logs: rigLogs, sorItems, job: data.job });
+        const r = perRig[0];
+        revenue = r?.earnings || 0;
+        meterage = r?.totalMetres || 0;
+        boreholeCount = r?.boreholeCount || 0;
+      }
+
+      // Shift start for on-site duration
+      const onSiteAssignment = data.rotaAssignments.find(a => a.arrived_on_site_at) ||
+                               data.rotaAssignments.find(a => a.started_at);
+      const shiftStart = onSiteAssignment?.arrived_on_site_at || onSiteAssignment?.started_at;
+
       return {
         rigId,
         rig,
@@ -133,18 +188,25 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
         hasRotaToday: data.hasRotaToday,
         leadDriller,
         firstAssignment: data.rotaAssignments[0],
+        revenue,
+        meterage,
+        boreholeCount,
+        shiftStart,
+        drillingMethod: data.job?.drilling_method,
       };
     }).sort((a, b) => {
       const order = { on_site: 0, completed: 1, deployed: 2, scheduled: 3, assigned: 4 };
-      return (order[a.state] - order[b.state]);
+      return (order[a.state] - order[b.state]) || (b.revenue - a.revenue);
     });
-  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff]);
+  }, [assignments, jobAssetAssignments, jobs, rigs, allStaff, todayLogs, sorItems]);
 
   const onSiteCount = rigStats.filter(r => r.state === 'on_site').length;
   const deployedCount = rigStats.filter(r => r.state === 'deployed').length;
   const scheduledCount = rigStats.filter(r => r.state === 'scheduled').length;
   const completedCount = rigStats.filter(r => r.state === 'completed').length;
   const activeRigCount = rigStats.length;
+  const totalRevenue = rigStats.reduce((s, r) => s + (r.revenue || 0), 0);
+  const totalMeterage = rigStats.reduce((s, r) => s + (r.meterage || 0), 0);
 
   const handleClick = () => navigate('/fleet?filter=today');
 
@@ -182,7 +244,10 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
               <p className="text-[11px] text-white/70">{format(new Date(), 'EEE dd MMM')}</p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition" />
+          <div className="text-right">
+            <p className="text-[9px] text-white/60 uppercase font-semibold tracking-wide">Earned Today</p>
+            <p className="text-sm font-bold tabular-nums leading-none">{fmtGBP(totalRevenue)}</p>
+          </div>
         </div>
       </div>
 
@@ -193,7 +258,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
         ) : (
           <>
             {/* Big numbers row */}
-            <div className="flex items-end gap-4 mb-4">
+            <div className="flex items-end gap-4 mb-3">
               <div>
                 <p className="text-4xl font-bold text-emerald-600 tabular-nums leading-none">{onSiteCount}</p>
                 <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide mt-1">On Site</p>
@@ -212,6 +277,12 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
                 <div className="border-l border-slate-200 pl-4">
                   <p className="text-2xl font-bold text-emerald-500 tabular-nums leading-none">{completedCount}</p>
                   <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide mt-1">Done</p>
+                </div>
+              )}
+              {totalMeterage > 0 && (
+                <div className="border-l border-slate-200 pl-4 ml-auto">
+                  <p className="text-2xl font-bold text-slate-600 tabular-nums leading-none">{totalMeterage.toFixed(0)}m</p>
+                  <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide mt-1">Drilled</p>
                 </div>
               )}
             </div>
@@ -236,6 +307,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
                 const dotColor = isOnSite ? 'bg-emerald-500' : isCompleted ? 'bg-emerald-600' : isDeployed ? 'bg-amber-500' : isScheduled ? 'bg-slate-300' : 'bg-slate-200';
                 const stateLabel = isOnSite ? 'On site' : isCompleted ? 'Done' : isDeployed ? 'Deployed' : isScheduled ? 'Scheduled' : 'Assigned';
                 const stateColor = isOnSite ? 'text-emerald-700 bg-emerald-50' : isCompleted ? 'text-emerald-700 bg-emerald-50' : isDeployed ? 'text-amber-700 bg-amber-50' : isScheduled ? 'text-slate-500 bg-slate-100' : 'text-slate-400 bg-slate-50';
+                const methodLabel = stat.drillingMethod && METHOD_LABEL[stat.drillingMethod];
 
                 return (
                   <motion.div
@@ -252,10 +324,36 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
                     </div>
                     <Cog className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-slate-900 truncate">{stat.rig?.name || 'Unknown Rig'}</p>
-                      <p className="text-[10px] text-slate-400 truncate flex items-center gap-1">
-                        {stat.job?.name || 'No job'}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-slate-900 truncate">{stat.rig?.name || 'Unknown Rig'}</p>
+                        {methodLabel && (
+                          <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{methodLabel}</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 truncate">{stat.job?.name || 'No job'}</p>
+                      <div className="flex items-center gap-2 mt-0.5 text-[10px]">
+                        {stat.leadDriller && (
+                          <span className="flex items-center gap-0.5 text-slate-500 truncate min-w-0">
+                            <HardHat className="w-2.5 h-2.5 text-emerald-600 flex-shrink-0" />
+                            <span className="truncate">{stat.leadDriller.name}</span>
+                          </span>
+                        )}
+                        {stat.meterage > 0 && (
+                          <span className="flex items-center gap-0.5 text-amber-600 flex-shrink-0">
+                            <Ruler className="w-2.5 h-2.5" />
+                            <span className="tabular-nums">{stat.meterage.toFixed(1)}m</span>
+                          </span>
+                        )}
+                        {stat.revenue > 0 && (
+                          <span className="text-emerald-600 font-bold flex-shrink-0 tabular-nums">{fmtGBP(stat.revenue)}</span>
+                        )}
+                        {isOnSite && stat.shiftStart && (
+                          <span className="flex items-center gap-0.5 text-slate-400 flex-shrink-0">
+                            <Clock className="w-2.5 h-2.5" />
+                            <span className="tabular-nums">{shiftDuration(stat.shiftStart)}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stateColor} flex-shrink-0`}>
                       {stateLabel}
@@ -281,7 +379,13 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
     </div>
     {showAllRigs && (
       <AllRigsModal
-        rigs={rigStats.map(r => ({ ...r, revenue: 0, meterage: 0, crewDayRate: 0 }))}
+        rigs={rigStats.map(r => ({
+          ...r,
+          revenue: r.revenue,
+          meterage: r.meterage,
+          crewDayRate: 0,
+          shiftStart: r.shiftStart ? new Date(r.shiftStart).getTime() : null,
+        }))}
         onClose={() => setShowAllRigs(false)}
       />
     )}
