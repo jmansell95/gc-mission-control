@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode
+  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format, eachDayOfInterval, isWeekend, differenceInCalendarDays } from 'date-fns';
@@ -16,6 +16,7 @@ import LoadPlannerModal from '@/components/logistics/LoadPlannerModal';
 import DeliveryList from '@/components/logistics/DeliveryList';
 import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
+import BillableItemsBasketModal from '@/components/logistics/BillableItemsBasketModal';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
 import { billingTotal } from '@/components/equipment/shared';
@@ -80,7 +81,8 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(blankForm());
   const [savingItem, setSavingItem] = useState(false);
-  const [hireFilter, setHireFilter] = useState('active');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showBasket, setShowBasket] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState(false);
   const [addingRigGear, setAddingRigGear] = useState(false);
   const [showRigPicker, setShowRigPicker] = useState(false);
@@ -110,7 +112,26 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const isLoadable = (c) => c.category !== 'labour' && c.category !== 'contractor_supplied' && c.category !== 'client_supplied';
   const activeItems = items.filter(c => (c.hire_status || 'active') !== 'off_hired').filter(isLoadable);
   const returnedItems = items.filter(c => c.hire_status === 'off_hired').filter(isLoadable);
-  const visibleItems = hireFilter === 'active' ? activeItems : returnedItems;
+  // Status derivation for filter pills:
+  //   on_site  = hire_status active AND current_location === 'site'
+  //   on_hire  = hire_status active AND current_location !== 'site' (yard/in_transit)
+  //   returned = hire_status off_hired
+  const onSiteItems = activeItems.filter(c => (c.current_location || 'yard') === 'site');
+  const onHireItems = activeItems.filter(c => (c.current_location || 'yard') !== 'site');
+  const statusCounts = {
+    all: activeItems.length + returnedItems.length,
+    on_site: onSiteItems.length,
+    on_hire: onHireItems.length,
+    returned: returnedItems.length,
+  };
+  const filterByStatus = (list) => {
+    if (statusFilter === 'all') return list;
+    if (statusFilter === 'on_site') return list.filter(c => (c.hire_status || 'active') !== 'off_hired' && (c.current_location || 'yard') === 'site');
+    if (statusFilter === 'on_hire') return list.filter(c => (c.hire_status || 'active') !== 'off_hired' && (c.current_location || 'yard') !== 'site');
+    if (statusFilter === 'returned') return list.filter(c => c.hire_status === 'off_hired');
+    return list;
+  };
+  const visibleItems = statusFilter === 'returned' ? returnedItems : filterByStatus(activeItems);
   const loadableItems = items.filter(isLoadable);
   // For day-rate items, the effective billing quantity = quantity × days on
   // site (from start_date → end_date). Rigs have quantity 1, so their total
@@ -565,7 +586,11 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
               <button onClick={() => { setForm(blankForm()); setEditingId(null); setAdding(true); }}
                 className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
-                <Plus className="w-4 h-4" /> Add Billable Item
+                <Plus className="w-4 h-4" /> Add Single Item
+              </button>
+              <button onClick={() => setShowBasket(true)}
+                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] hover:opacity-90 active:scale-[0.98] transition shadow-md w-full sm:w-auto">
+                <ShoppingCart className="w-4 h-4" /> Add Billable Items
               </button>
               <button onClick={() => setShowManifest(true)}
                 className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
@@ -599,12 +624,22 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           </Dialog>
 
           {(activeItems.length > 0 || returnedItems.length > 0) && (
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-full sm:w-auto sm:inline-flex">
-              <button onClick={() => setHireFilter('active')} className={`flex-1 sm:flex-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${hireFilter === 'active' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>
-                <Truck className="w-3.5 h-3.5" /> Active ({activeItems.length})
+            <div className="flex gap-1.5 flex-wrap w-full">
+              <button onClick={() => setStatusFilter('all')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${statusFilter === 'all' ? 'bg-slate-700 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                All <span className={`text-[10px] ${statusFilter === 'all' ? 'text-white/70' : 'text-slate-400'}`}>({statusCounts.all})</span>
               </button>
-              <button onClick={() => setHireFilter('off_hired')} className={`flex-1 sm:flex-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${hireFilter === 'off_hired' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}>
-                <FileCheck className="w-3.5 h-3.5" /> Returned ({returnedItems.length})
+              <button onClick={() => setStatusFilter('on_site')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${statusFilter === 'on_site' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                <span className={`w-2 h-2 rounded-full ${statusFilter === 'on_site' ? 'bg-white' : 'bg-emerald-500'}`} /> On Site <span className={`text-[10px] ${statusFilter === 'on_site' ? 'text-white/70' : 'text-emerald-600/60'}`}>({statusCounts.on_site})</span>
+              </button>
+              <button onClick={() => setStatusFilter('on_hire')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${statusFilter === 'on_hire' ? 'bg-amber-500 text-white shadow-sm' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}`}>
+                <span className={`w-2 h-2 rounded-full ${statusFilter === 'on_hire' ? 'bg-white' : 'bg-amber-500'}`} /> On Hire <span className={`text-[10px] ${statusFilter === 'on_hire' ? 'text-white/70' : 'text-amber-600/60'}`}>({statusCounts.on_hire})</span>
+              </button>
+              <button onClick={() => setStatusFilter('returned')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${statusFilter === 'returned' ? 'bg-slate-500 text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                <FileCheck className="w-3 h-3" /> Returned <span className={`text-[10px] ${statusFilter === 'returned' ? 'text-white/70' : 'text-slate-400'}`}>({statusCounts.returned})</span>
               </button>
             </div>
           )}
@@ -613,7 +648,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
             <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">
               {canSeeCosts ? 'No equipment on this job yet. Click "Add Billable Item" to add rigs, machinery, trailers, lifting gear, consumables or hire items.' : 'No equipment added to this job yet.'}
             </div>
-          ) : hireFilter === 'off_hired' ? (
+          ) : statusFilter === 'returned' ? (
             returnedItems.length === 0 ? (
               <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">No equipment returned yet.</div>
             ) : (
@@ -640,7 +675,9 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
               </div>
             )
           ) : visibleItems.length === 0 && !adding ? (
-            <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">No active equipment.</div>
+            <div className="text-center py-6 text-slate-400 text-sm border border-dashed border-slate-200 rounded-lg">
+              {statusFilter === 'on_site' ? 'No equipment on site.' : statusFilter === 'on_hire' ? 'No equipment on hire (at yard/depot).' : 'No equipment in this category.'}
+            </div>
           ) : (
             <div className="space-y-4">
               {rigAssemblyList.map(assembly => (
@@ -762,6 +799,17 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
       )}
       {showManifest && (
         <SiteManifestPDF jobId={jobId} jobName={job?.name || ''} onClose={() => setShowManifest(false)} />
+      )}
+
+      {showBasket && (
+        <BillableItemsBasketModal
+          jobId={jobId}
+          job={job}
+          rateCardItems={rateCardItems}
+          suppliers={suppliers}
+          defaultDates={defaultDates}
+          onClose={() => setShowBasket(false)}
+        />
       )}
     </div>
   );
