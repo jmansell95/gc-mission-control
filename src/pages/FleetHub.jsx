@@ -56,7 +56,7 @@ export default function FleetHub() {
       hubKey="fleet"
       icon={Truck}
       eyebrow="Fleet Hub"
-      title="Tracking"
+      title="Tracking Hub"
       subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
       breadcrumbs={[{ label: 'Fleet Hub' }]}
       help={{
