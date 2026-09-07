@@ -1,18 +1,19 @@
 import React from 'react';
-import { CheckCircle2, MapPin, ShieldCheck, Briefcase, Flag } from 'lucide-react';
+import { CheckCircle2, MapPin, ShieldCheck, Briefcase, Flag, ClipboardCheck } from 'lucide-react';
 
 // ShiftStepRail — left-pane step list for the tablet layout of ShiftWizard.
 // Shows each shift step with its status (done / active / upcoming) and lets
 // the user jump back to any completed or current step. Mobile uses the
 // compact progress dots instead; this rail is tablet-only.
 const STEP_META = {
+  checks: { icon: ClipboardCheck, label: 'Daily Checks', desc: 'Pre-work safety checklist' },
   arrive: { icon: MapPin, label: 'Arrive on Site', desc: 'Log travel & confirm arrival' },
   briefing: { icon: ShieldCheck, label: 'Briefing & Induction', desc: 'Sign the daily briefing' },
-  working: { icon: Briefcase, label: 'Working', desc: 'Log tasks & progress' },
+  working: { icon: Briefcase, label: 'Tasks', desc: 'Log tasks & progress' },
   end_of_shift: { icon: Flag, label: 'Finish Day', desc: 'Travel home & submit timesheet' },
 };
 
-export default function ShiftStepRail({ steps, currentStep, currentStepIndex, onJump }) {
+export default function ShiftStepRail({ steps, currentStep, currentStepIndex, onJump, previewMode = false }) {
   return (
     <div className="h-full flex flex-col">
       <div className="px-4 py-4 border-b border-slate-100">
@@ -27,7 +28,7 @@ export default function ShiftStepRail({ steps, currentStep, currentStepIndex, on
           const Icon = meta.icon;
           const done = i < currentStepIndex;
           const active = i === currentStepIndex;
-          const clickable = (done || active) && onJump;
+          const clickable = (done || active || previewMode) && onJump;
           return (
             <button
               key={s}
@@ -39,6 +40,8 @@ export default function ShiftStepRail({ steps, currentStep, currentStepIndex, on
                   ? 'bg-emerald-50 border border-emerald-200 shadow-sm'
                   : done
                   ? 'hover:bg-slate-100 border border-transparent'
+                  : previewMode
+                  ? 'hover:bg-slate-50 border border-transparent opacity-70'
                   : 'opacity-50 cursor-not-allowed border border-transparent'
               }`}
             >

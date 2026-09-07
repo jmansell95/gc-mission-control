@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
@@ -469,6 +469,19 @@ export default function TodayPage() {
           <IncentiveQuickLook staffId={staff.id} teamId={staff.team_id} />
         )}
 
+        {isPlatformAdmin && (
+          <button onClick={() => setShiftWizard({ assignmentId: 'preview', previewMode: true })} type="button"
+            className="w-full flex items-center gap-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl px-4 py-4 text-white active:scale-95 transition touch-manipulation shadow-lg shadow-amber-500/25">
+            <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+              <Play className="w-5 h-5 text-white" strokeWidth={2.5} />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-sm font-bold leading-tight">Preview Shift Flow</p>
+              <p className="text-[11px] text-white/75 truncate font-medium">Walk through the crew experience</p>
+            </div>
+          </button>
+        )}
+
         {staff?.id && !staff?.is_admin && (
           <div className="grid grid-cols-2 gap-3">
             <button onClick={() => setShowRigScanner(true)} type="button"
@@ -606,6 +619,7 @@ export default function TodayPage() {
       {shiftWizard && (
         <ShiftWizard
           open={!!shiftWizard}
+          previewMode={!!shiftWizard?.previewMode}
           assignment={assignments.find(a => a.id === shiftWizard.assignmentId)}
           job={jobs.find(j => j.id === assignments.find(a => a.id === shiftWizard.assignmentId)?.job_id)}
           client={clients.find(c => c.id === jobs.find(j => j.id === assignments.find(a => a.id === shiftWizard.assignmentId)?.job_id)?.client_id)}

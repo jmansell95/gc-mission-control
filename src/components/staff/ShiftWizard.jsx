@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   X, MapPin, Car, Clock, CheckCircle2, AlertTriangle, ShieldCheck,
   PlayCircle, ClipboardCheck, ChevronRight, Briefcase, Coffee, Send,
-  Ruler, FileText, Info, Timer, Loader2,
+  Ruler, FileText, Info, Timer, Loader2, Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import JobBriefingModal from '@/components/staff/JobBriefingModal';
@@ -218,8 +218,8 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
 export default function ShiftWizard({
   open,
   onClose,
-  assignment,
-  job,
+  assignment: assignmentProp,
+  job: jobProp,
   client,
   staff,
   staffId,
@@ -233,7 +233,34 @@ export default function ShiftWizard({
   isLastJob,
   isDriller,
   forceStep = null,
+  previewMode = false,
 }) {
+  // Preview mode — mock assignment/job so super admins can walk through the
+  // full shift flow without being assigned to a real job.
+  const PREVIEW_ASSIGNMENT = {
+    id: 'preview',
+    assignment_type: 'job',
+    status: 'assigned',
+    daily_checks_completed: false,
+    arrived_on_site_at: null,
+    briefing_signed: false,
+    assigned_date: format(new Date(), 'yyyy-MM-dd'),
+    vehicle_id: null,
+    staff_id: 'preview',
+    week_start: format(new Date(), 'yyyy-MM-dd'),
+  };
+  const PREVIEW_JOB = {
+    id: 'preview',
+    name: 'Preview Job — Cambridge North SI',
+    location: 'Cambridge Business Park, CB21 1AA',
+    site_lat: 52.2053,
+    site_lng: 0.1218,
+    drilling_method: 'cp',
+  };
+
+  const assignment = previewMode ? PREVIEW_ASSIGNMENT : assignmentProp;
+  const job = previewMode ? PREVIEW_JOB : jobProp;
+
   const [step, setStep] = useState(null);
   const [saving, setSaving] = useState(false);
   const [arriveData, setArriveData] = useState({ departHome: '', arriveSite: '' });
@@ -245,6 +272,7 @@ export default function ShiftWizard({
 
   // Build the list of wizard steps based on assignment state
   const buildSteps = () => {
+    if (previewMode) return ['checks', 'arrive', 'briefing', 'working', 'end_of_shift'];
     const steps = [];
     if (!assignment) return steps;
     // Daily checks come first — block everything until completed
@@ -275,6 +303,10 @@ export default function ShiftWizard({
 
   // ── Step transitions ──
   const advanceFromArrive = async () => {
+    if (previewMode) {
+      setStep(needsBriefing ? 'briefing' : 'working');
+      return;
+    }
     const el = document.getElementById('arrive-can-confirm');
     if (!el || el.value !== '1') return;
     const departHome = el.dataset.depart;
@@ -297,18 +329,27 @@ export default function ShiftWizard({
   };
 
   const handleBriefingSigned = (result) => {
+    if (previewMode) { setStep('working'); return; }
     if (onBriefingComplete) onBriefingComplete(result);
     if (onStartJob) onStartJob(assignment.id);
     setStep('working');
   };
 
   const handleEndOfShiftSubmit = (data) => {
+    if (previewMode) { setStep(null); return; }
     if (onEndOfShiftSubmit) onEndOfShiftSubmit(data);
     setStep(null);
   };
 
   // ── Render ──
   if (!open || !assignment) return null;
+
+  const PreviewBanner = previewMode ? (
+    <div className="bg-amber-500/95 backdrop-blur-sm px-5 py-2 flex items-center gap-2 flex-shrink-0">
+      <Eye className="w-4 h-4 text-white flex-shrink-0" />
+      <p className="text-xs font-bold text-white">Preview Mode — No data will be saved</p>
+    </div>
+  ) : null;
 
   // Depot / Yard duty assignments use a lighter wizard (checks + clock in/out)
   if (assignment.assignment_type === 'yard_depot') {
@@ -341,7 +382,7 @@ export default function ShiftWizard({
   const currentStepIndex = steps.indexOf(step);
 
   // ── Delegate to full-screen components for briefing and end_of_shift ──
-  if (step === 'briefing') {
+  if (step === 'briefing' && !previewMode) {
     return (
       <JobBriefingModal
         assignment={assignment}
@@ -356,7 +397,7 @@ export default function ShiftWizard({
     );
   }
 
-  if (step === 'end_of_shift') {
+  if (step === 'end_of_shift' && !previewMode) {
     return (
       <EndOfShiftWizard
         open={true}
@@ -385,11 +426,11 @@ export default function ShiftWizard({
           <div className="hero-gradient px-5 py-3.5 text-white flex-shrink-0 flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center flex-shrink-0">
-                {step === 'arrive' ? <MapPin className="w-5 h-5 text-white" /> : step === 'checks' ? <ClipboardCheck className="w-5 h-5 text-white" /> : <Briefcase className="w-5 h-5 text-white" />}
+                {step === 'arrive' ? <MapPin className="w-5 h-5 text-white" /> : step === 'checks' ? <ClipboardCheck className="w-5 h-5 text-white" /> : step === 'briefing' ? <ShieldCheck className="w-5 h-5 text-white" /> : step === 'end_of_shift' ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Briefcase className="w-5 h-5 text-white" />}
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg font-bold leading-tight">
-                  {step === 'arrive' ? 'Arrived on Site' : step === 'checks' ? 'Daily Checks' : "Today's Tasks"}
+                  {step === 'arrive' ? 'Arrived on Site' : step === 'checks' ? 'Daily Checks' : step === 'briefing' ? 'Site Briefing' : step === 'end_of_shift' ? 'End of Shift' : "Today's Tasks"}
                 </h2>
                 <p className="text-white/70 text-xs truncate">{job?.name || 'Shift'}</p>
               </div>
@@ -399,6 +440,8 @@ export default function ShiftWizard({
               <X className="w-5 h-5" />
             </button>
           </div>
+
+          {PreviewBanner}
 
           {/* Mobile progress dots — hidden on tablet (rail replaces them) */}
           <div className="md:hidden hero-gradient px-5 pb-3 text-white flex-shrink-0">
@@ -426,7 +469,7 @@ export default function ShiftWizard({
           <div className="flex-1 flex overflow-hidden">
             {/* Left rail — tablet only */}
             <div className="hidden md:block w-72 lg:w-80 border-r border-slate-200/60 flex-shrink-0 bg-white/40">
-              <ShiftStepRail steps={steps} currentStep={step} currentStepIndex={currentStepIndex} onJump={setStep} />
+              <ShiftStepRail steps={steps} currentStep={step} currentStepIndex={currentStepIndex} onJump={setStep} previewMode={previewMode} />
             </div>
             {/* Right content */}
             <div className="flex-1 overflow-y-auto">
@@ -457,6 +500,32 @@ export default function ShiftWizard({
                       assignment={assignment}
                     />
                   )}
+                  {step === 'briefing' && previewMode && (
+                    <div className="px-5 py-8 space-y-4">
+                      <div className="insight-card rounded-2xl p-5 text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
+                          <ShieldCheck className="w-7 h-7 text-amber-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900">Site Briefing & Induction</h3>
+                        <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
+                          In live mode, the crew member reviews site hazards, emergency procedures, and job-specific risks, then signs the daily briefing document.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {step === 'end_of_shift' && previewMode && (
+                    <div className="px-5 py-8 space-y-4">
+                      <div className="insight-card rounded-2xl p-5 text-center">
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                          <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-900">End of Shift</h3>
+                        <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
+                          In live mode, the crew member reviews their daily tasks, logs meterage (drillers), records travel home, signs the end-of-day declaration, and submits their timesheet for manager approval.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   {step === 'working' && (
                     <WorkingStep
                       staffId={staffId}
@@ -480,6 +549,7 @@ export default function ShiftWizard({
                 </button>
                 <button
                   onClick={async () => {
+                    if (previewMode) { setStep('arrive'); return; }
                     const el = document.getElementById('daily-checks-complete');
                     if (!el || el.value !== '1') return;
                     setSaving(true);
@@ -506,7 +576,7 @@ export default function ShiftWizard({
                   className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
                 >
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                  {saving ? 'Saving...' : 'Confirm Checks Complete'}
+                  {saving ? 'Saving…' : 'Confirm Checks Complete'}
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </>
@@ -522,6 +592,18 @@ export default function ShiftWizard({
                   {saving ? 'Saving…' : 'Confirm Arrival'} <ChevronRight className="w-5 h-5" />
                 </button>
               </>
+            )}
+            {step === 'briefing' && previewMode && (
+              <button onClick={() => setStep('working')}
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold touch-manipulation">
+                Continue to Tasks <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
+            {step === 'end_of_shift' && previewMode && (
+              <button onClick={() => setStep(null)}
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold touch-manipulation">
+                Finish Preview <ChevronRight className="w-5 h-5" />
+              </button>
             )}
             {step === 'working' && (
               <button onClick={() => setStep('end_of_shift')}
