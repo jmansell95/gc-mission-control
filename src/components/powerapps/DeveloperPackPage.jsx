@@ -8,8 +8,9 @@ import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
 import { generateClaudeBuildBrief } from '@/utils/powerapps/claudeBuildBrief';
+import { generateClaudeConversationScript } from '@/utils/powerapps/claudeConversationScript';
 import ClaudeBuildCheatSheet from '@/components/powerapps/ClaudeBuildCheatSheet';
-import { downloadMarkdown, downloadJSON, downloadCSV } from '@/utils/powerapps/download';
+import { downloadMarkdown, downloadJSON, downloadCSV, downloadText } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Database, Workflow, Smartphone, Plug, Code, Download, Loader2,
@@ -111,6 +112,7 @@ export default function DeveloperPackPage() {
   const [genStep, setGenStep] = useState(0);
   const [files, setFiles] = useState([]);
   const [briefBusy, setBriefBusy] = useState(false);
+  const [scriptBusy, setScriptBusy] = useState(false);
 
   // Fetch all entity schemas in parallel batches (same pattern as the Build Hub)
   useEffect(() => {
@@ -210,6 +212,36 @@ export default function DeveloperPackPage() {
     }
   };
 
+  const handleConversationScript = async () => {
+    if (schemaLoading) {
+      toast({
+        title: 'Schemas still loading',
+        description: 'Please wait for the database schemas to finish loading first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setScriptBusy(true);
+    try {
+      await new Promise((r) => setTimeout(r, 50));
+      const schemaList = UNIQUE_ENTITY_NAMES.map((name) => ({ name, schema: schemas[name] }));
+      const content = generateClaudeConversationScript(schemaList);
+      downloadText('GC-Mission-Control-Claude-Conversation-Script.txt', content);
+      toast({
+        title: 'Claude Conversation Script downloaded',
+        description: '12 phase prompts — paste each into Claude in order.',
+      });
+    } catch (e) {
+      toast({
+        title: 'Script generation failed',
+        description: e.message || 'An error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setScriptBusy(false);
+    }
+  };
+
   const downloadOne = (file) => {
     try {
       file.download(file.content);
@@ -305,6 +337,34 @@ export default function DeveloperPackPage() {
                 </>
               )}
             </button>
+
+            <div className="mt-4 pt-3 border-t border-white/20">
+              <h4 className="text-sm font-extrabold leading-tight">Claude Conversation Script</h4>
+              <p className="text-[11px] text-white/85 mt-0.5 leading-relaxed">
+                12 phase prompts with everything inline — paste each into Claude, one phase at a time,
+                and it walks you through every click and paste.
+              </p>
+              <button
+                onClick={handleConversationScript}
+                disabled={scriptBusy || schemaLoading}
+                className="mt-2.5 inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl font-bold text-xs hover:bg-white/90 transition shadow disabled:opacity-60"
+                style={{ color: BRAND_DARK }}
+              >
+                {scriptBusy ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Generating script…
+                  </>
+                ) : schemaLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading schemas {schemaProgress}/{ENTITY_COUNT}…
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" /> Download Claude Conversation Script
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

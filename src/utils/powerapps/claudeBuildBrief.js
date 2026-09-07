@@ -16,7 +16,7 @@ import { FLOW_COUNT } from './flowManifest';
 // A condensed, numbered build order — the roadmap phases in a form Claude can
 // follow step by step. (Kept self-contained here so the brief generator does
 // not depend on the roadmap page component.)
-const BUILD_ORDER = [
+export const BUILD_ORDER = [
   {
     phase: 0,
     title: 'Foundation & Environment Setup',
