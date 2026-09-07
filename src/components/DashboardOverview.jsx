@@ -16,8 +16,10 @@ import SiteSnapshotGrid from '@/components/dashboard/SiteSnapshotGrid';
 import JobQuickDrawer from '@/components/dashboard/JobQuickDrawer';
 import CommandJobModal from '@/components/dashboard/CommandJobModal';
 import DashboardStatsBar from '@/components/dashboard/DashboardStatsBar';
-import PageHeader from '@/components/PageHeader';
+import HubHeader from '@/components/hubs/HubHeader';
 import HubQuickLinks from '@/components/hubs/HubQuickLinks';
+import HubOnboardingBanner from '@/components/hubs/HubOnboardingBanner';
+import { DASHBOARD_HELP_TOPICS, DASHBOARD_ONBOARDING } from '@/components/dashboard/dashboardHelp';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 
 export default function DashboardOverview({ onNavigate, onSelectJob }) {
@@ -67,65 +69,53 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
         : null].filter(Boolean).join(' · ');
 
   return (
-    <div className="space-y-6">
-      {/* ── Premium Hero Header ── */}
-      {isAllJobs && (
-        <div className="hero-vibrant rounded-3xl px-6 py-7 lg:px-8 lg:py-8 text-white relative overflow-hidden shadow-xl">
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-white/70 text-sm font-medium mb-1">{format(new Date(), 'EEEE do MMMM yyyy')}</p>
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight">{headerTitle}</h1>
-              <p className="text-white/80 text-sm mt-1.5">Mission Control — Ground Control operations command centre</p>
-            </div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <button onClick={() => onNavigate?.('jobs')} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white text-sm font-semibold transition ring-1 ring-white/20">
-                <Briefcase className="w-4 h-4" /> Projects
-              </button>
-              <button onClick={() => onNavigate?.('rota')} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white text-sm font-semibold transition ring-1 ring-white/20">
-                <Grid3x3 className="w-4 h-4" /> Scheduling
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="space-y-3 sm:space-y-4 lg:space-y-5">
+      {/* ── Unified hub masthead (shared design system) ── */}
+      <HubHeader
+        icon={headerIcon}
+        eyebrow={isAllJobs ? 'Mission Control' : 'Project Focus'}
+        title={headerTitle}
+        subtitle={isAllJobs ? 'Ground Control operations command centre' : headerSubtitle}
+        breadcrumbs={isAllJobs ? undefined : [{ label: 'Command Centre', to: '/admin' }, { label: headerTitle }]}
+        help={{ hubKey: 'dashboard', title: 'Command Centre — how it works', topics: DASHBOARD_HELP_TOPICS }}
+        actions={isAllJobs ? (
+          <>
+            <button onClick={() => onNavigate?.('jobs')} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
+              <Briefcase className="w-4 h-4" /> Projects
+            </button>
+            <button onClick={() => onNavigate?.('rota')} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 active:scale-[0.97] transition">
+              <Grid3x3 className="w-4 h-4" /> Scheduling
+            </button>
+          </>
+        ) : (selectedJob ? (
+          <>
+            {selectedJob?.status && (
+              <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
+                {titleCase(selectedJob.status.replace(/_/g, ' '))}
+              </span>
+            )}
+            {gbp(selectedJob?.budget_amount) && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+                <span className="text-[11px] text-slate-500 font-medium">Budget</span>
+                <span className="text-sm font-bold text-slate-900 tabular-nums">{gbp(selectedJob.budget_amount)}</span>
+              </span>
+            )}
+          </>
+        ) : null)}
+      />
 
-      {/* ── Standardized PageHeader (for selected-job mode) ── */}
-      {!isAllJobs && (
-        <PageHeader
-          icon={headerIcon}
-          title={headerTitle}
-          subtitle={headerSubtitle}
-          actions={selectedJob ? (
-            <div className="flex items-center gap-2">
-              {selectedJob?.status && (
-                <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
-                  {titleCase(selectedJob.status.replace(/_/g, ' '))}
-                </span>
-              )}
-              {gbp(selectedJob?.budget_amount) && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500 font-medium">Budget</span>
-                  <span className="text-sm font-bold text-slate-900 tabular-nums">{gbp(selectedJob.budget_amount)}</span>
-                </span>
-              )}
-            </div>
-          ) : null}
-        />
-      )}
+      {/* ── First-run guidance ── */}
+      {isAllJobs && <HubOnboardingBanner hubKey="dashboard" {...DASHBOARD_ONBOARDING} />}
 
       {/* ── Cross-hub quick links ── */}
-      {isAllJobs && <div className="mb-1"><HubQuickLinks /></div>}
+      {isAllJobs && <HubQuickLinks hubKey="/admin" />}
 
       {/* ── Standardized KPI strip ── */}
-      {isAllJobs && (
-        <div className="mb-1">
-          <DashboardStatsBar onNavigate={onNavigate} />
-        </div>
-      )}
+      {isAllJobs && <DashboardStatsBar onNavigate={onNavigate} />}
 
       {/* ── Quick Action Bar ── */}
       {isAllJobs && (
-        <div className="mb-2">
+        <div>
           <QuickActionBar onAction={(action) => {
             if (action === 'new-job') onNavigate?.('jobs');
             else if (action === 'add-staff') onNavigate?.('staff');
@@ -137,16 +127,10 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
         </div>
       )}
 
-      <div className="pt-2">
-        <JobSelectorBar onSelectJob={onSelectJob} />
-      </div>
+      <JobSelectorBar onSelectJob={onSelectJob} />
 
       {/* ── Command Centre — customisable widget grid ── */}
-      {isAllJobs && (
-        <div className="mt-6">
-          <CommandCentreGrid blockRenderers={blockRenderers} />
-        </div>
-      )}
+      {isAllJobs && <CommandCentreGrid blockRenderers={blockRenderers} />}
 
       {/* Job Quick Drawer — slide-out drill-down without leaving the dashboard */}
       <JobQuickDrawer job={drawerJob} onClose={() => setDrawerJob(null)} onOpenFullDetails={onSelectJob} />
