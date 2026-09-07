@@ -379,7 +379,7 @@ export default function ShiftWizard({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-white flex flex-col"
+          className="fixed inset-0 z-50 page-bg-vibrant flex flex-col"
         >
           {/* Top bar — job title + close */}
           <div className="hero-gradient px-5 py-3.5 text-white flex-shrink-0 flex items-center justify-between">
@@ -425,7 +425,7 @@ export default function ShiftWizard({
           {/* Body — two-pane on tablet, single on mobile */}
           <div className="flex-1 flex overflow-hidden">
             {/* Left rail — tablet only */}
-            <div className="hidden md:block w-72 lg:w-80 border-r border-slate-100 flex-shrink-0 bg-slate-50/50">
+            <div className="hidden md:block w-72 lg:w-80 border-r border-slate-200/60 flex-shrink-0 bg-white/40">
               <ShiftStepRail steps={steps} currentStep={step} currentStepIndex={currentStepIndex} onJump={setStep} />
             </div>
             {/* Right content */}
@@ -471,7 +471,7 @@ export default function ShiftWizard({
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-100 p-4 flex gap-2.5 flex-shrink-0 safe-area-bottom">
+          <div className="hub-glass p-4 flex gap-2.5 flex-shrink-0 safe-area-bottom">
             {step === 'checks' && (
               <>
                 <button onClick={onClose} disabled={saving}

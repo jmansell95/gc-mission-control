@@ -33,6 +33,7 @@ import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import StaffMovementTimeline from '@/components/staff/StaffMovementTimeline';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import SubPills from '@/components/SubPills';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 
@@ -274,26 +275,16 @@ export default function StaffProfile() {
 
         {/* Scrollable single-line tab bar */}
         <div className="max-w-4xl mx-auto px-4 md:px-6 mt-5">
-          <div className="md:grid md:grid-cols-5 md:gap-1.5">
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar md:contents">
-              {TABS.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.key;
-                const disabled = tab.key === 'crew' && !staff.team_id;
-                return (
-                  <button key={tab.key} onClick={() => !disabled && setActiveTab(tab.key)} type="button" disabled={disabled}
-                    className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition touch-manipulation flex-shrink-0 whitespace-nowrap ${
-                      isActive ? 'bg-[#2E5A1A] text-white shadow-sm' :
-                      disabled ? 'bg-slate-100 text-slate-300' :
-                      'bg-white text-slate-600 shadow-sm hover:bg-slate-50'
-                    }`}>
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="leading-tight">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <SubPills
+            pills={TABS.filter(t => !(t.key === 'crew' && !staff.team_id)).map(t => ({
+              id: t.key,
+              label: t.label,
+              icon: t.icon,
+              badge: t.key === 'timesheets' ? pendingCount : undefined,
+            }))}
+            active={activeTab}
+            onChange={setActiveTab}
+          />
         </div>
 
         {/* Tab Content — white rounded cards on off-white background */}

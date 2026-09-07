@@ -17,6 +17,7 @@ import { isWithinSiteHours, isBeforeSiteOpen, SITE_OPEN_TIME, SITE_CLOSE_TIME } 
 import { saveOfflineDelivery, hasOfflineDelivery } from '@/utils/offlineSync';
 
 import FieldPageShell from '@/components/field/FieldPageShell';
+import StartMyRunHero from '@/components/staff/StartMyRunHero';
 import StaffHeaderActions from '@/components/field/StaffHeaderActions';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
@@ -400,6 +401,17 @@ export default function DeliveryDashboard() {
             <StatCard icon={CheckCircle2} value={deliveries.filter(d => d.status === 'completed').length} label="Done" gradient="stat-gradient-emerald" />
           </div>
         </div>
+
+        {/* Start My Run — pre-departure safety hero */}
+        {todaysSorted.length > 0 && (
+          <StartMyRunHero
+            hasStops={todaysSorted.length > 0}
+            onStart={() => {
+              const firstCard = document.querySelector('[data-delivery-id]');
+              if (firstCard) firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }}
+          />
+        )}
 
         {/* My Delivery Chain — multi-leg gear movements */}
         <DriverLegChainView staffId={staff?.id} />
