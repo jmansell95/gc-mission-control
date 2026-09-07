@@ -27,8 +27,8 @@ export default function FieldPageShell({
 }) {
   return (
     <div className="min-h-screen page-bg-vibrant">
-      {/* Header — glass morphism with gradient accent (fixed or sticky) */}
-      <div className={(fixedHeader ? "fixed top-0 left-0 right-0 " : "sticky top-0 ") + "z-30 bg-white/75 backdrop-blur-xl border-b border-slate-200/70 safe-area-top shadow-sm shadow-slate-900/[0.03]"}>
+      {/* Header — hub-glass surface with gradient accent (fixed or sticky) */}
+      <div className={(fixedHeader ? "fixed top-0 left-0 right-0 " : "sticky top-0 ") + "z-30 hub-glass safe-area-top"}>
         {/* Division accent strip — always visible at the top of the screen */}
         {accentColor && (
           <div className="h-1 w-full flex-shrink-0" style={{ background: accentColor }} />
@@ -46,11 +46,11 @@ export default function FieldPageShell({
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-base font-extrabold text-slate-900 truncate leading-tight tracking-tight">{title}</h1>
+              <h1 className="text-hub-title text-slate-900 truncate leading-tight">{title}</h1>
               {subtitle && (
                 <div className="flex flex-col sm:flex-row sm:gap-1.5 leading-tight mt-0.5 min-w-0">
-                  <span className="text-[11px] text-slate-700 font-bold truncate">{subtitle}</span>
-                  {meta && <span className="text-[11px] text-slate-500 font-bold tabular-nums sm:flex-shrink-0">{meta}</span>}
+                  <span className="text-hub-caption text-slate-700 font-bold truncate">{subtitle}</span>
+                  {meta && <span className="text-hub-caption text-slate-500 font-bold tabular-nums sm:flex-shrink-0">{meta}</span>}
                 </div>
               )}
             </div>
@@ -68,7 +68,7 @@ export default function FieldPageShell({
                 value={search || ''}
                 onChange={e => onSearchChange(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white/80 border border-slate-200/80 text-hub-body text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
               />
             </div>
           </div>
@@ -83,8 +83,8 @@ export default function FieldPageShell({
                 <button
                   key={f.key}
                   onClick={() => onFilterChange(f.key)}
-                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-semibold transition active:scale-95 ${
-                    active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200'
+                  className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-hub-body font-semibold transition active:scale-95 ${
+                    active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white/80 text-slate-600 border border-slate-200/80'
                   }`}
                 >
                   {f.label}

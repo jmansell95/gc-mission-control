@@ -64,7 +64,7 @@ export default function StaffTabBar({ activeTab, onChange, counts = {} }) {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-2xl border-t border-slate-200/60 safe-area-bottom shadow-[0_-4px_24px_-8px_rgba(15,23,42,0.08)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 hub-glass safe-area-bottom">
       <div className="max-w-6xl mx-auto flex items-stretch justify-around px-2 relative">
         {renderTab(sideTabs[0])}
         {renderTab(sideTabs[1])}

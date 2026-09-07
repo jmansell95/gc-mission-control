@@ -41,6 +41,7 @@ import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
+import StartMyDayHero from '@/components/staff/StartMyDayHero';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
@@ -666,25 +667,15 @@ export default function StaffDashboard() {
             />
           )}
 
-          {/* Pre-Work Safety Checklist — Start My Day button */}
+          {/* Start My Day — Mitti safety flow hero */}
           {staff?.id && !staff?.is_admin && nextTodayAssignment && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (
-            <button
-              onClick={() => {
+            <StartMyDayHero
+              isDriller={/driller/i.test(staff?.job_title || '')}
+              onStart={() => {
                 setSafetyChecklistAssignment(nextTodayAssignment);
                 setShowSafetyChecklist(true);
               }}
-              type="button"
-              className="w-full flex items-center gap-3 bg-gradient-to-r from-[#2E5A1A] to-[#1c4a12] rounded-2xl px-4 py-4 text-white active:scale-95 transition touch-manipulation shadow-lg shadow-[#2E5A1A]/25 glow-brand"
-            >
-              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-6 h-6 text-white" strokeWidth={2.5} />
-              </div>
-              <div className="text-left min-w-0 flex-1">
-                <p className="text-sm font-bold leading-tight">Start My Day — Safety Checks</p>
-                <p className="text-[11px] text-white/75 truncate font-medium">Vehicle check · {/driller/i.test(staff?.job_title || '') ? 'Plant check · ' : ''}POWRA before you start</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/70 flex-shrink-0" />
-            </button>
+            />
           )}
 
           {/* Consolidated alert — single line */}
