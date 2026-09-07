@@ -58,6 +58,21 @@ const HUB_RELATIONSHIPS = {
     { to: '/assets', label: 'Gear', icon: Boxes },
     { to: '/staff', label: 'Drivers', icon: Users },
   ],
+  '/investigation': [
+    { to: '/billing', label: 'Billing', icon: PoundSterling },
+    { to: '/assets', label: 'Rigs & Gear', icon: Boxes },
+    { to: '/compliance', label: 'Compliance', icon: ShieldCheck },
+  ],
+  '/scheduling': [
+    { to: '/staff', label: 'Staff', icon: Users },
+    { to: '/fleet', label: 'Vehicles', icon: Truck },
+    { to: '/admin/logistics', label: 'Logistics', icon: Truck },
+  ],
+  '/settings': [
+    { to: '/compliance', label: 'Compliance', icon: ShieldCheck },
+    { to: '/fleet', label: 'Fleet', icon: Truck },
+    { to: '/admin/logistics', label: 'Logistics', icon: Truck },
+  ],
 };
 
 export default function HubQuickLinks({ hubKey, links }) {

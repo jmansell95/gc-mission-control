@@ -6,7 +6,7 @@ import {
   Settings as SettingsIcon, CheckCircle2, EyeOff, Search, X,
   ChevronRight, ExternalLink, Link2, Link2Off, Eye, Loader2, SlidersHorizontal,
 } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
+import HubShell from '@/components/HubShell';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -97,20 +97,6 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   const integrationItems = visibleFiltered.filter(i => INTEGRATION_IDS.has(i.id));
   const planningItems = visibleFiltered.filter(i => PLANNING_IDS.has(i.id));
   const systemItems = visibleFiltered.filter(i => !INTEGRATION_IDS.has(i.id) && !PLANNING_IDS.has(i.id));
-
-  const statsTiles = [
-    { icon: CheckCircle2, label: 'Configured', value: configuredCount, tone: 'emerald' },
-    { icon: Link2Off, label: 'Not configured', value: notConfiguredCount, tone: 'slate' },
-    { icon: EyeOff, label: 'Hidden', value: hiddenCount, tone: 'amber' },
-    { icon: SlidersHorizontal, label: 'Total settings', value: allItems.length, tone: 'blue' },
-  ];
-
-  const toneClasses = {
-    emerald: 'bg-emerald-50 text-emerald-600',
-    amber: 'bg-amber-50 text-amber-600',
-    slate: 'bg-slate-100 text-slate-500',
-    blue: 'bg-blue-50 text-blue-600',
-  };
 
   const renderStatusBadge = (item) => {
     const isConfigured = integrationStatusById[item.id]?.status === 'configured';
@@ -236,43 +222,45 @@ export default function SettingsHubOverview({ onNavigate, items }) {
   };
 
   return (
-    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
-      <PageHeader
-        icon={SettingsIcon}
-        title="Settings"
-        subtitle="Full control of your site — manage everything from one place."
-        actions={
-          <button
-            onClick={() => setManageMode(m => !m)}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm ${
-              manageMode
-                ? 'bg-[#2E5A1A] text-white hover:bg-[#244715]'
-                : 'bg-white border border-slate-200 text-slate-700 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
-            }`}
-          >
-            {manageMode ? <><SlidersHorizontal className="w-4 h-4" /> Done</> : <><SlidersHorizontal className="w-4 h-4" /> Manage</>}
-          </button>
-        }
-      />
-
-      {/* Stat strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {statsTiles.map((t) => {
-          const Icon = t.icon;
-          return (
-            <div key={t.label} className="insight-card rounded-2xl p-4 flex items-center gap-3">
-              <div className={'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ' + toneClasses[t.tone]}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{t.value}</p>
-                <p className="text-[11px] text-slate-500 font-semibold mt-0.5 truncate">{t.label}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
+    <HubShell
+      hubKey="settings"
+      icon={SettingsIcon}
+      eyebrow="Settings"
+      title="Settings Hub"
+      subtitle="Full control of your site — manage everything from one place."
+      breadcrumbs={[{ label: 'Settings' }]}
+      stats={[
+        { icon: CheckCircle2, label: 'Configured', value: configuredCount, color: 'emerald' },
+        { icon: Link2Off, label: 'Not configured', value: notConfiguredCount, color: 'slate' },
+        { icon: EyeOff, label: 'Hidden', value: hiddenCount, color: 'amber' },
+        { icon: SlidersHorizontal, label: 'Total', value: allItems.length, color: 'blue' },
+      ]}
+      help={{
+        title: 'Settings Hub — how it works',
+        topics: [
+          { title: 'Command Hub', summary: 'At-a-glance overview of every settings area.', body: 'Search all settings, see which integrations are configured, and manage hidden integrations. Click any card to jump to that settings page.' },
+          { title: 'Integrations', summary: 'Connect external services to this business stream.', body: 'Each integration (Geotab, Holman, Asset Panda, Mitti, etc.) connects per-division. Use Manage mode to hide integrations you don\u2019t use.' },
+          { title: 'System Configuration', summary: 'Core platform settings and templates.', body: 'Configure daily checklists, dropdown options, email templates, branding, automations, and rewards. Each page has its own help guide.' },
+        ],
+      }}
+      onboarding={{
+        title: 'Welcome to the Settings Hub',
+        description: 'One place to manage integrations, branding, automations, and system configuration for this business stream.',
+        steps: ['Connect your integrations (Geotab, Mitti, etc.)', 'Configure branding and email templates', 'Set up automations and daily checklists', 'Manage dropdowns and system rules'],
+      }}
+      actions={
+        <button
+          onClick={() => setManageMode(m => !m)}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm ${
+            manageMode
+              ? 'bg-[#2E5A1A] text-white hover:bg-[#244715]'
+              : 'bg-white border border-slate-200 text-slate-700 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
+          }`}
+        >
+          {manageMode ? <><SlidersHorizontal className="w-4 h-4" /> Done</> : <><SlidersHorizontal className="w-4 h-4" /> Manage</>}
+        </button>
+      }
+    >
       {/* Manage mode banner */}
       {manageMode && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
@@ -320,6 +308,6 @@ export default function SettingsHubOverview({ onNavigate, items }) {
           {renderSection('System Configuration', systemItems)}
         </div>
       )}
-    </div>
+    </HubShell>
   );
 }

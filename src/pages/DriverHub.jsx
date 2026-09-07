@@ -98,9 +98,26 @@ export default function DriverHub() {
 
   return (
     <HubShell
+      hubKey="/admin/logistics"
       icon={Truck}
+      eyebrow="Logistics Hub"
       title="Logistics Hub"
       subtitle="Full lifecycle: runs, procurement, hire management, purchased-for-job & reconciliation"
+      breadcrumbs={[{ label: 'Logistics Hub' }]}
+      help={{
+        title: 'Logistics Hub — how it works',
+        topics: [
+          { title: 'Today\u2019s Runs', summary: 'Live delivery board and driver day planner.', body: 'Switch between Board (visual cards) and List (table) views. Filter by type, date, and driver. Click a delivery to open the detail drawer and update status.' },
+          { title: 'Procurement', summary: 'Goods in, consumables, and supplier deliveries.', body: 'Track incoming supplier deliveries, manage consumable stock levels, and reconcile goods-in receipts against purchase orders.' },
+          { title: 'Hire Management', summary: 'Hired equipment tracking and off-hire.', body: 'See all hired plant/equipment, track hire costs per job, and process off-hire returns to stop the clock on charges.' },
+          { title: 'Pick Lists', summary: 'Printable depot pick lists for crews.', body: 'Generate and print pick lists so depot staff can assemble the right gear for each crew before they leave for site.' },
+        ],
+      }}
+      onboarding={{
+        title: 'Welcome to the Logistics Hub',
+        description: 'Manage deliveries, procurement, hire equipment, and pick lists in one place.',
+        steps: ['Create delivery tasks from the Jobs hub', 'Assign drivers and schedule dates', 'Track progress on the board', 'Reconcile completed deliveries'],
+      }}
       tabs={[
         { id: 'runs', label: 'Today\u2019s Runs', icon: Truck },
         { id: 'procurement', label: 'Procurement', icon: Store },

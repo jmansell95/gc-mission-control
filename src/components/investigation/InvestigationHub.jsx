@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { format } from 'date-fns';
-import { CheckSquare, X, FlaskConical } from 'lucide-react';
+import { CheckSquare, X, FlaskConical, Clock, AlertTriangle, CheckCircle2, Layers } from 'lucide-react';
 import { Skeleton, EmptyState } from '@/components/StateViews';
+import HubShell from '@/components/HubShell';
 import InvestigationHeader from '@/components/investigation/InvestigationHeader';
 import InvestigationGroupCard from '@/components/investigation/InvestigationGroupCard';
 import InvestigationLogDrawer from '@/components/investigation/InvestigationLogDrawer';
@@ -13,7 +14,6 @@ import InvestigationBulkReview from '@/components/investigation/InvestigationBul
 import BulkApproveBar from '@/components/investigation/BulkApproveBar';
 import LiveKeyLogFeed from '@/components/investigation/LiveKeyLogFeed';
 import AGSUploadButton from '@/components/investigation/AGSUploadButton';
-import InvestigationHubHeader from '@/components/investigation/InvestigationHubHeader';
 import { getInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import { logTypeConfig } from '@/components/investigation/shared';
 
@@ -187,19 +187,35 @@ export default function InvestigationHub({ onNavigate }) {
   };
 
   return (
-    <div className="relative space-y-hub-gap-sm sm:space-y-hub-gap">
-      {/* Modern command-centre summary header */}
-      <InvestigationHubHeader
-        totalLogs={logs.length}
-        pendingCount={pendingCount}
-        queriedCount={queriedCount}
-        approvedCount={approvedCount}
-        jobsCovered={jobsCovered}
-        boreholesCovered={boreholesCovered}
-        inProgressCount={inProgressCount}
-        completedBoreholeCount={completedBoreholeCount}
-      />
-
+    <HubShell
+      hubKey="investigation"
+      icon={FlaskConical}
+      eyebrow="Investigation Hub"
+      title="Investigation Hub"
+      subtitle="Borehole data, site logs, geotech QC & AGS / KeyLogBook review"
+      breadcrumbs={[{ label: 'Investigation Hub' }]}
+      stats={[
+        { icon: FlaskConical, label: 'Total Logs', value: logs.length, color: 'blue' },
+        { icon: Clock, label: 'Pending', value: pendingCount, color: 'amber' },
+        { icon: AlertTriangle, label: 'Queried', value: queriedCount, color: 'rose' },
+        { icon: CheckCircle2, label: 'Approved', value: approvedCount, color: 'emerald' },
+        { icon: Layers, label: 'Boreholes', value: boreholesCovered, color: 'violet' },
+      ]}
+      help={{
+        title: 'Investigation Hub — how it works',
+        topics: [
+          { title: 'Grouping', summary: 'Re-group logs by borehole, staff, job, or date.', body: 'Use the Group By dropdown to change how logs are grouped. Borehole grouping shows logs per hole sorted by depth. Staff grouping shows logs per driller. Job grouping shows logs per project.' },
+          { title: 'Review Workflow', summary: 'Approve, query, or reject logs.', body: 'Click any log to open the detail drawer. Review the log data, then approve (ready for billing), query (send back for correction), or reject. Use bulk select to review multiple logs at once.' },
+          { title: 'KeyLogBook Sync', summary: 'Automatic borehole data from KeyLogBook.', body: 'AGS files pushed from KeyLogBook are automatically imported as InvestigationLog entries. The live feed shows today\u2019s incoming driller logs across all jobs.' },
+          { title: 'Export', summary: 'Export approved data to AGS or OpenGround.', body: 'Use the export bar to download approved logs as AGS files per job, borehole, or staff member. Connect OpenGround in Settings to push approved data directly.' },
+        ],
+      }}
+      onboarding={{
+        title: 'Welcome to the Investigation Hub',
+        description: 'Review, approve, and export all your borehole and site log data in one place.',
+        steps: ['Connect KeyLogBook in Settings to auto-import AGS data', 'Review incoming logs in the live feed', 'Approve or query logs individually or in bulk', 'Export approved data to AGS or OpenGround'],
+      }}
+    >
       <InvestigationHeader
         totalLogs={logs.length}
         pendingCount={pendingCount}
@@ -308,6 +324,6 @@ export default function InvestigationHub({ onNavigate }) {
           onDone={handleBulkDone}
         />
       )}
-    </div>
+    </HubShell>
   );
 }
