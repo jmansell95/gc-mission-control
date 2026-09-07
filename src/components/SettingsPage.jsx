@@ -78,6 +78,7 @@ import OpenGroundSettings from '@/components/settings/OpenGroundSettings';
 import RewardsManager from '@/components/settings/RewardsManager';
 import ComingSoonManager from '@/components/settings/ComingSoonManager';
 import ComingSoonLock from '@/components/settings/ComingSoonLock';
+import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfigManager';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
@@ -221,6 +222,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'openground-sync': return <OpenGroundSettings />;
       case 'rewards': return <RewardsManager />;
       case 'coming-soon-manager': return <ComingSoonManager />;
+      case 'division-check-config': return <DivisionCheckConfigManager />;
       default: return null;
     }
   };

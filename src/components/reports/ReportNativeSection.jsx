@@ -83,6 +83,10 @@ export default function ReportNativeSection({ hub, filters }) {
       { id: 'comp-status', title: 'Asset Compliance Status', icon: ShieldCheck, data: tally(data.assets, 'compliance_status'), type: 'pie', rows: data.assets,
         drillDown: { route: '/compliance' } },
       { id: 'comp-maint', title: 'Maintenance Status', icon: ShieldCheck, data: tally(data.assets, 'maintenance_status'), type: 'pie', rows: data.assets },
+      { id: 'comp-audit-cat', title: 'Audits by Category', icon: ShieldCheck, data: tally(data.safetyReports || [], 'audit_category'), type: 'bar', rows: data.safetyReports || [],
+        drillDown: { route: '/compliance' } },
+      { id: 'comp-audit-pass', title: 'Audit Pass/Fail', icon: ShieldCheck, data: tally(data.safetyReports || [], 'pass_fail'), type: 'pie', rows: data.safetyReports || [],
+        drillDown: { route: '/compliance' } },
 
       // ── Assets ──
       { id: 'asset-stock', title: 'Assets by Stock Level', icon: Boxes, data: tally(data.assets, 'stock_level'), type: 'bar', rows: data.assets },
@@ -103,7 +107,7 @@ export default function ReportNativeSection({ hub, filters }) {
       jobs: ['jobs-status', 'jobs-div', 'jobs-type', 'jobs-pm', 'job-profit'],
       fleet: ['fleet-status', 'fleet-mot', 'fleet-fuel'],
       staff: ['staff-team', 'staff-status', 'staff-role', 'timesheet-hours'],
-      compliance: ['comp-status', 'comp-maint', 'asset-compliance'],
+      compliance: ['comp-status', 'comp-maint', 'comp-audit-cat', 'comp-audit-pass', 'asset-compliance'],
       assets: ['assets-type', 'asset-stock', 'asset-value', 'asset-compliance'],
       geotech: ['inv-type', 'inv-source'],
       logistics: ['del-status', 'del-type'],

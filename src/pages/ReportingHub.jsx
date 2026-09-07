@@ -17,6 +17,7 @@ import ReportTemplateLibrary from '@/components/reports/ReportTemplateLibrary';
 import ReportScheduleModal from '@/components/reports/ReportScheduleModal';
 import ReportSaveModal from '@/components/reports/ReportSaveModal';
 import CustomReportBuilder from '@/components/reports/CustomReportBuilder';
+import ComplianceChecksReport from '@/components/reports/ComplianceChecksReport';
 import { useReportData, filterJobsByDate } from '@/hooks/useReportData';
 import { Bookmark, FileBarChart, Sparkles } from 'lucide-react';
 
@@ -202,7 +203,10 @@ export default function ReportingHub() {
             : isCustom ? <CustomReportBuilder />
             : isRigPerf ? <RigPerformanceReport filters={effectiveFilters} />
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
-            : <ReportNativeSection hub={category} filters={effectiveFilters} />}
+            : <>
+              <ReportNativeSection hub={category} filters={effectiveFilters} />
+              {category === 'compliance' && <ComplianceChecksReport filters={effectiveFilters} />}
+            </>}
         </div>
       </div>
 

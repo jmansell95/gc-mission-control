@@ -20,6 +20,7 @@ import SiteReadinessGateWidget from '@/components/dashboard/SiteReadinessGateWid
 import CrewCertificationPulseWidget from '@/components/dashboard/CrewCertificationPulseWidget';
 import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget';
 import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
+import MissingChecksTab from '@/components/compliance/MissingChecksTab';
 import RunReportButton from '@/components/reports/RunReportButton';
 import { resolveRole } from '@/utils/access';
 
@@ -28,6 +29,7 @@ const SC_URL = 'https://app.safetyculture.com';
 const TABS = [
   { id: 'audit-dashboard', label: 'Audit Dashboard', icon: BarChart3, sub: [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'missing-checks', label: 'Missing Checks', icon: ShieldAlert },
     { id: 'crew-shift', label: 'Crew Shift Status', icon: Users },
   ]},
   { id: 'incidents', label: 'Incidents', icon: Siren, sub: [
@@ -149,6 +151,7 @@ export default function CompliancePage() {
       {tab === 'audit-dashboard' && (
         <>
           {subTab === 'overview' && <AuditDashboardTab />}
+          {subTab === 'missing-checks' && <MissingChecksTab />}
           {subTab === 'crew-shift' && <CrewShiftStatusWidget />}
         </>
       )}

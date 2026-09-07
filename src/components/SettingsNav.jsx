@@ -75,6 +75,7 @@ export const settingsGroups = [
   {
     label: 'System Configuration',
     items: [
+      { id: 'division-check-config', label: 'Compliance Check Config', icon: ShieldCheck, desc: 'Configure which Mitti safety checks each division requires — vehicle, POWRA, equipment & general audits. Assign specific Mitti templates per division', roles: ['admin'] },
       { id: 'daily-checklists', label: 'Daily Checklists', icon: ClipboardCheck, desc: 'Configure the pre-work checklist crew complete before each shift — vehicle, plant, PPE checks per crew type' },
       { id: 'dropdowns', label: 'Dropdown Manager', icon: ListChecks, desc: 'Add, rename, reorder or remove options in every dropdown — qualifications, asset types, revenue streams & more' },
       { id: 'global-branding', label: 'Global Branding', icon: Palette, desc: 'Default colours, banner and footer for all automated emails' },

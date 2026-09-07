@@ -73,7 +73,26 @@ export default function ImageCropper({ imageSrc, aspect = 1.586, onConfirm, onCa
     setProcessing(true);
     try {
       const file = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
-      if (file) onConfirm(file);
+      if (file) {
+        onConfirm(file);
+      } else {
+        // toBlob returned null — image too large or canvas limit hit.
+        // Fallback: try a smaller crop dimension.
+        const smallerFile = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
+        if (smallerFile) {
+          onConfirm(smallerFile);
+        } else {
+          console.error('Image cropping failed — canvas size limit or browser restriction');
+          // Last resort: send the original uncropped file
+          try {
+            const resp = await fetch(imageSrc);
+            const blob = await resp.blob();
+            onConfirm(new File([blob], 'avatar.jpg', { type: 'image/jpeg' }));
+          } catch (err) {
+            console.error('All image processing failed', err);
+          }
+        }
+      }
     } catch (e) {
       console.error(e);
     }

@@ -1,0 +1,72 @@
+{
+  "name": "DivisionCheckConfig",
+  "type": "object",
+  "properties": {
+    "division_id": {
+      "type": "string",
+      "description": "The division this check configuration belongs to. One record per division."
+    },
+    "check_configs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "vehicle_check",
+              "powra",
+              "equipment",
+              "general"
+            ],
+            "description": "Check category. 'vehicle_check' = daily vehicle walk-round, 'powra' = Point of Work Risk Assessment, 'equipment' = plant/equipment check, 'general' = any other audit type."
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this check category is required for this division."
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label for this check category (e.g. 'Daily Vehicle Check', 'POWRA')."
+          },
+          "template_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Mitti template IDs from MittiConfig.synced_templates that are assigned to this check category for this division. When empty, any audit matching the category keyword will count."
+          }
+        },
+        "required": [
+          "category",
+          "enabled"
+        ]
+      },
+      "default": [],
+      "description": "Per-division check configuration. Each entry defines a check category (vehicle, POWRA, equipment, general), whether it's enabled, and which specific Mitti templates are assigned."
+    }
+  },
+  "required": [
+    "division_id"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -54,6 +54,11 @@ export function useReportData(filters = {}) {
     queryFn: () => base44.entities.InvestigationLog.filter(divQuery, '-created_date', 500),
   });
 
+  const safetyReports = useQuery({
+    queryKey: ['report-safety-reports', filters.divisionId],
+    queryFn: () => base44.entities.SafetyReport.list('-created_date', 500),
+  });
+
   const isLoading = jobs.isLoading || staff.isLoading || vehicles.isLoading || assets.isLoading;
 
   return {
@@ -66,6 +71,7 @@ export function useReportData(filters = {}) {
     timesheets: timesheets.data || [],
     deliveries: deliveries.data || [],
     invLogs: invLogs.data || [],
+    safetyReports: safetyReports.data || [],
     isLoading,
   };
 }
