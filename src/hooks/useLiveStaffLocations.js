@@ -6,11 +6,12 @@ import { base44 } from '@/api/base44Client';
  * who has reported in the last 2 hours, plus today's assignments to determine
  * shift state (travelling-to-site, on-site, travelling-home).
  *
- * Vehicle proxy: for staff with no recent phone GPS but an assigned (or
- * default) vehicle that has a recent Geotab position, synthesizes a pin
- * from the vehicle's latest GPS point with source='vehicle_proxy'. This
+ * Vehicle proxy: for staff with no recent phone GPS but a linked vehicle
+ * (via today's rota, their default vehicle, or the Geotab keeper link)
+ * that has a recent Geotab position, synthesizes a pin from the vehicle's
+ * latest GPS point with source='vehicle_proxy'. The Geotab keeper fallback
  * means crew in company vehicles appear on the live map immediately even
- * before phone tracking is working.
+ * when the rota has no vehicle selected — Geotab already knows who drives each.
  *
  * Returns an array of { staffId, staffName, lat, lng, accuracy, speed, heading,
  *   timestamp, isMoving, shiftState, jobName, source, vehicleName? } ready
@@ -53,10 +54,26 @@ export function useLiveStaffLocations(divisionId) {
     queryFn: () => base44.entities.Job.list(),
   });
 
-  // Vehicle proxy: collect vehicle IDs assigned today (via rota or default)
+  // Fetch Vehicle records to build a Geotab keeper map — each vehicle's
+  // geotab_keeper_staff_id links a staff member to the vehicle Geotab knows
+  // they drive, even when the rota has no vehicle selected.
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ['vehicles-for-keeper-map'],
+    queryFn: () => base44.entities.Vehicle.list('-created_date', 500),
+  });
+
+  // keeperStaffToVehicleId: geotab_keeper_staff_id → vehicle_id
+  const keeperStaffToVehicleId = {};
+  for (const v of vehicles) {
+    if (v.geotab_keeper_staff_id) keeperStaffToVehicleId[v.geotab_keeper_staff_id] = v.id;
+  }
+
+  // Vehicle proxy: collect vehicle IDs assigned today (via rota, default, or
+  // Geotab keeper link) so their fresh GPS logs are fetched.
   const assignedVehicleIds = todayAssignments.map(a => a.vehicle_id).filter(Boolean);
   const staffDefaultVehicleIds = staffList.map(s => s.default_vehicle_id).filter(Boolean);
-  const vehicleIds = [...new Set([...assignedVehicleIds, ...staffDefaultVehicleIds])];
+  const keeperVehicleIds = Object.values(keeperStaffToVehicleId);
+  const vehicleIds = [...new Set([...assignedVehicleIds, ...staffDefaultVehicleIds, ...keeperVehicleIds])];
 
   const { data: vehicleLogs = [] } = useQuery({
     queryKey: ['vehicle-location-for-staff-proxy', vehicleIds.join(',')],
@@ -119,14 +136,18 @@ export function useLiveStaffLocations(divisionId) {
     };
   });
 
-  // Vehicle proxy: for staff with no recent phone GPS but an assigned/default
-  // vehicle, synthesize a pin from the vehicle's latest Geotab position.
+  // Vehicle proxy: for staff with no recent phone GPS, synthesize a pin from
+  // the vehicle's latest Geotab position. Vehicle resolved in priority:
+  //   1. Today's rota assignment vehicle_id
+  //   2. Staff default_vehicle_id
+  //   3. Geotab keeper link (Vehicle.geotab_keeper_staff_id → this staff member)
+  // The keeper fallback (3) works even without a rota assignment, so all
+  // tracked drivers appear — Geotab already knows who drives each vehicle.
   const staffWithPhoneGps = new Set(Object.keys(latestByStaff));
   for (const staff of staffList) {
     if (staffWithPhoneGps.has(staff.id)) continue;
     const assignment = todayAssignments.find(a => a.staff_id === staff.id);
-    if (!assignment) continue; // only proxy staff on shift today
-    const vehicleId = assignment.vehicle_id || staff.default_vehicle_id;
+    const vehicleId = assignment?.vehicle_id || staff.default_vehicle_id || keeperStaffToVehicleId[staff.id];
     if (!vehicleId) continue;
     const vLog = latestByVehicle[vehicleId];
     if (!vLog || vLog.lat == null || vLog.lng == null) continue;
