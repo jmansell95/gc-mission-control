@@ -146,7 +146,7 @@ export default function CompliancePage() {
       activeTab={tab}
       onTabChange={handleTabChange}
     >
-      <SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} />
+      <div className="pb-1"><SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} /></div>
 
       {tab === 'audit-dashboard' && (
         <>
