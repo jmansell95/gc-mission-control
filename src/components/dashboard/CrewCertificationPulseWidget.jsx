@@ -2,15 +2,12 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldCheck, AlertTriangle, XCircle, CheckCircle2 } from 'lucide-react';
-import WidgetShell from '@/components/dashboard/WidgetShell';
+import HubCard from '@/components/hubs/HubCard';
+import HubLoadingState from '@/components/hubs/HubLoadingState';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 
-/**
- * Crew Certification Pulse — compliance status across all active crew.
- * Shows expired / expiring soon / valid counts with a stacked compliance bar.
- */
 export default function CrewCertificationPulseWidget() {
-  const { data: complianceItems = [] } = useQuery({
+  const { data: complianceItems = [], isLoading } = useQuery({
     queryKey: ['compliance-items-pulse'],
     queryFn: () => base44.entities.ComplianceItem.filter({ category: 'staff' }),
   });
@@ -36,45 +33,46 @@ export default function CrewCertificationPulseWidget() {
   const compliancePct = total > 0 ? Math.round((valid / total) * 100) : 0;
 
   const stats = [
-    { label: 'Valid', count: valid, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Expiring Soon', count: expiringSoon, icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Expired', count: expired, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
+    { label: 'Valid', count: valid, icon: CheckCircle2, gradient: 'stat-gradient-emerald' },
+    { label: 'Expiring Soon', count: expiringSoon, icon: AlertTriangle, gradient: 'stat-gradient-amber' },
+    { label: 'Expired', count: expired, icon: XCircle, gradient: 'stat-gradient-rose' },
   ];
 
+  if (isLoading) return <HubLoadingState variant="stats" count={3} />;
+
   return (
-    <WidgetShell icon={ShieldCheck} title="Crew Certification Pulse" subtitle={`${activeStaff.length} active crew · ${compliancePct}% compliant`}>
+    <HubCard icon={ShieldCheck} title="Crew Certification Pulse" subtitle={`${activeStaff.length} active crew · ${compliancePct}% compliant`} tone="blue">
       <div className="space-y-3">
-        {/* Stacked compliance bar */}
         {total > 0 && (
           <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex">
-            {valid > 0 && <div className="h-full bg-emerald-500" style={{ width: `${(valid / total) * 100}%` }} />}
-            {expiringSoon > 0 && <div className="h-full bg-amber-500" style={{ width: `${(expiringSoon / total) * 100}%` }} />}
-            {expired > 0 && <div className="h-full bg-rose-500" style={{ width: `${(expired / total) * 100}%` }} />}
+            {valid > 0 && <div className="h-full bg-emerald-500 transition-all" style={{ width: `${(valid / total) * 100}%` }} />}
+            {expiringSoon > 0 && <div className="h-full bg-amber-500 transition-all" style={{ width: `${(expiringSoon / total) * 100}%` }} />}
+            {expired > 0 && <div className="h-full bg-rose-500 transition-all" style={{ width: `${(expired / total) * 100}%` }} />}
           </div>
         )}
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {stats.map(s => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className={`${s.bg} rounded-xl p-2.5 text-center`}>
-                <Icon className={`w-4 h-4 ${s.color} mx-auto mb-1`} />
-                <p className={`text-xl font-bold ${s.color} tabular-nums`}>{s.count}</p>
+              <div key={s.label} className="hub-glass rounded-2xl p-3 text-center">
+                <span className={`w-8 h-8 rounded-xl ${s.gradient} flex items-center justify-center mx-auto mb-1.5 shadow-sm`}>
+                  <Icon className="w-4 h-4 text-white" />
+                </span>
+                <p className="text-xl font-bold text-slate-900 tabular-nums">{s.count}</p>
                 <p className="text-[10px] text-slate-500 font-medium">{s.label}</p>
               </div>
             );
           })}
         </div>
 
-        {/* Alert for expired */}
         {expired > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 border border-rose-200">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200">
             <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
             <p className="text-xs text-rose-700 font-medium">{expired} crew member{expired !== 1 ? 's' : ''} with expired certifications — cannot work on site</p>
           </div>
         )}
       </div>
-    </WidgetShell>
+    </HubCard>
   );
 }

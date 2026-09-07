@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { ChevronLeft, ChevronRight, ShieldCheck, Wrench, Users, Truck } from 'lucide-react';
-import { Skeleton } from '@/components/StateViews';
+import HubCard from '@/components/hubs/HubCard';
+import HubLoadingState from '@/components/hubs/HubLoadingState';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, startOfWeek, endOfWeek, isToday } from 'date-fns';
 
 const CATEGORY_STYLES = {
@@ -12,11 +13,6 @@ const CATEGORY_STYLES = {
   company: { color: 'bg-violet-500', light: 'bg-violet-50', text: 'text-violet-700', icon: ShieldCheck, label: 'Company' },
 };
 
-/**
- * Month-grid calendar showing every compliance expiry (staff certs, vehicle
- * MOT/tax/insurance, equipment LOLER/PUWER/PAT, company insurance) as
- * color-coded events. Navigate months, click a day to see all expiries.
- */
 export default function ComplianceCalendar() {
   const [month, setMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -25,12 +21,10 @@ export default function ComplianceCalendar() {
     queryKey: ['staff-compliance-cal'],
     queryFn: () => base44.entities.Staff.filter({ is_active: true }, 'name', 500),
   });
-
   const { data: assets = [], isLoading: al } = useQuery({
     queryKey: ['assets-compliance-cal'],
     queryFn: () => base44.entities.SiteAsset.filter({ is_active: true }, 'name', 500),
   });
-
   const { data: vehicles = [], isLoading: vl } = useQuery({
     queryKey: ['vehicles-compliance-cal'],
     queryFn: () => base44.entities.Vehicle.filter({ is_active: true }, 'name', 500),
@@ -38,47 +32,43 @@ export default function ComplianceCalendar() {
 
   const isLoading = sl || al || vl;
 
-  // Collect all expiries in the current month view range
   const expiries = useMemo(() => {
     const items = [];
     const monthStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
     const monthEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
 
-    // Staff compliance items
     staff.forEach(s => {
       (s.compliance_items || []).forEach(c => {
         if (!c.expiry_date) return;
         const d = new Date(c.expiry_date);
         if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'staff', title: `${s.name}: ${c.type || c.name || 'Cert'}`, detail: s.name });
+          items.push({ date: d, category: 'staff', title: `${s.name}: ${c.type || c.name || 'Cert'}` });
         }
       });
     });
 
-    // Assets
     assets.forEach(a => {
       if (a.compliance_expiry_date) {
         const d = new Date(a.compliance_expiry_date);
         if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'equipment', title: `${a.name}: LOLER/PUWER/PAT`, detail: a.name });
+          items.push({ date: d, category: 'equipment', title: `${a.name}: LOLER/PUWER/PAT` });
         }
       }
       if (a.next_service_date) {
         const d = new Date(a.next_service_date);
         if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'equipment', title: `${a.name}: Service Due`, detail: a.name });
+          items.push({ date: d, category: 'equipment', title: `${a.name}: Service Due` });
         }
       }
     });
 
-    // Vehicles
     vehicles.forEach(v => {
       ['mot_expiry', 'tax_expiry', 'insurance_expiry'].forEach(field => {
         if (v[field]) {
           const d = new Date(v[field]);
           if (d >= monthStart && d <= monthEnd) {
             const label = field.replace('_expiry', '').toUpperCase();
-            items.push({ date: d, category: 'vehicle', title: `${v.name || v.registration}: ${label}`, detail: v.name || v.registration });
+            items.push({ date: d, category: 'vehicle', title: `${v.name || v.registration}: ${label}` });
           }
         }
       });
@@ -104,20 +94,18 @@ export default function ComplianceCalendar() {
     return m;
   }, [expiries]);
 
-  if (isLoading) return <Skeleton className="h-96 rounded-xl" />;
+  if (isLoading) return <HubLoadingState variant="list" count={6} />;
 
   const selectedDayExpiries = selectedDay ? (expiriesByDay[format(selectedDay, 'yyyy-MM-dd')] || []) : [];
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      {/* Header */}
-      <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
-            <ShieldCheck className="w-4 h-4 text-rose-600" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-900">Compliance Calendar</h3>
-        </div>
+    <HubCard
+      icon={ShieldCheck}
+      title="Compliance Calendar"
+      subtitle="Staff certs, vehicle MOT/tax, equipment LOLER/PUWER/PAT"
+      tone="rose"
+      padded={false}
+      action={
         <div className="flex items-center gap-2">
           <button onClick={() => setMonth(addMonths(month, -1))} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
             <ChevronLeft className="w-4 h-4 text-slate-500" />
@@ -130,19 +118,16 @@ export default function ComplianceCalendar() {
             Today
           </button>
         </div>
-      </div>
-
+      }
+    >
       {/* Legend */}
-      <div className="px-5 py-2 border-b border-slate-50 flex items-center gap-3 flex-wrap">
-        {Object.entries(CATEGORY_STYLES).map(([key, s]) => {
-          const Icon = s.icon;
-          return (
-            <span key={key} className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-              <span className={`w-2 h-2 rounded-full ${s.color}`} />
-              {s.label}
-            </span>
-          );
-        })}
+      <div className="px-4 sm:px-5 py-2 border-b border-slate-50 flex items-center gap-3 flex-wrap">
+        {Object.entries(CATEGORY_STYLES).map(([key, s]) => (
+          <span key={key} className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+            <span className={`w-2 h-2 rounded-full ${s.color}`} />
+            {s.label}
+          </span>
+        ))}
       </div>
 
       {/* Calendar grid */}
@@ -164,7 +149,7 @@ export default function ComplianceCalendar() {
               <button
                 key={dayKey}
                 onClick={() => setSelectedDay(day)}
-                className={`min-h-[64px] p-1.5 rounded-lg border text-left transition ${
+                className={`min-h-[64px] p-1.5 rounded-xl border text-left transition ${
                   isSel ? 'border-[#2E5A1A] border-2 bg-[#2E5A1A]/5' :
                   today ? 'border-[#2E5A1A] bg-[#2E5A1A]/5' :
                   'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
@@ -194,7 +179,7 @@ export default function ComplianceCalendar() {
 
       {/* Selected day details */}
       {selectedDay && (
-        <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/50">
+        <div className="px-4 sm:px-5 py-3 border-t border-slate-100 bg-slate-50/50">
           <p className="text-xs font-semibold text-slate-700 mb-2">{format(selectedDay, 'EEEE, do MMMM yyyy')}</p>
           {selectedDayExpiries.length === 0 ? (
             <p className="text-xs text-slate-400">No compliance expiries on this day.</p>
@@ -205,7 +190,7 @@ export default function ComplianceCalendar() {
                 const Icon = s.icon;
                 return (
                   <div key={i} className="flex items-center gap-2 text-xs">
-                    <span className={`w-5 h-5 rounded ${s.light} flex items-center justify-center flex-shrink-0`}>
+                    <span className={`w-5 h-5 rounded-lg ${s.light} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`w-3 h-3 ${s.text}`} />
                     </span>
                     <span className="text-slate-700">{e.title}</span>
@@ -216,6 +201,6 @@ export default function ComplianceCalendar() {
           )}
         </div>
       )}
-    </div>
+    </HubCard>
   );
 }
