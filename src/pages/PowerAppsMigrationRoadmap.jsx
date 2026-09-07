@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import CodeSnippetBlock from '@/components/powerapps/CodeSnippetBlock';
 import DeveloperPackPage from '@/components/powerapps/DeveloperPackPage';
+import ClaudeScriptBookletPage from '@/components/powerapps/ClaudeScriptBookletPage';
 import { PHASE_SNIPPETS, getCompactFlow } from '@/utils/powerapps/phaseSnippets';
 
 const BRAND_DARK = '#2E5A1A';
@@ -836,6 +837,9 @@ export default function PowerAppsMigrationRoadmap() {
         <section className="print-page mb-6 sm:mb-0">
           <DeveloperPackPage />
         </section>
+
+        {/* === Claude Conversation Script — full text embedded for the A4 PDF === */}
+        <ClaudeScriptBookletPage />
       </div>
 
       {/* Print styles — A4 portrait booklet */}
@@ -952,6 +956,15 @@ export default function PowerAppsMigrationRoadmap() {
           overflow: visible !important;
           text-overflow: clip !important;
           white-space: normal !important;
+        }
+        /* Claude Conversation Script blocks — wrap long lines, never clip */
+        .pdf-rendering .print-page .claude-script-block,
+        .print-page .claude-script-block {
+          white-space: pre-wrap !important;
+          word-break: break-word !important;
+          overflow-wrap: anywhere !important;
+          overflow: hidden !important;
+          max-width: 100% !important;
         }
       `}</style>
     </div>

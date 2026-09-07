@@ -6,11 +6,13 @@ import { generateAllFlowsDocument, generateFlowBundles } from '@/utils/powerapps
 import { FLOW_COUNT } from '@/utils/powerapps/flowManifest';
 import { generatePowerFxDocument } from '@/utils/powerapps/powerFxSource';
 import { generateIntegrationGuide } from '@/utils/powerapps/integrationGuideContent';
-import { downloadMarkdown, downloadJSON, downloadCSV } from '@/utils/powerapps/download';
+import { generateClaudeConversationScript } from '@/utils/powerapps/claudeConversationScript';
+import { downloadMarkdown, downloadJSON, downloadCSV, downloadText } from '@/utils/powerapps/download';
 import { useToast } from '@/components/ui/use-toast';
+import ClaudeScriptHero from '@/components/powerapps/ClaudeScriptHero';
 import {
   Database, Workflow, Smartphone, Plug, FileDown, Loader2, CheckCircle2,
-  AlertCircle, Code, Boxes, ArrowLeft, Download, RefreshCw, FileText
+  AlertCircle, Code, Boxes, ArrowLeft, Download, RefreshCw, FileText, Wrench
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -26,6 +28,7 @@ export default function PowerAppsBuildHub() {
   const [genState, setGenState] = useState('idle');
   const [genStep, setGenStep] = useState(0); // 0-4 for the 5 volumes
   const [generatedFiles, setGeneratedFiles] = useState([]); // {id, title, filename, icon, download}
+  const [scriptBusy, setScriptBusy] = useState(false);
 
   // The 5 volumes — generated in order
   const VOLUMES = [
@@ -215,6 +218,36 @@ export default function PowerAppsBuildHub() {
     }
   };
 
+  // Download the Claude Conversation Script (the primary one-click path)
+  const handleDownloadScript = async () => {
+    if (schemaLoading) {
+      toast({
+        title: 'Schemas still loading',
+        description: 'Please wait for the database schemas to finish loading first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setScriptBusy(true);
+    try {
+      const schemaList = UNIQUE_ENTITY_NAMES.map((name) => ({ name, schema: schemas[name] }));
+      const content = generateClaudeConversationScript(schemaList);
+      downloadText('GC-Mission-Control-Claude-Conversation-Script.txt', content);
+      toast({
+        title: 'Claude Conversation Script downloaded',
+        description: '12 phase prompts — paste each into Claude in order.',
+      });
+    } catch (e) {
+      toast({
+        title: 'Script generation failed',
+        description: e.message || 'An error occurred.',
+        variant: 'destructive',
+      });
+    } finally {
+      setScriptBusy(false);
+    }
+  };
+
   // Download all files one by one (with user-initiated clicks, not auto)
   const handleDownloadAll = () => {
     let delay = 0;
@@ -289,6 +322,26 @@ export default function PowerAppsBuildHub() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-4">
+        {/* === Primary: Claude Conversation Script hero === */}
+        <ClaudeScriptHero
+          onDownload={handleDownloadScript}
+          busy={scriptBusy}
+          schemaLoading={schemaLoading}
+          schemaProgress={schemaProgress}
+          schemaTotal={ENTITY_COUNT}
+        />
+
+        {/* === Advanced — manual paste (optional) === */}
+        <div className="rounded-2xl bg-slate-100/70 border border-slate-200 p-4 md:p-5 space-y-4">
+          <div className="flex items-center gap-2 text-slate-500">
+            <Wrench className="w-4 h-4" />
+            <h3 className="text-xs font-bold uppercase tracking-wide">Advanced — manual paste (optional)</h3>
+          </div>
+          <p className="text-xs text-slate-500 -mt-2">
+            Prefer to paste each piece yourself? Generate the individual build volumes below.
+            The Claude Conversation Script above already contains all of this inline.
+          </p>
+
         {/* === Step 1: Generate === */}
         {genState === 'idle' && (
           <div className="insight-card rounded-2xl p-6 md:p-8 text-center">
@@ -462,19 +515,21 @@ export default function PowerAppsBuildHub() {
           </div>
         )}
 
+        </div>{/* end Advanced wrapper */}
+
         {/* === How this works note === */}
         <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <strong>What you get:</strong> {VOLUMES.length} files covering the complete Power Platform migration —
-            Dataverse table schemas (reads your live database), Dataverse CSV workbook + relationships (importable into Excel),
-            Power Automate flow bundles grouped by trigger type for all {FLOW_COUNT} backend functions,
-            Canvas app Power Fx source for every screen, and integration setup guides for all 16 connectors.
-            Hand these to a Power Platform developer and they can follow them step by step.
+            <strong>The fast path:</strong> download the Claude Conversation Script above and paste each
+            phase prompt into Claude — it builds everything end-to-end. The {VOLUMES.length} volumes in
+            the Advanced section are the same content split into separate files for manual pasting
+            (Dataverse schemas, CSV workbook, relationships, {FLOW_COUNT} Power Automate flows,
+            canvas app Power Fx, and the 16-connector integration guide).
           </div>
         </div>
 
-        {/* === Link to A3 roadmap === */}
+        {/* === Link to Migration Roadmap === */}
         <Link
           to="/powerapps-migration-roadmap"
           className="insight-card rounded-2xl p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition group"
@@ -483,8 +538,8 @@ export default function PowerAppsBuildHub() {
             <FileText className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-slate-900">A3 Migration Roadmap</h3>
-            <p className="text-xs text-slate-500">Print the 12-phase wall chart for your office</p>
+            <h3 className="text-sm font-bold text-slate-900">Migration Roadmap & A4 Booklet</h3>
+            <p className="text-xs text-slate-500">See the 12-phase plan and download the full PDF (script embedded)</p>
           </div>
           <ArrowLeft className="w-4 h-4 text-slate-400 rotate-180 group-hover:translate-x-1 transition" />
         </Link>

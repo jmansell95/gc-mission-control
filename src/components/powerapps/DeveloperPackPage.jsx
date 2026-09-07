@@ -292,13 +292,31 @@ export default function DeveloperPackPage() {
       {/* Intro */}
       <div className="rounded-xl p-3.5 mb-4 bg-slate-50 border-l-4" style={{ borderLeftColor: BRAND_DARK }}>
         <p className="text-[12px] sm:text-[13px] text-slate-700 leading-relaxed">
-          These are <strong>build manuals</strong> — structured documents you paste into Power Apps
-          Studio, Dataverse, and Power Automate. Power Platform has no single "upload and build
-          everything" import, so each volume gives the exact schema, flow JSON, and Power Fx to
-          copy in. Generate the pack, download the files, and hand them to your Power Platform
-          developer — or paste them in yourself.
+          <strong>The fast path:</strong> download the <strong>Claude Conversation Script</strong> below
+          and paste each phase prompt into Claude — it builds everything end-to-end from one file.
+          The <strong>Claude Build Brief</strong> is the same content as a single markdown hand-off.
+          The 7 volumes further down are the same content split into separate files for manual pasting.
+          Everything also lives on the <Link to="/powerapps-build-hub" className="underline font-semibold" style={{ color: BRAND_DARK }}>Build Hub</Link>.
         </p>
       </div>
+
+      {/* Open Build Hub CTA — the Build Hub is the single home for the script */}
+      <Link
+        to="/powerapps-build-hub"
+        className="rounded-2xl p-4 mb-4 text-white shadow-md relative overflow-hidden flex items-center gap-3 hover:opacity-95 transition group"
+        style={{ background: `linear-gradient(135deg, ${BRAND_DARK} 0%, #1c4a12 100%)` }}
+      >
+        <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+          <Boxes className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-extrabold leading-tight">Open the Build Hub — the single home for the Claude script</h3>
+          <p className="text-[11px] text-white/80 mt-0.5 leading-relaxed">
+            One-click download, 3-step how-to, and the advanced manual-paste volumes all in one place.
+          </p>
+        </div>
+        <ArrowRight className="w-5 h-5 text-white/80 group-hover:translate-x-1 transition flex-shrink-0" />
+      </Link>
 
       {/* === Claude Build Brief — single file to hand to an AI builder === */}
       <div
