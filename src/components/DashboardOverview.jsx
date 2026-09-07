@@ -3,19 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Grid3x3, Briefcase } from 'lucide-react';
 import { format } from 'date-fns';
-import CommandCentreGrid from '@/components/dashboard/CommandCentreGrid';
-import FieldPrioritiesWidget from '@/components/dashboard/FieldPrioritiesWidget';
-import ExceptionMonitorWidget from '@/components/dashboard/ExceptionMonitorWidget';
-import RigPerformanceWidget from '@/components/dashboard/RigPerformanceWidget';
-import MissionControlStrip from '@/components/dashboard/MissionControlStrip';
-import BoreholesInProgressWidget from '@/components/dashboard/BoreholesInProgressWidget';
+import BentoDashboard from '@/components/dashboard/BentoDashboard';
 import { useJobFilter } from '@/components/dashboard/JobFilterContext';
 import JobSelectorBar from '@/components/dashboard/JobSelectorBar';
 import QuickActionBar from '@/components/dashboard/QuickActionBar';
-import SiteSnapshotGrid from '@/components/dashboard/SiteSnapshotGrid';
 import JobQuickDrawer from '@/components/dashboard/JobQuickDrawer';
 import CommandJobModal from '@/components/dashboard/CommandJobModal';
-import DashboardStatsBar from '@/components/dashboard/DashboardStatsBar';
+
 import HubHeader from '@/components/hubs/HubHeader';
 import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 import HubOnboardingBanner from '@/components/hubs/HubOnboardingBanner';
@@ -42,18 +36,6 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
   const gbp = (n) => (n != null && !isNaN(n)) ? '£' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : null;
 
   const selectedJob = !isAllJobs ? jobs.find(j => j.id === selectedJobId) : null;
-
-  // Block renderers — each block ID maps to its component. All blocks are
-  // self-contained (fetch their own data) so the CommandCentreGrid can
-  // drag/resize/hide them without any data plumbing from this page.
-  const blockRenderers = {
-    'rigs-on-site':        () => <RigPerformanceWidget onJobBreakdown={(job) => onSelectJob?.(job, 'financials')} />,
-    'site-snapshot':       () => <SiteSnapshotGrid onSelectJob={openJobDrawer} onNavigate={onNavigate} />,
-    'mission-control':    () => <MissionControlStrip onNavigate={onNavigate} />,
-    'field-priorities':    () => <FieldPrioritiesWidget onNavigate={onNavigate} />,
-    'exception-monitor':   () => <ExceptionMonitorWidget onNavigate={onNavigate} />,
-    'boreholes-progress': () => <BoreholesInProgressWidget onNavigate={onNavigate} />,
-  };
 
   const openJobDrawer = (job) => setDrawerJob(job);
 
@@ -110,9 +92,6 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
       {/* ── Cross-hub quick links ── */}
       {isAllJobs && <HubQuickLinks hubKey="/admin" />}
 
-      {/* ── Standardized KPI strip ── */}
-      {isAllJobs && <DashboardStatsBar onNavigate={onNavigate} />}
-
       {/* ── Quick Action Bar ── */}
       {isAllJobs && (
         <div>
@@ -129,8 +108,15 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
 
       <JobSelectorBar onSelectJob={onSelectJob} />
 
-      {/* ── Command Centre — customisable widget grid ── */}
-      {isAllJobs && <CommandCentreGrid blockRenderers={blockRenderers} />}
+      {/* ── Bento Dashboard — fixed modern widget grid ── */}
+      {isAllJobs && (
+        <BentoDashboard
+          onNavigate={onNavigate}
+          onSelectJob={onSelectJob}
+          onOpenJobDrawer={openJobDrawer}
+          onJobBreakdown={(job) => onSelectJob?.(job, 'financials')}
+        />
+      )}
 
       {/* Job Quick Drawer — slide-out drill-down without leaving the dashboard */}
       <JobQuickDrawer job={drawerJob} onClose={() => setDrawerJob(null)} onOpenFullDetails={onSelectJob} />

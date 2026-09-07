@@ -82,7 +82,7 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
-              <ShieldCheck className="w-4.5 h-4.5 text-white" />
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <div>
               <h3 className="text-sm font-bold">Safety / Mitti Status</h3>

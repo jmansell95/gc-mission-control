@@ -19,7 +19,7 @@ import BentoStatTiles from '@/components/dashboard/BentoStatTiles';
  *
  * Every widget deep-links to its target hub on click.
  */
-export default function BentoDashboard({ onNavigate, onSelectJob, onJobBreakdown }) {
+export default function BentoDashboard({ onNavigate, onSelectJob, onOpenJobDrawer, onJobBreakdown }) {
   return (
     <div className="space-y-4 lg:space-y-5">
       {/* ── Hero row — 3 XL tiles ── */}
@@ -37,7 +37,7 @@ export default function BentoDashboard({ onNavigate, onSelectJob, onJobBreakdown
       </div>
 
       {/* ── Active Sites — full width with maps + crew ── */}
-      <SiteSnapshotGrid onSelectJob={onSelectJob} onNavigate={onNavigate} />
+      <SiteSnapshotGrid onSelectJob={onOpenJobDrawer || onSelectJob} onNavigate={onNavigate} />
 
       {/* ── Lower section — compact stat tiles ── */}
       <div>
