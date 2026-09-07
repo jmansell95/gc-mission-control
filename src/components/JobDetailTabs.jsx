@@ -25,7 +25,6 @@ import DelayLogManager from '@/components/DelayLogManager';
 import JobHazardMap from '@/components/JobHazardMap';
 import JobContextView from '@/components/JobContextView';
 import GeotechDataTab from '@/components/geotech/GeotechDataTab';
-import { hasDiscipline } from '@/utils/jobDisciplines';
 import TabStatRibbon from '@/components/TabStatRibbon';
 import JobFinancialsTab from '@/components/afp/JobFinancialsTab';
 import ProcurementPipeline from '@/components/enterprise/ProcurementPipeline';
@@ -59,16 +58,6 @@ export default function JobDetailTabs({
   const [siteActivitySelectedLogId, setSiteActivitySelectedLogId] = useState(null);
   const { user: authUser } = useAuth();
   const isManager = authUser?.role === 'admin';
-
-  // Borehole Explorer + Geotech tabs show for drilling jobs, but also for jobs
-  // that have drilling indicators (drilling_method, meterage) or legacy
-  // discipline types (coring, trial_pit) that map to drilling — so the tab
-  // doesn't disappear on jobs that genuinely have borehole data.
-  const showBoreholes = isDrillingJob ||
-    hasDiscipline(job, 'drilling') ||
-    (job?.drilling_method && job.drilling_method !== 'not_applicable') ||
-    Number(job?.meterage) > 0 ||
-    Number(job?.meterage_target) > 0;
 
   // Bidirectional deep-link: when a manager clicks "Open on Job Site Activity"
   // from the Investigation Hub, the target log id is stashed in sessionStorage.
@@ -218,8 +207,8 @@ export default function JobDetailTabs({
             { id: 'logs', label: 'Activity Logs', icon: Activity },
             { id: 'delays', label: 'Delays', icon: AlertTriangle },
             { id: 'hazards', label: 'Hazard Map', icon: ShieldCheck },
-            ...(showBoreholes ? [{ id: 'boreholes', label: 'Boreholes', icon: Mountain }] : []),
-            ...(showBoreholes ? [{ id: 'geotech', label: 'Geotech', icon: FlaskConical }] : []),
+            ...(isDrillingJob ? [{ id: 'boreholes', label: 'Boreholes', icon: Mountain }] : []),
+            ...(isDrillingJob ? [{ id: 'geotech', label: 'Geotech', icon: FlaskConical }] : []),
           ]}
           activeTab={activitySub}
           onChange={setActivitySub}
@@ -241,7 +230,7 @@ export default function JobDetailTabs({
           <DelayLogManager job={job} />
         ) : activitySub === 'hazards' ? (
           <JobHazardMap job={job} />
-        ) : activitySub === 'boreholes' && showBoreholes ? (
+        ) : activitySub === 'boreholes' && isDrillingJob ? (
           <>
             <TabStatRibbon
               icon={Mountain}
@@ -254,7 +243,7 @@ export default function JobDetailTabs({
             />
             <BoreholeDrillDown job={job} jobType={primaryType} />
           </>
-        ) : activitySub === 'geotech' && showBoreholes ? (
+        ) : activitySub === 'geotech' && isDrillingJob ? (
           <GeotechDataTab job={job} allStaff={allStaff} suppliers={suppliers} assets={undefined} />
         ) : null}
       </TabsContent>
