@@ -885,6 +885,74 @@ export default function PowerAppsMigrationRoadmap() {
         }
         /* Screen-only: hide the print-static snapshot */
         .print-static-only { display: none; }
+
+        /* === PDF rendering mode ===
+           Applied to the off-screen clone before html2canvas captures it.
+           Mirrors the @media print rules above so the canvas capture gets
+           the same wrapped text, tighter spacing, and static states that
+           the browser print dialog would — because @media print CSS does
+           NOT apply during html2canvas rendering (it renders in screen mode). */
+        .pdf-rendering .print-hide { display: none !important; }
+        .pdf-rendering .powerapps-roadmap-print-area { max-width: none !important; margin: 0 !important; padding: 0 !important; position: static !important; width: auto !important; }
+        .pdf-rendering .print-page {
+          width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        .pdf-rendering .booklet-phase { padding: 0 2px !important; }
+        .pdf-rendering .print-page .rounded-xl,
+        .pdf-rendering .print-page .rounded-2xl,
+        .pdf-rendering .print-page .rounded-lg,
+        .pdf-rendering .print-page pre,
+        .pdf-rendering .print-page table,
+        .pdf-rendering .print-page tr {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+        .pdf-rendering .print-page .mb-4, .pdf-rendering .print-page .mb-5, .pdf-rendering .print-page .mb-6 { margin-bottom: 0.5rem !important; }
+        .pdf-rendering .print-page .mt-4 { margin-top: 0.5rem !important; }
+        .pdf-rendering .print-page .space-y-2\\.5 > * + * { margin-top: 0.35rem !important; }
+        .pdf-rendering .print-page .space-y-2 > * + * { margin-top: 0.3rem !important; }
+        .pdf-rendering .print-page .space-y-3 > * + * { margin-top: 0.4rem !important; }
+        /* THE KEY FIX: wrap long code lines instead of letting them overflow + clip */
+        .pdf-rendering .print-page pre {
+          font-size: 8px !important;
+          line-height: 1.3 !important;
+          padding: 6px 8px !important;
+          max-width: 100% !important;
+          overflow: hidden !important;
+          white-space: pre-wrap !important;
+          word-break: break-all !important;
+          overflow-wrap: anywhere !important;
+        }
+        .pdf-rendering .print-page pre code {
+          white-space: pre-wrap !important;
+          word-break: break-all !important;
+          overflow-wrap: anywhere !important;
+        }
+        .pdf-rendering .print-page .py-4 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+        .pdf-rendering .print-page .p-4 { padding: 0.6rem !important; }
+        .pdf-rendering .print-page .p-3 { padding: 0.45rem !important; }
+        /* Force mobile card layout for tables (clone width 800px < lg breakpoint) */
+        .pdf-rendering .print-page .hidden.lg\\:table { display: none !important; }
+        .pdf-rendering .print-page .block.lg\\:hidden { display: block !important; }
+        /* Developer Pack: show static snapshot, hide interactive states */
+        .pdf-rendering .print-page .print-hide-interactive { display: none !important; }
+        .pdf-rendering .print-page .print-static-only { display: block !important; }
+        /* Ensure Gantt chart and wide grids fit within 800px without horizontal clip */
+        .pdf-rendering .print-page .overflow-x-auto { overflow: visible !important; }
+        .pdf-rendering .print-page .overflow-x-auto > * { min-width: 0 !important; }
+        /* General safety: prevent ANY text from being clipped in the canvas capture */
+        .pdf-rendering .print-page * {
+          overflow-wrap: anywhere !important;
+          word-break: break-word !important;
+        }
+        .pdf-rendering .print-page .truncate,
+        .pdf-rendering .print-page .truncate * {
+          overflow: visible !important;
+          text-overflow: clip !important;
+          white-space: normal !important;
+        }
       `}</style>
     </div>
   );
