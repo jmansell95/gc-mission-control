@@ -10,17 +10,10 @@ import { base44 } from '@/api/base44Client';
 import { differenceInDays } from 'date-fns';
 
 const LEVEL_BADGE = {
-  compliant: { label: 'OK', Icon: ShieldCheck, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  warning: { label: 'Attention', Icon: ShieldAlert, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  expired: { label: 'Critical', Icon: ShieldX, cls: 'bg-red-50 text-red-700 border-red-200' },
-  unknown: { label: 'Not Synced', Icon: CloudOff, cls: 'bg-slate-50 text-slate-500 border-slate-200' },
-};
-
-const LEVEL_ACCENT = {
-  compliant: 'before:bg-emerald-500',
-  warning: 'before:bg-amber-500',
-  expired: 'before:bg-red-500',
-  unknown: 'before:bg-slate-300',
+  compliant: { label: 'OK', Icon: ShieldCheck, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', accent: 'border-l-emerald-500' },
+  warning: { label: 'Attention', Icon: ShieldAlert, cls: 'bg-amber-50 text-amber-700 border-amber-200', accent: 'border-l-amber-500' },
+  expired: { label: 'Critical', Icon: ShieldX, cls: 'bg-red-50 text-red-700 border-red-200', accent: 'border-l-rose-500' },
+  unknown: { label: 'Not Synced', Icon: CloudOff, cls: 'bg-slate-50 text-slate-500 border-slate-200', accent: 'border-l-slate-300' },
 };
 
 function getVehicleStatus(v) {
@@ -49,8 +42,6 @@ function getVehicleStatus(v) {
 function getMotionStatus(liveLocation, geotabLive) {
   if (!geotabLive) return { state: 'offline', label: 'Offline', color: 'slate', Icon: Satellite };
   if (!liveLocation) return { state: 'no_data', label: 'No Signal', color: 'slate', Icon: Satellite };
-  // Fresh Geotab DeviceStatusInfo overlay sets is_driving_now when the vehicle
-  // is actively driving — trust this over potentially stale cached logs.
   if (liveLocation.is_driving_now) return { state: 'moving', label: 'Moving', color: 'emerald', Icon: Navigation };
   const isMoving = liveLocation.ignition_on && (liveLocation.speed_kph || 0) > 0;
   if (isMoving) return { state: 'moving', label: 'Moving', color: 'emerald', Icon: Navigation };
@@ -68,11 +59,6 @@ const MOTION_STYLES = {
 
 const KM_TO_MI = 0.621371;
 
-/**
- * FleetVehicleCard — modern, colourful vehicle card for the Fleet tab.
- * Features a gradient header strip, live motion indicator, spec chips,
- * compliance alerts, mini-map, and quick-action footer.
- */
 export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, driverName, onSelect, onBookMaintenance }) {
   const [reportLoading, setReportLoading] = useState(false);
   const { issues, level } = getVehicleStatus(vehicle);
@@ -80,8 +66,6 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
   const StatusIcon = badge.Icon;
   const makeModel = [vehicle.make, vehicle.model].filter(Boolean).join(' ');
 
-  // MOT badge — only show when Holman is synced (authoritative source).
-  // Guard against "null" / "None" strings from old DVLA syncs.
   const geotabLive = vehicle.geotab_sync_status === 'synced';
   const holmanSynced = vehicle.holman_sync_status === 'synced';
   const motExpiry = (vehicle.mot_expiry && vehicle.mot_expiry !== 'null' && vehicle.mot_expiry !== 'None') ? vehicle.mot_expiry : null;
@@ -128,30 +112,20 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
     setReportLoading(false);
   };
 
-  // Gradient strip colour based on compliance level
-  const stripGradient = level === 'expired' ? 'from-red-500 to-rose-600'
-    : level === 'warning' ? 'from-amber-500 to-orange-600'
-    : level === 'compliant' ? 'from-emerald-500 to-teal-600'
-    : 'from-slate-400 to-slate-500';
-
   return (
     <div
       onClick={() => onSelect(vehicle)}
-      className="insight-card rounded-2xl overflow-hidden relative cursor-pointer group"
+      className={`hub-glass rounded-3xl overflow-hidden relative cursor-pointer group border-l-4 ${badge.accent} transition-all hover:shadow-lg hover:-translate-y-0.5`}
     >
-      {/* Top gradient strip — colour-coded by compliance */}
-      <div className={`h-1.5 bg-gradient-to-r ${stripGradient}`} />
-
-      {/* ── Header: identity + status badges ── */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md ${geotabLive ? 'stat-gradient-cyan' : 'stat-gradient-slate'}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-sm">
               <Truck className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
               <p className="font-mono font-bold text-slate-900 truncate text-base tracking-tight">{vehicle.registration_number}</p>
-              <p className="text-xs font-semibold text-slate-600 truncate">{makeModel || vehicle.name || '—'}</p>
+              <p className="text-xs text-slate-500 truncate">{makeModel || vehicle.name || '—'}</p>
             </div>
           </div>
           <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border ${badge.cls} flex-shrink-0`}>
@@ -159,7 +133,6 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
           </span>
         </div>
 
-        {/* MOT + Tax badges row */}
         <div className="flex flex-wrap gap-1.5 mb-2.5">
           {motBadge && (
             <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full ${motBadge.cls}`}>
@@ -167,45 +140,28 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
               {motDays != null && motDays >= 0 && motDays <= 30 && <span className="opacity-80">({motDays}d)</span>}
             </span>
           )}
-          {/* Tax status badge */}
           {(() => {
             const taxDue = vehicle.tax_due_date;
             const taxDays = taxDue ? differenceInDays(new Date(taxDue + 'T00:00:00'), new Date()) : null;
-            if (vehicle.tax_status === 'untaxed' || (taxDays != null && taxDays < 0)) {
-              return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-red-500 text-white"><Receipt className="w-3 h-3" /> TAX EXPIRED</span>;
-            }
-            if (vehicle.tax_status === 'sorn') {
-              return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-600"><Receipt className="w-3 h-3" /> SORN</span>;
-            }
-            if (taxDays != null && taxDays <= 30) {
-              return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-amber-500 text-white"><Receipt className="w-3 h-3" /> TAX DUE ({taxDays}d)</span>;
-            }
-            if (vehicle.tax_status === 'taxed' || (taxDays != null && taxDays > 30)) {
-              return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500 text-white"><Receipt className="w-3 h-3" /> TAX OK</span>;
-            }
+            if (vehicle.tax_status === 'untaxed' || (taxDays != null && taxDays < 0)) return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-red-500 text-white"><Receipt className="w-3 h-3" /> TAX EXPIRED</span>;
+            if (vehicle.tax_status === 'sorn') return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-slate-200 text-slate-600"><Receipt className="w-3 h-3" /> SORN</span>;
+            if (taxDays != null && taxDays <= 30) return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-amber-500 text-white"><Receipt className="w-3 h-3" /> TAX DUE ({taxDays}d)</span>;
+            if (vehicle.tax_status === 'taxed' || (taxDays != null && taxDays > 30)) return <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500 text-white"><Receipt className="w-3 h-3" /> TAX OK</span>;
             return null;
           })()}
         </div>
 
-        {/* Live motion status badge */}
         <div className="flex items-center gap-2 mb-2">
           <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full ${motionStyle.badge}`}>
             <span className={`relative w-2 h-2 rounded-full ${motionStyle.dot}`}>
-              {motionStyle.pulse && (
-                <span className={`absolute inset-0 rounded-full ${motionStyle.dot} animate-ping opacity-75`} />
-              )}
+              {motionStyle.pulse && <span className={`absolute inset-0 rounded-full ${motionStyle.dot} animate-ping opacity-75`} />}
             </span>
             <MotionIcon className="w-3 h-3" /> {motion.label}
             {isMoving && speedMph > 0 && <span className="ml-0.5">{speedMph} mph</span>}
           </span>
-          {lastSeen && (
-            <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
-              <Clock className="w-2.5 h-2.5" /> {lastSeen}
-            </span>
-          )}
+          {lastSeen && <span className="text-[10px] text-slate-400 flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {lastSeen}</span>}
         </div>
 
-        {/* Key stats: engine hours + mileage — prominent display */}
         {(vehicle.engine_hours != null || vehicle.current_mileage != null) && (
           <div className="flex items-center gap-2 mb-2">
             {vehicle.engine_hours != null && (
@@ -229,40 +185,26 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
           </div>
         )}
 
-        {/* Geotab driver — keeper (fixed assignment) or last detected driver from trips */}
         <div className="flex items-center gap-1.5 mb-2 flex-wrap">
           {vehicle.geotab_keeper_name ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200" title="Geotab assigned keeper (User.defaultDevice)">
-              <Satellite className="w-3 h-3" /> Keeper: {vehicle.geotab_keeper_name}
-            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200"><Satellite className="w-3 h-3" /> Keeper: {vehicle.geotab_keeper_name}</span>
           ) : vehicle.geotab_driver_name ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200" title="Last detected driver from Geotab trip data">
-              <Satellite className="w-3 h-3" /> Driver: {vehicle.geotab_driver_name}
-            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200"><Satellite className="w-3 h-3" /> Driver: {vehicle.geotab_driver_name}</span>
           ) : geotabLive ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-50 text-slate-400 border border-slate-200 border-dashed" title="No Geotab driver data — vehicle may not have been driven recently">
-              <Satellite className="w-3 h-3" /> No Geotab driver
-            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-50 text-slate-400 border border-slate-200 border-dashed"><Satellite className="w-3 h-3" /> No Geotab driver</span>
           ) : driverName ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200" title="Manually assigned driver">
-              <User className="w-3 h-3" /> Assigned: {driverName}
-            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200"><User className="w-3 h-3" /> Assigned: {driverName}</span>
           ) : null}
           {vehicle.geotab_keeper_name && vehicle.geotab_driver_name && vehicle.geotab_driver_name !== vehicle.geotab_keeper_name && (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200" title="Last detected driver differs from keeper">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Driving: {vehicle.geotab_driver_name}
-            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200"><span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" /> Driving: {vehicle.geotab_driver_name}</span>
           )}
         </div>
 
-        {/* Driving Now — LIVE operator from active DeliveryLog task */}
         {vehicle.current_operator_name && (
           <>
             <div className="flex items-center gap-1.5 mb-1.5">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500 text-white shadow-sm">
-                <span className="relative w-2 h-2 rounded-full bg-white">
-                  <span className="absolute inset-0 rounded-full bg-white animate-ping opacity-75" />
-                </span>
+                <span className="relative w-2 h-2 rounded-full bg-white"><span className="absolute inset-0 rounded-full bg-white animate-ping opacity-75" /></span>
                 <Navigation className="w-3 h-3" /> Driving: {vehicle.current_operator_name}
               </span>
             </div>
@@ -276,76 +218,29 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
           </>
         )}
 
-        {/* Driver safety risk badge — from Geotab Exception events */}
         {vehicle.geotab_sync_status === 'synced' && vehicle.safety_event_count != null && (
           <div className="flex items-center gap-1.5 mb-2">
             <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full ${
               (vehicle.driver_risk_score || 100) >= 80 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
               (vehicle.driver_risk_score || 100) >= 50 ? 'bg-amber-50 text-amber-700 border border-amber-200' :
               'bg-red-50 text-red-700 border border-red-200'
-            }`} title={`Risk score ${vehicle.driver_risk_score ?? 100}/100 — ${vehicle.safety_event_count || 0} safety events in 30 days`}>
-              <ShieldAlert className="w-3 h-3" />
-              Risk {vehicle.driver_risk_score ?? 100}/100
+            }`}>
+              <ShieldAlert className="w-3 h-3" /> Risk {vehicle.driver_risk_score ?? 100}/100
             </span>
-            {vehicle.safety_event_count > 0 && (
-              <span className="text-[10px] text-slate-500 font-medium">
-                {vehicle.safety_event_count} event{vehicle.safety_event_count === 1 ? '' : 's'} · 30d
-              </span>
-            )}
+            {vehicle.safety_event_count > 0 && <span className="text-[10px] text-slate-500 font-medium">{vehicle.safety_event_count} event{vehicle.safety_event_count === 1 ? '' : 's'} · 30d</span>}
           </div>
         )}
 
-        {/* Spec chips */}
         <div className="flex flex-wrap gap-1.5">
-          {vehicle.year && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1">
-              <Car className="w-2.5 h-2.5" /> {vehicle.year}
-            </span>
-          )}
-          {vehicle.color && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1">
-              <Palette className="w-2.5 h-2.5" /> {vehicle.color}
-            </span>
-          )}
-          {vehicle.fuel_type && vehicle.fuel_type !== 'unknown' && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-              {vehicle.fuel_type.charAt(0).toUpperCase() + vehicle.fuel_type.slice(1)}
-            </span>
-          )}
-          {vehicle.vehicle_type && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">{vehicle.vehicle_type}</span>
-          )}
-          {vehicle.vin && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono flex items-center gap-1">
-              <Hash className="w-2.5 h-2.5" /> {vehicle.vin.slice(-6)}
-            </span>
-          )}
-          {driverName && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">{driverName}</span>
-          )}
-          {vehicle.spec_lookup_confidence === 'low' && (
-            <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium" title="Spec lookup returned partial data — review make/model manually">
-              <AlertTriangle className="w-2.5 h-2.5" /> Review spec
-            </span>
-          )}
-          {vehicle.engine_capacity_cc && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-              {vehicle.engine_capacity_cc}cc
-            </span>
-          )}
-          {vehicle.co2_emissions_g_km && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium" title="CO2 emissions">
-              {vehicle.co2_emissions_g_km}g/km
-            </span>
-          )}
-          {vehicle.last_service_date && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1" title={`Last serviced ${new Date(vehicle.last_service_date + 'T00:00:00').toLocaleDateString('en-GB')}`}>
-              <CalendarCheck className="w-2.5 h-2.5" /> {new Date(vehicle.last_service_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-            </span>
-          )}
+          {vehicle.year && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1"><Car className="w-2.5 h-2.5" /> {vehicle.year}</span>}
+          {vehicle.color && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1"><Palette className="w-2.5 h-2.5" /> {vehicle.color}</span>}
+          {vehicle.fuel_type && vehicle.fuel_type !== 'unknown' && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">{vehicle.fuel_type.charAt(0).toUpperCase() + vehicle.fuel_type.slice(1)}</span>}
+          {vehicle.vehicle_type && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">{vehicle.vehicle_type}</span>}
+          {vehicle.vin && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-mono flex items-center gap-1"><Hash className="w-2.5 h-2.5" /> {vehicle.vin.slice(-6)}</span>}
+          {vehicle.spec_lookup_confidence === 'low' && <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium"><AlertTriangle className="w-2.5 h-2.5" /> Review spec</span>}
+          {vehicle.last_service_date && <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium flex items-center gap-1"><CalendarCheck className="w-2.5 h-2.5" /> {new Date(vehicle.last_service_date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>}
         </div>
 
-        {/* Compliance alerts */}
         {issues.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
             {issues.map((issue, i) => (
@@ -357,17 +252,13 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
         )}
       </div>
 
-      {/* ── Live location snapshot ── */}
       <div className="px-4 pb-3">
         <VehicleLocationMiniMap {...(liveLocation || {})} />
       </div>
 
-      {/* ── Next maintenance booking banner ── */}
       {nextBooking && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }}
-          className="w-full flex items-center gap-2 px-4 py-2.5 bg-violet-50 border-y border-violet-100 text-left hover:bg-violet-100 transition"
-        >
+        <button onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }}
+          className="w-full flex items-center gap-2 px-4 py-2.5 bg-violet-50 border-y border-violet-100 text-left hover:bg-violet-100 transition">
           <Wrench className="w-3.5 h-3.5 text-violet-600 flex-shrink-0" />
           <span className="text-[11px] font-semibold text-violet-700 truncate flex-1">
             {nextBooking.booking_type ? nextBooking.booking_type.charAt(0).toUpperCase() + nextBooking.booking_type.slice(1) : 'Booking'} booked
@@ -378,44 +269,18 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
         </button>
       )}
 
-      {/* ── Footer: mileage + sync sources + actions ── */}
       <div className="px-4 py-3 flex items-center justify-between gap-2 text-[11px]">
         <div className="flex items-center gap-3">
-          <button
-            onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }}
-            className="flex items-center gap-1 text-[#2E5A1A] font-semibold hover:underline"
-          >
+          <button onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }} className="flex items-center gap-1 text-[#2E5A1A] font-semibold hover:underline">
             <Wrench className="w-3 h-3" /> Book
           </button>
-          <button
-            onClick={handleDownloadReport}
-            disabled={reportLoading}
-            className="flex items-center gap-1 text-blue-600 font-semibold hover:underline disabled:opacity-50"
-          >
+          <button onClick={handleDownloadReport} disabled={reportLoading} className="flex items-center gap-1 text-blue-600 font-semibold hover:underline disabled:opacity-50">
             {reportLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />} PDF
           </button>
         </div>
         <div className="flex items-center gap-2">
-          {vehicle.current_mileage != null && (
-            <span className="flex items-center gap-1 text-slate-400 font-medium">
-              <Gauge className="w-3 h-3" />{Number(vehicle.current_mileage).toLocaleString()} mi
-            </span>
-          )}
-          {vehicle.last_dvla_sync && (
-            <span className="flex items-center gap-1 text-slate-400 font-medium" title={`DVLA synced ${new Date(vehicle.last_dvla_sync).toLocaleDateString('en-GB')}`}>
-              <BadgeCheck className="w-3 h-3" /> DVLA
-            </span>
-          )}
-          {geotabLive && (
-            <span className="flex items-center gap-1 text-cyan-600 font-semibold" title={vehicle.last_geotab_sync ? `Geotab synced ${new Date(vehicle.last_geotab_sync).toLocaleString('en-GB')}` : 'Geotab live'}>
-              <Satellite className="w-3 h-3" /> Live
-            </span>
-          )}
-          {holmanSynced && (
-            <span className="flex items-center gap-1 text-blue-600 font-semibold" title={vehicle.last_holman_sync ? `Holman synced ${new Date(vehicle.last_holman_sync).toLocaleString('en-GB')}` : 'Holman synced'}>
-              <Link2 className="w-3 h-3" /> Holman
-            </span>
-          )}
+          {geotabLive && <span className="flex items-center gap-1 text-cyan-600 font-semibold"><Satellite className="w-3 h-3" /> Live</span>}
+          {holmanSynced && <span className="flex items-center gap-1 text-blue-600 font-semibold"><Link2 className="w-3 h-3" /> Holman</span>}
         </div>
       </div>
     </div>

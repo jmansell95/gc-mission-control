@@ -349,8 +349,8 @@ export default async function(req: Request): Promise<Response> {
       // live_fast skips the Geotab API overlay call (which adds 2-5s latency)
       // and returns cached logs instantly. The full "live" mode overlays
       // fresh driving/ignition status from Geotab for real-time accuracy.
-      let freshStatusByDeviceId: Record<string, { isDriving: boolean; isIgnitionOn: boolean }> = {};
-      if (mode === 'live') {
+      let freshStatusByDeviceId: Record<string, any> = {};
+      if (mode === 'live' || mode === 'live_fast') {
         // ── FRESH GEOTAB STATUS OVERLAY ──
         // Cached logs can be stale (sync runs every few minutes). Fetch the
         // current driving/ignition status directly from Geotab in a single
@@ -365,7 +365,7 @@ export default async function(req: Request): Promise<Response> {
             // unreachable, we skip the fresh status overlay and return
             // cached logs instantly so the live map always loads fast.
             const liveAuthController = new AbortController();
-            const liveAuthTimeout = setTimeout(() => liveAuthController.abort(), 4000);
+            const liveAuthTimeout = setTimeout(() => liveAuthController.abort(), mode === 'live_fast' ? 3000 : 4000);
             const authRes = await fetch(apiUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -380,7 +380,7 @@ export default async function(req: Request): Promise<Response> {
             const creds = authJson?.result?.credentials;
             if (creds?.sessionId) {
               const statusController = new AbortController();
-              const statusTimeout = setTimeout(() => statusController.abort(), 4000);
+              const statusTimeout = setTimeout(() => statusController.abort(), mode === 'live_fast' ? 3000 : 4000);
               const statusRes = await fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -403,6 +403,11 @@ export default async function(req: Request): Promise<Response> {
                 freshStatusByDeviceId[devId] = {
                   isDriving: !!s.isDriving,
                   isIgnitionOn: s.isDriving || (s.engineState === 'on') || false,
+                  lat: s.latitude ? Number(s.latitude) : null,
+                  lng: s.longitude ? Number(s.longitude) : null,
+                  speed: s.speed ? Number(s.speed) : 0,
+                  heading: s.heading ? Number(s.heading) : 0,
+                  timestamp: s.dateTime || null,
                 };
               }
             }
@@ -412,28 +417,56 @@ export default async function(req: Request): Promise<Response> {
         }
       }
 
+      // Build results from cached logs, enriching with fresh Geotab status
       const results = Object.values(latestByVehicle).map((log: any) => {
         const vehicle = vehicleMap[log.vehicle_id];
         const fresh = vehicle?.geotab_device_id ? freshStatusByDeviceId[vehicle.geotab_device_id] : null;
-        // If Geotab says the vehicle is driving RIGHT NOW, override the cached
-        // ignition/speed so the card shows "Moving" instead of stale "Stopped".
         const ignition_on = fresh?.isDriving ? true : (fresh?.isIgnitionOn ?? log.ignition_on);
-        const speed_kph = fresh?.isDriving ? Math.max(log.speed_kph || 0, 5) : log.speed_kph;
+        const speed_kph = fresh?.isDriving ? Math.max(log.speed_kph || 0, 5) : (fresh?.speed || log.speed_kph);
+        // Use fresh Geotab position if the cached log is stale (>1h old) or missing lat/lng
+        const logTime = log.timestamp ? new Date(log.timestamp).getTime() : 0;
+        const isStale = Date.now() - logTime > 60 * 60 * 1000;
+        const useFreshPos = fresh && (isStale || (log.lat == null || log.lng == null)) && fresh.lat != null && fresh.lng != null;
         return {
           vehicle_id: log.vehicle_id,
           registration_number: log.registration_number || vehicle?.registration_number || vehicle?.name || '',
           vehicle_name: log.vehicle_name || vehicle?.name || '',
-          lat: log.lat,
-          lng: log.lng,
+          lat: useFreshPos ? fresh.lat : log.lat,
+          lng: useFreshPos ? fresh.lng : log.lng,
           speed_kph,
-          heading: log.heading,
+          heading: fresh?.heading || log.heading,
           ignition_on,
           odometer_km: log.odometer_km,
           driver_name: log.driver_name,
-          timestamp: log.timestamp,
+          timestamp: useFreshPos && fresh.timestamp ? fresh.timestamp : log.timestamp,
           is_driving_now: fresh?.isDriving || false,
         };
       });
+
+      // Also include Geotab-synced vehicles that have NO cached logs at all.
+      // These vehicles have a geotab_device_id but no VehicleLocationLog entries,
+      // so they never appeared on the live map. Use DeviceStatusInfo for position
+      // if available; otherwise include with null position (shows in sidebar, not on map).
+      const existingVids = new Set(results.map((r: any) => r.vehicle_id));
+      for (const v of vehicles) {
+        if (!v.geotab_device_id || v.geotab_sync_status !== 'synced') continue;
+        if (existingVids.has(v.id)) continue;
+        const fresh = freshStatusByDeviceId[v.geotab_device_id];
+        results.push({
+          vehicle_id: v.id,
+          registration_number: v.registration_number || v.name || '',
+          vehicle_name: v.name || '',
+          lat: fresh?.lat ?? null,
+          lng: fresh?.lng ?? null,
+          speed_kph: fresh?.speed || 0,
+          heading: fresh?.heading || 0,
+          ignition_on: fresh?.isIgnitionOn ?? false,
+          odometer_km: null,
+          driver_name: v.geotab_keeper_name || v.geotab_driver_name || null,
+          timestamp: fresh?.timestamp || null,
+          is_driving_now: fresh?.isDriving || false,
+        });
+      }
       return Response.json({ ok: true, mode, count: results.length, vehicles: results });
     }
 

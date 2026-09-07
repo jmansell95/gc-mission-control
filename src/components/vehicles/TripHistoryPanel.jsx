@@ -206,7 +206,7 @@ export default function TripHistoryPanel({ vehicle }) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-slate-200 p-3 space-y-3">
+      <div className="hub-glass rounded-3xl p-4 space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Route className="w-4 h-4 text-emerald-700" />
           <h3 className="text-sm font-bold text-slate-800">Trip History</h3>
@@ -285,7 +285,7 @@ export default function TripHistoryPanel({ vehicle }) {
               const isToday = dg.date === todayStr();
               const dayLabel = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
               return (
-                <div key={dg.date} className="rounded-xl border border-slate-200 overflow-hidden">
+                <div key={dg.date} className="hub-glass rounded-3xl overflow-hidden">
                   <div className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-slate-50 to-white">
                     <Calendar className="w-4 h-4 text-slate-500" />
                     <span className="text-sm font-bold text-slate-800">{dayLabel}</span>

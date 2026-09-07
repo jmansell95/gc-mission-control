@@ -532,7 +532,7 @@ export default function TravelReconciliationReport({ vehicle }) {
 
           {/* Reconciliation summary */}
           {reconciliations.length > 0 && (
-            <div className="bg-white rounded-xl border border-slate-200 p-3">
+            <div className="hub-glass rounded-3xl p-4">
               <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-slate-500" />
                 Travel-Hour Reconciliation (GPS vs Timesheet)
@@ -578,7 +578,7 @@ export default function TravelReconciliationReport({ vehicle }) {
               const isDayOpen = expandedDay === dg.date || (expandedDay === null && dg === dayGroups[0]);
               const recon = reconciliations.find(r => r.date === dg.date);
               return (
-                <div key={dg.date} className="rounded-xl border border-slate-200 overflow-hidden">
+                <div key={dg.date} className="hub-glass rounded-3xl overflow-hidden">
                   {/* Day header */}
                   <button
                     onClick={() => setExpandedDay(isDayOpen ? null : dg.date)}

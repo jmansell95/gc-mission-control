@@ -5,12 +5,18 @@ import { ExternalLink, Search, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 
+// Must match SettingsHubOverview exactly — only integration items can be hidden
+const INTEGRATION_IDS = new Set([
+  'geotab-sync', 'holman-sync', 'asset-panda', 'bob-hr', 'concur-sync',
+  'safety-culture', 'cis-verification', 'payroll-export',
+  'met-office', 'google-maps', 'whatsapp', 'accounting-sync', 'payment-gateway',
+  'microsoft-365', 'zapier-webhooks', 'ags-import', 'openground-sync',
+]);
+
 /**
  * Settings Sidebar — persistent left navigation for the settings area.
- * Only shows items that have NOT migrated to operational hubs.
- *
- * Hidden integrations (flagged in the overview Manage mode) are filtered out
- * of the sidebar entirely so they don't clutter navigation.
+ * Uses the same item filtering as the SettingsHubOverview so the sidebar
+ * and the Command Hub overview always show the same items.
  *
  * `hideHeader` suppresses the internal "Settings Menu" card header — used
  * when the sidebar is embedded inside the mobile drawer (which provides its
@@ -26,9 +32,12 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
   const hiddenMap = stats?.integrationHidden || {};
 
   const itemMap = Object.fromEntries(items.map(i => [i.id, i]));
+  // Same filtering logic as SettingsHubOverview: exclude migrated items,
+  // and only hide integrations flagged in the hidden map (non-integration
+  // items are never hidden).
   const allGroups = settingsGroups
     .filter(g => g.label !== '_hidden_migrated')
-    .map(g => ({ ...g, items: g.items.filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id) && !hiddenMap[i.id]) }))
+    .map(g => ({ ...g, items: g.items.filter(i => itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id) && !(INTEGRATION_IDS.has(i.id) && hiddenMap[i.id])) }))
     .filter(g => g.items.length > 0);
 
   // Filter groups by search query — matches item label or group label
