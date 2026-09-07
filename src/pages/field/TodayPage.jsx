@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, CheckCircle2, UserCircle, ShieldCheck, AlertTriangle, Truck, HelpCircle, ScanLine, Package, LayoutDashboard, ChevronRight } from 'lucide-react';
-import { format, isFuture } from 'date-fns';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package } from 'lucide-react';
+import { format } from 'date-fns';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
 import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
@@ -29,7 +29,6 @@ import DrillingWeatherWidget from '@/components/DrillingWeatherWidget';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import RigSignInScanner from '@/components/staff/RigSignInScanner';
 import OfflineBanner from '@/components/field/OfflineBanner';
-import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import StartMyDayHero from '@/components/staff/StartMyDayHero';
@@ -38,7 +37,6 @@ import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
 import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
-import { getDeliveryInFrontState } from '@/utils/deliveryInFront';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 
