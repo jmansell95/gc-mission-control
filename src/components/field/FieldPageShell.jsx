@@ -24,9 +24,10 @@ export default function FieldPageShell({
   accentColor,
   fixedHeader = false,
   meta,
+  transparent = false,
 }) {
   return (
-    <div className="min-h-screen page-bg-vibrant">
+    <div className={transparent ? "min-h-0" : "min-h-screen page-bg-vibrant"}>
       {/* Header — hub-glass surface with gradient accent (fixed or sticky) */}
       <div className={(fixedHeader ? "fixed top-0 left-0 right-0 " : "sticky top-0 ") + "z-30 hub-glass safe-area-top"}>
         {/* Division accent strip — always visible at the top of the screen */}
