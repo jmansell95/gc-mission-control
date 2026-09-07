@@ -297,6 +297,7 @@ export default function PowerAppsMigrationRoadmap() {
     holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:800px;background:#ffffff;z-index:-1;';
     const clone = el.cloneNode(true);
     clone.style.cssText = 'width:800px;max-width:800px;padding:0;margin:0;';
+    clone.classList.add('pdf-rendering');
     holder.appendChild(clone);
     document.body.appendChild(holder);
     try {
