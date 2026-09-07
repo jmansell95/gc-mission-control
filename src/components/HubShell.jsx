@@ -3,7 +3,6 @@ import BackButton from '@/components/BackButton';
 import HubHeader from '@/components/hubs/HubHeader';
 import HubQuickLinks from '@/components/hubs/HubQuickLinks';
 import HubTabBar from '@/components/hubs/HubTabBar';
-import HubOnboardingBanner from '@/components/hubs/HubOnboardingBanner';
 import HubLoadingState from '@/components/hubs/HubLoadingState';
 import HubErrorState from '@/components/hubs/HubErrorState';
 import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
@@ -51,8 +50,6 @@ export default function HubShell({
         stats={stats}
         help={help ? { hubKey, ...help } : undefined}
       />
-
-      {onboarding && <HubOnboardingBanner hubKey={hubKey} {...onboarding} />}
 
       <HubQuickLinks hubKey={hubKey} links={quickLinks} />
 

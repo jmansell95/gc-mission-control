@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Mountain, CheckCircle2, CircleDashed, ArrowRight } from 'lucide-react';
+import { Mountain, CheckCircle2, CircleDashed, ChevronRight } from 'lucide-react';
 import { setInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
@@ -55,67 +55,98 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-4 h-full">
-        <WidgetLoadingState rows={3} />
+      <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+        <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
+              <Mountain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Boreholes in Progress</h3>
+              <p className="text-[11px] text-white/70">Loading…</p>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 flex-1">
+          <WidgetLoadingState rows={3} />
+        </div>
       </div>
     );
   }
 
   if (counts.total === 0) {
     return (
-      <div className="insight-card rounded-2xl p-4 h-full">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-            <Mountain className="w-4 h-4 text-slate-400" />
+      <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+        <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
+              <Mountain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Boreholes in Progress</h3>
+              <p className="text-[11px] text-white/70">No data yet</p>
+            </div>
           </div>
-          <h3 className="text-sm font-bold text-slate-900">Boreholes</h3>
         </div>
-        <WidgetEmptyState icon={Mountain} title="No borehole data" message="No borehole data synced yet." />
+        <div className="p-4 flex-1">
+          <WidgetEmptyState icon={Mountain} title="No borehole data" message="No borehole data synced yet." />
+        </div>
       </div>
     );
   }
 
   return (
-    <button
+    <div
       onClick={handleClick}
-      className="insight-card rounded-2xl p-4 h-full w-full text-left hover:shadow-lg transition group"
+      className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
     >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center group-hover:bg-amber-200 transition">
-          <Mountain className="w-4 h-4 text-amber-700" />
+      {/* Header */}
+      <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
+              <Mountain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Boreholes in Progress</h3>
+              <p className="text-[11px] text-white/70">{counts.inProgress} active · {counts.total} total</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition" />
         </div>
-        <h3 className="text-sm font-bold text-slate-900">Boreholes in Progress</h3>
-        <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-amber-600 group-hover:translate-x-0.5 transition ml-auto" />
       </div>
 
-      {/* Main in-progress number */}
-      <div className="flex items-end gap-1.5 mb-3">
-        <span className="text-3xl font-bold text-amber-600 tabular-nums leading-none">{counts.inProgress}</span>
-        <span className="text-xs text-slate-500 font-medium mb-0.5">in progress</span>
-      </div>
+      {/* Body */}
+      <div className="p-4 flex-1 flex flex-col">
+        {/* Main in-progress number */}
+        <div className="flex items-end gap-1.5 mb-3">
+          <span className="text-3xl font-bold text-amber-600 tabular-nums leading-none">{counts.inProgress}</span>
+          <span className="text-xs text-slate-500 font-medium mb-0.5">in progress</span>
+        </div>
 
-      {/* Secondary stats */}
-      <div className="grid grid-cols-3 gap-2">
-        <StatChip
-          icon={CircleDashed}
-          value={counts.unchecked}
-          label="Unchecked"
-          color="slate"
-        />
-        <StatChip
-          icon={CheckCircle2}
-          value={counts.complete}
-          label="Completed"
-          color="emerald"
-        />
-        <StatChip
-          icon={Mountain}
-          value={counts.total}
-          label="Total"
-          color="blue"
-        />
+        {/* Secondary stats */}
+        <div className="grid grid-cols-3 gap-2">
+          <StatChip
+            icon={CircleDashed}
+            value={counts.unchecked}
+            label="Unchecked"
+            color="slate"
+          />
+          <StatChip
+            icon={CheckCircle2}
+            value={counts.complete}
+            label="Completed"
+            color="emerald"
+          />
+          <StatChip
+            icon={Mountain}
+            value={counts.total}
+            label="Total"
+            color="blue"
+          />
+        </div>
       </div>
-    </button>
+    </div>
   );
 }
 

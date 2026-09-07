@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
+import AllRigsModal from '@/components/dashboard/AllRigsModal';
 
 const fmtGBP = (v) => {
   if (v == null || isNaN(v)) return '£0';
@@ -164,6 +165,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const top6 = rigStats.slice(0, 6);
 
   return (
+    <>
     <div
       className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
       onClick={handleClick}
@@ -277,5 +279,12 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
         )}
       </div>
     </div>
+    {showAllRigs && (
+      <AllRigsModal
+        rigs={rigStats.map(r => ({ ...r, revenue: 0, meterage: 0, crewDayRate: 0 }))}
+        onClose={() => setShowAllRigs(false)}
+      />
+    )}
+    </>
   );
 }

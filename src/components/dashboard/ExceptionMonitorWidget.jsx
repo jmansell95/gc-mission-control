@@ -4,9 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, differenceInDays } from 'date-fns';
 import {
   AlertOctagon, Clock, ShieldAlert, Truck, Ruler, RotateCcw,
-  ChevronRight, RefreshCw, Loader2, CheckCircle2, Inbox,
+  ChevronRight, RefreshCw, Loader2, CheckCircle2,
 } from 'lucide-react';
-import WidgetShell from '@/components/dashboard/WidgetShell';
 import { useToast } from '@/components/ui/use-toast';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
@@ -193,64 +192,81 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
   };
 
   return (
-    <WidgetShell
-      icon={AlertOctagon}
-      title="Needs Attention"
-      subtitle={`${exceptions.length} item${exceptions.length !== 1 ? 's' : ''} requiring action`}
-      action={
-        <button onClick={handleRefresh} disabled={isLoading}
-          className="p-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition">
-          {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" /> : <RefreshCw className="w-3.5 h-3.5 text-slate-500" />}
-        </button>
-      }
-    >
-      {/* Severity summary + filter pills */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex p-1 bg-slate-100 rounded-lg gap-0.5">
-          <button onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}>
-            All <span className="tabular-nums ml-1">{exceptions.length}</span>
-          </button>
-          <button onClick={() => setFilter('critical')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'critical' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500'}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Critical <span className="tabular-nums">{criticalCount}</span>
-          </button>
-          <button onClick={() => setFilter('warning')}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'warning' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500'}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Warning <span className="tabular-nums">{warningCount}</span>
+    <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-rose-500 to-rose-700 px-4 py-3.5 text-white flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
+              <AlertOctagon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Needs Attention</h3>
+              <p className="text-[11px] text-white/70">
+                {exceptions.length} item{exceptions.length !== 1 ? 's' : ''} requiring action
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition flex-shrink-0"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <RefreshCw className="w-4 h-4 text-white/80" />}
           </button>
         </div>
       </div>
 
-      {/* Exception list */}
-      {isLoading ? (
-        <WidgetLoadingState rows={4} />
-      ) : filtered.length === 0 ? (
-        <WidgetEmptyState icon={CheckCircle2} title="All clear" message="No exceptions detected. Everything is on track." />
-      ) : (
-        <div className="space-y-2 max-h-[420px] overflow-y-auto">
-          {filtered.map((item) => {
-            const sev = SEVERITY[item.severity];
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleItemClick(item.navTarget)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition hover:shadow-sm ${sev.bg} ${sev.border}`}
-              >
-                <div className={`w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0`}>
-                  <Icon className={`w-4 h-4 ${sev.text}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{item.title}</p>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">{item.detail}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-              </button>
-            );
-          })}
+      {/* Body */}
+      <div className="p-4 flex-1 flex flex-col">
+        {/* Severity summary + filter pills */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex p-1 bg-slate-100 rounded-lg gap-0.5">
+            <button onClick={() => setFilter('all')}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}>
+              All <span className="tabular-nums ml-1">{exceptions.length}</span>
+            </button>
+            <button onClick={() => setFilter('critical')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'critical' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Critical <span className="tabular-nums">{criticalCount}</span>
+            </button>
+            <button onClick={() => setFilter('warning')}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'warning' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Warning <span className="tabular-nums">{warningCount}</span>
+            </button>
+          </div>
         </div>
-      )}
-    </WidgetShell>
+
+        {/* Exception list */}
+        {isLoading ? (
+          <WidgetLoadingState rows={4} />
+        ) : filtered.length === 0 ? (
+          <WidgetEmptyState icon={CheckCircle2} title="All clear" message="No exceptions detected. Everything is on track." />
+        ) : (
+          <div className="space-y-2 max-h-[420px] overflow-y-auto">
+            {filtered.map((item) => {
+              const sev = SEVERITY[item.severity];
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleItemClick(item.navTarget)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition hover:shadow-sm ${sev.bg} ${sev.border}`}
+                >
+                  <div className={`w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0`}>
+                    <Icon className={`w-4 h-4 ${sev.text}`} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{item.title}</p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{item.detail}</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -22,6 +22,12 @@ import BentoStatTiles from '@/components/dashboard/BentoStatTiles';
 export default function BentoDashboard({ onNavigate, onSelectJob, onOpenJobDrawer, onJobBreakdown }) {
   return (
     <div className="space-y-4 lg:space-y-5">
+      {/* ── Key Metrics — at the top for immediate visibility ── */}
+      <div>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">Key Metrics</h3>
+        <BentoStatTiles onNavigate={onNavigate} />
+      </div>
+
       {/* ── Hero row — 3 XL tiles ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <RigsOnSiteBentoWidget onJobBreakdown={onJobBreakdown} />
@@ -39,11 +45,6 @@ export default function BentoDashboard({ onNavigate, onSelectJob, onOpenJobDrawe
       {/* ── Active Sites — full width with maps + crew ── */}
       <SiteSnapshotGrid onSelectJob={onOpenJobDrawer || onSelectJob} onNavigate={onNavigate} />
 
-      {/* ── Lower section — compact stat tiles ── */}
-      <div>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">Key Metrics</h3>
-        <BentoStatTiles onNavigate={onNavigate} />
-      </div>
     </div>
   );
 }
