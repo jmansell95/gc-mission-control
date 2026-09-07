@@ -227,6 +227,7 @@ export default function GenerateInvoiceModal({ open, onClose, job, client, data,
       const invoice = {
         invoice_number: nextNumber,
         job_id: job.id,
+        division_id: job.division_id || '',
         job_name: job.name,
         job_reference: job.job_reference || '',
         client_id: resolvedClient?.id || job.client_id || '',

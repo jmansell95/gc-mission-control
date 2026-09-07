@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Job this invoice was raised against"
     },
+    "division_id": {
+      "type": "string",
+      "description": "The division this invoice belongs to (inherited from the job's division). Set automatically when the invoice is created so enterprise per-division financial stats (outstanding, revenue, invoiced totals) resolve correctly. Blank = unassigned (visible to enterprise admins only)."
+    },
     "job_name": {
       "type": "string",
       "description": "Job name (denormalised for display on the invoice and in lists)"

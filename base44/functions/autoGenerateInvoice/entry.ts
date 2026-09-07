@@ -226,6 +226,7 @@ async function generateForJob(base44, job) {
   const invoice = {
     invoice_number: invoiceNumber,
     job_id: job.id,
+    division_id: job.division_id || '',
     job_name: job.name,
     job_reference: job.job_reference || '',
     client_id: job.client_id || '',

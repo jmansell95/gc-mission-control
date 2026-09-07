@@ -176,7 +176,10 @@ export default async function(req: Request): Promise<Response> {
         return exp >= now && exp <= thirtyDaysFromNow;
       }).length,
       compliancePassRate: compliance.length > 0
-        ? Math.round((compliance.filter(c => !c.expiry_date || new Date(c.expiry_date) >= now).length / compliance.length) * 100)
+        ? Math.round((compliance.filter(c =>
+            c.review_status !== 'pending_review' && c.review_status !== 'rejected' &&
+            (!c.expiry_date || new Date(c.expiry_date) >= now)
+          ).length / compliance.length) * 100)
         : 100,
     };
 

@@ -14,6 +14,7 @@ import AFPDatesEditor from './AFPDatesEditor';
 import AFPDisputeRow from './AFPDisputeRow';
 import AFPExportButtons from './AFPExportButtons';
 import AFPUploadModal from '@/components/cvr/AFPUploadModal';
+import AFPSummaryHeader from './AFPSummaryHeader';
 import AFPDualSideTable from './AFPDualSideTable';
 import AFPVariationLifecycle from './AFPVariationLifecycle';
 import AFPCompensationItems from './AFPCompensationItems';
@@ -613,193 +614,80 @@ export default function AFPBuilder({ job }) {
         </div>
       </div>
 
-      {/* ── AFP Header ── */}
+      {/* ── AFP Visual Summary Header ── */}
       {selectedAfp && (
-        <div className="insight-card rounded-2xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">AFP {selectedAfp.afp_number} — {job.name}</h3>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${statusMeta.bg} ${statusMeta.color}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} /> {statusMeta.label}
-                  </span>
-                  {/* Dates chip — opens the four-date editor */}
-                  <button
-                    onClick={() => setShowDatesEditor(true)}
-                    className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-[#2E5A1A] transition font-medium"
-                  >
-                    <Calendar className="w-3 h-3" />
-                    {fmtDate(selectedAfp.period_start_date)} → {selectedAfp.period_end_date ? fmtDate(selectedAfp.period_end_date) : 'Set dates'}
-                  </button>
-                  {selectedAfp.final_payment_notice_date && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold">
-                      <PoundSterling className="w-2.5 h-2.5" /> Pay by {fmtDate(selectedAfp.final_payment_notice_date)}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {selectedAfp.status === 'draft' && (
-                <button
-                  onClick={handlePopulate}
-                  disabled={populating}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 disabled:opacity-50"
-                >
-                  {populating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">Refresh from Field</span>
-                  <span className="sm:hidden">Refresh</span>
-                </button>
-              )}
-              {selectedAfp.status === 'draft' && (
-                <button
-                  onClick={handleReprice}
-                  disabled={repricing}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold transition active:scale-95 disabled:opacity-50"
-                  title="Re-resolve all auto-populated line items against the current rate card"
-                >
-                  {repricing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-                  <span className="hidden sm:inline">Re-price from Rate Card</span>
-                  <span className="sm:hidden">Re-price</span>
-                </button>
-              )}
-              {selectedAfp.status === 'draft' && (
-                <button
-                  onClick={handleSubmitForReview}
-                  disabled={submittingReview}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-amber-500 to-amber-700 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50"
-                >
-                  {submittingReview ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ClipboardCheck className="w-3.5 h-3.5" />}
-                  Submit for Review
-                </button>
-              )}
-              {selectedAfp.status === 'pending_review' && (
-                <button
-                  onClick={handleApprove}
-                  disabled={approving}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50"
-                >
-                  {approving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                  Approve
-                </button>
-              )}
-              {selectedAfp.status === 'approved' && (
-                <button
-                  onClick={handlePushToCVR}
-                  disabled={pushing}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50"
-                >
-                  {pushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowRight className="w-3.5 h-3.5" />}
-                  Push to CVR
-                </button>
-              )}
-              <AFPExportButtons afp={selectedAfp} job={job} />
-              <button
-                onClick={() => setShowUpload(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm"
-                title="Upload an AFP Excel file to import historical data"
-              >
-                <Upload className="w-3.5 h-3.5" /> Upload AFP
+        <>
+        <AFPSummaryHeader afp={selectedAfp} job={job} totals={totals} lineItems={lineItems} categoryCounts={categoryCounts} freshness={freshness} />
+
+        {/* Action bar with buttons + auto-save */}
+        <div className="insight-card rounded-2xl p-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {selectedAfp.status === 'draft' && (
+              <button onClick={handlePopulate} disabled={populating}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 disabled:opacity-50">
+                {populating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">Refresh from Field</span>
+                <span className="sm:hidden">Refresh</span>
               </button>
-            </div>
-          </div>
-
-          {/* Visual stat pills — premium header with AnimatedNumber count-up */}
-          <div className="px-4 py-4 space-y-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-              <div className="relative overflow-hidden rounded-xl stat-gradient-brand text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Contracted</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={selectedAfp.contract_value || 0} format={(v) => fmt(v)} />
-                </p>
-              </div>
-              <div className="relative overflow-hidden rounded-xl stat-gradient-blue text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Claimed</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={totals.claimed} format={(v) => fmt(v)} />
-                </p>
-                {totals.disputed > 0 && <p className="text-[10px] text-amber-200 font-medium mt-0.5">{fmt(totals.disputed)} disputed</p>}
-              </div>
-              <div className="relative overflow-hidden rounded-xl stat-gradient-cyan text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Assessed</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={totals.assessed} format={(v) => fmt(v)} />
-                </p>
-                <p className="text-[10px] text-white/60 font-medium mt-0.5">client valuation</p>
-              </div>
-              <div className="relative overflow-hidden rounded-xl stat-gradient-emerald text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Balance</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={totals.balance} format={(v) => fmt(v)} />
-                </p>
-                <p className="text-[10px] text-white/60 font-medium mt-0.5">remaining</p>
-              </div>
-              <div className="relative overflow-hidden rounded-xl stat-gradient-violet text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">Variations</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={variationsTotal} format={(v) => fmt(v)} />
-                </p>
-                <p className="text-[10px] text-white/60 font-medium mt-0.5">{variationSummaryItems.length} VOs</p>
-              </div>
-              <div className="relative overflow-hidden rounded-xl stat-gradient-amber text-white px-3 py-3 shadow-sm">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-wide">% Complete</p>
-                <p className="text-lg sm:text-xl font-extrabold tabular-nums mt-0.5">
-                  <AnimatedNumber value={selectedAfp.contract_value > 0 ? Math.min(100, Math.round((totals.agreed / selectedAfp.contract_value) * 100)) : 0} format={(v) => Math.round(v) + '%'} />
-                </p>
-                <p className="text-[10px] text-white/60 font-medium mt-0.5">of contract</p>
-              </div>
-            </div>
-            {selectedAfp.contract_value > 0 && (() => {
-              const pct = Math.min(100, Math.round((totals.agreed / selectedAfp.contract_value) * 100));
-              return (
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wide">Contract Progress</span>
-                    <span className="text-[10px] font-bold text-slate-600 tabular-nums">{pct}% of {fmt(selectedAfp.contract_value)}</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#2E5A1A] to-[#8DC63F] rounded-full transition-all duration-500"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* Data freshness + auto-save indicator */}
-          <div className="px-4 py-2 border-t border-slate-100 flex items-center gap-3 flex-wrap">
-            {/* Auto-save status */}
-            {saveStatus !== 'idle' && (
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                saveStatus === 'saving' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-              }`}>
-                {saveStatus === 'saving' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-                {saveStatus === 'saving' ? 'Saving…' : 'Saved'}
-              </span>
             )}
-            <span className="text-[10px] text-slate-400 uppercase font-semibold">Data Sources:</span>
-            {Object.entries(SOURCE_META).map(([key, meta]) => {
-              const count = freshness[key] || 0;
-              if (key === 'manual' && count === 0) return null;
-              return (
-                <span key={key} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${meta.bg} ${meta.color}`}>
-                  <meta.icon className="w-3 h-3" /> {meta.label}: {count}
+            {selectedAfp.status === 'draft' && (
+              <button onClick={handleReprice} disabled={repricing}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-xs font-bold transition active:scale-95 disabled:opacity-50">
+                {repricing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">Re-price</span>
+                <span className="sm:hidden">Re-price</span>
+              </button>
+            )}
+            {selectedAfp.status === 'draft' && (
+              <button onClick={handleSubmitForReview} disabled={submittingReview}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-amber-500 to-amber-700 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50">
+                {submittingReview ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ClipboardCheck className="w-3.5 h-3.5" />}
+                Submit for Review
+              </button>
+            )}
+            {selectedAfp.status === 'pending_review' && (
+              <button onClick={handleApprove} disabled={approving}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50">
+                {approving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                Approve
+              </button>
+            )}
+            {selectedAfp.status === 'approved' && (
+              <button onClick={handlePushToCVR} disabled={pushing}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm disabled:opacity-50">
+                {pushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ArrowRight className="w-3.5 h-3.5" />}
+                Push to CVR
+              </button>
+            )}
+            <AFPExportButtons afp={selectedAfp} job={job} />
+            <button onClick={() => setShowUpload(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm">
+              <Upload className="w-3.5 h-3.5" /> Upload AFP
+            </button>
+            <button onClick={() => setShowDatesEditor(true)}
+              className="inline-flex items-center gap-1 px-3 py-2 bg-slate-50 text-slate-500 hover:bg-slate-100 rounded-xl text-xs font-bold transition active:scale-95 border border-slate-200">
+              <Calendar className="w-3.5 h-3.5" /> Edit Dates
+            </button>
+
+            {/* Auto-save + freshness indicators */}
+            <div className="flex items-center gap-2 ml-auto flex-wrap">
+              {saveStatus !== 'idle' && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  saveStatus === 'saving' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                }`}>
+                  {saveStatus === 'saving' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  {saveStatus === 'saving' ? 'Saving…' : 'Saved'}
                 </span>
-              );
-            })}
-            {selectedAfp.last_populated_at && (
-              <span className="text-[10px] text-slate-400 ml-auto">
-                Last refreshed {new Date(selectedAfp.last_populated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-              </span>
-            )}
+              )}
+              {selectedAfp.last_populated_at && (
+                <span className="text-[10px] text-slate-400">
+                  Refreshed {new Date(selectedAfp.last_populated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
+            </div>
           </div>
         </div>
+        </>
       )}
 
       {/* ── AFP Tab Navigation ── */}
