@@ -34,6 +34,7 @@ import FieldShell from '@/components/field/FieldShell';
 import TodayPage from './pages/field/TodayPage';
 import UpcomingPage from './pages/field/UpcomingPage';
 import MorePage from './pages/field/MorePage';
+import MyDutiesPage from './pages/field/MyDutiesPage';
 import SubcontractorDashboard from './pages/SubcontractorDashboard';
 import ClientPortal from './pages/ClientPortal';
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -130,12 +131,14 @@ const AuthenticatedApp = () => {
             <Route path="/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
             <Route path="/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
             <Route path="/more" element={<RouteGuard><MorePage /></RouteGuard>} />
+            <Route path="/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />
             <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
             <Route path="/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
             {/* Mobile /m/ tree — same components, FieldShell handles mobile layout */}
             <Route path="/m/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
             <Route path="/m/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
             <Route path="/m/more" element={<RouteGuard><MorePage /></RouteGuard>} />
+            <Route path="/m/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />
             <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
             <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
           </Route>

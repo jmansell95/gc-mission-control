@@ -278,6 +278,29 @@
     "safety_events_last_sync": {
       "type": "string",
       "description": "ISO timestamp of the last Geotab safety events sync (Exception events pull)."
+    },
+    "check_frequency": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "daily",
+        "weekly"
+      ],
+      "default": "auto",
+      "description": "Vehicle check frequency for the ShiftWizard Daily Checks step. 'auto' = system detects from weekly mileage (300+ mi/week \u2192 daily, otherwise weekly). 'daily' = manager override to force daily checks. 'weekly' = manager override to force weekly checks regardless of mileage."
+    },
+    "check_frequency_override": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a manager has manually overridden the check frequency (check_frequency is not 'auto'). When false, the system auto-detects from Geotab/GPS mileage data."
+    },
+    "weekly_mileage_miles": {
+      "type": "number",
+      "description": "Calculated weekly mileage in miles (Mon\u2013Sun). Updated by the getMyDuties function on each call. Used to auto-determine if daily checks are needed (300+ mi/week threshold)."
+    },
+    "weekly_mileage_calculated_at": {
+      "type": "string",
+      "description": "ISO timestamp of when weekly_mileage_miles was last calculated."
     }
   },
   "required": [

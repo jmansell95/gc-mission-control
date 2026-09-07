@@ -1,13 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2, ClipboardCheck } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2, ClipboardCheck, Car } from 'lucide-react';
 import { format } from 'date-fns';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
 import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
 import SafetyFormsList from '@/components/staff/SafetyFormsList';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
+import { useVehicleCheckFrequency } from '@/hooks/useVehicleCheckFrequency';
 
 /**
  * DailyChecksStep — the pre-work checklist step of the ShiftWizard.
@@ -29,6 +30,10 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
     assignmentId: assignment?.id,
     staffId: staff?.id,
     jobDate: assignment?.assigned_date,
+  });
+  const { frequency: vehicleCheckFrequency, weeklyCheckDone, daysSinceLastCheck, weeklyMileage } = useVehicleCheckFrequency({
+    vehicleId: assignment?.vehicle_id,
+    staffId: staff?.id,
   });
 
   // Fetch the daily checklist config
@@ -74,7 +79,11 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
   const requiredItems = items.filter(i => i.required !== false);
   const allRequiredChecked = requiredItems.every(i => checkedItems[i.id]);
   // Gate: when connected, the vehicle check must be verified by Mitti.
-  const vehicleGatePassed = isConnected ? vehicleVerified : true;
+  // Exception: when the vehicle's effective frequency is 'weekly' and a check
+  // was completed within the last 7 days, the vehicle check is skippable
+  // (green badge shown) even without today's Mitti verification.
+  const isWeeklyCheckDone = vehicleCheckFrequency === 'weekly' && weeklyCheckDone;
+  const vehicleGatePassed = isWeeklyCheckDone || (isConnected ? vehicleVerified : true);
   const allDone = allRequiredChecked && vehicleGatePassed;
 
   const toggleItem = (id) => {
@@ -104,8 +113,24 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
   return (
     <div className="space-y-4 px-5 py-2">
       {/* Vehicle check — verified live by Mitti when connected, otherwise a
-          prominent "do this before you leave" prompt with manual confirmation. */}
-      {isConnected ? (
+           prominent "do this before you leave" prompt with manual confirmation.
+           When the vehicle's frequency is 'weekly' and a check was done within
+           the last 7 days, show a green "weekly check done" badge instead. */}
+      {isWeeklyCheckDone ? (
+        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-emerald-900">Weekly vehicle check complete</p>
+            <p className="text-xs text-emerald-700 mt-0.5">
+              {daysSinceLastCheck != null ? `${daysSinceLastCheck} day${daysSinceLastCheck !== 1 ? 's' : ''} ago` : 'Completed this week'}
+              {weeklyMileage > 0 && ` · ${weeklyMileage} mi this week`}
+            </p>
+          </div>
+          <span className="text-[10px] font-bold text-emerald-600 px-2 py-1 rounded-full bg-emerald-100">WEEKLY</span>
+        </div>
+      ) : isConnected ? (
         vehicleVerified ? (
           <MittiVerificationBadge type="vehicle" verified verifiedAt={vehicleCheckAt} url={vehicleCheckUrl} />
         ) : (
@@ -116,6 +141,14 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
         )
       ) : (
         <MittiSafetyPrompt type="vehicle" url={vehicleCheckUrl} />
+      )}
+      {vehicleCheckFrequency === 'daily' && !isWeeklyCheckDone && (
+        <div className="flex items-center gap-2.5 bg-indigo-50 border border-indigo-100 rounded-xl px-3.5 py-2.5">
+          <Car className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+          <p className="text-xs text-indigo-800 font-medium">
+            Daily checks active{weeklyMileage > 0 ? ` · ${weeklyMileage} mi this week (300+ threshold)` : ' · high mileage vehicle'}
+          </p>
+        </div>
       )}
 
       {/* Admin-configured safety form buttons for this step (big tappable buttons) */}

@@ -32,6 +32,7 @@ import OfflineBanner from '@/components/field/OfflineBanner';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import StartMyDayHero from '@/components/staff/StartMyDayHero';
+import DutiesSummaryCard from '@/components/staff/DutiesSummaryCard';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
@@ -420,6 +421,10 @@ export default function TodayPage() {
         )}
 
         <StaffAlerts isOnline={ctx.isOnline} staff={staff} />
+
+        {staff?.id && !staff?.is_admin && (
+          <DutiesSummaryCard staffId={staff.id} enabled={!!nextTodayAssignment} />
+        )}
 
         {(() => {
           const myItems = myCompliance.filter(i => i.reference_id === staff?.id || i.reference_name === staff?.name);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid } from 'lucide-react';
+import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList } from 'lucide-react';
 import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
@@ -35,6 +35,12 @@ export default function MorePage() {
       iconBg: 'bg-gradient-to-br from-blue-50 to-blue-100/50', iconColor: 'text-blue-600', textClass: 'text-slate-800',
     });
   }
+  tiles.push({
+    label: 'My Duties', icon: ClipboardList,
+    onClick: () => navigate('/my-duties'),
+    className: 'bg-white border border-slate-200/80 shadow-sm shadow-slate-900/[0.04] hover:border-[#2E5A1A]',
+    iconBg: 'bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10', iconColor: 'text-[#2E5A1A]', textClass: 'text-slate-800',
+  });
   tiles.push({
     label: 'Profile', icon: UserCircle,
     onClick: () => navigate('/staff-profile'),
