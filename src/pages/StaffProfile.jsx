@@ -168,7 +168,7 @@ export default function StaffProfile() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen page-bg-vibrant">
+      <div className="flex items-center justify-center min-h-[70vh]">
         <div className="w-12 h-12 border-4 border-slate-200/80 border-t-[#2E5A1A] rounded-full animate-spin"></div>
       </div>
     );
@@ -176,8 +176,8 @@ export default function StaffProfile() {
 
   if (!staff) {
     return (
-      <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
-        <div className="text-center max-w-sm insight-card rounded-3xl p-8">
+      <div className="flex items-center justify-center min-h-[70vh] px-6">
+        <div className="text-center max-w-sm field-card p-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center mx-auto mb-4">
             <HardHat className="w-8 h-8 text-slate-400" />
           </div>
@@ -199,7 +199,9 @@ export default function StaffProfile() {
       subtitle={`${staff.name}${staff.team?.name ? ' · ' + staff.team.name : ''}`}
       icon={UserCircle}
       fixedHeader
+      transparent
       onBack={() => navigate(-1)}
+      contentClassName="pb-24"
       actions={
         <button onClick={() => setShowEditDrawer(true)} type="button"
           className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center transition active:scale-95 touch-manipulation hover:shadow-md">

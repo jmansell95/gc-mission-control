@@ -30,6 +30,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import PrehistoricImportPage from './components/import/PrehistoricImportPage';
 import StaffDashboard from './pages/StaffDashboard';
 import StaffProfile from './pages/StaffProfile';
+import FieldShell from '@/components/field/FieldShell';
+import TodayPage from './pages/field/TodayPage';
+import UpcomingPage from './pages/field/UpcomingPage';
+import MorePage from './pages/field/MorePage';
 import SubcontractorDashboard from './pages/SubcontractorDashboard';
 import ClientPortal from './pages/ClientPortal';
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -120,18 +124,25 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/scanner" element={<MobileFieldRedirect><RouteGuard><AssetScannerPage /></RouteGuard></MobileFieldRedirect>} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
-          {/* Staff pages — full-screen, no admin header bar; they render their own mobile-first headers */}
-          <Route path="/staff-schedule" element={<MobileFieldRedirect><RouteGuard><StaffDashboard /></RouteGuard></MobileFieldRedirect>} />
-          <Route path="/staff-profile" element={<MobileFieldRedirect><RouteGuard><StaffProfile /></RouteGuard></MobileFieldRedirect>} />
-          <Route path="/deliveries" element={<MobileFieldRedirect><RouteGuard><DeliveryDashboard /></RouteGuard></MobileFieldRedirect>} />
-          {/* Mobile field crew routes — dedicated /m/ tree for phones, full-screen shell */}
-          <Route element={<MobileFieldShell />}>
-            <Route path="/m/staff-schedule" element={<RouteGuard><StaffDashboard /></RouteGuard>} />
-            <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
-            <Route path="/m/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
+          {/* Field crew routes — shared FieldShell with persistent bottom bar, fully responsive */}
+          <Route element={<FieldShell />}>
+            <Route path="/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
+            <Route path="/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
+            <Route path="/more" element={<RouteGuard><MorePage /></RouteGuard>} />
+            <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
+            <Route path="/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
+            {/* Mobile /m/ tree — same components, FieldShell handles mobile layout */}
+            <Route path="/m/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
+            <Route path="/m/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
+            <Route path="/m/more" element={<RouteGuard><MorePage /></RouteGuard>} />
             <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
+            <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
+          </Route>
+          {/* Deliveries — separate route (not one of the 5 main field tabs) */}
+          <Route path="/deliveries" element={<MobileFieldRedirect><RouteGuard><DeliveryDashboard /></RouteGuard></MobileFieldRedirect>} />
+          <Route element={<MobileFieldShell />}>
+            <Route path="/m/deliveries" element={<RouteGuard><DeliveryDashboard /></RouteGuard>} />
           </Route>
           <Route path="/help" element={<HelpGuide audience="office" />} />
           <Route path="/help-field" element={<HelpGuide audience="field" />} />
