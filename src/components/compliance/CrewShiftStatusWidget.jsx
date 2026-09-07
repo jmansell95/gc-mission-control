@@ -38,10 +38,11 @@ export default function CrewShiftStatusWidget() {
   const [search, setSearch] = useState('');
   const [jobFilter, setJobFilter] = useState('all');
   const [expandedId, setExpandedId] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const queryClient = useQueryClient();
   const { activeDivisionId, activeDivision } = useDivision();
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayStr = selectedDate;
 
   // Fetch division check config
   const { data: checkConfig, isLoading: configLoading } = useQuery({
@@ -61,7 +62,7 @@ export default function CrewShiftStatusWidget() {
 
   // Fetch today's job assignments
   const { data: assignments = [], isLoading } = useQuery({
-    queryKey: ['crew-shift-status', todayStr, activeDivisionId],
+    queryKey: ['crew-shift-status', selectedDate, activeDivisionId],
     queryFn: async () => {
       let list = await base44.entities.RotaAssignment.filter({ assigned_date: todayStr });
       list = list.filter(a => !a.assignment_type || a.assignment_type === 'job');
@@ -96,10 +97,10 @@ export default function CrewShiftStatusWidget() {
   // Realtime subscription
   useEffect(() => {
     const unsub = base44.entities.RotaAssignment.subscribe(() => {
-      queryClient.invalidateQueries({ queryKey: ['crew-shift-status', todayStr, activeDivisionId] });
+      queryClient.invalidateQueries({ queryKey: ['crew-shift-status', selectedDate, activeDivisionId] });
     });
     return () => { if (unsub) unsub(); };
-  }, [queryClient, todayStr, activeDivisionId]);
+  }, [queryClient, selectedDate, activeDivisionId]);
 
   // Build enriched crew rows with full check breakdown
   const crewRows = useMemo(() => {
@@ -216,8 +217,8 @@ export default function CrewShiftStatusWidget() {
     return (
       <HubEmptyState
         icon={Users}
-        title="No crew on rota today"
-        description="Crew members with job assignments for today will appear here with their full check breakdown."
+        title="No crew on rota for this date"
+        description="Crew members with job assignments for the selected date will appear here with their full check breakdown."
       />
     );
   }
@@ -268,12 +269,20 @@ export default function CrewShiftStatusWidget() {
       <HubCard
         icon={Activity}
         title="Crew Shift Status"
-        subtitle={`${activeDivision?.name || 'All divisions'} · ${format(new Date(), 'EEEE dd MMM')}`}
+        subtitle={`${activeDivision?.name || 'All divisions'} · ${format(new Date(selectedDate), 'EEEE dd MMM yyyy')}`}
         tone="brand"
         action={
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-            {summary.working}/{summary.total} working
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              {summary.working}/{summary.total} working
+            </span>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={e => setSelectedDate(e.target.value)}
+              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-[#2E5A1A]"
+            />
+          </div>
         }
       >
         {/* Filter bar */}
