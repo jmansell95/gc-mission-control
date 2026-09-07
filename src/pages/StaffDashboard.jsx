@@ -274,18 +274,31 @@ export default function StaffDashboard() {
   // Confirms leaving site: records the reason on the assignment and marks the
   // staff member as having left. The job stays open ('started') for up to 5
   // hours so they can enter their travel-home time and submit their timesheet.
-  const handleEarlyLeaveConfirm = async ({ reason, note }) => {
+  const handleEarlyLeaveConfirm = async ({ reason, note, leave_time, travel_minutes }) => {
     const assignment = earlyLeaveAssignment;
     if (!assignment) return;
     setEarlyLeaveAssignment(null);
     try {
+      let leftAt = new Date();
+      if (leave_time) {
+        const [h, m] = leave_time.split(':').map(Number);
+        leftAt.setHours(h, m, 0, 0);
+      }
+      const needsApproval = reason && (
+        reason.toLowerCase().includes('travel') || reason.toLowerCase().includes('client-approved')
+      );
+      const updates = {
+        early_leave_reason: reason,
+        early_leave_note: note,
+        left_site_at: leftAt.toISOString(),
+      };
+      if (needsApproval) updates.early_leave_status = 'pending';
+      if (travel_minutes && reason?.toLowerCase().includes('friday')) {
+        updates.friday_travel_home_minutes = travel_minutes;
+      }
       const res = await base44.functions.invoke('updateMyAssignment', {
         assignmentId: assignment.id,
-        updates: {
-          early_leave_reason: reason,
-          early_leave_note: note,
-          left_site_at: new Date().toISOString(),
-        },
+        updates,
       });
       if (res.data?.error) throw new Error(res.data.error);
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });

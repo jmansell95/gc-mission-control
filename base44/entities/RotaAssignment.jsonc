@@ -103,6 +103,37 @@
       "type": "string",
       "description": "Additional note explaining an early departure (e.g. appointment time, symptoms, client contact who approved it)."
     },
+    "early_leave_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "description": "Approval status for an early-leave request. 'pending' = staff has requested to leave early (e.g. Friday travel home, client-approved early finish) and is awaiting manager sign-off. 'approved' = manager has approved with signature. 'rejected' = manager rejected the request. Blank/null = no early-leave request submitted."
+    },
+    "early_leave_approved_by": {
+      "type": "string",
+      "description": "Name of the manager who approved or rejected the early-leave request."
+    },
+    "early_leave_approved_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the manager approved or rejected the early-leave request."
+    },
+    "early_leave_approval_signature": {
+      "type": "string",
+      "description": "Base64 PNG data URL of the manager's drawn signature approving the early-leave request. Captured via the SignaturePad component so there is a signed audit trail for the reduced hours."
+    },
+    "monday_travel_to_site_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Travel time in minutes from home to site on Monday (long-distance travel after the weekend). Logged by the field staff member and incorporated into their 9-hour day. Shown on the timesheet as payable travel time."
+    },
+    "friday_travel_home_minutes": {
+      "type": "number",
+      "default": 0,
+      "description": "Travel time in minutes from site/digs to home on Friday (long-distance travel home for the weekend). Logged by the field staff member and incorporated into their 9-hour day. Shown on the timesheet as payable travel time."
+    },
     "briefing_signed": {
       "type": "boolean",
       "default": false,
@@ -198,7 +229,7 @@
     "inter_site_travel_minutes": {
       "type": "number",
       "default": 0,
-      "description": "Total minutes spent travelling between different job sites during this assignment's day (e.g. Site A → Site B). Auto-calculated by the geofence engine from inter-site transitions. Chargeable to the client."
+      "description": "Total minutes spent travelling between different job sites during this assignment's day (e.g. Site A \u2192 Site B). Auto-calculated by the geofence engine from inter-site transitions. Chargeable to the client."
     },
     "end_of_day_signature_data_url": {
       "type": "string",
@@ -206,7 +237,7 @@
     },
     "end_of_day_signed_at": {
       "type": "string",
-      "description": "ISO timestamp of when the crew member signed the end-of-day declaration. Gates timesheet submission — the shift cannot be submitted without this signature."
+      "description": "ISO timestamp of when the crew member signed the end-of-day declaration. Gates timesheet submission \u2014 the shift cannot be submitted without this signature."
     }
   },
   "required": [

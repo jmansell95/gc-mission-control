@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play, Car } from 'lucide-react';
 import { format } from 'date-fns';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
@@ -14,6 +14,7 @@ import { complianceDaysUntil } from '@/utils/complianceDate';
 import OutsideSiteHours from '@/components/staff/OutsideSiteHours';
 import ShiftWizard from '@/components/staff/ShiftWizard';
 import EarlyLeaveModal from '@/components/staff/EarlyLeaveModal';
+import TravelTimeModal from '@/components/staff/TravelTimeModal';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import NextJobPrompt from '@/components/staff/NextJobPrompt';
 import AdHocVisitModal from '@/components/staff/AdHocVisitModal';
@@ -65,6 +66,9 @@ export default function TodayPage() {
   const [showSafetyChecklist, setShowSafetyChecklist] = useState(false);
   const [safetyChecklistAssignment, setSafetyChecklistAssignment] = useState(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
+  const [showTravelModal, setShowTravelModal] = useState(false);
+  const [travelAssignment, setTravelAssignment] = useState(null);
+  const [travelDayType, setTravelDayType] = useState('monday');
 
   // ── Handlers (preserved exactly from StaffDashboard) ──
   const handleStartJob = async (assignmentId) => {
@@ -125,14 +129,33 @@ export default function TodayPage() {
     setEarlyLeaveAssignment(assignment);
   };
 
-  const handleEarlyLeaveConfirm = async ({ reason, note }) => {
+  const handleEarlyLeaveConfirm = async ({ reason, note, leave_time, travel_minutes }) => {
     const assignment = earlyLeaveAssignment;
     if (!assignment) return;
     setEarlyLeaveAssignment(null);
     try {
+      // Build the left_site_at timestamp from the leave_time if provided (HH:MM today)
+      let leftAt = new Date();
+      if (leave_time) {
+        const [h, m] = leave_time.split(':').map(Number);
+        leftAt.setHours(h, m, 0, 0);
+      }
+      // Reasons that require manager approval with signature
+      const needsApproval = reason && (
+        reason.toLowerCase().includes('travel') || reason.toLowerCase().includes('client-approved')
+      );
+      const updates = {
+        early_leave_reason: reason,
+        early_leave_note: note,
+        left_site_at: leftAt.toISOString(),
+      };
+      if (needsApproval) updates.early_leave_status = 'pending';
+      if (travel_minutes && reason?.toLowerCase().includes('friday')) {
+        updates.friday_travel_home_minutes = travel_minutes;
+      }
       const res = await base44.functions.invoke('updateMyAssignment', {
         assignmentId: assignment.id,
-        updates: { early_leave_reason: reason, early_leave_note: note, left_site_at: new Date().toISOString() },
+        updates,
       });
       if (res.data?.error) throw new Error(res.data.error);
       queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });

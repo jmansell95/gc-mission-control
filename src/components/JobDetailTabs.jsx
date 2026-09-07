@@ -19,6 +19,8 @@ import JobWorkLog from '@/components/JobWorkLog';
 import MilestoneManager from '@/components/MilestoneManager';
 import JobScheduleOverview from '@/components/JobScheduleOverview';
 import PermanentCrewCard from '@/components/jobs/PermanentCrewCard';
+import JobRotaManager from '@/components/jobs/JobRotaManager';
+import EarlyLeaveApprovalCard from '@/components/jobs/EarlyLeaveApprovalCard';
 import DelayLogManager from '@/components/DelayLogManager';
 import JobHazardMap from '@/components/JobHazardMap';
 import JobContextView from '@/components/JobContextView';
@@ -26,6 +28,7 @@ import GeotechDataTab from '@/components/geotech/GeotechDataTab';
 import TabStatRibbon from '@/components/TabStatRibbon';
 import JobFinancialsTab from '@/components/afp/JobFinancialsTab';
 import ProcurementPipeline from '@/components/enterprise/ProcurementPipeline';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
  * JobDetailTabs — consolidated, progressive-disclosure tab structure.
@@ -53,6 +56,8 @@ export default function JobDetailTabs({
   const [activitySub, setActivitySub] = useState('logs');
   const [docsSub, setDocsSub] = useState('photos');
   const [siteActivitySelectedLogId, setSiteActivitySelectedLogId] = useState(null);
+  const { user: authUser } = useAuth();
+  const isManager = authUser?.role === 'admin';
 
   // Bidirectional deep-link: when a manager clicks "Open on Job Site Activity"
   // from the Investigation Hub, the target log id is stashed in sessionStorage.
@@ -171,6 +176,7 @@ export default function JobDetailTabs({
         />
         {scheduleSub === 'daily' ? (
           <>
+            {isManager && <EarlyLeaveApprovalCard job={job} rotas={rotas} allStaff={allStaff} />}
             <TabStatRibbon
               icon={CalendarDays}
               title="Schedule Summary"
@@ -183,6 +189,7 @@ export default function JobDetailTabs({
             />
             <PermanentCrewCard job={job} />
             <JobScheduleOverview job={job} primaryType={primaryType} assignedStaff={assignedStaff} rotas={rotas} allStaff={allStaff} vehicles={vehicles} rotasByDate={rotasByDate} sortedDates={sortedDates} />
+            {isManager && <JobRotaManager job={job} allStaff={allStaff} vehicles={vehicles} rotas={rotas} />}
           </>
         ) : (
           <JobHotelBookings job={job} assignedStaff={assignedStaff} allStaff={allStaff} />

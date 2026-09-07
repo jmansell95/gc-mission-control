@@ -37,6 +37,9 @@ const ALLOWED_FIELDS = new Set([
   'driver_checked',
   'driver_checked_by',
   'driver_checked_at',
+  'early_leave_status',
+  'monday_travel_to_site_minutes',
+  'friday_travel_home_minutes',
 ]);
 
 export default async function(req: Request): Promise<Response> {

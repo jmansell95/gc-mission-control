@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, DoorOpen, Clock, CheckCircle2, FileText } from 'lucide-react';
+import { X, DoorOpen, Clock, CheckCircle2, FileText, Car } from 'lucide-react';
 
 const DEFAULT_REASONS = [
+  'Friday Travel Home (Long Distance)',
+  'Monday Travel to Site (Long Distance)',
+  'Client-Approved Early Finish',
   'Weather — unsafe conditions',
   'Doctor/Dentist Appointment',
   'Illness / Feeling Unwell',
-  'Client-Approved Early Finish',
   'Family Emergency',
   'Vehicle Breakdown',
   'Other',
 ];
+
+// Reasons that trigger manager approval workflow
+const APPROVAL_REASONS = new Set([
+  'Friday Travel Home (Long Distance)',
+  'Monday Travel to Site (Long Distance)',
+  'Client-Approved Early Finish',
+]);
 
 function nowHHMM() {
   const d = new Date();
@@ -26,7 +35,11 @@ export default function EarlyLeaveModal({ open, onClose, onConfirm, jobName, def
   const [customReason, setCustomReason] = useState('');
   const [note, setNote] = useState('');
   const [leaveTime, setLeaveTime] = useState('');
+  const [travelHours, setTravelHours] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const isTravelReason = reason === 'Friday Travel Home (Long Distance)';
+  const travelMinutes = isTravelReason && travelHours ? Math.round(parseFloat(travelHours) * 60) : 0;
 
   // Auto-populate the time when the modal opens
   useEffect(() => {
@@ -40,9 +53,9 @@ export default function EarlyLeaveModal({ open, onClose, onConfirm, jobName, def
   const handleConfirm = async () => {
     if (!canConfirm) return;
     setSaving(true);
-    await onConfirm({ reason: finalReason, note: note.trim() || null, leave_time: leaveTime });
+    await onConfirm({ reason: finalReason, note: note.trim() || null, leave_time: leaveTime, travel_minutes: travelMinutes || null });
     setSaving(false);
-    setReason(''); setCustomReason(''); setNote('');
+    setReason(''); setCustomReason(''); setNote(''); setTravelHours('');
   };
 
   return (
@@ -81,6 +94,11 @@ export default function EarlyLeaveModal({ open, onClose, onConfirm, jobName, def
                 <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-900 leading-relaxed">
                   Please record your reason for leaving site. This is saved on your timesheet for your manager to review.
+                  {APPROVAL_REASONS.has(reason) && (
+                    <span className="block mt-1.5 font-semibold text-amber-700">
+                      ⚑ This reason will be sent to your manager for approval with their signature.
+                    </span>
+                  )}
                 </p>
               </div>
 
@@ -116,6 +134,25 @@ export default function EarlyLeaveModal({ open, onClose, onConfirm, jobName, def
                   <label className="block text-xs font-medium text-slate-600 mb-1.5">Custom reason</label>
                   <input type="text" value={customReason} onChange={e => setCustomReason(e.target.value)} placeholder="Describe the reason…"
                     className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 bg-white" />
+                </div>
+              )}
+
+              {isTravelReason && (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl px-3.5 py-3">
+                  <label className="block text-xs font-semibold text-blue-700 uppercase mb-1.5 flex items-center gap-1">
+                    <Car className="w-3.5 h-3.5" /> Travel time home (hours)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.25"
+                    min="0"
+                    max="8"
+                    value={travelHours}
+                    onChange={e => setTravelHours(e.target.value)}
+                    placeholder="e.g. 2 for 2 hours travel home"
+                    className="w-full px-3 py-2.5 border border-blue-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 bg-white"
+                  />
+                  <p className="text-[11px] text-blue-600 mt-1.5">This travel time is incorporated into your 9-hour day and shown on your timesheet as payable travel time.</p>
                 </div>
               )}
 
