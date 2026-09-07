@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift, Bot, Smartphone } from 'lucide-react';
+import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ClipboardCheck, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift, Bot } from 'lucide-react';
 import { normalizePermissions } from '@/utils/permissions';
 
 // Items that have migrated to operational hubs (Financial Control, Compliance,
@@ -48,7 +48,6 @@ export const settingsGroups = [
     label: 'Integrations',
     items: [
       { id: 'geotab-sync', label: 'Geotab GPS', icon: Satellite, desc: 'Live vehicle locations + specs via Geotab API — connect this stream\'s own Geotab account' },
-      { id: 'phone-gps', label: 'Phone GPS Tracking', icon: Smartphone, desc: 'FREE background GPS tracking for field crew via GPSLogger / OwnTracks — no Capacitor build needed. Tracks even with app closed', external: '/background-tracking-setup', roles: ['admin'] },
       { id: 'holman-sync', label: 'Holman Fleet', icon: Radio, desc: 'MOT, service dates & mileage from Holman fleet management — this stream\'s account' },
       { id: 'asset-panda', label: 'Asset Panda', icon: Database, desc: 'Live stock levels, warehouse locations & asset matching for this stream' },
       { id: 'bob-hr', label: 'Bob HR (Hibob)', icon: Users, desc: 'Bidirectional time-off sync with Bob HR for this stream\'s staff' },
