@@ -8,8 +8,8 @@ import {
   TrendingUp, FileX, Clock, Users, Siren, Leaf,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
+import { COMPLIANCE_HELP_TOPICS, COMPLIANCE_ONBOARDING, COMPLIANCE_QUICK_LINKS } from '@/components/compliance/complianceHubContent';
 import SafetyCultureGate from '@/components/safety/SafetyCultureGate';
 import SafetyCultureCheckHub from '@/components/safety/SafetyCultureCheckHub';
 import IncidentReporter from '@/components/safety/IncidentReporter';
@@ -20,7 +20,6 @@ import SiteReadinessGateWidget from '@/components/dashboard/SiteReadinessGateWid
 import CrewCertificationPulseWidget from '@/components/dashboard/CrewCertificationPulseWidget';
 import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget';
 import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
 import RunReportButton from '@/components/reports/RunReportButton';
 import { resolveRole } from '@/utils/access';
 
@@ -119,9 +118,12 @@ export default function CompliancePage() {
 
   return (
     <HubShell
+      hubKey="compliance"
       icon={ShieldAlert}
+      eyebrow="Compliance Hub"
       title="Safety & Compliance"
       subtitle="Mitti integration pending — configure in Settings to sync audits & incidents"
+      breadcrumbs={[{ label: 'Compliance Hub' }]}
       actions={
         <div className="flex items-center gap-2">
           <RunReportButton hub="compliance" />
@@ -129,26 +131,26 @@ export default function CompliancePage() {
             href={SC_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition active:scale-95"
+            className="inline-flex items-center gap-2 h-9 px-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-50 transition active:scale-95"
           >
             <ExternalLink className="w-3.5 h-3.5" /> Mitti
           </a>
         </div>
       }
-      kpiStrip={
-        <HubStatsBar tiles={[
-          { icon: AlertTriangle, label: 'Open Incidents', value: complianceKpis.openIncidents, sublabel: 'Needs attention', color: complianceKpis.openIncidents > 0 ? 'rose' : 'emerald' },
-          { icon: FileX, label: 'Expired Certs', value: complianceKpis.expired, sublabel: 'Overdue', color: complianceKpis.expired > 0 ? 'rose' : 'emerald' },
-          { icon: Clock, label: 'Expiring Soon', value: complianceKpis.expiringSoon, sublabel: 'Within 30 days', color: complianceKpis.expiringSoon > 0 ? 'amber' : 'slate' },
-          { icon: Users, label: 'Active Staff', value: complianceKpis.totalStaff, sublabel: 'In scope', color: 'blue' },
-          { icon: HardHat, label: 'Toolbox Talks', value: complianceKpis.recentTalks, sublabel: 'Last 30 days', color: 'brand' },
-        ]} />
-      }
+      stats={[
+        { icon: AlertTriangle, label: 'Open Incidents', value: complianceKpis.openIncidents, sublabel: 'Needs attention', color: complianceKpis.openIncidents > 0 ? 'rose' : 'emerald' },
+        { icon: FileX, label: 'Expired Certs', value: complianceKpis.expired, sublabel: 'Overdue', color: complianceKpis.expired > 0 ? 'rose' : 'emerald' },
+        { icon: Clock, label: 'Expiring Soon', value: complianceKpis.expiringSoon, sublabel: 'Within 30 days', color: complianceKpis.expiringSoon > 0 ? 'amber' : 'slate' },
+        { icon: Users, label: 'Active Staff', value: complianceKpis.totalStaff, sublabel: 'In scope', color: 'blue' },
+        { icon: HardHat, label: 'Toolbox Talks', value: complianceKpis.recentTalks, sublabel: 'Last 30 days', color: 'brand' },
+      ]}
+      help={{ title: 'Compliance Hub — how it works', topics: COMPLIANCE_HELP_TOPICS }}
+      onboarding={COMPLIANCE_ONBOARDING}
+      quickLinks={COMPLIANCE_QUICK_LINKS}
       tabs={TABS.map(t => ({ id: t.id, label: t.label, icon: t.icon }))}
       activeTab={tab}
       onTabChange={handleTabChange}
     >
-      <HubJobBreadcrumb />
 
       {/* ── Sub-pills for the active tab ── */}
       <SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} />

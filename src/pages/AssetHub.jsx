@@ -37,13 +37,10 @@ import PredictiveMaintenanceWidget from '@/components/vehicles/PredictiveMainten
 import PredictiveInsightsWidget from '@/components/dashboard/PredictiveInsightsWidget';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/StateViews';
-import PageHeader from '@/components/PageHeader';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
-import HubQuickLinks from '@/components/hubs/HubQuickLinks';
-import RunReportButton from '@/components/reports/RunReportButton';
-import TabBar from '@/components/TabBar';
+import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
+import { ASSETS_HELP_TOPICS, ASSETS_ONBOARDING, ASSETS_QUICK_LINKS } from '@/components/assethub/assetsHubContent';
+import RunReportButton from '@/components/reports/RunReportButton';
 import { useAssetRealtime } from '@/hooks/useAssetRealtime';
 
 const CATEGORIES = [
@@ -165,47 +162,46 @@ export default function AssetHub() {
     return (a.name || '').toLowerCase().includes(q) || (a.serial_number || '').toLowerCase().includes(q);
   }), [equipment, category, compFilter, search, sourceFilter, depotOnly]);
 
-  return (
-    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
-      <PageHeader
-        icon={Boxes}
-        title="Assets Hub"
-        subtitle="Rigs, gear & PAT — Asset Panda synced + locally created. Warehouse consumables & internal stock."
-        actions={
-            <div className="flex items-center gap-2 flex-wrap">
-              <PrintWeightRegister assets={assets} />
-              <RunReportButton hub="assets" />
-              <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Scanner</button>
-              <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
-              <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
-              <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
-              <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm"><Weight className="w-3.5 h-3.5" /> Bulk Weights</button>
-              <button onClick={openAdd} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
-            </div>
-        }
-      />
-      <HubJobBreadcrumb />
-      <HubQuickLinks />
-      <TabBar
-        tabs={TAB_GROUPS.map(g => ({ id: g.id, label: g.label, icon: g.icon, badge: g.id === 'compliance' ? recertCount : undefined, count: g.id === 'inventory' ? assets.length : undefined }))}
-        activeTab={group}
-        onChange={handleGroupChange}
-      />
-      <SubPills active={view} onChange={setView} pills={activeGroup?.sub || []} />
+  const stats = assets.length > 0 ? [
+    { icon: Boxes, label: 'Total Assets', value: assets.length, sublabel: 'Excl. vehicles', color: 'brand' },
+    { icon: Database, label: 'Panda Synced', value: pandaCount, sublabel: 'From Asset Panda', color: 'amber' },
+    { icon: CircleDot, label: 'Locally Created', value: localCount, sublabel: 'Manual entries', color: 'blue' },
+    { icon: Cog, label: 'Rigs', value: categoryCounts.rig, sublabel: 'Drilling units', color: 'amber' },
+    { icon: Anchor, label: 'Lifting', value: categoryCounts.lifting, sublabel: 'LOLER gear', color: 'blue' },
+    { icon: Wrench, label: 'Machinery', value: categoryCounts.machinery, sublabel: 'Plant & equip', color: 'violet' },
+    { icon: ShieldCheck, label: 'Compliant', value: fleetCounts.compliant, sublabel: `${Math.round(fleetHealthPct)}% of known`, color: 'emerald' },
+    { icon: AlertTriangle, label: 'Needs Recert', value: recertCount, sublabel: 'Expired/expiring', color: recertCount > 0 ? 'rose' : 'slate' },
+  ] : [];
 
-      {/* Assets KPI Bar — quick category + compliance overview */}
-      {assets.length > 0 && (
-        <HubStatsBar tiles={[
-          { icon: Boxes, label: 'Total Assets', value: assets.length, sublabel: 'Excl. vehicles', color: 'brand' },
-          { icon: Database, label: 'Panda Synced', value: pandaCount, sublabel: 'From Asset Panda', color: 'amber' },
-          { icon: CircleDot, label: 'Locally Created', value: localCount, sublabel: 'Manual entries', color: 'blue' },
-          { icon: Cog, label: 'Rigs', value: categoryCounts.rig, sublabel: 'Drilling units', color: 'amber' },
-          { icon: Anchor, label: 'Lifting', value: categoryCounts.lifting, sublabel: 'LOLER gear', color: 'blue' },
-          { icon: Wrench, label: 'Machinery', value: categoryCounts.machinery, sublabel: 'Plant & equip', color: 'violet' },
-          { icon: ShieldCheck, label: 'Compliant', value: fleetCounts.compliant, sublabel: `${Math.round(fleetHealthPct)}% of known`, color: 'emerald' },
-          { icon: AlertTriangle, label: 'Needs Recert', value: recertCount, sublabel: 'Expired/expiring', color: recertCount > 0 ? 'rose' : 'slate' },
-        ]} />
-      )}
+  return (
+    <HubShell
+      hubKey="assets"
+      icon={Boxes}
+      eyebrow="Assets Hub"
+      title="Assets Hub"
+      subtitle="Rigs, gear & PAT — Asset Panda synced + locally created. Warehouse consumables & internal stock."
+      breadcrumbs={[{ label: 'Assets Hub' }]}
+      stats={stats}
+      help={{ title: 'Assets Hub — how it works', topics: ASSETS_HELP_TOPICS }}
+      onboarding={ASSETS_ONBOARDING}
+      quickLinks={ASSETS_QUICK_LINKS}
+      actions={
+        <div className="flex items-center gap-2 flex-wrap">
+          <PrintWeightRegister assets={assets} />
+          <RunReportButton hub="assets" />
+          <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Scanner</button>
+          <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
+          <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
+          <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
+          <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm"><Weight className="w-3.5 h-3.5" /> Bulk Weights</button>
+          <button onClick={openAdd} className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-[#2E5A1A] text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
+        </div>
+      }
+      tabs={TAB_GROUPS.map(g => ({ id: g.id, label: g.label, icon: g.icon, badge: g.id === 'compliance' ? recertCount : undefined, count: g.id === 'inventory' ? assets.length : undefined }))}
+      activeTab={group}
+      onTabChange={handleGroupChange}
+    >
+      <SubPills active={view} onChange={setView} pills={activeGroup?.sub || []} />
 
       {/* Tools tab — bulk upload / smart import / QR labels */}
       {view === 'tools' ? (
@@ -426,6 +422,6 @@ export default function AssetHub() {
       {showSmartImport && <SmartCertImport onClose={() => setShowSmartImport(false)} />}
       {showBulkQR && <BulkQRPrinter onClose={() => setShowBulkQR(false)} />}
       {showBulkWeight && <BulkWeightModal assets={assets} onClose={() => setShowBulkWeight(false)} />}
-    </div>
+    </HubShell>
   );
 }
