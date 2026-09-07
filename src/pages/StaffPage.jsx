@@ -4,10 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat, KeyRound, BarChart3, ClipboardList, UserCog, CalendarClock, CalendarX, Package } from 'lucide-react';
 import HubShell from '@/components/HubShell';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
+import { STAFF_HELP_TOPICS, STAFF_ONBOARDING, STAFF_QUICK_LINKS } from '@/components/staff/staffHubContent';
 import MissingRatesBanner from '@/components/staff/MissingRatesBanner';
 import PeopleDirectory from '@/components/staff/PeopleDirectory';
 import StaffListTab from '@/components/staff/StaffListTab';
@@ -100,23 +99,26 @@ export default function StaffPage() {
 
   return (
     <HubShell
+      hubKey="staff"
       icon={Users}
+      eyebrow="Staff Hub"
       title="People & Team Management"
       subtitle="Manage crew members, timesheets, clients, subcontractors and suppliers"
+      breadcrumbs={[{ label: 'Staff Hub' }]}
       actions={<RunReportButton hub="staff" />}
       tabs={TABS.map(t => ({ id: t.id, label: t.label, icon: t.icon }))}
       activeTab={tab}
       onTabChange={handleTabChange}
-      kpiStrip={staffStats.total > 0 ? (
-        <HubStatsBar tiles={[
-          { icon: Users, label: 'Total People', value: staffStats.total, sublabel: 'All records', color: 'brand' },
-          { icon: UserCheck, label: 'Active', value: staffStats.active, sublabel: 'Currently employed', color: 'emerald' },
-          { icon: HardHat, label: 'Subcontractors', value: staffStats.subcontractors, sublabel: 'External crews', color: 'amber' },
-          { icon: UsersRound, label: 'Agency', value: staffStats.agency, sublabel: 'Temp labour', color: 'blue' },
-        ]} />
-      ) : null}
+      stats={staffStats.total > 0 ? [
+        { icon: Users, label: 'Total People', value: staffStats.total, sublabel: 'All records', color: 'brand' },
+        { icon: UserCheck, label: 'Active', value: staffStats.active, sublabel: 'Currently employed', color: 'emerald' },
+        { icon: HardHat, label: 'Subcontractors', value: staffStats.subcontractors, sublabel: 'External crews', color: 'amber' },
+        { icon: UsersRound, label: 'Agency', value: staffStats.agency, sublabel: 'Temp labour', color: 'blue' },
+      ] : []}
+      help={{ title: 'Staff Hub — how it works', topics: STAFF_HELP_TOPICS }}
+      onboarding={STAFF_ONBOARDING}
+      quickLinks={STAFF_QUICK_LINKS}
     >
-      <HubJobBreadcrumb />
       <MissingRatesBanner />
 
       {hasSub && <SubPills active={renderTab} onChange={setSubTab} pills={activeTab.sub} />}

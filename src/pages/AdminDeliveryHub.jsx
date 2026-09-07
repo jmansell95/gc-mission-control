@@ -17,9 +17,8 @@ import DriverDayPlan from '@/components/admin/DriverDayPlan';
 import SampleRunDrawer from '@/components/geotech/SampleRunDrawer';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import HubShell from '@/components/HubShell';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import SubPills from '@/components/SubPills';
-import HubStatsBar from '@/components/dashboard/HubStatsBar';
+import { LOGISTICS_HELP_TOPICS, LOGISTICS_ONBOARDING, LOGISTICS_QUICK_LINKS } from '@/components/logistics/logisticsHubContent';
 
 const typeFilters = [
   { value: 'all', label: 'All Types', icon: Filter },
@@ -104,24 +103,29 @@ export default function AdminDeliveryHub() {
 
   return (
     <HubShell
+      hubKey="logistics"
       icon={Truck}
+      eyebrow="Logistics Hub"
       title="Logistics Hub"
       subtitle="Delivery board, collections, route optimisation & driver handovers"
+      breadcrumbs={[{ label: 'Logistics Hub' }]}
       tabs={[
         { id: 'operations', label: 'Operations', icon: LayoutGrid },
         { id: 'inventory', label: 'Inventory', icon: Boxes },
       ]}
       activeTab={group}
       onTabChange={(g) => { setGroup(g); setSub(g === 'operations' ? 'board' : 'goods-in'); }}
-      kpiStrip={<HubStatsBar tiles={[
+      stats={[
         { icon: Clock, label: 'Today', value: stats.today, color: 'amber' },
         { icon: PlayCircle, label: 'In Transit', value: stats.inTransit, color: 'blue' },
         { icon: CheckCircle2, label: 'Completed', value: stats.completed, color: 'emerald' },
         { icon: AlertTriangle, label: 'Overdue', value: stats.overdue, color: 'rose' },
         { icon: ArrowRightLeft, label: 'Handovers', value: stats.handovers, color: 'violet' },
-      ]} />}
+      ]}
+      help={{ title: 'Logistics Hub — how it works', topics: LOGISTICS_HELP_TOPICS }}
+      onboarding={LOGISTICS_ONBOARDING}
+      quickLinks={LOGISTICS_QUICK_LINKS}
     >
-      <HubJobBreadcrumb />
       <SubPills active={sub} onChange={setSub} pills={
         group === 'operations'
           ? [{ id: 'board', label: 'Delivery Board', icon: LayoutGrid }, { id: 'day-plan', label: 'Day Plan', icon: Clock }, { id: 'reconcile', label: 'Reconcile', icon: CheckCircle2 }]
