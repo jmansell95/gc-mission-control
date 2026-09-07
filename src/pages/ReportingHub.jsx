@@ -4,9 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { downloadStructuredCsv } from '@/utils/csvExport';
 import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
 import { useToast } from '@/components/ui/use-toast';
-import ReportHeroHeader from '@/components/reports/ReportHeroHeader';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
-import HubQuickLinks from '@/components/hubs/HubQuickLinks';
+import HubShell from '@/components/HubShell';
+import { REPORTS_HELP_TOPICS, REPORTS_ONBOARDING, REPORTS_QUICK_LINKS } from '@/components/reports/reportsHubContent';
 import ReportStatTiles from '@/components/reports/ReportStatTiles';
 import UniversalReportFilters from '@/components/reports/UniversalReportFilters';
 import ReportSidebar, { REPORT_CATEGORIES } from '@/components/reports/ReportSidebar';
@@ -19,7 +18,7 @@ import ReportScheduleModal from '@/components/reports/ReportScheduleModal';
 import ReportSaveModal from '@/components/reports/ReportSaveModal';
 import CustomReportBuilder from '@/components/reports/CustomReportBuilder';
 import { useReportData, filterJobsByDate } from '@/hooks/useReportData';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, FileBarChart, Sparkles } from 'lucide-react';
 
 const HUB_MAP = { billing: 'financial', fleet: 'fleet', staff: 'staff', compliance: 'compliance', assets: 'assets', powerbi: 'powerbi' };
 
@@ -150,11 +149,25 @@ export default function ReportingHub() {
   };
 
   return (
-    <div className="space-y-hub-gap-sm sm:space-y-hub-gap">
-      <HubJobBreadcrumb />
-      <HubQuickLinks />
-      <ReportHeroHeader onBuildCustom={() => setShowCustom(true)} />
-
+    <HubShell
+      hubKey="reports"
+      icon={FileBarChart}
+      eyebrow="Reports Hub"
+      title="Reporting Hub"
+      subtitle="Unified analytics across every hub — financials, fleet, staff, compliance, assets and more."
+      breadcrumbs={[{ label: 'Reports Hub' }]}
+      actions={
+        <button
+          onClick={() => setShowCustom(true)}
+          className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm"
+        >
+          <Sparkles className="w-3.5 h-3.5" /> Build Custom Report
+        </button>
+      }
+      help={{ title: 'Reports Hub — how it works', topics: REPORTS_HELP_TOPICS }}
+      onboarding={REPORTS_ONBOARDING}
+      quickLinks={REPORTS_QUICK_LINKS}
+    >
       {/* Summary stat tiles — hidden on special tabs */}
       {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && <ReportStatTiles data={data} />}
 
@@ -210,6 +223,6 @@ export default function ReportingHub() {
           </div>
         </div>
       )}
-    </div>
+    </HubShell>
   );
 }

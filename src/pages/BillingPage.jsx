@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Shield, ScrollText, FileText,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
-import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
+import { BILLING_HELP_TOPICS, BILLING_ONBOARDING, BILLING_QUICK_LINKS } from '@/components/billing/billingHubContent';
 import CVRExportTab from '@/components/billing/CVRExportTab';
 import AFPPortfolioOverview from '@/components/afp/AFPPortfolioOverview';
 import AFPTemplateUploader from '@/components/afp/AFPTemplateUploader';
@@ -65,9 +65,12 @@ export default function BillingPage() {
 
   return (
     <HubShell
+      hubKey="billing"
       icon={PoundSterling}
+      eyebrow="Financial Hub"
       title="Financial Control"
       subtitle="AFP portfolio, rate card & CVR export"
+      breadcrumbs={[{ label: 'Financial Hub' }]}
       actions={
         <div className="flex items-center gap-2">
           <RunReportButton hub="billing" />
@@ -77,9 +80,10 @@ export default function BillingPage() {
       tabs={tabs}
       activeTab={tab}
       onTabChange={setTab}
+      help={{ title: 'Financial Hub — how it works', topics: BILLING_HELP_TOPICS }}
+      onboarding={BILLING_ONBOARDING}
+      quickLinks={BILLING_QUICK_LINKS}
     >
-      <HubJobBreadcrumb />
-
       {/* ── Insights: portfolio-wide financial health dashboard ── */}
       {tab === 'insights' && <BillingInsightsTab />}
 
