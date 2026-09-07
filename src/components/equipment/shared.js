@@ -1,4 +1,4 @@
-import { Truck, ShoppingCart, Wrench, HardHat, Hammer, Users } from 'lucide-react';
+import { Truck, ShoppingCart, Wrench, HardHat, Hammer } from 'lucide-react';
 
 export const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
 
@@ -22,11 +22,13 @@ export const billingTotal = (item) => {
   return rate * qty;
 };
 
+// Labour / Extra Crew removed — crew costs are AFP-driven, not added as
+// billable items. Existing labour JobCostItem records are preserved but
+// no new ones can be created from the EquipmentForm flow.
 export const categoryConfig = {
   hired_equipment: { label: 'Hired Equipment', icon: Truck, desc: 'Hired from a supplier', color: 'amber' },
   purchased_equipment: { label: 'Purchased Equipment', icon: ShoppingCart, desc: 'Bought for this job (needs PO + order slip)', color: 'purple' },
   internal_equipment: { label: 'Owned Equipment', icon: Wrench, desc: 'Priced from the Master Price List (Plant & Materials)', color: 'blue' },
-  labour: { label: 'Labour / Extra Crew', icon: Users, desc: 'Billable crew member from the Master Price List', color: 'emerald' },
   contractor_supplied: { label: 'Contractor Supplied', icon: HardHat, desc: 'Supplied by the contractor — no cost tracked', color: 'indigo' },
   client_supplied: { label: 'Client Supplied', icon: Hammer, desc: 'Delivered by client — informational only', color: 'slate' },
 };
