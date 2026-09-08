@@ -4,11 +4,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, differenceInDays } from 'date-fns';
 import {
   AlertOctagon, Clock, ShieldAlert, Truck, Ruler, RotateCcw,
-  ChevronRight, RefreshCw, Loader2, CheckCircle2,
+  ChevronRight, RefreshCw, Loader2, CheckCircle2, Calendar,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
 
 const SEVERITY = {
   critical: { label: 'Critical', dot: 'bg-rose-500', text: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' },
@@ -75,6 +78,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
         title: 'Timesheet awaiting approval >48h',
         detail: `${t.staff_name || 'Staff'} · ${job?.name || 'No job'} · ${format(new Date(t.date || t.created_date), 'dd MMM')}`,
         navTarget: 'staff',
+        ageDays: Math.floor((nowMs - new Date(t.created_date).getTime()) / 86400000),
       });
     });
 
@@ -92,6 +96,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
         title: `${i.title || i.qualification_type || 'Compliance'} expired`,
         detail: `${i.reference_name || 'Unknown'} · expired ${i.expiry_date ? format(new Date(i.expiry_date), 'dd MMM yyyy') : ''}`,
         navTarget: 'compliance',
+        ageDays: i.expiry_date ? Math.abs(differenceInDays(new Date(i.expiry_date + 'T00:00:00'), new Date())) : 0,
       });
     });
 
@@ -108,6 +113,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
             title: 'MOT expired',
             detail: `${v.registration_number || v.name} · expired ${format(new Date(motExpiry), 'dd MMM yyyy')}`,
             navTarget: 'assets',
+            ageDays: Math.abs(d),
           });
         } else if (d <= 30) {
           items.push({
@@ -117,6 +123,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
             title: 'MOT due soon',
             detail: `${v.registration_number || v.name} · ${d} days left`,
             navTarget: 'assets',
+            ageDays: 0,
           });
         }
       }
@@ -130,6 +137,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
             title: 'Service overdue',
             detail: `${v.registration_number || v.name} · due ${format(new Date(v.service_due_date), 'dd MMM yyyy')}`,
             navTarget: 'assets',
+            ageDays: Math.abs(d),
           });
         }
       }
@@ -152,6 +160,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
           title: 'Missing meterage',
           detail: `${r.staff_name || 'Crew'} · ${job?.name || 'Job'} · shift completed, 0m recorded`,
           navTarget: 'staff',
+          ageDays: 0,
         });
       }
     });
@@ -168,6 +177,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
         title: 'Gear still on hire after job end',
         detail: `${c.description || c.asset_name || 'Item'} · ${job?.name || 'Job'} · return to supplier`,
         navTarget: 'logistics',
+        ageDays: 0,
       });
     });
 
@@ -182,6 +192,11 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
   const warningCount = exceptions.filter(e => e.severity === 'warning').length;
   const isLoading = tsLoading;
 
+  // Oldest open days — the max age of any exception
+  const oldestOpenDays = exceptions.length > 0
+    ? Math.max(...exceptions.map(e => e.ageDays || 0))
+    : 0;
+
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['exception-'] });
     toast({ title: 'Exception monitor refreshed' });
@@ -189,6 +204,12 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
 
   const handleItemClick = (navTarget) => {
     if (onNavigate && navTarget) onNavigate(navTarget);
+  };
+
+  const handleTriage = () => {
+    const firstCritical = exceptions.find(e => e.severity === 'critical');
+    const target = firstCritical || exceptions[0];
+    if (target?.navTarget) handleItemClick(target.navTarget);
   };
 
   return (
@@ -219,20 +240,28 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
 
       {/* Body */}
       <div className="p-4 flex-1 flex flex-col">
+        {/* New stat: oldest open days */}
+        {oldestOpenDays > 0 && (
+          <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100">
+            <Calendar className="w-3.5 h-3.5 text-rose-600 flex-shrink-0" />
+            <span className="text-xs font-bold text-rose-700">Oldest issue: {oldestOpenDays}d ago</span>
+          </div>
+        )}
+
         {/* Severity summary + filter pills */}
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex p-1 bg-slate-100 rounded-lg gap-0.5">
             <button onClick={() => setFilter('all')}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'all' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500'}`}>
-              All <span className="tabular-nums ml-1">{exceptions.length}</span>
+              All <span className="tabular-nums ml-1"><AnimatedNumber value={exceptions.length} /></span>
             </button>
             <button onClick={() => setFilter('critical')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'critical' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Critical <span className="tabular-nums">{criticalCount}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Critical <span className="tabular-nums"><AnimatedNumber value={criticalCount} /></span>
             </button>
             <button onClick={() => setFilter('warning')}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filter === 'warning' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Warning <span className="tabular-nums">{warningCount}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Warning <span className="tabular-nums"><AnimatedNumber value={warningCount} /></span>
             </button>
           </div>
         </div>
@@ -243,13 +272,14 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
         ) : filtered.length === 0 ? (
           <WidgetEmptyState icon={CheckCircle2} title="All clear" message="No exceptions detected. Everything is on track." />
         ) : (
-          <div className="space-y-2 max-h-[420px] overflow-y-auto">
-            {filtered.map((item) => {
+          <div className="space-y-2 max-h-[420px] overflow-y-auto flex-1">
+            {filtered.map((item, i) => {
               const sev = SEVERITY[item.severity];
               const Icon = item.icon;
               return (
-                <button
+                <motion.button
                   key={item.id}
+                  initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                   onClick={() => handleItemClick(item.navTarget)}
                   className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition hover:shadow-sm ${sev.bg} ${sev.border}`}
                 >
@@ -261,11 +291,19 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
                     <p className="text-xs text-slate-500 truncate mt-0.5">{item.detail}</p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                </button>
+                </motion.button>
               );
             })}
           </div>
         )}
+
+        {/* Footer — deep-link + quick-action */}
+        <WidgetActionFooter
+          deepLinkLabel="Compliance Hub"
+          onDeepLink={() => onNavigate?.('compliance')}
+          quickActionLabel="Triage First"
+          onQuickAction={handleTriage}
+        />
       </div>
     </div>
   );

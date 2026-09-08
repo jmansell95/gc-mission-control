@@ -3,14 +3,17 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
-  Drill, Satellite, ChevronRight, Cog, Wrench,
-  Truck, HardHat, Ruler, Clock,
+  Drill, MapPinOff, ChevronRight, Cog, Wrench,
+  Truck, HardHat, Ruler, Clock, TrendingUp, Activity,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
+import RigMeterageModal from '@/components/dashboard/RigMeterageModal';
 import { computeRigEarnings } from '@/utils/rigEarnings';
 
 const fmtGBP = (v) => {
@@ -45,6 +48,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const navigate = useNavigate();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const [showAllRigs, setShowAllRigs] = useState(false);
+  const [showMeterage, setShowMeterage] = useState(false);
 
   // Auto-refresh
   const queryClient = useQueryClient();
@@ -87,7 +91,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   });
 
   // Live Geotab vehicle positions
-  const { data: liveData } = useQuery({
+  const { data: liveData, isLoading: gpsLoading } = useQuery({
     queryKey: ['geotab-live-locations-bento'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getVehicleLocationHistory', { mode: 'live_fast', limit: 500 });
@@ -97,7 +101,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
     staleTime: 15000,
   });
   const liveVehicles = liveData?.vehicles || [];
-  const hasGpsData = liveVehicles.length > 0;
+  const gpsSettled = !gpsLoading;
 
   const rigStats = useMemo(() => {
     const byRig = {};
@@ -207,6 +211,8 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const activeRigCount = rigStats.length;
   const totalRevenue = rigStats.reduce((s, r) => s + (r.revenue || 0), 0);
   const totalMeterage = rigStats.reduce((s, r) => s + (r.meterage || 0), 0);
+  const avgRevenuePerRig = activeRigCount > 0 ? totalRevenue / activeRigCount : 0;
+  const utilisationPct = activeRigCount > 0 ? Math.round(((onSiteCount + deployedCount) / activeRigCount) * 100) : 0;
 
   const handleClick = () => navigate('/fleet?filter=today');
 
@@ -260,7 +266,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
             {/* Big numbers row */}
             <div className="flex items-end gap-4 mb-3">
               <div>
-                <p className="text-4xl font-bold text-emerald-600 tabular-nums leading-none">{onSiteCount}</p>
+                <p className="text-4xl font-bold text-emerald-600 tabular-nums leading-none"><AnimatedNumber value={onSiteCount} /></p>
                 <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide mt-1">On Site</p>
               </div>
               <div className="border-l border-slate-200 pl-4">
@@ -287,14 +293,27 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
               )}
             </div>
 
-            {/* No GPS Data badge */}
-            {!hasGpsData && (
-              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200" title="Rig GPS trackers are not fitted yet. Live tracking will appear here once trackers are installed and Geotab is connected.">
-                <Satellite className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                <span className="text-[11px] font-semibold text-amber-700">No GPS Data</span>
-                <span className="text-[10px] text-amber-600/80">· trackers not fitted yet</span>
+            {/* New stats: avg revenue per rig + utilisation */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <TrendingUp className="w-3 h-3 text-emerald-600" />
+                  <span className="text-base font-bold tabular-nums text-emerald-700 leading-none">
+                    <AnimatedNumber value={avgRevenuePerRig} format={(v) => fmtGBP(v)} />
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">avg revenue / rig</p>
               </div>
-            )}
+              <div className="rounded-xl bg-blue-50 border border-blue-100 px-3 py-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Activity className="w-3 h-3 text-blue-600" />
+                  <span className="text-base font-bold tabular-nums text-blue-700 leading-none">
+                    <AnimatedNumber value={utilisationPct} format={(v) => `${Math.round(v)}%`} />
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">utilisation</p>
+              </div>
+            </div>
 
             {/* Rig leaderboard */}
             <div className="space-y-0.5 flex-1">
@@ -328,6 +347,11 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
                         <p className="text-xs font-bold text-slate-900 truncate">{stat.rig?.name || 'Unknown Rig'}</p>
                         {methodLabel && (
                           <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-slate-200 text-slate-600 uppercase flex-shrink-0">{methodLabel}</span>
+                        )}
+                        {gpsSettled && !stat.rig?.geotab_device_id && (
+                          <span title="No GPS tracker fitted on this rig" className="flex-shrink-0">
+                            <MapPinOff className="w-3 h-3 text-slate-300" />
+                          </span>
                         )}
                       </div>
                       <p className="text-[10px] text-slate-400 truncate">{stat.job?.name || 'No job'}</p>
@@ -363,15 +387,21 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
               })}
             </div>
 
-            {/* Footer */}
+            {/* Footer — deep-link + quick-action */}
+            <WidgetActionFooter
+              deepLinkLabel="Fleet Hub"
+              onDeepLink={() => navigate('/fleet?filter=today')}
+              quickActionLabel="Log Meterage"
+              onQuickAction={() => setShowMeterage(true)}
+            />
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowAllRigs(true); }}
-              className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2E5A1A]/8 text-[#2E5A1A] rounded-lg text-xs font-bold hover:bg-[#2E5A1A]/15 transition border border-[#2E5A1A]/20"
+              className="w-full mt-1.5 flex items-center justify-center gap-1 px-2 py-1.5 text-slate-400 rounded-lg text-[11px] font-semibold hover:bg-slate-50 hover:text-slate-600 transition"
             >
-              <Truck className="w-3.5 h-3.5" />
+              <Truck className="w-3 h-3" />
               View All Rigs ({activeRigCount})
-              <ChevronRight className="w-3.5 h-3.5" />
+              <ChevronRight className="w-3 h-3" />
             </button>
           </>
         )}
@@ -388,6 +418,9 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
         }))}
         onClose={() => setShowAllRigs(false)}
       />
+    )}
+    {showMeterage && (
+      <RigMeterageModal rigs={rigStats} onClose={() => setShowMeterage(false)} />
     )}
     </>
   );

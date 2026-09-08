@@ -1,12 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
-  PoundSterling, FileText, AlertTriangle, ChevronRight, Clock, TrendingDown,
+  PoundSterling, FileText, AlertTriangle, ChevronRight, Clock, TrendingDown, Calendar,
 } from 'lucide-react';
+import { differenceInDays } from 'date-fns';
+import { motion } from 'framer-motion';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmtGBP = (v) => {
   if (v == null || isNaN(v)) return '£0';
@@ -15,11 +20,13 @@ const fmtGBP = (v) => {
 
 /**
  * BillingPipelineWidget — middle-row tile showing the billing pipeline:
- * draft AFPs, overdue invoices, and outstanding total. Deep-links to the
- * Financial Hub scoped to overdue invoices (the most urgent filter).
+ * draft AFPs, overdue invoices, and outstanding total. Shows oldest overdue
+ * days and deep-links to the Financial Hub. Quick-action chases overdue invoices.
  */
 export default function BillingPipelineWidget({ onNavigate }) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [chasing, setChasing] = useState(false);
 
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ['billing-bento-invoices'],
@@ -39,6 +46,14 @@ export default function BillingPipelineWidget({ onNavigate }) {
     const totalOutstanding = outstanding.reduce((s, i) => s + (Number(i.gross_total) || 0), 0);
     const overdueTotal = overdueInvoices.reduce((s, i) => s + (Number(i.gross_total) || 0), 0);
 
+    // Oldest overdue days — how long the most overdue invoice has been unpaid
+    const oldestOverdueDays = overdueInvoices.length > 0
+      ? Math.max(...overdueInvoices.map(i => {
+          if (!i.due_date) return 0;
+          return differenceInDays(new Date(), new Date(i.due_date));
+        }))
+      : 0;
+
     const draftAfps = afps.filter(a => (a.status || 'draft') === 'draft').length;
     const submittedAfps = afps.filter(a => a.status === 'submitted' || a.status === 'pending_review').length;
 
@@ -47,6 +62,7 @@ export default function BillingPipelineWidget({ onNavigate }) {
       overdueCount: overdueInvoices.length,
       totalOutstanding,
       overdueTotal,
+      oldestOverdueDays,
       draftAfps,
       submittedAfps,
       hasUrgent: overdueInvoices.length > 0,
@@ -56,6 +72,18 @@ export default function BillingPipelineWidget({ onNavigate }) {
   const handleClick = () => {
     if (onNavigate) onNavigate('billing');
     else navigate('/billing?filter=overdue');
+  };
+
+  const handleChase = async () => {
+    setChasing(true);
+    try {
+      await base44.functions.invoke('chaseOverdueInvoices');
+      toast({ title: 'Overdue invoices chased' });
+    } catch {
+      toast({ title: 'Chase failed', variant: 'destructive' });
+    } finally {
+      setChasing(false);
+    }
   };
 
   if (isLoading) {
@@ -98,20 +126,30 @@ export default function BillingPipelineWidget({ onNavigate }) {
       {/* Body */}
       <div className="p-4 flex-1 flex flex-col">
         {/* Big outstanding number */}
-        <div className="mb-4">
+        <div className="mb-3">
           <div className="flex items-end gap-2">
             <p className={`text-3xl font-bold tabular-nums leading-none ${stats.hasUrgent ? 'text-rose-600' : 'text-slate-800'}`}>
-              {fmtGBP(stats.totalOutstanding)}
+              <AnimatedNumber value={stats.totalOutstanding} format={(v) => fmtGBP(v)} />
             </p>
             {stats.hasUrgent && <TrendingDown className="w-4 h-4 text-rose-500 mb-1" />}
           </div>
           <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wide mt-1.5">Outstanding</p>
         </div>
 
+        {/* New stats: oldest overdue days */}
+        {stats.hasUrgent && (
+          <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100">
+            <Calendar className="w-3.5 h-3.5 text-rose-600 flex-shrink-0" />
+            <span className="text-xs font-bold text-rose-700">Oldest overdue: {stats.oldestOverdueDays}d</span>
+          </div>
+        )}
+
         {/* Pipeline items */}
         <div className="space-y-2 flex-1">
-          {/* Overdue invoices */}
-          <div className={`flex items-center gap-2.5 p-2.5 rounded-xl border ${stats.overdueCount > 0 ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-100'}`}>
+          <motion.div
+            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0 }}
+            className={`flex items-center gap-2.5 p-2.5 rounded-xl border ${stats.overdueCount > 0 ? 'bg-rose-50 border-rose-200' : 'bg-slate-50 border-slate-100'}`}
+          >
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${stats.overdueCount > 0 ? 'bg-rose-100' : 'bg-slate-100'}`}>
               <AlertTriangle className={`w-4 h-4 ${stats.overdueCount > 0 ? 'text-rose-600' : 'text-slate-400'}`} />
             </div>
@@ -122,10 +160,12 @@ export default function BillingPipelineWidget({ onNavigate }) {
             <span className={`text-sm font-bold tabular-nums ${stats.overdueCount > 0 ? 'text-rose-600' : 'text-slate-500'}`}>
               {stats.overdueCount}
             </span>
-          </div>
+          </motion.div>
 
-          {/* Draft invoices */}
-          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <motion.div
+            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 }}
+            className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+          >
             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
               <Clock className="w-4 h-4 text-blue-600" />
             </div>
@@ -134,10 +174,12 @@ export default function BillingPipelineWidget({ onNavigate }) {
               <p className="text-[10px] text-slate-400">Awaiting approval</p>
             </div>
             <span className="text-sm font-bold tabular-nums text-slate-700">{stats.draftInvoices}</span>
-          </div>
+          </motion.div>
 
-          {/* Draft AFPs */}
-          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+          <motion.div
+            initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08 }}
+            className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+          >
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
               <FileText className="w-4 h-4 text-amber-600" />
             </div>
@@ -146,7 +188,7 @@ export default function BillingPipelineWidget({ onNavigate }) {
               <p className="text-[10px] text-slate-400">{stats.submittedAfps} submitted</p>
             </div>
             <span className="text-sm font-bold tabular-nums text-slate-700">{stats.draftAfps}</span>
-          </div>
+          </motion.div>
         </div>
 
         {/* Urgent action */}
@@ -157,6 +199,14 @@ export default function BillingPipelineWidget({ onNavigate }) {
             </p>
           </div>
         )}
+
+        {/* Footer — deep-link + quick-action */}
+        <WidgetActionFooter
+          deepLinkLabel="Financial Hub"
+          onDeepLink={handleClick}
+          quickActionLabel={chasing ? 'Chasing…' : 'Chase Overdue'}
+          onQuickAction={handleChase}
+        />
       </div>
     </div>
   );

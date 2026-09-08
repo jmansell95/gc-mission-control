@@ -1,20 +1,26 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, ChevronRight, ClipboardCheck, AlertCircle, Car } from 'lucide-react';
-import { format } from 'date-fns';
+import { ShieldCheck, ChevronRight, ClipboardCheck, AlertCircle, Car, Clock, ListChecks } from 'lucide-react';
+import { format, differenceInDays } from 'date-fns';
+import { motion } from 'framer-motion';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
+import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
+import LatestAuditModal from '@/components/dashboard/LatestAuditModal';
 import { useMittiStatus } from '@/hooks/useSafetyCultureStatus';
 
 /**
  * SafetyMittiStatusWidget — hero tile showing today's crew safety compliance.
  * Counts how many shifts completed daily checks / POWRA via Mitti today vs
- * total active shifts. Deep-links to the Compliance Hub safety view.
+ * total active shifts. Shows days since last audit, open action items, and
+ * deep-links to the Compliance Hub. Quick-action opens the latest audit.
  */
 export default function SafetyMittiStatusWidget({ onNavigate }) {
   const navigate = useNavigate();
+  const [showAudit, setShowAudit] = useState(false);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const { isConnected: mittiConnected, isLoading: mittiLoading } = useMittiStatus();
 
@@ -27,6 +33,15 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
     queryKey: ['safety-bento-reports'],
     queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }, '-created_date', 50),
   });
+
+  const { data: latestAudit = [] } = useQuery({
+    queryKey: ['safety-bento-latest-audit'],
+    queryFn: () => base44.entities.SafetyReport.list('-conducted_at', 1),
+  });
+  const daysSinceAudit = latestAudit[0]?.conducted_at
+    ? differenceInDays(new Date(), new Date(latestAudit[0].conducted_at))
+    : null;
+  const openActionItems = safetyReports.reduce((s, r) => s + (r.action_items?.length || 0), 0);
 
   const stats = useMemo(() => {
     const activeShifts = assignments.filter(a => a.status !== 'completed' || a.completed_at);
@@ -73,6 +88,7 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
   const hasWarning = stats.criticalCount > 0 || stats.checksPending > 0;
 
   return (
+    <>
     <div
       className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
       onClick={handleClick}
@@ -102,10 +118,10 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
         ) : (
           <>
             {/* Big compliance number */}
-            <div className="mb-4">
+            <div className="mb-3">
               <div className="flex items-end gap-2">
                 <p className={`text-4xl font-bold tabular-nums leading-none ${isHealthy ? 'text-emerald-600' : hasWarning ? 'text-amber-600' : 'text-slate-700'}`}>
-                  {stats.compliancePct}%
+                  <AnimatedNumber value={stats.compliancePct} format={(v) => `${Math.round(v)}%`} />
                 </p>
                 {isHealthy ? (
                   <ShieldCheck className="w-5 h-5 text-emerald-500 mb-1" />
@@ -118,9 +134,34 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
               </p>
             </div>
 
+            {/* New stats: days since audit + open action items */}
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Clock className="w-3 h-3 text-slate-500" />
+                  <span className="text-base font-bold tabular-nums text-slate-700 leading-none">
+                    {daysSinceAudit != null ? `${daysSinceAudit}d` : '—'}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">since last audit</p>
+              </div>
+              <div className="rounded-xl bg-amber-50 border border-amber-100 px-3 py-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <ListChecks className="w-3 h-3 text-amber-600" />
+                  <span className="text-base font-bold tabular-nums text-amber-700 leading-none">
+                    {openActionItems}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-medium">open actions</p>
+              </div>
+            </div>
+
             {/* Check breakdown */}
             <div className="space-y-2 flex-1">
-              <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <motion.div
+                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0 }}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+              >
                 <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                   <Car className="w-4 h-4 text-blue-600" />
                 </div>
@@ -129,9 +170,12 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
                   <p className="text-[10px] text-slate-400">{stats.vehicleChecksDone} of {stats.totalShifts} done</p>
                 </div>
                 <span className="text-sm font-bold tabular-nums text-slate-700">{stats.vehicleChecksDone}/{stats.totalShifts}</span>
-              </div>
+              </motion.div>
 
-              <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+              <motion.div
+                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.04 }}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+              >
                 <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
                   <ClipboardCheck className="w-4 h-4 text-amber-600" />
                 </div>
@@ -140,10 +184,13 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
                   <p className="text-[10px] text-slate-400">{stats.powraDone} of {stats.totalShifts} done</p>
                 </div>
                 <span className="text-sm font-bold tabular-nums text-slate-700">{stats.powraDone}/{stats.totalShifts}</span>
-              </div>
+              </motion.div>
 
               {mittiConnected && stats.openSafetyCount > 0 && (
-                <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-rose-50 border border-rose-200">
+                <motion.div
+                  initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.08 }}
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-rose-50 border border-rose-200"
+                >
                   <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center flex-shrink-0">
                     <AlertCircle className="w-4 h-4 text-rose-600" />
                   </div>
@@ -152,7 +199,7 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
                     <p className="text-[10px] text-rose-500">{stats.criticalCount} critical</p>
                   </div>
                   <span className="text-sm font-bold tabular-nums text-rose-700">{stats.openSafetyCount}</span>
-                </div>
+                </motion.div>
               )}
             </div>
 
@@ -164,9 +211,19 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
                 </p>
               </div>
             )}
+
+            {/* Footer — deep-link + quick-action */}
+            <WidgetActionFooter
+              deepLinkLabel="Compliance Hub"
+              onDeepLink={handleClick}
+              quickActionLabel="Latest Audit"
+              onQuickAction={() => setShowAudit(true)}
+            />
           </>
         )}
       </div>
     </div>
+    {showAudit && <LatestAuditModal onClose={() => setShowAudit(false)} />}
+    </>
   );
 }
