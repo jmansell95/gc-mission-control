@@ -7,10 +7,22 @@ import MarketDojoPill from './MarketDojoPill';
 import AddressBookModal from './AddressBookModal';
 import CrewEditorModal from './CrewEditorModal';
 import AgencyWorkersModal from './AgencyWorkersModal';
+import { useConfigLists } from '@/hooks/useConfigLists';
 import {
-  Plus, Search, X, Loader2, Building2, Briefcase,
+  Plus, Search, X, Loader2, Building2, Briefcase, Tag, Check,
   Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw, Users,
 } from 'lucide-react';
+
+const CATEGORY_PILL_CLASSES = {
+  training: 'bg-blue-100 text-blue-700',
+  materials: 'bg-amber-100 text-amber-700',
+  plant: 'bg-emerald-100 text-emerald-700',
+  ppe: 'bg-violet-100 text-violet-700',
+  fuel: 'bg-rose-100 text-rose-700',
+  consumables: 'bg-cyan-100 text-cyan-700',
+  other: 'bg-slate-100 text-slate-600',
+};
+const getCategoryPillClass = (category) => CATEGORY_PILL_CLASSES[(category || '').toLowerCase()] || 'bg-slate-100 text-slate-600';
 
 const SUB_TO_TYPE = {
   clients: { key: 'client', label: 'Clients', singular: 'Client', icon: Building2, color: '#059669', isStaff: false },
@@ -20,7 +32,7 @@ const SUB_TO_TYPE = {
 };
 
 const emptyForm = {
-  full_name: '', job_title: '', company: '', market_dojo_onboarded: false,
+  full_name: '', job_title: '', company: '', category: '', market_dojo_onboarded: false,
   email: '', phone: '', mobile: '',
 };
 
@@ -38,9 +50,45 @@ export default function ContactsTab({ activeSub }) {
   const [crewEditor, setCrewEditor] = useState(null);
   const [workersEditor, setWorkersEditor] = useState(null);
   const [migrating, setMigrating] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
   const { activeDivisionId } = useDivision();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getOptions, invalidate: invalidateConfigLists } = useConfigLists();
+  const categoryOptions = getOptions('supplier_categories');
+
+  const handleAddCategoryInline = async () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    setSavingCategory(true);
+    try {
+      const value = name.toLowerCase().replace(/\s+/g, '_');
+      const existing = await base44.entities.ConfigList.filter({ key: 'supplier_categories' });
+      if (existing.length > 0) {
+        const rec = existing[0];
+        const options = [...(rec.options || []), { value, label: name }];
+        await base44.entities.ConfigList.update(rec.id, { options });
+      } else {
+        await base44.entities.ConfigList.create({
+          key: 'supplier_categories', label: 'Supplier Categories', category: 'Suppliers',
+          is_system: true, options: [{ value, label: name }],
+        });
+      }
+      invalidateConfigLists();
+      setAddForm(prev => ({ ...prev, category: value }));
+      setEditForm(prev => ({ ...prev, category: value }));
+      setNewCategoryName('');
+      setAddingCategory(false);
+      toast({ title: 'Category added', description: name });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Could not add category', variant: 'destructive' });
+    }
+    setSavingCategory(false);
+  };
 
   const handleMigrateCrews = async () => {
     if (!confirm('Migrate legacy Lead Driller / Second Man text fields into the new DrillingCrew grouping structure? This is a one-time operation.')) return;
@@ -136,6 +184,7 @@ export default function ContactsTab({ activeSub }) {
           full_name: s.contact_name || contact.name || '',
           job_title: contact.role || '',
           company: s.name || '',
+          category: s.category || '',
           email: s.contact_email || contact.email || '',
           phone: s.contact_phone || contact.phone || '',
           mobile: s.emergency_mobile || '',
@@ -146,21 +195,29 @@ export default function ContactsTab({ activeSub }) {
       });
     }
     if (q) {
-      list = list.filter(r =>
-        (r.full_name || '').toLowerCase().includes(q) ||
-        (r.job_title || '').toLowerCase().includes(q) ||
-        (r.company || '').toLowerCase().includes(q)
-      );
+      list = list.filter(r => {
+        const catLabel = meta.key === 'supplier'
+          ? (categoryOptions.find(o => o.value === r.category)?.label || r.category || '')
+          : '';
+        return (r.full_name || '').toLowerCase().includes(q) ||
+          (r.job_title || '').toLowerCase().includes(q) ||
+          (r.company || '').toLowerCase().includes(q) ||
+          (catLabel || '').toLowerCase().includes(q);
+      });
+    }
+    if (meta.key === 'supplier' && categoryFilter !== 'all') {
+      list = list.filter(r => (r.category || '') === categoryFilter);
     }
     return list;
-  }, [isStaffType, meta.key, staff, clients, suppliers, search, allCrews]);
+  }, [isStaffType, meta.key, staff, clients, suppliers, search, allCrews, categoryOptions, categoryFilter]);
 
   const onboardedCount = isStaffType ? records.filter(r => r.onboarded).length : 0;
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!addForm.full_name.trim() || !addForm.company.trim()) {
-      toast({ title: 'Full name and company are required', variant: 'destructive' });
+    const requireFullName = isStaffType || meta.key === 'client';
+    if (requireFullName ? (!addForm.full_name.trim() || !addForm.company.trim()) : !addForm.company.trim()) {
+      toast({ title: requireFullName ? 'Full name and company are required' : 'Company name is required', variant: 'destructive' });
       return;
     }
     setSaving(true);
@@ -187,13 +244,17 @@ export default function ContactsTab({ activeSub }) {
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-clients'] });
       } else {
+        const email = addForm.email.trim();
+        const phone = addForm.phone.trim();
+        const contacts = [];
+        if (email || phone) contacts.push({ name: '', role: '', email, phone });
         await base44.entities.Supplier.create({
           name: addForm.company.trim(),
-          contact_name: addForm.full_name.trim(),
-          contact_email: addForm.email.trim() || '',
-          contact_phone: addForm.phone.trim() || '',
+          category: addForm.category || '',
+          contact_email: email,
+          contact_phone: phone,
           emergency_mobile: addForm.mobile.trim() || '',
-          contacts: [{ name: addForm.full_name.trim(), role: addForm.job_title.trim(), email: addForm.email.trim(), phone: addForm.phone.trim() }],
+          contacts,
           division_id: activeDivisionId || '',
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
@@ -215,6 +276,7 @@ export default function ContactsTab({ activeSub }) {
       full_name: rec.full_name,
       job_title: rec.job_title,
       company: rec.company,
+      category: rec.category || '',
       market_dojo_onboarded: rec.onboarded,
       email: rec.email || '',
       phone: rec.phone || '',
@@ -248,14 +310,18 @@ export default function ContactsTab({ activeSub }) {
           contacts: [{ name: editForm.full_name.trim(), role: editForm.job_title.trim() }],
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-clients'] });
-      } else {
+      } else if (editForm.kind === 'supplier') {
+        const email = editForm.email?.trim() || '';
+        const phone = editForm.phone?.trim() || '';
+        const contacts = [];
+        if (email || phone) contacts.push({ name: '', role: '', email, phone });
         await base44.entities.Supplier.update(editForm.id, {
           name: editForm.company.trim(),
-          contact_name: editForm.full_name.trim(),
-          contact_email: editForm.email?.trim() || '',
-          contact_phone: editForm.phone?.trim() || '',
+          category: editForm.category || '',
+          contact_email: email,
+          contact_phone: phone,
           emergency_mobile: editForm.mobile?.trim() || '',
-          contacts: [{ name: editForm.full_name.trim(), role: editForm.job_title.trim(), email: editForm.email?.trim() || '', phone: editForm.phone?.trim() || '' }],
+          contacts,
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
       }
@@ -269,7 +335,8 @@ export default function ContactsTab({ activeSub }) {
   };
 
   const handleDelete = async (rec) => {
-    if (!confirm(`Delete ${rec.full_name || rec.company}? This cannot be undone.`)) return;
+    const displayName = meta.key === 'supplier' ? (rec.company || rec.full_name) : (rec.full_name || rec.company);
+    if (!confirm(`Delete ${displayName}? This cannot be undone.`)) return;
     setDeletingId(rec.id);
     try {
       if (isStaffType) {
@@ -373,6 +440,18 @@ export default function ContactsTab({ activeSub }) {
         </div>
       </div>
 
+      {/* Category filter pills — suppliers only */}
+      {meta.key === 'supplier' && categoryOptions.length > 0 && (
+        <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          <button onClick={() => setCategoryFilter('all')} className={`px-3 py-1.5 rounded-full text-ui-caption font-bold whitespace-nowrap transition ${categoryFilter === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>All</button>
+          {categoryOptions.map(opt => (
+            <button key={opt.value} onClick={() => setCategoryFilter(opt.value)} className={`px-3 py-1.5 rounded-full text-ui-caption font-bold whitespace-nowrap transition ${categoryFilter === opt.value ? getCategoryPillClass(opt.value) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* List */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -391,18 +470,29 @@ export default function ContactsTab({ activeSub }) {
             <div key={rec.id} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-slate-300 transition group">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm" style={{ background: meta.color }}>
-                  {(rec.full_name || rec.company || '?').charAt(0).toUpperCase()}
+                  {(meta.key === 'supplier' ? (rec.company || '?') : (rec.full_name || rec.company || '?')).charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{rec.full_name || '—'}</p>
-                    {isStaffType && <MarketDojoPill onboarded={rec.onboarded} size="xs" />}
-                  </div>
-                  <p className="text-xs text-slate-500 truncate">{rec.job_title || 'No job title'}</p>
-                  <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
-                    <Building2 className="w-3 h-3 flex-shrink-0" /> {rec.company || 'No company'}
-                  </p>
-                  {isStaffType && crewBadge(rec)}
+                  {meta.key === 'supplier' ? (
+                    <>
+                      <p className="text-ui-subheading font-bold text-slate-900 truncate">{rec.company || '—'}</p>
+                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-ui-micro font-bold ${getCategoryPillClass(rec.category)}`}>
+                        {categoryOptions.find(o => o.value === rec.category)?.label || (rec.category ? rec.category : 'Uncategorised')}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{rec.full_name || '—'}</p>
+                        {isStaffType && <MarketDojoPill onboarded={rec.onboarded} size="xs" />}
+                      </div>
+                      <p className="text-xs text-slate-500 truncate">{rec.job_title || 'No job title'}</p>
+                      <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                        <Building2 className="w-3 h-3 flex-shrink-0" /> {rec.company || 'No company'}
+                      </p>
+                      {isStaffType && crewBadge(rec)}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-slate-50">
@@ -413,7 +503,7 @@ export default function ContactsTab({ activeSub }) {
                   <Edit2 className="w-3 h-3" /> Edit
                 </button>
                 <button
-                  onClick={() => setAddressBook({ type: isStaffType ? 'staff' : meta.key, id: rec.id, name: rec.full_name || rec.company, contacts: rec.contacts || [] })}
+                  onClick={() => setAddressBook({ type: isStaffType ? 'staff' : meta.key, id: rec.id, name: meta.key === 'supplier' ? (rec.company || rec.full_name) : (rec.full_name || rec.company), contacts: rec.contacts || [] })}
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 rounded-lg hover:bg-[#2E5A1A]/5 transition text-xs font-medium"
                   title="Address book — manage multiple contacts"
                 >
@@ -465,18 +555,51 @@ export default function ContactsTab({ activeSub }) {
               </button>
             </div>
             <form onSubmit={handleAdd} className="p-5 space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Full Name *</label>
-                <input type="text" value={addForm.full_name} onChange={e => setAddForm({ ...addForm, full_name: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
-                <input type="text" value={addForm.job_title} onChange={e => setAddForm({ ...addForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Company *</label>
-                <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
+              {meta.key === 'supplier' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
+                    <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Category</label>
+                    {!addingCategory ? (
+                      <div className="flex gap-2">
+                        <select value={addForm.category} onChange={e => setAddForm({ ...addForm, category: e.target.value })} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm bg-white">
+                          <option value="">— Uncategorised —</option>
+                          {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-caption font-semibold whitespace-nowrap transition">
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New category name" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCategoryInline(); } }} />
+                        <button type="button" onClick={handleAddCategoryInline} disabled={savingCategory || !newCategoryName.trim()} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] transition disabled:opacity-50">
+                          {savingCategory ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+                        </button>
+                        <button type="button" onClick={() => { setAddingCategory(false); setNewCategoryName(''); }} className="inline-flex items-center h-9 px-3 rounded-xl bg-slate-100 text-slate-500 text-ui-caption font-semibold hover:bg-slate-200 transition">Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Full Name *</label>
+                    <input type="text" value={addForm.full_name} onChange={e => setAddForm({ ...addForm, full_name: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
+                    <input type="text" value={addForm.job_title} onChange={e => setAddForm({ ...addForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Company *</label>
+                    <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                </>
+              )}
               {meta.key === 'supplier' && (
                 <>
                   <div>
@@ -534,18 +657,51 @@ export default function ContactsTab({ activeSub }) {
                   <MarketDojoPill onboarded={editForm.market_dojo_onboarded} />
                 </div>
               )}
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Full Name</label>
-                <input type="text" value={editForm.full_name || ''} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
-                <input type="text" value={editForm.job_title || ''} onChange={e => setEditForm({ ...editForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
-                <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
-              </div>
+              {meta.key === 'supplier' ? (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
+                    <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Category</label>
+                    {!addingCategory ? (
+                      <div className="flex gap-2">
+                        <select value={editForm.category || ''} onChange={e => setEditForm({ ...editForm, category: e.target.value })} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm bg-white">
+                          <option value="">— Uncategorised —</option>
+                          {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                        </select>
+                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-caption font-semibold whitespace-nowrap transition">
+                          <Plus className="w-3.5 h-3.5" /> Add
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} placeholder="New category name" className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCategoryInline(); } }} />
+                        <button type="button" onClick={handleAddCategoryInline} disabled={savingCategory || !newCategoryName.trim()} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] transition disabled:opacity-50">
+                          {savingCategory ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+                        </button>
+                        <button type="button" onClick={() => { setAddingCategory(false); setNewCategoryName(''); }} className="inline-flex items-center h-9 px-3 rounded-xl bg-slate-100 text-slate-500 text-ui-caption font-semibold hover:bg-slate-200 transition">Cancel</button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Full Name</label>
+                    <input type="text" value={editForm.full_name || ''} onChange={e => setEditForm({ ...editForm, full_name: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Job Title</label>
+                    <input type="text" value={editForm.job_title || ''} onChange={e => setEditForm({ ...editForm, job_title: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Company</label>
+                    <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                </>
+              )}
               {meta.key === 'supplier' && (
                 <>
                   <div>
