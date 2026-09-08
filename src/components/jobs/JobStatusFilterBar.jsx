@@ -24,12 +24,12 @@ export default function JobStatusFilterBar({ jobs, statusFilter, onStatusChange,
               key={btn.value}
               type="button"
               onClick={() => onStatusChange(btn.value)}
-              className={`flex-shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition active:scale-[0.97] ${
+              className={`flex-shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-ui-caption sm:text-ui-body font-semibold transition active:scale-[0.97] ${
                 active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2E5A1A]/30 hover:text-slate-900'
               }`}
             >
               {btn.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${active ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{countFor(btn.value)}</span>
+              <span className={`text-ui-micro px-1.5 py-0.5 rounded-full font-bold ${active ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{countFor(btn.value)}</span>
             </button>
           );
         })}
@@ -41,7 +41,7 @@ export default function JobStatusFilterBar({ jobs, statusFilter, onStatusChange,
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Search projects by name, location or reference…"
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
         />
       </div>
     </div>

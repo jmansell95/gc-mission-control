@@ -24,7 +24,7 @@ export default function BentoDashboard({ onNavigate, onSelectJob, onOpenJobDrawe
     <div className="space-y-4 lg:space-y-5">
       {/* ── Key Metrics — at the top for immediate visibility ── */}
       <div>
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">Key Metrics</h3>
+        <h3 className="text-ui-micro font-bold text-slate-400 uppercase tracking-wider mb-2.5 px-1">Key Metrics</h3>
         <BentoStatTiles onNavigate={onNavigate} />
       </div>
 

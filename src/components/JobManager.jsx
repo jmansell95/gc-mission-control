@@ -233,10 +233,10 @@ export default function JobManager({ onNavigateRota }) {
       actions={
         <>
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            <button type="button" onClick={() => setLayoutView('grid')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${layoutView === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            <button type="button" onClick={() => setLayoutView('grid')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-ui-caption font-semibold transition ${layoutView === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               <LayoutGrid className="w-3.5 h-3.5" /> Grid
             </button>
-            <button type="button" onClick={() => setLayoutView('kanban')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${layoutView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            <button type="button" onClick={() => setLayoutView('kanban')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-ui-caption font-semibold transition ${layoutView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               <BarChart3 className="w-3.5 h-3.5" /> Kanban
             </button>
           </div>
@@ -245,7 +245,7 @@ export default function JobManager({ onNavigateRota }) {
           <button
             type="button"
             onClick={() => setShowSplitModal(true)}
-            className="inline-flex items-center gap-1.5 h-9 px-3 bg-white text-violet-600 border border-violet-200 rounded-xl hover:bg-violet-50 transition text-xs font-semibold shadow-sm"
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-white text-violet-600 border border-violet-200 rounded-xl hover:bg-violet-50 transition text-ui-caption font-semibold shadow-sm"
             title="Split existing multi-site jobs into standalone projects"
           >
             <GitBranch className="w-4 h-4" /> <span className="hidden sm:inline">Split Multi-Site</span>
@@ -253,7 +253,7 @@ export default function JobManager({ onNavigateRota }) {
           <button
             type="button"
             onClick={openWizard}
-            className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#244715] active:scale-[0.97] transition text-xs font-semibold shadow-sm"
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#244715] active:scale-[0.97] transition text-ui-caption font-semibold shadow-sm"
           >
             <Plus className="w-4 h-4" /> Add Project
           </button>

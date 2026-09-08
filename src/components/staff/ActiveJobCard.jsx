@@ -111,15 +111,15 @@ export default function ActiveJobCard({
     >
       {/* Status strip — gradient with subtle depth */}
       <div className={`px-4 py-3 flex items-center justify-between ${status.bg} border-b border-slate-100/50`}>
-        <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${status.color}`}>
+        <span className={`inline-flex items-center gap-1.5 text-ui-body font-bold ${status.color}`}>
           <StatusIcon className="w-4 h-4" strokeWidth={2.5} /> {status.label}
         </span>
         <div className="flex items-center gap-2">
           {isStarted && assignment.started_at && (
-            <span className="text-xs text-slate-500">since {format(new Date(assignment.started_at), 'HH:mm')}</span>
+            <span className="text-ui-caption text-slate-500">since {format(new Date(assignment.started_at), 'HH:mm')}</span>
           )}
           {assignment.is_overtime && (
-            <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+            <span className="text-ui-caption font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
               OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
             </span>
           )}
@@ -128,13 +128,13 @@ export default function ActiveJobCard({
 
       {/* Main content */}
       <div className="p-4 md:p-5">
-        <h2 className="text-xl font-bold text-slate-900 leading-tight tracking-tight">{job.name}</h2>
+        <h2 className="text-ui-heading font-bold text-slate-900 leading-tight tracking-tight">{job.name}</h2>
         <div className="mt-3 space-y-2">
-          <div className="flex items-start gap-2 text-sm text-slate-600">
+          <div className="flex items-start gap-2 text-ui-body text-slate-600">
             <MapPin className="w-5 h-5 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
             <span className="break-words">{job.location}</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+          <div className="flex flex-wrap items-center gap-3 text-ui-body text-slate-600">
             <span className="inline-flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-[#2E5A1A]/60" /> {format(new Date(assignment.assigned_date), 'EEE dd MMM')}
             </span>
@@ -176,19 +176,19 @@ export default function ActiveJobCard({
         {isStarted && canPerformActions && !hasLeftSite && (
           <div className="flex gap-2.5 mt-3">
             <button onClick={() => onLeaveSite?.(assignment.id)} type="button"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-sm font-semibold touch-manipulation">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-ui-body font-semibold touch-manipulation">
               <DoorOpen className="w-5 h-5" /> Leave Site
             </button>
             {onAdHocVisit && (
               <button onClick={onAdHocVisit} type="button"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-sm font-semibold touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-ui-body font-semibold touch-manipulation">
                 <Navigation className="w-5 h-5" /> Ad-hoc Visit
               </button>
             )}
           </div>
         )}
         {isStarted && canPerformActions && hasLeftSite && (
-          <div className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${windowExpired ? 'bg-red-50 text-red-700 ring-1 ring-red-200' : 'bg-amber-50 text-amber-800 ring-1 ring-amber-200'}`}>
+          <div className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-xl text-ui-body font-medium ${windowExpired ? 'bg-red-50 text-red-700 ring-1 ring-red-200' : 'bg-amber-50 text-amber-800 ring-1 ring-amber-200'}`}>
             <Clock className="w-4 h-4 flex-shrink-0" />
             {windowExpired
               ? <>5-hour window has passed — please submit your timesheet now.</>
@@ -198,7 +198,7 @@ export default function ActiveJobCard({
 
         {/* Details toggle */}
         <button onClick={() => setShowDetails(s => !s)} type="button"
-          className="w-full mt-4 flex items-center justify-center gap-1.5 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition">
+          className="w-full mt-4 flex items-center justify-center gap-1.5 py-2 text-ui-body font-semibold text-slate-500 hover:text-slate-700 transition">
           {showDetails ? 'Hide' : 'Show'} Details
           <ChevronDown className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
         </button>

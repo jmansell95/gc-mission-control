@@ -51,8 +51,8 @@ function StatTile({ icon: Icon, label, value, tone = 'slate' }) {
         <Icon className="w-3.5 h-3.5" />
       </div>
       <div className="min-w-0">
-        <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 leading-none">{label}</div>
-        <div className="text-sm font-bold text-slate-800 leading-tight mt-0.5 truncate">{value}</div>
+        <div className="text-ui-micro font-semibold uppercase tracking-wider text-slate-400 leading-none">{label}</div>
+        <div className="text-ui-body font-bold text-slate-800 leading-tight mt-0.5 truncate">{value}</div>
       </div>
     </div>
   );
@@ -62,8 +62,8 @@ function DetailItem({ icon: Icon, label, value }) {
   return (
     <div className="flex items-center gap-1.5 min-w-0">
       <Icon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-      <span className="text-[10px] text-slate-400 uppercase font-medium flex-shrink-0">{label}</span>
-      <span className="text-slate-700 font-medium truncate">{value}</span>
+      <span className="text-ui-micro text-slate-400 uppercase font-medium flex-shrink-0">{label}</span>
+      <span className="text-ui-body text-slate-700 font-medium truncate">{value}</span>
     </div>
   );
 }

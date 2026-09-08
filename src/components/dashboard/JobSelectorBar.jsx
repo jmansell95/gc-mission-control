@@ -51,8 +51,8 @@ export default function JobSelectorBar({ onSelectJob }) {
             <Briefcase className="w-5 h-5 text-[#2E5A1A]" />
           </div>
           <div className="text-left flex-1 min-w-0">
-            <p className="text-sm font-bold leading-tight">Find a Job</p>
-            <p className="text-[11px] leading-tight text-slate-400">Click to search and jump straight to a job</p>
+            <p className="text-ui-body font-bold leading-tight">Find a Job</p>
+            <p className="text-ui-micro leading-tight text-slate-400">Click to search and jump straight to a job</p>
           </div>
           <ChevronDown className={`w-4 h-4 flex-shrink-0 transition text-slate-400 ${open ? 'rotate-180' : ''}`} />
         </button>
@@ -68,13 +68,13 @@ export default function JobSelectorBar({ onSelectJob }) {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search by name, location or reference…"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:border-[#2E5A1A] focus:bg-white"
+                  className="w-full pl-9 pr-3 py-2 text-ui-body bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:border-[#2E5A1A] focus:bg-white"
                 />
               </div>
             </div>
             <div className="max-h-72 overflow-y-auto">
               {filtered.length === 0 ? (
-                <p className="text-center text-sm text-slate-400 py-6">No jobs match "{search}"</p>
+                <p className="text-center text-ui-body text-slate-400 py-6">No jobs match "{search}"</p>
               ) : filtered.map(j => {
                 const st = statusStyles[j.status] || statusStyles.planning;
                 return (
@@ -85,13 +85,13 @@ export default function JobSelectorBar({ onSelectJob }) {
                   >
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${st.dot}`} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{j.name}</p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                      <p className="text-ui-body font-semibold text-slate-800 truncate">{j.name}</p>
+                      <div className="flex items-center gap-2 text-ui-micro text-slate-400">
                         {j.location && <span className="flex items-center gap-0.5 truncate"><MapPin className="w-3 h-3" />{j.location}</span>}
                         {j.start_date && <span className="flex items-center gap-0.5 flex-shrink-0"><Calendar className="w-3 h-3" />{format(new Date(j.start_date), 'dd MMM')}</span>}
                       </div>
                     </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${st.badge}`}>{st.label}</span>
+                    <span className={`text-ui-micro px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${st.badge}`}>{st.label}</span>
                   </button>
                 );
               })}

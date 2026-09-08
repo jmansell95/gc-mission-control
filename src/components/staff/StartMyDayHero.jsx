@@ -35,10 +35,10 @@ export default function StartMyDayHero({ isDriller = false, onStart }) {
             <ShieldCheck className="w-5 h-5 text-white" strokeWidth={2.5} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-white leading-tight">Start My Day</p>
-            <p className="text-[11px] text-white/75 truncate">Complete safety checks before you start work</p>
+            <p className="text-ui-body font-bold text-white leading-tight">Start My Day</p>
+            <p className="text-ui-micro text-white/75 truncate">Complete safety checks before you start work</p>
           </div>
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 text-white text-xs font-bold">
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white/15 text-white text-ui-caption font-bold">
             <Play className="w-3.5 h-3.5" /> Begin
           </div>
         </div>
@@ -51,8 +51,8 @@ export default function StartMyDayHero({ isDriller = false, onStart }) {
                 <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/8 flex items-center justify-center">
                   <step.icon className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
                 </div>
-                <p className="text-[10px] font-bold text-slate-700 text-center leading-tight truncate w-full">{step.label}</p>
-                <p className="text-[9px] text-slate-400 text-center leading-tight truncate w-full hidden sm:block">{step.sub}</p>
+                <p className="text-ui-micro font-bold text-slate-700 text-center leading-tight truncate w-full">{step.label}</p>
+                <p className="text-ui-micro text-slate-400 text-center leading-tight truncate w-full hidden sm:block">{step.sub}</p>
               </div>
               {i < steps.length - 1 && (
                 <ChevronRight className="w-4 h-4 text-slate-300 flex-shrink-0" />

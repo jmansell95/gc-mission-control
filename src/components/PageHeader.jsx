@@ -21,8 +21,8 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
               </div>
             )}
             <div className="min-w-0">
-              <h1 className="text-hub-title text-slate-900 tracking-tight truncate">{title}</h1>
-              {subtitle && <p className="text-hub-caption text-slate-500 truncate mt-0.5">{subtitle}</p>}
+              <h1 className="text-ui-heading text-slate-900 tracking-tight truncate">{title}</h1>
+              {subtitle && <p className="text-ui-caption text-slate-500 truncate mt-0.5">{subtitle}</p>}
             </div>
           </div>
           {actions && (
@@ -45,9 +45,9 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
                 >
                   <div className="flex items-center gap-1.5 mb-0.5">
                     {SIcon && <SIcon className="w-3.5 h-3.5 text-slate-400" />}
-                    <span className="text-[10px] uppercase text-slate-400 font-semibold truncate">{s.label}</span>
+                    <span className="text-ui-micro uppercase text-slate-400 font-semibold truncate">{s.label}</span>
                   </div>
-                  <p className="text-xl font-bold text-slate-900 tabular-nums leading-none">
+                  <p className="text-ui-heading font-bold text-slate-900 tabular-nums leading-none">
                     <AnimatedNumber value={s.value} />
                   </p>
                 </Wrapper>

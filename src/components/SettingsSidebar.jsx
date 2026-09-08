@@ -57,7 +57,7 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         {!hideHeader && (
           <div className="px-3 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-900">Settings Menu</h3>
+            <h3 className="text-ui-body font-bold text-slate-900">Settings Menu</h3>
           </div>
         )}
         <div className="p-2 max-h-[calc(100vh-180px)] overflow-y-auto">
@@ -69,7 +69,7 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search settings..."
-              className="w-full pl-8 pr-7 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]/30 focus:bg-white transition"
+              className="w-full pl-8 pr-7 py-2 text-ui-caption bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]/30 focus:bg-white transition"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -78,11 +78,11 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
             )}
           </div>
           {groups.length === 0 && (
-            <p className="px-2 py-4 text-xs text-slate-400 text-center">No settings match "{search}"</p>
+            <p className="px-2 py-4 text-ui-caption text-slate-400 text-center">No settings match "{search}"</p>
           )}
           {groups.map(group => (
             <div key={group.label} className="mb-1.5">
-              <p className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{group.label}</p>
+              <p className="px-2 py-1 text-ui-micro font-bold text-slate-400 uppercase tracking-wider">{group.label}</p>
               {group.items.map(item => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -90,7 +90,7 @@ export default function SettingsSidebar({ activeTab, onNavigate, items, hideHead
                   <button
                     key={item.id}
                     onClick={() => item.external ? navigate(item.external) : onNavigate(item.id)}
-                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition text-left ${
+                    className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-ui-body font-medium transition text-left ${
                       isActive
                         ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]'
                         : 'text-slate-600 hover:bg-slate-50'

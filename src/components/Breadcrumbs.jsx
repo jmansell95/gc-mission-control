@@ -91,13 +91,13 @@ export default function Breadcrumbs({ sectionLabel }) {
         {showBack && (
         <button
           onClick={handleBack}
-          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:scale-95 transition text-sm font-semibold shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 active:scale-95 transition text-ui-body font-semibold shadow-sm flex-shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Back</span>
         </button>
         )}
-        <div className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-sm text-sm overflow-hidden">
+        <div className="inline-flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/70 shadow-sm text-ui-body overflow-hidden">
           <Link to="/" className="flex items-center gap-1 text-slate-400 hover:text-[#2E5A1A] transition font-medium flex-shrink-0">
             <Home className="w-3.5 h-3.5" /><span className="hidden sm:inline">Home</span>
           </Link>

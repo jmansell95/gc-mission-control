@@ -17,8 +17,8 @@ export default function SettingsSectionHeader({ icon: Icon, title, description, 
             </div>
           )}
           <div className="min-w-0">
-            <h2 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight truncate">{title}</h2>
-            {description && <p className="text-sm text-slate-500 mt-0.5">{description}</p>}
+            <h2 className="text-ui-heading md:text-ui-display font-bold text-slate-900 tracking-tight truncate">{title}</h2>
+            {description && <p className="text-ui-body text-slate-500 mt-0.5">{description}</p>}
           </div>
         </div>
         {actions && (

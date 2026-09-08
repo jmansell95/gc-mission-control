@@ -14,7 +14,7 @@ export default function TabStatRibbon({ stats = [], icon: Icon, title, action })
             <Icon className="w-3.5 h-3.5 text-[#2E5A1A]" />
           </div>
         )}
-        {title && <h3 className="text-sm font-semibold text-slate-900">{title}</h3>}
+        {title && <h3 className="text-ui-body font-semibold text-slate-900">{title}</h3>}
         {action && <div className="ml-auto">{action}</div>}
       </div>
       {stats.length > 0 && (
@@ -25,8 +25,8 @@ export default function TabStatRibbon({ stats = [], icon: Icon, title, action })
               <div key={i} className={`flex items-center gap-2 px-4 py-2.5 flex-1 min-w-[120px] ${s.tone || ''}`}>
                 {StatIcon && <StatIcon className={`w-4 h-4 flex-shrink-0 ${s.iconColor || 'text-slate-400'}`} />}
                 <div className="min-w-0">
-                  <p className="text-lg font-bold text-slate-900 tabular-nums leading-tight">{s.value}</p>
-                  <p className="text-[10px] text-slate-400 uppercase font-medium tracking-wide truncate">{s.label}</p>
+                  <p className="text-ui-heading font-bold text-slate-900 tabular-nums leading-tight">{s.value}</p>
+                  <p className="text-ui-micro text-slate-400 uppercase font-medium tracking-wide truncate">{s.label}</p>
                 </div>
               </div>
             );

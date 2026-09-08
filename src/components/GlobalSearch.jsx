@@ -47,7 +47,7 @@ export default function GlobalSearch({ compact = false }) {
       <button
         onClick={() => setOpen(true)}
         title="Search jobs, crew, vehicles…"
-        className={`hidden lg:flex items-center ${compact ? 'justify-center px-2' : 'gap-2.5 px-4'} w-full py-3 bg-emerald-900/40 text-emerald-300/60 hover:text-white hover:bg-emerald-800/60 rounded-xl transition cursor-pointer text-sm font-medium ring-1 ring-emerald-700/30`}
+        className={`hidden lg:flex items-center ${compact ? 'justify-center px-2' : 'gap-2.5 px-4'} w-full py-3 bg-emerald-900/40 text-emerald-300/60 hover:text-white hover:bg-emerald-800/60 rounded-xl transition cursor-pointer text-ui-body font-medium ring-1 ring-emerald-700/30`}
       >
         <Search className="w-4 h-4 flex-shrink-0" />
         {!compact && <span>Search jobs, crew, vehicles…</span>}
@@ -55,7 +55,7 @@ export default function GlobalSearch({ compact = false }) {
 
       <CommandDialog open={open} onOpenChange={setOpen}>
         <div className="px-3 pt-3 pb-2 border-b border-slate-100">
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          <div className="flex items-center gap-2 text-ui-micro font-semibold uppercase tracking-wide text-slate-400">
             <Search className="w-3.5 h-3.5" />
             <span>Global Search — jump straight to any record</span>
           </div>
@@ -75,7 +75,7 @@ export default function GlobalSearch({ compact = false }) {
                   <Briefcase className="w-4 h-4 text-emerald-600" />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium truncate">{job.name}</p>
-                    {job.location && <p className="text-xs text-slate-400 truncate flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</p>}
+                    {job.location && <p className="text-ui-caption text-slate-400 truncate flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</p>}
                   </div>
                 </CommandItem>
               ))}

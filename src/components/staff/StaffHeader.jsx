@@ -32,12 +32,12 @@ export default function StaffHeader({ staff, onShowSchedule }) {
           <div className="flex items-center gap-3 min-w-0">
             <Logo height={40} className="flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-white font-bold text-sm leading-tight truncate">
+              <p className="text-white font-bold text-ui-body leading-tight truncate">
                 {greeting}, {firstName}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <p className="text-white/70 text-xs">{format(new Date(), 'EEE dd MMM · HH:mm')}</p>
-                <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${isOnline ? 'bg-emerald-400/20 text-emerald-200' : 'bg-amber-400/20 text-amber-200'}`}>
+                <p className="text-white/70 text-ui-caption">{format(new Date(), 'EEE dd MMM · HH:mm')}</p>
+                <span className={`inline-flex items-center gap-0.5 text-ui-micro font-semibold px-1.5 py-0.5 rounded-full ${isOnline ? 'bg-emerald-400/20 text-emerald-200' : 'bg-amber-400/20 text-amber-200'}`}>
                   {isOnline ? <Wifi className="w-2.5 h-2.5" /> : <WifiOff className="w-2.5 h-2.5" />}
                   {isOnline ? 'Live' : 'Offline'}
                 </span>

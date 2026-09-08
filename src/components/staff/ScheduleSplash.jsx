@@ -46,12 +46,12 @@ export default function ScheduleSplash({ assignments, jobs, vehicles, clients, t
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Your Schedule</h1>
-              <p className="text-slate-500 text-sm mt-0.5">
+              <p className="text-slate-500 text-ui-body mt-0.5">
                 {format(weekStartDate, 'dd MMM')} – {format(weekEndDate, 'dd MMM yyyy')}
               </p>
             </div>
           </div>
-          <p className="text-slate-600 text-sm">
+          <p className="text-slate-600 text-ui-body">
             {reviewMode
               ? `Hi ${staff.name.split(' ')[0]}, here's a reminder of your assignments for this week.`
               : `Hi ${staff.name.split(' ')[0]}, please review your assignments for this week before starting.`}

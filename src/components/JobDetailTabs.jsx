@@ -77,7 +77,7 @@ export default function JobDetailTabs({
 
   // Shared tab trigger class — clean, compact, brand-accented
   const triggerClass =
-    'text-xs sm:text-sm inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl flex-shrink-0 whitespace-nowrap data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2E5A1A] data-[state=active]:to-[#5A8C1E] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition';
+    'text-ui-caption sm:text-ui-body inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl flex-shrink-0 whitespace-nowrap data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2E5A1A] data-[state=active]:to-[#5A8C1E] data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition';
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -298,12 +298,12 @@ export default function JobDetailTabs({
             <DocumentManager job={job} />
             {job.requisition_list_url && (
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2"><FileText className="w-5 h-5 text-[#2E5A1A]" /><h3 className="font-semibold text-slate-900 text-sm">Requisition List</h3></div>
+                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2"><FileText className="w-5 h-5 text-[#2E5A1A]" /><h3 className="font-semibold text-slate-900 text-ui-body">Requisition List</h3></div>
                 <div className="px-5 py-4 space-y-2">
-                  <p className="text-sm text-slate-700 truncate">{job.requisition_list_name || 'Requisition List'}</p>
+                  <p className="text-ui-body text-slate-700 truncate">{job.requisition_list_name || 'Requisition List'}</p>
                   <div className="flex gap-2">
-                    <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2E5A1A] hover:bg-emerald-100 rounded-lg text-xs font-medium transition"><Eye className="w-3.5 h-3.5" /> View</a>
-                    <a href={job.requisition_list_url} download={job.requisition_list_name || 'requisition'} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-medium transition"><Download className="w-3.5 h-3.5" /> Download</a>
+                    <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2E5A1A] hover:bg-emerald-100 rounded-lg text-ui-caption font-medium transition"><Eye className="w-3.5 h-3.5" /> View</a>
+                    <a href={job.requisition_list_url} download={job.requisition_list_name || 'requisition'} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-ui-caption font-medium transition"><Download className="w-3.5 h-3.5" /> Download</a>
                   </div>
                 </div>
               </div>

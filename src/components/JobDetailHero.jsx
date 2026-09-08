@@ -36,16 +36,16 @@ export default function JobDetailHero({
           <div className="min-w-0 flex-1">
             {/* Status + type badges */}
             <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/15 backdrop-blur-sm border border-white/20`}>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-ui-caption font-bold bg-white/15 backdrop-blur-sm border border-white/20`}>
                 <span className="w-2 h-2 rounded-full bg-[#8DC63F] animate-pulse" />
                 {getJobTypeLabel(primaryType, jobTypes)}
               </span>
               <button onClick={onStatusClick}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${statusBadge[job.status || 'planning']} hover:opacity-80 transition cursor-pointer`}>
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-ui-caption font-bold ${statusBadge[job.status || 'planning']} hover:opacity-80 transition cursor-pointer`}>
                 {statusLabels[job.status || 'planning']}
               </button>
               {job.job_reference && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/10 backdrop-blur-sm border border-white/15">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-ui-micro font-medium bg-white/10 backdrop-blur-sm border border-white/15">
                   Ref: {job.job_reference}
                 </span>
               )}
@@ -55,11 +55,11 @@ export default function JobDetailHero({
               {job.name}
             </h1>
             {/* Location */}
-            <div className="flex items-center gap-2 mt-2 text-white/80 text-sm flex-wrap">
+            <div className="flex items-center gap-2 mt-2 text-white/80 text-ui-body flex-wrap">
               <MapPin className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{job.location}</span>
               {job.what3words && (
-                <span className="inline-flex items-center rounded-full font-mono font-semibold bg-white/15 text-white border border-white/20 text-[11px] px-2.5 py-1 gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <span className="inline-flex items-center rounded-full font-mono font-semibold bg-white/15 text-white border border-white/20 text-ui-micro px-2.5 py-1 gap-1.5" onClick={(e) => e.stopPropagation()}>
                   <MapPin className="w-3 h-3" />
                   <a href={`https://what3words.com/${String(job.what3words).trim().toLowerCase()}`} target="_blank" rel="noopener noreferrer" className="hover:underline">{job.what3words}</a>
                 </span>
@@ -72,7 +72,7 @@ export default function JobDetailHero({
               {startDate && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/15">
                   <Calendar className="w-4 h-4 text-white/70" />
-                  <span className="text-xs font-medium text-white/90">
+                  <span className="text-ui-caption font-medium text-white/90">
                     {format(startDate, 'dd MMM')} → {endDate ? format(endDate, 'dd MMM') : 'TBC'}
                   </span>
                 </div>
@@ -82,8 +82,8 @@ export default function JobDetailHero({
             {dayCount > 0 && (
               <div className="flex items-center gap-2 px-3 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/15">
                 <CalendarClock className="w-4 h-4 text-[#8DC63F]" />
-                <span className="font-bold text-white text-sm">{dayCount}</span>
-                <span className="text-white/60 text-xs">{dayCount === 1 ? 'day' : 'days'}</span>
+                <span className="font-bold text-white text-ui-body">{dayCount}</span>
+                <span className="text-white/60 text-ui-caption">{dayCount === 1 ? 'day' : 'days'}</span>
               </div>
             )}
           </div>
@@ -145,8 +145,8 @@ function MetricChip({ icon: Icon, value, label, color, bg }) {
         <Icon className={`w-3.5 h-3.5 ${color}`} />
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="font-bold text-slate-900 text-sm tabular-nums">{value}</span>
-        <span className="text-slate-400 text-[11px]">{label}</span>
+        <span className="font-bold text-slate-900 text-ui-body tabular-nums">{value}</span>
+        <span className="text-slate-400 text-ui-micro">{label}</span>
       </div>
     </div>
   );
@@ -159,14 +159,14 @@ function Divider() {
 function ProgressBar({ label, value, total, pct, gradient }) {
   return (
     <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-      <div className="flex items-center justify-between text-[11px] mb-1.5">
+      <div className="flex items-center justify-between text-ui-micro mb-1.5">
         <span className="text-slate-500 font-semibold">{label}</span>
         <span className="text-slate-600 font-bold tabular-nums">{value} / {total}</span>
       </div>
       <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
         <div className={`h-full bg-gradient-to-r ${gradient} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-[10px] text-slate-400 mt-1 text-right font-medium">{pct}%</p>
+      <p className="text-ui-caption text-slate-400 mt-1 text-right font-medium">{pct}%</p>
     </div>
   );
 }

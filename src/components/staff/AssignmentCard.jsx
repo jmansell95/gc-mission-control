@@ -57,8 +57,8 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
         <div className="flex items-start gap-2 bg-amber-50 border-b border-amber-100 px-4 py-2.5">
           <PauseCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-amber-800">This job is on hold</p>
-            <p className="text-[11px] text-amber-700 mt-0.5">Do not start work until management confirms it has resumed. {job.status_reason ? `Reason: ${job.status_reason}` : ''}</p>
+            <p className="text-ui-caption font-semibold text-amber-800">This job is on hold</p>
+            <p className="text-ui-micro text-amber-700 mt-0.5">Do not start work until management confirms it has resumed. {job.status_reason ? `Reason: ${job.status_reason}` : ''}</p>
           </div>
         </div>
       )}
@@ -67,26 +67,26 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
       <button onClick={() => setExpanded(e => !e)} className="w-full text-left p-4 md:p-5 flex items-start gap-3 hover:bg-slate-50/40 transition">
         <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ring-2 ring-offset-2 ring-offset-white ${assignment.status === 'completed' ? 'bg-[#2E5A1A] ring-[#2E5A1A]/20' : assignment.status === 'started' ? 'bg-blue-500 ring-blue-500/20' : 'bg-slate-300 ring-slate-300/20'}`} />
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold text-slate-900 leading-tight truncate tracking-tight">{job.name}</h3>
+          <h3 className="text-ui-heading font-bold text-slate-900 leading-tight truncate tracking-tight">{job.name}</h3>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${jobTypeBadgeColors[job.job_type]}`}>{formatJobType(job.job_type)}</span>
+            <span className={`inline-block px-2 py-0.5 rounded text-ui-caption font-semibold ${jobTypeBadgeColors[job.job_type]}`}>{formatJobType(job.job_type)}</span>
             {assignment.is_overtime && (
-              <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-700">
+              <span className="inline-block px-2 py-0.5 rounded text-ui-caption font-bold bg-amber-100 text-amber-700">
                 OT{assignment.rate_multiplier ? ` ${Number(assignment.rate_multiplier)}x` : ''}
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1 text-ui-body text-slate-500">
               <Calendar className="w-4 h-4 text-slate-400" />
               <span className="font-medium">{format(new Date(assignment.assigned_date), 'EEE dd MMM')}</span>
             </span>
             {assignment.start_time && (
-              <span className="inline-flex items-center gap-1 text-sm text-slate-500">
+              <span className="inline-flex items-center gap-1 text-ui-body text-slate-500">
                 <Clock className="w-4 h-4 text-slate-400" />
                 <span className="font-medium">{assignment.start_time}{assignment.end_time ? `–${assignment.end_time}` : ''}</span>
               </span>
             )}
             {vehicle && (
-              <span className="inline-flex items-center gap-1 text-sm text-slate-500">
+              <span className="inline-flex items-center gap-1 text-ui-body text-slate-500">
                 <Truck className="w-4 h-4 text-slate-400" />
                 <span className="font-mono font-medium">{vehicle.registration_number}</span>
               </span>
@@ -94,12 +94,12 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
           </div>
         </div>
         <div className="flex items-center gap-2.5 flex-shrink-0">
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold ${status.badge}`}>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-ui-body font-semibold ${status.badge}`}>
             <StatusIcon className="w-4 h-4" /> <span className="hidden sm:inline">{status.label}</span>
           </span>
 
           {assignment.status === 'started' && assignment.started_at && (
-            <span className="text-xs text-slate-400 hidden md:inline">since {format(new Date(assignment.started_at), 'HH:mm')}</span>
+            <span className="text-ui-caption text-slate-400 hidden md:inline">since {format(new Date(assignment.started_at), 'HH:mm')}</span>
           )}
           <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
         </div>
@@ -111,7 +111,7 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
           {/* Quick actions row */}
           <div className="flex flex-wrap gap-2 mb-4">
             {(assignment.status || 'assigned') === 'assigned' && !canPerformActions && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold">
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-ui-caption font-semibold">
                 <Clock className="w-3.5 h-3.5 flex-shrink-0" /> {isBeforeSiteOpen() ? 'Early access — work actions unlock at 8:00 AM' : 'Outside working hours (8am–5pm) — come back tomorrow'}
               </div>
             )}
@@ -130,7 +130,7 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
               </div>
             )}
             {assignment.status === 'started' && !canPerformActions && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold">
+              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 rounded-xl text-ui-caption font-semibold">
                 <Clock className="w-3.5 h-3.5 flex-shrink-0" /> {isBeforeSiteOpen() ? 'Early access — shift actions unlock at 8:00 AM' : 'Outside working hours — actions resume at 8:00 AM'}
               </div>
             )}
@@ -155,16 +155,16 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
                         <PlayCircle className="w-6 h-6" strokeWidth={2.5} /> Continue Shift
                       </button>
                       <button onClick={() => onLeaveSite?.(assignment.id)}
-                        className="flex items-center gap-2 px-4 py-4 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-sm font-semibold">
+                        className="flex items-center gap-2 px-4 py-4 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-ui-body font-semibold">
                         <DoorOpen className="w-5 h-5" /> Leave Site
                       </button>
                       <button onClick={() => onEarlyLeave(assignment.id)}
-                        className="flex items-center gap-2 px-4 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-sm font-semibold">
+                        className="flex items-center gap-2 px-4 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-ui-body font-semibold">
                         <PauseCircle className="w-5 h-5" /> Early Leave
                       </button>
                       {onAdHocVisit && (
                         <button onClick={onAdHocVisit}
-                          className="flex items-center gap-2 px-4 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-sm font-semibold">
+                          className="flex items-center gap-2 px-4 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 active:scale-95 transition text-ui-body font-semibold">
                           <Navigation className="w-5 h-5" /> Ad-hoc Visit
                         </button>
                       )}

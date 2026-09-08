@@ -19,7 +19,7 @@ export default function SubTabNav({ tabs, activeTab, onChange, className = '' })
             key={t.id}
             onClick={() => onChange(t.id)}
             type="button"
-            className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
+            className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-ui-body font-semibold transition-all flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
               active
                 ? 'bg-gradient-to-br from-[#8DC63F] to-[#6fa828] text-[#1c4a12] shadow-sm shadow-emerald-500/30 ring-1 ring-[#8DC63F]/40'
                 : 'text-slate-500 hover:bg-white/70 hover:text-[#2E5A1A]'
@@ -28,7 +28,7 @@ export default function SubTabNav({ tabs, activeTab, onChange, className = '' })
             {Icon && <Icon className={`w-4 h-4 transition-colors ${active ? 'text-[#1c4a12]' : 'text-slate-400 group-hover:text-[#2E5A1A]'}`} />}
             {t.label}
             {t.badge != null && t.badge > 0 && (
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${active ? 'bg-[#1c4a12]/15 text-[#1c4a12]' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-ui-micro font-bold ${active ? 'bg-[#1c4a12]/15 text-[#1c4a12]' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
             )}
           </button>
         );

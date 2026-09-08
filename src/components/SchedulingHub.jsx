@@ -110,13 +110,13 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
         <>
           <TemplateWeekCopy targetWeekStart={currentWeekStart} />
           <button onClick={handleGeotabSync} disabled={syncing} type="button"
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 active:scale-[0.97] transition shadow-sm disabled:opacity-60">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-blue-600 text-white text-ui-caption font-semibold hover:bg-blue-700 active:scale-[0.97] transition shadow-sm disabled:opacity-60">
             {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation2 className="w-4 h-4" />}
             <span className="hidden sm:inline">Sync GPS Timesheets</span>
             <span className="sm:hidden">GPS</span>
           </button>
           <button onClick={openChat} type="button"
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
             <CalendarClock className="w-4 h-4" />
             <span className="hidden sm:inline">Schedule Assistant</span>
             <span className="sm:hidden">Assistant</span>
