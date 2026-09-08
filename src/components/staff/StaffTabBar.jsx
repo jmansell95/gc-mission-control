@@ -38,7 +38,7 @@ export default function StaffTabBar() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 field-header-glass safe-area-bottom">
+    <nav className="mobile-tab-bar fixed bottom-0 left-0 right-0 z-40 field-header-glass safe-area-bottom">
       <div className="max-w-5xl mx-auto flex items-stretch justify-around px-2 relative">
         {TABS.map((tab) => {
           const Icon = tab.icon;

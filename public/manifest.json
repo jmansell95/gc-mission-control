@@ -1,14 +1,12 @@
 {
   "name": "GC Mission Control",
-  "short_name": "Mission Control",
+  "short_name": "GC Mission",
   "description": "Enterprise management platform for Ground Control operations — rota, timesheets, deliveries, assets, compliance & financials.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
+  "background_color": "#f8fafc",
   "theme_color": "#2E5A1A",
-  "background_color": "#ffffff",
-  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "https://media.base44.com/images/public/6a44ff49723371caf4d96d4c/993ce8312_GC_Logo-removebg-preview.png",
@@ -22,5 +20,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["business", "productivity", "utilities"]
 }

@@ -16,8 +16,16 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 export default function FieldShell() {
   return (
     <FieldDataProvider>
-      <div className="min-h-screen field-bg flex flex-col">
-        <main className="flex-1">
+      <div className="h-[100dvh] field-bg flex flex-col overflow-hidden safe-area-top">
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden mobile-app-content"
+          style={{
+            paddingBottom: 'calc(72px + env(safe-area-inset-bottom, 0px))',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+            overscrollBehavior: 'contain',
+          }}
+        >
           <ErrorBoundary>
             <Outlet />
           </ErrorBoundary>
