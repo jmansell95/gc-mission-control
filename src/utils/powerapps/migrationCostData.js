@@ -4,14 +4,32 @@
  * Single source of truth for the Base44 vs Power Apps cost comparison.
  * All figures in GBP. Based on 100-user deployment.
  *
- * Pricing sources:
- *  - Microsoft Power Platform pricing (Sept 2026, GBP):
- *    Power Apps Per User Premium: £16/user/month
- *    Power Automate Per Flow: £80/flow/month
- *    Power BI Pro: £8/user/month
- *    Dataverse: included in Per User (3GB relational + 3GB file per user)
- *  - Azure services (UK South, consumption estimates)
- *  - Base44: estimated platform subscription + integration credits
+ * ── PRICING SOURCES (verified 8 Sept 2026) ───────────────────────────────────
+ *
+ * Base44 — https://base44.com/pricing (NOT per-user; flat platform subscription):
+ *    Elite plan: $160/month billed annually = $1,920/year
+ *    Includes 1,200 message credits + 50,000 integration credits per month
+ *    (Pro = $80/mo, Builder = $40/mo, Starter = $16/mo, Free = $0)
+ *
+ * Microsoft Power Platform — https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing :
+ *    Power Apps Premium: $20/user/month (annual) — unlimited apps + Dataverse
+ *    Power Automate Premium: $15/user/month (per-flow model retired; now per-user)
+ *    Power BI Pro: $14/user/month (raised from $10, effective 1 Apr 2025)
+ *    Dataverse Database Capacity add-on: $40/GB/month
+ *    Power Pages: $200 per 100 users/site/month
+ *
+ * Exchange rate: $1 = £0.74 (£1 = $1.352, 8 Sept 2026 — source: OFX/MTFX)
+ *
+ * Converted GBP list prices:
+ *    Power Apps Premium: £14.80/user/month  → 100 users × 12 = £17,760/yr
+ *    Power Automate Premium: £11.10/user/month → 15 automation users × 12 = £1,998/yr
+ *    Power BI Pro: £10.36/user/month → 100 users × 12 = £12,432/yr
+ *    Dataverse add-on: £29.60/GB/month → 10 GB × 12 = £3,552/yr
+ *    Power Pages: £148/site/month → 1 client portal site × 12 = £1,776/yr
+ *    Base44 Elite: £118.40/month → £1,421/yr (flat, unlimited users)
+ *
+ * Azure Functions / infrastructure / email are consumption-based estimates
+ * (Azure pricing calculator, UK South) — not fixed list prices.
  *
  * Build-effort rates:
  *  - Power Platform developer: £65/hour (UK blended contract rate)
@@ -19,19 +37,21 @@
  */
 
 export const USER_COUNT = 100;
+export const AUTOMATION_USERS = 15; // not all 100 users need Power Automate flow authoring
 
 // ── RECURRING ANNUAL COSTS ──────────────────────────────────────────────────
 
 export const BASE44_RECURRING = [
-  { item: 'Platform subscription', detail: `${USER_COUNT} users × £20/user/month`, base44: 24000, powerApps: 0 },
-  { item: 'Power Apps Per User Premium', detail: `${USER_COUNT} users × £16/user/month`, base44: 0, powerApps: 19200 },
-  { item: 'Power Automate (per-flow, unattended)', detail: '10 unattended flows × £80/flow/month', base44: 0, powerApps: 9600 },
-  { item: 'Power BI Pro', detail: `${USER_COUNT} users × £8/user/month`, base44: 0, powerApps: 9600 },
-  { item: 'Dataverse additional capacity', detail: 'File/log capacity add-on', base44: 0, powerApps: 1200 },
-  { item: 'Azure Functions (Premium plan)', detail: '200 functions, always-on', base44: 0, powerApps: 1800 },
-  { item: 'Azure infrastructure', detail: 'Blob, SignalR, Key Vault, App Insights', base44: 0, powerApps: 1800 },
-  { item: 'Azure Communication Services (email)', detail: 'Automated notification emails', base44: 0, powerApps: 600 },
-  { item: 'Integration / AI credits', detail: 'LLM calls, file uploads, TTS', base44: 3000, powerApps: 0 },
+  { item: 'Base44 platform (Elite plan)', detail: 'Flat $160/mo annual · unlimited users · 1,200 msg + 50k integration credits', base44: 1421, powerApps: 0 },
+  { item: 'Power Apps Premium', detail: `${USER_COUNT} users × £14.80/user/month ($20 USD)`, base44: 0, powerApps: 17760 },
+  { item: 'Power Automate Premium', detail: `${AUTOMATION_USERS} automation users × £11.10/user/month ($15 USD)`, base44: 0, powerApps: 1998 },
+  { item: 'Power BI Pro', detail: `${USER_COUNT} users × £10.36/user/month ($14 USD, raised Apr 2025)`, base44: 0, powerApps: 12432 },
+  { item: 'Power Pages (client portal)', detail: '1 site × £148/site/month ($200 per 100 users/site)', base44: 0, powerApps: 1776 },
+  { item: 'Dataverse additional capacity', detail: '10 GB × £29.60/GB/month ($40/GB add-on)', base44: 0, powerApps: 3552 },
+  { item: 'Azure Functions (Premium plan)', detail: '200 functions, always-on (consumption estimate)', base44: 0, powerApps: 1800 },
+  { item: 'Azure infrastructure', detail: 'Blob, SignalR, Key Vault, App Insights (consumption estimate)', base44: 0, powerApps: 1800 },
+  { item: 'Azure Communication Services (email)', detail: 'Automated notification emails (consumption estimate)', base44: 0, powerApps: 600 },
+  { item: 'Integration / AI credit overages', detail: 'LLM calls, file uploads, TTS beyond 50k included credits', base44: 1000, powerApps: 0 },
 ];
 
 export const BASE44_ANNUAL_TOTAL = BASE44_RECURRING.reduce((s, r) => s + r.base44, 0);
@@ -114,7 +134,7 @@ export const PARITY_SUMMARY = {
 
 export const RECOMMENDATION = {
   verdict: 'Stay on Base44',
-  summary: 'A 1:1 Power Apps migration is technically feasible but costs £411K more over 5 years, takes 6 months of dedicated development, and carries high integration risk — with zero functional gain.',
+  summary: 'A 1:1 Power Apps migration is technically feasible but costs significantly more over 5 years, takes 6 months of dedicated development, and carries high integration risk — with zero functional gain.',
   factors: [
     { label: '5-Year TCO', base44: `£${BASE44_5YR_TCO.toLocaleString()}`, powerApps: `£${POWERAPPS_5YR_TCO.toLocaleString()}`, delta: `+£${TCO_DELTA.toLocaleString()}`, favours: 'base44' },
     { label: 'Annual recurring', base44: `£${BASE44_ANNUAL_TOTAL.toLocaleString()}/yr`, powerApps: `£${POWERAPPS_ANNUAL_TOTAL.toLocaleString()}/yr`, delta: `+£${(POWERAPPS_ANNUAL_TOTAL - BASE44_ANNUAL_TOTAL).toLocaleString()}/yr`, favours: 'base44' },
