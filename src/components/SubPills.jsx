@@ -21,7 +21,7 @@ import React from 'react';
 export default function SubPills({ pills = [], active, onChange }) {
   if (!pills || pills.length <= 1) return null;
   return (
-    <div className="relative bg-gradient-to-b from-slate-50/90 to-[#2E5A1A]/[0.04] backdrop-blur-md rounded-hub border border-[#2E5A1A]/12 shadow-[inset_0_1px_3px_rgba(46,90,26,0.08)] p-1.5 flex gap-1 overflow-x-auto no-scrollbar sm:flex-wrap">
+    <div className="relative sticky top-[3.5rem] lg:static z-10 bg-gradient-to-b from-slate-50/90 to-[#2E5A1A]/[0.04] backdrop-blur-md rounded-hub border border-[#2E5A1A]/12 shadow-[inset_0_1px_3px_rgba(46,90,26,0.08)] p-1.5 flex gap-1 overflow-x-auto no-scrollbar sm:flex-wrap">
       {pills.map(p => {
         const Icon = p.icon;
         const isActive = active === p.id;

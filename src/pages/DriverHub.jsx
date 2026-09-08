@@ -156,7 +156,7 @@ export default function DriverHub() {
           {sub !== 'day-plan' && (
             <>
               {/* Filter bar */}
-              <div className="bg-white rounded-hub border border-slate-200 p-hub-card-pad-sm md:p-hub-card-pad space-y-3">
+              <div className="hub-glass rounded-hub p-hub-card-pad-sm md:p-hub-card-pad space-y-3">
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
