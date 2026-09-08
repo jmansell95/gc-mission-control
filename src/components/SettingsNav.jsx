@@ -18,6 +18,8 @@ export const HUB_MIGRATED_ITEMS = new Set([
   // → Staff Hub
   'absences', 'holiday-accrual', 'staff-reviews',
   'timesheet-delegation',
+  // → Items with their own dedicated hubs (People, Fleet, Logistics)
+  'clients', 'contractors', 'suppliers', 'teams', 'staff', 'vehicles', 'timesheets',
 ]);
 
 export const settingsGroups = [
@@ -68,6 +70,7 @@ export const settingsGroups = [
     label: 'Planning & Briefing',
     items: [
       { id: 'azure-migration', label: 'Azure Migration Plan', icon: Cloud, desc: '13-week 1:1 migration roadmap to Azure-native architecture with A3 wall chart and parity matrix', external: '/azure-migration-plan', roles: ['admin'] },
+      { id: 'migration-hub', label: 'Migration Hub', icon: Database, desc: 'Power Apps migration financial comparison, build-effort estimates, roadmap timeline, parity matrix & integration risk map', roles: ['admin'] },
       { id: 'presentation-pack', label: 'Team Briefing Pack', icon: FileText, desc: 'Full platform walkthrough — why we built it, every hub, and recent major work. Download a print-ready PDF', external: '/presentation-pack', roles: ['admin'] },
     ],
   },
