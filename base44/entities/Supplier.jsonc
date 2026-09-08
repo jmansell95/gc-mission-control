@@ -10,6 +10,10 @@
       "type": "string",
       "description": "The division this supplier belongs to. Set automatically from the active division when the supplier is created. Drives division-scoped filtering \u2014 a division only sees its own suppliers. Blank = unassigned (visible to enterprise admins only)."
     },
+    "category": {
+      "type": "string",
+      "description": "Supplier category tag (e.g. 'training', 'materials', 'plant', 'ppe', 'fuel'). Populated from the configurable 'supplier_categories' ConfigList. Shown as a coloured pill on the supplier list and used to exclude training suppliers from the billable items wizard. Blank = uncategorised."
+    },
     "contact_name": {
       "type": "string",
       "description": "Primary contact person (legacy single-contact field, kept for backward compatibility). Prefer the 'contacts' array for multiple contacts."

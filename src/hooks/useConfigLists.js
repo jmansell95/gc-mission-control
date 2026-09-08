@@ -333,6 +333,20 @@ export const DEFAULT_CONFIG_LISTS = {
       { value: 'supplier', label: 'Supplier' },
     ],
   },
+  supplier_categories: {
+    label: 'Supplier Categories',
+    category: 'Suppliers',
+    is_system: true,
+    options: [
+      { value: 'training', label: 'Training' },
+      { value: 'materials', label: 'Materials' },
+      { value: 'plant', label: 'Plant' },
+      { value: 'ppe', label: 'PPE' },
+      { value: 'fuel', label: 'Fuel' },
+      { value: 'consumables', label: 'Consumables' },
+      { value: 'other', label: 'Other' },
+    ],
+  },
   // ---- Help ----
   help_categories: {
     label: 'Help Topic Categories',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { X, ShoppingCart, Package, PencilLine, Layers, Upload, Truck, HardHat, UserCheck, Loader2, FileText, Sparkles } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -39,6 +39,23 @@ export default function AddBillableItemsWizard({
   const [source, setSource] = useState('');    // 'purchased' | 'hired' | 'client_supplied'
   const [uploadRows, setUploadRows] = useState([]);
   const [uploading, setUploading] = useState(false);
+
+  // Exclude the entire Training category from the billable items flow:
+  // filter out RateCardItems whose own category is 'training' OR whose
+  // linked supplier's category is 'training'. Training courses and
+  // training-supplier rate cards never appear as billable items.
+  const filteredRateCardItems = useMemo(() => {
+    const trainingSupplierIds = new Set(
+      (suppliers || [])
+        .filter(s => (s.category || '').toLowerCase() === 'training')
+        .map(s => s.id)
+    );
+    return (rateCardItems || []).filter(r => {
+      if ((r.category || '').toLowerCase() === 'training') return false;
+      if (r.supplier_id && trainingSupplierIds.has(r.supplier_id)) return false;
+      return true;
+    });
+  }, [rateCardItems, suppliers]);
 
   const handleSelectCount = (c) => { setCount(c); setStep('method'); };
   const handleSelectMethod = (m) => { setMethod(m); setStep('source'); };
@@ -196,7 +213,7 @@ export default function AddBillableItemsWizard({
               job={job}
               source={source}
               method={method}
-              rateCardItems={rateCardItems}
+              rateCardItems={filteredRateCardItems}
               suppliers={suppliers}
               jobStart={jobStart}
               jobEnd={jobEnd}
@@ -209,7 +226,7 @@ export default function AddBillableItemsWizard({
               job={job}
               source={source}
               method={method}
-              rateCardItems={rateCardItems}
+              rateCardItems={filteredRateCardItems}
               suppliers={suppliers}
               jobStart={jobStart}
               jobEnd={jobEnd}

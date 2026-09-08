@@ -585,11 +585,11 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           {canSeeCosts && !adding && !effectiveLocked && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
               <button onClick={() => { setForm(blankForm()); setEditingId(null); setAdding(true); }}
-                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
-                <Plus className="w-4 h-4" /> Add Single Item
+                className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
+                <Plus className="w-4 h-4 text-emerald-600" /> Add Equipment
               </button>
               <button onClick={() => setShowBasket(true)}
-                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E] hover:opacity-90 active:scale-[0.98] transition shadow-md w-full sm:w-auto">
+                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
                 <ShoppingCart className="w-4 h-4" /> Add Billable Items
               </button>
               <button onClick={() => setShowManifest(true)}
