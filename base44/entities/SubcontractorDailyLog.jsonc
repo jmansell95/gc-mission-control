@@ -1,0 +1,127 @@
+{
+  "name": "SubcontractorDailyLog",
+  "type": "object",
+  "properties": {
+    "portal_type": {
+      "type": "string",
+      "enum": [
+        "subcontractor_onboarding"
+      ],
+      "default": "subcontractor_onboarding",
+      "description": "Portal type this log came from (always subcontractor for now)."
+    },
+    "subcontractor_name": {
+      "type": "string",
+      "description": "Name of the subcontractor who submitted the log."
+    },
+    "subcontractor_company": {
+      "type": "string",
+      "description": "Company the subcontractor represents."
+    },
+    "subcontractor_email": {
+      "type": "string",
+      "description": "Email of the subcontractor (for follow-up)."
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Job the log is for (if matched)."
+    },
+    "job_name": {
+      "type": "string",
+      "description": "Job name (denormalised for display)."
+    },
+    "site_reference": {
+      "type": "string",
+      "description": "Site reference or location (free text)."
+    },
+    "log_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the work was carried out."
+    },
+    "tasks": {
+      "type": "string",
+      "description": "Description of tasks performed during the day."
+    },
+    "hours_worked": {
+      "type": "number",
+      "description": "Total hours worked that day."
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Start time (HH:MM)."
+    },
+    "end_time": {
+      "type": "string",
+      "description": "End time (HH:MM)."
+    },
+    "meterage": {
+      "type": "number",
+      "description": "Meters drilled (if applicable)."
+    },
+    "borehole_ref": {
+      "type": "string",
+      "description": "Borehole reference (if applicable)."
+    },
+    "equipment_used": {
+      "type": "string",
+      "description": "Equipment used during the day."
+    },
+    "crew_names": {
+      "type": "string",
+      "description": "Names of crew members on site."
+    },
+    "photo_urls": {
+      "type": "string",
+      "description": "Comma-separated URLs of photos uploaded with the log."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or observations."
+    },
+    "uses_keylogbook": {
+      "type": "boolean",
+      "description": "True when the subcontractor indicated they use KeyLogBook (so managers know logs are recorded there, not here)."
+    },
+    "submitted_at": {
+      "type": "string",
+      "description": "ISO timestamp when the log was submitted."
+    },
+    "manager_review_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "queried"
+      ],
+      "default": "pending",
+      "description": "Manager review status."
+    },
+    "manager_review_note": {
+      "type": "string",
+      "description": "Note from the manager when reviewing."
+    }
+  },
+  "required": [
+    "subcontractor_name",
+    "log_date"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

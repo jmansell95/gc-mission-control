@@ -1,0 +1,86 @@
+{
+  "name": "PortalSignIn",
+  "type": "object",
+  "properties": {
+    "portal_type": {
+      "type": "string",
+      "enum": [
+        "client_portal",
+        "subcontractor_onboarding"
+      ],
+      "description": "Which portal the sign-in came from."
+    },
+    "visitor_name": {
+      "type": "string",
+      "description": "Name of the visitor who signed in (client representative or subcontractor)."
+    },
+    "visitor_company": {
+      "type": "string",
+      "description": "Company the visitor represents."
+    },
+    "visitor_email": {
+      "type": "string",
+      "description": "Email of the visitor (optional, for follow-up)."
+    },
+    "visitor_phone": {
+      "type": "string",
+      "description": "Phone number of the visitor (optional)."
+    },
+    "job_id": {
+      "type": "string",
+      "description": "Job the visitor signed in for (if matched)."
+    },
+    "job_name": {
+      "type": "string",
+      "description": "Job name (denormalised for display)."
+    },
+    "site_reference": {
+      "type": "string",
+      "description": "Site reference or location the visitor entered (free text \u2014 may be a job reference, site name, or address)."
+    },
+    "signed_in_at": {
+      "type": "string",
+      "description": "ISO timestamp when the visitor signed in."
+    },
+    "signed_out_at": {
+      "type": "string",
+      "description": "ISO timestamp when the visitor signed out (optional \u2014 visitors may not sign out)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "on_site",
+        "signed_out"
+      ],
+      "default": "on_site",
+      "description": "Whether the visitor is currently on site or has signed out."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes from the visitor (e.g. reason for visit, who they're meeting)."
+    }
+  },
+  "required": [
+    "portal_type",
+    "visitor_name",
+    "signed_in_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

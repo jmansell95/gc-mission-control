@@ -59,6 +59,118 @@
       "type": "boolean",
       "default": true,
       "description": "Master toggle. When false, the portal shows a 'temporarily unavailable' message."
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique stable ID for this widget (used as React key and for reorder tracking)."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "progress",
+              "schedule",
+              "team",
+              "documents",
+              "photos",
+              "milestones",
+              "comments",
+              "client_charge",
+              "site_signin",
+              "daily_logs",
+              "keylogbook_prompt",
+              "company_info",
+              "insurance",
+              "cis",
+              "contacts",
+              "references",
+              "custom_html"
+            ],
+            "description": "Widget type. Client portal widgets: progress, schedule, team, documents, photos, milestones, comments, client_charge, site_signin. Subcontractor portal widgets: company_info, insurance, cis, contacts, references, daily_logs, keylogbook_prompt, site_signin. custom_html = admin-defined HTML block."
+          },
+          "title": {
+            "type": "string",
+            "description": "Display title shown in the widget header."
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this widget is visible on the portal."
+          },
+          "order": {
+            "type": "number",
+            "default": 0,
+            "description": "Sort order \u2014 lower appears first. Widgets are draggable in the editor to set this."
+          },
+          "config": {
+            "type": "object",
+            "description": "Per-widget configuration (e.g. custom HTML content, column overrides, filter settings).",
+            "properties": {
+              "html": {
+                "type": "string",
+                "description": "For custom_html widgets \u2014 the raw HTML content to render."
+              },
+              "columns": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "For table-based widgets \u2014 which columns to show."
+              },
+              "filter": {
+                "type": "string",
+                "description": "Optional filter expression for the widget's data."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title"
+        ]
+      },
+      "default": [],
+      "description": "Ordered list of widgets shown on the portal. Admins can add, remove, reorder (drag-and-drop), and configure each widget. The portal renders them in order, skipping any with enabled=false."
+    },
+    "site_signin_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the portal shows a 'Sign In to Site' button so clients and subcontractors can record their arrival on site. Creates a PortalSignIn record with timestamp, name, company, and site/job reference."
+    },
+    "site_signin_instructions": {
+      "type": "string",
+      "description": "Instructions shown to the visitor on the site sign-in screen (e.g. 'Tap sign in when you arrive on site so the site team knows you're here')."
+    },
+    "subcontractor_logs_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the subcontractor portal shows a daily log form so subcontractors can record what they did each day \u2014 tasks, hours, meterage, equipment used, photos. Creates SubcontractorDailyLog records visible to managers."
+    },
+    "subcontractor_logs_instructions": {
+      "type": "string",
+      "description": "Instructions shown to the subcontractor on the daily log screen (e.g. 'Log your daily activities so we have a record of your day on site')."
+    },
+    "keylogbook_prompt_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, the subcontractor portal shows a KeyLogBook prompt asking 'Do you use KeyLogBook?'. If they click No, the daily log form loads. If they click Yes, a message tells them to log everything on their tablet inside KeyLogBook."
+    },
+    "keylogbook_prompt_text": {
+      "type": "string",
+      "description": "The question text shown in the KeyLogBook prompt (e.g. 'Do you use KeyLogBook for your drilling logs?')."
+    },
+    "keylogbook_yes_message": {
+      "type": "string",
+      "description": "The message shown when the subcontractor clicks 'Yes' to the KeyLogBook prompt (e.g. 'Great \u2014 please log all your drilling activity on your tablet inside KeyLogBook. It will sync automatically to this system.')."
+    },
+    "keylogbook_no_message": {
+      "type": "string",
+      "description": "The message shown when the subcontractor clicks 'No' to the KeyLogBook prompt (e.g. 'No problem \u2014 please use the daily log form below to record your activities each day.')."
     }
   },
   "required": [
