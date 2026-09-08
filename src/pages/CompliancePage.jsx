@@ -5,12 +5,14 @@ import { base44 } from '@/api/base44Client';
 import {
   ShieldCheck, ShieldAlert, AlertTriangle, BarChart3, HardHat,
   CalendarDays, ExternalLink, Lock, Siren, Leaf, Users,
-  FileX, Clock, TrendingUp, XCircle,
+  FileX, FileText, Clock, TrendingUp, XCircle,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
 import { COMPLIANCE_HELP_TOPICS, COMPLIANCE_ONBOARDING, COMPLIANCE_QUICK_LINKS } from '@/components/compliance/complianceHubContent';
 import AuditDashboardTab from '@/components/compliance/AuditDashboardTab';
+import StaffComplianceDirectory from '@/components/compliance/StaffComplianceDirectory';
+import JobPacksTab from '@/components/compliance/JobPacksTab';
 import IncidentTimelineTab from '@/components/compliance/IncidentTimelineTab';
 import IncidentReporter from '@/components/safety/IncidentReporter';
 import RIDDORStatsPanel from '@/components/safety/RIDDORStatsPanel';
@@ -28,7 +30,11 @@ const SC_URL = 'https://app.safetyculture.com';
 const TABS = [
   { id: 'audit-dashboard', label: 'Audit Dashboard', icon: BarChart3, sub: [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'staff-compliance', label: 'Staff Compliance', icon: Users },
     { id: 'crew-checks', label: 'Crew Checks', icon: Users },
+  ]},
+  { id: 'job-packs', label: 'Job Packs', icon: FileText, sub: [
+    { id: 'packs', label: 'Auditor Packs', icon: FileText },
   ]},
   { id: 'incidents', label: 'Incidents', icon: Siren, sub: [
     { id: 'timeline', label: 'Timeline', icon: Siren },
@@ -149,7 +155,14 @@ export default function CompliancePage() {
       {tab === 'audit-dashboard' && (
         <>
           {subTab === 'overview' && <AuditDashboardTab />}
+          {subTab === 'staff-compliance' && <StaffComplianceDirectory />}
           {subTab === 'crew-checks' && <CrewShiftStatusWidget />}
+        </>
+      )}
+
+      {tab === 'job-packs' && (
+        <>
+          {subTab === 'packs' && <JobPacksTab />}
         </>
       )}
 

@@ -1,4 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import {
+  brandedWrapper, escapeHtml as escHtml, getAppBaseUrl,
+  dataTable, statusPill, pillDanger, pillWarning, pillSuccess,
+  sectionCard, callout, helpTip, heading, p, html, statTileRow,
+} from '../../shared/emailStyling.ts';
 
 // ============================================================
 // checkJobBudgetAlerts — scheduled alert for budget overruns and
@@ -174,22 +179,49 @@ function formatGBP(n: number): string {
   return '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
 
-function escapeHtml(s: any): string {
-  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 function buildAlertEmail(alerts: any[]): string {
-  const rows = alerts.map(a => {
-    const alertLines = a.alerts.map((al: any) => `    • [${escapeHtml(al.severity.toUpperCase())}] ${escapeHtml(al.message)}`).join('\n');
-    return `  ${escapeHtml(a.job_name)} (${escapeHtml(a.job_status)})\n    Budget: ${formatGBP(a.budget)} | Cost: ${formatGBP(a.cost_net)} | Revenue: ${formatGBP(a.revenue_net)} | Profit: ${formatGBP(a.profit)} | Margin: ${a.margin_pct}%\n${alertLines}`;
-  }).join('\n\n');
+  const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const highCount = alerts.filter(a => a.alerts.some((al: any) => al.severity === 'high')).length;
+  const medCount = alerts.length - highCount;
 
-  return `<div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px;">
-  <h2 style="color: #dc2626;">⚠️ Job Budget Alert</h2>
-  <p>The following active jobs have exceeded your configured budget overrun or margin thresholds and need management attention:</p>
-  <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; border-radius: 6px; margin: 16px 0;">
-<pre style="font-family: Arial, sans-serif; font-size: 13px; white-space: pre-wrap; margin: 0;">${rows}</pre>
-  </div>
-  <p style="color: #666; font-size: 12px;">This alert was generated automatically. Review each job's financial breakdown in the admin dashboard → Job Financials tab.</p>
-</div>`;
+  const stats = statTileRow([
+    { label: 'Jobs Flagged', value: String(alerts.length), icon: '📊', color: '#be123c' },
+    { label: 'High Severity', value: String(highCount), icon: '🛑', color: highCount > 0 ? '#be123c' : '#059669' },
+    { label: 'Medium Severity', value: String(medCount), icon: '⚠', color: medCount > 0 ? '#d97706' : '#059669' },
+    { label: 'Date', value: today.split(' ').slice(0, 2).join(' '), icon: '📅', color: '#2E5A1A' },
+  ]);
+
+  // Build alert table rows
+  const tableRows = alerts.map(a => {
+    const topSeverity = a.alerts[0].severity;
+    const pill = topSeverity === 'high' ? html(pillDanger(topSeverity.toUpperCase())) : html(pillWarning(topSeverity.toUpperCase()));
+    const alertSummary = a.alerts.map((al: any) => al.message).join('; ');
+    return [
+      a.job_name,
+      formatGBP(a.budget),
+      formatGBP(a.cost_net),
+      `${a.margin_pct}%`,
+      formatGBP(a.profit),
+      alertSummary,
+      pill,
+    ];
+  });
+
+  const table = dataTable(
+    ['Job', 'Budget', 'Cost', 'Margin', 'Profit', 'Alerts', 'Severity'],
+    tableRows,
+  );
+
+  const bodyHtml =
+    heading('Job budget alert') +
+    p(`${alerts.length} active project${alerts.length > 1 ? 's' : ''} have exceeded your configured budget overrun or margin thresholds and need management attention. Review the financial breakdown for each job in the admin dashboard.`) +
+    stats +
+    callout(`${highCount} high-severity alert${highCount !== 1 ? 's' : ''} — immediate review recommended. ${highCount > 0 ? 'These jobs are running at a loss or significantly over budget.' : ''}`, 'danger') +
+    sectionCard('Flagged Projects', table, { titleBg: '#be123c' }) +
+    helpTip('What to do next', 'Open each flagged job in the admin dashboard → Job Financials tab. Review the cost breakdown, check for missing charges or unapproved timesheets, and adjust the budget or scope if needed. For negative-profit jobs, escalate to the project manager immediately.');
+
+  return brandedWrapper(bodyHtml, {
+    headerVariant: 'rose',
+    banner_subtitle: 'Budget Alert · ' + today,
+  });
 }
