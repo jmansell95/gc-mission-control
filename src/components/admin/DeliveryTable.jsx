@@ -20,11 +20,11 @@ const statusBadge = {
 
 export default function DeliveryTable({ deliveries, jobs, drivers, onSelectDelivery }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+    <div className="hub-glass rounded-hub overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200 text-left">
+            <tr className="bg-slate-50/80 border-b border-slate-200/60 text-left">
               <th className="px-3 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">Type</th>
               <th className="px-3 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">Status</th>
               <th className="px-3 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">Job</th>

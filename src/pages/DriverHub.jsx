@@ -211,7 +211,7 @@ export default function DriverHub() {
                   {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="bg-white rounded-hub border border-slate-200">
+                <div className="hub-glass rounded-hub">
                   <EmptyState icon={Truck} title="No runs found" message="Try adjusting your filters." />
                 </div>
               ) : sub === 'route' ? (
@@ -246,7 +246,7 @@ export default function DriverHub() {
 
       {/* === Reconciliation tab === */}
       {tab === 'reconcile' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-5">
+        <div className="hub-glass rounded-hub p-hub-card-pad-sm md:p-hub-card-pad">
           <BulkDeliveryReconciliation />
         </div>
       )}

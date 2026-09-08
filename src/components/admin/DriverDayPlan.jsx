@@ -67,7 +67,7 @@ export default function DriverDayPlan({ deliveries, jobs, drivers, onSelectDeliv
 
   if (todayDeliveries.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 text-center py-12 text-slate-400">
+      <div className="hub-glass rounded-hub text-center py-12 text-slate-400">
         <Clock className="w-8 h-8 mx-auto mb-2 text-slate-300" />
         No deliveries scheduled for today
       </div>
@@ -109,8 +109,8 @@ export default function DriverDayPlan({ deliveries, jobs, drivers, onSelectDeliv
         const runLoadedKg = run.stops.reduce((s, d) => s + (Number(d.total_loaded_weight_kg) || Number(d.weight_kg) || 0), 0);
         const runAxleNote = run.stops.find(s => s.axle_guidance_note)?.axle_guidance_note || '';
         return (
-          <div key={run.driverId} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2.5 bg-slate-50">
+          <div key={run.driverId} className="hub-glass rounded-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-200/60 flex items-center gap-2.5 bg-slate-50/50">
               <div className="w-9 h-9 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                 {(run.driverName || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()}
               </div>

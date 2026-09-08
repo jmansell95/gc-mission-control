@@ -23,8 +23,8 @@ export default function DeliveryBoard({ deliveries, jobs, drivers, onSelectDeliv
         const items = grouped[col.key] || [];
         const Icon = col.icon;
         return (
-          <div key={col.key} className="flex flex-col rounded-2xl bg-slate-100/70 border border-slate-200 min-h-[200px]">
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-slate-200">
+          <div key={col.key} className="flex flex-col rounded-2xl hub-glass min-h-[200px]">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-slate-200/60">
               <div className="flex items-center gap-2">
                 <span className={`w-7 h-7 rounded-lg flex items-center justify-center ${col.accent}`}>
                   <Icon className="w-4 h-4" />
