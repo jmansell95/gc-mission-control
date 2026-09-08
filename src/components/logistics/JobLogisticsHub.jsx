@@ -16,7 +16,7 @@ import LoadPlannerModal from '@/components/logistics/LoadPlannerModal';
 import DeliveryList from '@/components/logistics/DeliveryList';
 import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
-import BillableItemsBasketModal from '@/components/logistics/BillableItemsBasketModal';
+import AddBillableItemsWizard from '@/components/logistics/wizard/AddBillableItemsWizard';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
 import { billingTotal } from '@/components/equipment/shared';
@@ -802,7 +802,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
       )}
 
       {showBasket && (
-        <BillableItemsBasketModal
+        <AddBillableItemsWizard
           jobId={jobId}
           job={job}
           rateCardItems={rateCardItems}

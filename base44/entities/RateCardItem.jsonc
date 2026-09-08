@@ -95,6 +95,27 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this rate is current and available for use."
+    },
+    "price_query_pending": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a quote upload detected a price discrepancy and the billing team flagged it for query with the supplier. Surfaces as a 'price query pending' badge in the rate card manager so the team can raise it with the supplier before rectifying the stored price."
+    },
+    "price_query_note": {
+      "type": "string",
+      "description": "Note explaining the price query \u2014 the quote price that differed, the quote source, and why it's being queried. Set when price_query_pending is true."
+    },
+    "price_query_quote_price": {
+      "type": "number",
+      "description": "The unit price from the quote that differed from the stored price, captured when the query was raised so the billing team can see the discrepancy at a glance."
+    },
+    "price_query_raised_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the price query was raised."
+    },
+    "price_query_raised_by": {
+      "type": "string",
+      "description": "Name of the user who raised the price query."
     }
   },
   "required": [
