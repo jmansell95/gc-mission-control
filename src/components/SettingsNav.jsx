@@ -79,7 +79,7 @@ export const settingsGroups = [
       { id: 'dropdowns', label: 'Dropdown Manager', icon: ListChecks, desc: 'Add, rename, reorder or remove options in every dropdown — qualifications, asset types, revenue streams & more' },
       { id: 'global-branding', label: 'Global Branding', icon: Palette, desc: 'Default colours, banner and footer for all automated emails' },
       { id: 'login-branding', label: 'Login Page Customiser', icon: Palette, desc: 'Customise the staff login page — background, colours, logo, welcome text & live preview', roles: ['admin'] },
-      { id: 'portal-branding', label: 'Portal Branding Editor', icon: Palette, desc: 'Customise the client portal & subcontractor onboarding portal — welcome text, logo, colours, support contacts & live preview', roles: ['admin'] },
+      { id: 'portal-branding', label: 'Portal Editor', icon: Palette, desc: 'Customise everything on your client & subcontractor portals — appearance, widgets, site sign-in, daily logs & KeyLogBook integration', roles: ['admin'] },
       { id: 'email-templates', label: 'Email Builder', icon: Mail, desc: 'Modern branded email template builder — live preview, design kit, tables, pills & buttons. Every email uses the same GC Mission Control design' },
       { id: 'report-templates', label: 'Report Builder', icon: FileBarChart, desc: 'Modern report template builder — mirrors the Email Builder. Pick data source, fields, chart type, filters & scheduling with a live layout preview' },
       { id: 'email-alerts', label: 'Email Alerts', icon: Mail, desc: 'Edit templates, recipients and timing for each automated email' },

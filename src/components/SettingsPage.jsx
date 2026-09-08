@@ -8,7 +8,8 @@ import AbsenceManager from '@/components/AbsenceManager';
 import EmailAlertsSettings from '@/components/EmailAlertsSettings';
 import GlobalBrandingSettings from '@/components/GlobalBrandingSettings';
 import LoginBrandingSettings from '@/components/settings/LoginBrandingSettings';
-import PortalBrandingEditor from '@/components/settings/PortalBrandingEditor';
+import PortalEditor from '@/components/settings/PortalEditor';
+import SettingsPageBanner from '@/components/settings/SettingsPageBanner';
 import SupplierManager from '@/components/SupplierManager';
 import OvertimeRatesManager from '@/components/OvertimeRatesManager';
 import BusinessConfigManager from '@/components/BusinessConfigManager';
@@ -145,8 +146,24 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       return <SettingsAccessGuard pageLabel={active.label} lockedBy={activeLockdown.lockedBy} lockedAt={activeLockdown.lockedAt} />;
     }
 
+    // The 'hub' tab renders its own full-page overview — no shared banner.
+    if (activeTab === 'hub') return <SettingsHubOverview onNavigate={setActiveTab} items={items} />;
+
+    // Shared settings page banner — consistent across every settings sub-page.
+    const banner = active ? (
+      <SettingsPageBanner icon={active.icon} title={active.label} description={active.desc} />
+    ) : null;
+
+    return (
+      <div className="space-y-5">
+        {banner}
+        <div>{renderSettingsComponent()}</div>
+      </div>
+    );
+  };
+
+  const renderSettingsComponent = () => {
     switch (activeTab) {
-      case 'hub': return <SettingsHubOverview onNavigate={setActiveTab} items={items} />;
       case 'autopilot': return <AutopilotControlPanel />;
       case 'divisions': return <DivisionManager />;
       case 'readiness': return <ReadinessManager />;
@@ -166,7 +183,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'email-alerts': return <EmailAlertsSettings />;
       case 'global-branding': return <GlobalBrandingSettings />;
       case 'login-branding': return <LoginBrandingSettings />;
-      case 'portal-branding': return <PortalBrandingEditor />;
+      case 'portal-branding': return <PortalEditor />;
       case 'automations': return <AutomationCenter />;
       case 'daily-checklists': return <DailyChecklistManager />;
       case 'dropdowns': return <DropdownConfigManager />;
