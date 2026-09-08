@@ -17,6 +17,7 @@ import { isWithinSiteHours, isBeforeSiteOpen, SITE_OPEN_TIME, SITE_CLOSE_TIME } 
 import { saveOfflineDelivery, hasOfflineDelivery } from '@/utils/offlineSync';
 
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import StartMyRunHero from '@/components/staff/StartMyRunHero';
 import StaffHeaderActions from '@/components/field/StaffHeaderActions';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
@@ -388,7 +389,7 @@ export default function DeliveryDashboard() {
       <RedAlertBanner />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 md:px-6 pt-3 md:pt-4 space-y-3">
+      <FieldContainer>
         <SyncHUD />
         <StaffAlerts isOnline={isOnline} staff={staff} />
 
@@ -480,7 +481,7 @@ export default function DeliveryDashboard() {
             </div>
           </div>
         )}
-      </div>
+      </FieldContainer>
 
       {/* Site collection scanner */}
       {scanDelivery && (

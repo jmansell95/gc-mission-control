@@ -49,7 +49,7 @@ export default function EnterpriseHeader() {
       style={{ paddingTop: 'env(safe-area-inset-top)' }}
     >
       <div className="absolute inset-0 sidebar-modern" />
-      <div className="relative z-10 h-14 flex items-center justify-between px-3">
+      <div className="relative z-10 h-14 flex items-center justify-between px-4">
         <div className="flex items-center gap-2.5 flex-shrink-0">
           <Logo height={26} />
 

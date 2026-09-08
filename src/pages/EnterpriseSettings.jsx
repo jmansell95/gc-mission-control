@@ -80,7 +80,7 @@ export default function EnterpriseSettings() {
 
       {/* Desktop top bar — visible only on lg+ since EnterpriseHeader is mobile-only */}
       <div className="hidden lg:block sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-slate-200/70">
-        <div className="px-6 h-14 flex items-center justify-between">
+        <div className="px-4 lg:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/enterprise')} type="button"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-600 text-sm font-semibold hover:bg-slate-100 transition">

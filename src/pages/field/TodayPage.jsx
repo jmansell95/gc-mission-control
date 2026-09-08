@@ -21,6 +21,7 @@ import AdHocVisitModal from '@/components/staff/AdHocVisitModal';
 import TodayPrepStrip from '@/components/staff/TodayPrepStrip';
 import SyncHUD from '@/components/staff/SyncHUD';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import StaffHeaderActions from '@/components/field/StaffHeaderActions';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import StaffAlerts from '@/components/staff/StaffAlerts';
@@ -417,7 +418,7 @@ export default function TodayPage() {
       <DivisionIdentityBar />
       <RedAlertBanner />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 md:pt-4 space-y-3">
+      <FieldContainer>
         <OfflineBanner />
         <SyncHUD />
         <TrackingConsentCard staff={staff} onSignNow={() => setShowConsentModal(true)} />
@@ -636,7 +637,7 @@ export default function TodayPage() {
             ))}
           </div>
         )}
-      </div>
+      </FieldContainer>
 
       {/* ── Modals ── */}
       {shiftWizard && (

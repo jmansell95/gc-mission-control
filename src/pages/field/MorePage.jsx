@@ -5,6 +5,7 @@ import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import { format } from 'date-fns';
@@ -70,7 +71,7 @@ export default function MorePage() {
       accentColor={activeDivision?.color}
     >
       <DivisionIdentityBar />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 md:pt-5 space-y-4">
+      <FieldContainer space="4">
         {/* Quick link tiles — 2 col on phone, 3 on tablet, 4 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
           {tiles.map((tile) => {
@@ -115,7 +116,7 @@ export default function MorePage() {
             allStaff={allStaff}
           />
         </div>
-      </div>
+      </FieldContainer>
 
       {showScheduleSummary && (
         <ScheduleSplash

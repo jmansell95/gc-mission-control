@@ -215,7 +215,7 @@ export default function StaffProfile() {
       {/* ── Premium card stack on vibrant background (matches StaffDashboard) ── */}
       <div>
         {/* Hero card */}
-        <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="insight-card rounded-2xl p-5 md:p-6">
             <div className="flex items-center gap-4">
               <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={64} />
@@ -257,26 +257,26 @@ export default function StaffProfile() {
         </div>
 
         {/* Quick Stats — 2x2 grid of white cards */}
-        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
           <ProfileStats staffId={staff.id} jobType={staff.team?.job_type} />
         </div>
 
         {/* Zero-touch timesheet status — shows today's auto-built timesheet */}
         {!viewingOther && staff?.id && (
-          <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
             <AutoTimesheetStatus staffId={staff.id} />
           </div>
         )}
 
         {/* Today's GPS movements — geofence timeline + breadcrumb trail */}
         {staff?.id && (
-          <div className="max-w-4xl mx-auto px-4 md:px-6 mt-3">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
             <StaffMovementTimeline staffId={staff.id} staffName={staff.name} />
           </div>
         )}
 
         {/* Scrollable single-line tab bar */}
-        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
           <SubPills
             pills={TABS.filter(t => !(t.key === 'crew' && !staff.team_id)).map(t => ({
               id: t.key,
@@ -290,7 +290,7 @@ export default function StaffProfile() {
         </div>
 
         {/* Tab Content — white rounded cards on off-white background */}
-        <div className="max-w-4xl mx-auto px-4 md:px-6 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
           {activeTab === 'performance' && (staff.id
             ? <div className="space-y-4">
                 <div className="insight-card rounded-2xl p-5 md:p-6">

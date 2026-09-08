@@ -8,6 +8,7 @@ import {
   Wrench, Leaf, Award, RefreshCw, Loader2, ExternalLink,
 } from 'lucide-react';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useFieldData } from '@/components/field/FieldDataProvider';
@@ -155,7 +156,7 @@ export default function MyDutiesPage() {
       accentColor={activeDivision?.color}
     >
       <DivisionIdentityBar />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 md:pt-5 space-y-5">
+      <FieldContainer space="5">
         {/* Summary banner */}
         {data && (
           <div className={`field-card rounded-2xl p-4 ${data.summary.all_done ? 'border-emerald-200 bg-emerald-50/40' : data.summary.overdue > 0 ? 'border-red-200 bg-red-50/30' : 'border-amber-200 bg-amber-50/30'}`}>
@@ -226,7 +227,7 @@ export default function MyDutiesPage() {
             </div>
           );
         })}
-      </div>
+      </FieldContainer>
     </FieldPageShell>
   );
 }

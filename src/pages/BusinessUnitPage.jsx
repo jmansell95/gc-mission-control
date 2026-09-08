@@ -97,7 +97,7 @@ export default function BusinessUnitPage() {
       <div className="relative">
         <div className="absolute inset-0 overflow-hidden" style={{ background: `linear-gradient(135deg, ${divColor} 0%, ${divColor}dd 50%, #0a120a 100%)` }} />
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 85% 20%, rgba(141,198,63,0.4) 0%, transparent 50%)' }} />
-        <div className="relative px-4 xl:px-6 xl:pt-8 pb-6">
+        <div className="relative px-4 lg:px-6 pt-4 lg:pt-6 pb-5 lg:pb-6 safe-area-top">
           <div className="max-w-7xl mx-auto">
             {/* Back button */}
             <button
@@ -150,7 +150,7 @@ export default function BusinessUnitPage() {
       </div>
 
       {/* ─── Division Breakdown ─── */}
-      <div className="px-4 xl:px-6 pb-24 xl:pb-8 max-w-7xl mx-auto">
+      <div className="px-4 lg:px-6 pb-24 xl:pb-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2.5 mt-6 sm:mt-8 mb-4">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-md flex-shrink-0">
             <Building2 className="w-5 h-5 text-white" />

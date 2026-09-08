@@ -3,6 +3,7 @@ import { CalendarDays } from 'lucide-react';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import WeeklyRotaView from '@/components/staff/WeeklyRotaView';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 
@@ -20,7 +21,7 @@ export default function UpcomingPage() {
       accentColor={activeDivision?.color}
     >
       <DivisionIdentityBar />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 md:pt-4 space-y-3">
+      <FieldContainer>
         {assignmentsLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 2 }).map((_, i) => (
@@ -43,7 +44,7 @@ export default function UpcomingPage() {
             staff={staff}
           />
         )}
-      </div>
+      </FieldContainer>
     </FieldPageShell>
   );
 }
