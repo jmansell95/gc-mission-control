@@ -45,7 +45,7 @@ export const FEATURE_REGISTRY = {
   dashboard:      { label: 'Dashboard',        type: 'hub', icon: Grid3x3,      dependsOn: null,           defaultState: 'active' },
   jobs:           { label: 'Jobs Hub',         type: 'hub', icon: Briefcase,   dependsOn: null,           defaultState: 'active' },
   scheduling:     { label: 'Scheduling Hub',   type: 'hub', icon: Calendar,    dependsOn: null,           defaultState: 'active' },
-  staff:          { label: 'Staff Hub',        type: 'hub', icon: Users,       dependsOn: null,           defaultState: 'active' },
+  staff:          { label: 'People Hub',        type: 'hub', icon: Users,       dependsOn: null,           defaultState: 'active' },
   logistics:      { label: 'Deliveries Hub',   type: 'hub', icon: Truck,       dependsOn: null,           defaultState: 'active' },
   assets:         { label: 'Assets Hub',       type: 'hub', icon: Boxes,       dependsOn: null,           defaultState: 'active' },
   fleet:          { label: 'Tracking',         type: 'hub', icon: Car,         dependsOn: null,           defaultState: 'active' },

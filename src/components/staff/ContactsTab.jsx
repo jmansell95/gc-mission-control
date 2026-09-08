@@ -33,7 +33,7 @@ const SUB_TO_TYPE = {
 
 const emptyForm = {
   full_name: '', job_title: '', company: '', category: [], market_dojo_onboarded: false,
-  email: '', phone: '', mobile: '',
+  email: '', phone: '', mobile: '', account_number: '',
 };
 
 export default function ContactsTab({ activeSub }) {
@@ -188,6 +188,7 @@ export default function ContactsTab({ activeSub }) {
           email: s.contact_email || contact.email || '',
           phone: s.contact_phone || contact.phone || '',
           mobile: s.emergency_mobile || '',
+          account_number: s.account_number || '',
           onboarded: false,
           contacts: s.contacts || [],
           raw: s,
@@ -254,6 +255,7 @@ export default function ContactsTab({ activeSub }) {
           contact_email: email,
           contact_phone: phone,
           emergency_mobile: addForm.mobile.trim() || '',
+          account_number: addForm.account_number?.trim() || '',
           contacts,
           division_id: activeDivisionId || '',
         });
@@ -281,6 +283,7 @@ export default function ContactsTab({ activeSub }) {
       email: rec.email || '',
       phone: rec.phone || '',
       mobile: rec.mobile || '',
+      account_number: rec.account_number || '',
     });
     setEditing(rec);
   };
@@ -321,6 +324,7 @@ export default function ContactsTab({ activeSub }) {
           contact_email: email,
           contact_phone: phone,
           emergency_mobile: editForm.mobile?.trim() || '',
+          account_number: editForm.account_number?.trim() || '',
           contacts,
         });
         queryClient.invalidateQueries({ queryKey: ['contacts-suppliers'] });
@@ -476,6 +480,9 @@ export default function ContactsTab({ activeSub }) {
                   {meta.key === 'supplier' ? (
                     <>
                       <p className="text-ui-subheading font-bold text-slate-900 truncate">{rec.company || '—'}</p>
+                      {rec.account_number && (
+                        <p className="text-ui-micro text-slate-400 mt-0.5">A/C: {rec.account_number}</p>
+                      )}
                       <div className="flex flex-wrap gap-1 mt-1">
                         {(Array.isArray(rec.category) ? rec.category : (rec.category ? [rec.category] : [])).length === 0 ? (
                           <span className="inline-block px-2 py-0.5 rounded-full text-ui-micro font-bold bg-slate-100 text-slate-500">Uncategorised</span>
@@ -568,6 +575,10 @@ export default function ContactsTab({ activeSub }) {
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
                     <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Account Number</label>
+                    <input type="text" value={addForm.account_number} onChange={e => setAddForm({ ...addForm, account_number: e.target.value })} placeholder="e.g. ACC-12345" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
                   </div>
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Categories <span className="text-slate-400 font-normal">(select all that apply)</span></label>
@@ -675,6 +686,10 @@ export default function ContactsTab({ activeSub }) {
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Company Name *</label>
                     <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Account Number</label>
+                    <input type="text" value={editForm.account_number || ''} onChange={e => setEditForm({ ...editForm, account_number: e.target.value })} placeholder="e.g. ACC-12345" className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
                   </div>
                   <div>
                     <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Categories <span className="text-slate-400 font-normal">(select all that apply)</span></label>

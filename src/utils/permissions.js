@@ -19,7 +19,7 @@ export const PERMISSION_MODULES = [
   { key: 'overview', label: 'Dashboard', icon: 'LayoutGrid', sensitive: false },
   { key: 'jobs', label: 'Projects Hub', icon: 'Briefcase', sensitive: false },
   { key: 'scheduling', label: 'Scheduling Hub', icon: 'CalendarClock', sensitive: true },
-  { key: 'staff', label: 'Staff Hub', icon: 'Users', sensitive: true },
+  { key: 'staff', label: 'People Hub', icon: 'Users', sensitive: true },
   { key: 'logistics', label: 'Logistics Hub', icon: 'Truck', sensitive: false },
   { key: 'assets', label: 'Assets Hub', icon: 'Boxes', sensitive: false },
   { key: 'fleet', label: 'Fleet Hub', icon: 'Car', sensitive: false },

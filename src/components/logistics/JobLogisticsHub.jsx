@@ -6,7 +6,7 @@ import {
   Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { format, eachDayOfInterval, isWeekend, differenceInCalendarDays } from 'date-fns';
+import { format, eachDayOfInterval, isWeekend } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { SITE_OPEN_TIME, SITE_CLOSE_TIME } from '@/utils/siteHours';
 import EquipmentForm from '@/components/EquipmentForm';
@@ -58,10 +58,6 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
     queryKey: ['equipment-catalogue-active'],
     queryFn: async () => { const list = await base44.entities.EquipmentCatalogue.filter({ is_active: true }, '-created_date', 500); return list.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || (a.description || '').localeCompare(b.description || '')); }
   });
-  const { data: presets = [] } = useQuery({
-    queryKey: ['cost-presets-active'],
-    queryFn: async () => { const list = await base44.entities.CostPreset.filter({ is_active: true }); return list.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || a.name.localeCompare(b.name)); }
-  });
   const { data: fetchedSuppliers = [] } = useQuery({ queryKey: ['suppliers-logistics'], queryFn: () => base44.entities.Supplier.list(), enabled: !externalSuppliers || externalSuppliers.length === 0 });
   const suppliers = externalSuppliers.length > 0 ? externalSuppliers : fetchedSuppliers;
   const { data: rateCardItems = [] } = useQuery({ queryKey: ['rate-card-items-logistics'], queryFn: () => base44.entities.RateCardItem.list('-created_date', 500) });
@@ -83,7 +79,6 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const [savingItem, setSavingItem] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [showBasket, setShowBasket] = useState(false);
-  const [applyingPreset, setApplyingPreset] = useState(false);
   const [addingRigGear, setAddingRigGear] = useState(false);
   const [showRigPicker, setShowRigPicker] = useState(false);
   const [showManifest, setShowManifest] = useState(false);
@@ -391,46 +386,6 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
     } catch (e) { console.error(e); }
   };
 
-  const applyPreset = async (e) => {
-    const presetId = e.target.value;
-    if (!presetId) return;
-    e.target.value = '';
-    setApplyingPreset(true);
-    try {
-      const presetItems = await base44.entities.PresetItem.filter({ preset_id: presetId });
-      if (presetItems.length === 0) { toast({ title: 'Preset is empty' }); return; }
-      const preset = presets.find(p => p.id === presetId);
-      // Auto-fill day-rate preset items with the job's start/end dates so their
-      // cost is calculated for the full job duration (quantity = items × days).
-      const jobStart = job?.start_date || '';
-      const jobEnd = job?.end_date || '';
-      const payload = presetItems.map(item => {
-        const isDayRate = item.unit_label === 'day';
-        const startDate = isDayRate ? jobStart : '';
-        const endDate = isDayRate ? jobEnd : '';
-        let quantity = Number(item.quantity) || 1;
-        if (isDayRate && startDate && endDate) {
-          const d = differenceInCalendarDays(new Date(endDate + 'T00:00:00'), new Date(startDate + 'T00:00:00')) + 1;
-          if (d > 0) quantity = quantity * d;
-        }
-        return {
-          job_id: jobId, category: item.category || 'hired_equipment', supplier_id: item.supplier_id || '',
-          description: item.description, reference_number: item.reference_number || '',
-          po_number: '', site_asset_id: item.site_asset_id || '', start_date: startDate, end_date: endDate,
-          unit_cost: Number(item.unit_cost) || 0, quantity,
-          unit_label: item.unit_label || 'each', vat_exempt: !!item.vat_exempt,
-          hire_status: 'active', current_location: 'yard', notes: ''
-        };
-      });
-      await base44.entities.JobCostItem.bulkCreate(payload);
-      queryClient.invalidateQueries({ queryKey: ['job-cost-items', jobId] });
-      queryClient.invalidateQueries({ queryKey: ['job-cost-items-manifest', jobId] });
-      const datedCount = payload.filter(p => p.start_date).length;
-      toast({ title: `Added ${payload.length} items`, description: `From "${preset?.name || 'Preset'}"${datedCount > 0 ? ` · ${datedCount} day-rate item(s) set to job dates` : ''}.` });
-    } catch (err) { console.error(err); toast({ title: 'Error', description: 'Could not apply preset.' }); }
-    setApplyingPreset(false);
-  };
-
   // Match a rig (SiteAsset) to its RateCardItem (Our Rate Card).
   // Uses the shared rigRateMatcher module — supports CP, Rotary, and Window Sampling rigs.
   const matchRigRateCard = (rigAsset) => findRigRateCardItem(rigAsset, rateCardItems, job?.project_id);
@@ -582,19 +537,11 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
         </div>
         <div className="p-4 sm:p-5 space-y-4">
           {isLocked && <BillingLockBanner lockReason={lockReason} job={job} tempOpen={tempOpen} onTempOpen={setTempOpen} />}
-          {canSeeCosts && !adding && !effectiveLocked && (
+          {canSeeCosts && !effectiveLocked && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
-              <button onClick={() => { setForm(blankForm()); setEditingId(null); setAdding(true); }}
-                className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
-                <Plus className="w-4 h-4 text-emerald-600" /> Add Equipment
-              </button>
               <button onClick={() => setShowBasket(true)}
                 className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
                 <ShoppingCart className="w-4 h-4" /> Add Billable Items
-              </button>
-              <button onClick={() => setShowManifest(true)}
-                className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
-                <QrCode className="w-4 h-4 text-blue-600" /> Print Site Manifest
               </button>
               {isDrillingJob && allRigs.length > 0 && (
                 <button onClick={() => setShowRigPicker(true)} disabled={addingRigGear}
@@ -602,13 +549,10 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
                   <Plus className="w-4 h-4" /> Add Rig & Gear
                 </button>
               )}
-              {presets.length > 0 && (
-                <select value="" onChange={applyPreset} disabled={applyingPreset}
-                  className="text-sm px-4 py-3 sm:py-2.5 rounded-xl border border-emerald-200 bg-white text-emerald-700 font-medium hover:bg-emerald-50 cursor-pointer disabled:opacity-50 w-full sm:w-auto">
-                  <option value="">{applyingPreset ? 'Adding…' : '📋 Add from preset…'}</option>
-                  {presets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              )}
+              <button onClick={() => setShowManifest(true)}
+                className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
+                <QrCode className="w-4 h-4 text-blue-600" /> Print Site Manifest
+              </button>
             </div>
           )}
 

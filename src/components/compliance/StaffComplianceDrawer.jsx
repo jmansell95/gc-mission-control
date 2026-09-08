@@ -140,7 +140,7 @@ function CertsSection({ details }) {
       <div className="insight-card rounded-2xl p-8 text-center">
         <IdCard className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No certificates or cards on file</p>
-        <p className="text-xs text-slate-400 mt-1">Add compliance items from the Staff Hub.</p>
+        <p className="text-xs text-slate-400 mt-1">Add compliance items from the People Hub.</p>
       </div>
     );
   }
@@ -214,7 +214,7 @@ function TrainingSection({ details, bookings, staffId }) {
       <div className="insight-card rounded-2xl p-8 text-center">
         <GraduationCap className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No training categories assigned</p>
-        <p className="text-xs text-slate-400 mt-1">Assign training categories from the Staff Hub.</p>
+        <p className="text-xs text-slate-400 mt-1">Assign training categories from the People Hub.</p>
       </div>
     );
   }

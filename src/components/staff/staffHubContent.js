@@ -8,7 +8,7 @@ export const STAFF_HELP_TOPICS = [
 ];
 
 export const STAFF_ONBOARDING = {
-  title: 'Welcome to the Staff Hub',
+  title: 'Welcome to the People Hub',
   description: 'Your people, their time, their training and your contacts — all in one place.',
   steps: ['Add staff or import from a spreadsheet', 'Set permission groups for access', 'Book training and track compliance'],
 };

@@ -98,7 +98,7 @@ export default function JobDetailTabs({
       {/* ── Overview ── */}
       <TabsContent value="overview" className="mt-0 space-y-4">
         <div className="flex items-center justify-end gap-2 flex-wrap">
-          <HubDeepLink to="/staff" jobId={job.id} label="Staff Hub" icon={Users} />
+          <HubDeepLink to="/staff" jobId={job.id} label="People Hub" icon={Users} />
           <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
           <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
         </div>
@@ -162,7 +162,7 @@ export default function JobDetailTabs({
       {/* ── Schedule & Crew ── */}
       <TabsContent value="schedule" className="space-y-4 mt-0">
         <div className="flex items-center justify-end gap-2 flex-wrap">
-          <HubDeepLink to="/staff" jobId={job.id} label="Staff Hub" icon={Users} />
+          <HubDeepLink to="/staff" jobId={job.id} label="People Hub" icon={Users} />
           <HubDeepLink to="/scheduling" jobId={job.id} label="Rota Builder" icon={CalendarDays} />
           <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
         </div>

@@ -101,10 +101,10 @@ export default function StaffPage() {
     <HubShell
       hubKey="staff"
       icon={Users}
-      eyebrow="Staff Hub"
+      eyebrow="People Hub"
       title="People & Team Management"
       subtitle="Manage crew members, timesheets, clients, subcontractors and suppliers"
-      breadcrumbs={[{ label: 'Staff Hub' }]}
+      breadcrumbs={[{ label: 'People Hub' }]}
       actions={<RunReportButton hub="staff" />}
       tabs={TABS.map(t => ({ id: t.id, label: t.label, icon: t.icon }))}
       activeTab={tab}
@@ -115,7 +115,7 @@ export default function StaffPage() {
         { icon: HardHat, label: 'Subcontractors', value: staffStats.subcontractors, sublabel: 'External crews', color: 'amber' },
         { icon: UsersRound, label: 'Agency', value: staffStats.agency, sublabel: 'Temp labour', color: 'blue' },
       ] : []}
-      help={{ title: 'Staff Hub — how it works', topics: STAFF_HELP_TOPICS }}
+      help={{ title: 'People Hub — how it works', topics: STAFF_HELP_TOPICS }}
       onboarding={STAFF_ONBOARDING}
       quickLinks={STAFF_QUICK_LINKS}
     >

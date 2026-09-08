@@ -13,7 +13,6 @@ import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
 import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
-import RigMeterageModal from '@/components/dashboard/RigMeterageModal';
 import { computeRigEarnings } from '@/utils/rigEarnings';
 
 const fmtGBP = (v) => {
@@ -48,7 +47,6 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const navigate = useNavigate();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const [showAllRigs, setShowAllRigs] = useState(false);
-  const [showMeterage, setShowMeterage] = useState(false);
 
   // Auto-refresh
   const queryClient = useQueryClient();
@@ -391,8 +389,6 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
             <WidgetActionFooter
               deepLinkLabel="Fleet Hub"
               onDeepLink={() => navigate('/fleet?filter=today')}
-              quickActionLabel="Log Meterage"
-              onQuickAction={() => setShowMeterage(true)}
             />
             <button
               type="button"
@@ -418,9 +414,6 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
         }))}
         onClose={() => setShowAllRigs(false)}
       />
-    )}
-    {showMeterage && (
-      <RigMeterageModal rigs={rigStats} onClose={() => setShowMeterage(false)} />
     )}
     </>
   );

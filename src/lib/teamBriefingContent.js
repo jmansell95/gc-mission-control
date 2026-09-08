@@ -39,7 +39,7 @@ export const hubTour = [
     ],
   },
   {
-    name: 'Staff Hub',
+    name: 'People Hub',
     icon: 'Users',
     summary: 'People, crews, training and compliance in one place — from rota building to qualification tracking to holiday accrual.',
     talkingPoints: [

@@ -89,7 +89,7 @@ export default function StaffAssignmentPanel({ scopedDivisionId, focusStaffId })
       <div className="insight-card rounded-2xl p-10 text-center">
         <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
         <p className="text-sm font-semibold text-slate-600">{q ? 'No staff match your search' : 'No staff in this business stream'}</p>
-        <p className="text-xs text-slate-400 mt-1">{q ? 'Try a different name or role.' : 'Add staff via the Staff Hub to assign their access here.'}</p>
+        <p className="text-xs text-slate-400 mt-1">{q ? 'Try a different name or role.' : 'Add staff via the People Hub to assign their access here.'}</p>
       </div>
     );
   }

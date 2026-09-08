@@ -15,17 +15,17 @@
  */
 export const DROPDOWN_USAGE_MAP = {
   qualifications: [
-    { page: 'Staff Hub', section: 'Training & Qualifications', field: 'Add Qualification', route: '/staff' },
+    { page: 'People Hub', section: 'Training & Qualifications', field: 'Add Qualification', route: '/staff' },
     { page: 'Compliance', section: 'Training Matrix', field: 'Qualification filter', route: '/compliance' },
   ],
   asset_types: [
     { page: 'Assets Hub', section: 'Add / Edit Asset', field: 'Asset Type', route: '/assets' },
   ],
   revenue_streams: [
-    { page: 'Staff Hub', section: 'Crew Profile', field: 'Revenue Stream', route: '/staff' },
+    { page: 'People Hub', section: 'Crew Profile', field: 'Revenue Stream', route: '/staff' },
   ],
   team_job_types: [
-    { page: 'Staff Hub', section: 'Team Manager', field: 'Crew Job Type', route: '/staff' },
+    { page: 'People Hub', section: 'Team Manager', field: 'Crew Job Type', route: '/staff' },
   ],
   strata_types: [
     { page: 'Investigation Logs', section: 'Driller Log', field: 'Strata Classification', route: '/admin' },
@@ -69,10 +69,10 @@ export const DROPDOWN_USAGE_MAP = {
     { page: 'Compliance', section: 'Asset Compliance Report', field: 'Status filter', route: '/compliance' },
   ],
   worker_types: [
-    { page: 'Staff Hub', section: 'Crew Profile', field: 'Worker Type', route: '/staff' },
+    { page: 'People Hub', section: 'Crew Profile', field: 'Worker Type', route: '/staff' },
   ],
   team_categories: [
-    { page: 'Staff Hub', section: 'Team Manager', field: 'Team Category', route: '/staff' },
+    { page: 'People Hub', section: 'Team Manager', field: 'Team Category', route: '/staff' },
   ],
   job_statuses: [
     { page: 'Projects Hub', section: 'Project Manager', field: 'Project Status', route: '/admin' },

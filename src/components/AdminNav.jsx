@@ -91,7 +91,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
     { id: 'overview', label: 'Dashboard', icon: Grid3x3 },
     { id: 'jobs', label: 'Projects Hub', icon: Briefcase },
     { id: 'scheduling', label: 'Scheduling Hub', icon: Calendar },
-    { id: 'staff', label: 'Staff Hub', icon: Users },
+    { id: 'staff', label: 'People Hub', icon: Users },
     { id: 'logistics', label: 'Logistics Hub', icon: Truck },
     { id: 'assets', label: 'Assets Hub', icon: Boxes },
     { id: 'fleet', label: 'Tracking Hub', icon: Car },

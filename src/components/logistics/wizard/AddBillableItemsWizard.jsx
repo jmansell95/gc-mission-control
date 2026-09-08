@@ -6,10 +6,12 @@ import WizardBreadcrumb from './WizardBreadcrumb';
 import WizardStepCards from './WizardStepCards';
 import SingleItemForm from './SingleItemForm';
 import MultiItemBasket from './MultiItemBasket';
+import SmartUploadReview from './SmartUploadReview';
 
 const STEPS = [
   { id: 'splash', label: 'Splash' },
   { id: 'method', label: 'Method' },
+  { id: 'smart-review', label: 'Review' },
   { id: 'source', label: 'Source' },
   { id: 'entry', label: 'Entry' },
 ];
@@ -39,6 +41,8 @@ export default function AddBillableItemsWizard({
   const [source, setSource] = useState('');    // 'purchased' | 'hired' | 'client_supplied'
   const [uploadRows, setUploadRows] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [smartUploadData, setSmartUploadData] = useState(null); // { fileUrl, fileName, rawRows, detectedColumns, rawText }
+  const [matching, setMatching] = useState(false);
 
   // Exclude the entire Training category from the billable items flow:
   // filter out RateCardItems whose own category is 'training' OR whose
@@ -73,8 +77,8 @@ export default function AddBillableItemsWizard({
 
   const handleJump = (stepId) => {
     // Jumping back clears downstream selections so state stays consistent
-    if (stepId === 'splash') { setCount(''); setMethod(''); setSource(''); setUploadRows([]); }
-    if (stepId === 'method') { setMethod(''); setSource(''); setUploadRows([]); }
+    if (stepId === 'splash') { setCount(''); setMethod(''); setSource(''); setUploadRows([]); setSmartUploadData(null); }
+    if (stepId === 'method') { setMethod(''); setSource(''); setUploadRows([]); setSmartUploadData(null); }
     if (stepId === 'source') { setSource(''); }
     setStep(stepId);
   };
@@ -87,19 +91,58 @@ export default function AddBillableItemsWizard({
     try {
       // 1. Upload the file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      // 2. Parse it — if method is already chosen as rate_cards, match; otherwise
-      //    default to matching so the user sees discrepancy flags regardless.
-      const matchRateCards = method === 'rate_cards' || true; // always match so discrepancies surface
-      const supplierId = ''; // no supplier selected yet at method stage
+      // 2. Extract raw rows + detected columns (no matching yet — the user
+      //    maps columns in the review step first, then we match).
       const res = await base44.functions.invoke('parseQuoteUpload', {
         file_url,
-        match_rate_cards: matchRateCards,
-        supplier_id: supplierId,
+        mode: 'extract',
       });
       const data = res.data;
-      if (!data.success || data.rows.length === 0) {
-        toast({ title: 'Could not extract items', description: data.error || 'No line items found. Please enter manually.', variant: 'destructive' });
+      if (!data.success) {
+        toast({ title: 'Could not extract content', description: data.error || 'No content found. Please enter manually.', variant: 'destructive' });
         setUploading(false);
+        return;
+      }
+      setSmartUploadData({
+        fileUrl: file_url,
+        fileName: file.name,
+        rawRows: data.raw_rows || [],
+        detectedColumns: data.detected_columns || [],
+        rawText: data.raw_text || '',
+      });
+      toast({
+        title: `Extracted ${(data.raw_rows || []).length} row${(data.raw_rows || []).length !== 1 ? 's' : ''}`,
+        description: 'Review and map columns to billable fields.',
+      });
+      setStep('smart-review');
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast({ title: 'Upload failed', description: 'Could not read the quote. Please try again or enter manually.', variant: 'destructive' });
+    }
+    setUploading(false);
+  };
+
+  // --- Smart upload: apply column mapping + fuzzy match ---
+  const handleSmartApply = async (mappedRows, errorMsg) => {
+    if (errorMsg) {
+      toast({ title: 'Nothing to extract', description: errorMsg, variant: 'destructive' });
+      return;
+    }
+    if (mappedRows.length === 0) {
+      toast({ title: 'No rows', description: 'Map a column to "Description" and try again.', variant: 'destructive' });
+      return;
+    }
+    setMatching(true);
+    try {
+      const res = await base44.functions.invoke('parseQuoteUpload', {
+        mode: 'match',
+        mapped_rows: mappedRows,
+        supplier_id: '',
+      });
+      const data = res.data;
+      if (!data.success) {
+        toast({ title: 'Match failed', description: data.error || 'Could not match rows.', variant: 'destructive' });
+        setMatching(false);
         return;
       }
       setUploadRows(data.rows);
@@ -107,15 +150,15 @@ export default function AddBillableItemsWizard({
         title: `Extracted ${data.extracted_count} line item${data.extracted_count !== 1 ? 's' : ''}`,
         description: `${data.matched_count} matched to rate card${data.discrepancy_count > 0 ? ` · ${data.discrepancy_count} price discrepancy${data.discrepancy_count !== 1 ? 's' : ''}` : ''}`,
       });
-      // Jump straight to entry. If method not yet chosen, default to manual.
+      // Default method + source, then jump to entry
       if (!method) setMethod('manual');
-      if (!source) setSource('purchased'); // default source; user can change on entry screen via breadcrumb
+      if (!source) setSource('purchased');
       setStep('entry');
     } catch (err) {
-      console.error('Upload failed:', err);
-      toast({ title: 'Upload failed', description: 'Could not read the quote. Please try again or enter manually.', variant: 'destructive' });
+      console.error('Match failed:', err);
+      toast({ title: 'Match failed', description: 'Could not match rows. Please try again or enter manually.', variant: 'destructive' });
     }
-    setUploading(false);
+    setMatching(false);
   };
 
   const sourceOptions = [
@@ -137,6 +180,7 @@ export default function AddBillableItemsWizard({
             <p className="text-xs text-slate-500">
               {step === 'splash' && 'Choose how many items to add'}
               {step === 'method' && 'Choose how to enter your items'}
+              {step === 'smart-review' && 'Review extracted rows and map columns'}
               {step === 'source' && 'How do the items reach site?'}
               {step === 'entry' && `${count === 'single' ? 'Single item' : 'Multiple items'} · ${method === 'manual' ? 'Manual entry' : 'Rate cards'} · ${source}`}
             </p>
@@ -170,7 +214,7 @@ export default function AddBillableItemsWizard({
                   {uploading ? (
                     <div className="flex items-center justify-center gap-2 text-[#2E5A1A]">
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span className="text-sm font-bold">Extracting line items…</span>
+                      <span className="text-sm font-bold">Extracting document…</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-2.5">
@@ -206,6 +250,21 @@ export default function AddBillableItemsWizard({
         {/* Source screen */}
         {step === 'source' && (
           <WizardStepCards options={sourceOptions} onSelect={handleSelectSource} />
+        )}
+
+        {/* Smart Upload Review screen */}
+        {step === 'smart-review' && smartUploadData && (
+          <SmartUploadReview
+            fileUrl={smartUploadData.fileUrl}
+            fileName={smartUploadData.fileName}
+            rawRows={smartUploadData.rawRows}
+            detectedColumns={smartUploadData.detectedColumns}
+            rawText={smartUploadData.rawText}
+            onApply={handleSmartApply}
+            onBack={() => setStep('method')}
+            onClose={onClose}
+            applying={matching}
+          />
         )}
 
         {/* Entry screen */}

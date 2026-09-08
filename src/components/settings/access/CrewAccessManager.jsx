@@ -315,7 +315,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
           <div className="text-center py-6">
             <Users className="w-8 h-8 text-slate-200 mx-auto mb-2" />
             <p className="text-xs font-semibold text-slate-500">No staff assigned to this crew yet</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">Assign staff to this team via the Staff Hub</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Assign staff to this team via the People Hub</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">

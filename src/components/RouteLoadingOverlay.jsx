@@ -13,7 +13,7 @@ const ROUTE_NAMES = {
   '/fleet': 'Fleet Hub',
   '/compliance': 'Compliance Hub',
   '/billing': 'Financial Hub',
-  '/staff': 'Staff Hub',
+  '/staff': 'People Hub',
   '/subcontractor': 'Subcontractor Portal',
   '/admin/logistics': 'Deliveries Hub',
   '/scanner': 'Asset Scanner',
