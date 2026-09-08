@@ -17,6 +17,7 @@ import DeliveryList from '@/components/logistics/DeliveryList';
 import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
 import AddBillableItemsWizard from '@/components/logistics/wizard/AddBillableItemsWizard';
+import PoGroupedAccordion from '@/components/logistics/PoGroupedAccordion';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
 import { billingTotal } from '@/components/equipment/shared';
@@ -164,14 +165,18 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   });
 
   const standaloneItems = visibleItems.filter(c => !assemblyItemIds.has(c.id));
-  // Group items by responsible person, falling back to the equipment category
-  // label when no person is set (instead of an "Unassigned" bucket).
+  // Split standalone items: those with a po_number go into PO accordions;
+  // those without stay in the existing person-grouped list.
+  const poGroupedItems = standaloneItems.filter(c => c.po_number && c.po_number.trim());
+  const noPoItems = standaloneItems.filter(c => !c.po_number || !c.po_number.trim());
+  // Group no-PO items by responsible person, falling back to the equipment
+  // category label when no person is set (instead of an "Unassigned" bucket).
   const categoryFallback = {
     hired_equipment: 'Hired Equipment',
     purchased_equipment: 'Purchased Equipment',
     internal_equipment: 'Internal Equipment',
   };
-  const personGroups = standaloneItems.reduce((acc, c) => {
+  const personGroups = noPoItems.reduce((acc, c) => {
     const person = c.responsible_person || categoryFallback[c.category] || 'Unassigned';
     if (!acc[person]) acc[person] = [];
     acc[person].push(c);
@@ -633,6 +638,16 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
                   onOffHire={openOffHire} onLocationUpdate={updateLocation}
                   updatingIds={updatingIds} assetMap={assetMap} complianceByAssetId={complianceByAssetId} />
               ))}
+              {poGroupedItems.length > 0 && (
+                <PoGroupedAccordion
+                  poItems={poGroupedItems}
+                  suppliers={suppliers} contractors={contractors}
+                  canSeeCosts={canSeeCosts} canEdit={canSeeCosts}
+                  selectedIds={selectedIds} onToggleSelect={toggleSelect}
+                  onEdit={editItem} onDeleteItem={deleteItem} onOffHire={openOffHire}
+                  onLocationUpdate={updateLocation} updatingIds={updatingIds}
+                  assetMap={assetMap} complianceByAssetId={complianceByAssetId} />
+              )}
               {Object.entries(personGroups).map(([person, personItems]) => (
                 <div key={person}>
                   <div className="flex items-center gap-1.5 mb-2 px-1">
