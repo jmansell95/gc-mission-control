@@ -25,9 +25,9 @@ export default function HubHeader({ icon: Icon, title, subtitle, actions, breadc
               </div>
             )}
             <div className="min-w-0">
-              {eyebrow && <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#2E5A1A]/70 mb-0.5">{eyebrow}</div>}
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-tight truncate">{title}</h1>
-              {subtitle && <p className="text-xs sm:text-sm text-slate-500 mt-0.5 line-clamp-2 md:truncate">{subtitle}</p>}
+              {eyebrow && <div className="text-ui-micro uppercase tracking-[0.18em] text-[#2E5A1A]/70 mb-0.5">{eyebrow}</div>}
+              <h1 className="text-ui-heading sm:text-ui-display font-extrabold tracking-tight text-slate-900 leading-tight truncate">{title}</h1>
+              {subtitle && <p className="text-ui-caption sm:text-ui-body text-slate-500 mt-0.5 line-clamp-2 md:truncate">{subtitle}</p>}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 md:justify-end [&>button]:whitespace-nowrap">

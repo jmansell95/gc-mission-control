@@ -34,7 +34,7 @@ export default function TabBar({ tabs, activeTab, onChange, className = '' }) {
             ref={active ? activeRef : null}
             onClick={() => onChange(t.id)}
             type="button"
-            className={`snap-start inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-hub-body font-semibold transition flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
+            className={`snap-start inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-ui-body font-semibold transition flex-shrink-0 whitespace-nowrap active:scale-[0.97] ${
               active
                 ? 'bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white shadow-sm shadow-emerald-200/60'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -43,10 +43,10 @@ export default function TabBar({ tabs, activeTab, onChange, className = '' }) {
             {Icon && <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-slate-400'}`} />}
             {t.label}
             {t.badge != null && t.badge > 0 && (
-              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${active ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
+              <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-ui-micro font-bold ${active ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
             )}
             {t.count != null && (
-              <span className={`ml-0.5 text-xs font-normal ${active ? 'text-white/70' : 'text-slate-400'}`}>{t.count}</span>
+              <span className={`ml-0.5 text-ui-caption font-normal ${active ? 'text-white/70' : 'text-slate-400'}`}>{t.count}</span>
             )}
           </button>
         );

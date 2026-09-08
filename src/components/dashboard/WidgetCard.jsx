@@ -16,7 +16,7 @@ export default function WidgetCard({ widgetId, children }) {
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-sm icon-tile-glow">
           <Icon className="w-4 h-4 text-white" />
         </div>
-        <p className="text-sm font-bold text-slate-800 truncate flex-1">{config.title}</p>
+        <p className="text-ui-subheading font-bold text-slate-800 truncate flex-1">{config.title}</p>
       </div>
       <div className="p-4">
         {children}

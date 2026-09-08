@@ -83,7 +83,14 @@ module.exports = {
   			'hub-title': ['var(--hub-title-size)', { lineHeight: '1.2', fontWeight: '700' }],
   			'hub-section': ['var(--hub-section-size)', { lineHeight: '1.3', fontWeight: '700' }],
   			'hub-body': ['var(--hub-body-size)', { lineHeight: '1.55' }],
-  			'hub-caption': ['var(--hub-caption-size)', { lineHeight: '1.4' }]
+  			'hub-caption': ['var(--hub-caption-size)', { lineHeight: '1.4' }],
+  			'ui-display': ['var(--text-display)', { lineHeight: '1.2', fontWeight: '700' }],
+  			'ui-heading': ['var(--text-heading)', { lineHeight: '1.25', fontWeight: '700' }],
+  			'ui-subheading': ['var(--text-subheading)', { lineHeight: '1.3', fontWeight: '700' }],
+  			'ui-body': ['var(--text-body)', { lineHeight: '1.55' }],
+  			'ui-caption': ['var(--text-caption)', { lineHeight: '1.4' }],
+  			'ui-micro': ['var(--text-micro)', { lineHeight: '1.2', fontWeight: '700' }],
+  			'ui-kpi': ['var(--text-kpi)', { lineHeight: '1.1', fontWeight: '800' }]
   		},
   		borderRadius: {
   			'hub': 'var(--hub-radius)'

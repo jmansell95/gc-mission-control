@@ -34,7 +34,7 @@ export default function BackButton({ fallback, label = 'Back', className = '' })
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition active:scale-[0.97] ${className}`}
+      className={`inline-flex items-center gap-1 h-9 px-3 rounded-xl text-ui-caption font-semibold text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition active:scale-[0.97] ${className}`}
     >
       <ChevronLeft className="w-4 h-4" />
       {label}

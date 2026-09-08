@@ -151,7 +151,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
       {(isSuperAdmin || permittedDivisions.length > 1) && (
         <div className="px-2 pb-1.5">
           <button type="button" onClick={() => navigate('/enterprise')}
-            className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3.5 py-2'} rounded-xl text-sm font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-200 hover:from-amber-500/30 hover:to-amber-600/20 ring-1 ring-amber-400/30`}>
+            className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-200 hover:from-amber-500/30 hover:to-amber-600/20 ring-1 ring-amber-400/30`}>
             <ArrowLeftRight className="w-[18px] h-[18px] flex-shrink-0 text-amber-300" />
             {!effectiveCollapsed && <span>Switch Business Stream</span>}
           </button>
@@ -171,18 +171,18 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                 type="button"
                 onClick={() => setActiveSection(item.id)}
                 title={effectiveCollapsed ? item.label : undefined}
-                className="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-medium opacity-50 hover:opacity-70 transition cursor-pointer touch-manipulation select-none"
+                className="w-full flex items-center gap-3 px-3 h-9 rounded-xl text-ui-body font-semibold opacity-50 hover:opacity-70 transition cursor-pointer touch-manipulation select-none"
               >
                 <Icon className="w-[18px] h-[18px] flex-shrink-0 text-white/40" />
                 {!effectiveCollapsed && <span className="text-white/40 flex-1">{item.label}</span>}
-                {!effectiveCollapsed && <span className="text-[9px] font-bold text-amber-300/80 bg-amber-500/20 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Soon</span>}
+                {!effectiveCollapsed && <span className="text-ui-micro font-bold text-amber-300/80 bg-amber-500/20 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Soon</span>}
               </button>
             );
           }
           return (
             <div key={item.id}>
               <button type="button" onClick={() => setActiveSection(item.id)} title={effectiveCollapsed ? item.label : undefined}
-                className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3.5 py-2'} rounded-xl text-sm font-medium transition cursor-pointer touch-manipulation select-none ${
+                className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3 h-9'} rounded-xl text-ui-body font-semibold transition cursor-pointer touch-manipulation select-none ${
                   isActive
                     ? 'command-gradient text-white shadow-lg glow-brand ring-1 ring-[#8DC63F]/30'
                     : 'text-white/75 hover:bg-white/10 hover:text-white'
@@ -248,40 +248,40 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                   <div className="py-1">
                     {canViewSchedule && activeDivision && (
                       <button onClick={() => { navigate('/staff-schedule'); setProfileMenuOpen(false); }} type="button"
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                        className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                         <CalendarDays className="w-4 h-4 text-slate-400" /> My Schedule
                       </button>
                     )}
                     <button onClick={() => { navigate('/staff-profile'); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <User className="w-4 h-4 text-slate-400" /> My Profile
                     </button>
                     {profile?.delivery_dashboard_enabled && (
                       <button onClick={() => { navigate('/deliveries'); setProfileMenuOpen(false); }} type="button"
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                        className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                         <Truck className="w-4 h-4 text-slate-400" /> Driver Hub
                       </button>
                     )}
                     <button onClick={() => { openScanner(); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <ScanLine className="w-4 h-4 text-[#2E5A1A]" /> Scan Asset
                     </button>
                     <button onClick={() => { openHub(); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <Sparkles className="w-4 h-4 text-[#2E5A1A]" /> AI Hubs
                     </button>
                     <button onClick={() => { navigate('/reports'); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <FileBarChart className="w-4 h-4 text-slate-400" /> Reports Hub
                     </button>
                     <button onClick={() => { navigate('/help'); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <HelpCircle className="w-4 h-4 text-slate-400" /> Help Guides
                     </button>
                   </div>
                   <div className="border-t border-slate-100 py-1">
                     <button onClick={() => { handleLogout(); setProfileMenuOpen(false); }} type="button"
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50 transition text-left">
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-rose-600 hover:bg-rose-50 transition text-left">
                       <LogOut className="w-4 h-4" /> Logout
                     </button>
                   </div>

@@ -36,8 +36,8 @@ export default function KpiTile({ label, value = 0, format = 'number', icon: Ico
             <TrendDelta current={current} previous={previous} invert={invert} />
           )}
         </div>
-        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wide opacity-80 leading-tight mt-1">{label}</p>
-        <p className="text-lg sm:text-2xl font-extrabold mt-0.5 truncate">
+        <p className="text-ui-micro font-bold uppercase tracking-wide opacity-80 leading-tight mt-1">{label}</p>
+        <p className="text-ui-kpi font-extrabold mt-0.5 truncate">
           <AnimatedCounter value={value} format={format} />
         </p>
       </div>

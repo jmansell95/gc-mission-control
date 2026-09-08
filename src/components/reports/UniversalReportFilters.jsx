@@ -85,7 +85,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
     setFilters(prev => ({ ...prev, divisionId: val, teamId: '', clientId: '' }));
   };
 
-  const selectCls = 'rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[110px] sm:min-w-[130px] bg-white flex-1 sm:flex-none';
+  const selectCls = 'rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[110px] sm:min-w-[130px] bg-white flex-1 sm:flex-none';
 
   return (
     <div className="insight-card rounded-2xl p-4 space-y-3">
@@ -95,8 +95,8 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Report Scope</p>
-            <p className="text-sm font-extrabold text-slate-900">{hubLabel}</p>
+            <p className="text-ui-micro font-bold text-slate-400 uppercase tracking-wide">Report Scope</p>
+            <p className="text-ui-subheading font-extrabold text-slate-900">{hubLabel}</p>
           </div>
         </div>
 
@@ -104,7 +104,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         <div className="flex bg-slate-100 rounded-xl p-0.5 flex-wrap">
           {PRESETS.map(p => (
             <button key={p.id} onClick={() => applyPreset(p.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`h-9 px-3 rounded-lg text-ui-caption font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               {p.label}
             </button>
           ))}
@@ -114,10 +114,10 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         {filters.datePreset === 'custom' && (
           <div className="flex items-center gap-2">
             <input type="date" value={filters.dateFrom || ''} onChange={e => set('dateFrom', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
-            <span className="text-slate-400 text-xs">to</span>
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+            <span className="text-slate-400 text-ui-caption">to</span>
             <input type="date" value={filters.dateTo || ''} onChange={e => set('dateTo', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
           </div>
         )}
       </div>
@@ -163,11 +163,11 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
         {/* Export buttons */}
         <div className="flex items-center gap-2 flex-shrink-0 sm:ml-auto">
           <button onClick={onExportCsv} disabled={exporting}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition disabled:opacity-50 flex-1 sm:flex-none justify-center">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-ui-caption font-semibold transition disabled:opacity-50 flex-1 sm:flex-none justify-center">
             {exporting === 'csv' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} CSV
           </button>
           <button onClick={onExportPdf} disabled={exporting}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm flex-1 sm:flex-none justify-center">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-ui-caption font-semibold transition disabled:opacity-50 shadow-sm flex-1 sm:flex-none justify-center">
             {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} PDF
           </button>
         </div>

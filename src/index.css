@@ -59,6 +59,28 @@
     --hub-radius: 1rem;
     --hub-tab-h: 2.5rem;
     --hub-kpi-h: 5rem;
+
+    /* === Unified Button Standard ===
+       Single source of truth for every button across the site.
+       Compact: h-9 (36px), px-3 (12px), text-xs (12px), rounded-xl.
+       Consumed by the shared Button component and mapped Tailwind classes. */
+    --btn-h: 2.25rem;
+    --btn-px: 0.75rem;
+    --btn-text-size: 0.75rem;
+    --btn-radius: 0.875rem;
+    --btn-icon-size: 2.25rem;
+
+    /* === Unified Text Type Scale ===
+       Single source of truth for all UI text across the site.
+       Every heading, card title, KPI number, label, caption, and body
+       text consumes these tokens via the mapped text-ui-* Tailwind classes. */
+    --text-display: 1.5rem;
+    --text-heading: 1.125rem;
+    --text-subheading: 0.9rem;
+    --text-body: 0.875rem;
+    --text-caption: 0.75rem;
+    --text-micro: 0.625rem;
+    --text-kpi: 1.75rem;
   }
 
   .dark {

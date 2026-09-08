@@ -37,19 +37,19 @@ export default function StatPill({ icon: Icon, label, value, sublabel, color = '
             <Icon className="w-3.5 h-3.5" />
           </span>
         )}
-        <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate">{label}</span>
+        <span className="text-ui-micro uppercase tracking-wider text-slate-500 truncate">{label}</span>
       </div>
       <div className="flex items-baseline gap-1.5 min-w-0">
-        <span className="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums leading-none truncate">
+        <span className="text-ui-kpi font-extrabold text-slate-900 tabular-nums leading-none truncate">
           <AnimatedNumber value={value} />
         </span>
         {delta && (
-          <span className={`text-[10px] font-bold tabular-nums ${delta.positive ? 'text-emerald-600' : 'text-rose-600'}`}>
+          <span className={`text-ui-micro font-bold tabular-nums ${delta.positive ? 'text-emerald-600' : 'text-rose-600'}`}>
             {delta.positive ? '▲' : '▼'} {delta.value}
           </span>
         )}
       </div>
-      {sublabel && <p className="text-[10px] sm:text-[11px] text-slate-400 mt-1 truncate">{sublabel}</p>}
+      {sublabel && <p className="text-ui-caption text-slate-400 mt-1 truncate">{sublabel}</p>}
     </Wrapper>
   );
 }

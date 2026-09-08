@@ -58,7 +58,7 @@ export default function StaffTabBar() {
                 <div className="w-14 h-14 -mt-6 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white flex items-center justify-center shadow-xl shadow-[#2E5A1A]/40 ring-4 ring-white active:scale-90 transition glow-brand">
                   <ScanLine className="w-6 h-6" strokeWidth={2.5} />
                 </div>
-                <span className={`text-[11px] font-bold ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`}>Scan</span>
+                <span className={`text-ui-micro font-bold ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`}>Scan</span>
               </button>
             );
           }
@@ -80,14 +80,14 @@ export default function StaffTabBar() {
                   <Icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : ''}`} />
                 </div>
                 {hasBadge && (
-                  <span className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold flex items-center justify-center ring-2 ring-white ${
+                  <span className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full text-ui-micro font-bold flex items-center justify-center ring-2 ring-white ${
                     active ? 'bg-[#2E5A1A] text-white' : 'bg-slate-300 text-white'
                   }`}>
                     {badge > 9 ? '9+' : badge}
                   </span>
                 )}
               </div>
-              <span className={`text-[11px] font-semibold ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`}>
+              <span className={`text-ui-micro font-semibold ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`}>
                 {tab.label}
               </span>
             </button>

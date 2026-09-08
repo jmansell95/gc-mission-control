@@ -27,7 +27,7 @@ export default function TrendDelta({ current = 0, previous = 0, invert = false, 
   const sign = isUp ? '+' : isDown ? '' : '';
 
   return (
-    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${color} ${className}`}>
+    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-ui-micro font-bold ${color} ${className}`}>
       <Icon className="w-2.5 h-2.5" />
       {sign}{Math.round(Math.abs(deltaPct))}%
     </span>

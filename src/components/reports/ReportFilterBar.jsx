@@ -60,8 +60,8 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Report Scope</p>
-            <p className="text-sm font-extrabold text-slate-900">{hubLabel}</p>
+            <p className="text-ui-micro font-bold text-slate-400 uppercase tracking-wide">Report Scope</p>
+            <p className="text-ui-subheading font-extrabold text-slate-900">{hubLabel}</p>
           </div>
         </div>
 
@@ -69,7 +69,7 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
         <div className="flex bg-slate-100 rounded-xl p-0.5 flex-wrap">
           {PRESETS.map(p => (
             <button key={p.id} onClick={() => applyPreset(p.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`h-9 px-3 rounded-lg text-ui-caption font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               {p.label}
             </button>
           ))}
@@ -79,22 +79,22 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
         {filters.datePreset === 'custom' && (
           <div className="flex items-center gap-2">
             <input type="date" value={filters.dateFrom || ''} onChange={e => set('dateFrom', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
-            <span className="text-slate-400 text-xs">to</span>
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+            <span className="text-slate-400 text-ui-caption">to</span>
             <input type="date" value={filters.dateTo || ''} onChange={e => set('dateTo', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
           </div>
         )}
 
         {/* Division scope */}
         <select value={filters.divisionId || ''} onChange={e => set('divisionId', e.target.value)}
-          className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[160px]">
+          className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[160px]">
           <option value="">All Business Streams</option>
           {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
 
         <button onClick={onExport} disabled={exporting}
-          className="ml-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition disabled:opacity-50 flex-shrink-0">
+          className="ml-auto inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-ui-caption font-semibold transition disabled:opacity-50 flex-shrink-0">
           {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Export CSV
         </button>
       </div>

@@ -24,7 +24,7 @@ export default function QuickActionBar({ onAction }) {
           <button
             key={a.key}
             onClick={() => onAction?.(a.key)}
-            className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 ${a.color} text-white rounded-xl text-sm font-medium ${a.hover} transition shadow-sm active:scale-95`}
+            className={`flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3 ${a.color} text-white rounded-xl text-ui-caption font-semibold ${a.hover} transition shadow-sm active:scale-95`}
           >
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{a.label}</span>

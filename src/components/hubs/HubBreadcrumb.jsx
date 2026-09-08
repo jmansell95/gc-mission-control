@@ -10,7 +10,7 @@ import { ChevronRight, LayoutDashboard } from 'lucide-react';
 export default function HubBreadcrumb({ items = [] }) {
   if (!items.length) return null;
   return (
-    <nav aria-label="Hub breadcrumb" className="flex items-center gap-1 text-xs font-medium text-slate-400 min-w-0 overflow-hidden">
+    <nav aria-label="Hub breadcrumb" className="flex items-center gap-1 text-ui-caption font-medium text-slate-400 min-w-0 overflow-hidden">
       <Link to="/admin" className="inline-flex items-center gap-1 hover:text-[#2E5A1A] transition flex-shrink-0">
         <LayoutDashboard className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Dashboard</span>

@@ -84,10 +84,10 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
             <div key={i} className={`insight-card rounded-xl p-3.5 border ${lightColorMap[tile.color]}`}>
               <div className="flex items-center gap-2 mb-1.5">
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <p className="text-[10px] font-bold uppercase tracking-wide opacity-70">{tile.label}</p>
+                <p className="text-ui-micro font-bold uppercase tracking-wide opacity-70">{tile.label}</p>
               </div>
-              <p className="text-lg font-bold tabular-nums">{tile.value}</p>
-              <p className="text-[10px] opacity-60 mt-0.5">{tile.sub}</p>
+              <p className="text-ui-kpi font-bold tabular-nums">{tile.value}</p>
+              <p className="text-ui-caption opacity-60 mt-0.5">{tile.sub}</p>
             </div>
           );
         }
@@ -95,9 +95,9 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
           <div key={i} className={`${tile.gradient} rounded-xl p-3.5 relative overflow-hidden`}>
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-white/80 truncate">{tile.label}</p>
-                <p className="text-xl font-bold tabular-nums text-white mt-0.5">{tile.value}</p>
-                <p className="text-[10px] text-white/70 mt-0.5 truncate">{tile.sub}</p>
+                <p className="text-ui-micro font-bold uppercase tracking-wide text-white/80 truncate">{tile.label}</p>
+                <p className="text-ui-kpi font-bold tabular-nums text-white mt-0.5">{tile.value}</p>
+                <p className="text-ui-caption text-white/70 mt-0.5 truncate">{tile.sub}</p>
               </div>
               <div className="w-9 h-9 rounded-lg bg-white/15 flex items-center justify-center flex-shrink-0">
                 <Icon className="w-4 h-4 text-white" />

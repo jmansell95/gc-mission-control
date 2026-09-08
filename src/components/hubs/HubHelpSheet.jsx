@@ -55,7 +55,7 @@ export default function HubHelpSheet({ open, onOpenChange, hubKey, title, topics
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search help topics…"
-              className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
+              className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
             />
             {search && (
               <button
@@ -71,18 +71,18 @@ export default function HubHelpSheet({ open, onOpenChange, hubKey, title, topics
         <div className="mt-5 space-y-4">
           {filtered.length === 0 && (
             <div className="text-center py-10">
-              <p className="text-sm font-semibold text-slate-500">{search ? 'No topics match your search' : 'No help topics yet for this hub.'}</p>
-              {search && <p className="text-xs text-slate-400 mt-1">Try a different keyword or clear the search.</p>}
+              <p className="text-ui-body font-semibold text-slate-500">{search ? 'No topics match your search' : 'No help topics yet for this hub.'}</p>
+              {search && <p className="text-ui-caption text-slate-400 mt-1">Try a different keyword or clear the search.</p>}
             </div>
           )}
           {filtered.map((t, i) => (
             <article key={i} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <h4 className="text-base font-bold text-slate-900 mb-1.5">{t.title}</h4>
-              {t.summary && <p className="text-sm text-slate-500 mb-3">{t.summary}</p>}
+              <h4 className="text-ui-subheading font-bold text-slate-900 mb-1.5">{t.title}</h4>
+              {t.summary && <p className="text-ui-body text-slate-500 mb-3">{t.summary}</p>}
               <div className="prose prose-sm prose-slate max-w-none text-[14px] leading-relaxed"><ReactMarkdown>{t.body || ''}</ReactMarkdown></div>
             </article>
           ))}
-          <Link to="/help" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2E5A1A] hover:underline">
+          <Link to="/help" className="inline-flex items-center gap-1.5 text-ui-body font-semibold text-[#2E5A1A] hover:underline">
             Open the full Help Guide <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

@@ -31,9 +31,9 @@ export default function StatCard({
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className={`text-lg sm:text-xl font-extrabold text-slate-900 truncate tabular-nums ${valueClassName}`}>{value}</p>
-        <p className="text-[10px] sm:text-[11px] text-slate-500 font-semibold truncate uppercase tracking-wide leading-tight">{label}</p>
-        {sub && <p className="text-[10px] text-slate-400 truncate hidden sm:block mt-0.5">{sub}</p>}
+        <p className={`text-ui-kpi font-extrabold text-slate-900 truncate tabular-nums ${valueClassName}`}>{value}</p>
+        <p className="text-ui-micro text-slate-500 font-semibold truncate uppercase tracking-wide leading-tight">{label}</p>
+        {sub && <p className="text-ui-caption text-slate-400 truncate hidden sm:block mt-0.5">{sub}</p>}
       </div>
       {arrow && <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition flex-shrink-0 hidden sm:block" />}
     </Tag>

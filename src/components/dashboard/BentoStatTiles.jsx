@@ -103,9 +103,9 @@ export default function BentoStatTiles({ onNavigate }) {
             <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition`}>
               <Icon className={`w-4 h-4 ${c.iconColor}`} />
             </div>
-            <p className={`text-xl font-bold tabular-nums leading-none ${c.valueColor}`}>{tile.value}</p>
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mt-1 truncate">{tile.label}</p>
-            <p className="text-[10px] text-slate-400 truncate mt-0.5">{tile.sub}</p>
+            <p className={`text-ui-kpi font-bold tabular-nums leading-none ${c.valueColor}`}>{tile.value}</p>
+            <p className="text-ui-micro font-semibold text-slate-500 uppercase tracking-wide mt-1 truncate">{tile.label}</p>
+            <p className="text-ui-caption text-slate-400 truncate mt-0.5">{tile.sub}</p>
           </button>
         );
       })}

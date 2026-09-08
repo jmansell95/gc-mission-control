@@ -20,10 +20,10 @@ export default function SectionHeader({ title, icon: Icon, accent, collapsed, on
           </div>
         )}
         <div className="flex-1 text-left min-w-0">
-          <h2 className="text-sm font-bold tracking-tight leading-tight text-[#2E5A1A] uppercase truncate">{title}</h2>
+          <h2 className="text-ui-subheading font-bold tracking-tight leading-tight text-[#2E5A1A] uppercase truncate">{title}</h2>
         </div>
         {visibleCount != null && (
-          <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] text-[11px] font-bold tabular-nums">
+          <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] text-ui-micro font-bold tabular-nums">
             {visibleCount}
           </span>
         )}

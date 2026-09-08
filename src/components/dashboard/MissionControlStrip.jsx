@@ -94,43 +94,43 @@ export default function MissionControlStrip({ onNavigate }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <Radar className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />
-            <p className="text-xs font-bold text-[#2E5A1A] uppercase tracking-wide">Mission Control</p>
+            <p className="text-ui-micro font-bold text-[#2E5A1A] uppercase tracking-wide">Mission Control</p>
           </div>
-          <p className="text-sm font-bold text-slate-800 truncate">{healthLabel}</p>
-          {m.issues.length > 0 && <p className="text-[11px] text-slate-400 truncate">{m.issues.join(' · ')}</p>}
+          <p className="text-ui-subheading font-bold text-slate-800 truncate">{healthLabel}</p>
+          {m.issues.length > 0 && <p className="text-ui-caption text-slate-400 truncate">{m.issues.join(' · ')}</p>}
         </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 px-3 pb-3 sm:px-4 sm:pb-4 pt-2.5 border-t border-slate-100 flex-1">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0"><Gauge className="w-4 h-4 text-slate-500" /></div>
           <div className="min-w-0">
-            <p className={`text-base sm:text-lg font-bold tabular-nums leading-none ${burnText}`}>{m.burnRate}%</p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Burn Rate</p>
+            <p className={`text-ui-kpi font-bold tabular-nums leading-none ${burnText}`}>{m.burnRate}%</p>
+            <p className="text-ui-micro text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Burn Rate</p>
             <div className="mt-1 w-14 sm:w-16 h-1 bg-slate-200 rounded-full overflow-hidden"><div className={`h-full rounded-full ${burnColor}`} style={{ width: `${Math.min(m.burnRate, 100)}%` }} /></div>
           </div>
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0"><PoundSterling className="w-4 h-4 text-slate-500" /></div>
           <div className="min-w-0">
-            <p className="text-base sm:text-lg font-bold tabular-nums text-slate-800 leading-none truncate">{gbp(m.totalInvoiceValue)}</p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Outstanding</p>
-            <p className="text-[10px] text-slate-400 mt-0.5 truncate">{m.pendingInvoices} pending · {m.overdueInvoices} overdue</p>
+            <p className="text-ui-kpi font-bold tabular-nums text-slate-800 leading-none truncate">{gbp(m.totalInvoiceValue)}</p>
+            <p className="text-ui-micro text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Outstanding</p>
+            <p className="text-ui-caption text-slate-400 mt-0.5 truncate">{m.pendingInvoices} pending · {m.overdueInvoices} overdue</p>
           </div>
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0"><ShieldCheck className="w-4 h-4 text-slate-500" /></div>
           <div className="min-w-0">
-            <p className={`text-base sm:text-lg font-bold tabular-nums leading-none ${m.fleetCompliancePct < 80 ? 'text-amber-600' : 'text-slate-800'}`}>{m.fleetCompliancePct}%</p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Fleet Compliance</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{m.compliantAssets}/{m.totalAssets} assets</p>
+            <p className={`text-ui-kpi font-bold tabular-nums leading-none ${m.fleetCompliancePct < 80 ? 'text-amber-600' : 'text-slate-800'}`}>{m.fleetCompliancePct}%</p>
+            <p className="text-ui-micro text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Fleet Compliance</p>
+            <p className="text-ui-caption text-slate-400 mt-0.5">{m.compliantAssets}/{m.totalAssets} assets</p>
           </div>
         </div>
         <div className="flex items-center gap-2 min-w-0">
           <div className={`w-8 h-8 rounded-lg ${ph.bg} flex items-center justify-center flex-shrink-0`}><TrendingUp className={`w-4 h-4 ${ph.color}`} /></div>
           <div className="min-w-0">
-            <p className={`text-base sm:text-lg font-bold leading-none ${ph.color}`}>{ph.label}</p>
-            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Project Health</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{m.jobsWithDelays} delayed</p>
+            <p className={`text-ui-kpi font-bold leading-none ${ph.color}`}>{ph.label}</p>
+            <p className="text-ui-micro text-slate-400 font-semibold uppercase tracking-wide mt-0.5">Project Health</p>
+            <p className="text-ui-caption text-slate-400 mt-0.5">{m.jobsWithDelays} delayed</p>
           </div>
         </div>
       </div>

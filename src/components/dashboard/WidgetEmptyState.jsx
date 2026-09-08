@@ -13,8 +13,8 @@ export default function WidgetEmptyState({ icon: Icon, title, message }) {
           <Icon className="w-5 h-5 text-slate-300" />
         </div>
       )}
-      <p className="text-sm font-semibold text-slate-600">{title || 'No data'}</p>
-      {message && <p className="text-xs text-slate-400 mt-1 max-w-xs">{message}</p>}
+      <p className="text-ui-body font-semibold text-slate-600">{title || 'No data'}</p>
+      {message && <p className="text-ui-caption text-slate-400 mt-1 max-w-xs">{message}</p>}
     </div>
   );
 }
