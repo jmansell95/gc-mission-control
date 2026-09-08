@@ -51,12 +51,21 @@ export default async function(req: Request): Promise<Response> {
     const now = new Date();
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+    // Job map for invoice division fallback (invoices without division_id
+    // inherit the linked job's division so stats are accurate pre-backfill).
+    const jobMap = new Map(jobs.map((j: any) => [j.id, j]));
+    const invoiceDivision = (inv: any): string | null => {
+      if (inv.division_id) return inv.division_id;
+      const job = inv.job_id ? jobMap.get(inv.job_id) : null;
+      return job?.division_id || null;
+    };
+
     // Per-division stats
     const divisionStats = divisions.map(d => {
       const dStaff = staff.filter(s => s.division_id === d.id);
       const dJobs = jobs.filter(j => j.division_id === d.id);
       const dVehicles = vehicles.filter(v => v.division_id === d.id);
-      const dInvoices = invoices.filter(i => i.division_id === d.id);
+      const dInvoices = invoices.filter(i => invoiceDivision(i) === d.id);
       const dCompliance = compliance.filter(c => c.division_id === d.id);
       const dAssets = assets.filter(a => a.division_id === d.id);
       const dDeliveries = deliveries.filter(dl => dl.division_id === d.id);
@@ -153,6 +162,8 @@ export default async function(req: Request): Promise<Response> {
       totalRevenue: invoices
         .filter(i => i.status === 'paid')
         .reduce((sum, i) => sum + (i.gross_total || 0), 0),
+      // Note: global totals count ALL invoices regardless of division_id,
+      // so they're correct even before the division backfill runs.
 
       // Operations & Logistics
       activeDeliveries: deliveries.filter(dl => dl.status === 'pending' || dl.status === 'in_progress').length,

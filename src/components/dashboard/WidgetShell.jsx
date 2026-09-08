@@ -1,10 +1,38 @@
 import React from 'react';
+import WidgetLoadingState from './WidgetLoadingState';
+import WidgetErrorState from './WidgetErrorState';
+import WidgetEmptyState from './WidgetEmptyState';
 
 /**
  * WidgetShell — modernized wrapper for dashboard widgets.
  * Uses the new insight-card style system with layered shadows and gradient header.
+ *
+ * Built-in state handling: pass `isLoading`, `error`, `isEmpty` (with optional
+ * `emptyIcon`, `emptyTitle`, `emptyMessage`, `onRetry`, `loadingVariant`,
+ * `loadingRows`) and the shell renders the standardized WidgetLoadingState,
+ * WidgetErrorState, or WidgetEmptyState inside the body so every widget
+ * shows the same loading / error / empty animation instead of ad-hoc spinners.
  */
-export default function WidgetShell({ icon: Icon, iconBg = 'bg-[#2E5A1A]/10', iconColor = 'text-[#2E5A1A]', title, subtitle, action, children, bodyClassName = 'p-5' }) {
+export default function WidgetShell({
+  icon: Icon,
+  iconBg = 'bg-[#2E5A1A]/10',
+  iconColor = 'text-[#2E5A1A]',
+  title,
+  subtitle,
+  action,
+  children,
+  bodyClassName = 'p-5',
+  // Standardized state props
+  isLoading = false,
+  error = null,
+  onRetry = null,
+  isEmpty = false,
+  emptyIcon = null,
+  emptyTitle = 'No data',
+  emptyMessage = null,
+  loadingVariant = 'list',
+  loadingRows = 3,
+}) {
   return (
     <div className="insight-card relative rounded-2xl overflow-hidden h-full flex flex-col min-h-[200px]">
       <div className="px-4 sm:px-5 py-4 bg-gradient-to-r from-slate-50/90 via-white to-white border-b border-slate-100/80 flex flex-wrap items-center justify-between gap-2">
@@ -22,7 +50,15 @@ export default function WidgetShell({ icon: Icon, iconBg = 'bg-[#2E5A1A]/10', ic
         {action && <div className="flex-shrink-0 w-full sm:w-auto flex justify-end">{action}</div>}
       </div>
       <div className={`${bodyClassName} flex-1`}>
-        {children}
+        {isLoading ? (
+          <WidgetLoadingState rows={loadingRows} variant={loadingVariant} />
+        ) : error ? (
+          <WidgetErrorState message={typeof error === 'string' ? error : error.message || "Couldn't load this data"} onRetry={onRetry} />
+        ) : isEmpty ? (
+          <WidgetEmptyState icon={emptyIcon} title={emptyTitle} message={emptyMessage} />
+        ) : (
+          children
+        )}
       </div>
     </div>
   );

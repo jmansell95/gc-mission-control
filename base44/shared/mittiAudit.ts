@@ -154,12 +154,37 @@ export async function processAndStoreAudit(
   }
 
   // Match Job by site name
-  const { jobId, jobName } = config.auto_link_to_jobs
+  let { jobId, jobName } = config.auto_link_to_jobs
     ? matchJob(fields.site_name, jobs)
     : { jobId: null, jobName: '' };
 
   // Match auditor to Staff
   const auditorStaffId = matchStaffByEmail(fields.auditor_email, allStaff);
+
+  // Fallback: if site-name matching failed but the auditor is a known staff
+  // member, use their RotaAssignment for the audit date to infer the job.
+  // This catches audits where the site field is blank or uses a different
+  // name than the job name (the most common auto-link failure).
+  if (!jobId && auditorStaffId && config.auto_link_to_jobs && fields.conducted_at) {
+    try {
+      let checkDate = new Date().toISOString().slice(0, 10);
+      const d = new Date(fields.conducted_at);
+      if (!isNaN(d.getTime())) checkDate = d.toISOString().slice(0, 10);
+      const assignments = await base44.asServiceRole.entities.RotaAssignment.filter({
+        staff_id: auditorStaffId,
+        assigned_date: checkDate,
+        assignment_type: 'job',
+      });
+      if (assignments && assignments.length > 0) {
+        const jobAssignment = assignments[0];
+        const matchedJob = jobs.find((j: any) => j.id === jobAssignment.job_id);
+        if (matchedJob) {
+          jobId = matchedJob.id;
+          jobName = matchedJob.name;
+        }
+      }
+    } catch (e) { /* best-effort fallback */ }
+  }
 
   const report: any = {
     safetyculture_audit_id: auditId,
