@@ -152,17 +152,15 @@ export default function AvailabilityHeatmap() {
           <p className="text-xs text-slate-400 mt-1">Try a different search or year.</p>
         </div>
       ) : (
-        <div className="heatmap-grid-scroll">
-          <HeatmapGrid
-            days={days}
-            staffRows={filteredStaff}
-            rigRows={filteredRigs}
-            staffStatus={staffStatus}
-            rigStatus={rigStatus}
-            showStaff={showStaff}
-            showRigs={showRigs}
-          />
-        </div>
+        <HeatmapGrid
+          days={days}
+          staffRows={filteredStaff}
+          rigRows={filteredRigs}
+          staffStatus={staffStatus}
+          rigStatus={rigStatus}
+          showStaff={showStaff}
+          showRigs={showRigs}
+        />
       )}
     </div>
   );

@@ -19,17 +19,20 @@ import ReportSaveModal from '@/components/reports/ReportSaveModal';
 import CustomReportBuilder from '@/components/reports/CustomReportBuilder';
 import ComplianceChecksReport from '@/components/reports/ComplianceChecksReport';
 import SupplierSpendReport from '@/components/reports/SupplierSpendReport';
+import AvailabilityReport from '@/components/reports/AvailabilityReport';
 import { useReportData, filterJobsByDate } from '@/hooks/useReportData';
 import { Bookmark, FileBarChart, Sparkles } from 'lucide-react';
 
-const HUB_MAP = { billing: 'financial', fleet: 'fleet', staff: 'staff', compliance: 'compliance', assets: 'assets', powerbi: 'powerbi' };
+const HUB_MAP = { billing: 'financial', fleet: 'fleet', staff: 'staff', compliance: 'compliance', assets: 'assets', powerbi: 'powerbi', availability: 'availability' };
 
 export default function ReportingHub() {
   const { toast } = useToast();
   const [params] = useSearchParams();
   const initialHub = params.get('hub');
   const [category, setCategory] = useState(HUB_MAP[initialHub] || 'overview');
-  const [filters, setFilters] = useState({ datePreset: '30d', dateFrom: '', dateTo: '', divisionId: '', teamId: '', clientId: '', jobTypeId: '' });
+  const initialDateFrom = params.get('dateFrom') || '';
+  const initialDateTo = params.get('dateTo') || '';
+  const [filters, setFilters] = useState({ datePreset: initialDateFrom ? 'custom' : '30d', dateFrom: initialDateFrom, dateTo: initialDateTo, divisionId: '', teamId: '', clientId: '', jobTypeId: '' });
   const [exporting, setExporting] = useState(null);
   const [showSave, setShowSave] = useState(false);
   const [scheduleTpl, setScheduleTpl] = useState(null);
@@ -42,7 +45,8 @@ export default function ReportingHub() {
   const isRigPerf = category === 'rig_performance';
   const isCrewPerf = category === 'crew_performance';
   const isSupplierSpend = category === 'supplier_spend';
-  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend;
+  const isAvailability = category === 'availability';
+  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend || isAvailability;
 
   // Apply date preset to get actual date range
   const getEffectiveDateRange = () => {
@@ -176,7 +180,7 @@ export default function ReportingHub() {
       quickLinks={REPORTS_QUICK_LINKS}
     >
       {/* Summary stat tiles — hidden on special tabs */}
-      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && <ReportStatTiles data={data} />}
+      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && <ReportStatTiles data={data} />}
 
       {/* Filter bar — hidden on Templates and Custom Builder tabs */}
       {!isTemplates && (
@@ -195,7 +199,7 @@ export default function ReportingHub() {
 
         <div className="flex-1 min-w-0 space-y-4">
           {/* Save-as-template button for native categories */}
-          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && (
+          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:text-[#2E5A1A] text-slate-600 text-xs font-semibold transition">
@@ -209,6 +213,7 @@ export default function ReportingHub() {
             : isRigPerf ? <RigPerformanceReport filters={effectiveFilters} />
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
             : isSupplierSpend ? <SupplierSpendReport filters={effectiveFilters} />
+            : isAvailability ? <AvailabilityReport filters={effectiveFilters} />
             : <>
               <ReportNativeSection hub={category} filters={effectiveFilters} />
               {category === 'compliance' && <ComplianceChecksReport filters={effectiveFilters} />}

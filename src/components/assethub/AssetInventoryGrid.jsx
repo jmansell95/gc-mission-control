@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   Cog, Wrench, Package, Truck, Anchor, Plug, ShieldCheck, ShieldAlert, ShieldX,
   HelpCircle, ChevronRight, Link2, Lock, ScanLine, Check, CheckSquare, Database, CircleDot,
   Warehouse, MapPin, CalendarClock, AlertTriangle, Boxes, Hash, Ruler, Gauge, Clock,
-  TrendingDown, PoundSterling, Activity, Weight, Upload,
+  TrendingDown, PoundSterling, Activity, Weight, Upload, Plus, Loader2,
 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useToast } from '@/components/ui/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { rollupCompliance, derivedComplianceStatus, COMPLIANCE_META, ASSET_TYPE_META, findParentRig, daysUntil } from '@/utils/rigRollup';
 import RigUtilizationSparkline from '@/components/righub/RigUtilizationSparkline';
 import AssetColourDot from '@/components/assethub/AssetColourDot';
@@ -160,28 +163,79 @@ function QuantityBadge({ available, owned }) {
  * type-gradient icon tile when there's no photo.
  */
 function AssetCardBanner({ asset, heightClass = 'h-28' }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef(null);
+
   const img = Array.isArray(asset?.panda_image_urls) ? asset.panda_image_urls[0] : null;
   const imgUrl = img?.thumb || img?.medium || img?.url;
   const Icon = TYPE_ICON[asset?.asset_type] || Wrench;
-  const grad = TYPE_GRADIENT[asset?.asset_type] || 'from-slate-500 to-slate-700';
   const expiry = asset?.compliance_expiry_date;
   const days = expiry ? daysUntil(expiry) : null;
   const showPill = days !== null;
   const pillCls = days < 0 ? 'bg-red-500 text-white' : days <= 30 ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white';
+  const hasPanda = !!asset?.panda_asset_id;
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    if (!hasPanda) {
+      toast({ title: 'Not linked to Asset Panda', description: 'Sync this asset to Asset Panda before uploading photos.', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.functions.invoke('pushAssetPhotoToPanda', {
+        site_asset_id: asset.id, action: 'upload', file_url, file_name: file.name,
+      });
+      if (res?.data?.success === false) {
+        toast({ title: 'Upload failed', description: res?.data?.error || 'Could not push to Asset Panda.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Photo uploaded', description: 'Image synced to Asset Panda.' });
+        qc.invalidateQueries({ queryKey: ['site-assets'] });
+      }
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err?.message || 'Could not upload photo.', variant: 'destructive' });
+    }
+    setUploading(false);
+  };
+
   return (
-    <div className={`relative ${heightClass} overflow-hidden`}>
+    <div className={`relative ${heightClass} overflow-hidden group`}>
       {imgUrl ? (
         <img src={imgUrl} alt={asset?.name || ''} loading="lazy"
           className="w-full h-full object-cover"
           onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
       ) : null}
-      <div className={`w-full h-full bg-gradient-to-br ${grad} flex items-center justify-center`} style={{ display: imgUrl ? 'none' : 'flex' }}>
-        <Icon className="w-10 h-10 text-white/80" />
+      <div className="w-full h-full bg-slate-200 flex flex-col items-center justify-center gap-1 px-2" style={{ display: imgUrl ? 'none' : 'flex' }}>
+        <Icon className="w-5 h-5 text-slate-400" />
+        <p className="text-[9px] font-semibold text-slate-400 text-center leading-tight">
+          {hasPanda ? 'No image on Asset Panda' : 'Not linked to Asset Panda'}
+        </p>
+        {hasPanda && (
+          <button
+            onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
+            disabled={uploading}
+            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white border border-slate-300 flex items-center justify-center transition disabled:opacity-50 shadow-sm"
+            title="Upload photo to Asset Panda"
+          >
+            {uploading ? <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" /> : <Plus className="w-4 h-4 text-slate-600" />}
+          </button>
+        )}
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
       </div>
       <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/45 to-transparent" />
       {showPill && (
         <div className={`absolute bottom-2 left-2 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold shadow-lg ${pillCls}`}>
           {days < 0 ? `${Math.abs(days)}d overdue` : `${days}d left`}
+        </div>
+      )}
+      {uploading && (
+        <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+          <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
         </div>
       )}
     </div>
