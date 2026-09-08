@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { Truck, Download, Loader2, ChevronRight, ArrowLeft, FileText } from 'lucide-react';
+import { Truck, Download, Loader2, ChevronRight, ArrowLeft, FileText, Store, Briefcase, TrendingUp } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { downloadStructuredCsv } from '@/utils/csvExport';
 import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
@@ -107,6 +107,13 @@ export default function SupplierSpendReport({ filters }) {
   }, [datedItems, supplierMap]);
 
   const grandTotal = supplierRows.reduce((s, r) => s + r.total, 0);
+  const uniqueJobCount = useMemo(() => {
+    const ids = new Set();
+    for (const c of datedItems) {
+      if (c.job_id) ids.add(c.job_id);
+    }
+    return ids.size;
+  }, [datedItems]);
 
   // Time-series chart data for monthly/weekly grouping
   const chartData = useMemo(() => {
@@ -285,7 +292,53 @@ export default function SupplierSpendReport({ filters }) {
   // ── Main: ranked supplier list ──
   return (
     <div className="space-y-4">
-      {/* Header + grouping toggle */}
+      {/* Summary tiles */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="insight-card rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center"><Truck className="w-4 h-4" /></div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</p>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-900">{fmt0(grandTotal)}</p>
+        </div>
+        <div className="insight-card rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><Store className="w-4 h-4" /></div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Suppliers</p>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-900">{supplierRows.length}</p>
+        </div>
+        <div className="insight-card rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><Briefcase className="w-4 h-4" /></div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Jobs</p>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-900">{uniqueJobCount}</p>
+        </div>
+        <div className="insight-card rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center"><TrendingUp className="w-4 h-4" /></div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">Avg / Supplier</p>
+          </div>
+          <p className="text-2xl font-extrabold text-slate-900">{fmt0(supplierRows.length > 0 ? grandTotal / supplierRows.length : 0)}</p>
+        </div>
+      </div>
+
+      {/* Export buttons */}
+      <div className="flex justify-end gap-2">
+        <button onClick={() => handleExportCsv(supplierRows, [
+          { key: 'name', label: 'Supplier' }, { key: 'count', label: 'Items' }, { key: 'total', label: 'Spend' },
+        ], 'supplier_spend.csv')}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition">
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
+        <button onClick={handleExportPdf} disabled={exporting === 'pdf'}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
+          {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} Export PDF
+        </button>
+      </div>
+
+      {/* Grouping toggle */}
       <div className="insight-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">
@@ -296,27 +349,13 @@ export default function SupplierSpendReport({ filters }) {
             <p className="text-sm font-extrabold text-slate-900">{fmt0(grandTotal)} across {supplierRows.length} suppliers</p>
           </div>
         </div>
-
-        <div className="flex bg-slate-100 rounded-xl p-0.5 flex-shrink-0">
+        <div className="flex bg-slate-100 rounded-xl p-0.5 flex-shrink-0 sm:ml-auto">
           {[{ id: 'total', label: 'Total' }, { id: 'monthly', label: 'Monthly' }, { id: 'weekly', label: 'Weekly' }].map(g => (
             <button key={g.id} onClick={() => setGrouping(g.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${grouping === g.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               {g.label}
             </button>
           ))}
-        </div>
-
-        <div className="flex items-center gap-2 sm:ml-auto">
-          <button onClick={() => handleExportCsv(supplierRows, [
-            { key: 'name', label: 'Supplier' }, { key: 'count', label: 'Items' }, { key: 'total', label: 'Spend' },
-          ], 'supplier_spend.csv')}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
-            <Download className="w-3.5 h-3.5" /> CSV
-          </button>
-          <button onClick={handleExportPdf} disabled={exporting === 'pdf'}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
-            {exporting === 'pdf' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />} PDF
-          </button>
         </div>
       </div>
 

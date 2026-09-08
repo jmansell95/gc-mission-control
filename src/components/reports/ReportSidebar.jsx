@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard, BarChart3, PoundSterling, Briefcase, Car, Users,
-  ShieldCheck, Boxes, FlaskConical, Truck, Bookmark, Plus, Drill, HardHat, Store,
+  ShieldCheck, Boxes, FlaskConical, Truck, Bookmark, Drill, HardHat, Store,
 } from 'lucide-react';
 
 export const REPORT_CATEGORIES = [
@@ -19,7 +19,6 @@ export const REPORT_CATEGORIES = [
   { id: 'crew_performance', label: 'Crew Performance', icon: HardHat },
   { id: 'powerbi', label: 'Power BI', icon: BarChart3 },
   { id: 'templates', label: 'My Reports', icon: Bookmark },
-  { id: 'custom', label: 'Custom Builder', icon: Plus },
 ];
 
 /**

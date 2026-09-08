@@ -39,11 +39,10 @@ export default function ReportingHub() {
   const activeCat = REPORT_CATEGORIES.find(c => c.id === category) || REPORT_CATEGORIES[0];
   const isPowerBI = category === 'powerbi';
   const isTemplates = category === 'templates';
-  const isCustom = category === 'custom';
   const isRigPerf = category === 'rig_performance';
   const isCrewPerf = category === 'crew_performance';
   const isSupplierSpend = category === 'supplier_spend';
-  const isSpecial = isPowerBI || isTemplates || isCustom || isRigPerf || isCrewPerf || isSupplierSpend;
+  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend;
 
   // Apply date preset to get actual date range
   const getEffectiveDateRange = () => {
@@ -177,10 +176,10 @@ export default function ReportingHub() {
       quickLinks={REPORTS_QUICK_LINKS}
     >
       {/* Summary stat tiles — hidden on special tabs */}
-      {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && !isSupplierSpend && <ReportStatTiles data={data} />}
+      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && <ReportStatTiles data={data} />}
 
       {/* Filter bar — hidden on Templates and Custom Builder tabs */}
-      {!isTemplates && !isCustom && (
+      {!isTemplates && (
         <UniversalReportFilters
           filters={filters}
           setFilters={setFilters}
@@ -196,7 +195,7 @@ export default function ReportingHub() {
 
         <div className="flex-1 min-w-0 space-y-4">
           {/* Save-as-template button for native categories */}
-          {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && !isSupplierSpend && (
+          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:text-[#2E5A1A] text-slate-600 text-xs font-semibold transition">
@@ -207,7 +206,6 @@ export default function ReportingHub() {
 
           {isPowerBI ? <PowerBIReportSection />
             : isTemplates ? <ReportTemplateLibrary onSchedule={setScheduleTpl} onBuildCustom={() => setShowCustom(true)} />
-            : isCustom ? <CustomReportBuilder />
             : isRigPerf ? <RigPerformanceReport filters={effectiveFilters} />
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
             : isSupplierSpend ? <SupplierSpendReport filters={effectiveFilters} />
