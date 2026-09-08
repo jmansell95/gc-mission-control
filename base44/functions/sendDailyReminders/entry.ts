@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  infoTable, statusPill, pillInfo, pillSuccess, pillWarning,
+  sectionCard, helpTip, heading, p, callout, html, dataTable
+} from '../../shared/emailStyling.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -37,33 +41,58 @@ Deno.serve(async (req) => {
       const assignments = (byStaff[member.id] || []).filter(a => jobs.find(j => j.id === a.job_id));
       if (assignments.length === 0) continue;
 
-      const lines = assignments.map(a => {
+      // Build rich HTML content with a data table
+      const tableRows = assignments.map(a => {
         const job = jobs.find(j => j.id === a.job_id);
         const vehicle = vehicles.find(v => v.id === a.vehicle_id);
         const jobName = job ? job.name : 'Unknown job';
-        const location = job ? job.location : '';
-        const time = (a.start_time || a.end_time) ? ` · ${a.start_time || '—'}–${a.end_time || '—'}` : '';
-        const reg = vehicle ? ` · ${vehicle.registration_number}` : '';
-        const notes = a.notes ? `\n      Notes: ${a.notes}` : '';
-        return `   • ${jobName}${location ? ' — ' + location : ''}${time}${reg}${notes}`;
-      }).join('\n');
+        const location = job ? job.location : '—';
+        const time = (a.start_time || a.end_time) ? `${a.start_time || '—'}–${a.end_time || '—'}` : '—';
+        const reg = vehicle ? vehicle.registration_number : '—';
+        const statusBadge = a.shift_status === 'confirmed' ? html(pillSuccess('Confirmed'))
+          : a.shift_status === 'declined' ? html(pillWarning('Declined'))
+          : html(pillInfo('Pending'));
+        return [jobName, location, time, reg, statusBadge];
+      });
 
-      let bodyText;
-      if (dailyCfg.template) {
-        bodyText = dailyCfg.template
-          .replace(/\{staff_name\}/g, member.name).replace(/\{today_date\}/g, todayStr)
-          .replace(/\{assignment_list\}/g, lines);
-      } else {
-        const intro = dailyCfg.intro_message ? dailyCfg.intro_message + '\n\n' : '';
-        bodyText = intro + `Hello ${member.name},\n\nHere is your schedule for today (${todayStr}):\n\n${lines}\n\nHave a safe shift.\n\nGC Mission Control`;
-      }
-      const bodyHtml = escapeHtml(bodyText).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
+      const shiftsTable = dataTable(
+        ['Job', 'Location', 'Time', 'Vehicle', 'Status'],
+        tableRows
+      );
+
+      const bodyHtml =
+        heading('Your schedule for today') +
+        p('Hi ' + member.name + ',') +
+        p('You have ' + assignments.length + ' shift' + (assignments.length > 1 ? 's' : '') + ' scheduled for today (' + todayStr + '). Here\'s what your day looks like:') +
+        shiftsTable +
+        helpTip('What to do next', 'Open the app to see full shift details. When you arrive on site, tap <strong>Sign In</strong> so the office knows you\'ve arrived safely. Complete your daily checks and POWRA before starting work.') +
+        linkBlock(baseUrl, '/staff-schedule', 'View My Schedule');
+
+      // If custom template is set, use it instead
+      const finalHtml = (dailyCfg.template)
+        ? (() => {
+            const lines = assignments.map(a => {
+              const job = jobs.find(j => j.id === a.job_id);
+              const vehicle = vehicles.find(v => v.id === a.vehicle_id);
+              const jobName = job ? job.name : 'Unknown job';
+              const location = job ? job.location : '';
+              const time = (a.start_time || a.end_time) ? ` · ${a.start_time || '—'}–${a.end_time || '—'}` : '';
+              const reg = vehicle ? ` · ${vehicle.registration_number}` : '';
+              return `   • ${jobName}${location ? ' — ' + location : ''}${time}${reg}`;
+            }).join('\n');
+            const text = dailyCfg.template
+              .replace(/\{staff_name\}/g, member.name)
+              .replace(/\{today_date\}/g, todayStr)
+              .replace(/\{assignment_list\}/g, lines);
+            return escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
+          })()
+        : bodyHtml;
 
       try {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: member.email,
           subject: dailyCfg.subject ? dailyCfg.subject.replace(/\{staff_name\}/g, member.name).replace(/\{today_date\}/g, todayStr) : `Your schedule for today — ${assignments.length} shift${assignments.length > 1 ? 's' : ''}`,
-          body: styledHtml(bodyHtml, dailyCfg)
+          body: brandedWrapper(finalHtml, { ...dailyCfg, headerVariant: 'brand', banner_subtitle: 'Daily Schedule · ' + todayStr })
         });
         notified++;
       } catch (err) {
@@ -79,22 +108,36 @@ Deno.serve(async (req) => {
     if (recipients.length > 0) {
       const validRotas = todaysRotas.filter((a) => jobs.find((j) => j.id === a.job_id));
       if (validRotas.length > 0) {
-        const lines = validRotas.map((a) => {
+        const tableRows = validRotas.map((a) => {
           const job = jobs.find((j) => j.id === a.job_id);
           const member = staff.find((s) => s.id === a.staff_id);
           const vehicle = vehicles.find((v) => v.id === a.vehicle_id);
           const staffName = member ? member.name : '—';
           const jobName = job ? job.name : 'Unknown job';
-          const location = job ? job.location : '';
-          const time = (a.start_time || a.end_time) ? ' · ' + (a.start_time || '—') + '–' + (a.end_time || '—') : '';
-          const reg = vehicle ? ' · ' + vehicle.registration_number : '';
-          return '   • ' + staffName + ' — ' + jobName + (location ? ' — ' + location : '') + time + reg;
-        }).join('\n');
-        const bodyText = 'Daily schedule overview for ' + todayStr + ':\n\n' + lines + '\n\nGC Mission Control';
-        const bodyHtml = escapeHtml(bodyText).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/admin', 'Open planner');
+          const location = job ? job.location : '—';
+          const time = (a.start_time || a.end_time) ? `${a.start_time || '—'}–${a.end_time || '—'}` : '—';
+          const reg = vehicle ? vehicle.registration_number : '—';
+          return [staffName, jobName, location, time, reg];
+        });
+
+        const overviewTable = dataTable(
+          ['Staff Member', 'Job', 'Location', 'Time', 'Vehicle'],
+          tableRows
+        );
+
+        const bodyHtml =
+          heading('Daily schedule overview') +
+          p('Here\'s the full crew schedule for ' + todayStr + ':') +
+          overviewTable +
+          linkBlock(baseUrl, '/admin', 'Open Planner');
+
         for (const email of recipients) {
           try {
-            await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject: 'Daily schedule overview — ' + todayStr, body: styledHtml(bodyHtml, schedCfg) });
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to: email,
+              subject: 'Daily schedule overview — ' + todayStr,
+              body: brandedWrapper(bodyHtml, { ...(schedCfg || {}), headerVariant: 'blue', banner_subtitle: 'Crew Overview · ' + todayStr })
+            });
             copies++;
           } catch (e) {}
         }

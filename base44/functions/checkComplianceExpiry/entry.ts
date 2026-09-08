@@ -1,29 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function linkBlock(baseUrl, path, label) {
-  if (!baseUrl) return '';
-  const href = baseUrl.replace(/\/+$/, '') + (path || '');
-  return '<p style="margin-top:18px"><a href="' + escapeHtml(href) + '" style="display:inline-block;background:#0e7a4f;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif">' + escapeHtml(label) + '</a></p>';
-}
-function styledHtml(rawBodyHtml, cfg) {
-  const accent = (cfg && cfg.accent_color) || '#0e7a4f';
-  const bannerTitle = (cfg && cfg.banner_title) || 'GC Mission Control';
-  const showBanner = !(cfg && cfg.show_banner === false);
-  const footer = (cfg && cfg.footer_text) || 'GC Mission Control';
-  const banner = showBanner
-    ? '<tr><td style="background:' + accent + ';padding:18px 24px"><h1 style="margin:0;color:#ffffff;font-size:18px;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px">' + escapeHtml(bannerTitle) + '</h1></td></tr>'
-    : '';
-  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">' +
-    '<table align="center" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;margin:24px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 6px 24px rgba(15,42,31,0.08)">' +
-    banner +
-    '<tr><td style="padding:24px;color:#1e293b;font-size:14px;line-height:1.6">' + rawBodyHtml + '</td></tr>' +
-    '<tr><td style="padding:14px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;text-align:center">' + escapeHtml(footer) + '</td></tr>' +
-    '</table></body></html>';
-}
-async function getAppBaseUrl(base44) {
-  try { const list = await base44.asServiceRole.entities.AppSetting.filter({ key: 'global' }); return (list[0] && list[0].app_base_url) || ''; } catch (e) { return ''; }
-}
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  infoTable, statusPill, pillDanger, pillWarning, pillSuccess,
+  sectionCard, helpTip, heading, p, callout, html, dataTable, statTileRow
+} from '../../shared/emailStyling.ts';
 
 // Parse compliance date — supports YYYY-MM (staff) and YYYY-MM-DD (other categories)
 function parseDate(str) {
@@ -32,7 +12,6 @@ function parseDate(str) {
   return new Date(str + 'T00:00:00');
 }
 
-// Whole days from now until a YYYY-MM-DD date (negative = past).
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr + 'T00:00:00');
@@ -40,7 +19,6 @@ function daysUntil(dateStr) {
   return Math.floor((d.getTime() - Date.now()) / 86400000);
 }
 
-// Derive the most likely statutory inspection type from the asset type.
 function recordTypeForAsset(assetType) {
   if (assetType === 'portable_appliance') return 'pat_inspection';
   if (assetType === 'rig' || assetType === 'lifting') return 'loler_inspection';
@@ -104,21 +82,39 @@ Deno.serve(async (req) => {
             if (b.status === 'EXPIRED' && a.status !== 'EXPIRED') return 1;
             return a.expiryDate.localeCompare(b.expiryDate);
           });
-          let alertList = '';
-          alerts.forEach(a => {
-            alertList += a.referenceName + ' — ' + a.title + ' (' + a.category + '):\n';
-            alertList += '  ' + a.status + ' (expiry: ' + a.expiryDate + ')\n';
+
+          const expiredCount = alerts.filter(a => a.status === 'EXPIRED').length;
+          const expiringCount = alerts.length - expiredCount;
+
+          const tableRows = alerts.map(a => {
+            const pill = a.status === 'EXPIRED' ? html(pillDanger('EXPIRED')) : html(pillWarning('Expiring'));
+            return [a.referenceName, a.title, a.category, a.expiryDate, pill];
           });
+
+          const alertsTable = dataTable(['Name', 'Item', 'Category', 'Expiry', 'Status'], tableRows);
+
+          const bodyHtml =
+            heading('Compliance expiry alert') +
+            p('The following compliance items have expired or are expiring within ' + daysBefore + ' days. Please arrange renewals to keep your team and equipment compliant.') +
+            statTileRow([
+              { label: 'Expired', value: String(expiredCount), icon: '⚠', color: '#e11d48' },
+              { label: 'Expiring Soon', value: String(expiringCount), icon: '⏰', color: '#d97706' },
+              { label: 'Total Alerts', value: String(alerts.length), icon: '📋', color: '#2E5A1A' },
+            ]) +
+            (expiredCount > 0 ? callout(expiredCount + ' item(s) have already EXPIRED and need immediate attention. Staff or equipment with expired compliance may not legally work on site.', 'danger') : '') +
+            sectionCard('Compliance Items', alertsTable, { titleBg: '#be123c' }) +
+            helpTip('What to do next', 'Open the Compliance Hub to review each item. For staff compliance, arrange renewal training via the Training Hub. For vehicle/equipment compliance, book a maintenance appointment via the Fleet Hub.') +
+            linkBlock(await getAppBaseUrl(base44), '/compliance', 'Open Compliance Hub');
+
           const subject = cfg.subject
             ? cfg.subject.replace(/\{alert_count\}/g, String(alerts.length))
-            : 'Compliance Expiry Alert - ' + alerts.length + ' item(s) need attention';
-          const text = cfg.template
-            .replace(/\{alert_count\}/g, String(alerts.length))
-            .replace(/\{alert_list\}/g, alertList);
-          const baseUrl = await getAppBaseUrl(base44);
-          const bodyHtml = escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/admin', 'Open planner');
+            : 'Compliance Expiry Alert — ' + alerts.length + ' item(s) need attention';
+
           for (const to of recipients) {
-            await base44.asServiceRole.integrations.Core.SendEmail({ to, subject, body: styledHtml(bodyHtml, cfg) });
+            await base44.asServiceRole.integrations.Core.SendEmail({
+              to, subject,
+              body: brandedWrapper(bodyHtml, { ...cfg, headerVariant: 'rose', banner_subtitle: 'Compliance Alert' })
+            });
           }
           ciResult = { sent: true, alertCount: alerts.length, notifiedRecipients: recipients.length };
         } else {
@@ -143,15 +139,13 @@ Deno.serve(async (req) => {
         if (!c.expiry_date) continue;
         const expiry = parseDate(c.expiry_date);
         if (!expiry || isNaN(expiry.getTime())) continue;
-        if (expiry > cutoff30) continue; // only act within 30 days of expiry
+        if (expiry > cutoff30) continue;
         trainingResult.checked++;
-        // Skip if a booked training already exists for this compliance item
         if (existingBookings.some(b => b.linked_compliance_id === c.id && b.status === 'booked')) {
           trainingResult.skipped++; continue;
         }
         const staffMember = allStaff.find(s => s.id === c.reference_id || s.name === c.reference_name);
         if (!staffMember) { trainingResult.skipped++; continue; }
-        // Find a scheduled course matching the qualification type with a future start date
         const matchingCourse = allCourses.find(course =>
           course.category === c.qualification_type &&
           course.status === 'scheduled' &&
@@ -161,7 +155,6 @@ Deno.serve(async (req) => {
         if (matchingCourse) {
           courseId = matchingCourse.id;
         } else {
-          // Create a placeholder renewal course 14 days out for the manager to confirm
           const startDate = new Date(now.getTime() + 14 * 86400000).toISOString().slice(0, 10);
           try {
             const created = await base44.asServiceRole.entities.TrainingCourse.create({
@@ -215,12 +208,10 @@ Deno.serve(async (req) => {
         else if (days <= 30) stage = '30d';
         if (!stage) continue;
 
-        // Find existing open task for this asset
         const task = existingTasks.find(t => t.site_asset_id === asset.id && t.status === 'open');
         const currentStage = task?.alert_stage || 'none';
         const shouldAlert = stageRank[stage] > stageRank[currentStage];
 
-        // Resolve recipients: compliance team (division admins) + responsible person (best-effort email)
         const divAdmins = asset.division_id ? admins.filter(u => u.division_id === asset.division_id) : admins;
         const complianceEmails = divAdmins.map(u => u.email).filter(Boolean);
         let respEmail = null;
@@ -235,23 +226,36 @@ Deno.serve(async (req) => {
             ? `OVERDUE: ${asset.name} certificate has expired`
             : `Action needed: ${asset.name} certificate ${stage === '7d' ? 'expires in 7 days' : 'expires in 30 days'}`;
           const expiryStr = asset.compliance_expiry_date;
-          let bodyText = `The ${asset.asset_type || 'asset'} "${asset.name}"${asset.fleet_number ? ` (FAA ${asset.fleet_number})` : ''} has a compliance certificate ${stage === 'expired' ? 'that EXPIRED on' : 'expiring on'} ${expiryStr}.\n\n`;
-          bodyText += stage === 'expired'
-            ? `This asset has been deactivated and cannot be assigned to jobs until a new passing inspection is logged.\n`
-            : `Please arrange re-certification before this date to keep the asset available.\n`;
-          if (asset.responsible_person) bodyText += `\nResponsible person: ${asset.responsible_person}\n`;
-          bodyText += `\nOpen the Assets Hub to log the new inspection.`;
-          const bodyHtml = styledHtml(escapeHtml(bodyText).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/assets', 'Open Assets Hub'), null);
+
+          const pill = stage === 'expired' ? pillDanger('EXPIRED') : pillWarning(stage === '7d' ? '7 DAYS' : '30 DAYS');
+          const detailsTable = infoTable([
+            ['Asset', asset.name + (asset.fleet_number ? ' (FAA ' + asset.fleet_number + ')' : '')],
+            ['Type', asset.asset_type || '—'],
+            ['Expiry Date', expiryStr],
+            ['Status', html(pill)],
+            ['Responsible Person', asset.responsible_person || '—'],
+          ]);
+
+          const bodyHtml =
+            heading(stage === 'expired' ? 'Asset certificate EXPIRED' : 'Asset certificate expiring soon') +
+            p(stage === 'expired'
+              ? 'This asset has been deactivated and cannot be assigned to jobs until a new passing inspection is logged.'
+              : 'Please arrange re-certification before this date to keep the asset available.') +
+            sectionCard('Asset Details', detailsTable, { titleBg: stage === 'expired' ? '#be123c' : '#b45309' }) +
+            helpTip('What to do next', 'Open the Assets Hub to log the new inspection. Once a passing inspection is recorded, the asset will be reactivated automatically.') +
+            linkBlock(baseUrl, '/assets', 'Open Assets Hub');
+
+          const bodyHtmlWrapped = brandedWrapper(bodyHtml, { headerVariant: stage === 'expired' ? 'rose' : 'amber', banner_subtitle: 'Asset Compliance' });
+
           for (const to of recipients) {
-            try { await base44.asServiceRole.integrations.Core.SendEmail({ to, subject: subj, body: bodyHtml }); } catch (e) {}
+            try { await base44.asServiceRole.integrations.Core.SendEmail({ to, subject: subj, body: bodyHtmlWrapped }); } catch (e) {}
           }
-          // Push to compliance team admins (best-effort — requires native mobile build)
           for (const u of divAdmins) {
             try {
               await base44.asServiceRole.integrations.Core.SendPushNotification({
                 user_id: u.id,
                 title: subj,
-                content: bodyText.slice(0, 200),
+                content: `${asset.name} certificate ${stage === 'expired' ? 'EXPIRED' : 'expiring'} ${expiryStr}`,
                 action_url: assetsPath || undefined,
               });
             } catch (e) {}
@@ -259,7 +263,6 @@ Deno.serve(async (req) => {
           assetResult.alertsSent++;
         }
 
-        // Create / update the recert task
         const recordType = recordTypeForAsset(asset.asset_type);
         if (!task) {
           try {
@@ -287,7 +290,6 @@ Deno.serve(async (req) => {
           } catch (e) {}
         }
 
-        // Auto-deactivate expired assets with no passing inspection since the expiry date
         if (days < 0 && asset.is_active !== false) {
           const recerted = recentRecords.some(r =>
             r.site_asset_id === asset.id &&

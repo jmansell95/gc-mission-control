@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  infoTable, statusPill, sectionCard, helpTip, heading, p, callout, html,
+  bulletList, timeline
+} from '../../shared/emailStyling.ts';
 
 // ============================================================
 // sendWelcomeEmail — triggered when a Staff record's user_id is
@@ -53,16 +57,41 @@ export default async function(req: Request): Promise<Response> {
       ? cfg.subject.replace(/\{staff_name\}/g, staffName).replace(/\{email\}/g, staff.email)
       : `Welcome to GC Mission Control`;
 
-    const text = (cfg.template || 'Hi {staff_name},\n\nYou have been invited to join the GC Mission Control app. Use the login link sent to {email} to set up your account and start viewing your schedule and logging timesheets.\n\nGC Mission Control')
-      .replace(/\{staff_name\}/g, staffName)
-      .replace(/\{email\}/g, staff.email);
+    // Build rich welcome HTML
+    const onboardingSteps = [
+      { title: 'Open the app', body: 'Tap the button below to open GC Mission Control on your phone or computer.' },
+      { title: 'Complete your profile', body: 'Add your photo and phone number so your manager and crew can reach you.' },
+      { title: 'View your schedule', body: 'Check your upcoming shifts and assignments on the Today page.' },
+      { title: 'Sign the tracking consent', body: 'Review and sign the GPS tracking consent form in your profile settings.' },
+    ];
 
-    const bodyHtml = escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/', 'Open GC Mission Control');
+    const bodyHtml =
+      heading('Welcome to GC Mission Control') +
+      p('Hi ' + staffName + ',') +
+      p('You\'ve been successfully added to the GC Mission Control platform. This is where you\'ll see your daily schedule, log your hours, manage your compliance documents, and stay connected with your crew.') +
+      sectionCard('Your Account', infoTable([
+        ['Name', staffName],
+        ['Email', staff.email],
+        ['Role', staff.job_title || staff.worker_type || 'Team Member'],
+      ]), { titleBg: '#2E5A1A' }) +
+      heading('Getting started') +
+      timeline(onboardingSteps) +
+      helpTip('Need help?', 'If you can\'t log in or see a blank screen, make sure you\'ve set up your password using the link sent in the separate registration email. If you\'re still stuck, contact your manager or the office team.') +
+      linkBlock(baseUrl, '/', 'Open GC Mission Control');
+
+    // If custom template is set, use it instead
+    const finalHtml = (cfg && cfg.template)
+      ? escapeHtml(
+          cfg.template
+            .replace(/\{staff_name\}/g, staffName)
+            .replace(/\{email\}/g, staff.email)
+        ).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/', 'Open GC Mission Control')
+      : bodyHtml;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: staff.email,
       subject,
-      body: styledHtml(bodyHtml, cfg),
+      body: brandedWrapper(finalHtml, { ...cfg, headerVariant: 'emerald', banner_subtitle: 'Welcome Aboard' }),
     });
 
     return Response.json({ sent: true, to: staff.email, staff_id: staff.id });

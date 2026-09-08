@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl, dataTable, p, heading, BRAND } from '../../shared/emailStyling.ts';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  dataTable, infoTable, statusPill, pillInfo, pillSuccess, pillWarning,
+  sectionCard, helpTip, heading, p, callout, html, BRAND
+} from '../../shared/emailStyling.ts';
 
 const DEFAULT_SCHEDULE_TEMPLATE = "Hi {staff_name},\n\nHere is your weekly schedule for {week_start}. You have {assignment_count} shift(s) this week. Please review the details below.";
 
@@ -25,7 +29,6 @@ Deno.serve(async (req) => {
 
     const { weekStart, staffId, recipientEmail } = await req.json();
 
-    // Only the configured staff_schedule template is sent — no default fallback.
     const cfgList = await base44.asServiceRole.entities.EmailAlertSetting.filter({ alert_key: 'staff_schedule' });
     const cfg = cfgList[0];
     if (cfg && cfg.enabled === false) {
@@ -55,28 +58,38 @@ Deno.serve(async (req) => {
       const vehicle = vehicles.find(v => v && v.id === r.vehicle_id);
       if (!job) continue;
       const times = (r.start_time || r.end_time) ? (r.start_time || '—') + '–' + (r.end_time || '—') : '—';
+      const statusBadge = r.shift_status === 'confirmed' ? html(pillSuccess('Confirmed'))
+        : r.shift_status === 'declined' ? html(pillWarning('Declined'))
+        : html(pillInfo('Pending'));
       tableRows.push([
         fmtDate(r.assigned_date),
         job.name,
         job.location || '—',
         times,
         vehicle ? vehicle.registration_number : '—',
+        statusBadge,
       ]);
     }
-    const table = dataTable(['Date', 'Job', 'Location', 'Times', 'Vehicle'], tableRows, { accent: (cfg && cfg.accent_color) || BRAND.primary });
+    const table = dataTable(['Date', 'Job', 'Location', 'Times', 'Vehicle', 'Status'], tableRows, { accent: (cfg && cfg.accent_color) || BRAND.primary });
 
     const subject = (cfg && cfg.subject)
       ? cfg.subject.replace(/\{staff_name\}/g, staff ? staff.name : '').replace(/\{week_start\}/g, weekLabel)
       : ((staff ? staff.name + "'s Weekly Schedule – " : 'Weekly Rota – ') + weekLabel);
 
     const baseUrl = await getAppBaseUrl(base44);
-    const bodyHtml = '<p style="font-size:14px;color:#475569;margin:0 0 16px 0;white-space:pre-wrap">' + escapeHtml(intro).replace(/\n/g, '<br>') + '</p>' +
-      table + linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
+
+    // Rich HTML body
+    const bodyHtml =
+      heading('Your weekly schedule') +
+      '<p style="font-size:14px;color:#475569;margin:0 0 16px 0;white-space:pre-wrap">' + escapeHtml(intro).replace(/\n/g, '<br>') + '</p>' +
+      table +
+      helpTip('What to do next', 'Review your shifts for the week ahead. If any shift says <strong>Pending</strong>, please confirm in the app. On each working day, sign in when you arrive on site and complete your daily checks before starting work.') +
+      linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: recipientEmail,
       subject,
-      body: styledHtml(bodyHtml, cfg),
+      body: brandedWrapper(bodyHtml, { ...cfg, headerVariant: 'brand', banner_subtitle: 'Weekly Schedule · ' + weekLabel }),
       from_name: 'GC Mission Control'
     });
 

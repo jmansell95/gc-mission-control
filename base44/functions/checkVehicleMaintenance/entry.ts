@@ -1,29 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function linkBlock(baseUrl, path, label) {
-  if (!baseUrl) return '';
-  const href = baseUrl.replace(/\/+$/, '') + (path || '');
-  return '<p style="margin-top:18px"><a href="' + escapeHtml(href) + '" style="display:inline-block;background:#0e7a4f;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif">' + escapeHtml(label) + '</a></p>';
-}
-function styledHtml(rawBodyHtml, cfg) {
-  const accent = (cfg && cfg.accent_color) || '#0e7a4f';
-  const bannerTitle = (cfg && cfg.banner_title) || 'GC Mission Control';
-  const showBanner = !(cfg && cfg.show_banner === false);
-  const footer = (cfg && cfg.footer_text) || 'GC Mission Control';
-  const banner = showBanner
-    ? '<tr><td style="background:' + accent + ';padding:18px 24px"><h1 style="margin:0;color:#ffffff;font-size:18px;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px">' + escapeHtml(bannerTitle) + '</h1></td></tr>'
-    : '';
-  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">' +
-    '<table align="center" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;margin:24px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 6px 24px rgba(15,42,31,0.08)">' +
-    banner +
-    '<tr><td style="padding:24px;color:#1e293b;font-size:14px;line-height:1.6">' + rawBodyHtml + '</td></tr>' +
-    '<tr><td style="padding:14px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;text-align:center">' + escapeHtml(footer) + '</td></tr>' +
-    '</table></body></html>';
-}
-async function getAppBaseUrl(base44) {
-  try { const list = await base44.asServiceRole.entities.AppSetting.filter({ key: 'global' }); return (list[0] && list[0].app_base_url) || ''; } catch (e) { return ''; }
-}
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  infoTable, statusPill, pillDanger, pillWarning, pillSuccess,
+  sectionCard, helpTip, heading, p, callout, html, dataTable, statTileRow
+} from '../../shared/emailStyling.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -36,7 +16,6 @@ Deno.serve(async (req) => {
     if (!cfg || cfg.enabled === false) {
       return Response.json({ skipped: true, reason: 'Alert disabled' });
     }
-    // Only the configured template is sent — no default fallback.
     if (!cfg.template) {
       return Response.json({ skipped: true, reason: 'No template configured for vehicle maintenance' });
     }
@@ -87,30 +66,41 @@ Deno.serve(async (req) => {
       return Response.json({ sent: false, reason: 'No maintenance alerts', checked: vehicles.length });
     }
 
-    let alertList = '';
-    alerts.forEach(a => {
-      alertList += a.vehicle + ' (' + a.registration + '):\n';
-      a.issues.forEach(issue => {
-        alertList += '  - ' + issue.type + ': ' + issue.status + ' (due ' + issue.date + ')\n';
-      });
-      alertList += '\n';
+    const overdueCount = alerts.reduce((s, a) => s + a.issues.filter(i => i.status === 'OVERDUE').length, 0);
+    const dueSoonCount = alerts.reduce((s, a) => s + a.issues.filter(i => i.status === 'Due soon').length, 0);
+
+    // Build rich HTML with stat tiles and data table
+    const tableRows = alerts.map(a => {
+      const issueText = a.issues.map(i => i.type + ': ' + i.status + ' (' + i.date + ')').join('; ');
+      const hasOverdue = a.issues.some(i => i.status === 'OVERDUE');
+      const pill = hasOverdue ? html(pillDanger('OVERDUE')) : html(pillWarning('Due Soon'));
+      return [a.vehicle, a.registration, issueText, pill];
     });
+
+    const alertsTable = dataTable(['Vehicle', 'Reg', 'Issues', 'Status'], tableRows);
+
+    const bodyHtml =
+      heading('Vehicle maintenance alert') +
+      p('The following vehicles have maintenance items that are overdue or due within ' + daysBefore + ' days. Please arrange bookings to keep your fleet roadworthy and compliant.') +
+      statTileRow([
+        { label: 'Overdue', value: String(overdueCount), icon: '⚠', color: '#e11d48' },
+        { label: 'Due Soon', value: String(dueSoonCount), icon: '⏰', color: '#d97706' },
+        { label: 'Vehicles', value: String(alerts.length), icon: '🚐', color: '#2E5A1A' },
+      ]) +
+      (overdueCount > 0 ? callout(overdueCount + ' maintenance item(s) are OVERDUE. Vehicles with expired MOT or overdue service must not be driven on public roads.', 'danger') : '') +
+      sectionCard('Vehicle Alerts', alertsTable, { titleBg: '#b45309' }) +
+      helpTip('What to do next', 'Open the Fleet Hub to book maintenance appointments. For MOT, use the DVLA-verified booking flow. For services, contact your preferred garage. Assign a driver to take the vehicle to the appointment.') +
+      linkBlock(await getAppBaseUrl(base44), '/fleet', 'Open Fleet Hub');
 
     const subject = cfg.subject
       ? cfg.subject.replace(/\{alert_count\}/g, String(alerts.length))
-      : 'Vehicle Maintenance Alert - ' + alerts.length + ' vehicle(s) need attention';
-    const text = cfg.template
-      .replace(/\{alert_count\}/g, String(alerts.length))
-      .replace(/\{alert_list\}/g, alertList);
-
-    const baseUrl = await getAppBaseUrl(base44);
-    const bodyHtml = escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/admin', 'Open planner');
+      : 'Vehicle Maintenance Alert — ' + alerts.length + ' vehicle(s) need attention';
 
     for (const to of recipients) {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to,
         subject,
-        body: styledHtml(bodyHtml, cfg)
+        body: brandedWrapper(bodyHtml, { ...cfg, headerVariant: 'amber', banner_subtitle: 'Fleet Maintenance' })
       });
     }
 

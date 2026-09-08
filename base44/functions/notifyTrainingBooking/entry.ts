@@ -1,29 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-function linkBlock(baseUrl, path, label) {
-  if (!baseUrl) return '';
-  const href = baseUrl.replace(/\/+$/, '') + (path || '');
-  return '<p style="margin-top:18px"><a href="' + escapeHtml(href) + '" style="display:inline-block;background:#0e7a4f;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Arial,Helvetica,sans-serif">' + escapeHtml(label) + '</a></p>';
-}
-function styledHtml(rawBodyHtml, cfg) {
-  const accent = (cfg && cfg.accent_color) || '#0e7a4f';
-  const bannerTitle = (cfg && cfg.banner_title) || 'GC Mission Control';
-  const showBanner = !(cfg && cfg.show_banner === false);
-  const footer = (cfg && cfg.footer_text) || 'GC Mission Control';
-  const banner = showBanner
-    ? '<tr><td style="background:' + accent + ';padding:18px 24px"><h1 style="margin:0;color:#ffffff;font-size:18px;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.3px">' + escapeHtml(bannerTitle) + '</h1></td></tr>'
-    : '';
-  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">' +
-    '<table align="center" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;margin:24px auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 6px 24px rgba(15,42,31,0.08)">' +
-    banner +
-    '<tr><td style="padding:24px;color:#1e293b;font-size:14px;line-height:1.6">' + rawBodyHtml + '</td></tr>' +
-    '<tr><td style="padding:14px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;text-align:center">' + escapeHtml(footer) + '</td></tr>' +
-    '</table></body></html>';
-}
-async function getAppBaseUrl(base44) {
-  try { const list = await base44.asServiceRole.entities.AppSetting.filter({ key: 'global' }); return (list[0] && list[0].app_base_url) || ''; } catch (e) { return ''; }
-}
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
+  infoTable, statusPill, pillInfo, sectionCard, helpTip, heading, p, callout, html
+} from '../../shared/emailStyling.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -51,7 +30,7 @@ Deno.serve(async (req) => {
       : null;
 
     const cfgList = await base44.asServiceRole.entities.EmailAlertSetting.filter({ alert_key: 'training_booking' });
-    const cfg = cfgList[0] || { accent_color: '#0e7a4f', banner_title: 'GC Mission Control', show_banner: true, footer_text: 'GC Mission Control' };
+    const cfg = cfgList[0] || {};
     if (cfg.enabled === false) return Response.json({ skipped: true, reason: 'Email alert disabled' });
 
     const tok = {
@@ -64,38 +43,49 @@ Deno.serve(async (req) => {
       description: course?.description || ''
     };
 
-    let text;
-    if (cfg.template) {
-      text = cfg.template
-        .replace(/\{staff_name\}/g, tok.staff_name).replace(/\{course_title\}/g, tok.course_title)
-        .replace(/\{start_date\}/g, tok.start_date).replace(/\{end_date\}/g, tok.end_date)
-        .replace(/\{start_time\}/g, tok.start_time).replace(/\{end_time\}/g, tok.end_time)
-        .replace(/\{venue\}/g, tok.venue).replace(/\{address\}/g, tok.address)
-        .replace(/\{provider\}/g, tok.provider).replace(/\{provider_phone\}/g, tok.provider_phone)
-        .replace(/\{description\}/g, tok.description);
-    } else {
-      const intro = cfg.intro_message ? cfg.intro_message + '\n\n' : '';
-      text = intro + `Hello ${tok.staff_name},\n\nYou have been booked onto a training course:\n\nCourse: ${tok.course_title}\nDate: ${tok.start_date}${tok.end_date ? ' to ' + tok.end_date : ''}`;
-      if (tok.start_time) text += `\nTime: ${tok.start_time}${tok.end_time ? ' - ' + tok.end_time : ''}`;
-      if (tok.venue) text += `\nVenue: ${tok.venue}`;
-      if (tok.address) text += `\nAddress: ${tok.address}`;
-      if (tok.provider) text += `\nProvider: ${tok.provider}`;
-      if (tok.provider_phone) text += `\nProvider Phone: ${tok.provider_phone}`;
-      if (tok.description) text += `\n\nDetails: ${tok.description}`;
-      text += `\n\nPlease arrive on time and bring any required PPE or identification. Contact your manager if you have any questions.\n\nGC Mission Control`;
-    }
-
     const subject = cfg.subject
       ? cfg.subject.replace(/\{course_title\}/g, tok.course_title).replace(/\{staff_name\}/g, tok.staff_name)
       : `Training Booking — ${course?.title || 'Training Course'}`;
 
     const baseUrl = await getAppBaseUrl(base44);
-    const bodyHtml = escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
+
+    // Rich HTML body
+    const detailsTable = infoTable([
+      ['Course', tok.course_title],
+      ['Date', tok.start_date + (tok.end_date ? ' to ' + tok.end_date : '')],
+      ['Time', tok.start_time ? (tok.start_time + (tok.end_time ? ' - ' + tok.end_time : '')) : '—'],
+      ['Venue', tok.venue || '—'],
+      ['Address', tok.address || '—'],
+      ['Provider', tok.provider || '—'],
+      ['Provider Phone', tok.provider_phone || '—'],
+    ].filter(r => r[1] && r[1] !== '—'));
+
+    const bodyHtml =
+      heading('Training course booking') +
+      p('Hi ' + tok.staff_name + ',') +
+      p('You have been booked onto a training course. Please arrive on time and bring any required PPE or identification.') +
+      sectionCard('Course Details', detailsTable, { titleBg: '#7c3aed' }) +
+      (tok.description ? callout(tok.description, 'info') : '') +
+      helpTip('What to do next', 'Check your schedule for the training date. Make sure you know the venue address and arrive 10 minutes early. Bring your ID and any PPE required for the course. If you can\'t attend, contact your manager immediately to rearrange.') +
+      linkBlock(baseUrl, '/staff-schedule', 'View your schedule');
+
+    // If custom template is set, use it instead
+    const finalHtml = (cfg.template)
+      ? escapeHtml(
+          cfg.template
+            .replace(/\{staff_name\}/g, tok.staff_name).replace(/\{course_title\}/g, tok.course_title)
+            .replace(/\{start_date\}/g, tok.start_date).replace(/\{end_date\}/g, tok.end_date)
+            .replace(/\{start_time\}/g, tok.start_time).replace(/\{end_time\}/g, tok.end_time)
+            .replace(/\{venue\}/g, tok.venue).replace(/\{address\}/g, tok.address)
+            .replace(/\{provider\}/g, tok.provider).replace(/\{provider_phone\}/g, tok.provider_phone)
+            .replace(/\{description\}/g, tok.description)
+        ).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/staff-schedule', 'View your schedule')
+      : bodyHtml;
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: staff.email,
       subject,
-      body: styledHtml(bodyHtml, cfg)
+      body: brandedWrapper(finalHtml, { ...cfg, headerVariant: 'violet', banner_subtitle: 'Training Booking' })
     });
 
     return Response.json({ success: true });
