@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Grid3x3, Download, FileText, Loader2, Users, Cog } from 'lucide-react';
 import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
 import { downloadStructuredCsv } from '@/utils/csvExport';
 import { useToast } from '@/components/ui/use-toast';
-import { STATUS_CONFIG, buildStatusMaps, getRowSummary } from '@/components/rota/heatmapUtils';
-import { format, addDays, startOfYear } from 'date-fns';
+import { STATUS_CONFIG, buildStatusMaps } from '@/components/rota/heatmapUtils';
+import { format, addDays } from 'date-fns';
 
 export default function AvailabilityReport({ filters }) {
   const { toast } = useToast();

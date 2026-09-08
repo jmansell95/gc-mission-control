@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Calendar, Search, ChevronLeft, ChevronRight, Download, Loader2, Grid3x3, Users, Cog } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Download, Loader2, Grid3x3, Users, Cog } from 'lucide-react';
 import { useDivision } from '@/contexts/DivisionContext';
 import { STATUS_CONFIG, STATUS_ORDER, buildStatusMaps, getYearDays } from './heatmapUtils';
 import HeatmapGrid from './HeatmapGrid';
