@@ -1,0 +1,37 @@
+{
+  "name": "Green-Path Timesheet Auto-Approval",
+  "description": "When a daily summary timesheet is submitted, auto-approves it if it meets green-path criteria (routine day, no overtime, reasonable hours, break taken). Exceptions still go to the manager for manual review.",
+  "trigger": {
+    "condition": "${ ((.trigger.data.is_summary == true) and (.trigger.data.status == \"submitted\")) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Timesheet"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "green_path_timesheet_auto_approval",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "greenPathApproveTimesheet",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "greenPathApproveTimesheet"
+  }
+}

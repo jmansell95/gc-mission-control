@@ -1,0 +1,44 @@
+{
+  "name": "Asset Panda Return Sync Retry",
+  "description": "Every 30 minutes \u2014 retries failed Asset Panda stock-level pushes from AssetReturnLog records that haven't synced yet. Skips automatically if Asset Panda is not configured.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 30,
+      "interval_unit": "minutes",
+      "interval_anchor": "2026-08-02T11:08:04.943000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "asset_panda_return_sync_retry",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "retryAssetReturnSync",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "retryAssetReturnSync"
+  }
+}

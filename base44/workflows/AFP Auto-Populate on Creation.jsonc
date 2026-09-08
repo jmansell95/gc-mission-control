@@ -1,0 +1,37 @@
+{
+  "name": "AFP Auto-Populate on Creation",
+  "description": "When a new AFP is created (via the chain or manually), immediately auto-populate it from all billable field data in its period so it's complete from creation.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "AFP"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "afp_auto_populate_on_creation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoPopulateNewAFP",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "autoPopulateNewAFP"
+  }
+}

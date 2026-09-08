@@ -1,0 +1,37 @@
+{
+  "name": "Welcome Email on Registration",
+  "description": "Sends a branded welcome email (using the staff_invitation template) when a Staff record's user_id is linked \u2014 meaning the invited user has registered.",
+  "trigger": {
+    "condition": "${ ((.trigger.data.user_id != null and .trigger.data.user_id != \"\" and .trigger.data.user_id != [] and .trigger.data.user_id != {}) and (.trigger.old_data.user_id == null or .trigger.old_data.user_id == \"\" or .trigger.old_data.user_id == [] or .trigger.old_data.user_id == {})) }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "Staff"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "welcome_email_on_registration",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "sendWelcomeEmail",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "sendWelcomeEmail"
+  }
+}

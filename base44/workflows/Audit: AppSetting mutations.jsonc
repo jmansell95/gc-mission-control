@@ -1,0 +1,39 @@
+{
+  "name": "Audit: AppSetting mutations",
+  "description": "Records every create/update/delete on AppSetting into the Financial Audit Log",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "AppSetting"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "audit_appsetting_mutations",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "recordFinancialAudit",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "recordFinancialAudit"
+  }
+}

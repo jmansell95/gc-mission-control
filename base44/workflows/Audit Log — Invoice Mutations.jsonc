@@ -1,0 +1,39 @@
+{
+  "name": "Audit Log \u2014 Invoice Mutations",
+  "description": "Auto-logs every Invoice create/update/delete to SystemAuditLog for financial governance",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "Invoice"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "audit_log_invoice_mutations",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "logSystemAudit",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "logSystemAudit"
+  }
+}

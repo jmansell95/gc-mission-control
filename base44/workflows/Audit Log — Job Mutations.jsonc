@@ -1,0 +1,39 @@
+{
+  "name": "Audit Log \u2014 Job Mutations",
+  "description": "Auto-logs every Job create/update/delete to SystemAuditLog with SHA-256 hashing for ISO 27001 non-repudiation",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "Job"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "audit_log_job_mutations",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "logSystemAudit",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "logSystemAudit"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "Monthly CIS Re-Verification",
+  "description": "Re-verifies all subcontractors with a UTR against HMRC's CIS register on the 1st of each month. Keeps deduction rates current and flags subcontractors whose CIS status has changed.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 5 1 * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "monthly_cis_re_verification",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "verifyCIS",
+            "args": {
+              "action": "verify_all"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "verifyCIS"
+  }
+}

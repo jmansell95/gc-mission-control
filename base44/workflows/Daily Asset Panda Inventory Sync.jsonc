@@ -1,0 +1,44 @@
+{
+  "name": "Daily Asset Panda Inventory Sync",
+  "description": "Pulls live inventory, stock levels and billing rates from Asset Panda into SiteAsset records. Runs daily after the GC Compliance sync. Requires Asset Panda API credentials configured in Settings \u2192 Asset Panda Sync.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "15 5 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_asset_panda_inventory_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncAssetPanda",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "syncAssetPanda"
+  }
+}

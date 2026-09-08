@@ -1,0 +1,44 @@
+{
+  "name": "Nightly Geotab Timesheet Auto-Generation",
+  "description": "Auto-generates draft timesheet entries from Geotab GPS data for yesterday's shifts. Runs at 1am so arrival/departure detection has the full previous day's location logs. Entries are created as drafts for crew review and submission.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 0 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "nightly_geotab_timesheet_auto_generation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncGeotabTimesheets",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "syncGeotabTimesheets"
+  }
+}

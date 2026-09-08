@@ -1,0 +1,37 @@
+{
+  "name": "Auto-Update Asset Compliance on Maintenance Completion",
+  "description": "When a VehicleMaintenanceBooking is marked as completed, automatically updates the linked SiteAsset's compliance status, last service date, and next service date so the Rig Fleet reflects the maintenance work.",
+  "trigger": {
+    "condition": "${ (.trigger.data.status == \"completed\") }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "VehicleMaintenanceBooking"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_update_asset_compliance_on_maintenance_completion",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "updateAssetComplianceOnMaintenance",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "updateAssetComplianceOnMaintenance"
+  }
+}

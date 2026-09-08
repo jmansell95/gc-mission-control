@@ -1,0 +1,39 @@
+{
+  "name": "Audit Log \u2014 Investigation Log Mutations",
+  "description": "Auto-logs every InvestigationLog create/update/delete to SystemAuditLog \u2014 borehole logs, trial pit logs, sample collections",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "InvestigationLog"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "audit_log_investigation_log_mutations",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "logSystemAudit",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "logSystemAudit"
+  }
+}

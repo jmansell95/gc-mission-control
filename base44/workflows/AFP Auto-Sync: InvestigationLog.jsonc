@@ -1,0 +1,37 @@
+{
+  "name": "AFP Auto-Sync: InvestigationLog",
+  "description": "Real-time: when a driller log is created, upsert its AFP line item into the draft AFP covering the log's date.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "InvestigationLog"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "afp_auto_sync_investigationlog",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncBillableItemToAFP",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  },
+  "x-base44-migrated-from-automation": {
+    "legacy_payload_function": "syncBillableItemToAFP"
+  }
+}
