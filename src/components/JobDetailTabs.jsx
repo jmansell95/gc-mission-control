@@ -250,10 +250,6 @@ export default function JobDetailTabs({
 
       {/* ── Equipment ── */}
       <TabsContent value="equipment" className="space-y-4 mt-0">
-        <div className="flex items-center justify-end gap-2 flex-wrap">
-          <HubDeepLink to="/admin/logistics" jobId={job.id} label="Logistics Hub" icon={Truck} />
-          <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
-        </div>
         <TabStatRibbon
           icon={Boxes}
           title="Equipment & Logistics"

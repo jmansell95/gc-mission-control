@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart
+  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart, Layers, Hammer
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format, eachDayOfInterval, isWeekend } from 'date-fns';
@@ -18,6 +18,7 @@ import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
 import AddBillableItemsWizard from '@/components/logistics/wizard/AddBillableItemsWizard';
 import PoGroupedAccordion from '@/components/logistics/PoGroupedAccordion';
+import HubDeepLink from '@/components/hubs/HubDeepLink';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
 import { billingTotal } from '@/components/equipment/shared';
@@ -113,7 +114,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   //   on_hire  = hire_status active AND current_location !== 'site' (yard/in_transit)
   //   returned = hire_status off_hired
   const onSiteItems = activeItems.filter(c => (c.current_location || 'yard') === 'site');
-  const onHireItems = activeItems.filter(c => (c.current_location || 'yard') !== 'site');
+  const onHireItems = activeItems.filter(c => (c.current_location || 'yard') !== 'site' && c.category === 'hired_equipment');
   const statusCounts = {
     all: activeItems.length + returnedItems.length,
     on_site: onSiteItems.length,
@@ -123,7 +124,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const filterByStatus = (list) => {
     if (statusFilter === 'all') return list;
     if (statusFilter === 'on_site') return list.filter(c => (c.hire_status || 'active') !== 'off_hired' && (c.current_location || 'yard') === 'site');
-    if (statusFilter === 'on_hire') return list.filter(c => (c.hire_status || 'active') !== 'off_hired' && (c.current_location || 'yard') !== 'site');
+    if (statusFilter === 'on_hire') return list.filter(c => (c.hire_status || 'active') !== 'off_hired' && (c.current_location || 'yard') !== 'site' && c.category === 'hired_equipment');
     if (statusFilter === 'returned') return list.filter(c => c.hire_status === 'off_hired');
     return list;
   };
@@ -133,6 +134,14 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   // site (from start_date → end_date). Rigs have quantity 1, so their total
   // comes entirely from day_rate × days. Non-day-rate items use quantity only.
   const totalNet = loadableItems.reduce((s, c) => s + billingTotal(c), 0);
+  // Equipment summary stats for the stat widgets at the top of the tab.
+  const rigsTotal = items.filter(c => {
+    const asset = c.site_asset_id ? assetMap[c.site_asset_id] : null;
+    return asset?.asset_type === 'rig';
+  }).reduce((s, c) => s + billingTotal(c), 0);
+  const purchasedTotal = items.filter(c => c.category === 'purchased_equipment').reduce((s, c) => s + billingTotal(c), 0);
+  const hiredTotal = items.filter(c => c.category === 'hired_equipment').reduce((s, c) => s + billingTotal(c), 0);
+  const clientItemCount = items.filter(c => c.category === 'client_supplied').length;
 
   // Every rig (SiteAsset with asset_type === 'rig') gets a RigAssemblyGroup card,
   // even when it has zero linked gear — so rigs never fall through to the
@@ -529,6 +538,46 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
 
   return (
     <div className="space-y-4 pb-28 sm:pb-0">
+      {/* Stats + hub links row — stats on the left, hub deep-links on the right */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        {canSeeCosts && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="hub-glass rounded-xl px-3 py-2 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-900 tabular-nums">{fmt(rigsTotal)}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-medium tracking-wide">Rigs</p>
+              </div>
+            </div>
+            <div className="hub-glass rounded-xl px-3 py-2 flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-900 tabular-nums">{fmt(purchasedTotal)}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-medium tracking-wide">Purchased</p>
+              </div>
+            </div>
+            <div className="hub-glass rounded-xl px-3 py-2 flex items-center gap-2">
+              <Package className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-900 tabular-nums">{fmt(hiredTotal)}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-medium tracking-wide">Hired</p>
+              </div>
+            </div>
+            <div className="hub-glass rounded-xl px-3 py-2 flex items-center gap-2">
+              <Hammer className="w-4 h-4 text-slate-600 flex-shrink-0" />
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-900 tabular-nums">{clientItemCount}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-medium tracking-wide">Client Items</p>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2 flex-wrap ml-auto">
+          <HubDeepLink to="/admin/logistics" jobId={jobId} label="Logistics Hub" icon={Truck} />
+          <HubDeepLink to="/assets" jobId={jobId} label="Assets Hub" icon={Boxes} />
+        </div>
+      </div>
+
       <LifecycleBar items={items} isDecommissioning={job?.status === 'decommissioning'} onBulkCollect={bulkCollectAll} />
 
       {/* Equipment & Assets — unified section: physical asset assignments (compliance) + billable hire items */}
@@ -654,6 +703,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
                     <User className="w-3.5 h-3.5 text-slate-400" />
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{person}</p>
                     <span className="text-xs text-slate-400">({personItems.length})</span>
+                    {canSeeCosts && <span className="ml-auto text-xs font-bold text-[#2E5A1A]">{fmt(personItems.reduce((s, c) => s + billingTotal(c), 0))}</span>}
                   </div>
                   <div className="space-y-2">
                     {personItems.map(c => (
