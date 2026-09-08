@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Package, Plus, Edit2, Trash2, Mail, Phone, Search, Wrench,
-  Upload, FileSpreadsheet, Loader2, RefreshCw, MapPin
+  Upload, FileSpreadsheet, Loader2, RefreshCw, MapPin, Tag, Check
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
@@ -11,11 +11,24 @@ import { format } from 'date-fns';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import { useConfigLists } from '@/hooks/useConfigLists';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
 
-const blank = { name: '', contact_name: '', contact_email: '', contact_phone: '', contacts: [], notes: '', is_maintenance_provider: false, emergency_mobile: '', technical_email: '', portal_login_url: '', maintenance_services: [], account_number: '', lat: '', lng: '', geofence_radius_override: '' };
+const blank = { name: '', category: '', contacts: [], notes: '', is_maintenance_provider: false, emergency_mobile: '', technical_email: '', portal_login_url: '', maintenance_services: [], account_number: '', lat: '', lng: '', geofence_radius_override: '' };
+
+const CATEGORY_PILL_CLASSES = {
+  training: 'bg-blue-100 text-blue-700',
+  materials: 'bg-amber-100 text-amber-700',
+  plant: 'bg-emerald-100 text-emerald-700',
+  ppe: 'bg-violet-100 text-violet-700',
+  fuel: 'bg-rose-100 text-rose-700',
+  consumables: 'bg-cyan-100 text-cyan-700',
+  other: 'bg-slate-100 text-slate-600',
+};
+
+const getCategoryPillClass = (category) => CATEGORY_PILL_CLASSES[(category || '').toLowerCase()] || 'bg-slate-100 text-slate-600';
 
 const MAINT_SERVICE_OPTS = [
   { value: 'mot', label: 'MOT' },
@@ -43,16 +56,54 @@ export default function SupplierManager() {
 
   const { activeDivisionId } = useDivision();
   const { data: suppliers = [] } = useScopedEntity('Supplier', { queryKey: ['suppliers'] });
+  const { getOptions, invalidate: invalidateConfigLists } = useConfigLists();
+  const categoryOptions = getOptions('supplier_categories');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
 
-  const filtered = suppliers.filter(s =>
-    s.name?.toLowerCase().includes(search.toLowerCase()) ||
-    s.contact_name?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = suppliers.filter(s => {
+    if (categoryFilter !== 'all' && (s.category || '') !== categoryFilter) return false;
+    return s.name?.toLowerCase().includes(search.toLowerCase());
+  });
+
+  const handleAddCategoryInline = async () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    setSavingCategory(true);
+    try {
+      const value = name.toLowerCase().replace(/\s+/g, '_');
+      const existing = await base44.entities.ConfigList.filter({ key: 'supplier_categories' });
+      if (existing.length > 0) {
+        const rec = existing[0];
+        const options = [...(rec.options || []), { value, label: name }];
+        await base44.entities.ConfigList.update(rec.id, { options });
+      } else {
+        await base44.entities.ConfigList.create({
+          key: 'supplier_categories',
+          label: 'Supplier Categories',
+          category: 'Suppliers',
+          is_system: true,
+          options: [{ value, label: name }],
+        });
+      }
+      invalidateConfigLists();
+      setForm(prev => ({ ...prev, category: value }));
+      setNewCategoryName('');
+      setAddingCategory(false);
+      toast({ title: 'Category added', description: name });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Could not add category', variant: 'destructive' });
+    }
+    setSavingCategory(false);
+  };
 
   const startAdd = () => { setForm(blank); setEditingId(null); setAdding(true); };
   const startEdit = (s) => {
     setForm({
-      name: s.name, contact_name: s.contact_name || '', contact_email: s.contact_email || '', contact_phone: s.contact_phone || '', contacts: s.contacts || [], notes: s.notes || '',
+      name: s.name, category: s.category || '', contacts: s.contacts || [], notes: s.notes || '',
       is_maintenance_provider: s.is_maintenance_provider || false, emergency_mobile: s.emergency_mobile || '',
       technical_email: s.technical_email || '', portal_login_url: s.portal_login_url || '',
       maintenance_services: s.maintenance_services || [], account_number: s.account_number || '',
@@ -147,16 +198,28 @@ export default function SupplierManager() {
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Contact Name</label>
-              <input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-              <input type="email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className={inputCls} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
-              <input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} className={inputCls} />
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                <Tag className="w-3.5 h-3.5 text-slate-400" /> Category
+              </label>
+              {!addingCategory ? (
+                <div className="flex gap-2">
+                  <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={inputCls + ' flex-1'}>
+                    <option value="">— Uncategorised —</option>
+                    {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setAddingCategory(true)} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
+                    <Plus className="w-3.5 h-3.5" /> Add
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="New category name" className={inputCls + ' flex-1'} autoFocus onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCategoryInline(); } }} />
+                  <button type="button" onClick={handleAddCategoryInline} disabled={savingCategory || !newCategoryName.trim()} className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition disabled:opacity-50 flex items-center gap-1">
+                    {savingCategory ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
+                  </button>
+                  <button type="button" onClick={() => { setAddingCategory(false); setNewCategoryName(''); }} className="px-3 py-2 bg-slate-100 text-slate-500 rounded-lg text-xs font-semibold hover:bg-slate-200 transition">Cancel</button>
+                </div>
+              )}
             </div>
             <ContactsEditor
               value={form.contacts}
@@ -245,10 +308,20 @@ export default function SupplierManager() {
         </DialogContent>
       </Dialog>
 
-      <div className="relative mb-4">
+      <div className="relative mb-3">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search suppliers..." className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm bg-white" />
       </div>
+      {categoryOptions.length > 0 && (
+        <div className="flex gap-1.5 mb-4 overflow-x-auto no-scrollbar pb-1">
+          <button onClick={() => setCategoryFilter('all')} className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${categoryFilter === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>All</button>
+          {categoryOptions.map(opt => (
+            <button key={opt.value} onClick={() => setCategoryFilter(opt.value)} className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition ${categoryFilter === opt.value ? getCategoryPillClass(opt.value) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">
@@ -266,7 +339,9 @@ export default function SupplierManager() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-semibold text-slate-900 truncate">{s.name}</p>
-                    {s.contact_name && <p className="text-xs text-slate-500 truncate">{s.contact_name}</p>}
+                    <span className={`inline-block mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${getCategoryPillClass(s.category)}`}>
+                      {categoryOptions.find(o => o.value === s.category)?.label || (s.category ? s.category : 'Uncategorised')}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 flex-shrink-0">
