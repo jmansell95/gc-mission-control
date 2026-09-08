@@ -7,6 +7,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 import AGSAutoSyncSection from '@/components/keylogbook/AGSAutoSyncSection';
+import KeyLogBookPullSync from '@/components/keylogbook/KeyLogBookPullSync';
 
 const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
 
@@ -28,6 +29,14 @@ export default function KeyLogBookSettings() {
   const { data: jobs = [] } = useQuery({
     queryKey: ['jobs-keylogbook'],
     queryFn: () => base44.entities.Job.list('-created_date', 500),
+  });
+
+  const { data: keylogbookConfig = null } = useQuery({
+    queryKey: ['keylogbook-config'],
+    queryFn: async () => {
+      const list = await base44.entities.KeyLogBookConfig.filter({ key: 'global' });
+      return list[0] || null;
+    },
   });
 
   const handleFile = (e) => { setFile(e.target.files?.[0] || null); setResult(null); setError(''); };
@@ -59,6 +68,9 @@ export default function KeyLogBookSettings() {
 
       {/* KeyLogBook webhook — borehole data AND driller remarks/diary via one endpoint */}
       <AGSAutoSyncSection />
+
+      {/* Pull sync — API details + pull button */}
+      <KeyLogBookPullSync config={keylogbookConfig} />
 
       {/* Manual AGS upload */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">

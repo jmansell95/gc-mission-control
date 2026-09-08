@@ -104,6 +104,24 @@
       "type": "number",
       "default": 30,
       "description": "How often the scheduled pull sync runs (in minutes). The automation is created with this interval. Defaults to 30 minutes."
+    },
+    "custom_endpoints": {
+      "type": "object",
+      "description": "Custom API endpoint paths \u2014 overrides the default inferred paths when KeyLogBook's API shape differs from the assumed REST conventions. Leave blank to use the defaults. The '{projectId}' placeholder in the borehole/remark paths is replaced with each project's ID at runtime.",
+      "properties": {
+        "projects_path": {
+          "type": "string",
+          "description": "Path to fetch all projects. Default: '/projects'"
+        },
+        "boreholes_path": {
+          "type": "string",
+          "description": "Path to fetch boreholes for a project. Use '{projectId}' as placeholder. Default: '/projects/{projectId}/boreholes'"
+        },
+        "remarks_path": {
+          "type": "string",
+          "description": "Path to fetch driller remarks for a project. Use '{projectId}' as placeholder. Default: '/projects/{projectId}/remarks'"
+        }
+      }
     }
   },
   "required": [

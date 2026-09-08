@@ -17,12 +17,23 @@ import { generateKeyLogBookTimesheet } from '../../shared/keylogbookTimesheet.ts
 const REQUEST_DELAY_MS = 1500; // pace to avoid rate limiting
 const MAX_RETRIES = 3;
 
-// KeyLogBook API endpoint paths — adjust once the real API is confirmed
-const ENDPOINTS = {
+// Default KeyLogBook API endpoint paths — overridden by config.custom_endpoints
+const DEFAULT_ENDPOINTS = {
   projects: '/projects',
-  boreholes: (pid: string) => `/projects/${pid}/boreholes`,
-  remarks: (pid: string) => `/projects/${pid}/remarks`,
+  boreholes: '/projects/{projectId}/boreholes',
+  remarks: '/projects/{projectId}/remarks',
 };
+
+function buildEndpoints(custom: any = {}) {
+  const projects = custom.projects_path || DEFAULT_ENDPOINTS.projects;
+  const boreholes = custom.boreholes_path || DEFAULT_ENDPOINTS.boreholes;
+  const remarks = custom.remarks_path || DEFAULT_ENDPOINTS.remarks;
+  return {
+    projects,
+    boreholes: (pid: string) => boreholes.replace('{projectId}', encodeURIComponent(pid)),
+    remarks: (pid: string) => remarks.replace('{projectId}', encodeURIComponent(pid)),
+  };
+}
 
 function delay(ms: number) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -119,6 +130,7 @@ export default async function(req: Request): Promise<Response> {
     const apiKey: string = config.api_key;
     const lastSync: string | null = config.last_pull_sync_at || null;
     const syncParams = lastSync ? { modified_since: lastSync } : {};
+    const ENDPOINTS = buildEndpoints(config.custom_endpoints);
 
     // --- Fetch all projects (paginated) ---
     const allProjects: any[] = [];
