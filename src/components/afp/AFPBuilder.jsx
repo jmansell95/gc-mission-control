@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
@@ -7,6 +7,7 @@ import {
   MessageSquare, X, FileBarChart,
   TrendingUp, Zap, CheckSquare, Square, Trash2, Search,
   ChevronDown, ChevronRight, GitBranch, Package, Upload, ClipboardCheck, Save, Layers,
+  Drill, HardHat, Hotel, Truck, MapPin,
 } from 'lucide-react';
 import useAutoSave from '@/hooks/useAutoSave';
 import CreateFirstAFPModal from './CreateFirstAFPModal';
@@ -20,6 +21,7 @@ import AFPVariationLifecycle from './AFPVariationLifecycle';
 import AFPCompensationItems from './AFPCompensationItems';
 import FieldSheetBOQVsActual from './FieldSheetBOQVsActual';
 import VariationBreakdownTab from './VariationBreakdownTab';
+import EWRSheetTab from './EWRSheetTab';
 import AddVariationModal from './AddVariationModal';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
 
@@ -55,6 +57,22 @@ const CATEGORIES = [
   { id: 'mobilisation', label: 'Mobilisation' },
   { id: 'delivery', label: 'Delivery' },
   { id: 'other', label: 'Other' },
+];
+
+// EWR jobs use a different AFP template with different sheets. Detected by
+// job name containing 'ewr' or 'east west rail'.
+const isEWRJob = (job) => /\b(ewr|east\s*west\s*rail)\b/i.test(job?.name || '');
+
+const EWR_SHEETS = [
+  { id: 'ewr_rotary_drilling', label: 'Rotary Drilling', icon: 'Drill' },
+  { id: 'ewr_cp_drilling', label: 'CP Drilling', icon: 'Drill' },
+  { id: 'ewr_rotary_dayworks', label: 'Rotary Dayworks', icon: 'Clock' },
+  { id: 'ewr_cp_dayworks', label: 'CP Dayworks', icon: 'Clock' },
+  { id: 'ewr_enabling_crew', label: 'Enabling Crew', icon: 'HardHat' },
+  { id: 'ewr_accommodation', label: 'Accommodation', icon: 'Hotel' },
+  { id: 'ewr_misc', label: 'Misc', icon: 'Package' },
+  { id: 'ewr_hires', label: 'Hires', icon: 'Truck' },
+  { id: 'ewr_mileage', label: 'Mileage', icon: 'MapPin' },
 ];
 
 function weekKey(dateStr) {
@@ -108,6 +126,19 @@ export default function AFPBuilder({ job }) {
     if (!afps.length) return null;
     return afps.find(a => a.id === selectedAfpId) || afps[0];
   }, [afps, selectedAfpId]);
+
+  const ewr = isEWRJob(job);
+
+  // When switching to an EWR job, default to the first EWR sheet tab instead
+  // of the standard 'measured-works' tab (which has no EWR data).
+  useEffect(() => {
+    if (ewr && activeTab === 'measured-works') {
+      setActiveTab(EWR_SHEETS[0].id);
+    }
+    if (!ewr && EWR_SHEETS.some(s => s.id === activeTab)) {
+      setActiveTab('measured-works');
+    }
+  }, [ewr, activeTab]);
 
   // Auto-save hook — debounced saves on every edit + flush on AFP switch.
   // Must be called AFTER selectedAfp is defined (it depends on selectedAfp.id).
@@ -693,7 +724,12 @@ export default function AFPBuilder({ job }) {
       {/* ── AFP Tab Navigation ── */}
       <div className="insight-card rounded-2xl p-2">
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-          {[
+          {(ewr ? [
+            ...EWR_SHEETS.map(s => ({ id: s.id, label: s.label, icon: { Drill, Clock, HardHat, Hotel, Package, Truck, MapPin }[s.icon] || Package, count: lineItems.filter(li => li.sheet_name === s.id).length })),
+            { id: 'variations', label: 'Variations', icon: GitBranch, count: variationSummaryItems.length },
+            ...variationRefs.map(ref => ({ id: `vo-${ref}`, label: ref, icon: GitBranch, count: lineItems.filter(li => li.sheet_name === 'variations' && li.vo_ref === ref && li.is_variation_breakdown).length, isRef: true })),
+            { id: 'all-lines', label: 'All Lines', icon: Layers, count: lineItems.length },
+          ] : [
             { id: 'measured-works', label: 'Measured Works', icon: FileText, count: lineItems.filter(li => li.sheet_name === 'measured_works').length },
             { id: 'field-sheet', label: 'Field Sheet', icon: Layers, count: lineItems.filter(li => li.sheet_name === 'measured_works').length },
             { id: 'variations', label: 'Variations', icon: GitBranch, count: variationSummaryItems.length },
@@ -701,7 +737,7 @@ export default function AFPBuilder({ job }) {
             { id: 'compensation', label: 'Compensation', icon: Package, count: lineItems.filter(li => li.sheet_name === 'compensation_item').length },
             { id: 'materials', label: 'Materials', icon: Package, count: lineItems.filter(li => li.sheet_name === 'materials').length },
             { id: 'all-lines', label: 'All Lines', icon: Layers, count: lineItems.length },
-          ].map(tab => {
+          ]).map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
@@ -1116,6 +1152,22 @@ export default function AFPBuilder({ job }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── EWR Sheet Tabs (one per EWR sheet) ── */}
+      {ewr && EWR_SHEETS.some(s => s.id === activeTab) && (
+        <EWRSheetTab
+          sheetName={activeTab}
+          lineItems={lineItems}
+          afp={selectedAfp}
+          canEdit={selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review'}
+          canDispute={selectedAfp?.status === 'pending_review' || selectedAfp?.status === 'submitted'}
+          canSelect={canSelect}
+          selectedItems={selectedItems}
+          onToggleSelect={toggleItemSelection}
+          onAutoSave={scheduleSave}
+          onDelete={handleDeleteItem}
+        />
       )}
 
       {/* ── Category-grouped view (collapsible sections with subtotals) ── */}

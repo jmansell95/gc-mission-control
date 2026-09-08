@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, isWeekend } from 'date-fns';
 import {
   X, Drill, HardHat, Users, Briefcase, Calendar, CalendarClock,
@@ -75,6 +75,50 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
     }
   }, [isOpen]);
 
+  // Fetch primary-rig assignments for the selected job (create mode) so we can
+  // auto-select an on-site rig and block when no rig has been added yet.
+  const { data: jobRigAssignments = [], refetch: refetchJobRigs } = useQuery({
+    queryKey: ['crew-rig-job-assignments', jobId],
+    queryFn: () => base44.entities.JobAssetAssignment.filter({ job_id: jobId, role: 'primary_rig' }),
+    enabled: !!jobId,
+  });
+
+  // When a job is chosen, default the From date to the job's start_date (not
+  // today). Clear any previous rig selection so the auto-select effect can fire.
+  useEffect(() => {
+    if (!jobId) return;
+    const job = jobs.find(j => j.id === jobId);
+    setStartDate(job?.start_date || format(new Date(), 'yyyy-MM-dd'));
+    setEndDate('');
+    setRigId('');
+  }, [jobId, jobs]);
+
+  // Auto-select an on-site rig and pre-fill its dates when rig assignments load.
+  // Only fires when the user hasn't manually picked a rig yet (rigId is empty).
+  useEffect(() => {
+    if (!jobId || jobRigAssignments.length === 0 || rigId) return;
+    const job = jobs.find(j => j.id === jobId);
+    const onSite = jobRigAssignments.filter(a => a.status === 'on_site' || a.status === 'assigned');
+    if (onSite.length === 1) {
+      setRigId(onSite[0].asset_id);
+      setStartDate(onSite[0].arrived_on_site_date || onSite[0].assigned_date || job?.start_date || format(new Date(), 'yyyy-MM-dd'));
+      setEndDate(onSite[0].returned_date || job?.end_date || '');
+    } else if (onSite.length > 1) {
+      const firstOnSite = onSite.find(a => a.status === 'on_site') || onSite[0];
+      setStartDate(firstOnSite.arrived_on_site_date || firstOnSite.assigned_date || job?.start_date || format(new Date(), 'yyyy-MM-dd'));
+      setEndDate(firstOnSite.returned_date || job?.end_date || '');
+    }
+  }, [jobId, jobRigAssignments, rigId, jobs]);
+
+  // Re-check rig assignments when the modal regains focus (e.g. after the user
+  // navigates away to add a rig and comes back).
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = () => { if (jobId) refetchJobRigs(); };
+    window.addEventListener('focus', handler);
+    return () => window.removeEventListener('focus', handler);
+  }, [isOpen, jobId, refetchJobRigs]);
+
   const drillingTeamIds = useMemo(() => {
     const ids = new Set();
     (teams || []).forEach(t => {
@@ -142,6 +186,15 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
   const selectedPairing = pairings.find(p => p.id === pairingId);
   const swapRig = activeRigs.find(r => r.id === newRigId);
 
+  // For swap mode: fetch rig assignments for the selected pairing's job so we
+  // can restrict the new-rig picker to rigs already on that job.
+  const swapJobId = selectedPairing?.job_id || '';
+  const { data: swapJobRigAssignments = [] } = useQuery({
+    queryKey: ['crew-rig-job-assignments', swapJobId],
+    queryFn: () => base44.entities.JobAssetAssignment.filter({ job_id: swapJobId, role: 'primary_rig' }),
+    enabled: !!swapJobId,
+  });
+
   // Fetch both crew members' shifts so we can preview which dates are
   // linkable (both have an existing shift on the selected job that day) vs
   // skipped (no shift on that job). The rig is stamped ONTO existing shifts —
@@ -172,7 +225,24 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
 
   const skippedDays = useMemo(() => rangeDays.filter(d => !linkableDays.includes(d)), [rangeDays, linkableDays]);
 
-  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && linkableDays.length > 0;
+  // Rigs already assigned to the selected job (create mode) — used to block
+  // the flow when none exist and to highlight on-site rigs in the picker.
+  const onSiteRigIds = useMemo(
+    () => new Set(jobRigAssignments.filter(a => a.status === 'on_site' || a.status === 'assigned').map(a => a.asset_id)),
+    [jobRigAssignments]
+  );
+  const hasJobRigs = onSiteRigIds.size > 0;
+
+  // Swap mode: restrict the new-rig picker to rigs already on the pairing's job.
+  const swapOnSiteRigIds = useMemo(
+    () => new Set(swapJobRigAssignments.filter(a => a.status === 'on_site' || a.status === 'assigned').map(a => a.asset_id)),
+    [swapJobRigAssignments]
+  );
+  const swapRigOptions = swapOnSiteRigIds.size > 0
+    ? activeRigs.filter(r => swapOnSiteRigIds.has(r.id) && r.id !== selectedPairing?.rig_id)
+    : activeRigs.filter(r => r.id !== selectedPairing?.rig_id);
+
+  const canCreate = leadId && secondId && leadId !== secondId && jobId && rigId && linkableDays.length > 0 && hasJobRigs;
   const canSwap = pairingId && newRigId && swapFromDate && newRigId !== selectedPairing?.rig_id;
 
   if (!isOpen) return null;
@@ -340,12 +410,37 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-500 mb-1">Rig *</label>
-                    <Select value={rigId} onValueChange={setRigId}>
-                      <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select Rig" /></SelectTrigger>
-                      <SelectContent>
-                        {activeRigs.map(r => <SelectItem key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    {hasJobRigs ? (
+                      <Select value={rigId} onValueChange={setRigId}>
+                        <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select Rig" /></SelectTrigger>
+                        <SelectContent>
+                          {activeRigs.map(r => <SelectItem key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}{onSiteRigIds.has(r.id) ? ' · on site' : ''}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-semibold text-amber-800">No rig added to this job yet</p>
+                            <p className="text-amber-700 mt-0.5">Add a rig to this job first, then assign the crew to it.</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const job = jobs.find(j => j.id === jobId);
+                                if (job) {
+                                  window.dispatchEvent(new CustomEvent('app-navigate', { detail: { section: 'job-detail', job, jobTab: 'equipment' } }));
+                                }
+                                onClose();
+                              }}
+                              className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-bold hover:bg-amber-700 transition active:scale-95"
+                            >
+                              <Drill className="w-3.5 h-3.5" /> Add Rig to Job
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -361,6 +456,11 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                     <label className="block text-[11px] font-medium text-slate-500 mb-1">From *</label>
                     <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm" />
+                    {selectedJob?.start_date && (
+                      <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" /> Job starts {format(new Date(selectedJob.start_date + 'T00:00:00'), 'dd MMM yyyy')}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-500 mb-1">To {jobEndDate ? '(blank = job end)' : ''}</label>
@@ -462,11 +562,14 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                 <Select value={newRigId} onValueChange={setNewRigId}>
                   <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select replacement rig" /></SelectTrigger>
                   <SelectContent>
-                    {activeRigs.filter(r => r.id !== selectedPairing?.rig_id).map(r => (
+                    {swapRigOptions.map(r => (
                       <SelectItem key={r.id} value={r.id}>{r.name}{r.serial_number ? ` — ${r.serial_number}` : ''}{r.colour ? ` · ${r.colour}` : ''}{r.rig_type && r.rig_type !== 'n/a' ? ` (${r.rig_type.toUpperCase()})` : ''}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {swapOnSiteRigIds.size > 0 && (
+                  <p className="text-[10px] text-slate-400 mt-1">Showing rigs already on this job.</p>
+                )}
               </div>
 
               <div>
