@@ -369,47 +369,58 @@ export default function SupplierSpendReport({ filters }) {
         </div>
       )}
 
-      {/* Ranked supplier list */}
-      <div className="space-y-2">
-        {supplierRows.map((r, i) => (
-          <motion.button
-            key={r.supplier_id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.02 }}
-            onClick={() => setDrillSupplier(r)}
-            className="w-full insight-card rounded-2xl p-4 flex items-center gap-3 sm:gap-4 text-left hover:shadow-md transition group"
-          >
-            <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
-              {i + 1}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-sm font-bold text-slate-900 truncate">{r.name}</p>
-                {supplierCategoryPill(r.category)}
-              </div>
-              <p className="text-xs text-slate-500">{r.count} item{r.count !== 1 ? 's' : ''}</p>
-            </div>
-
-            {/* % bar */}
-            <div className="hidden sm:block w-24 flex-shrink-0">
-              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#5A8C1E] to-[#2E5A1A] rounded-full" style={{ width: `${grandTotal > 0 ? (r.total / grandTotal) * 100 : 0}%` }} />
-              </div>
-              <p className="text-[10px] text-slate-400 text-right mt-0.5">{grandTotal > 0 ? Math.round((r.total / grandTotal) * 100) : 0}%</p>
-            </div>
-
-            <div className="text-right flex-shrink-0">
-              <p className="text-sm sm:text-base font-extrabold text-slate-900">{fmt0(r.total)}</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] transition flex-shrink-0" />
-          </motion.button>
-        ))}
-        {supplierRows.length === 0 && (
-          <div className="text-center py-12 text-slate-400 text-sm border border-dashed border-slate-200 rounded-2xl">
-            No supplier spend found in the selected date range.
-          </div>
-        )}
+      {/* Per-Supplier Summary table */}
+      <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-slate-100">
+          <h3 className="text-sm font-bold text-slate-900">Per-Supplier Summary</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                <th className="text-left px-4 py-2.5">Rank</th>
+                <th className="text-left px-3 py-2.5">Supplier</th>
+                <th className="text-left px-3 py-2.5">Category</th>
+                <th className="text-right px-3 py-2.5">Items</th>
+                <th className="text-right px-3 py-2.5">Spend</th>
+                <th className="text-right px-3 py-2.5">% of Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {supplierRows.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400 text-sm">
+                    No supplier spend found in the selected date range.
+                  </td>
+                </tr>
+              ) : (
+                supplierRows.map((r, i) => (
+                  <tr key={r.supplier_id} onClick={() => setDrillSupplier(r)}
+                    className="border-t border-slate-100 hover:bg-slate-50/50 cursor-pointer transition">
+                    <td className="px-4 py-2.5 font-bold text-slate-400 tabular-nums">{i + 1}</td>
+                    <td className="px-3 py-2.5 font-semibold text-slate-900">{r.name}</td>
+                    <td className="px-3 py-2.5">{supplierCategoryPill(r.category) || <span className="text-xs text-slate-400">—</span>}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">{r.count}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums font-bold text-[#2E5A1A]">{fmt0(r.total)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">{grandTotal > 0 ? Math.round((r.total / grandTotal) * 100) : 0}%</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+            {supplierRows.length > 0 && (
+              <tfoot>
+                <tr className="bg-[#8DC63F]/20 border-t-2 border-[#8DC63F]">
+                  <td className="px-4 py-2.5 font-bold text-[#2E5A1A]">TOTAL</td>
+                  <td></td>
+                  <td></td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{supplierRows.reduce((s, r) => s + r.count, 0)}</td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmt0(grandTotal)}</td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">100%</td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
       </div>
     </div>
   );

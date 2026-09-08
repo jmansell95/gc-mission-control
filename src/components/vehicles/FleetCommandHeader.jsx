@@ -62,7 +62,7 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
     { icon: CheckCircle2, label: 'Compliant', value: stats.compliant, sub: 'MOT & service OK', gradient: 'stat-gradient-emerald', light: false },
     { icon: Navigation, label: 'Driving Now', value: stats.driving, sub: 'Live from Geotab', gradient: 'stat-gradient-blue', light: false },
     { icon: ShieldAlert, label: 'Avg Risk', value: stats.avgRisk ?? '—', sub: stats.avgRisk != null ? `${stats.avgRisk}/100` : 'No data', gradient: stats.avgRisk != null && stats.avgRisk >= 80 ? 'stat-gradient-emerald' : stats.avgRisk != null && stats.avgRisk >= 50 ? 'stat-gradient-amber' : 'stat-gradient-slate', light: false },
-    { icon: Clock, label: 'Engine Hours', value: stats.totalEngineHours > 0 ? `${stats.totalEngineHours.toLocaleString()}h` : '—', sub: 'Across fleet', light: true, color: 'blue' },
+    { icon: Clock, label: 'Engine Hours', value: `${stats.totalEngineHours.toLocaleString()}h`, sub: stats.totalEngineHours > 0 ? 'Across fleet' : 'No Geotab data', light: true, color: 'blue' },
     { icon: Gauge, label: 'Total Mileage', value: stats.totalMileage > 0 ? `${stats.totalMileage.toLocaleString()} mi` : '—', sub: 'Across fleet', light: true, color: 'emerald' },
     { icon: AlertTriangle, label: 'MOT Due', value: stats.motDue, sub: 'Within 30 days', light: true, color: stats.motDue > 0 ? 'amber' : 'slate' },
     { icon: Wrench, label: 'Service Due', value: stats.serviceDue, sub: 'Within 30 days', light: true, color: stats.serviceDue > 0 ? 'amber' : 'slate' },

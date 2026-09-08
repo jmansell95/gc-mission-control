@@ -60,7 +60,7 @@ export default function FleetHub() {
       subtitle="Live GPS tracking — vehicles & crew phones, full fleet specs, engine hours & mileage"
       breadcrumbs={[{ label: 'Tracking Hub' }]}
       help={{
-        title: 'Fleet Hub — how it works',
+        title: 'Tracking Hub — how it works',
         topics: [
           { title: 'Live Tracking', summary: 'Where every vehicle and crew phone is right now.', body: 'Solid pins are vehicles from Geotab. Dashed blue pins are crew shown **via their vehicle** — the driver is the Geotab keeper, their rota vehicle, or their default vehicle. Phone GPS always takes priority when available.' },
           { title: 'Vehicles', summary: 'Specs, mileage, engine hours and keeper links.', body: 'Open a vehicle to see its Geotab keeper, MOT/service history and live status. Link a keeper so that driver appears on the live map automatically.' },
@@ -68,7 +68,7 @@ export default function FleetHub() {
         ],
       }}
       onboarding={{
-        title: 'Welcome to the Fleet Hub',
+        title: 'Welcome to the Tracking Hub',
         description: 'One place for live tracking, vehicle records and maintenance.',
         steps: ['Sync Geotab in Settings → Integrations', 'Link a keeper to each vehicle', 'Watch crew appear on the live map'],
       }}
