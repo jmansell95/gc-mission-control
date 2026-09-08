@@ -6,14 +6,6 @@
       "type": "string",
       "description": "Singleton key \u2014 always 'global'. Used to fetch the single config record."
     },
-    "api_base_url": {
-      "type": "string",
-      "description": "KeyLogBook REST API base URL (for pull-based synchronisation). Used by the syncKeyLogBook backend function to fetch all projects, boreholes, and driller remarks. Leave blank if using webhooks only."
-    },
-    "api_key": {
-      "type": "string",
-      "description": "KeyLogBook API key / bearer token (for pull-based synchronisation). Sent as Authorization: Bearer <token> with each API request. Leave blank if using webhooks only."
-    },
     "ags_sync_enabled": {
       "type": "boolean",
       "default": false,
@@ -81,47 +73,6 @@
     "last_ags_sync_summary": {
       "type": "string",
       "description": "Short human-readable summary of the last webhook result (e.g. 'Imported 42 log entries into Cambridge North job \u00b7 1 timesheet auto-generated' or 'Hole BH-03 deleted \u2014 removed 12 log entries')."
-    },
-    "last_pull_sync_at": {
-      "type": "string",
-      "description": "ISO timestamp of the last successful pull-based sync from the KeyLogBook API. Used by the incremental sync to fetch only records modified since this timestamp. Set by the syncKeyLogBook backend function on each run (manual or scheduled)."
-    },
-    "last_pull_sync_status": {
-      "type": "string",
-      "enum": [
-        "success",
-        "failed",
-        "never"
-      ],
-      "default": "never",
-      "description": "Outcome of the last pull sync \u2014 'success' = API reached and data processed, 'failed' = API unreachable, invalid credentials, or processing error, 'never' = no pull sync run yet. Shown in the Pull Sync status panel in Settings."
-    },
-    "last_pull_sync_summary": {
-      "type": "string",
-      "description": "Human-readable summary of the last pull sync result (e.g. 'Pulled 5 project(s) \u00b7 42 borehole record(s) \u00b7 18 remark activit(ies) \u00b7 3 timesheet(s) generated'). Shown in the Pull Sync status panel."
-    },
-    "pull_sync_interval_minutes": {
-      "type": "number",
-      "default": 30,
-      "description": "How often the scheduled pull sync runs (in minutes). The automation is created with this interval. Defaults to 30 minutes."
-    },
-    "custom_endpoints": {
-      "type": "object",
-      "description": "Custom API endpoint paths \u2014 overrides the default inferred paths when KeyLogBook's API shape differs from the assumed REST conventions. Leave blank to use the defaults. The '{projectId}' placeholder in the borehole/remark paths is replaced with each project's ID at runtime.",
-      "properties": {
-        "projects_path": {
-          "type": "string",
-          "description": "Path to fetch all projects. Default: '/projects'"
-        },
-        "boreholes_path": {
-          "type": "string",
-          "description": "Path to fetch boreholes for a project. Use '{projectId}' as placeholder. Default: '/projects/{projectId}/boreholes'"
-        },
-        "remarks_path": {
-          "type": "string",
-          "description": "Path to fetch driller remarks for a project. Use '{projectId}' as placeholder. Default: '/projects/{projectId}/remarks'"
-        }
-      }
     }
   },
   "required": [
