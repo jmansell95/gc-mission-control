@@ -1,12 +1,13 @@
 import React from 'react';
 import {
   LayoutDashboard, BarChart3, PoundSterling, Briefcase, Car, Users,
-  ShieldCheck, Boxes, FlaskConical, Truck, Bookmark, Plus, Drill, HardHat,
+  ShieldCheck, Boxes, FlaskConical, Truck, Bookmark, Plus, Drill, HardHat, Store,
 } from 'lucide-react';
 
 export const REPORT_CATEGORIES = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'financial', label: 'Financial', icon: PoundSterling },
+  { id: 'supplier_spend', label: 'Supplier Spend', icon: Store },
   { id: 'jobs', label: 'Jobs', icon: Briefcase },
   { id: 'fleet', label: 'Fleet', icon: Car },
   { id: 'staff', label: 'Staff', icon: Users },

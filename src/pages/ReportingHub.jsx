@@ -18,6 +18,7 @@ import ReportScheduleModal from '@/components/reports/ReportScheduleModal';
 import ReportSaveModal from '@/components/reports/ReportSaveModal';
 import CustomReportBuilder from '@/components/reports/CustomReportBuilder';
 import ComplianceChecksReport from '@/components/reports/ComplianceChecksReport';
+import SupplierSpendReport from '@/components/reports/SupplierSpendReport';
 import { useReportData, filterJobsByDate } from '@/hooks/useReportData';
 import { Bookmark, FileBarChart, Sparkles } from 'lucide-react';
 
@@ -41,7 +42,8 @@ export default function ReportingHub() {
   const isCustom = category === 'custom';
   const isRigPerf = category === 'rig_performance';
   const isCrewPerf = category === 'crew_performance';
-  const isSpecial = isPowerBI || isTemplates || isCustom || isRigPerf || isCrewPerf;
+  const isSupplierSpend = category === 'supplier_spend';
+  const isSpecial = isPowerBI || isTemplates || isCustom || isRigPerf || isCrewPerf || isSupplierSpend;
 
   // Apply date preset to get actual date range
   const getEffectiveDateRange = () => {
@@ -62,6 +64,11 @@ export default function ReportingHub() {
       const from = new Date(now.getFullYear(), q * 3, 1);
       const to = new Date(now.getFullYear(), q * 3 + 3, 0);
       return { dateFrom: from.toISOString().slice(0, 10), dateTo: to.toISOString().slice(0, 10) };
+    }
+    if (filters.datePreset === 'year') {
+      const now = new Date();
+      const from = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate() + 1);
+      return { dateFrom: from.toISOString().slice(0, 10), dateTo: today };
     }
     return { dateFrom: '', dateTo: '' };
   };
@@ -170,7 +177,7 @@ export default function ReportingHub() {
       quickLinks={REPORTS_QUICK_LINKS}
     >
       {/* Summary stat tiles — hidden on special tabs */}
-      {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && <ReportStatTiles data={data} />}
+      {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && !isSupplierSpend && <ReportStatTiles data={data} />}
 
       {/* Filter bar — hidden on Templates and Custom Builder tabs */}
       {!isTemplates && !isCustom && (
@@ -189,7 +196,7 @@ export default function ReportingHub() {
 
         <div className="flex-1 min-w-0 space-y-4">
           {/* Save-as-template button for native categories */}
-          {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && (
+          {!isPowerBI && !isTemplates && !isCustom && !isRigPerf && !isCrewPerf && !isSupplierSpend && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:text-[#2E5A1A] text-slate-600 text-xs font-semibold transition">
@@ -203,6 +210,7 @@ export default function ReportingHub() {
             : isCustom ? <CustomReportBuilder />
             : isRigPerf ? <RigPerformanceReport filters={effectiveFilters} />
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
+            : isSupplierSpend ? <SupplierSpendReport filters={effectiveFilters} />
             : <>
               <ReportNativeSection hub={category} filters={effectiveFilters} />
               {category === 'compliance' && <ComplianceChecksReport filters={effectiveFilters} />}

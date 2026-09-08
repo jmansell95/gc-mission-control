@@ -8,6 +8,7 @@ const PRESETS = [
   { id: '7d', label: '7 Days' },
   { id: '30d', label: '30 Days' },
   { id: 'quarter', label: 'This Quarter' },
+  { id: 'year', label: 'Last Year' },
   { id: 'custom', label: 'Custom' },
 ];
 
@@ -31,6 +32,11 @@ function presetToRange(preset) {
     return { from: d.toISOString().slice(0, 10), to: today };
   }
   if (preset === 'quarter') return quarterRange();
+  if (preset === 'year') {
+    const now = new Date();
+    const from = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate() + 1);
+    return { from: from.toISOString().slice(0, 10), to: today };
+  }
   return { from: '', to: '' };
 }
 
