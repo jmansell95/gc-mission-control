@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import AGSAutoSyncSection from '@/components/keylogbook/AGSAutoSyncSection';
+import MigrationHubTab from '@/components/settings/MigrationHubTab';
 
 const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
 
@@ -119,6 +121,13 @@ export default function GeotechSettings() {
         description="KeyLogBook AGS sync and Bentley OpenGround push — borehole data flows in, approved logs push out."
         icon={Database}
       />
+
+      <Tabs defaultValue="geotech" className="w-full">
+        <TabsList className="mb-4 grid grid-cols-2 w-full max-w-xs">
+          <TabsTrigger value="geotech">Geotech Settings</TabsTrigger>
+          <TabsTrigger value="migration">Migration Hub</TabsTrigger>
+        </TabsList>
+        <TabsContent value="geotech" className="space-y-5 focus:outline-none">
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* ── KeyLogBook section ── */}
@@ -319,6 +328,13 @@ export default function GeotechSettings() {
           </div>
         </div>
       )}
+
+        </TabsContent>
+        <TabsContent value="migration" className="focus:outline-none">
+          <MigrationHubTab />
+        </TabsContent>
+      </Tabs>
+
     </div>
   );
 }
