@@ -70,6 +70,18 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
         is_active: form.is_active,
         avatar_url: form.avatar_url,
       });
+      // SSO auto-link: if this staff member has an email but no linked user
+      // account, silently link them if a matching platform user already exists.
+      if (form.email && !form.user_id) {
+        try {
+          const res = await base44.functions.invoke('getUnlinkedUsers');
+          const unlinked = res?.data?.unlinked || [];
+          const existingUser = unlinked.find((u) => (u.email || '').toLowerCase() === form.email.toLowerCase());
+          if (existingUser) {
+            await base44.entities.Staff.update(staff.id, { user_id: existingUser.id, invite_sent: true });
+          }
+        } catch (e) { /* best-effort silent link */ }
+      }
       toast({ title: 'Profile saved', description: `${form.name} updated.` });
       onSaved?.();
       onOpenChange(false);
