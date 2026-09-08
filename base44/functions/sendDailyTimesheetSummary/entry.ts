@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
-import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import {
+  brandedWrapper, getAppBaseUrl, heading, p, helpTip,
+  linkBlock, statTileRow, sectionCard, dataTable, pillWarning, html, BRAND
+} from '../../shared/emailStyling.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -74,34 +77,38 @@ Deno.serve(async (req) => {
     const cfg = cfgList[0] || { accent_color: '#0e7a4f', banner_title: 'GC Mission Control', show_banner: true, footer_text: 'GC Mission Control' };
     if (cfg.enabled === false) return Response.json({ skipped: true, reason: 'Email alert disabled' });
 
-    const fmtRows = (rows) => rows.length > 0
-      ? rows.map(r => '   • ' + r.name + ' — ' + r.jobName + (r.submittedAt ? ' (submitted ' + r.submittedAt + ')' : r.arrivedAt ? ' (arrived ' + r.arrivedAt + ')' : '') + (r.earlyLeave ? ' [left early: ' + (r.earlyLeaveReason || '—') + ']' : '')).join('\n')
-      : '   None';
-
-    let text;
-    if (cfg.template) {
-      text = cfg.template
-        .replace(/\{date\}/g, todayStr)
-        .replace(/\{submitted_count\}/g, String(submitted.length))
-        .replace(/\{in_progress_count\}/g, String(inProgress.length))
-        .replace(/\{not_started_count\}/g, String(notStarted.length))
-        .replace(/\{submitted_list\}/g, fmtRows(submitted))
-        .replace(/\{in_progress_list\}/g, fmtRows(inProgress))
-        .replace(/\{not_started_list\}/g, fmtRows(notStarted));
-    } else {
-      const intro = cfg.intro_message ? cfg.intro_message + '\n\n' : '';
-      text = intro +
-        'Daily timesheet summary for ' + todayStr + ':\n\n' +
-        'SUBMITTED (' + submitted.length + '):\n' + fmtRows(submitted) + '\n\n' +
-        'IN PROGRESS (' + inProgress.length + '):\n' + fmtRows(inProgress) + '\n\n' +
-        'NOT STARTED (' + notStarted.length + '):\n' + fmtRows(notStarted) + '\n\n' +
-        'Review and approve pending timesheets in the Timesheets page.\n\nGC Mission Control';
-    }
     const subject = cfg.subject
       ? cfg.subject.replace(/\{date\}/g, todayStr)
       : 'Daily timesheet summary — ' + todayStr;
 
-    const bodyHtml = escapeHtml(text).replace(/\n/g, '<br>') + linkBlock(baseUrl, '/admin', 'Open Timesheets');
+    // v2 branded body — stat tiles + per-status data tables
+    const statsTiles = statTileRow([
+      { label: 'Submitted', value: String(submitted.length), icon: '✓', color: '#059669' },
+      { label: 'In Progress', value: String(inProgress.length), icon: '⏳', color: '#d97706' },
+      { label: 'Not Started', value: String(notStarted.length), icon: '⬜', color: '#e11d48' },
+      { label: 'Total on Rota', value: String(submitted.length + inProgress.length + notStarted.length), icon: '👥', color: '#2E5A1A' },
+    ]);
+
+    const buildTable = (rows) => {
+      if (rows.length === 0) return p('None');
+      const tableRows = rows.map(r => [
+        r.name,
+        r.jobName,
+        r.submittedAt || r.arrivedAt || '—',
+        r.earlyLeave ? html(pillWarning('Left early: ' + (r.earlyLeaveReason || '—'))) : '—',
+      ]);
+      return dataTable(['Staff', 'Job', 'Time', 'Notes'], tableRows);
+    };
+
+    const bodyHtml =
+      heading('Daily timesheet summary for ' + todayStr) +
+      (cfg.intro_message ? p(cfg.intro_message) : '') +
+      statsTiles +
+      sectionCard('✓ Submitted', buildTable(submitted), { titleBg: '#047857' }) +
+      sectionCard('⏳ In Progress', buildTable(inProgress), { titleBg: '#b45309' }) +
+      sectionCard('⬜ Not Started', buildTable(notStarted), { titleBg: '#be123c' }) +
+      helpTip('What to do next', 'Review and approve pending timesheets in the Timesheets page. Follow up with any staff who haven\'t started their shift.') +
+      linkBlock(baseUrl, '/admin', 'Open Timesheets');
 
     let sent = 0;
     const errors = [];
@@ -110,7 +117,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: email,
           subject,
-          body: styledHtml(bodyHtml, cfg)
+          body: brandedWrapper(bodyHtml, { headerVariant: 'brand', banner_subtitle: 'Timesheet Summary · ' + todayStr, ...cfg })
         });
         sent++;
       } catch (e) {

@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, p,
+  infoTable, bulletList, sectionCard, linkBlock,
+  formatGBP, progressBar, BRAND
+} from '../../shared/emailStyling.ts';
 
 // ============================================================
 // sendWeeklyProgressReport — sends a weekly progress report
@@ -81,61 +85,70 @@ export default async function(req: Request): Promise<Response> {
           ? Math.min(100, Math.round((Number(job.meterage) / Number(job.meterage_target)) * 100))
           : 0;
 
-        let milestoneHtml = '';
-        if (milestones.length > 0) {
-          milestoneHtml = '<h3 style="color:#1c4a12;margin:20px 0 8px;font-size:14px">Milestones</h3><ul style="margin:0;padding-left:18px;font-size:13px;color:#475569">';
-          for (const m of milestones.slice(0, 5)) {
-            const done = m.status === 'completed' || m.completed;
-            milestoneHtml += `<li style="margin:4px 0">${done ? '✅' : '⬜'} ${escapeHtml(m.title || m.name || 'Milestone')}${m.due_date ? ' — due ' + m.due_date : ''}</li>`;
-          }
-          milestoneHtml += '</ul>';
-        }
+        const milestoneItems = milestones.slice(0, 5).map(m => {
+          const done = m.status === 'completed' || m.completed;
+          const label = (m.title || m.name || 'Milestone') + (m.due_date ? ' — due ' + m.due_date : '');
+          return (done ? '✅ ' : '⬜ ') + label;
+        });
+        const milestoneBlock = milestoneItems.length > 0
+          ? sectionCard('Milestones', bulletList(milestoneItems), { titleBg: BRAND.primary })
+          : '';
 
-        let photoHtml = '';
+        let photoBlock = '';
         if (recentPhotos.length > 0) {
-          photoHtml = '<h3 style="color:#1c4a12;margin:20px 0 8px;font-size:14px">Recent Site Photos</h3><div style="display:flex;gap:8px;flex-wrap:wrap">';
-          for (const p of recentPhotos) {
-            if (p.photo_url) {
-              photoHtml += `<img src="${escapeHtml(p.photo_url)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0" alt="Site photo" />`;
-            }
-          }
-          photoHtml += '</div>';
+          const photoImgs = recentPhotos.filter(p => p.photo_url).map(p =>
+            `<img src="${escapeHtml(p.photo_url)}" style="width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid ${BRAND.slate200};margin:2px" alt="Site photo" />`
+          ).join('');
+          photoBlock = sectionCard('Recent Site Photos', `<div style="font-size:0">${photoImgs}</div>`, { titleBg: BRAND.primary });
         }
 
         const invoiceTotal = invoices.reduce((s, i) => s + (Number(i.gross_total) || 0), 0);
         const paidTotal = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (Number(i.gross_total) || 0), 0);
 
-        const portalLink = job.portal_token
-          ? linkBlock(baseUrl, `/client-portal/${job.portal_token}`, 'View Full Project Portal')
+        const infoRows = [
+          ['Status', escapeHtml(statusLabel)],
+          ['Location', escapeHtml(job.location || '—')],
+        ];
+        if (job.start_date && job.end_date) {
+          infoRows.push(['Schedule', job.start_date + ' → ' + job.end_date]);
+        }
+        if (progressPct > 0) {
+          infoRows.push(['Progress', progressPct + '% (' + job.meterage + 'm of ' + job.meterage_target + 'm target)']);
+        }
+        infoRows.push(['Crew This Week', rotas.length + ' shift' + (rotas.length === 1 ? '' : 's') + ' scheduled']);
+        if (invoiceTotal > 0) {
+          infoRows.push(['Billing', formatGBP(invoiceTotal) + ' total · ' + formatGBP(paidTotal) + ' paid']);
+        }
+
+        const progressBlock = progressPct > 0
+          ? progressBar('Drilling Progress', progressPct)
           : '';
 
-        const bodyHtml = `
-          <p style="margin:0 0 16px">Hi ${escapeHtml(clientName)},</p>
-          <p style="margin:0 0 16px">Here's your weekly progress update for <strong>${escapeHtml(job.name)}</strong>.</p>
+        const notesBlock = job.notes
+          ? sectionCard('Notes', p(job.notes), { titleBg: BRAND.primary })
+          : '';
 
-          <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">
-            <tr><td style="padding:6px 0;color:#64748b;width:120px">Status</td><td style="padding:6px 0;font-weight:600;color:#1e293b;text-transform:capitalize">${escapeHtml(statusLabel)}</td></tr>
-            <tr><td style="padding:6px 0;color:#64748b">Location</td><td style="padding:6px 0;color:#1e293b">${escapeHtml(job.location || '—')}</td></tr>
-            ${job.start_date && job.end_date ? `<tr><td style="padding:6px 0;color:#64748b">Schedule</td><td style="padding:6px 0;color:#1e293b">${job.start_date} → ${job.end_date}</td></tr>` : ''}
-            ${progressPct > 0 ? `<tr><td style="padding:6px 0;color:#64748b">Progress</td><td style="padding:6px 0;color:#1e293b">${progressPct}% (${job.meterage}m of ${job.meterage_target}m target)</td></tr>` : ''}
-            <tr><td style="padding:6px 0;color:#64748b">Crew This Week</td><td style="padding:6px 0;color:#1e293b">${rotas.length} shift${rotas.length === 1 ? '' : 's'} scheduled</td></tr>
-            ${invoiceTotal > 0 ? `<tr><td style="padding:6px 0;color:#64748b">Billing</td><td style="padding:6px 0;color:#1e293b">£${invoiceTotal.toLocaleString('en-GB')} total · £${paidTotal.toLocaleString('en-GB')} paid</td></tr>` : ''}
-          </table>
+        const portalLink = job.portal_token
+          ? linkBlock(baseUrl, '/client-portal/' + job.portal_token, 'View Full Project Portal')
+          : '';
 
-          ${milestoneHtml}
-          ${photoHtml}
-
-          ${job.notes ? `<h3 style="color:#1c4a12;margin:20px 0 8px;font-size:14px">Notes</h3><p style="font-size:13px;color:#475569;margin:0">${escapeHtml(job.notes)}</p>` : ''}
-
-          ${portalLink}
-        `;
+        const bodyHtml =
+          p('Hi ' + clientName + ',') +
+          p("Here's your weekly progress update for " + job.name + ".") +
+          infoTable(infoRows) +
+          progressBlock +
+          milestoneBlock +
+          photoBlock +
+          notesBlock +
+          portalLink;
 
         const subject = `Weekly Progress: ${job.name} — ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}`;
 
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: clientEmail,
           subject,
-          body: styledHtml(bodyHtml, { accent_color: '#2E5A1A', banner_title: `Project Update — ${job.name}`, show_banner: true, footer_text: 'GC Mission Control' }),
+          body: brandedWrapper(bodyHtml, { headerVariant: 'brand', banner_subtitle: 'Project Update · ' + job.name }),
+          from_name: 'GC Mission Control',
         });
         sent++;
       } catch (e) {

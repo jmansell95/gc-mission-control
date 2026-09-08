@@ -1,4 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, heading, p, subheading,
+  bulletList, statTileRow, sectionCard, callout, linkBlock, BRAND
+} from '../../shared/emailStyling.ts';
 
 // ---------------------------------------------------------------------------
 // AI-Powered Weekly Operations Digest
@@ -10,7 +14,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 // Highlights: what went well, what's at risk, and what needs attention next week.
 // ---------------------------------------------------------------------------
 
-export default async function main(req: any, res: any) {
+export default async function main(req: Request): Promise<Response> {
   const base44 = createClientFromRequest(req);
 
   try {
@@ -21,11 +25,11 @@ export default async function main(req: any, res: any) {
 
     // Gather week's data
     const [jobs, rotas, timesheets, incidents, invoices] = await Promise.all([
-      base44.entities.Job.list('-created_date', 500),
-      base44.entities.RotaAssignment.list('-created_date', 500),
-      base44.entities.Timesheet.list('-created_date', 500),
-      base44.entities.SafetyReport.filter({ report_type: 'incident' }),
-      base44.entities.Invoice.list('-created_date', 200),
+      base44.asServiceRole.entities.Job.list('-created_date', 500),
+      base44.asServiceRole.entities.RotaAssignment.list('-created_date', 500),
+      base44.asServiceRole.entities.Timesheet.list('-created_date', 500),
+      base44.asServiceRole.entities.SafetyReport.filter({ report_type: 'incident' }),
+      base44.asServiceRole.entities.Invoice.list('-created_date', 200),
     ]);
 
     // Filter to this week
@@ -89,7 +93,7 @@ export default async function main(req: any, res: any) {
     });
 
     // Generate the AI digest
-    const llmResponse = await base44.integrations.Core.InvokeLLM({
+    const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt: `You are the operations director of Ground Control, a UK geotechnical and ground investigation company. Write a concise weekly operations digest email for the directors based on this week's data. Structure it as:
 
 1. **Week in Review** — 2-3 sentence summary
@@ -116,45 +120,53 @@ ${dataContext}`,
 
     const digest = llmResponse || {};
 
-    // Build the email body
-    const emailBody = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px;">
-        <div style="background: linear-gradient(135deg, #2E5A1A, #1c4a12); border-radius: 16px; padding: 32px; margin-bottom: 24px;">
-          <h1 style="color: white; margin: 0; font-size: 24px;">Weekly Operations Digest</h1>
-          <p style="color: rgba(255,255,255,0.8); margin: 8px 0 0;">${weekStartStr} — ${todayStr}</p>
-        </div>
+    // Build the email body with v2 branded building blocks
+    const statsTiles = statTileRow([
+      { label: 'Active Jobs', value: String(activeJobs), icon: '📍', color: BRAND.primary },
+      { label: 'New This Week', value: String(weekJobs.length), icon: '🆕', color: BRAND.blue },
+      { label: 'Shifts', value: String(totalShifts), icon: '👷', color: BRAND.emerald },
+      { label: 'Incidents', value: String(weekIncidents.length), icon: '⚠', color: weekIncidents.length > 0 ? BRAND.rose : BRAND.emerald },
+    ]);
 
-        <h2 style="color: #2E5A1A; font-size: 18px; margin-bottom: 8px;">Week in Review</h2>
-        <p style="color: #334155; line-height: 1.6; margin-bottom: 24px;">${digest.week_in_review || ''}</p>
+    const financeTiles = statTileRow([
+      { label: 'Timesheets Submitted', value: String(submittedTimesheets), icon: '📝', color: BRAND.primary },
+      { label: 'Approved', value: String(approvedTimesheets), icon: '✓', color: BRAND.emerald },
+      { label: 'Invoices Issued', value: String(weekInvoices.length), icon: '🧾', color: BRAND.blue },
+      { label: 'Total Invoiced', value: '£' + Number(totalInvoiced || 0).toLocaleString('en-GB'), icon: '£', color: BRAND.amber },
+    ]);
 
-        <h2 style="color: #2E5A1A; font-size: 18px; margin-bottom: 8px;">✅ What Went Well</h2>
-        <ul style="color: #334155; line-height: 1.8; margin-bottom: 24px;">
-          ${(digest.what_went_well || []).map((item: string) => `<li>${item}</li>`).join('')}
-        </ul>
+    const wellList = (digest.what_went_well || []).length > 0
+      ? bulletList(digest.what_went_well)
+      : p('No specific highlights recorded this week.');
 
-        <h2 style="color: #dc2626; font-size: 18px; margin-bottom: 8px;">⚠️ At Risk</h2>
-        <ul style="color: #334155; line-height: 1.8; margin-bottom: 24px;">
-          ${(digest.at_risk || []).map((item: string) => `<li>${item}</li>`).join('')}
-        </ul>
+    const riskList = (digest.at_risk || []).length > 0
+      ? bulletList(digest.at_risk)
+      : p('No items at risk — all operations on track.');
 
-        <h2 style="color: #d97706; font-size: 18px; margin-bottom: 8px;">📋 Needs Attention Next Week</h2>
-        <ul style="color: #334155; line-height: 1.8; margin-bottom: 24px;">
-          ${(digest.needs_attention || []).map((item: string) => `<li>${item}</li>`).join('')}
-        </ul>
+    const attentionList = (digest.needs_attention || []).length > 0
+      ? bulletList(digest.needs_attention)
+      : p('No specific actions required next week.');
 
-        <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-          <h2 style="color: #2E5A1A; font-size: 16px; margin: 0 0 8px;">Key Numbers</h2>
-          <p style="color: #334155; margin: 0; line-height: 1.6;">${digest.key_numbers || ''}</p>
-        </div>
+    const baseUrl = await getAppBaseUrl(base44);
 
-        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 32px;">
-          GC Mission Control — Automated Weekly Digest · Generated ${todayStr}
-        </p>
-      </div>
-    `;
+    const bodyHtml =
+      heading('Week in Review') +
+      p(digest.week_in_review || 'No summary available for this week.') +
+      statsTiles +
+      sectionCard('✅ What Went Well', wellList, { titleBg: BRAND.emeraldDark }) +
+      sectionCard('⚠️ At Risk', riskList, { titleBg: BRAND.roseDark }) +
+      sectionCard('📋 Needs Attention Next Week', attentionList, { titleBg: BRAND.amberDark }) +
+      financeTiles +
+      sectionCard('Key Numbers', p(digest.key_numbers || 'No key numbers recorded.'), { titleBg: BRAND.primary }) +
+      linkBlock(baseUrl, '/admin', 'Open Dashboard');
+
+    const emailBody = brandedWrapper(bodyHtml, {
+      headerVariant: 'brand',
+      banner_subtitle: 'Weekly Operations Digest · ' + weekStartStr + ' — ' + todayStr,
+    });
 
     // Fetch admin users to email the digest to
-    const admins = await base44.entities.User.list();
+    const admins = await base44.asServiceRole.entities.User.list();
     const directorEmails = admins
       .filter((u: any) => u.role === 'admin')
       .map((u: any) => u.email)
@@ -163,10 +175,11 @@ ${dataContext}`,
     let emailSent = false;
     if (directorEmails.length > 0) {
       try {
-        await base44.integrations.Core.SendEmail({
+        await base44.asServiceRole.integrations.Core.SendEmail({
           to: directorEmails.join(','),
           subject: `Weekly Operations Digest — ${weekStartStr} to ${todayStr}`,
           body: emailBody,
+          from_name: 'GC Mission Control',
         });
         emailSent = true;
       } catch (emailErr) {
@@ -174,7 +187,7 @@ ${dataContext}`,
       }
     }
 
-    return res.json({
+    return Response.json({
       success: true,
       digest,
       email_sent: emailSent,
@@ -196,9 +209,9 @@ ${dataContext}`,
     });
   } catch (error: any) {
     console.error('Weekly digest error:', error);
-    return res.status(500).json({
+    return Response.json({
       success: false,
       error: error.message || 'Weekly digest generation failed',
-    });
+    }, { status: 500 });
   }
 }
