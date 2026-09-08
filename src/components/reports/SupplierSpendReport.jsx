@@ -195,7 +195,7 @@ export default function SupplierSpendReport({ filters }) {
       await generateReportPdf({
         title: 'Supplier Spend Report',
         subtitle: 'GC Mission Control',
-        filterSummary: buildFilterSummary(filters, null, null, null, null),
+        filterSummary: buildFilterSummary(filters, null, null, null),
         sections: [{ title: 'Supplier Spend', columns: cols, rows, totals }],
       });
       toast({ title: 'PDF exported', description: `${supplierRows.length} suppliers.` });

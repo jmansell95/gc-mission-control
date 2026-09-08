@@ -59,6 +59,14 @@ export function useReportData(filters = {}) {
     queryFn: () => base44.entities.SafetyReport.list('-created_date', 500),
   });
 
+  const costItems = useQuery({
+    queryKey: ['report-cost-items', filters.divisionId],
+    queryFn: () => base44.entities.JobCostItem.filter(
+      filters.divisionId ? { division_id: filters.divisionId } : {},
+      '-created_date', 500
+    ),
+  });
+
   const isLoading = jobs.isLoading || staff.isLoading || vehicles.isLoading || assets.isLoading;
 
   return {
@@ -72,6 +80,7 @@ export function useReportData(filters = {}) {
     deliveries: deliveries.data || [],
     invLogs: invLogs.data || [],
     safetyReports: safetyReports.data || [],
+    costItems: costItems.data || [],
     isLoading,
   };
 }
