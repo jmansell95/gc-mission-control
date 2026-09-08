@@ -403,10 +403,17 @@ export default function CrewRigAssignmentModal({ isOpen, onClose, staff, jobs, r
                       <SelectTrigger className="w-full h-9 px-3 border border-slate-300 rounded-lg text-sm bg-white"><SelectValue placeholder="Select Job" /></SelectTrigger>
                       <SelectContent>
                         {sortAZ(jobs.filter(j => j.status === 'in_progress' || j.status === 'planning'), 'name').map(j => (
-                          <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>
+                          <SelectItem key={j.id} value={j.id}>{j.name}{j.start_date ? ` · starts ${format(new Date(j.start_date + 'T00:00:00'), 'dd MMM yyyy')}` : ''}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {selectedJob?.start_date && (
+                      <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-[#2E5A1A] bg-[#2E5A1A]/5 border border-[#2E5A1A]/15 rounded-lg px-2.5 py-1.5">
+                        <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="font-semibold">Job starts {format(new Date(selectedJob.start_date + 'T00:00:00'), 'dd MMM yyyy')}</span>
+                        <span className="text-slate-400">· auto-filled as From date (change if needed)</span>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-500 mb-1">Rig *</label>

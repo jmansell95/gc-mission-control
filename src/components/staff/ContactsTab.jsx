@@ -32,7 +32,7 @@ const SUB_TO_TYPE = {
 };
 
 const emptyForm = {
-  full_name: '', job_title: '', company: '', category: '', market_dojo_onboarded: false,
+  full_name: '', job_title: '', company: '', category: [], market_dojo_onboarded: false,
   email: '', phone: '', mobile: '',
 };
 
@@ -78,8 +78,8 @@ export default function ContactsTab({ activeSub }) {
         });
       }
       invalidateConfigLists();
-      setAddForm(prev => ({ ...prev, category: value }));
-      setEditForm(prev => ({ ...prev, category: value }));
+      setAddForm(prev => ({ ...prev, category: [...(Array.isArray(prev.category) ? prev.category : []), value] }));
+      setEditForm(prev => ({ ...prev, category: [...(Array.isArray(prev.category) ? prev.category : []), value] }));
       setNewCategoryName('');
       setAddingCategory(false);
       toast({ title: 'Category added', description: name });
@@ -184,7 +184,7 @@ export default function ContactsTab({ activeSub }) {
           full_name: s.contact_name || contact.name || '',
           job_title: contact.role || '',
           company: s.name || '',
-          category: s.category || '',
+          category: Array.isArray(s.category) ? s.category : (s.category ? [s.category] : []),
           email: s.contact_email || contact.email || '',
           phone: s.contact_phone || contact.phone || '',
           mobile: s.emergency_mobile || '',
@@ -196,17 +196,17 @@ export default function ContactsTab({ activeSub }) {
     }
     if (q) {
       list = list.filter(r => {
-        const catLabel = meta.key === 'supplier'
-          ? (categoryOptions.find(o => o.value === r.category)?.label || r.category || '')
+        const catLabels = meta.key === 'supplier'
+          ? (Array.isArray(r.category) ? r.category : (r.category ? [r.category] : [])).map(c => categoryOptions.find(o => o.value === c)?.label || c || '').join(' ')
           : '';
         return (r.full_name || '').toLowerCase().includes(q) ||
           (r.job_title || '').toLowerCase().includes(q) ||
           (r.company || '').toLowerCase().includes(q) ||
-          (catLabel || '').toLowerCase().includes(q);
+          (catLabels || '').toLowerCase().includes(q);
       });
     }
     if (meta.key === 'supplier' && categoryFilter !== 'all') {
-      list = list.filter(r => (r.category || '') === categoryFilter);
+      list = list.filter(r => { const cats = Array.isArray(r.category) ? r.category : (r.category ? [r.category] : []); return cats.includes(categoryFilter); });
     }
     return list;
   }, [isStaffType, meta.key, staff, clients, suppliers, search, allCrews, categoryOptions, categoryFilter]);
@@ -250,7 +250,7 @@ export default function ContactsTab({ activeSub }) {
         if (email || phone) contacts.push({ name: '', role: '', email, phone });
         await base44.entities.Supplier.create({
           name: addForm.company.trim(),
-          category: addForm.category || '',
+          category: Array.isArray(addForm.category) ? addForm.category : [],
           contact_email: email,
           contact_phone: phone,
           emergency_mobile: addForm.mobile.trim() || '',
@@ -276,7 +276,7 @@ export default function ContactsTab({ activeSub }) {
       full_name: rec.full_name,
       job_title: rec.job_title,
       company: rec.company,
-      category: rec.category || '',
+      category: Array.isArray(rec.category) ? rec.category : (rec.category ? [rec.category] : []),
       market_dojo_onboarded: rec.onboarded,
       email: rec.email || '',
       phone: rec.phone || '',
@@ -317,7 +317,7 @@ export default function ContactsTab({ activeSub }) {
         if (email || phone) contacts.push({ name: '', role: '', email, phone });
         await base44.entities.Supplier.update(editForm.id, {
           name: editForm.company.trim(),
-          category: editForm.category || '',
+          category: Array.isArray(editForm.category) ? editForm.category : [],
           contact_email: email,
           contact_phone: phone,
           emergency_mobile: editForm.mobile?.trim() || '',
@@ -476,9 +476,17 @@ export default function ContactsTab({ activeSub }) {
                   {meta.key === 'supplier' ? (
                     <>
                       <p className="text-ui-subheading font-bold text-slate-900 truncate">{rec.company || '—'}</p>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-ui-micro font-bold ${getCategoryPillClass(rec.category)}`}>
-                        {categoryOptions.find(o => o.value === rec.category)?.label || (rec.category ? rec.category : 'Uncategorised')}
-                      </span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(Array.isArray(rec.category) ? rec.category : (rec.category ? [rec.category] : [])).length === 0 ? (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-ui-micro font-bold bg-slate-100 text-slate-500">Uncategorised</span>
+                        ) : (
+                          (Array.isArray(rec.category) ? rec.category : [rec.category]).map(cat => (
+                            <span key={cat} className={`inline-block px-2 py-0.5 rounded-full text-ui-micro font-bold ${getCategoryPillClass(cat)}`}>
+                              {categoryOptions.find(o => o.value === cat)?.label || cat}
+                            </span>
+                          ))
+                        )}
+                      </div>
                     </>
                   ) : (
                     <>
@@ -562,15 +570,20 @@ export default function ContactsTab({ activeSub }) {
                     <input type="text" value={addForm.company} onChange={e => setAddForm({ ...addForm, company: e.target.value })} autoFocus className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
                   </div>
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Category</label>
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Categories <span className="text-slate-400 font-normal">(select all that apply)</span></label>
                     {!addingCategory ? (
-                      <div className="flex gap-2">
-                        <select value={addForm.category} onChange={e => setAddForm({ ...addForm, category: e.target.value })} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm bg-white">
-                          <option value="">— Uncategorised —</option>
-                          {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                        </select>
-                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-caption font-semibold whitespace-nowrap transition">
-                          <Plus className="w-3.5 h-3.5" /> Add
+                      <div className="flex flex-wrap gap-1.5">
+                        {categoryOptions.map(opt => {
+                          const cats = Array.isArray(addForm.category) ? addForm.category : [];
+                          const selected = cats.includes(opt.value);
+                          return (
+                            <button key={opt.value} type="button" onClick={() => setAddForm({ ...addForm, category: selected ? cats.filter(c => c !== opt.value) : [...cats, opt.value] })} className={`px-2.5 py-1 rounded-full text-ui-micro font-bold transition ${selected ? getCategoryPillClass(opt.value) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-micro font-bold transition">
+                          <Plus className="w-3 h-3" /> Add
                         </button>
                       </div>
                     ) : (
@@ -664,15 +677,20 @@ export default function ContactsTab({ activeSub }) {
                     <input type="text" value={editForm.company || ''} onChange={e => setEditForm({ ...editForm, company: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
                   </div>
                   <div>
-                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Category</label>
+                    <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600 mb-1"><Tag className="w-3.5 h-3.5 text-slate-400" /> Categories <span className="text-slate-400 font-normal">(select all that apply)</span></label>
                     {!addingCategory ? (
-                      <div className="flex gap-2">
-                        <select value={editForm.category || ''} onChange={e => setEditForm({ ...editForm, category: e.target.value })} className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm bg-white">
-                          <option value="">— Uncategorised —</option>
-                          {categoryOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                        </select>
-                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-caption font-semibold whitespace-nowrap transition">
-                          <Plus className="w-3.5 h-3.5" /> Add
+                      <div className="flex flex-wrap gap-1.5">
+                        {categoryOptions.map(opt => {
+                          const cats = Array.isArray(editForm.category) ? editForm.category : [];
+                          const selected = cats.includes(opt.value);
+                          return (
+                            <button key={opt.value} type="button" onClick={() => setEditForm({ ...editForm, category: selected ? cats.filter(c => c !== opt.value) : [...cats, opt.value] })} className={`px-2.5 py-1 rounded-full text-ui-micro font-bold transition ${selected ? getCategoryPillClass(opt.value) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                        <button type="button" onClick={() => setAddingCategory(true)} className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-ui-micro font-bold transition">
+                          <Plus className="w-3 h-3" /> Add
                         </button>
                       </div>
                     ) : (

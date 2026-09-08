@@ -47,7 +47,10 @@ export default function AddBillableItemsWizard({
   const filteredRateCardItems = useMemo(() => {
     const trainingSupplierIds = new Set(
       (suppliers || [])
-        .filter(s => (s.category || '').toLowerCase() === 'training')
+        .filter(s => {
+          const cats = Array.isArray(s.category) ? s.category : (s.category ? [s.category] : []);
+          return cats.some(c => (c || '').toLowerCase() === 'training');
+        })
         .map(s => s.id)
     );
     return (rateCardItems || []).filter(r => {

@@ -11,8 +11,12 @@
       "description": "The division this supplier belongs to. Set automatically from the active division when the supplier is created. Drives division-scoped filtering \u2014 a division only sees its own suppliers. Blank = unassigned (visible to enterprise admins only)."
     },
     "category": {
-      "type": "string",
-      "description": "Supplier category tag (e.g. 'training', 'materials', 'plant', 'ppe', 'fuel'). Populated from the configurable 'supplier_categories' ConfigList. Shown as a coloured pill on the supplier list and used to exclude training suppliers from the billable items wizard. Blank = uncategorised."
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Supplier category tags (e.g. 'training', 'materials', 'plant', 'ppe', 'fuel'). Populated from the configurable 'supplier_categories' ConfigList. Suppliers can have multiple categories since they often do more than one thing. Shown as coloured pills on the supplier list and used to exclude training suppliers from the billable items wizard. Empty = uncategorised."
     },
     "contact_name": {
       "type": "string",
