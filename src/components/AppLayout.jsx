@@ -14,6 +14,7 @@ const ROUTE_SECTION_MAP = {
   '/enterprise': '',
   '/staff-schedule': 'scheduling',
   '/staff-profile': 'scheduling',
+  '/admin/profile': '',
   '/subcontractor': 'scheduling',
   '/deliveries': 'logistics',
   '/admin/logistics': 'logistics',

@@ -13,7 +13,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
  * ErrorBoundary wraps the Outlet so a render crash in any field page shows
  * a visible error message + retry button instead of a blank white screen.
  */
-export default function FieldShell() {
+export default function FieldShell({ children }) {
   return (
     <FieldDataProvider>
       <div className="h-[100dvh] field-bg flex flex-col overflow-hidden safe-area-top">
@@ -27,7 +27,7 @@ export default function FieldShell() {
           }}
         >
           <ErrorBoundary>
-            <Outlet />
+            {children || <Outlet />}
           </ErrorBoundary>
         </main>
         <StaffTabBar />

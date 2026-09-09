@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import {
   UserCircle, ShieldCheck, GraduationCap, ClipboardList, TrendingUp,
-  Pencil, Loader2, Mail, Phone, Briefcase, Calendar, Award,
+  Pencil, Loader2, Mail, Phone, Briefcase, Calendar,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '@/lib/AuthContext';
@@ -283,14 +283,14 @@ export default function DesktopProfile() {
             <div className="hub-glass rounded-2xl p-5 md:p-6">
               <ComplianceWallet staffId={staff.id} staffName={staff.name} />
             </div>
-          ) : <NoCrewProfileState tab="compliance" onGoAdmin={() => {}} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
+          ) : <NoCrewProfileState tab="compliance" onGoAdmin={null} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
 
           {/* Training */}
           {activeSection === 'training' && (staff.id ? (
             <div className="hub-glass rounded-2xl p-5 md:p-6">
               <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={isPlatformAdmin} />
             </div>
-          ) : <NoCrewProfileState tab="training" onGoAdmin={() => {}} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
+          ) : <NoCrewProfileState tab="training" onGoAdmin={null} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
 
           {/* Timesheets */}
           {activeSection === 'timesheets' && (staff.id ? (
@@ -307,7 +307,7 @@ export default function DesktopProfile() {
                 <StaffBookings staffId={staff.id} />
               </div>
             </div>
-          ) : <NoCrewProfileState tab="timesheets" onGoAdmin={() => {}} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
+          ) : <NoCrewProfileState tab="timesheets" onGoAdmin={null} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
 
           {/* Performance & Incentives */}
           {activeSection === 'performance' && (staff.id ? (
@@ -325,7 +325,7 @@ export default function DesktopProfile() {
                 <RewardsCatalogue staffId={staff.id} staffName={staff.name} />
               </div>
             </div>
-          ) : <NoCrewProfileState tab="performance" onGoAdmin={() => {}} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
+          ) : <NoCrewProfileState tab="performance" onGoAdmin={null} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
         </div>
       </div>
 

@@ -147,15 +147,6 @@ export const SYSTEM_GROUPS = [
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'write'])),
   },
   {
-    name: 'Admin',
-    description: 'Full dashboard access including settings and all hubs.',
-    is_system: true,
-    is_read_only: false,
-    staff_type: 'office',
-    landing_page: '/admin',
-    permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'write'])),
-  },
-  {
     name: 'Management',
     description: 'Operations access — all hubs except Settings. Can manage projects, rotas, staff, compliance and financials.',
     is_system: true,
@@ -167,7 +158,7 @@ export const SYSTEM_GROUPS = [
     ),
   },
   {
-    name: 'User',
+    name: 'Users',
     description: 'Basic office access — read-only view of Dashboard, Projects, Scheduling, Staff, Logistics and Compliance.',
     is_system: true,
     is_read_only: false,
@@ -178,7 +169,7 @@ export const SYSTEM_GROUPS = [
     ),
   },
   {
-    name: 'Field Staff',
+    name: 'Field Team',
     description: 'Field crew — schedule and personal profile only. No admin dashboard access. Assign to all on-site workers.',
     is_system: true,
     is_read_only: false,

@@ -31,7 +31,8 @@ import EnterpriseResourcePoolPage from './pages/EnterpriseResourcePoolPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PrehistoricImportPage from './components/import/PrehistoricImportPage';
 import StaffDashboard from './pages/StaffDashboard';
-import StaffProfile from './pages/StaffProfile';
+import ProfileRouter from '@/components/staff/ProfileRouter';
+import DesktopProfile from '@/components/staff/DesktopProfile';
 import FieldShell from '@/components/field/FieldShell';
 import TodayPage from './pages/field/TodayPage';
 import UpcomingPage from './pages/field/UpcomingPage';
@@ -142,6 +143,12 @@ const AuthenticatedApp = () => {
           <Route path="/pending-access" element={<PendingAccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
+          {/* Profile router — splits field (mobile) vs office (desktop) profile.
+              Standalone (not inside FieldShell) so office users get a clean
+              redirect to /admin/profile without a FieldShell flash, and field
+              users get FieldShell wrapping conditionally inside ProfileRouter. */}
+          <Route path="/staff-profile" element={<RouteGuard><ProfileRouter /></RouteGuard>} />
+          <Route path="/m/staff-profile" element={<RouteGuard><ProfileRouter /></RouteGuard>} />
           {/* Field crew routes — shared FieldShell with persistent bottom bar, fully responsive */}
           <Route element={<FieldShell />}>
             <Route path="/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
@@ -149,14 +156,12 @@ const AuthenticatedApp = () => {
             <Route path="/more" element={<RouteGuard><MorePage /></RouteGuard>} />
             <Route path="/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />
             <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
-            <Route path="/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
             {/* Mobile /m/ tree — same components, FieldShell handles mobile layout */}
             <Route path="/m/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
             <Route path="/m/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
             <Route path="/m/more" element={<RouteGuard><MorePage /></RouteGuard>} />
             <Route path="/m/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />
             <Route path="/m/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
-            <Route path="/m/staff-profile" element={<RouteGuard><StaffProfile /></RouteGuard>} />
           </Route>
           {/* Deliveries — separate route (not one of the 5 main field tabs) */}
           <Route path="/deliveries" element={<MobileFieldRedirect><RouteGuard><DeliveryDashboard /></RouteGuard></MobileFieldRedirect>} />
@@ -177,6 +182,7 @@ const AuthenticatedApp = () => {
           <Route path="/enterprise/crew-availability" element={<RouteGuard><EnterpriseCrewAvailabilityPage /></RouteGuard>} />
           <Route path="/enterprise/resource-pool" element={<RouteGuard><EnterpriseResourcePoolPage /></RouteGuard>} />
           <Route element={<AppLayout />}>
+            <Route path="/admin/profile" element={<RouteGuard><DesktopProfile /></RouteGuard>} />
             <Route path="/subcontractor" element={<RouteGuard><SubcontractorDashboard /></RouteGuard>} />
             <Route path="/admin/logistics" element={<RouteGuard><HubReadinessGate featureId="logistics"><DriverHub /></HubReadinessGate></RouteGuard>} />
             <Route path="/depot-pick-lists" element={<RouteGuard><HubReadinessGate featureId="logistics"><DepotPickLists /></HubReadinessGate></RouteGuard>} />

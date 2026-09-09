@@ -144,10 +144,12 @@ export async function buildMyProfile(base44, user) {
 
   const GROUP_NAME_TO_ROLE = {
     'Super Admin': 'super_admin',
-    'Admin': 'admin',
+    'Admin': 'super_admin', // legacy — merged into Super Admin
     'Management': 'management',
-    'User': 'user',
-    'Field Staff': 'field',
+    'Users': 'user',
+    'User': 'user', // legacy
+    'Field Team': 'field',
+    'Field Staff': 'field', // legacy
     'Field': 'field',
     'Read Only': 'read_only',
   };
