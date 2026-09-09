@@ -24,6 +24,7 @@ import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget'
 import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
 import RunReportButton from '@/components/reports/RunReportButton';
 import { resolveRole } from '@/utils/access';
+import { useAuth } from '@/lib/AuthContext';
 
 const SC_URL = 'https://app.safetyculture.com';
 
@@ -54,6 +55,8 @@ const TABS = [
 
 export default function CompliancePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isPlatformAdmin = user?.role === 'admin';
   const [tab, setTab] = useState('audit-dashboard');
   const [subTab, setSubTab] = useState('overview');
   const [profile, setProfile] = useState(null);
@@ -64,8 +67,19 @@ export default function CompliancePage() {
     })();
   }, []);
 
-  const role = resolveRole(profile) || 'field';
-  const canAccess = role === 'admin' || role === 'super_admin' || role === 'management' || role === 'manager';
+  const role = resolveRole(profile, isPlatformAdmin);
+  const canAccess = isPlatformAdmin || role === 'admin' || role === 'super_admin' || role === 'management' || role === 'manager';
+
+  // Show a loading state while the profile loads (platform admins skip this
+  // — they always have access). Previously, a null profile fell through to
+  // 'field' and locked even super admins out on the published site.
+  if (!canAccess && !profile && !isPlatformAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   const { data: safetyReports = [] } = useQuery({ queryKey: ['safety-reports-open'], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }) });
   const { data: complianceItems = [] } = useQuery({ queryKey: ['compliance-items-staff'], queryFn: () => base44.entities.ComplianceItem.filter({ category: 'staff' }, '-created_date', 500) });
