@@ -1,0 +1,44 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 1 * *",
+      "one_time_date": null,
+      "timezone": "Europe/London",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Monthly AFP Creation",
+  "description": "Creates one draft AFP per active project on the 1st of each month. Each AFP covers the full calendar month and auto-populates from field data (driller logs, deliveries, timesheets, cost items, asset hire) via the AFP Auto-Populate on Creation entity automation.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "monthly_afp_creation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "create_afps": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "createMonthlyAFPs"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Create monthly AFPs",
+            "description": "One draft AFP per active project for the current month"
+          }
+        }
+      }
+    ]
+  }
+}
