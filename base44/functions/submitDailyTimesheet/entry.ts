@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -175,6 +176,22 @@ Deno.serve(async (req) => {
     try {
       await base44.asServiceRole.functions.invoke('notifyTimesheetSubmitted', { summaries, staff_id: staff_id, date });
     } catch (e) { /* notification failure shouldn't block submission */ }
+
+    // ── Create inbox approval for the manager to approve the timesheet ──
+    try {
+      const totalHours = summaries.reduce((s, x) => s + (Number(x.total_hours) || 0), 0);
+      await createApproval(base44, {
+        approvalType: 'timesheet',
+        requesterStaffId: staff_id,
+        title: `Timesheet for ${staff.name} — ${date} (${totalHours.toFixed(1)}h)`,
+        body: `${staff.name} submitted their daily timesheet for ${date}. Total: ${totalHours.toFixed(1)} hours across ${summaries.length} job(s). Please review and approve.`,
+        sourceHub: 'staff',
+        sourceEntity: 'Timesheet',
+        sourceId: summaries[0]?.id || '',
+        deepLink: '/staff?tab=timesheets',
+        priority: 'normal',
+      });
+    } catch (_) { /* don't block submission on inbox failure */ }
 
     return Response.json({ success: true, summaries, merged_count: allDraftIds.length });
   } catch (error) {

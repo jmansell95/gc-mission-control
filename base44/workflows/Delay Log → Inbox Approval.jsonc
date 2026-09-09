@@ -1,0 +1,36 @@
+{
+  "name": "Delay Log \u2192 Inbox Approval",
+  "description": "When a delay log is created (by a crew member or from remarks), creates an inbox approval routed to the submitter's manager chain so the manager can approve (shifts rota + extends job) or reject.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "JobDelayLog"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "delay_log_inbox_approval",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "createDelayLogApproval",
+            "args": {
+              "delayLogId": "${ .data.id }"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

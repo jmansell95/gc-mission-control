@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 // ---------------------------------------------------------------------------
 // Process Off-Hire — Auto-Return Reconciliation
@@ -68,6 +69,24 @@ export default async function(req) {
     );
     const onSite = gearItems.filter(ci => ci.current_location === 'site');
     const inTransit = gearItems.filter(ci => ci.current_location === 'in_transit');
+
+    // ── Create inbox approval for the off-hire reconciliation ──
+    try {
+      const myStaff = await base44.asServiceRole.entities.Staff.filter({ user_id: user.id });
+      const jobList = await base44.asServiceRole.entities.Job.filter({ id: job_id });
+      const jobName = jobList[0]?.name || 'job';
+      await createApproval(base44, {
+        approvalType: 'off_hire',
+        requesterStaffId: myStaff[0]?.id || null,
+        title: `Off-hire reconciliation — ${jobName} (${offHired.length} items returned)`,
+        body: `${offHired.length} item(s) marked off-hired on ${jobName}. ${gearItems.length - returned.length} item(s) still on site. Please confirm the reconciliation is correct.`,
+        sourceHub: 'logistics',
+        sourceEntity: 'JobCostItem',
+        sourceId: job_id,
+        deepLink: `/admin?job=${job_id}&tab=logistics`,
+        priority: 'normal',
+      });
+    } catch (_) { /* don't block on inbox failure */ }
 
     return Response.json({
       status: 'success',

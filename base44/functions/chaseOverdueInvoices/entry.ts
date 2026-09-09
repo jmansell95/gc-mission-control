@@ -4,6 +4,7 @@ import {
   infoTable, statusPill, pillDanger, pillWarning, pillInfo, pillSuccess,
   sectionCard, helpTip, heading, p, callout, html, dataTable, statTileRow, formatGBP, formatDate
 } from '../../shared/emailStyling.ts';
+import { createNotification } from '../../shared/inboxEngine.ts';
 
 // Automated invoice chasing — sends escalating reminder emails for overdue invoices.
 // Escalation schedule:
@@ -172,6 +173,28 @@ export default async function(req) {
         chase_count: (inv.chase_count || 0) + 1,
         last_chase_at: new Date().toISOString(),
       });
+
+      // ── Debt collection inbox alert on final notice ──
+      if (targetStage === 'final_notice') {
+        try {
+          const users = await base44.asServiceRole.entities.User.list();
+          const adminRecipients = users.filter(u => u.role === 'admin' && u.email).map(u => ({
+            staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email,
+          }));
+          await createNotification(base44, {
+            recipients: adminRecipients,
+            type: 'alert',
+            category: 'debt_collection',
+            title: `Debt collection handoff — ${inv.invoice_number} (${inv.client_name || 'client'})`,
+            body: `Invoice ${inv.invoice_number} for ${inv.client_name || 'client'} is ${days} days overdue and has reached final notice stage. Amount: ${amount}. Please decide whether to escalate to debt recovery.`,
+            sourceHub: 'billing',
+            sourceEntity: 'Invoice',
+            sourceId: inv.id,
+            deepLink: '/billing?tab=invoices',
+            priority: 'urgent',
+          });
+        } catch (_) {}
+      }
 
       sent++;
       results.push({

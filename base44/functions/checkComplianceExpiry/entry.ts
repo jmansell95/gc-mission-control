@@ -4,6 +4,7 @@ import {
   infoTable, statusPill, pillDanger, pillWarning, pillSuccess,
   sectionCard, helpTip, heading, p, callout, html, dataTable, statTileRow
 } from '../../shared/emailStyling.ts';
+import { createNotification } from '../../shared/inboxEngine.ts';
 
 // Parse compliance date — supports YYYY-MM (staff) and YYYY-MM-DD (other categories)
 function parseDate(str) {
@@ -116,6 +117,26 @@ Deno.serve(async (req) => {
               body: brandedWrapper(bodyHtml, { ...cfg, headerVariant: 'rose', banner_subtitle: 'Compliance Alert' })
             });
           }
+
+          // ── Create inbox alert for compliance expiry ──
+          try {
+            const adminRecipients = admins.map(u => ({
+              staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email,
+            }));
+            await createNotification(base44, {
+              recipients: adminRecipients,
+              type: 'alert',
+              category: 'compliance_expiry',
+              title: `Compliance expiry — ${alerts.length} item(s) need attention`,
+              body: `${expiredCount} expired, ${expiringCount} expiring soon. Open the Compliance Hub to review and arrange renewals.`,
+              sourceHub: 'compliance',
+              sourceEntity: 'ComplianceItem',
+              sourceId: '',
+              deepLink: '/compliance',
+              priority: expiredCount > 0 ? 'urgent' : 'normal',
+            });
+          } catch (_) {}
+
           ciResult = { sent: true, alertCount: alerts.length, notifiedRecipients: recipients.length };
         } else {
           ciResult = { sent: false, alertCount: 0, checked: complianceItems.length };

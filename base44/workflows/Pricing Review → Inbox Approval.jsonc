@@ -1,0 +1,36 @@
+{
+  "name": "Pricing Review \u2192 Inbox Approval",
+  "description": "When an investigation log's pricing_review_status is set to 'pending_review' (low-confidence keyword match), creates an inbox approval routed to the billing team so they can confirm or correct the rate card match.",
+  "trigger": {
+    "condition": "${ .data.pricing_review_status == \"pending_review\" }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "InvestigationLog"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "pricing_review_inbox_approval",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "createPricingReviewApproval",
+            "args": {
+              "logId": "${ .data.id }"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

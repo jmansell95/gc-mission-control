@@ -3,6 +3,7 @@ import {
   brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
   infoTable, statusPill, pillInfo, sectionCard, helpTip, heading, p, callout, html
 } from '../../shared/emailStyling.ts';
+import { createNotification } from '../../shared/inboxEngine.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -74,6 +75,25 @@ Deno.serve(async (req) => {
         notified++;
       } catch (e) {}
     }
+
+    // ── Create inbox notice for all admins ──
+    try {
+      const adminRecipients = admins.map(u => ({
+        staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email,
+      }));
+      await createNotification(base44, {
+        recipients: adminRecipients,
+        type: 'notice',
+        category: 'new_job',
+        title: `New job — ${job.name}`,
+        body: `A new job has been created: ${job.name}${ref ? ' (' + ref + ')' : ''}. Location: ${job.location || '—'}. Start: ${job.start_date || '—'}.`,
+        sourceHub: 'jobs',
+        sourceEntity: 'Job',
+        sourceId: job.id || '',
+        deepLink: '/admin',
+        priority: 'info',
+      });
+    } catch (_) {}
 
     if (ac) { try { await base44.asServiceRole.entities.AutomationControl.update(ac.id, { last_run_at: new Date().toISOString(), last_run_status: 'success' }); } catch (e) {} }
     return Response.json({ sent: true, notified });

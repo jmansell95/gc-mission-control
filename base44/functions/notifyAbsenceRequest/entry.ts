@@ -4,6 +4,7 @@ import {
   infoTable, statusPill, pillInfo, pillWarning,
   sectionCard, helpTip, heading, p, callout, html
 } from '../../shared/emailStyling.ts';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -82,6 +83,21 @@ Deno.serve(async (req) => {
         notified++;
       } catch (e) {}
     }
+
+    // ── Create inbox approval routed to the manager chain ──
+    try {
+      await createApproval(base44, {
+        approvalType: 'absence',
+        requesterStaffId: abs.staff_id || null,
+        title: `Time-off request — ${staffName} (${reason})`,
+        body: `${staffName} requested ${reason} from ${abs.start_date || '—'} to ${abs.end_date || '—'}.${notesStr ? ' Notes: ' + notesStr : ''} Please approve or decline from the planner.`,
+        sourceHub: 'staff',
+        sourceEntity: 'Absence',
+        sourceId: abs.id || '',
+        deepLink: '/admin?tab=planner',
+        priority: 'normal',
+      });
+    } catch (_) { /* don't block on inbox failure */ }
 
     if (ac) { try { await base44.asServiceRole.entities.AutomationControl.update(ac.id, { last_run_at: new Date().toISOString(), last_run_status: 'success' }); } catch (e) {} }
     return Response.json({ sent: true, notified });

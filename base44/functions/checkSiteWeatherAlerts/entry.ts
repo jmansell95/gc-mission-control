@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createNotification } from '../../shared/inboxEngine.ts';
 import { getAppSettingValue } from '../../shared/appSettings.ts';
 import { DEFAULT_THRESHOLDS, resolveThresholds, evaluateWeather, fetchSiteWeather } from '../../shared/weatherThresholds.ts';
 import {
@@ -129,6 +130,28 @@ export default async function (req: Request): Promise<Response> {
         emailed++;
       } catch (_) { /* skip individual failures */ }
     }
+
+    // ── Create inbox alert for each stop-work site ──
+    try {
+      const users = await base44.asServiceRole.entities.User.list('-created_date', 100);
+      const adminRecipients = users
+        .filter((u: any) => (u.role === 'admin' || u.role === 'super_admin') && u.email)
+        .map((u: any) => ({ staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email }));
+      for (const a of stopAlerts) {
+        await createNotification(base44, {
+          recipients: adminRecipients,
+          type: 'alert',
+          category: 'weather_warning',
+          title: `🛑 STOP WORK — ${a.job.name}`,
+          body: `Weather conditions on ${a.job.name} breach stop-work thresholds: ${a.assessment.reasons.join(', ')}. Crews must NOT work until conditions improve.`,
+          sourceHub: 'overview',
+          sourceEntity: 'Job',
+          sourceId: a.job.id,
+          deepLink: `/admin?job=${a.job.id}`,
+          priority: 'urgent',
+        });
+      }
+    } catch (_) {}
 
     return Response.json({
       ok: true,

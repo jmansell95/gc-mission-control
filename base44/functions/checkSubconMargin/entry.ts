@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createNotification } from '../../shared/inboxEngine.ts';
 
 // ============================================================
 // checkSubconMargin — Subcontractor margin guardrail
@@ -129,6 +130,26 @@ export default async function(req: Request): Promise<Response> {
             source: 'entity_automation',
           });
         } catch (_) { /* audit logging is best-effort */ }
+
+        // ── Inbox alert to billing managers ──
+        try {
+          const users = await base44.asServiceRole.entities.User.list();
+          const adminRecipients = users.filter(u => u.role === 'admin' && u.email).map(u => ({
+            staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email,
+          }));
+          await createNotification(base44, {
+            recipients: adminRecipients,
+            type: 'alert',
+            category: 'margin_breach',
+            title: `Margin warning — ${subName} (${marginPct.toFixed(1)}%)`,
+            body: `${reason}. Subcontractor log for ${subName}. Please review the pricing before this cost is invoiced.`,
+            sourceHub: 'billing',
+            sourceEntity: 'SubcontractorLog',
+            sourceId: entityId,
+            deepLink: '/billing?tab=margin',
+            priority: 'urgent',
+          });
+        } catch (_) {}
       }
     }
 
