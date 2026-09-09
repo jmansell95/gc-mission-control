@@ -104,7 +104,8 @@ export const AuthProvider = ({ children }) => {
       // ground-control.co.uk address. Clears the session so the user
       // can't access the app, and surfaces a dedicated error screen.
       const email = (currentUser?.email || '').toLowerCase();
-      if (email && !email.endsWith('@' + ALLOWED_DOMAIN)) {
+      const isAdmin = currentUser?.role === 'admin';
+      if (email && !isAdmin && !email.endsWith('@' + ALLOWED_DOMAIN)) {
         try { await base44.auth.logout(); } catch (_) {}
         setUser(null);
         setIsAuthenticated(false);
