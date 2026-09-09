@@ -1,14 +1,15 @@
 import React from 'react';
-import { Download, CheckSquare, Briefcase, UploadCloud } from 'lucide-react';
+import { Download, CheckSquare, Briefcase } from 'lucide-react';
 import AGSUploadButton from './AGSUploadButton';
 
 /**
  * Unified action toolbar — replaces the separate export bar, bulk review
  * bar, and bulk-select toggle that were sandwiched between content. One
  * clean row: AGS upload on the left, Export / Bulk Review / Select on the right.
+ * The Select toggle only appears at the borehole detail level (showSelect).
  */
 export default function InvestigationToolbar({
-  hasLogs, jobs, bulkMode, pendingCount,
+  hasLogs, jobs, bulkMode, pendingCount, showSelect,
   onToggleBulk, onOpenExport, onOpenBulkReview,
 }) {
   if (!hasLogs) return null;
@@ -30,12 +31,14 @@ export default function InvestigationToolbar({
         >
           <Download className="w-3.5 h-3.5" /> Export
         </button>
-        <button
-          onClick={onToggleBulk}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
-        >
-          <CheckSquare className="w-3.5 h-3.5" /> {bulkMode ? 'Done' : 'Select'}
-        </button>
+        {showSelect && (
+          <button
+            onClick={onToggleBulk}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            <CheckSquare className="w-3.5 h-3.5" /> {bulkMode ? 'Done' : 'Select'}
+          </button>
+        )}
       </div>
     </div>
   );

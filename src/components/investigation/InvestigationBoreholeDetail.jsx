@@ -5,7 +5,7 @@ import {
   Ruler, CheckCircle2, AlertTriangle, XCircle, Mountain, Drill, User, CalendarDays, Camera,
 } from 'lucide-react';
 import {
-  strataConfig, reviewStatusConfig, logTypeConfig, getSptDensityLabel,
+  strataConfig, strataColors, reviewStatusConfig, logTypeConfig,
 } from '@/components/investigation/shared';
 import {
   BOREHOLE_STATUS_CONFIG, DRILLING_METHOD_CONFIG,
@@ -201,7 +201,7 @@ function StrataList({ logs, onSelectLog, bulkMode, bulkSelected, toggleBulkSelec
             onClick={() => bulkMode ? toggleBulkSelect(log.id) : onSelectLog(log.id)}
             className={`w-full text-left flex items-stretch gap-0 rounded-lg overflow-hidden border border-slate-100 hover:shadow-sm transition ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A]/10' : ''}`}
           >
-            <div className="w-2 flex-shrink-0" style={{ background: strata ? undefined : '#94a3b8' }} />
+            <div className="w-2 flex-shrink-0" style={{ background: strataColors[log.strata_descriptor] || '#94a3b8' }} />
             <div className="flex-1 px-3 py-2 flex items-center gap-2.5">
               {bulkMode && (
                 <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 bg-white'}`}>
