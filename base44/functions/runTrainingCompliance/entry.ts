@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { brandedWrapper, heading, p, dataTable, callout, escapeHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
 
 /**
  * Training Compliance Autopilot — runs weekly on Monday at 07:00.

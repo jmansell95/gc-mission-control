@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { brandedWrapper, heading, p, dataTable, callout, escapeHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
 
 /**
  * Weather-Aware Auto-Rostering — runs daily at 06:00.

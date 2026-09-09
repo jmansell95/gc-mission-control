@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { brandedWrapper, heading, p, dataTable, callout, ctaButton, statTileRow, escapeHtml, formatGBP, getAppBaseUrl } from '../../shared/emailStyling.ts';
 
 /**
  * Cash Flow Forecast Engine — runs nightly at 01:00.

@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import { brandedWrapper, heading, p, dataTable, callout, escapeHtml, formatGBP, getAppBaseUrl } from '../../shared/emailStyling.ts';
 
 /**
  * Rig Profitability Auto-Optimiser — runs daily at 18:00.
