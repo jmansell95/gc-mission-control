@@ -104,6 +104,42 @@ export default async function(req: Request): Promise<Response> {
     // Parse the full audit into structured check items
     const detail = parseAuditItems(fullAudit);
 
+    // Resolve any mitti-media: prefixed photo IDs to direct URLs.
+    // The Mitti/SafetyCulture API sometimes returns media objects with only
+    // an ID (no direct URL). We try to resolve these via the media endpoint.
+    if (config?.api_token) {
+      for (const item of detail.items) {
+        if (!item.photos || item.photos.length === 0) continue;
+        const resolved = [];
+        for (const photo of item.photos) {
+          if (typeof photo === 'string' && photo.startsWith('mitti-media:')) {
+            const mediaId = photo.replace('mitti-media:', '');
+            try {
+              const mediaResp = await fetch(`https://api.mitti.com/audits/${auditId}/media/${mediaId}`, {
+                headers: { 'Authorization': `Bearer ${config.api_token}`, 'Accept': 'application/json' },
+              });
+              if (mediaResp.ok) {
+                const mediaData = await mediaResp.json();
+                const url = mediaData?.url || mediaData?.media_url || mediaData?.download_url || mediaData?.link || mediaData?.href;
+                if (url) { resolved.push(String(url)); continue; }
+              }
+            } catch (e) { /* best-effort — skip unresolved media */ }
+            // Could not resolve — skip this photo rather than show a broken placeholder
+          } else {
+            resolved.push(photo);
+          }
+        }
+        item.photos = resolved;
+      }
+    } else {
+      // No API token — filter out unresolvable mitti-media: placeholders
+      for (const item of detail.items) {
+        if (item.photos) {
+          item.photos = item.photos.filter((p: string) => !p.startsWith('mitti-media:'));
+        }
+      }
+    }
+
     // Merge with stored report fields (stored fields may have better job/staff links)
     if (storedReport) {
       if (!detail.reportUrl && storedReport.audit_report_url) detail.reportUrl = storedReport.audit_report_url;

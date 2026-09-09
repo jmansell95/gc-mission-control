@@ -45,28 +45,44 @@ export interface ParsedAuditDetail {
 }
 
 // Extract photo URLs from a media/asset field — handles multiple
-// Mitti payload shapes (media, assets, photos, image_url).
+// Mitti/SafetyCulture payload shapes. The real API stores media under
+// `responses.media` (SafetyCulture v1/v2 format) with each entry having
+// a `media_url` or `url` field. Also checks legacy `media`, `assets`,
+// `photos`, `image`, `image_url` locations and additional URL field names.
 function extractPhotos(item: any): string[] {
   const photos: string[] = [];
+  // The real SafetyCulture/Mitti structure nests media under responses
   const sources = [
+    deepGet(item, 'responses.media'),
     deepGet(item, 'media'),
     deepGet(item, 'assets'),
     deepGet(item, 'photos'),
     deepGet(item, 'image'),
     deepGet(item, 'image_url'),
   ];
+  const urlFields = ['url', 'media_url', 'file_url', 'src', 'download_url', 'link', 'href', 'download', 'file'];
   for (const src of sources) {
-    if (src == null) continue;
+    if (src == null || src === '') continue;
     if (typeof src === 'string') { photos.push(src); continue; }
     if (Array.isArray(src)) {
       for (const m of src) {
+        if (m == null) continue;
         if (typeof m === 'string') { photos.push(m); continue; }
-        const url = deepGet(m, 'url', 'media_url', 'file_url', 'src', 'download_url');
-        if (url) photos.push(String(url));
+        // Try all known URL field names
+        const url = deepGet(m, ...urlFields);
+        if (url) { photos.push(String(url)); continue; }
+        // Some payloads nest the URL under a 'media' sub-object
+        const nestedUrl = deepGet(m, 'media.url', 'media.media_url', 'media.file_url');
+        if (nestedUrl) { photos.push(String(nestedUrl)); continue; }
+        // Fallback: if the object itself looks like a URL string when stringified
+        if (typeof m === 'object' && m.type === 'image' && m.id) {
+          // Media ID only — no direct URL. The backend function will resolve these.
+          photos.push(`mitti-media:${m.id}`);
+        }
       }
     } else if (typeof src === 'object') {
-      const url = deepGet(src, 'url', 'media_url', 'file_url', 'src', 'download_url');
-      if (url) photos.push(String(url));
+      const url = deepGet(src, ...urlFields);
+      if (url) { photos.push(String(url)); }
     }
   }
   return photos;

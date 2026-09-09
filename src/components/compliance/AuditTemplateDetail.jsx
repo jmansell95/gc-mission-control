@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { ArrowLeft, Search, CheckCircle2, XCircle, AlertTriangle, FileText, Calendar, User, Filter } from 'lucide-react';
 import HubCard from '@/components/hubs/HubCard';
+import AuditExportBar from './AuditExportBar';
 import { getCategoryMeta, getStatusMeta, fmtDateTime } from './auditConstants';
 
 const PASS_FAIL_CHIPS = [
@@ -80,9 +81,12 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
 
       <HubCard icon={Icon} title={template.name} subtitle={`${filtered.length} of ${templateReports.length} audits · ${meta.label}`} tone="brand"
         action={
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] w-40 sm:w-52" />
+          <div className="flex items-center gap-2">
+            <AuditExportBar audits={filtered} fileName={`audits-${template.name?.replace(/\s+/g, '-').toLowerCase() || 'template'}`} />
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] w-40 sm:w-52" />
+            </div>
           </div>
         }>
 

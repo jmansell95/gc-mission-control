@@ -36,40 +36,38 @@ export default function ComplianceCalendar() {
     const items = [];
     const monthStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
     const monthEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
+    const now = new Date();
+
+    const urgencyFor = (d) => {
+      const days = Math.ceil((d - now) / 86400000);
+      if (days < 0) return 'expired';
+      if (days <= 7) return 'critical';
+      if (days <= 30) return 'soon';
+      return 'ok';
+    };
+
+    const push = (d, category, title) => {
+      if (d < monthStart || d > monthEnd) return;
+      items.push({ date: d, category, title, urgency: urgencyFor(d) });
+    };
 
     staff.forEach(s => {
       (s.compliance_items || []).forEach(c => {
         if (!c.expiry_date) return;
-        const d = new Date(c.expiry_date);
-        if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'staff', title: `${s.name}: ${c.type || c.name || 'Cert'}` });
-        }
+        push(new Date(c.expiry_date), 'staff', `${s.name}: ${c.type || c.name || 'Cert'}`);
       });
     });
 
     assets.forEach(a => {
-      if (a.compliance_expiry_date) {
-        const d = new Date(a.compliance_expiry_date);
-        if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'equipment', title: `${a.name}: LOLER/PUWER/PAT` });
-        }
-      }
-      if (a.next_service_date) {
-        const d = new Date(a.next_service_date);
-        if (d >= monthStart && d <= monthEnd) {
-          items.push({ date: d, category: 'equipment', title: `${a.name}: Service Due` });
-        }
-      }
+      if (a.compliance_expiry_date) push(new Date(a.compliance_expiry_date), 'equipment', `${a.name}: LOLER/PUWER/PAT`);
+      if (a.next_service_date) push(new Date(a.next_service_date), 'equipment', `${a.name}: Service Due`);
     });
 
     vehicles.forEach(v => {
       ['mot_expiry', 'tax_expiry', 'insurance_expiry'].forEach(field => {
         if (v[field]) {
-          const d = new Date(v[field]);
-          if (d >= monthStart && d <= monthEnd) {
-            const label = field.replace('_expiry', '').toUpperCase();
-            items.push({ date: d, category: 'vehicle', title: `${v.name || v.registration}: ${label}` });
-          }
+          const label = field.replace('_expiry', '').toUpperCase();
+          push(new Date(v[field]), 'vehicle', `${v.name || v.registration}: ${label}`);
         }
       });
     });
@@ -128,6 +126,11 @@ export default function ComplianceCalendar() {
             {s.label}
           </span>
         ))}
+        <span className="ml-auto inline-flex items-center gap-2 text-[11px] text-slate-500">
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500" />Expired</span>
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" />≤7 days</span>
+          <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-300" />≤30 days</span>
+        </span>
       </div>
 
       {/* Calendar grid */}
@@ -161,9 +164,14 @@ export default function ComplianceCalendar() {
                 <div className="space-y-0.5 mt-0.5">
                   {dayExpiries.slice(0, 3).map((e, i) => {
                     const s = CATEGORY_STYLES[e.category];
+                    const urgencyClass =
+                      e.urgency === 'expired' ? 'bg-rose-100 text-rose-700 border border-rose-300' :
+                      e.urgency === 'critical' ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+                      e.urgency === 'soon' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                      `${s.light} ${s.text}`;
                     return (
-                      <div key={i} className={`text-[9px] px-1 py-0.5 rounded ${s.light} ${s.text} truncate font-medium`}>
-                        {e.title}
+                      <div key={i} className={`text-[9px] px-1 py-0.5 rounded truncate font-medium ${urgencyClass}`}>
+                        {e.urgency === 'expired' && '⚠ '}{e.title}
                       </div>
                     );
                   })}
@@ -188,12 +196,21 @@ export default function ComplianceCalendar() {
               {selectedDayExpiries.map((e, i) => {
                 const s = CATEGORY_STYLES[e.category];
                 const Icon = s.icon;
+                const urgencyBadge =
+                  e.urgency === 'expired' ? 'bg-rose-100 text-rose-700' :
+                  e.urgency === 'critical' ? 'bg-amber-100 text-amber-700' :
+                  e.urgency === 'soon' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500';
+                const urgencyLabel =
+                  e.urgency === 'expired' ? 'EXPIRED' :
+                  e.urgency === 'critical' ? '≤7 DAYS' :
+                  e.urgency === 'soon' ? '≤30 DAYS' : '';
                 return (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span className={`w-5 h-5 rounded-lg ${s.light} flex items-center justify-center flex-shrink-0`}>
                       <Icon className={`w-3 h-3 ${s.text}`} />
                     </span>
-                    <span className="text-slate-700">{e.title}</span>
+                    <span className="text-slate-700 flex-1">{e.title}</span>
+                    {urgencyLabel && <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${urgencyBadge}`}>{urgencyLabel}</span>}
                   </div>
                 );
               })}

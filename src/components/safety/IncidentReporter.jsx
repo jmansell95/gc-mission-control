@@ -44,6 +44,16 @@ const SEVERITY_STYLES = {
   critical: 'bg-red-100 text-red-700 ring-2 ring-red-200',
 };
 
+const QUICK_TEMPLATES = [
+  { label: 'Near miss — trip hazard', type: 'near_miss', severity: 'low', desc: 'A trip hazard was identified on site. The area was made safe and the hazard removed. No injury occurred but had the potential to cause harm.' },
+  { label: 'Near miss — vehicle reversing', type: 'near_miss', severity: 'medium', desc: 'A vehicle was observed reversing without a banksman in a pedestrian area. No contact was made but the risk of collision was significant.' },
+  { label: 'Incident — minor injury', type: 'incident', severity: 'medium', desc: 'A crew member sustained a minor injury (cut/bruise) while carrying out work. First aid was administered on site. No hospital treatment required.' },
+  { label: 'Incident — equipment damage', type: 'incident', severity: 'medium', desc: 'Equipment was damaged during operations. The equipment was isolated and removed from service. No personal injury occurred.' },
+  { label: 'Accident — lost time injury', type: 'accident', severity: 'high', desc: 'A crew member sustained an injury that prevented them from continuing work. Medical treatment was required. The incident is RIDDOR reportable as an over-7-day injury.' },
+  { label: 'Dangerous occurrence', type: 'dangerous_occurrence', severity: 'high', desc: 'A dangerous occurrence took place on site (e.g. collapse, equipment failure, near-miss with significant potential). No injury occurred but the event is RIDDOR-reportable.' },
+  { label: 'Environmental — spill', type: 'environmental', severity: 'medium', desc: 'A spill of hydraulic fluid / diesel / coolant occurred on site. The spill was contained using the spill kit and the area was cleaned. No watercourse contamination.' },
+];
+
 export default function IncidentReporter() {
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -300,6 +310,30 @@ function IncidentForm({ jobs, staff, onClose, onSaved }) {
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
           {error && <div className="bg-red-50 border border-red-100 text-red-700 text-sm rounded-xl px-3 py-2">{error}</div>}
+
+          {/* Quick-fill template selector */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Quick-fill template (optional)</label>
+            <select
+              onChange={(e) => {
+                const tpl = QUICK_TEMPLATES.find(t => t.label === e.target.value);
+                if (tpl) {
+                  setForm(prev => ({
+                    ...prev,
+                    incident_type: tpl.type,
+                    severity: tpl.severity,
+                    description: tpl.desc,
+                    riddor_reportable: tpl.severity === 'high' || tpl.type === 'dangerous_occurrence',
+                  }));
+                }
+              }}
+              className={inputCls}
+              value=""
+            >
+              <option value="">Choose a template to pre-fill…</option>
+              {QUICK_TEMPLATES.map(t => <option key={t.label} value={t.label}>{t.label}</option>)}
+            </select>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1.5">Type</label>

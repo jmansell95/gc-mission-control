@@ -66,10 +66,12 @@ export default function RIDDORStatsPanel() {
     );
   }
 
+  const pendingRiddor = stats.riddorReportable - stats.riddorSubmitted;
+
   const statTiles = [
     { icon: ShieldAlert, label: 'RIDDOR Reportable', value: stats.riddorReportable, gradient: 'stat-gradient-rose' },
     { icon: FileWarning, label: 'Submitted to HSE', value: stats.riddorSubmitted, gradient: 'stat-gradient-emerald' },
-    { icon: AlertTriangle, label: 'Open Actions', value: stats.openActions, gradient: 'stat-gradient-amber' },
+    { icon: AlertTriangle, label: 'Pending Submission', value: pendingRiddor, gradient: pendingRiddor > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
     { icon: Activity, label: 'Total Incidents', value: incidents.length, gradient: 'stat-gradient-slate' },
   ];
 
@@ -140,6 +142,29 @@ export default function RIDDORStatsPanel() {
           })}
         </div>
       </HubCard>
+
+      {/* RIDDOR pending submission alert */}
+      {pendingRiddor > 0 && (
+        <div className="hub-glass rounded-2xl p-4 border-l-4 border-l-amber-400">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <FileWarning className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-slate-900">{pendingRiddor} RIDDOR reportable incident{pendingRiddor !== 1 ? 's' : ''} pending submission</p>
+              <p className="text-xs text-slate-500 mt-0.5">These incidents are flagged as RIDDOR-reportable but have not yet been submitted to the HSE.</p>
+              <a
+                href="https://www.hse.gov.uk/forms/incident/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition"
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> Submit to HSE
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Audit stats */}
       {audits.length > 0 && (
