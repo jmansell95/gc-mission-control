@@ -2,94 +2,87 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { format } from 'date-fns';
-import { CheckSquare, X, FlaskConical, Clock, AlertTriangle, CheckCircle2, Layers } from 'lucide-react';
-import { Skeleton, EmptyState } from '@/components/StateViews';
+import { FlaskConical, Clock, AlertTriangle, CheckCircle2, Layers, ChevronRight } from 'lucide-react';
+import { Skeleton } from '@/components/StateViews';
 import HubShell from '@/components/HubShell';
 import InvestigationHeader from '@/components/investigation/InvestigationHeader';
-import InvestigationGroupCard from '@/components/investigation/InvestigationGroupCard';
+import InvestigationToolbar from '@/components/investigation/InvestigationToolbar';
+import InvestigationOverview from '@/components/investigation/InvestigationOverview';
+import InvestigationJobView from '@/components/investigation/InvestigationJobView';
+import InvestigationBoreholeDetail from '@/components/investigation/InvestigationBoreholeDetail';
 import InvestigationLogDrawer from '@/components/investigation/InvestigationLogDrawer';
-import InvestigationExportBar from '@/components/investigation/InvestigationExportBar';
-import InvestigationBulkReview from '@/components/investigation/InvestigationBulkReview';
+import InvestigationExportModal from '@/components/investigation/InvestigationExportModal';
+import InvestigationBulkReviewModal from '@/components/investigation/InvestigationBulkReviewModal';
 import BulkApproveBar from '@/components/investigation/BulkApproveBar';
 import LiveKeyLogFeed from '@/components/investigation/LiveKeyLogFeed';
-import AGSUploadButton from '@/components/investigation/AGSUploadButton';
 import { getInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
 import { logTypeConfig } from '@/components/investigation/shared';
 
 /**
- * Investigation Hub — single master board that managers re-group on the fly
- * (by borehole, staff member, job, or date) to review every site log and
- * borehole record, approve or reject logs per job, and export approved data
- * as downloadable AGS files (per job / per borehole / per staff) for import
- * into OpenGround. Unified responsive design across desktop, tablet, mobile.
+ * Investigation Hub — redesigned with hierarchical drilldown:
+ *   Overview (job cards) → Job view (borehole cards) → Borehole detail
+ *   (organized strata / samples / SPT / installations / remarks sections).
+ *
+ * The old group-by control is replaced by the natural drilldown hierarchy.
+ * The old inline export bar and bulk review bar are consolidated into a
+ * unified toolbar with modals. Advanced filters are behind a "Filters"
+ * toggle so the header stays clean.
  */
 export default function InvestigationHub({ onNavigate }) {
-  const [selectedLogId, setSelectedLogId] = useState(null);
+  // Drill state
+  const [drillLevel, setDrillLevel] = useState('overview');
+  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [selectedBoreholeRef, setSelectedBoreholeRef] = useState(null);
+
+  // Filter state
   const [search, setSearch] = useState('');
   const [reviewFilter, setReviewFilter] = useState('all');
-  const [jobFilter, setJobFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [boreholeFilter, setBoreholeFilter] = useState('all');
   const [boreholeStatusFilter, setBoreholeStatusFilter] = useState('all');
   const [drillerFilter, setDrillerFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [groupBy, setGroupBy] = useState('borehole');
+
+  // Modal / bulk state
+  const [showExport, setShowExport] = useState(false);
+  const [showBulkReview, setShowBulkReview] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState(new Set());
+
+  // Log drawer
+  const [selectedLogId, setSelectedLogId] = useState(null);
+
   const queryClient = useQueryClient();
 
-  // Bidirectional deep-link: when a manager clicks "View in Investigation Hub"
-  // from a job's Site Activity tab or Borehole Data tab, the target job + log
-  // id + borehole ref are stashed in sessionStorage. On mount, read + clear it,
-  // pre-filter to that job/borehole, and open the log drawer.
+  // Deep-link: pre-filter to a job/borehole and open a log
   useEffect(() => {
     const link = getInvestigationHubDeepLink();
     if (!link) return;
-    if (link.jobId) setJobFilter(link.jobId);
+    if (link.jobId) { setSelectedJobId(link.jobId); setDrillLevel(link.jobId ? 'job' : 'overview'); }
+    if (link.boreholeRef) { setSelectedBoreholeRef(link.boreholeRef); setDrillLevel('borehole'); }
     if (link.logId) setSelectedLogId(link.logId);
-    if (link.boreholeRef) { setBoreholeFilter(link.boreholeRef); setGroupBy('borehole'); }
-    if (link.boreholeStatus) { setBoreholeStatusFilter(link.boreholeStatus); setGroupBy('borehole'); }
   }, []);
 
-  // When a job filter is active, fetch that job's full log set (limit 2000)
-  // instead of relying on the 300-most-recent cross-division slice — older
-  // logs for the selected job would otherwise be cut off and the board would
-  // show "No logs match your filters". jobFilter is in the queryKey so the
-  // query re-fetches when the filter changes.
+  // Data — fetch more logs when a specific job is selected
   const { data: logs = [], isLoading } = useScopedEntity('InvestigationLog', {
-    queryKey: ['investigation-hub-logs', jobFilter],
+    queryKey: ['investigation-hub-logs', selectedJobId],
     sort: '-created_date',
-    filter: jobFilter !== 'all' ? { job_id: jobFilter } : {},
-    limit: jobFilter !== 'all' ? 2000 : 500,
+    filter: selectedJobId ? { job_id: selectedJobId } : {},
+    limit: selectedJobId ? 2000 : 500,
   });
   const { data: jobs = [] } = useScopedEntity('Job', { queryKey: ['investigation-hub-jobs'], limit: 500 });
   const { data: staff = [] } = useQuery({ queryKey: ['investigation-hub-staff'], queryFn: () => base44.entities.Staff.list() });
 
-  const jobMap = useMemo(() => { const m = {}; jobs.forEach(j => { m[j.id] = j; }); return m; }, [jobs]);
-  const staffMap = useMemo(() => { const m = {}; staff.forEach(s => { m[s.id] = s; }); return m; }, [staff]);
+  const jobMap = useMemo(() => { const m = {}; jobs.forEach(j => m[j.id] = j); return m; }, [jobs]);
+  const staffMap = useMemo(() => { const m = {}; staff.forEach(s => m[s.id] = s); return m; }, [staff]);
 
-  // Distinct borehole refs + drillers for the filter dropdowns
-  const boreholeOptions = useMemo(() => {
-    const source = jobFilter !== 'all' ? logs.filter(l => l.job_id === jobFilter) : logs;
-    return [...new Set(source.map(l => l.borehole_ref).filter(Boolean))].sort();
-  }, [logs, jobFilter]);
-  const drillerOptions = useMemo(() => {
-    const source = jobFilter !== 'all' ? logs.filter(l => l.job_id === jobFilter) : logs;
-    return [...new Set(source.map(l => l.staff_name).filter(Boolean))].sort();
-  }, [logs, jobFilter]);
+  // Distinct drillers for the filter dropdown
+  const drillerOptions = useMemo(() => [...new Set(logs.map(l => l.staff_name).filter(Boolean))].sort(), [logs]);
 
-  // Map borehole_ref → borehole_status from borehole_progress logs.
-  // Used to filter non-progress logs (strata, samples, etc.) by the
-  // status of their parent borehole.
+  // Borehole ref → status map (for filtering non-progress logs by borehole status)
   const boreholeRefStatusMap = useMemo(() => {
     const map = {};
-    logs.forEach(l => {
-      if (l.log_type === 'borehole_progress' && l.borehole_ref && l.borehole_status) {
-        map[l.borehole_ref] = l.borehole_status;
-      }
-    });
+    logs.forEach(l => { if (l.log_type === 'borehole_progress' && l.borehole_ref && l.borehole_status) map[l.borehole_ref] = l.borehole_status; });
     return map;
   }, [logs]);
 
@@ -97,16 +90,9 @@ export default function InvestigationHub({ onNavigate }) {
   const filtered = useMemo(() => {
     return logs.filter(l => {
       if (reviewFilter !== 'all' && (l.manager_review_status || 'pending') !== reviewFilter) return false;
-      if (jobFilter !== 'all' && l.job_id !== jobFilter) return false;
       if (typeFilter !== 'all' && l.log_type !== typeFilter) return false;
-      if (boreholeFilter !== 'all' && l.borehole_ref !== boreholeFilter) return false;
       if (boreholeStatusFilter !== 'all') {
-        // Filter by borehole_status — only borehole_progress logs carry the
-        // status, so we match any log whose borehole_ref has a progress log
-        // with the selected status.
         if (l.log_type !== 'borehole_progress' || l.borehole_status !== boreholeStatusFilter) {
-          // Also include non-progress logs if their borehole_ref matches a
-          // progress log with the selected status (checked via the ref map).
           if (!boreholeRefStatusMap[l.borehole_ref] || boreholeRefStatusMap[l.borehole_ref] !== boreholeStatusFilter) return false;
         }
       }
@@ -120,63 +106,75 @@ export default function InvestigationHub({ onNavigate }) {
       }
       return true;
     });
-  }, [logs, reviewFilter, jobFilter, typeFilter, boreholeFilter, boreholeStatusFilter, drillerFilter, dateFrom, dateTo, search, boreholeRefStatusMap]);
+  }, [logs, reviewFilter, typeFilter, boreholeStatusFilter, drillerFilter, dateFrom, dateTo, search, boreholeRefStatusMap]);
 
-  // Group the filtered logs by the selected dimension
-  const groups = useMemo(() => {
+  // Overview: group filtered logs by job
+  const jobGroups = useMemo(() => {
     const map = {};
     filtered.forEach(l => {
-      let key, label;
-      if (groupBy === 'borehole') {
-        key = l.borehole_ref || '— No borehole —';
-        label = key;
-      } else if (groupBy === 'staff') {
-        key = l.staff_id || l.staff_name || '— Unknown —';
-        label = staffMap[l.staff_id]?.name || l.staff_name || 'Unknown staff';
-      } else if (groupBy === 'job') {
-        key = l.job_id || '— No job —';
-        label = jobMap[l.job_id]?.name || 'Unknown job';
-      } else {
-        key = l.date || '— No date —';
-        label = l.date ? format(new Date(l.date), 'EEEE, dd MMM yyyy') : 'No date';
-      }
-      if (!map[key]) map[key] = { key, label, logs: [] };
+      const key = l.job_id || '—unassigned—';
+      if (!map[key]) map[key] = { key, label: jobMap[l.job_id]?.name || 'Unassigned', logs: [] };
       map[key].logs.push(l);
     });
-    // Sort logs within each group
-    const arr = Object.values(map);
-    arr.forEach(g => {
-      g.logs.sort((a, b) => {
-        if (groupBy === 'borehole') return (a.depth_from ?? 0) - (b.depth_from ?? 0);
-        if (groupBy === 'date') return (a.borehole_ref || '').localeCompare(b.borehole_ref || '') || (a.depth_from ?? 0) - (b.depth_from ?? 0);
-        return (a.date || '').localeCompare(b.date || '') || (a.depth_from ?? 0) - (b.depth_from ?? 0);
-      });
+    return Object.values(map).map(g => ({
+      ...g,
+      pending: g.logs.filter(l => (l.manager_review_status || 'pending') === 'pending').length,
+      queried: g.logs.filter(l => l.manager_review_status === 'queried').length,
+      approved: g.logs.filter(l => l.manager_review_status === 'approved').length,
+      boreholeCount: new Set(g.logs.map(l => l.borehole_ref).filter(Boolean)).size,
+    })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [filtered, jobMap]);
+
+  // Job view: group filtered logs (within selected job) by borehole
+  const boreholeGroups = useMemo(() => {
+    if (!selectedJobId) return [];
+    const jobLogs = filtered.filter(l => l.job_id === selectedJobId);
+    const map = {};
+    jobLogs.forEach(l => {
+      const key = l.borehole_ref || '— No borehole —';
+      if (!map[key]) map[key] = { ref: key, logs: [] };
+      map[key].logs.push(l);
     });
-    // Sort groups: borehole/staff/job alphabetically, date descending
-    arr.sort((a, b) => {
-      if (groupBy === 'date') return b.key.localeCompare(a.key);
-      return a.label.localeCompare(b.label);
-    });
-    return arr;
-  }, [filtered, groupBy, jobMap, staffMap]);
+    return Object.values(map).map(bh => {
+      const progressLog = bh.logs.find(l => l.log_type === 'borehole_progress' && l.borehole_status);
+      const hasRemarks = bh.logs.some(l => l.source === 'keylogbook_remarks');
+      return {
+        ...bh,
+        status: progressLog?.borehole_status || null,
+        drillingMethod: progressLog?.drilling_method || null,
+        maxDepth: bh.logs.reduce((m, l) => l.depth_to != null ? Math.max(m, l.depth_to) : m, 0),
+        pending: bh.logs.filter(l => (l.manager_review_status || 'pending') === 'pending').length,
+        queried: bh.logs.filter(l => l.manager_review_status === 'queried').length,
+        approved: bh.logs.filter(l => l.manager_review_status === 'approved').length,
+        missingDataCount: [
+          bh.logs.filter(l => l.strata_descriptor && l.strata_descriptor !== 'other').length === 0 && 'strata',
+          bh.logs.filter(l => l.sample_id).length === 0 && 'samples',
+          bh.logs.filter(l => l.spt_n_value != null || (l.spt_blows?.length > 0)).length === 0 && 'spt',
+          bh.logs.filter(l => l.log_type === 'installation').length === 0 && 'installations',
+          !hasRemarks && 'remarks',
+          (bh.logs.reduce((m, l) => l.depth_to != null ? Math.max(m, l.depth_to) : m, 0) === 0) && 'finalDepth',
+        ].filter(Boolean).length,
+      };
+    }).sort((a, b) => a.ref.localeCompare(b.ref));
+  }, [filtered, selectedJobId]);
+
+  // Borehole detail: logs for the selected borehole
+  const boreholeLogs = useMemo(() => {
+    if (!selectedJobId || !selectedBoreholeRef) return [];
+    return filtered.filter(l => l.job_id === selectedJobId && (l.borehole_ref || '— No borehole —') === selectedBoreholeRef);
+  }, [filtered, selectedJobId, selectedBoreholeRef]);
 
   const selectedLog = logs.find(l => l.id === selectedLogId) || null;
+  const selectedJob = selectedJobId ? jobMap[selectedJobId] : null;
 
   const pendingCount = logs.filter(l => (l.manager_review_status || 'pending') === 'pending').length;
   const queriedCount = logs.filter(l => l.manager_review_status === 'queried').length;
   const approvedCount = logs.filter(l => l.manager_review_status === 'approved').length;
-  const jobsCovered = new Set(logs.map(l => l.job_id).filter(Boolean)).size;
   const boreholesCovered = new Set(logs.map(l => l.borehole_ref).filter(Boolean)).size;
-  const inProgressCount = Object.values(boreholeRefStatusMap).filter(s => s === 'in_progress').length;
-  const completedBoreholeCount = Object.values(boreholeRefStatusMap).filter(s => s === 'complete').length;
   const hasNoLogs = !isLoading && logs.length === 0;
 
   const toggleBulkSelect = useCallback((id) => {
-    setBulkSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+    setBulkSelected(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   }, []);
 
   const handleBulkDone = () => {
@@ -184,6 +182,29 @@ export default function InvestigationHub({ onNavigate }) {
     queryClient.invalidateQueries({ queryKey: ['investigation-logs'] });
     setBulkSelected(new Set());
     setBulkMode(false);
+  };
+
+  const handleSelectJob = (jobId) => {
+    setSelectedJobId(jobId === '—unassigned—' ? null : jobId);
+    setSelectedBoreholeRef(null);
+    setDrillLevel('job');
+    setBulkMode(false); setBulkSelected(new Set());
+  };
+
+  const handleSelectBorehole = (ref) => {
+    setSelectedBoreholeRef(ref);
+    setDrillLevel('borehole');
+    setBulkMode(false); setBulkSelected(new Set());
+  };
+
+  const handleBackToOverview = () => {
+    setDrillLevel('overview'); setSelectedJobId(null); setSelectedBoreholeRef(null);
+    setBulkMode(false); setBulkSelected(new Set());
+  };
+
+  const handleBackToJob = () => {
+    setDrillLevel('job'); setSelectedBoreholeRef(null);
+    setBulkMode(false); setBulkSelected(new Set());
   };
 
   return (
@@ -204,52 +225,63 @@ export default function InvestigationHub({ onNavigate }) {
       help={{
         title: 'Investigation Hub — how it works',
         topics: [
-          { title: 'Grouping', summary: 'Re-group logs by borehole, staff, job, or date.', body: 'Use the Group By dropdown to change how logs are grouped. Borehole grouping shows logs per hole sorted by depth. Staff grouping shows logs per driller. Job grouping shows logs per project.' },
-          { title: 'Review Workflow', summary: 'Approve, query, or reject logs.', body: 'Click any log to open the detail drawer. Review the log data, then approve (ready for billing), query (send back for correction), or reject. Use bulk select to review multiple logs at once.' },
-          { title: 'KeyLogBook Sync', summary: 'Automatic borehole data from KeyLogBook.', body: 'AGS files pushed from KeyLogBook are automatically imported as InvestigationLog entries. The live feed shows today\u2019s incoming driller logs across all jobs.' },
-          { title: 'Export', summary: 'Export approved data to AGS or OpenGround.', body: 'Use the export bar to download approved logs as AGS files per job, borehole, or staff member. Connect OpenGround in Settings to push approved data directly.' },
+          { title: 'Drilldown', summary: 'Navigate Jobs → Boreholes → Detail.', body: 'Click a job card to see its boreholes. Click a borehole to see organized strata, samples, SPT, installations, and driller remarks. Use the breadcrumb to navigate back.' },
+          { title: 'Review Workflow', summary: 'Approve, query, or reject logs.', body: 'Click any log to open the detail drawer. Review the data, then approve or query. Use Bulk Review to approve/query all pending logs in a job at once. Use Select mode to pick individual logs.' },
+          { title: 'KeyLogBook Sync', summary: 'Automatic borehole data from KeyLogBook.', body: 'AGS files pushed from KeyLogBook are automatically imported. The live feed on the overview shows today\u2019s incoming driller logs.' },
+          { title: 'Export', summary: 'Export approved data to AGS or OpenGround.', body: 'Click Export in the toolbar to download approved logs as an AGS file (per job, borehole, or staff) or push directly to OpenGround.' },
         ],
       }}
       onboarding={{
         title: 'Welcome to the Investigation Hub',
-        description: 'Review, approve, and export all your borehole and site log data in one place.',
-        steps: ['Connect KeyLogBook in Settings to auto-import AGS data', 'Review incoming logs in the live feed', 'Approve or query logs individually or in bulk', 'Export approved data to AGS or OpenGround'],
+        description: 'Review, approve, and export all your borehole and site log data.',
+        steps: ['Click a job card to drill into its boreholes', 'Click a borehole to see organized strata, samples, SPT, and remarks', 'Review and approve logs individually or in bulk', 'Export approved data to AGS or push to OpenGround'],
       }}
     >
+      {/* Breadcrumb */}
+      {drillLevel !== 'overview' && (
+        <div className="flex items-center gap-1.5 mb-3 text-sm flex-wrap">
+          <button onClick={handleBackToOverview} className="text-slate-500 hover:text-slate-700 font-medium transition">All Jobs</button>
+          {drillLevel === 'job' && (
+            <>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <span className="font-bold text-slate-900 truncate">{selectedJob?.name || 'Job'}</span>
+            </>
+          )}
+          {drillLevel === 'borehole' && (
+            <>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <button onClick={handleBackToJob} className="text-slate-500 hover:text-slate-700 font-medium transition truncate">{selectedJob?.name || 'Job'}</button>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <span className="font-mono font-bold text-slate-900">{selectedBoreholeRef}</span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Filter header */}
       <InvestigationHeader
-        totalLogs={logs.length}
-        pendingCount={pendingCount}
-        queriedCount={queriedCount}
-        groupBy={groupBy} setGroupBy={setGroupBy}
         search={search} setSearch={setSearch}
         reviewFilter={reviewFilter} setReviewFilter={setReviewFilter}
-        jobFilter={jobFilter} setJobFilter={setJobFilter} jobs={jobs}
         typeFilter={typeFilter} setTypeFilter={setTypeFilter} logTypes={logTypeConfig}
-        boreholeFilter={boreholeFilter} setBoreholeFilter={setBoreholeFilter} boreholeOptions={boreholeOptions}
         boreholeStatusFilter={boreholeStatusFilter} setBoreholeStatusFilter={setBoreholeStatusFilter}
         drillerFilter={drillerFilter} setDrillerFilter={setDrillerFilter} drillerOptions={drillerOptions}
         dateFrom={dateFrom} setDateFrom={setDateFrom} dateTo={dateTo} setDateTo={setDateTo}
       />
 
-      {/* Quick upload + live feed */}
-      <div className="flex items-center justify-end">
-        <AGSUploadButton jobs={jobs} />
-      </div>
+      {/* Unified toolbar */}
+      <InvestigationToolbar
+        hasLogs={!hasNoLogs}
+        jobs={jobs}
+        bulkMode={bulkMode}
+        pendingCount={pendingCount}
+        showSelect={drillLevel === 'borehole'}
+        onToggleBulk={() => { setBulkMode(m => !m); setBulkSelected(new Set()); }}
+        onOpenExport={() => setShowExport(true)}
+        onOpenBulkReview={() => setShowBulkReview(true)}
+      />
 
-      {/* Live KeyLogBook feed — today's incoming driller logs across all jobs */}
-      <LiveKeyLogFeed jobs={jobs} />
-
-      {/* Bulk-select toggle — sits under the header */}
-      {!hasNoLogs && (
-        <div className="flex items-center justify-end">
-          <button
-            onClick={() => { setBulkMode(m => !m); setBulkSelected(new Set()); }}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
-          >
-            <CheckSquare className="w-3.5 h-3.5" /> {bulkMode ? 'Done selecting' : 'Select logs'}
-          </button>
-        </div>
-      )}
+      {/* Live feed — only on overview */}
+      {drillLevel === 'overview' && !hasNoLogs && <LiveKeyLogFeed jobs={jobs} />}
 
       {/* Empty state */}
       {hasNoLogs && (
@@ -265,45 +297,27 @@ export default function InvestigationHub({ onNavigate }) {
         </div>
       )}
 
-      {/* Export + bulk review controls — only when logs exist */}
-      {!hasNoLogs && (
-        <>
-          <InvestigationExportBar logs={logs} jobs={jobs} staff={staff} />
-          <InvestigationBulkReview logs={logs} jobs={jobs} onDone={handleBulkDone} />
-        </>
-      )}
-
-      {/* Grouped board */}
-      {!hasNoLogs && (
+      {/* Content by drill level */}
+      {isLoading ? (
         <div className="space-y-3">
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="insight-card rounded-2xl p-8">
-              <EmptyState icon={FlaskConical} title="No logs match your filters" message="Try adjusting the search, status, job, or type filters above." />
-            </div>
-          ) : (
-            groups.map((g, idx) => (
-              <InvestigationGroupCard
-                key={g.key}
-                groupLabel={g.label}
-                logs={g.logs}
-                groupBy={groupBy}
-                staffMap={staffMap}
-                jobMap={jobMap}
-                selectedLogId={selectedLogId}
-                onSelectLog={setSelectedLogId}
-                bulkMode={bulkMode}
-                bulkSelected={bulkSelected}
-                toggleBulkSelect={toggleBulkSelect}
-                defaultOpen={idx < 3}
-              />
-            ))
-          )}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
         </div>
-      )}
+      ) : drillLevel === 'overview' && !hasNoLogs ? (
+        <InvestigationOverview groups={jobGroups} jobMap={jobMap} onSelectJob={handleSelectJob} />
+      ) : drillLevel === 'job' ? (
+        <InvestigationJobView boreholes={boreholeGroups} onSelectBorehole={handleSelectBorehole} />
+      ) : drillLevel === 'borehole' ? (
+        <InvestigationBoreholeDetail
+          boreholeRef={selectedBoreholeRef}
+          logs={boreholeLogs}
+          jobName={selectedJob?.name || '—'}
+          staffMap={staffMap}
+          bulkMode={bulkMode}
+          bulkSelected={bulkSelected}
+          toggleBulkSelect={toggleBulkSelect}
+          onSelectLog={setSelectedLogId}
+        />
+      ) : null}
 
       {/* Log detail drawer */}
       {selectedLog && !bulkMode && (
@@ -316,7 +330,7 @@ export default function InvestigationHub({ onNavigate }) {
         />
       )}
 
-      {/* Ad-hoc bulk approve bar */}
+      {/* Bulk approve bar */}
       {bulkMode && bulkSelected.size > 0 && (
         <BulkApproveBar
           selectedIds={Array.from(bulkSelected)}
@@ -324,6 +338,22 @@ export default function InvestigationHub({ onNavigate }) {
           onDone={handleBulkDone}
         />
       )}
+
+      {/* Modals */}
+      <InvestigationExportModal
+        open={showExport}
+        onClose={() => setShowExport(false)}
+        logs={logs}
+        jobs={jobs}
+        staff={staff}
+      />
+      <InvestigationBulkReviewModal
+        open={showBulkReview}
+        onClose={() => setShowBulkReview(false)}
+        logs={logs}
+        jobs={jobs}
+        onDone={handleBulkDone}
+      />
     </HubShell>
   );
 }
