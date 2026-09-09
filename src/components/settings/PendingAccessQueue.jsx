@@ -21,10 +21,6 @@ export default function PendingAccessQueue() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['pending-access-users'],
     queryFn: async () => {
-      const res = await base44.functions.invoke('getUnlinkedUsers');
-      const data = res.data || res;
-      // getUnlinkedUsers returns all unlinked users — we need ALL users to check access_status
-      // So fetch all users directly instead
       const allUsers = await base44.entities.User.list('-created_date', 500);
       return allUsers.filter((u) => u.access_status === 'pending');
     },
