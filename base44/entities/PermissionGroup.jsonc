@@ -44,6 +44,12 @@
       "default": "auto",
       "description": "Where members of this group land after login / onboarding. 'auto' = derive from staff_type (office \u2192 /admin, field \u2192 /staff-schedule) or the role-based fallback. Set to a concrete route to force a specific landing page for everyone in this group. A staff member's own default_landing_page still overrides this when set."
     },
+    "sub_tab_permissions": {
+      "type": "object",
+      "description": "Per-sub-tab access overrides keyed by '<hub>.<tab>' or '<hub>.<tab>.<subtab>' (e.g. 'billing.afp', 'compliance.audit_dashboard.action_items'). Each value is 'none', 'read', or 'write'. When this object is non-empty, any sub-tab NOT listed here defaults to 'none' (default deny). When null/empty, sub-tabs inherit the hub-level permission (backward compatible with groups created before sub-tab permissions were introduced). The hub-level 'permissions' object acts as the coarse gate: if a hub is 'none', all its sub-tabs are hidden regardless of what's set here.",
+      "default": null,
+      "properties": {}
+    },
     "permissions": {
       "type": "object",
       "description": "Per-hub access level: 'none' (hidden), 'read' (view only, no edits), or 'write' (full create/update/delete). The 12 keys below map 1:1 to the top-level navigation hubs in the admin sidebar. Staff assigned this group inherit these levels for every admin hub.",

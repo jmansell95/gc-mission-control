@@ -365,6 +365,70 @@ async function processDeliveryList(base44: any, workbook: any, jobId: string, fi
   }
 }
 
+// ── Fuzzy supplier matching with auto-create ──
+// Normalises supplier names (strips Ltd/Limited/UK/etc., lowercases, trims)
+// and tries exact then Levenshtein-distance matching. If no match is found,
+// auto-creates a new Supplier record so POs get a real supplier_id.
+async function resolveOrCreateSupplier(
+  base44: any, name: string, cache: Record<string, string>, results: any
+): Promise<string> {
+  const clean = name.toLowerCase().trim();
+  if (!clean) return 'unmatched';
+
+  // 1. Exact match (cache)
+  if (cache[clean]) return cache[clean];
+
+  // 2. Normalised match (strip suffixes)
+  const normalise = (s: string) =>
+    s.toLowerCase().trim().replace(/\b(ltd|limited|uk|ltd\.|plc|llp|inc|corp)\b\.?/g, '').replace(/[^\w\s]/g, '').trim();
+  const normalisedName = normalise(name);
+  for (const [cachedName, id] of Object.entries(cache)) {
+    if (normalise(cachedName) === normalisedName) {
+      cache[clean] = id; // cache for next time
+      return id;
+    }
+  }
+
+  // 3. Fuzzy match (Levenshtein distance ≤ 2)
+  for (const [cachedName, id] of Object.entries(cache)) {
+    const dist = levenshtein(normalisedName, normalise(cachedName));
+    if (dist <= 2 && normalisedName.length > 3) {
+      cache[clean] = id;
+      return id;
+    }
+  }
+
+  // 4. Auto-create a new Supplier
+  try {
+    const newSupplier = await base44.asServiceRole.entities.Supplier.create({
+      name: name.trim(),
+      division_id: DIVISION_ID,
+      notes: 'Auto-created from project data import',
+    });
+    cache[clean] = newSupplier.id;
+    results.details.push(`Created supplier: ${name}`);
+    return newSupplier.id;
+  } catch (e) {
+    return 'unmatched';
+  }
+}
+
+function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+    }
+  }
+  return dp[m][n];
+}
+
 // ============================================================
 // AFP Workbook (QE2, Beckton, DLR)
 // ============================================================
@@ -378,12 +442,25 @@ async function processAFPWorkbook(base44: any, workbook: any, jobId: string, fil
       const c1 = cleanStr(cell(row, 1));
       const c2 = cleanStr(cell(row, 2));
       const c3 = cleanStr(cell(row, 3));
-      if (c0.includes('job no') || c0.includes('gcl')) gcJobNumber = c1 || gcJobNumber;
-      if (c0.includes('project name')) clientName = c2;
-      if (c0.includes('client') && !clientName) clientName = c1 || c2;
-      if (c0.includes('order no')) clientPO = c3;
+      // Extract the first non-label value from cells after the label cell.
+      // Skips cells that look like labels (end with ':' or match known label text).
+      const findValue = (row: any[], startIdx: number): string => {
+        for (let j = startIdx; j < row.length; j++) {
+          const v = cleanStr(cell(row, j));
+          if (!v) continue;
+          // Skip label-like cells
+          if (v.endsWith(':')) continue;
+          if (/^(project name|job no|gcl|client|order no|contract|application no)\b/i.test(v)) continue;
+          return v;
+        }
+        return '';
+      };
+      if (c0.includes('job no') || c0.includes('gcl')) { const v = findValue(row, 1); if (v) gcJobNumber = v; }
+      if (c0.includes('project name')) { const v = findValue(row, 1); if (v) clientName = v; }
+      if (c0.includes('client') && !clientName) { const v = findValue(row, 1); if (v) clientName = v; }
+      if (c0.includes('order no')) { const v = findValue(row, 1); if (v) clientPO = v; }
       if (c0.includes('contract') && c2) contractValue = parseNum(c2);
-      if (c0.includes('application no')) afpNumber = parseNum(c1 || c2);
+      if (c0.includes('application no')) { const v = findValue(row, 1); if (v) afpNumber = parseNum(v); }
     }
   }
 
@@ -520,7 +597,7 @@ async function processAFPWorkbook(base44: any, workbook: any, jobId: string, fil
         const invoiceNo = cleanStr(getCol(row, colMap, 'invoice no.', 'invoice no'));
         const notes = cleanStr(getCol(row, colMap, 'notes'));
 
-        const supplierId = supplierByLowerName[supplier.toLowerCase().trim()] || 'unmatched';
+        const supplierId = await resolveOrCreateSupplier(base44, supplier, supplierByLowerName, results);
         poItems.push({
           po_number: poNumber, job_id: jobId, job_name: 'DLR Extension to Thamesmead',
           supplier_id: supplierId, supplier_name: supplier,

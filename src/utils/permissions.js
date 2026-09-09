@@ -7,6 +7,8 @@
 //   'read'  — hub visible, all create/update/delete/upload disabled
 //   'write' — full create / update / delete access
 
+import { getHubTabs, getAllPermissionKeysForHub, getAllPermissionKeys } from './subTabRegistry';
+
 export const ACCESS_LEVELS = [
   { value: 'none', label: 'No Access', color: 'slate' },
   { value: 'read', label: 'Read Only', color: 'amber' },
@@ -242,4 +244,102 @@ export function canWriteModule(profile, isPlatformAdmin, moduleKey) {
 // Can the user at least read this module?
 export function canReadModule(profile, isPlatformAdmin, moduleKey) {
   return resolveModuleLevel(profile, isPlatformAdmin, moduleKey) !== 'none';
+}
+
+// ── Sub-Tab Permission Resolution ──
+// Per-sub-tab control with default deny. The hub-level permission acts as
+// the coarse gate (hub 'none' → all sub-tabs hidden). Within an allowed hub,
+// sub_tab_permissions provides fine-grained per-tab/per-sub-tab overrides.
+//
+// Resolution:
+//   1. Platform admin → 'write' for everything
+//   2. Hub-level 'none' → 'none' for all sub-tabs
+//   3. sub_tab_permissions is null/empty → inherit hub level (backward compatible)
+//   4. sub_tab_permissions is non-empty → look up key, default to 'none' (default deny)
+//
+// Keys: '<hub>.<tab>' for tab-level, '<hub>.<tab>.<subtab>' for sub-tab-level.
+
+export function resolveSubTabLevel(profile, isPlatformAdmin, hubKey, tabKey, subTabKey) {
+  if (isPlatformAdmin) return 'write';
+  if (!profile) return 'none';
+
+  // Hub-level coarse gate
+  const hubLevel = resolveModuleLevel(profile, isPlatformAdmin, hubKey);
+  if (hubLevel === 'none') return 'none';
+
+  // Build the permission key
+  const tabPermKey = `${hubKey}.${tabKey}`;
+  const subPermKey = subTabKey ? `${hubKey}.${tabKey}.${subTabKey}` : null;
+
+  const group = profile.permission_group;
+  if (!group) return hubLevel; // fallback to role-based hub level
+
+  const subPerms = group.sub_tab_permissions;
+
+  // Backward compatible: no sub_tab_permissions → inherit hub level
+  if (!subPerms || (typeof subPerms === 'object' && Object.keys(subPerms).length === 0)) {
+    return hubLevel;
+  }
+
+  // Default deny: check sub-tab key first, then tab key, then default to 'none'
+  if (subPermKey && subPerms[subPermKey]) {
+    const level = subPerms[subPermKey];
+    if (level === 'none' || level === 'read' || level === 'write') {
+      // Read-only group forces write → read
+      if (group.is_read_only && level === 'write') return 'read';
+      return level;
+    }
+  }
+  if (subPerms[tabPermKey]) {
+    const level = subPerms[tabPermKey];
+    if (level === 'none' || level === 'read' || level === 'write') {
+      if (group.is_read_only && level === 'write') return 'read';
+      return level;
+    }
+  }
+
+  // Default deny: sub-tab not explicitly granted
+  return 'none';
+}
+
+// Can the user access (read) a specific sub-tab?
+export function canAccessSubTab(profile, isPlatformAdmin, hubKey, tabKey, subTabKey) {
+  return resolveSubTabLevel(profile, isPlatformAdmin, hubKey, tabKey, subTabKey) !== 'none';
+}
+
+// Can the user write in a specific sub-tab?
+export function canWriteSubTab(profile, isPlatformAdmin, hubKey, tabKey, subTabKey) {
+  return resolveSubTabLevel(profile, isPlatformAdmin, hubKey, tabKey, subTabKey) === 'write';
+}
+
+// Get the list of accessible tab keys for a hub (for rendering tab navigation).
+// Returns only tabs the user can at least read.
+export function getAccessibleTabs(profile, isPlatformAdmin, hubKey) {
+  const tabs = getHubTabs(hubKey);
+  return tabs.filter(tab => resolveSubTabLevel(profile, isPlatformAdmin, hubKey, tab.key) !== 'none');
+}
+
+// Does the user have ANY accessible tab on this hub? (Lockdown check)
+// If false, the hub page should show the LockdownScreen.
+export function hasAnyAccessibleTab(profile, isPlatformAdmin, hubKey) {
+  const accessible = getAccessibleTabs(profile, isPlatformAdmin, hubKey);
+  return accessible.length > 0;
+}
+
+// Build a default sub_tab_permissions map that grants all tabs for a hub
+// at the given level. Used when migrating existing groups or creating new
+// system groups so they don't lock out everyone.
+export function buildDefaultSubTabPermissions(hubKey, level) {
+  const keys = getAllPermissionKeysForHub(hubKey);
+  const out = {};
+  for (const k of keys) out[k] = level;
+  return out;
+}
+
+// Build sub_tab_permissions for ALL hubs at a given level.
+export function buildAllSubTabPermissions(level) {
+  const keys = getAllPermissionKeys();
+  const out = {};
+  for (const k of keys) out[k] = level;
+  return out;
 }

@@ -139,6 +139,29 @@ export function buildFromBOQVariation(afpId: string, jobId: string, variation: a
   };
 }
 
+export function buildFromHotelBooking(afpId: string, jobId: string, booking: any): any | null {
+  const totalCost = toNum(booking.total_cost);
+  if (totalCost <= 0) return null;
+  const checkIn = (booking.check_in_date || '').slice(0, 10);
+  const checkOut = (booking.check_out_date || '').slice(0, 10);
+  let nights = 1;
+  if (checkIn && checkOut) {
+    const diff = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000);
+    if (diff > 0) nights = diff;
+  }
+  const staffNames = (booking.assigned_staff_names || []).join(', ') || booking.staff_name || '';
+  const hotelName = booking.hotel_name || 'Accommodation';
+  const rate = Math.round((totalCost / nights) * 100) / 100;
+  return {
+    afp_id: afpId, job_id: jobId, sheet_name: 'plant_hire', category: 'accommodation',
+    item: `Accommodation — ${hotelName}${staffNames ? ' (' + staffNames + ')' : ''}`,
+    unit: 'night', qty: nights, rate, amount: totalCost,
+    source: 'hotel_booking', source_date: checkIn, source_id: booking.id,
+    is_manual: false, dispute_status: 'none',
+    original_amount: totalCost, agreed_amount: totalCost,
+  };
+}
+
 export function buildFromJobCostItem(afpId: string, jobId: string, item: any): any | null {
   // Exclude contractor/client-supplied (non-billable — no cost or charge to us)
   if (item.category === 'contractor_supplied' || item.category === 'client_supplied') return null;
@@ -352,6 +375,7 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
     base44.entities.JobAssetAssignment.filter({ job_id: afp.job_id }, '-created_date', 500),
     base44.entities.JobCostItem.filter({ job_id: afp.job_id }, '-created_date', 500),
     base44.entities.JobBillOfQuantities.filter({ job_id: afp.job_id, is_variation: true, status: 'complete' }, '-approved_at', 500),
+    base44.entities.HotelBooking.filter({ job_id: afp.job_id }, '-created_date', 500),
   ]);
 
   const fLogs = logs.filter((l: any) => inRange(l.date, startDate, endDate));
@@ -361,6 +385,9 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
   const fCosts = costs.filter((c: any) => inRange(c.date, startDate, endDate));
   const fAssignments = assignments.filter((a: any) => inRange(a.assigned_date, startDate, endDate) && (a.status === 'assigned' || a.status === 'on_site'));
   const fCostItems = costItems.filter((ci: any) => inRange(ci.start_date, startDate, endDate));
+  const fHotelBookings = hotelBookings.filter((hb: any) =>
+    inRange(hb.check_in_date, startDate, endDate) && toNum(hb.total_cost) > 0
+  );
 
   // Delete existing auto-populated items (keep manual + uploaded variation breakdowns)
   const existing = await base44.entities.AFPLineItem.filter({ afp_id: afpId }, 'sort_order', 500);
@@ -394,6 +421,7 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
   for (const cost of fCosts) push(buildFromDailyCost(afpId, afp.job_id, cost));
   for (const ci of fCostItems) push(buildFromJobCostItem(afpId, afp.job_id, ci));
   for (const bv of boqVariations) push(buildFromBOQVariation(afpId, afp.job_id, bv));
+  for (const hb of fHotelBookings) push(buildFromHotelBooking(afpId, afp.job_id, hb));
 
   // Asset assignments (grouped by asset, rate-resolved)
   const assetGroups: Record<string, any[]> = {};
@@ -440,6 +468,29 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
     });
   }
 
+  // ── Pricing step: resolve rates for driller_log items with rate=0 ──
+  // Imported KeyLogBook AGS logs have no billing data — price them against
+  // the job rate card → global Master Price List via the rate resolver.
+  for (const item of newItems) {
+    if (item.source === 'driller_log' && toNum(item.rate) === 0 && toNum(item.amount) === 0) {
+      try {
+        const resolved = await resolveRate(base44, {
+          job_id: afp.job_id,
+          description: item.item,
+          quantity: item.qty,
+          activeContract,
+          job_date: item.source_date,
+        });
+        if (resolved && resolved.unit_price > 0) {
+          item.rate = resolved.unit_price;
+          item.amount = Math.round(resolved.unit_price * toNum(item.qty) * 100) / 100;
+          item.original_amount = item.amount;
+          item.agreed_amount = item.amount;
+        }
+      } catch (_) { /* rate resolution failed — leave at 0 */ }
+    }
+  }
+
   if (newItems.length > 0) await base44.entities.AFPLineItem.bulkCreate(newItems);
 
   // Recalculate totals
@@ -471,6 +522,7 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
       asset_assignments: fAssignments.length,
       job_cost_items: fCostItems.length,
       boq_variations: boqVariations.length,
+      hotel_bookings: fHotelBookings.length,
     },
     total,
     agreed_total: agreedTotal,

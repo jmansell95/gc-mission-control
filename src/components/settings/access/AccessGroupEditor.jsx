@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, X, Save, Lock, KeyRound } from 'lucide-react';
 import { normalizePermissions } from '@/utils/permissions';
+import { getAllPermissionKeysForHub } from '@/utils/subTabRegistry';
 import AccessModuleGrid from './AccessModuleGrid';
 
 export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
@@ -12,6 +13,7 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
     staff_type: group.staff_type || 'flexible',
     landing_page: group.landing_page || 'auto',
     permissions: normalizePermissions(group.permissions),
+    sub_tab_permissions: group.sub_tab_permissions || {},
   }));
 
   const setLevel = (key, level) => setForm(f => ({ ...f, permissions: { ...f.permissions, [key]: level } }));
@@ -19,6 +21,17 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
     const newPerms = {};
     Object.keys(form.permissions).forEach(k => { newPerms[k] = level; });
     setForm(f => ({ ...f, permissions: newPerms }));
+  };
+
+  // Sub-tab permission handlers
+  const setSubTabLevel = (permKey, level) =>
+    setForm(f => ({ ...f, sub_tab_permissions: { ...f.sub_tab_permissions, [permKey]: level } }));
+
+  const setHubSubTabs = (hubKey, level) => {
+    const keys = getAllPermissionKeysForHub(hubKey);
+    const newSubs = { ...form.sub_tab_permissions };
+    for (const k of keys) newSubs[k] = level;
+    setForm(f => ({ ...f, sub_tab_permissions: newSubs }));
   };
 
   return (
@@ -131,6 +144,9 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
               isReadOnly={form.is_read_only}
               onChange={setLevel}
               onSetAll={setAll}
+              subTabPermissions={form.sub_tab_permissions}
+              onSubTabChange={setSubTabLevel}
+              onSetHubSubTabs={setHubSubTabs}
             />
           </div>
         </div>
