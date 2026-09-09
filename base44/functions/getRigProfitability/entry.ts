@@ -91,14 +91,29 @@ export default async function(req: Request): Promise<Response> {
       rigJobEarned[rigId][li.job_id] = (rigJobEarned[rigId][li.job_id] || 0) + amt;
     }
 
-    // 7. Aggregate cost per rig from JobCostItems (rate card cost_price × qty)
+    // 7. Aggregate cost per rig from JobCostItems.
+    // Cost source priority: RateCardItem.cost_price → JobCostItem.unit_cost.
+    // For day-rate items (unit_label 'day'), cost = dayRate × days_on_site
+    // (start_date to min(end_date, today)). For other units, cost = unitCost × qty.
     const rigCost: Record<string, number> = {};
     const rigJobCost: Record<string, Record<string, number>> = {};
+    const todayStr = new Date().toISOString().slice(0, 10);
     for (const c of rigCostItemsInRange) {
       const rc = c.rate_card_item_id ? rateCardById[c.rate_card_item_id] : null;
-      const unitCost = rc && rc.cost_price != null ? Number(rc.cost_price) || 0 : 0;
-      const qty = Number(c.quantity) || 1;
-      const cost = unitCost * qty;
+      let unitCost = rc && rc.cost_price != null ? Number(rc.cost_price) || 0 : 0;
+      if (!unitCost) unitCost = Number(c.unit_cost) || 0;
+      if (!unitCost) continue;
+      const unitLabel = String(c.unit_label || (rc && rc.unit) || '').toLowerCase();
+      let cost: number;
+      if (unitLabel === 'day' || unitLabel === 'days') {
+        const start = c.start_date || c.assigned_date || todayStr;
+        const end = c.end_date && c.end_date < todayStr ? c.end_date : todayStr;
+        const elapsedMs = new Date(end).getTime() - new Date(start).getTime();
+        const days = Math.max(1, Math.ceil(elapsedMs / 86400000));
+        cost = unitCost * days;
+      } else {
+        cost = unitCost * (Number(c.quantity) || 1);
+      }
       if (cost <= 0) continue;
       rigCost[c.site_asset_id] = (rigCost[c.site_asset_id] || 0) + cost;
       if (!rigJobCost[c.site_asset_id]) rigJobCost[c.site_asset_id] = {};

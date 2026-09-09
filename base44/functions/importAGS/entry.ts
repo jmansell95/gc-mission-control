@@ -999,9 +999,21 @@ Deno.serve(async (req) => {
           || allJobs.find((j: any) => j.job_reference && j.job_reference.toLowerCase().includes(lc));
       }
       if (!job && klbProjectName) {
-        const lc = klbProjectName.toLowerCase();
+        const lc = klbProjectName.toLowerCase().trim();
         job = allJobs.find((j: any) => j.name && j.name.toLowerCase() === lc)
           || allJobs.find((j: any) => j.name && j.name.toLowerCase().includes(lc));
+        // Acronym match: KLB project names are often abbreviations of the full
+        // job name (e.g. "EWR" → "East West Rail"). Build the acronym from the
+        // job name's word-initial letters and compare so abbreviated project
+        // names link to the correct job even when they're not a substring.
+        if (!job && lc.length >= 2) {
+          job = allJobs.find((j: any) => {
+            const jn = (j.name || '').toLowerCase().trim();
+            if (!jn) return false;
+            const acronym = jn.split(/\s+/).map(w => w[0] || '').join('');
+            return acronym === lc;
+          });
+        }
       }
     }
     if (!job && groups.PROJ && groups.PROJ.rows.length) {
