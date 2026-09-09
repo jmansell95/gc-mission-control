@@ -116,6 +116,8 @@ export default function AuditDetailDrawer({ audit, onClose }) {
     return Object.entries(groups);
   }, [checkItems]);
 
+  if (!audit) return null;
+
   const failed = passFail === 'fail';
   const passed = passFail === 'pass';
   const statusMeta = getStatusMeta(passFail);
