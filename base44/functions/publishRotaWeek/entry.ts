@@ -255,7 +255,7 @@ Deno.serve(async (req) => {
       if (myRotas.length === 0) continue;
       const { html, subject } = buildEmail(s, myRotas, jobs, vehicles, effectiveCfg, weekStart, baseUrl);
       try {
-        await base44.asServiceRole.integrations.Core.SendEmail({ to: s.email, subject, body: html, from_name: 'GC Mission Control' });
+        await base44.asServiceRole.integrations.Core.SendEmail({ to: s.email, subject, html, from_name: 'GC Mission Control' });
         emailed++;
       } catch (e) {
         skipped++;
@@ -275,7 +275,7 @@ Deno.serve(async (req) => {
         const { html: mgrHtml, subject: mgrSubject } = buildManagerEmail(withNames, jobs, vehicles, effectiveCfg, weekStart, baseUrl);
         for (const email of recipients) {
           try {
-            await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject: mgrSubject, body: mgrHtml, from_name: 'GC Mission Control' });
+            await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject: mgrSubject, html: mgrHtml, from_name: 'GC Mission Control' });
             copies++;
           } catch (e) {}
         }

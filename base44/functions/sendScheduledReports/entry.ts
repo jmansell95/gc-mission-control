@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { brandedWrapper, heading, p, dataTable, statTileRow, escapeHtml, getAppBaseUrl, ctaButton } from '../../shared/emailStyling.ts';
 
 // ============================================================
 // sendScheduledReports — runs on a schedule, finds all
@@ -7,10 +8,6 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 // the stored recipients via SendEmail. Uses the service role so
 // it works without a user session.
 // ============================================================
-
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
 
 function tally(rows, field) {
   const m = {};
@@ -23,34 +20,6 @@ function tally(rows, field) {
 
 function sumField(rows, field) {
   return rows.reduce((s, r) => s + (Number(r[field]) || 0), 0);
-}
-
-function buildHtmlTable(title, rows, maxRows = 15) {
-  if (!rows.length) return `<p style="color:#64748b;font-size:12px;">No data for ${title}.</p>`;
-  const keys = Object.keys(rows[0]).slice(0, 6);
-  const header = keys.map(k => `<th style="background:#2E5A1A;color:#fff;padding:6px 8px;text-align:left;font-size:11px;">${escapeHtml(k.replace(/_/g, ' '))}</th>`).join('');
-  const bodyRows = rows.slice(0, maxRows).map(r =>
-    `<tr>${keys.map(k => {
-      const v = r[k];
-      let display = '';
-      if (v == null) display = '';
-      else if (Array.isArray(v)) display = v.join('; ');
-      else if (typeof v === 'object') display = JSON.stringify(v).substring(0, 40);
-      else display = String(v).substring(0, 60);
-      return `<td style="padding:5px 8px;border-bottom:1px solid #e2e8f0;font-size:11px;">${escapeHtml(display)}</td>`;
-    }).join('')}</tr>`
-  ).join('');
-  const more = rows.length > maxRows ? `<tr><td colspan="${keys.length}" style="padding:6px 8px;font-size:10px;color:#94a3b8;">…and ${rows.length - maxRows} more rows</td></tr>` : '';
-  return `<table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr>${header}</tr></thead><tbody>${bodyRows}${more}</tbody></table>`;
-}
-
-function buildChartSummary(title, data) {
-  if (!data.length) return '';
-  const bars = data.map(d => {
-    const pct = Math.min(100, (d.value / Math.max(...data.map(x => x.value))) * 100);
-    return `<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;"><span>${escapeHtml(d.name)}</span><strong>${escapeHtml(String(d.value))}</strong></div><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:#2E5A1A;border-radius:3px;"></div></div></div>`;
-  }).join('');
-  return `<div style="margin-top:12px;"><p style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;">${escapeHtml(title)}</p>${bars}</div>`;
 }
 
 async function fetchTemplateData(base44, tpl) {
@@ -104,37 +73,39 @@ export default async function(req) {
         const sumKey = tpl.fields?.[0] || 'budget_amount';
         const totalValue = sumField(rows, sumKey);
 
-        const html = `
-          <div style="font-family:Inter,Arial,sans-serif;max-width:640px;margin:0 auto;background:#f8fafc;border-radius:12px;overflow:hidden;">
-            <div style="background:linear-gradient(135deg,#2E5A1A,#1c4a12);padding:20px 24px;">
-              <h1 style="color:#fff;font-size:20px;margin:0;">${tpl.name}</h1>
-              <p style="color:rgba(255,255,255,0.8);font-size:12px;margin:4px 0 0;">Scheduled report · ${tpl.schedule_cadence} · ${now.toDateString()}</p>
-            </div>
-            <div style="padding:20px 24px;">
-              ${tpl.description ? `<p style="font-size:13px;color:#475569;margin:0 0 12px;">${tpl.description}</p>` : ''}
-              ${tpl.schedule_message ? `<div style="background:#f1f5f9;border-radius:8px;padding:10px 12px;margin-bottom:12px;"><p style="font-size:12px;color:#475569;margin:0;">${tpl.schedule_message}</p></div>` : ''}
-              <div style="display:flex;gap:12px;margin-bottom:16px;">
-                <div style="flex:1;background:#fff;border-radius:8px;padding:12px;border:1px solid #e2e8f0;">
-                  <p style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin:0;">Total Records</p>
-                  <p style="font-size:24px;font-weight:800;color:#2E5A1A;margin:4px 0 0;">${total}</p>
-                </div>
-                <div style="flex:1;background:#fff;border-radius:8px;padding:12px;border:1px solid #e2e8f0;">
-                  <p style="font-size:10px;color:#94a3b8;text-transform:uppercase;margin:0;">${sumKey.replace(/_/g, ' ')} Total</p>
-                  <p style="font-size:24px;font-weight:800;color:#2E5A1A;margin:4px 0 0;">${totalValue.toLocaleString()}</p>
-                </div>
-              </div>
-              ${buildChartSummary(`Breakdown by ${groupBy.replace(/_/g, ' ')}`, tallied)}
-              ${buildHtmlTable('Recent Records', rows, 10)}
-              <p style="font-size:11px;color:#94a3b8;margin-top:16px;">Generated by GC Mission Control Reports Hub</p>
-            </div>
-          </div>
-        `;
+        const baseUrl = await getAppBaseUrl(base44);
+        const tableRows = rows.slice(0, 10).map(r => {
+          const keys = Object.keys(r).slice(0, 6);
+          return keys.map(k => {
+            const v = r[k];
+            if (v == null) return '';
+            if (Array.isArray(v)) return v.join('; ');
+            if (typeof v === 'object') return JSON.stringify(v).substring(0, 40);
+            return String(v).substring(0, 60);
+          });
+        });
+        const tableHeaders = rows.length > 0 ? Object.keys(rows[0]).slice(0, 6).map(k => k.replace(/_/g, ' ')) : [];
+        const talliedRows = tallied.map(t => [t.name, String(t.value)]);
+
+        const content = heading(tpl.name) +
+          p(`Scheduled report · ${tpl.schedule_cadence} · ${now.toDateString()}`) +
+          (tpl.description ? p(tpl.description) : '') +
+          (tpl.schedule_message ? `<div style="background:#f1f5f9;border-radius:8px;padding:10px 12px;margin-bottom:12px;"><p style="font-size:12px;color:#475569;margin:0;font-family:Arial,Helvetica,sans-serif">${escapeHtml(tpl.schedule_message)}</p></div>` : '') +
+          statTileRow([
+            { label: 'Total Records', value: String(total), icon: '📋' },
+            { label: `${sumKey.replace(/_/g, ' ')} Total`, value: totalValue.toLocaleString(), icon: '💰' },
+          ]) +
+          (talliedRows.length > 0 ? heading(`Breakdown by ${groupBy.replace(/_/g, ' ')}`) + dataTable(['Category', 'Count'], talliedRows) : '') +
+          (tableRows.length > 0 ? heading('Recent Records') + dataTable(tableHeaders, tableRows) : '') +
+          (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/reports', 'Open Reports Hub')}</div>` : '');
+
+        const emailHtml = brandedWrapper(content, { banner_subtitle: 'Scheduled Report', headerVariant: 'blue' });
 
         const recipients = tpl.schedule_recipients.split(',').map(s => s.trim()).filter(Boolean).join(',');
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: recipients,
           subject: `${tpl.name} — ${tpl.schedule_cadence} report (${now.toLocaleDateString()})`,
-          body: html,
+          html: emailHtml,
         });
 
         await base44.asServiceRole.entities.ReportTemplate.update(tpl.id, { last_run_at: now.toISOString() });
