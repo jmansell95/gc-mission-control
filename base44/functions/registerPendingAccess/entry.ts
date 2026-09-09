@@ -43,19 +43,17 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ access_status: 'rejected' });
     }
 
-    // Fetch approver config
+    // Fetch contact instructions from the access gate config (approvers are
+    // now designated via the is_approver flag on Staff records, not stored
+    // in this config).
     const configSettings = await sr.entities.AppSetting.filter({ key: 'access_gate_config' });
     const config = (configSettings[0]?.value as any) || {};
-    const approverIds: string[] = config.approver_user_ids || [];
 
-    // Fetch approver user details
-    let approvers: any[] = [];
-    if (approverIds.length > 0) {
-      const allUsers = await sr.entities.User.list('-created_date', 500);
-      approvers = allUsers
-        .filter((u: any) => approverIds.includes(u.id))
-        .map((u: any) => ({ name: u.full_name || u.email, email: u.email }));
-    }
+    // Fetch approvers — Staff records flagged as is_approver
+    const approverStaff = await sr.entities.Staff.filter({ is_approver: true });
+    const approvers: any[] = approverStaff
+      .filter((s: any) => s.email)
+      .map((s: any) => ({ name: s.name || s.email, email: s.email }));
 
     // First login (no status set) — set to pending and notify approvers
     if (!currentStatus) {

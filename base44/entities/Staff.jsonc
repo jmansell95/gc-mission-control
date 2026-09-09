@@ -182,6 +182,11 @@
       "default": "field",
       "description": "Legacy app-level access role. Now derived from the assigned permission group. Kept for backward compatibility \u2014 use permission_group_id instead."
     },
+    "is_approver": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this staff member is designated as an access approver \u2014 they receive email notifications when a new user signs in and is waiting for access approval, and their name/email appear on the pending user's screen as a contact. Toggled from the staff edit form (super admins only)."
+    },
     "last_acknowledged_week": {
       "type": "string",
       "format": "date",

@@ -62,9 +62,6 @@ import PowerAppsBuildHub from './pages/PowerAppsBuildHub';
 
 import StaffPage from './pages/StaffPage';
 import Login from './pages/Login';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import SetupAccount from './pages/SetupAccount';
 import OAuthConsent from './pages/OAuthConsent';
 import { StaffAssistantProvider } from '@/components/StaffAssistantChat';
 import { GlobalScannerProvider } from '@/contexts/GlobalScannerContext';
@@ -138,9 +135,6 @@ const AuthenticatedApp = () => {
         <RouteLoadingOverlay />
         <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/setup-account" element={<SetupAccount />} />
         <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppShell />}>

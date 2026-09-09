@@ -40,6 +40,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     system_role: 'field', phone_gps_consent: false,
     permission_group_id: '', default_landing_page: '',
     division_id: '',
+    is_approver: false,
   };
 
   useEffect(() => {
@@ -248,6 +249,17 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
             </label>
           </div>
         </div>
+
+        {/* Access Control — super admins only */}
+        {isAdmin && (
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access Control</p>
+            <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-purple-50/60 border border-purple-100">
+              <input type="checkbox" checked={form.is_approver === true} onChange={e => set('is_approver', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
+              <span className="text-sm text-slate-700 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-purple-600" /> Access Approver — receives notifications and can approve new users waiting for access</span>
+            </label>
+          </div>
+        )}
       </div>
     </FormModal>
   );

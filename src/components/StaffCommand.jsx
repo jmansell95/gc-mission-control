@@ -56,7 +56,7 @@ export default function StaffCommand() {
   const [addForm, setAddForm] = useState(emptyStaff);
   const [adding, setAdding] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(null);
-  const [resetLoading, setResetLoading] = useState(null);
+
   const [showBulkInvite, setShowBulkInvite] = useState(false);
 
   const { data: staff = [], isLoading } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
@@ -135,19 +135,6 @@ export default function StaffCommand() {
       toast({ title: 'Could not send invite', description: err?.message, variant: 'destructive' });
     }
     setInviteLoading(null);
-  };
-
-  const handlePasswordReset = async (m) => {
-    if (!m.email) { toast({ title: 'No email on file', variant: 'destructive' }); return; }
-    if (!confirm(`Send a password reset link to ${m.email}?`)) return;
-    setResetLoading(m.id);
-    try {
-      await base44.auth.resetPasswordRequest(m.email);
-      toast({ title: 'Reset link sent', description: `Check ${m.email}` });
-    } catch (err) {
-      toast({ title: 'Could not send reset link', description: err?.message, variant: 'destructive' });
-    }
-    setResetLoading(null);
   };
 
   const handleDelete = async (m) => {
@@ -274,7 +261,6 @@ export default function StaffCommand() {
             {tab === 'profile' && selected && (
               <ProfileTab staff={selected} user={selectedUser} teams={teams} permissionGroups={permissionGroups} vehicles={vehicles} staffList={staff} workerTypeOptions={workerTypeOptions}
                 onInvite={() => handleInvite(selected)} inviteLoading={inviteLoading === selected.id}
-                onResetPassword={() => handlePasswordReset(selected)} resetLoading={resetLoading === selected.id}
                 onDelete={() => handleDelete(selected)} />
             )}
             {tab === 'compliance' && selected && (
@@ -331,7 +317,7 @@ export default function StaffCommand() {
   );
 }
 
-function ProfileTab({ staff: m, user, teams, permissionGroups, vehicles, staffList, workerTypeOptions, onInvite, inviteLoading, onResetPassword, resetLoading, onDelete }) {
+function ProfileTab({ staff: m, user, teams, permissionGroups, vehicles, staffList, workerTypeOptions, onInvite, inviteLoading, onDelete }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [form, setForm] = useState(m);
@@ -442,9 +428,6 @@ function ProfileTab({ staff: m, user, teams, permissionGroups, vehicles, staffLi
         </button>
         <button type="button" onClick={onInvite} disabled={inviteLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-blue-700 bg-blue-50 rounded-lg text-sm font-medium hover:bg-blue-100 transition disabled:opacity-50">
           {inviteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} Send App Invite
-        </button>
-        <button type="button" onClick={onResetPassword} disabled={resetLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-amber-700 bg-amber-50 rounded-lg text-sm font-medium hover:bg-amber-100 transition disabled:opacity-50">
-          {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />} Reset Password
         </button>
         <button type="button" onClick={onDelete} className="inline-flex items-center gap-1.5 px-3 py-2 text-red-600 bg-red-50 rounded-lg text-sm font-medium hover:bg-red-100 transition ml-auto">
           <Trash2 className="w-4 h-4" /> Delete

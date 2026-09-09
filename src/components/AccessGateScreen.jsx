@@ -1,14 +1,14 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Clock, LogOut, Mail, UserCog } from 'lucide-react';
+import { AlertTriangle, Lock, LogOut, Mail, UserCog } from 'lucide-react';
 import Logo from '@/components/Logo';
 
 /**
- * AccessGateScreen — shown when a non-admin user logs in and their
- * access_status is 'pending' (waiting for admin approval) or 'rejected'
- * (admin denied access). The pending variant shows the configured
- * approver contacts so the user knows who to reach out to.
+ * AccessGateScreen — shown when a user logs in and their access_status is
+ * 'pending' (waiting for admin approval) or 'rejected' (admin denied access).
+ * The pending variant states the user has not been set up with permissions yet
+ * and shows the configured approver contacts so they know who to reach out to.
  */
 export default function AccessGateScreen({ status, email, approvers = [], contactInstructions = '' }) {
   const isRejected = status === 'rejected';
@@ -18,17 +18,17 @@ export default function AccessGateScreen({ status, email, approvers = [], contac
   };
 
   return (
-    <div className="min-h-screen page-bg-vibrant flex items-center justify-center px-4">
+    <div className="min-h-screen page-bg-vibrant flex items-center justify-center px-4 py-8">
       <div className="max-w-md w-full">
         <div className="flex flex-col items-center mb-8">
           <Logo height={48} />
         </div>
-        <div className="insight-card rounded-2xl p-8 text-center">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${isRejected ? 'bg-rose-100' : 'bg-amber-100'}`}>
+        <div className="hub-glass rounded-2xl p-8 text-center">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 ${isRejected ? 'bg-rose-100' : 'bg-amber-100'}`}>
             {isRejected ? (
               <AlertTriangle className="w-7 h-7 text-rose-600" />
             ) : (
-              <Clock className="w-7 h-7 text-amber-600" />
+              <Lock className="w-7 h-7 text-amber-600" />
             )}
           </div>
 
@@ -42,12 +42,9 @@ export default function AccessGateScreen({ status, email, approvers = [], contac
             </>
           ) : (
             <>
-              <h1 className="text-xl font-extrabold text-slate-900 mb-2">Awaiting Access Approval</h1>
-              <p className="text-sm text-slate-500 mb-1">
-                Your account is waiting for administrator approval.
-              </p>
+              <h1 className="text-xl font-extrabold text-slate-900 mb-2">You have not been set up with permissions yet</h1>
               <p className="text-sm text-slate-500 mb-6">
-                You'll be able to access the app once an administrator approves your request.
+                Your account is waiting for an administrator to grant access.
               </p>
             </>
           )}

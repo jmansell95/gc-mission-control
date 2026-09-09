@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
       // can't access the app, and surfaces a dedicated error screen.
       const email = (currentUser?.email || '').toLowerCase();
       const isAdmin = currentUser?.role === 'admin';
-      if (email && !isAdmin && !email.endsWith('@' + ALLOWED_DOMAIN)) {
+      if (email && !email.endsWith('@' + ALLOWED_DOMAIN)) {
         try { await base44.auth.logout(); } catch (_) {}
         setUser(null);
         setIsAuthenticated(false);
