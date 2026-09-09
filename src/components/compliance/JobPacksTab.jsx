@@ -4,10 +4,11 @@ import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import {
   Search, FileText, Download, Loader2, Package, X, ChevronRight,
-  Calendar, MapPin, Building2, FileCheck, Archive,
+  Calendar, MapPin, Building2, FileCheck, Archive, Zap,
 } from 'lucide-react';
 import { findGeotechnicalDivision } from '@/utils/staffCompliance';
 import JobPackView from '@/components/audit/JobPackView';
+import JobPackCoverageBadge from '@/components/compliance/JobPackCoverageBadge';
 
 /**
  * Job Packs Tab — lets managers select a Geotechnical job and download the
@@ -191,6 +192,11 @@ export default function JobPacksTab() {
               onClick={() => setSelectedJob(job)}
             />
           ))}
+          {filteredJobs.length > 0 && (
+            <p className="text-[10px] text-slate-400 text-center pt-2">
+              {filteredJobs.length} Geotechnical project{filteredJobs.length !== 1 ? 's' : ''} · Click any project to view the full auditor pack
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -232,6 +238,7 @@ function JobRow({ job, clientName, onClick }) {
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
+        <JobPackCoverageBadge jobId={job.id} compact />
         <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
           <Download className="w-3.5 h-3.5" /> Pack
         </span>

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { HardHat, Plus, Trash2, CheckCircle2, Calendar, Users, Clock, X } from 'lucide-react';
+import { HardHat, Plus, Trash2, CheckCircle2, Calendar, Users, Clock, X, ClipboardCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import HubCard from '@/components/hubs/HubCard';
 import HubEmptyState from '@/components/hubs/HubEmptyState';
+import DeliverTalkModal from '@/components/safety/DeliverTalkModal';
 
 const CATEGORY_LABELS = {
   general_safety: 'General Safety',
@@ -33,6 +34,7 @@ const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm 
 
 export default function ToolboxTalkManager() {
   const [showForm, setShowForm] = useState(false);
+  const [deliverTalk, setDeliverTalk] = useState(null);
   const [form, setForm] = useState({ title: '', topic_category: 'general_safety', description: '', scheduled_date: format(new Date(), 'yyyy-MM-dd'), job_id: '', delivered_by_name: '', duration_minutes: 15 });
   const [selectedStaff, setSelectedStaff] = useState([]);
   const { toast } = useToast();
@@ -77,13 +79,7 @@ export default function ToolboxTalkManager() {
   };
 
   const markDelivered = async (talk) => {
-    await base44.entities.ToolboxTalk.update(talk.id, {
-      status: 'delivered',
-      attendee_ids: talk.attendee_ids || [],
-      attendee_names: talk.attendee_names || [],
-    });
-    queryClient.invalidateQueries({ queryKey: ['toolbox-talks'] });
-    toast({ title: 'Marked as delivered' });
+    setDeliverTalk(talk);
   };
 
   const handleDelete = async (id) => {
@@ -222,7 +218,9 @@ export default function ToolboxTalkManager() {
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     {talk.status === 'scheduled' && (
-                      <button onClick={() => markDelivered(talk)} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Mark delivered"><CheckCircle2 className="w-4 h-4" /></button>
+                      <button onClick={() => markDelivered(talk)} className="inline-flex items-center gap-1 px-2.5 h-8 text-xs font-semibold text-white bg-[#2E5A1A] rounded-lg hover:bg-[#1c4a12] transition" title="Confirm attendance & deliver">
+                        <ClipboardCheck className="w-3.5 h-3.5" /> Deliver
+                      </button>
                     )}
                     <button onClick={() => handleDelete(talk.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
                   </div>
@@ -231,6 +229,17 @@ export default function ToolboxTalkManager() {
             ))}
           </div>
         </HubCard>
+      )}
+
+      {deliverTalk && (
+        <DeliverTalkModal
+          talk={deliverTalk}
+          onClose={() => setDeliverTalk(null)}
+          onDelivered={() => {
+            setDeliverTalk(null);
+            queryClient.invalidateQueries({ queryKey: ['toolbox-talks'] });
+          }}
+        />
       )}
     </div>
   );

@@ -21,6 +21,7 @@ import ComplianceCalendar from '@/components/compliance/ComplianceCalendar';
 import SiteReadinessGateWidget from '@/components/dashboard/SiteReadinessGateWidget';
 import CrewCertificationPulseWidget from '@/components/dashboard/CrewCertificationPulseWidget';
 import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget';
+import CarbonFootprintByProject from '@/components/dashboard/CarbonFootprintByProject';
 import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
 import RunReportButton from '@/components/reports/RunReportButton';
 import { resolveRole } from '@/utils/access';
@@ -198,7 +199,12 @@ export default function CompliancePage() {
       {tab === 'training-env' && (
         <>
           {subTab === 'toolbox' && <ToolboxTalkManager />}
-          {subTab === 'environmental' && <CarbonFootprintWidget onNavigate={navToAdmin} />}
+          {subTab === 'environmental' && (
+            <div className="space-y-4">
+              <CarbonFootprintWidget onNavigate={navToAdmin} />
+              <CarbonFootprintByProject />
+            </div>
+          )}
         </>
       )}
     </HubShell>
