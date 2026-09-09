@@ -1,4 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
+import {
+  brandedWrapper, escapeHtml, getAppBaseUrl, linkBlock,
+  heading, p, sectionCard, helpTip, infoTable, html, BRAND
+} from '../../shared/emailStyling.ts';
 
 /**
  * Client Portal Auto-Reporting — runs Friday at 17:00.
@@ -24,6 +28,7 @@ export default async function(req: Request): Promise<Response> {
       status: { $nin: ['completed', 'cancelled', 'on_hold'] },
     });
 
+    const baseUrl = await getAppBaseUrl(base44);
     const reports = [];
 
     for (const job of jobs) {
@@ -93,6 +98,39 @@ Keep it professional, factual, and under 200 words. Use £ for any monetary refe
         author_name: 'Weekly Report Autopilot',
         message: `Weekly Progress Report (${weekAgoStr} to ${today})\n\n${reportText}`,
       });
+
+      // 6. Send a V2-branded progress email to the client contact + project manager
+      const clientList = job.client_id ? await base44.asServiceRole.entities.Client.filter({ id: job.client_id }) : [];
+      const client = clientList[0];
+      const clientEmail = client?.contact_email || '';
+      const portalPath = job.portal_token ? '/client-portal/' + job.portal_token : '';
+
+      const emailBody =
+        heading('Weekly Progress Report') +
+        p('Here is your weekly progress update for ' + (job.name || job.site_name || 'your project') + '.') +
+        sectionCard('Week of ' + weekAgoStr + ' to ' + today,
+          '<div style="font-size:14px;line-height:1.6;color:#334155;white-space:pre-wrap">' + escapeHtml(reportText).replace(/\n/g, '<br>') + '</div>',
+          { titleBg: '#2E5A1A' }) +
+        infoTable([
+          ['Site Logs', String(logs.length)],
+          ['Metres Drilled', meterage + 'm'],
+          ['Crew Days', String(crewDays)],
+          ['Photos', String(photos.length)],
+          ['Milestones Completed', String(completedMilestones)],
+        ]) +
+        (portalPath ? helpTip('View full details', 'Click below to open the client portal and see the full project progress, photos, and milestones.') + linkBlock(baseUrl, portalPath, 'View Project Portal') : '') +
+        helpTip('Questions?', 'If you have any questions about this report or the project progress, please contact your project manager.');
+
+      const emailSubject = 'Weekly Progress Report — ' + (job.name || job.site_name || 'Project');
+      const wrappedHtml = brandedWrapper(emailBody, { headerVariant: 'brand', banner_subtitle: 'Weekly Progress · ' + today });
+
+      let emailSentTo = '';
+      if (clientEmail) {
+        try {
+          await base44.asServiceRole.integrations.Core.SendEmail({ to: clientEmail, subject: emailSubject, body: wrappedHtml });
+          emailSentTo = clientEmail;
+        } catch (e) { /* non-fatal — client email may not be a registered user */ }
+      }
 
       reports.push({
         job_id: job.id,
