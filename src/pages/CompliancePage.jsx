@@ -69,17 +69,7 @@ export default function CompliancePage() {
 
   const role = resolveRole(profile, isPlatformAdmin);
   const canAccess = isPlatformAdmin || role === 'admin' || role === 'super_admin' || role === 'management' || role === 'manager';
-
-  // Show a loading state while the profile loads (platform admins skip this
-  // — they always have access). Previously, a null profile fell through to
-  // 'field' and locked even super admins out on the published site.
-  if (!canAccess && !profile && !isPlatformAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  const profileLoading = !canAccess && !profile && !isPlatformAdmin;
 
   const { data: safetyReports = [] } = useQuery({ queryKey: ['safety-reports-open'], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }) });
   const { data: complianceItems = [] } = useQuery({ queryKey: ['compliance-items-staff'], queryFn: () => base44.entities.ComplianceItem.filter({ category: 'staff' }, '-created_date', 500) });
@@ -115,13 +105,17 @@ export default function CompliancePage() {
   if (!canAccess) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <div className="insight-card rounded-3xl p-8 max-w-md text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Lock className="w-8 h-8 text-white" />
+        {profileLoading ? (
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+        ) : (
+          <div className="insight-card rounded-3xl p-8 max-w-md text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Lock className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Management Access Only</h2>
+            <p className="text-sm text-slate-500">The Safety & Compliance Hub is restricted to management and admin roles. Contact your supervisor if you need access.</p>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Management Access Only</h2>
-          <p className="text-sm text-slate-500">The Safety & Compliance Hub is restricted to management and admin roles. Contact your supervisor if you need access.</p>
-        </div>
+        )}
       </div>
     );
   }
