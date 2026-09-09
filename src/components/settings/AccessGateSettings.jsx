@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Save, Loader2, Info, UserCog } from 'lucide-react';
+import LoginFlowPreview from '@/components/settings/LoginFlowPreview';
 
 /**
  * AccessGateSettings — admin Settings page for configuring the access gate.
@@ -119,6 +120,11 @@ export default function AccessGateSettings() {
           )}
           Save Settings
         </Button>
+      </div>
+
+      {/* Login Flow Preview — pixel-accurate preview of each gate state */}
+      <div className="pt-2 border-t border-slate-100">
+        <LoginFlowPreview contactInstructions={contactInstructions} />
       </div>
     </div>
   );
