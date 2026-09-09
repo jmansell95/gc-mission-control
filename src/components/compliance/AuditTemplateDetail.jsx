@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { ArrowLeft, Search, CheckCircle2, XCircle, AlertTriangle, FileText, Calendar, User, Filter } from 'lucide-react';
+import { ArrowLeft, Search, CheckCircle2, XCircle, AlertTriangle, FileText, Calendar, User, TrendingUp, BarChart3 } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import HubCard from '@/components/hubs/HubCard';
 import AuditExportBar from './AuditExportBar';
 import { getCategoryMeta, getStatusMeta, fmtDateTime } from './auditConstants';
@@ -12,6 +13,26 @@ const PASS_FAIL_CHIPS = [
   { key: 'fail', label: 'Failed' },
   { key: 'pending', label: 'Pending' },
 ];
+
+// Stats tile for the template hero
+function StatTile({ icon: Icon, label, value, tone = 'slate' }) {
+  const tones = {
+    slate: 'from-slate-50 to-slate-100 text-slate-700',
+    emerald: 'from-emerald-50 to-emerald-100 text-emerald-700',
+    rose: 'from-rose-50 to-rose-100 text-rose-700',
+    amber: 'from-amber-50 to-amber-100 text-amber-700',
+    brand: 'from-[#2E5A1A]/8 to-[#8DC63F]/12 text-[#2E5A1A]',
+  };
+  return (
+    <div className={`rounded-2xl bg-gradient-to-br ${tones[tone]} p-3 flex items-center gap-2.5`}>
+      <Icon className="w-4 h-4 flex-shrink-0" />
+      <div className="min-w-0">
+        <p className="text-[9px] font-bold uppercase tracking-wide opacity-60 leading-none">{label}</p>
+        <p className="text-lg font-extrabold tabular-nums leading-tight">{value}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function AuditTemplateDetail({ template, onBack, onSelectAudit }) {
   const [query, setQuery] = useState('');
@@ -39,6 +60,44 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
       if (r.auditor_name) set.set(r.auditor_name, r.auditor_email || '');
     }
     return Array.from(set.entries()).map(([name, email]) => ({ name, email }));
+  }, [templateReports]);
+
+  // Per-template trend chart data (weekly pass rate)
+  const trendData = useMemo(() => {
+    const scored = templateReports.filter(r => r.pass_fail === 'pass' || r.pass_fail === 'fail');
+    const byWeek = {};
+    scored.forEach(r => {
+      const d = r.conducted_at || r.created_date;
+      if (!d) return;
+      const dt = new Date(d);
+      const weekStart = new Date(dt); weekStart.setDate(dt.getDate() - dt.getDay());
+      const key = weekStart.toISOString().slice(0, 10);
+      if (!byWeek[key]) byWeek[key] = { week: key, total: 0, passed: 0 };
+      byWeek[key].total++;
+      if (r.pass_fail === 'pass') byWeek[key].passed++;
+    });
+    return Object.values(byWeek).sort((a, b) => a.week.localeCompare(b.week)).slice(-12).map(w => ({
+      week: new Date(w.week).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }),
+      passRate: w.total > 0 ? Math.round((w.passed / w.total) * 100) : null,
+      count: w.total,
+    }));
+  }, [templateReports]);
+
+  // Template stats
+  const stats = useMemo(() => {
+    const passed = templateReports.filter(r => r.pass_fail === 'pass').length;
+    const failed = templateReports.filter(r => r.pass_fail === 'fail').length;
+    const scored = passed + failed;
+    const actionCount = templateReports.reduce((s, r) => s + (r.action_items || []).length, 0);
+    const lastDate = templateReports[0] ? (templateReports[0].conducted_at || templateReports[0].created_date) : null;
+    return {
+      total: templateReports.length,
+      passed,
+      failed,
+      passRate: scored > 0 ? Math.round((passed / scored) * 100) : null,
+      actionCount,
+      lastDate,
+    };
   }, [templateReports]);
 
   const filtered = useMemo(() => {
@@ -79,7 +138,49 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
         <span className="text-xs font-semibold text-slate-700 truncate">{template.name}</span>
       </div>
 
-      <HubCard icon={Icon} title={template.name} subtitle={`${filtered.length} of ${templateReports.length} audits · ${meta.label}`} tone="brand"
+      {/* Template hero — stats tiles */}
+      <div className="hub-glass rounded-3xl p-4 sm:p-5 animate-slide-up">
+        <div className="flex items-start gap-3 mb-4">
+          <div className={`w-12 h-12 rounded-2xl ${meta.iconBg} flex items-center justify-center flex-shrink-0`}>
+            <Icon className={`w-6 h-6 ${meta.iconColor}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold text-slate-900 truncate">{template.name}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${meta.badgeClass}`}>{meta.label}</span>
+              <span className="text-xs text-slate-400">{template.template_id}</span>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <StatTile icon={FileText} label="Total Audits" value={stats.total} tone="brand" />
+          <StatTile icon={CheckCircle2} label="Pass Rate" value={stats.passRate != null ? `${stats.passRate}%` : '—'} tone={stats.passRate != null ? (stats.passRate >= 80 ? 'emerald' : stats.passRate >= 50 ? 'amber' : 'rose') : 'slate'} />
+          <StatTile icon={XCircle} label="Failed" value={stats.failed} tone={stats.failed > 0 ? 'rose' : 'slate'} />
+          <StatTile icon={AlertTriangle} label="Actions" value={stats.actionCount} tone={stats.actionCount > 0 ? 'amber' : 'slate'} />
+          <StatTile icon={Calendar} label="Last Audit" value={stats.lastDate ? new Date(stats.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '—'} tone="slate" />
+        </div>
+      </div>
+
+      {/* Per-template trend chart */}
+      {trendData.length > 0 && (
+        <HubCard icon={TrendingUp} title="Pass Rate Trend" subtitle="Weekly pass rate for this template" tone="brand">
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="week" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#94a3b8" unit="%" />
+              <Tooltip
+                contentStyle={{ borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '12px' }}
+                formatter={(value) => value == null ? ['—', 'Pass Rate'] : [`${value}%`, 'Pass Rate']}
+              />
+              <Line type="monotone" dataKey="passRate" stroke="#2E5A1A" strokeWidth={3} dot={{ fill: '#8DC63F', r: 4 }} connectNulls />
+            </LineChart>
+          </ResponsiveContainer>
+        </HubCard>
+      )}
+
+      {/* Audit list with filters */}
+      <HubCard icon={BarChart3} title="Audits" subtitle={`${filtered.length} of ${templateReports.length} audits`} tone="brand"
         action={
           <div className="flex items-center gap-2">
             <AuditExportBar audits={filtered} fileName={`audits-${template.name?.replace(/\s+/g, '-').toLowerCase() || 'template'}`} />
@@ -92,22 +193,17 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
 
         {/* Filter row */}
         <div className="flex flex-wrap gap-2 mb-3">
-          {/* Pass/fail chips */}
           <div className="flex gap-1.5">
             {PASS_FAIL_CHIPS.map(c => (
               <button key={c.key} onClick={() => setPassFailFilter(c.key)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${passFailFilter === c.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{c.label}</button>
             ))}
           </div>
-
-          {/* Date filter */}
           <select value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
             <option value="all">All dates</option>
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
           </select>
-
-          {/* Auditor filter */}
           <select value={auditorFilter} onChange={e => setAuditorFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A] max-w-[180px]">
             <option value="all">All auditors</option>
             {auditors.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
