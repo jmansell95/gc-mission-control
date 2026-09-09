@@ -34,14 +34,22 @@ export async function flush() {
   flushing = true;
   const pending = [...queue];
   const succeeded = [];
+  let failed = false;
   for (const item of pending) {
+    if (failed) break;
     try {
       if (item.op === 'create') await base44.entities[item.entity].create(item.data);
       else if (item.op === 'update') await base44.entities[item.entity].update(item.recordId, item.data);
       succeeded.push(item.id);
     } catch (e) {
-      // stop on first failure (likely still offline or server error)
-      break;
+      failed = true;
+      // Exponential backoff — schedule a retry after 2s, then 4s, 8s, max 30s
+      const attempts = (item._attempts || 0) + 1;
+      item._attempts = attempts;
+      if (attempts < 5) {
+        const delay = Math.min(30000, 2000 * Math.pow(2, attempts - 1));
+        setTimeout(() => { if (isOnline) flush(); }, delay);
+      }
     }
   }
   if (succeeded.length) setQueue(queue.filter((i) => !succeeded.includes(i.id)));

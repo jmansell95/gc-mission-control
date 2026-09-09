@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox } from 'lucide-react';
+import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox, Users } from 'lucide-react';
 import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import { useInbox } from '@/hooks/useInbox';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
@@ -8,6 +8,7 @@ import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
+import QuickActionsBar from '@/components/field/QuickActionsBar';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import { format } from 'date-fns';
 
@@ -22,6 +23,7 @@ export default function MorePage() {
   const latestPublishedWeek = publishedWeekStarts.length > 0 ? [...publishedWeekStarts].sort().reverse()[0] : null;
 
   const tiles = [];
+  // ── Primary actions (top row) ──
   tiles.push({
     label: 'Inbox', icon: Inbox,
     onClick: () => navigate('/inbox'),
@@ -29,6 +31,14 @@ export default function MorePage() {
     iconBg: 'bg-gradient-to-br from-[#8DC63F]/15 to-[#8DC63F]/5', iconColor: 'text-[#2E5A1A]', textClass: 'text-slate-800',
     badge: inboxCounts.total || 0,
   });
+  if (isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management'].includes(staff?.system_role)) {
+    tiles.push({
+      label: 'My Team', icon: Users,
+      onClick: () => navigate('/manager-team'),
+      className: 'bg-white border border-slate-200/80 shadow-sm shadow-slate-900/[0.04] hover:border-[#2E5A1A]',
+      iconBg: 'bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10', iconColor: 'text-[#2E5A1A]', textClass: 'text-slate-800',
+    });
+  }
   if (isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(staff?.system_role)) {
     tiles.push({
       label: 'Admin Dashboard', icon: LayoutDashboard,
@@ -37,6 +47,8 @@ export default function MorePage() {
       iconBg: 'bg-white/20', iconColor: 'text-white', textClass: 'text-white',
     });
   }
+
+  // ── Secondary actions ──
   if (staff?.delivery_dashboard_enabled) {
     tiles.push({
       label: 'Deliveries', icon: Truck,
@@ -81,6 +93,7 @@ export default function MorePage() {
     >
       <DivisionIdentityBar />
       <FieldContainer space="4">
+        <QuickActionsBar />
         {/* Quick link tiles — 2 col on phone, 3 on tablet, 4 on desktop */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
           {tiles.map((tile) => {

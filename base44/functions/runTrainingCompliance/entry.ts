@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { brandedWrapper, heading, p, dataTable, callout, escapeHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import { createNotification } from '../../shared/inboxEngine.ts';
 
 /**
  * Training Compliance Autopilot — runs weekly on Monday at 07:00.
@@ -102,8 +103,32 @@ export default async function(req: Request): Promise<Response> {
       }
     }
 
-    // 4. Send weekly digest email to admins
+    // 4. Send weekly digest email to admins + create inbox alert
     if (digest.length > 0) {
+      // ── Inbox alert to compliance managers ──
+      try {
+        const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+        const adminRecipients = admins.filter(u => u.email).map(u => ({
+          staffId: null, userId: u.id, name: u.full_name || u.email, email: u.email,
+        }));
+        const expiredCount = expiring.filter(item => {
+          const exp = item.expiry_date?.length === 7 ? new Date(item.expiry_date + '-01') : new Date(item.expiry_date);
+          return exp < now;
+        }).length;
+        await createNotification(base44, {
+          recipients: adminRecipients,
+          type: 'alert',
+          category: 'compliance_expiry',
+          title: `Training gap — ${expiring.length} qualification${expiring.length !== 1 ? 's' : ''} expiring (${expiredCount} expired)`,
+          body: `${expiredCount} expired, ${expiring.length - expiredCount} expiring within 60 days. ${bookingsDrafted.length} training booking${bookingsDrafted.length !== 1 ? 's' : ''} auto-drafted for manager review. Open the People Hub training tab to confirm.`,
+          sourceHub: 'staff',
+          sourceEntity: 'ComplianceItem',
+          sourceId: '',
+          deepLink: '/staff?tab=training',
+          priority: expiredCount > 0 ? 'urgent' : 'normal',
+        });
+      } catch (_) {}
+
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
       const baseUrl = await getAppBaseUrl(base44);
       const rows = digest.map((d) => [

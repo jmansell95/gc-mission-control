@@ -30,6 +30,7 @@ import EnterpriseComplianceHub from './pages/EnterpriseComplianceHub';
 import EnterpriseCrewAvailabilityPage from './pages/EnterpriseCrewAvailabilityPage';
 import EnterpriseResourcePoolPage from './pages/EnterpriseResourcePoolPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ManagerTeamDashboard from '@/components/dashboard/ManagerTeamDashboard';
 import PrehistoricImportPage from './components/import/PrehistoricImportPage';
 import StaffDashboard from './pages/StaffDashboard';
 import ProfileRouter from '@/components/staff/ProfileRouter';
@@ -145,6 +146,7 @@ const AuthenticatedApp = () => {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/inbox" element={<RouteGuard><InboxPage /></RouteGuard>} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
+          <Route path="/manager-team" element={<RouteGuard><ManagerTeamDashboard /></RouteGuard>} />
           {/* Profile router — splits field (mobile) vs office (desktop) profile.
               Standalone (not inside FieldShell) so office users get a clean
               redirect to /admin/profile without a FieldShell flash, and field

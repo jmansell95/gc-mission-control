@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import StaffTabBar from '@/components/staff/StaffTabBar';
 import { FieldDataProvider } from '@/components/field/FieldDataProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import OfflineBanner from '@/components/field/OfflineBanner';
 
 /**
  * Shared layout route for all five field crew pages (Today, Upcoming, Scan,
@@ -17,6 +18,7 @@ export default function FieldShell({ children }) {
   return (
     <FieldDataProvider>
       <div className="h-[100dvh] field-bg flex flex-col overflow-hidden safe-area-top">
+        <OfflineBanner />
         <main
           className="flex-1 overflow-y-auto overflow-x-hidden mobile-app-content"
           style={{

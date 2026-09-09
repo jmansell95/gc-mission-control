@@ -1,13 +1,12 @@
 {
-  "name": "Training Compliance Autopilot",
-  "description": "Weekly training compliance scan \u2014 finds expiring qualifications, drafts training bookings, and emails managers a digest.",
+  "description": "Daily proactive training compliance scan \u2014 finds expiring qualifications (within 60 days), drafts training bookings, creates inbox alerts, and emails managers a digest so they can act before staff become non-compliant.",
   "trigger": {
     "condition": null,
     "config": {
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 6 * * 1",
+      "cron_expression": "0 7 * * *",
       "one_time_date": null,
       "timezone": "UTC",
       "interval_value": null,
@@ -38,6 +37,7 @@
       }
     ]
   },
+  "name": "Training Compliance Autopilot",
   "x-base44-migrated-from-automation": {
     "legacy_payload_function": "runTrainingCompliance"
   }

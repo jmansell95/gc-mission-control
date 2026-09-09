@@ -114,10 +114,72 @@ export function FieldDataProvider({ children }) {
     enabled: !!staff?.id
   });
 
-  const { data: jobs = [] } = useQuery({ queryKey: ['jobs-for-assignments'], queryFn: () => base44.entities.Job.list() });
-  const { data: vehicles = [] } = useQuery({ queryKey: ['vehicles'], queryFn: () => base44.entities.Vehicle.list() });
-  const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list() });
-  const { data: allStaff = [] } = useQuery({ queryKey: ['staff'], queryFn: () => base44.entities.Staff.list() });
+  // Reference data — cached to localStorage for offline access so field crews
+  // can see job names, locations, client info and crew mates even without signal.
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['jobs-for-assignments'],
+    queryFn: async () => {
+      try {
+        const list = await base44.entities.Job.list();
+        try { localStorage.setItem('cached_jobs', JSON.stringify(list)); } catch {}
+        return list;
+      } catch (err) {
+        if (!navigator.onLine) {
+          const cached = localStorage.getItem('cached_jobs');
+          if (cached) return JSON.parse(cached);
+        }
+        throw err;
+      }
+    },
+  });
+  const { data: vehicles = [] } = useQuery({
+    queryKey: ['vehicles'],
+    queryFn: async () => {
+      try {
+        const list = await base44.entities.Vehicle.list();
+        try { localStorage.setItem('cached_vehicles', JSON.stringify(list)); } catch {}
+        return list;
+      } catch (err) {
+        if (!navigator.onLine) {
+          const cached = localStorage.getItem('cached_vehicles');
+          if (cached) return JSON.parse(cached);
+        }
+        throw err;
+      }
+    },
+  });
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: async () => {
+      try {
+        const list = await base44.entities.Client.list();
+        try { localStorage.setItem('cached_clients', JSON.stringify(list)); } catch {}
+        return list;
+      } catch (err) {
+        if (!navigator.onLine) {
+          const cached = localStorage.getItem('cached_clients');
+          if (cached) return JSON.parse(cached);
+        }
+        throw err;
+      }
+    },
+  });
+  const { data: allStaff = [] } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      try {
+        const list = await base44.entities.Staff.list();
+        try { localStorage.setItem('cached_all_staff', JSON.stringify(list)); } catch {}
+        return list;
+      } catch (err) {
+        if (!navigator.onLine) {
+          const cached = localStorage.getItem('cached_all_staff');
+          if (cached) return JSON.parse(cached);
+        }
+        throw err;
+      }
+    },
+  });
   const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: () => base44.entities.Team.list() });
   const { data: allAssignments = [] } = useQuery({ queryKey: ['all-rota-assignments'], queryFn: () => base44.entities.RotaAssignment.list('-created_date', 500) });
   const { data: mgrTimesheets = [] } = useQuery({ queryKey: ['all-timesheets-mgr'], queryFn: () => base44.entities.Timesheet.list('-created_date', 500) });

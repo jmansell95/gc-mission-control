@@ -42,6 +42,7 @@ import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
 import { useFieldData } from '@/components/field/FieldDataProvider';
+import QuickActionsBar from '@/components/field/QuickActionsBar';
 
 export default function TodayPage() {
   const navigate = useNavigate();
@@ -423,6 +424,7 @@ export default function TodayPage() {
         <SyncHUD />
         <TrackingConsentCard staff={staff} onSignNow={() => setShowConsentModal(true)} />
         <KeyLogBookPromptBanner staff={staff} />
+        <QuickActionsBar />
 
         {nextTodayAssignment && !staff?.is_admin && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (
           <ArrivalPromptBanner
