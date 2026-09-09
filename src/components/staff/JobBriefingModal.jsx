@@ -59,7 +59,14 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
     queryKey: ['briefing-docs', job?.id],
     queryFn: async () => {
       const all = await base44.entities.JobDocument.filter({ job_id: job.id });
-      return all.filter(d => d.is_briefing_document);
+      // Show work orders (scope_of_work) and site maps in the briefing so crew
+      // review them before starting work. Also include any legacy
+      // is_briefing_document-flagged docs for backward compatibility.
+      return all.filter(d =>
+        d.category === 'scope_of_work' ||
+        d.category === 'site_map' ||
+        d.is_briefing_document
+      );
     },
     enabled: !!job?.id
   });
@@ -447,14 +454,28 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
                   <div className="space-y-3">
                     {briefingDocs.map(doc => {
                       const reviewed = reviewedDocIds.has(doc.id);
+                      const isWorkOrder = doc.category === 'scope_of_work';
+                      const isSiteMap = doc.category === 'site_map';
+                      const badge = isWorkOrder
+                        ? { label: 'Work Order', cls: 'bg-amber-100 text-amber-700' }
+                        : isSiteMap
+                          ? { label: 'Site Map', cls: 'bg-emerald-100 text-emerald-700' }
+                          : null;
                       return (
                         <div key={doc.id} className={`rounded-xl border-2 transition ${reviewed ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-white'}`}>
                           <a href={doc.document_url} target="_blank" rel="noopener noreferrer"
                             className="flex items-center justify-between gap-3 p-3.5 hover:bg-slate-50/50 rounded-t-xl transition">
                             <div className="flex items-center gap-3 min-w-0">
-                              <FileText className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                              <FileText className={`w-5 h-5 flex-shrink-0 ${isWorkOrder ? 'text-amber-600' : 'text-emerald-600'}`} />
                               <div className="min-w-0">
-                                <p className="font-semibold text-slate-900 text-sm truncate">{doc.document_name}</p>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <p className="font-semibold text-slate-900 text-sm truncate">{doc.document_name}</p>
+                                  {badge && (
+                                    <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide flex-shrink-0 ${badge.cls}`}>
+                                      {badge.label}
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-emerald-600 flex items-center gap-1">Tap to open <ExternalLink className="w-3 h-3" /></p>
                               </div>
                             </div>

@@ -7,6 +7,7 @@ import EquipmentManager from '@/components/EquipmentManager';
 import FormSection from '@/components/forms/FormSection';
 import ChipMultiSelect from '@/components/forms/ChipMultiSelect';
 import DisciplineBuilder from '@/components/disciplines/DisciplineBuilder';
+import JobDocumentsStep from '@/components/jobs/JobDocumentsStep';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 
 const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm";
@@ -20,8 +21,8 @@ function Field({ label, children, full, hint, required }) {
   );
 }
 
-const TOTAL_STEPS = 4;
-const STEP_LABELS = ['Details', 'Schedule & Contacts', 'Costing', 'Review'];
+const TOTAL_STEPS = 5;
+const STEP_LABELS = ['Details', 'Schedule & Contacts', 'Costing', 'Documents', 'Review'];
 
 export default function JobForm({ formData, setFormData, onSubmit, onCancel, editingId, clients, contractors, onFileUpload, uploadingFile }) {
   const [step, setStep] = useState(1);
@@ -217,8 +218,19 @@ export default function JobForm({ formData, setFormData, onSubmit, onCancel, edi
           </>
         )}
 
-        {/* STEP 4 — Review (new jobs only) */}
-        {!editingId && step === 4 && (
+        {/* STEP 4 — Documents */}
+        {(editingId || step === 4) && (
+          <FormSection title="Work Order & Documents" icon={FileText} columns={false}>
+            <JobDocumentsStep
+              jobId={editingId || null}
+              stagedFiles={formData._stagedDocs || []}
+              onStagedFilesChange={(docs) => setFormData({ ...formData, _stagedDocs: docs })}
+            />
+          </FormSection>
+        )}
+
+        {/* STEP 5 — Review (new jobs only) */}
+        {!editingId && step === 5 && (
           <FormSection title="Review & Confirm" icon={Check} columns={false}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <ReviewRow label="Name" value={formData.name} />

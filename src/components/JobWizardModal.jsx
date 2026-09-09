@@ -11,6 +11,7 @@ import SubcontractorAssignments from '@/components/SubcontractorAssignments';
 import DisciplineBuilder from '@/components/disciplines/DisciplineBuilder';
 import JobTypeManager from '@/components/jobs/JobTypeManager';
 import BOQWizardStep from '@/components/jobs/BOQWizardStep';
+import JobDocumentsStep from '@/components/jobs/JobDocumentsStep';
 import { getJobDisciplines, getDisciplineSubcategories } from '@/utils/jobDisciplines';
 import { getJobTypeColor, isDrillingJobType } from '@/utils/jobTeams';
 import { useDivision } from '@/contexts/DivisionContext';
@@ -23,7 +24,8 @@ const STEPS = [
   { id: 3, label: 'Billing', icon: Receipt },
   { id: 4, label: 'BOQ', icon: ClipboardList },
   { id: 5, label: 'Subcontractors', icon: Building2 },
-  { id: 6, label: 'Review', icon: Check },
+  { id: 6, label: 'Documents', icon: FileText },
+  { id: 7, label: 'Review', icon: Check },
 ];
 
 const REVENUE_METHODS = [
@@ -66,6 +68,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
   const [originalSubIds, setOriginalSubIds] = useState([]);
   const [boqLines, setBoqLines] = useState([]);
   const [originalBoqIds, setOriginalBoqIds] = useState([]);
+  const [stagedDocs, setStagedDocs] = useState([]);
   const [managerOpen, setManagerOpen] = useState(false);
   const queryClient = useQueryClient();
   const { activeDivisionId, isSuperAdmin } = useDivision();
@@ -82,6 +85,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
       setOriginalSubIds([]);
       setBoqLines([]);
       setOriginalBoqIds([]);
+      setStagedDocs([]);
       setForm(editingJob ? { ...emptyForm, ...editingJob, disciplines: getJobDisciplines(editingJob) } : emptyForm);
       if (editingJob?.id) {
         base44.entities.JobBillOfQuantities.filter({ job_id: editingJob.id }, 'sort_order', 500).then(lines => {
@@ -337,6 +341,31 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
       for (const oldBoqId of originalBoqIds) {
         if (!keptBoqIds.has(oldBoqId)) {
           await base44.entities.JobBillOfQuantities.delete(oldBoqId);
+        }
+      }
+
+      // Upload staged documents (work orders, site maps, etc.)
+      if (stagedDocs.length > 0) {
+        const failed = [];
+        for (const sf of stagedDocs) {
+          try {
+            const { file_url } = await base44.integrations.Core.UploadFile({ file: sf.file });
+            await base44.entities.JobDocument.create({
+              job_id: jobId,
+              document_url: file_url,
+              document_name: sf.file.name,
+              category: sf.category,
+              version: 1,
+              is_current_version: true,
+            });
+          } catch (uploadErr) {
+            failed.push(sf.file.name);
+          }
+        }
+        queryClient.invalidateQueries({ queryKey: ['job-documents', jobId] });
+        queryClient.invalidateQueries({ queryKey: ['job-documents-staff', jobId] });
+        if (failed.length > 0) {
+          console.warn('Failed to upload documents:', failed.join(', '));
         }
       }
 
@@ -720,8 +749,17 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                 />
               )}
 
-              {/* STEP 6 — Review */}
+              {/* STEP 6 — Documents */}
               {step === 6 && (
+                <JobDocumentsStep
+                  jobId={editingJob?.id || null}
+                  stagedFiles={stagedDocs}
+                  onStagedFilesChange={setStagedDocs}
+                />
+              )}
+
+              {/* STEP 7 — Review */}
+              {step === 7 && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-[#2E5A1A]">
                     <Sparkles className="w-4 h-4" />
@@ -784,7 +822,23 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                       })}
                     </div>
                   )}
-                  <p className="text-xs text-slate-400">Equipment, documents and the full rota can be added from the job page after creation.</p>
+                  {/* Documents summary */}
+                  {stagedDocs.length > 0 && (
+                    <div className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#2E5A1A]" />
+                        <p className="text-sm font-semibold text-slate-800">Documents ({stagedDocs.length})</p>
+                      </div>
+                      {stagedDocs.map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs bg-white rounded-lg px-2.5 py-1.5 border border-slate-100">
+                          <FileText className="w-3 h-3 text-slate-400" />
+                          <span className="font-medium text-slate-700 truncate">{f.file.name}</span>
+                          <span className="text-slate-400 ml-auto capitalize">{(f.category || 'other').replace(/_/g, ' ')}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-400">Equipment and the full rota can be added from the job page after creation.</p>
                 </div>
               )}
             </div>
@@ -806,7 +860,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
           )}
-          {step < 6 ? (
+          {step < 7 ? (
             <button type="button" onClick={() => stepValid() && setStep(step + 1)} disabled={!stepValid()} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-40 flex items-center justify-center gap-1.5">
               Continue <ChevronRight className="w-4 h-4" />
             </button>
