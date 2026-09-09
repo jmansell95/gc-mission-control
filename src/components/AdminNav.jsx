@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Calendar, CalendarDays, Grid3x3, LogOut, Settings, Bell, Sparkles, Menu, HelpCircle, Receipt, User, Truck, Boxes, Car, Clock, ShieldCheck, PoundSterling, ShieldAlert, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, Wrench, Warehouse, Users, Contact, Zap, FileBarChart, FileUp, ClipboardCheck, FlaskConical,   Crown, ArrowLeftRight, TrendingUp, ScanLine } from 'lucide-react';
+import { Briefcase, Calendar, CalendarDays, Grid3x3, LogOut, Settings, Bell, Sparkles, Menu, HelpCircle, Receipt, User, Truck, Boxes, Car, Clock, ShieldCheck, PoundSterling, ShieldAlert, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, Wrench, Warehouse, Users, Contact, Zap, FileBarChart, FileUp, ClipboardCheck, FlaskConical,   Crown, ArrowLeftRight, TrendingUp, ScanLine, Inbox } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import NotificationCenter from '@/components/NotificationCenter';
 import { useNotifications } from '@/hooks/useNotifications';
+import InboxBadge from '@/components/inbox/InboxBadge';
+import { useInbox } from '@/hooks/useInbox';
 import { useAIHub } from '@/components/ai/AIHub';
 import { useNavigate } from 'react-router-dom';
 import MobileNavDrawer from '@/components/MobileNavDrawer';
@@ -35,6 +37,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
   const [isTablet, setIsTablet] = useState(false);
   const notifications = useNotifications();
   const notifCount = notifications.count;
+  const { counts: inboxCounts } = useInbox();
   const { openHub } = useAIHub();
   const { isComingSoon, isLocked } = useReadiness();
   const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
@@ -157,6 +160,24 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
           </button>
         </div>
       )}
+      {/* Universal Inbox — prominent at top of nav for all staff */}
+      <div className="px-2 pb-1.5">
+        <button type="button" onClick={() => navigate('/inbox')}
+          className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-[#8DC63F]/20 to-[#8DC63F]/10 text-[#8DC63F] hover:from-[#8DC63F]/30 hover:to-[#8DC63F]/20 ring-1 ring-[#8DC63F]/30 relative`}>
+          <Inbox className="w-[18px] h-[18px] flex-shrink-0" />
+          {!effectiveCollapsed && <span className="flex-1 text-left">Inbox</span>}
+          {!effectiveCollapsed && inboxCounts.total > 0 && (
+            <span className="text-ui-micro font-bold text-white bg-[#8DC63F] px-1.5 py-0.5 rounded-full">
+              {inboxCounts.total > 9 ? '9+' : inboxCounts.total}
+            </span>
+          )}
+          {effectiveCollapsed && inboxCounts.total > 0 && (
+            <span className="absolute top-1 right-1 min-w-[14px] h-3.5 px-1 bg-[#8DC63F] text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-1 ring-white/30">
+              {inboxCounts.total > 9 ? '9+' : inboxCounts.total}
+            </span>
+          )}
+        </button>
+      </div>
       <div className="flex-1 px-2 py-1.5 space-y-0.5 overflow-y-auto">
         {navItems.map(item => {
           const Icon = item.icon;
@@ -224,6 +245,15 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
+            <button onClick={() => navigate('/inbox')} aria-label="Inbox" type="button"
+              className="relative h-10 w-10 flex items-center justify-center text-white hover:bg-white/15 active:scale-95 rounded-lg transition flex-shrink-0 touch-manipulation select-none">
+              <Inbox className="w-[18px] h-[18px]" />
+              {inboxCounts.total > 0 && (
+                <span className={`absolute top-0.5 right-0.5 min-w-[15px] h-4 px-1 ${inboxCounts.overdue > 0 ? 'bg-rose-500' : 'bg-[#8DC63F]'} text-white text-[9px] font-bold rounded-full flex items-center justify-center ring-1 ring-white/30`}>
+                  {inboxCounts.total > 9 ? '9+' : inboxCounts.total}
+                </span>
+              )}
+            </button>
             <button onClick={() => setNotifOpen(true)} aria-label="Notifications" type="button"
               className="relative h-10 w-10 flex items-center justify-center text-white hover:bg-white/15 active:scale-95 rounded-lg transition flex-shrink-0 touch-manipulation select-none">
               <Bell className="w-[18px] h-[18px]" />

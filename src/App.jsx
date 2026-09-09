@@ -15,6 +15,7 @@ import HubReadinessGate from '@/components/HubReadinessGate';
 import { MobileAppProvider } from '@/contexts/MobileAppContext';
 import AppShell from '@/components/mobile/AppShell';
 import Home from './pages/Home';
+import InboxPage from './pages/InboxPage';
 import PendingAccess from './pages/PendingAccess';
 import Onboarding from './pages/Onboarding';
 import EnterpriseDashboard from './pages/EnterpriseDashboard';
@@ -142,6 +143,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/inbox" element={<RouteGuard><InboxPage /></RouteGuard>} />
           <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
           {/* Profile router — splits field (mobile) vs office (desktop) profile.
               Standalone (not inside FieldShell) so office users get a clean

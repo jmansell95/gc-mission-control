@@ -1,0 +1,192 @@
+{
+  "name": "InboxItem",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "approval",
+        "alert",
+        "notice"
+      ],
+      "default": "notice",
+      "description": "What kind of item this is. 'approval' = needs a yes/no decision from the recipient; 'alert' = actionable warning needing human attention (compliance expiring, invoice overdue, failed audit); 'notice' = info-only (schedule published, new job, crew message)."
+    },
+    "category": {
+      "type": "string",
+      "description": "Machine category key (e.g. 'afp_review', 'timesheet', 'access_request', 'early_leave', 'delay_log', 'absence', 'pricing_review', 'afp_dispute', 'off_hire', 'compliance_doc', 'compliance_expiry', 'invoice_overdue', 'failed_audit', 'zero_line_afp', 'margin_breach', 'schedule_published', 'new_job', 'crew_message', 'weather_warning', 'toolbox_talk', 'debt_collection', 'payroll_gap', 'entity_orphan', 'system'). Used for filtering and icon mapping."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short headline shown in the inbox list (e.g. 'AFP #3 for Cambridge North needs your review')."
+    },
+    "body": {
+      "type": "string",
+      "description": "Longer description / context shown when the item is expanded. Supports plain text."
+    },
+    "source_hub": {
+      "type": "string",
+      "enum": [
+        "overview",
+        "jobs",
+        "scheduling",
+        "staff",
+        "logistics",
+        "assets",
+        "fleet",
+        "investigation",
+        "compliance",
+        "billing",
+        "reports",
+        "settings",
+        "field",
+        "enterprise"
+      ],
+      "description": "Which hub this item originated from. Drives the sidebar badge count and the hub-colour coding in the inbox."
+    },
+    "source_entity": {
+      "type": "string",
+      "description": "The entity type this item relates to (e.g. 'AFP', 'RotaAssignment', 'Absence', 'Invoice'). Used for deep-linking and audit."
+    },
+    "source_id": {
+      "type": "string",
+      "description": "The ID of the underlying record (AFP id, assignment id, etc.). Used to deep-link and to group sibling items."
+    },
+    "deep_link": {
+      "type": "string",
+      "description": "App route to open when the item is tapped (e.g. '/billing?afp=<id>'). Opens the exact record in the relevant hub."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "urgent",
+        "normal",
+        "info"
+      ],
+      "default": "normal",
+      "description": "Urgency level. 'urgent' = red, surfaces at top + triggers immediate email; 'normal' = standard; 'info' = low-priority notice, batched into the daily digest."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "dismissed",
+        "archived"
+      ],
+      "default": "pending",
+      "description": "Lifecycle. 'pending' = awaiting action; 'approved'/'rejected' = decision made (approvals); 'dismissed' = recipient cleared it (alerts/notices); 'archived' = moved to archive after being handled."
+    },
+    "assigned_to_staff_id": {
+      "type": "string",
+      "description": "Staff ID of the person who must action this item. Resolved by the approval engine from the routing config."
+    },
+    "assigned_to_user_id": {
+      "type": "string",
+      "description": "Platform user ID of the assignee (denormalised from Staff.user_id). Used for RLS so the assigned user can read/action their items without a join."
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Assignee display name (denormalised for the inbox UI)."
+    },
+    "requester_staff_id": {
+      "type": "string",
+      "description": "Staff ID of the person who triggered this item (the one who submitted the AFP, requested leave, etc.)."
+    },
+    "requester_user_id": {
+      "type": "string",
+      "description": "Platform user ID of the requester. Used for RLS so requesters can see the status of their own requests."
+    },
+    "requester_name": {
+      "type": "string",
+      "description": "Requester display name (denormalised)."
+    },
+    "approval_type": {
+      "type": "string",
+      "description": "The approval type key (matching ApprovalRoutingConfig.approval_type). Only set on type='approval' items. Used to look up the routing config and to group sibling items sent to multiple approvers."
+    },
+    "group_key": {
+      "type": "string",
+      "description": "Shared key linking sibling items created for the same approval request (when multiple approvers each get their own copy). When any sibling is actioned, the engine closes all items with the same group_key. Format: '<approval_type>:<source_id>:<timestamp>'."
+    },
+    "sla_due_at": {
+      "type": "string",
+      "description": "ISO timestamp by which this item should be actioned. Computed from the routing config's sla_hours. When exceeded, the SLA checker escalates (re-notify, then route to fallback). Null for notices and SLA-disabled types."
+    },
+    "is_overdue": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set to true by the SLA checker when sla_due_at has passed without action. Drives the red overdue badge in the inbox."
+    },
+    "delegated_by_staff_id": {
+      "type": "string",
+      "description": "Staff ID of the person who delegated this item to the current assignee. Set when a manager delegates their approvals."
+    },
+    "delegated_until": {
+      "type": "string",
+      "description": "ISO timestamp after which delegation expires and items route back to the original approver."
+    },
+    "action_note": {
+      "type": "string",
+      "description": "Note attached when the item was actioned (approver's reason, rejecter's explanation, dismissal reason)."
+    },
+    "actioned_at": {
+      "type": "string",
+      "description": "ISO timestamp when the item was actioned/closed."
+    },
+    "actioned_by": {
+      "type": "string",
+      "description": "Name of the person who actioned the item."
+    },
+    "email_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the notification email was successfully sent to the assignee. False if email failed or was muted for this type by the recipient."
+    }
+  },
+  "required": [
+    "type",
+    "title",
+    "source_hub"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.assigned_to_user_id": "{{user.id}}"
+        },
+        {
+          "data.requester_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "data.assigned_to_user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

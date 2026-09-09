@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox } from 'lucide-react';
 import SelfServiceHub from '@/components/staff/SelfServiceHub';
+import { useInbox } from '@/hooks/useInbox';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import FieldPageShell from '@/components/field/FieldPageShell';
@@ -15,11 +16,19 @@ export default function MorePage() {
   const ctx = useFieldData();
   const { activeDivision, staff, isPlatformAdmin, allStaff, jobs, visibleAssignments, assignmentsLoading, vehicles, clients, rotaWeeks } = ctx;
   const [showScheduleSummary, setShowScheduleSummary] = useState(false);
+  const { counts: inboxCounts } = useInbox();
 
   const publishedWeekStarts = rotaWeeks.filter(w => w.status === 'published' && !w.superseded).map(w => w.week_start);
   const latestPublishedWeek = publishedWeekStarts.length > 0 ? [...publishedWeekStarts].sort().reverse()[0] : null;
 
   const tiles = [];
+  tiles.push({
+    label: 'Inbox', icon: Inbox,
+    onClick: () => navigate('/inbox'),
+    className: 'bg-white border border-slate-200/80 shadow-sm shadow-slate-900/[0.04] hover:border-[#8DC63F]',
+    iconBg: 'bg-gradient-to-br from-[#8DC63F]/15 to-[#8DC63F]/5', iconColor: 'text-[#2E5A1A]', textClass: 'text-slate-800',
+    badge: inboxCounts.total || 0,
+  });
   if (isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(staff?.system_role)) {
     tiles.push({
       label: 'Admin Dashboard', icon: LayoutDashboard,
@@ -79,8 +88,13 @@ export default function MorePage() {
             return (
               <button key={tile.label} onClick={tile.onClick} type="button"
                 className={`rounded-2xl flex flex-col items-center gap-3 p-5 hover:shadow-lg active:scale-95 transition touch-manipulation ${tile.className}`}>
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${tile.iconBg}`}>
+                <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${tile.iconBg}`}>
                   <Icon className={`w-7 h-7 ${tile.iconColor}`} strokeWidth={2.5} />
+                  {tile.badge > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-[#8DC63F] text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
+                      {tile.badge > 9 ? '9+' : tile.badge}
+                    </span>
+                  )}
                 </div>
                 <span className={`text-base font-bold ${tile.textClass}`}>{tile.label}</span>
               </button>

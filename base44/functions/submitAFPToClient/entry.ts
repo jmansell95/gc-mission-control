@@ -1,8 +1,11 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 /**
  * submitAFPToClient — marks an AFP as submitted to the client and auto-creates
  * the next AFP in the chain (period_start = submitted AFP's period_end + 1 day).
+ * Also creates an inbox approval routed to the configured AFP reviewer(s) so a
+ * manager is notified to review the submitted AFP.
  *
  * Input:  { afp_id: string }
  * Output: { success, afp, next_afp }
@@ -100,6 +103,25 @@ export default async function(req: Request): Promise<Response> {
       // Link next AFP to current
       await base44.entities.AFP.update(afp_id, { next_afp_id: nextAfp.id });
     }
+
+    // ── Create inbox approval for the billing manager to review this AFP ──
+    // Resolve the submitter's Staff record so the approval engine can route
+    // via their manager chain (or the configured AFP reviewer group).
+    try {
+      const myStaff = await base44.asServiceRole.entities.Staff.filter({ user_id: user.id });
+      const requesterStaffId = myStaff[0]?.id || null;
+      await createApproval(base44, {
+        approvalType: 'afp_review',
+        requesterStaffId,
+        title: `AFP #${afp.afp_number || ''} for ${afp.job_name || afp.job_reference || 'job'} needs your review`,
+        body: `Submitted by ${userName}. Total claimed: £${Number(originalTotal || 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}. Period: ${afp.period_start_date || '—'} to ${afp.period_end_date || '—'}. Please review and approve.`,
+        sourceHub: 'billing',
+        sourceEntity: 'AFP',
+        sourceId: afp_id,
+        deepLink: `/billing?afp=${afp_id}`,
+        priority: 'normal',
+      });
+    } catch (_) { /* don't fail the submission if the inbox item fails */ }
 
     return Response.json({
       success: true,

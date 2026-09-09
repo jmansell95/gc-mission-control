@@ -83,6 +83,7 @@ import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfi
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
 import PendingAccessQueue from '@/components/settings/PendingAccessQueue';
 import AccessGateSettings from '@/components/settings/AccessGateSettings';
+import ApprovalRoutingSettings from '@/components/settings/ApprovalRoutingSettings';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
@@ -244,6 +245,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'coming-soon-manager': return <ComingSoonManager />;
       case 'pending-access': return <PendingAccessQueue />;
       case 'access-gate': return <AccessGateSettings />;
+      case 'approval-routing': return <ApprovalRoutingSettings />;
       case 'division-check-config': return <DivisionCheckConfigManager />;
       case 'migration-hub': return <MigrationHubTab />;
       default: return null;

@@ -1,0 +1,41 @@
+{
+  "name": "Inbox SLA Escalation Check",
+  "description": "Nightly check of pending inbox approval items past their SLA deadline. Marks them overdue, re-notifies the approver, and escalates items >24h overdue to fallback approvers or super admins.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "inbox_sla_escalation_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkInboxSLAs",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

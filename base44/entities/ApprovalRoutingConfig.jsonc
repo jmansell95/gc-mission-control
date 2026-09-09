@@ -1,0 +1,104 @@
+{
+  "name": "ApprovalRoutingConfig",
+  "type": "object",
+  "properties": {
+    "approval_type": {
+      "type": "string",
+      "description": "Unique key identifying the approval type (e.g. 'afp_review', 'timesheet', 'access_request', 'early_leave', 'delay_log', 'absence', 'pricing_review', 'afp_dispute', 'off_hire', 'compliance_doc', 'debt_collection'). Matches the category on InboxItem records. The approval engine looks up this config to decide who receives each request."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable name shown in the Settings \u2192 Approval Routing editor."
+    },
+    "hub": {
+      "type": "string",
+      "enum": [
+        "overview",
+        "jobs",
+        "scheduling",
+        "staff",
+        "logistics",
+        "assets",
+        "fleet",
+        "investigation",
+        "compliance",
+        "billing",
+        "reports",
+        "settings"
+      ],
+      "description": "Which hub this approval type belongs to. Shown in the routing editor grouped by hub."
+    },
+    "approver_mode": {
+      "type": "string",
+      "enum": [
+        "manager_chain",
+        "permission_group",
+        "specific_staff"
+      ],
+      "default": "manager_chain",
+      "description": "How approvers are resolved. 'manager_chain' = the requester's Staff.manager_id, escalating to fallback then super admins if no manager. 'permission_group' = all active staff in the named permission group. 'specific_staff' = the explicit staff list in approver_staff_ids."
+    },
+    "approver_staff_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Staff IDs of the approvers. Used when approver_mode is 'specific_staff'. Ignored otherwise."
+    },
+    "fallback_staff_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Fallback approvers used when the primary approver(s) can't be resolved (no manager set, or permission group is empty), and when SLA escalation triggers. If empty, escalation goes to super admins."
+    },
+    "permission_group_id": {
+      "type": "string",
+      "description": "PermissionGroup ID used when approver_mode is 'permission_group'. All active staff assigned this group receive the approval."
+    },
+    "sla_hours": {
+      "type": "number",
+      "default": 48,
+      "description": "Hours within which this approval should be actioned. The engine sets sla_due_at = created_at + sla_hours on each item. When exceeded, the SLA checker escalates. 0 = no SLA (never escalates)."
+    },
+    "requires_multiple_signoffs": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when every approver must sign off independently (each gets their own item that stays pending until they action it). False = first approver to act closes all sibling items (first-to-action-wins)."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "When false, approvals of this type are not routed (the underlying record is auto-approved or handled by a different flow). Used to disable a routing config without deleting it."
+    },
+    "last_edited_by": {
+      "type": "string",
+      "description": "Name of the admin who last edited this routing config. Set on every save for the audit trail."
+    }
+  },
+  "required": [
+    "approval_type",
+    "label",
+    "approver_mode"
+  ],
+  "rls": {
+    "read": null,
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
