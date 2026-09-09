@@ -28,6 +28,15 @@
       "type": "boolean",
       "default": false,
       "description": "Legacy flag for users who previously oversaw all divisions. Super admins (role='admin') have full access regardless of this flag. Directors use managed_division_ids for scoped multi-division access instead of this flag."
+    },
+    "access_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "description": "Access gate status. 'pending' = new SSO user waiting for admin approval (shown a pending screen with approver contact info). 'approved' = admin approved or auto-linked via a matching Staff record. 'rejected' = admin denied access (shown a rejection screen). Blank/undefined = existing user from before the gate was introduced (treated as 'approved' so no one is locked out). Admins (role='admin') always bypass this check."
     }
   }
 }

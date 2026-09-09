@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import DomainAccessError from '@/components/DomainAccessError';
+import AccessGateScreen from '@/components/AccessGateScreen';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import RouteGuard from '@/components/RouteGuard';
@@ -105,6 +106,23 @@ const AuthenticatedApp = () => {
   // Reject Microsoft SSO logins from non-ground-control.co.uk email domains
   if (!isClientPortalRoute && authError && authError.type === 'domain_not_allowed') {
     return <DomainAccessError email={authError.email} />;
+  }
+
+  // Access gate — user is waiting for admin approval
+  if (!isClientPortalRoute && authError && authError.type === 'access_pending') {
+    return (
+      <AccessGateScreen
+        status="pending"
+        email={authError.email}
+        approvers={authError.approvers || []}
+        contactInstructions={authError.contact_instructions || ''}
+      />
+    );
+  }
+
+  // Access gate — user was rejected by an admin
+  if (!isClientPortalRoute && authError && authError.type === 'access_rejected') {
+    return <AccessGateScreen status="rejected" email={authError.email} />;
   }
 
   // Render the main app

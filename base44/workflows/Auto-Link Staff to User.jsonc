@@ -1,0 +1,34 @@
+{
+  "name": "Auto-Link Staff to User",
+  "description": "When a Staff record is created, checks if a platform User with a matching email exists and is pending. If so, auto-approves the user and links the Staff record's user_id \u2014 so creating a Staff record is all an admin needs to do to grant someone access.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create"
+      ],
+      "entity_name": "Staff"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_link_staff_to_user",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autoLinkStaffToUser",
+            "args": {}
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

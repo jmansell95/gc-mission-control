@@ -119,6 +119,66 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
+      // ── Access gate ──
+      // Non-admins must have access_status='approved' to enter the app.
+      // 'pending' or undefined → show pending screen (and register them).
+      // 'rejected' → show rejection screen.
+      if (!isAdmin) {
+        const accessStatus = currentUser?.access_status;
+
+        if (accessStatus === 'approved') {
+          // Approved — proceed normally
+          setUser(currentUser);
+          setIsAuthenticated(true);
+          setAuthError(null);
+          setIsLoadingAuth(false);
+          setAuthChecked(true);
+        } else if (accessStatus === 'rejected') {
+          // Rejected — show rejection screen
+          setUser(currentUser);
+          setIsAuthenticated(false);
+          setAuthChecked(true);
+          setIsLoadingAuth(false);
+          setAuthError({ type: 'access_rejected', message: 'Access not granted', email: currentUser?.email });
+        } else {
+          // Pending or undefined — register and show pending screen
+          setUser(currentUser);
+          setIsAuthenticated(false);
+          setAuthChecked(true);
+          setIsLoadingAuth(false);
+          try {
+            const res = await base44.functions.invoke('registerPendingAccess');
+            const data = res?.data || res || {};
+            if (data.access_status === 'approved') {
+              // Auto-approved in the meantime (e.g. staff link)
+              setIsAuthenticated(true);
+              setAuthError(null);
+            } else if (data.access_status === 'rejected') {
+              setAuthError({ type: 'access_rejected', message: 'Access not granted', email: currentUser?.email });
+            } else {
+              setAuthError({
+                type: 'access_pending',
+                message: 'Awaiting access approval',
+                email: currentUser?.email,
+                approvers: data.approvers || [],
+                contact_instructions: data.contact_instructions || '',
+              });
+            }
+          } catch (e) {
+            // If the function fails, still show the pending screen
+            setAuthError({
+              type: 'access_pending',
+              message: 'Awaiting access approval',
+              email: currentUser?.email,
+              approvers: [],
+              contact_instructions: '',
+            });
+          }
+        }
+        return;
+      }
+
+      // Admins bypass the gate
       setUser(currentUser);
       setIsAuthenticated(true);
       setAuthError(null);

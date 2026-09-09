@@ -81,6 +81,8 @@ import ComingSoonManager from '@/components/settings/ComingSoonManager';
 import ComingSoonLock from '@/components/settings/ComingSoonLock';
 import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfigManager';
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
+import PendingAccessQueue from '@/components/settings/PendingAccessQueue';
+import AccessGateSettings from '@/components/settings/AccessGateSettings';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
@@ -240,6 +242,8 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'openground-sync': return <OpenGroundSettings />;
       case 'rewards': return <RewardsManager />;
       case 'coming-soon-manager': return <ComingSoonManager />;
+      case 'pending-access': return <PendingAccessQueue />;
+      case 'access-gate': return <AccessGateSettings />;
       case 'division-check-config': return <DivisionCheckConfigManager />;
       case 'migration-hub': return <MigrationHubTab />;
       default: return null;
