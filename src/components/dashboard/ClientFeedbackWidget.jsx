@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Star, MessageSquare, TrendingUp, ThumbsUp, Smile, Meh, Frown } from 'lucide-react';
+import { Star, MessageSquare, TrendingUp, ThumbsUp, Smile, Meh, Frown, ArrowRight, Settings } from 'lucide-react';
 import WidgetShell from '@/components/dashboard/WidgetShell';
 import { format } from 'date-fns';
 
@@ -14,6 +15,7 @@ const NPS_BAND = (score) => {
 
 export default function ClientFeedbackWidget() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
 
   const { data: feedback = [] } = useQuery({ queryKey: ['client-feedback'], queryFn: () => base44.entities.ClientFeedback.list('-submitted_at', 30) });
@@ -67,9 +69,20 @@ export default function ClientFeedbackWidget() {
         {/* Recent feedback */}
         <div className="space-y-2 max-h-64 overflow-y-auto">
           {feedback.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-6 text-center">
-              <MessageSquare className="w-8 h-8 text-slate-300 mb-2" />
-              <p className="text-xs text-slate-500">No client feedback yet. Feedback is collected via the client portal after job completion.</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center mb-3">
+                <MessageSquare className="w-7 h-7 text-slate-300" />
+              </div>
+              <p className="text-sm font-semibold text-slate-700 mb-1">No client feedback yet</p>
+              <p className="text-xs text-slate-400 mb-4 max-w-[220px]">Feedback is collected via the client portal after job completion. Enable it to start collecting NPS scores and reviews.</p>
+              <button
+                onClick={() => navigate('/enterprise/settings')}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-[#2E5A1A] bg-[#2E5A1A]/5 hover:bg-[#2E5A1A]/10 rounded-lg transition border border-[#2E5A1A]/15"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Enable feedback on portal
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           ) : feedback.slice(0, 8).map(f => {
             const band = NPS_BAND(f.nps_score);

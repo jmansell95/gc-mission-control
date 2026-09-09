@@ -1,124 +1,101 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
 import {
-  FolderKanban, Loader2, TrendingUp, TrendingDown, ShieldCheck, ShieldAlert,
+  Loader2, TrendingUp, TrendingDown, ShieldCheck, ShieldAlert,
   Calendar, AlertTriangle, CheckCircle2, Activity, PoundSterling, Clock,
+  Briefcase,
 } from 'lucide-react';
 import WidgetShell from '@/components/dashboard/WidgetShell';
 import { useAllJobsFinancials } from '@/hooks/useAllJobsFinancials';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 const fmtGbp = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
 
-// Project Health Dashboard — combines schedule progress, compliance status,
-// risk flags and financials into one executive health score per project.
-// Each project gets a health badge (green/amber/red) based on:
-//   • Schedule — is the project on time or slipping?
-//   • Compliance — any expired equipment or staff quals on active jobs?
+// Project Health Dashboard — per-job health score combining schedule
+// progress, compliance status and financials into one executive health badge.
+// Rebuilt at the Job level (Jobs ARE the projects in this app).
+// Each job gets a health badge (green/amber/red) based on:
+//   • Schedule — is the job on time or slipping?
+//   • Compliance — any expired equipment or staff quals?
 //   • Financials — is margin positive and within budget?
 export default function ProjectHealthDashboardWidget({ onNavigate }) {
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
-  const { data: projects = [], isLoading: projLoading } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => base44.entities.Project.list(),
-  });
-  const { data: jobs = [] } = useQuery({
-    queryKey: ['jobs-active'],
-    queryFn: () => base44.entities.Job.filter({ status: 'in_progress' }),
-  });
   const { data: assets = [] } = useQuery({
-    queryKey: ['assets-all'],
+    queryKey: ['assets-all-health'],
     queryFn: () => base44.entities.SiteAsset.list(),
   });
   const { data: complianceItems = [] } = useQuery({
     queryKey: ['compliance-staff-all-health'],
     queryFn: () => base44.entities.ComplianceItem.filter({ category: 'staff' }),
   });
-  const { data: staff = [] } = useQuery({
-    queryKey: ['staff-active-health'],
-    queryFn: () => base44.entities.Staff.filter({ is_active: true }),
-  });
   const { data: allFin, isLoading: finLoading } = useAllJobsFinancials();
 
+  const jobs = allFin?.jobs || [];
   const finMap = allFin?.finMap || {};
-  const allJobs = allFin?.jobs || jobs;
 
-  const jobsByProject = useMemo(() => {
-    const map = {};
-    allJobs.forEach((j) => { if (j.project_id) { (map[j.project_id] ||= []).push(j); } });
-    return map;
-  }, [allJobs]);
-
-  const projectOptions = useMemo(
-    () => projects.filter((p) => (jobsByProject[p.id] || []).length > 0),
-    [projects, jobsByProject]
+  // Only show active jobs (in_progress, planning, decommissioning)
+  const activeJobs = useMemo(
+    () => jobs.filter(j => j.status !== 'completed' && j.status !== 'cancelled'),
+    [jobs]
   );
 
-  const effectiveProjectId = selectedProjectId || projectOptions[0]?.id || null;
-  const project = projects.find((p) => p.id === effectiveProjectId);
-  const projectJobs = jobsByProject[effectiveProjectId] || [];
+  const effectiveJobId = selectedJobId || activeJobs[0]?.id || null;
+  const job = activeJobs.find(j => j.id === effectiveJobId);
 
-  // ── Health calculations ──
+  // ── Health calculations for the selected job ──
   const health = useMemo(() => {
-    if (!projectJobs.length) return null;
+    if (!job) return null;
 
-    // Financials
-    let totalRevenue = 0, totalCost = 0, totalInvoiced = 0;
-    projectJobs.forEach((j) => {
-      const f = finMap[j.id] || {};
-      totalRevenue += f.earned || f.revenue || 0;
-      totalCost += f.cost || 0;
-      totalInvoiced += f.invoiced || 0;
-    });
+    const fin = finMap[job.id] || {};
+    const totalRevenue = fin?.summary?.total_revenue_net || fin?.earned || fin?.revenue || 0;
+    const totalCost = fin?.summary?.total_cost || fin?.cost || 0;
+    const totalInvoiced = fin?.invoiced || 0;
     const profit = totalRevenue - totalCost;
     const margin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
-    const unbilled = totalRevenue - totalInvoiced;
+    const unbilled = Math.max(0, totalRevenue - totalInvoiced);
 
     // Schedule — compare planned end vs today
     const today = new Date().toISOString().slice(0, 10);
-    const overdueJobs = projectJobs.filter((j) => j.end_date && j.end_date < today && j.status !== 'completed');
-    const onTrackJobs = projectJobs.filter((j) => !j.end_date || j.end_date >= today);
+    const isOverdue = j => j.end_date && j.end_date < today && j.status !== 'completed';
+    const overdue = isOverdue(job);
 
-    // Compliance — check assets assigned to this project's jobs
-    const projectJobIds = new Set(projectJobs.map((j) => j.id));
-    const projectAssets = assets.filter((a) => a.is_active);
-    const expiredAssets = projectAssets.filter((a) => a.compliance_status === 'expired');
-    const expiringAssets = projectAssets.filter((a) => a.compliance_status === 'expiring');
+    // Compliance — check all assets (division-scoped filtering happens at query level)
+    const expiredAssets = assets.filter(a => a.compliance_status === 'expired');
+    const expiringAssets = assets.filter(a => a.compliance_status === 'expiring');
 
-    // Staff compliance — check staff assigned to this project's jobs
-    const projectStaff = staff.filter((s) => s.is_active);
-    const expiredStaffCompliance = complianceItems.filter((c) =>
-      c.category === 'staff' && c.expiry_date && c.expiry_date < today
+    // Staff compliance
+    const todayStr = today;
+    const expiredStaffCompliance = complianceItems.filter(c =>
+      c.category === 'staff' && c.expiry_date && c.expiry_date < todayStr
     );
 
     // Risk flags
     const risks = [];
-    if (overdueJobs.length > 0) risks.push({ type: 'schedule', label: `${overdueJobs.length} job(s) past planned end date`, severity: 'amber' });
+    if (overdue) risks.push({ type: 'schedule', label: 'Past planned end date', severity: 'amber' });
     if (expiredAssets.length > 0) risks.push({ type: 'compliance', label: `${expiredAssets.length} asset(s) with expired compliance`, severity: 'red' });
     if (margin < 0) risks.push({ type: 'financial', label: `Negative margin (${margin.toFixed(1)}%)`, severity: 'red' });
     if (unbilled > 10000) risks.push({ type: 'financial', label: `High unbilled revenue (${fmtGbp(unbilled)})`, severity: 'amber' });
     if (expiringAssets.length > 0) risks.push({ type: 'compliance', label: `${expiringAssets.length} asset(s) expiring soon`, severity: 'amber' });
+    if (expiredStaffCompliance.length > 0) risks.push({ type: 'compliance', label: `${expiredStaffCompliance.length} staff cert(s) expired`, severity: 'amber' });
 
     // Overall health score
-    const hasRed = risks.some((r) => r.severity === 'red');
-    const hasAmber = risks.some((r) => r.severity === 'amber');
+    const hasRed = risks.some(r => r.severity === 'red');
+    const hasAmber = risks.some(r => r.severity === 'amber');
     const healthStatus = hasRed ? 'at_risk' : hasAmber ? 'warning' : 'healthy';
     const healthScore = Math.max(0, 100 - risks.length * 15 - (hasRed ? 20 : 0));
 
     return {
       totalRevenue, totalCost, profit, margin, totalInvoiced, unbilled,
-      overdueJobs: overdueJobs.length, onTrackJobs: onTrackJobs.length,
-      expiredAssets: expiredAssets.length, expiringAssets: expiringAssets.length,
+      overdue, expiredAssets: expiredAssets.length, expiringAssets: expiringAssets.length,
       expiredStaffCompliance: expiredStaffCompliance.length,
       risks, healthStatus, healthScore,
-      jobCount: projectJobs.length,
     };
-  }, [projectJobs, finMap, assets, staff, complianceItems]);
+  }, [job, finMap, assets, complianceItems]);
 
-  if (projLoading || finLoading) {
+  if (finLoading) {
     return (
-      <WidgetShell title="Project Health" icon={Activity}>
+      <WidgetShell title="Job Health" icon={Activity}>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 text-slate-300 animate-spin" />
         </div>
@@ -126,11 +103,11 @@ export default function ProjectHealthDashboardWidget({ onNavigate }) {
     );
   }
 
-  if (!projectOptions.length) {
+  if (!activeJobs.length) {
     return (
-      <WidgetShell title="Project Health" icon={Activity}>
+      <WidgetShell title="Job Health" icon={Activity}>
         <div className="text-center py-8 text-sm text-slate-400">
-          No active projects with jobs yet.
+          No active jobs yet. Health scores appear here once jobs are created and have financial activity.
         </div>
       </WidgetShell>
     );
@@ -146,30 +123,30 @@ export default function ProjectHealthDashboardWidget({ onNavigate }) {
   const HealthIcon = cfg.icon;
 
   return (
-    <WidgetShell title="Project Health" icon={Activity}>
-      {/* Project selector */}
-      {projectOptions.length > 1 && (
+    <WidgetShell title="Job Health" icon={Activity}>
+      {/* Job selector */}
+      {activeJobs.length > 1 && (
         <div className="mb-3">
           <select
-            value={effectiveProjectId || ''}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-emerald-600"
+            value={effectiveJobId || ''}
+            onChange={(e) => setSelectedJobId(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium focus:outline-none focus:border-emerald-600 bg-white"
           >
-            {projectOptions.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
+            {activeJobs.map(j => (
+              <option key={j.id} value={j.id}>{j.name}{j.job_reference ? ` · ${j.job_reference}` : ''}</option>
             ))}
           </select>
         </div>
       )}
 
-      {project && (
+      {job && (
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">
-            <FolderKanban className="w-4 h-4 text-slate-400" />
-            <h3 className="text-sm font-bold text-slate-900 truncate">{project.name}</h3>
+            <Briefcase className="w-4 h-4 text-slate-400" />
+            <h3 className="text-sm font-bold text-slate-900 truncate">{job.name}</h3>
           </div>
-          {project.reference && (
-            <p className="text-xs text-slate-500 ml-6 font-mono">{project.reference}</p>
+          {job.job_reference && (
+            <p className="text-xs text-slate-500 ml-6 font-mono">{job.job_reference}</p>
           )}
         </div>
       )}
@@ -181,7 +158,7 @@ export default function ProjectHealthDashboardWidget({ onNavigate }) {
             <HealthIcon className={`w-5 h-5 ${cfg.text} flex-shrink-0`} />
             <div className="flex-1">
               <p className={`text-sm font-bold ${cfg.text}`}>{cfg.label}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{health.risks.length} risk flag(s) · {health.jobCount} active job(s)</p>
+              <p className="text-xs text-slate-500 mt-0.5">{health.risks.length} risk flag(s)</p>
             </div>
             <div className="text-right">
               <p className={`text-2xl font-bold ${cfg.text}`}>{health.healthScore}</p>
@@ -232,12 +209,12 @@ export default function ProjectHealthDashboardWidget({ onNavigate }) {
               </div>
               <p className={`text-sm font-bold ${health.expiredAssets > 0 ? 'text-red-700' : 'text-slate-700'}`}>{health.expiredAssets}</p>
             </div>
-            <div className={`rounded-lg p-2.5 border ${health.overdueJobs > 0 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`rounded-lg p-2.5 border ${health.overdue ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
               <div className="flex items-center gap-1.5 mb-0.5">
-                <Calendar className={`w-3.5 h-3.5 ${health.overdueJobs > 0 ? 'text-amber-600' : 'text-slate-400'}`} />
-                <p className="text-[10px] font-semibold text-slate-500 uppercase">Jobs Overdue</p>
+                <Calendar className={`w-3.5 h-3.5 ${health.overdue ? 'text-amber-600' : 'text-slate-400'}`} />
+                <p className="text-[10px] font-semibold text-slate-500 uppercase">Schedule</p>
               </div>
-              <p className={`text-sm font-bold ${health.overdueJobs > 0 ? 'text-amber-700' : 'text-slate-700'}`}>{health.overdueJobs}</p>
+              <p className={`text-sm font-bold ${health.overdue ? 'text-amber-700' : 'text-emerald-700'}`}>{health.overdue ? 'Overdue' : 'On Track'}</p>
             </div>
           </div>
 
@@ -260,7 +237,7 @@ export default function ProjectHealthDashboardWidget({ onNavigate }) {
           {health.risks.length === 0 && (
             <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
               <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>No risk flags — project is on track.</span>
+              <span>No risk flags — job is on track.</span>
             </div>
           )}
         </>

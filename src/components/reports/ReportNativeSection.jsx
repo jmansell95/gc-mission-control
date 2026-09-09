@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Briefcase, Users, Car, Boxes, PoundSterling, ShieldCheck, FlaskConical, Truck, TrendingUp, FileText,
+  ChevronDown, ChevronRight,
 } from 'lucide-react';
 import { useReportData, filterJobsByDate, tally, sumField } from '@/hooks/useReportData';
 import ReportChartCard from './ReportChartCard';
@@ -21,6 +22,7 @@ const fmt0 = (n) => '£' + Math.round(Number(n || 0)).toLocaleString('en-GB');
 export default function ReportNativeSection({ hub, filters }) {
   const data = useReportData(filters);
   const [drill, setDrill] = useState(null);
+  const [expandedGroup, setExpandedGroup] = useState(null);
 
   const filteredJobs = useMemo(() => {
     let result = filterJobsByDate(data.jobs, filters.dateFrom, filters.dateTo);
@@ -227,25 +229,57 @@ export default function ReportNativeSection({ hub, filters }) {
             </thead>
             <tbody>
               {breakdownGroups.map((g, i) => (
-                <motion.tr
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.02 }}
-                  onClick={() => setDrill({ title: `${breakdownTable.label} → ${g.name}`, records: g.rows, cols: breakdownTable.cols, breadcrumb: [hub, breakdownTable.label, g.name] })}
-                  className="hover:bg-slate-50 cursor-pointer"
-                >
-                  <td className="px-3 py-2 border-b border-slate-100 text-slate-700 font-medium">{g.name}</td>
-                  <td className="px-3 py-2 border-b border-slate-100 text-slate-700 text-right tabular-nums">{g.count}</td>
-                  <td className="px-3 py-2 border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden max-w-[100px]">
-                        <div className="h-full bg-gradient-to-r from-[#5A8C1E] to-[#2E5A1A] rounded-full" style={{ width: `${breakdownTable.rows.length ? (g.count / breakdownTable.rows.length) * 100 : 0}%` }} />
+                <React.Fragment key={i}>
+                  <motion.tr
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.02 }}
+                    onClick={() => setExpandedGroup(expandedGroup === g.name ? null : g.name)}
+                    className="hover:bg-slate-50 cursor-pointer"
+                  >
+                    <td className="px-3 py-2 border-b border-slate-100 text-slate-700 font-medium">
+                      <div className="flex items-center gap-1.5">
+                        {expandedGroup === g.name
+                          ? <ChevronDown className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                          : <ChevronRight className="w-3 h-3 text-slate-400 flex-shrink-0" />}
+                        {g.name}
                       </div>
-                      <span className="text-slate-500 text-[10px]">{breakdownTable.rows.length ? Math.round((g.count / breakdownTable.rows.length) * 100) : 0}%</span>
-                    </div>
-                  </td>
-                </motion.tr>
+                    </td>
+                    <td className="px-3 py-2 border-b border-slate-100 text-slate-700 text-right tabular-nums">{g.count}</td>
+                    <td className="px-3 py-2 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden max-w-[100px]">
+                          <div className="h-full bg-gradient-to-r from-[#5A8C1E] to-[#2E5A1A] rounded-full" style={{ width: `${breakdownTable.rows.length ? (g.count / breakdownTable.rows.length) * 100 : 0}%` }} />
+                        </div>
+                        <span className="text-slate-500 text-[10px]">{breakdownTable.rows.length ? Math.round((g.count / breakdownTable.rows.length) * 100) : 0}%</span>
+                      </div>
+                    </td>
+                  </motion.tr>
+                  {expandedGroup === g.name && g.rows.slice(0, 20).map((r, ri) => (
+                    <tr key={`${i}-${ri}`} className="bg-slate-50/40">
+                      <td colSpan={3} className="px-3 py-0">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 py-1.5 text-[11px] text-slate-600">
+                          {breakdownTable.cols.map((col, ci) => (
+                            <div key={ci} className="flex items-center gap-1">
+                              <span className="text-slate-400 font-medium">{col.label}:</span>
+                              <span className="font-medium text-slate-700 truncate max-w-[160px]">
+                                {col.key === 'client_charge' || col.key === 'agreed_total' || col.key === 'total_claimed' || col.key === 'unit_cost' || col.key === 'acquisition_cost'
+                                  ? fmt0(r[col.key])
+                                  : String(r[col.key] || '—')}
+                              </span>
+                            </div>
+                          ))}
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setDrill({ title: `${breakdownTable.label} → ${g.name}`, records: g.rows, cols: breakdownTable.cols, breadcrumb: [hub, breakdownTable.label, g.name] }); }}
+                            className="ml-auto text-[10px] font-bold text-[#2E5A1A] hover:underline"
+                          >
+                            View all {g.rows.length} →
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               ))}
             </tbody>
             <tfoot>
