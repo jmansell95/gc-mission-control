@@ -92,11 +92,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const ALLOWED_DOMAIN = 'ground-control.co.uk';
+
   const checkUserAuth = async () => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
       const currentUser = await base44.auth.me();
+
+      // Domain guard — reject any Microsoft SSO login that isn't a
+      // ground-control.co.uk address. Clears the session so the user
+      // can't access the app, and surfaces a dedicated error screen.
+      const email = (currentUser?.email || '').toLowerCase();
+      if (email && !email.endsWith('@' + ALLOWED_DOMAIN)) {
+        try { await base44.auth.logout(); } catch (_) {}
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        setIsLoadingAuth(false);
+        setAuthError({
+          type: 'domain_not_allowed',
+          message: `Access restricted to @${ALLOWED_DOMAIN} emails`,
+          email: currentUser?.email,
+        });
+        return;
+      }
+
       setUser(currentUser);
       setIsAuthenticated(true);
       setAuthError(null);

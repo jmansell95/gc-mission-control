@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import DomainAccessError from '@/components/DomainAccessError';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import RouteGuard from '@/components/RouteGuard';
@@ -99,6 +100,11 @@ const AuthenticatedApp = () => {
   // hard redirect during render (which caused the refresh loop on publish).
   if (!isClientPortalRoute && authError && authError.type === 'user_not_registered') {
     return <UserNotRegisteredError />;
+  }
+
+  // Reject Microsoft SSO logins from non-ground-control.co.uk email domains
+  if (!isClientPortalRoute && authError && authError.type === 'domain_not_allowed') {
+    return <DomainAccessError email={authError.email} />;
   }
 
   // Render the main app
