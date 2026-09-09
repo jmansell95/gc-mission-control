@@ -178,6 +178,16 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
           )}
         </button>
       </div>
+      {/* My Team — manager dashboard for team oversight (managers + admins only) */}
+      {(isPlatformAdmin || ['super_admin', 'admin', 'management'].includes(profile?.system_role)) && (
+        <div className="px-2 pb-1.5">
+          <button type="button" onClick={() => navigate('/manager-team')}
+            className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-white/5 text-white/80 hover:bg-white/10 hover:text-white`}>
+            <Users className="w-[18px] h-[18px] flex-shrink-0" />
+            {!effectiveCollapsed && <span className="flex-1 text-left">My Team</span>}
+          </button>
+        </div>
+      )}
       <div className="flex-1 px-2 py-1.5 space-y-0.5 overflow-y-auto">
         {navItems.map(item => {
           const Icon = item.icon;

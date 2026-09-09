@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart, Layers, Hammer
+  Boxes, Plus, FileCheck, Undo2, ExternalLink, User, Truck, X, Loader2, Package, QrCode, ShoppingCart, Layers, Hammer, Zap
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format, eachDayOfInterval, isWeekend } from 'date-fns';
@@ -17,6 +17,7 @@ import DeliveryList from '@/components/logistics/DeliveryList';
 import RigAssemblyGroup from '@/components/logistics/RigAssemblyGroup';
 import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
 import AddBillableItemsWizard from '@/components/logistics/wizard/AddBillableItemsWizard';
+import BillableItemsQuickAdd from '@/components/logistics/BillableItemsQuickAdd';
 import PoGroupedAccordion from '@/components/logistics/PoGroupedAccordion';
 import HubDeepLink from '@/components/hubs/HubDeepLink';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
@@ -81,6 +82,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
   const [savingItem, setSavingItem] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [showBasket, setShowBasket] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [addingRigGear, setAddingRigGear] = useState(false);
   const [showRigPicker, setShowRigPicker] = useState(false);
   const [showManifest, setShowManifest] = useState(false);
@@ -593,9 +595,13 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           {isLocked && <BillingLockBanner lockReason={lockReason} job={job} tempOpen={tempOpen} onTempOpen={setTempOpen} />}
           {canSeeCosts && !effectiveLocked && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
-              <button onClick={() => setShowBasket(true)}
+              <button onClick={() => setShowQuickAdd(true)}
                 className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
-                <ShoppingCart className="w-4 h-4" /> Add Billable Items
+                <Zap className="w-4 h-4" /> Quick Add Items
+              </button>
+              <button onClick={() => setShowBasket(true)}
+                className="inline-flex items-center justify-center gap-2 text-sm text-slate-700 font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 active:scale-[0.98] transition shadow-sm w-full sm:w-auto">
+                <ShoppingCart className="w-4 h-4" /> Full Wizard
               </button>
               {isDrillingJob && allRigs.length > 0 && (
                 <button onClick={() => setShowRigPicker(true)} disabled={addingRigGear}
@@ -818,6 +824,17 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           suppliers={suppliers}
           defaultDates={defaultDates}
           onClose={() => setShowBasket(false)}
+        />
+      )}
+
+      {showQuickAdd && (
+        <BillableItemsQuickAdd
+          jobId={jobId}
+          job={job}
+          rateCardItems={rateCardItems}
+          suppliers={suppliers}
+          defaultDates={defaultDates}
+          onClose={() => setShowQuickAdd(false)}
         />
       )}
     </div>
