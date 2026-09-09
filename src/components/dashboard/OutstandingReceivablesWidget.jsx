@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { PoundSterling, Clock, AlertTriangle, CheckCircle2, TrendingDown } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
+import { getOutstanding, getOverdue, getCollected } from '@/utils/financialStats';
 
 const STATUS_META = {
   draft: { label: 'Draft', icon: PoundSterling, tone: 'text-slate-600 bg-slate-100', bar: 'bg-slate-400' },
@@ -17,23 +18,19 @@ const gbp = (n) => n != null && !isNaN(n) ? '£' + Number(n).toLocaleString(unde
 export default function OutstandingReceivablesWidget() {
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ['invoices-receivables'],
-    queryFn: () => base44.entities.Invoice.list('-issue_date', 200),
+    queryFn: () => base44.entities.Invoice.list('-issue_date', 500),
   });
 
   const today = new Date();
+  const outstandingResult = getOutstanding(invoices);
+  const overdueResult = getOverdue(invoices);
+  const collectedResult = getCollected(invoices);
 
-  const outstanding = invoices.filter(i => i.status === 'sent' || i.status === 'overdue');
-  const overdueInvoices = invoices.filter(i => {
-    if (i.status === 'overdue') return true;
-    if (i.status === 'sent' && i.due_date) {
-      return new Date(i.due_date + 'T00:00:00') < today;
-    }
-    return false;
-  });
-
-  const totalOutstanding = outstanding.reduce((s, i) => s + (i.gross_total || 0), 0);
-  const totalOverdue = overdueInvoices.reduce((s, i) => s + (i.gross_total || 0), 0);
-  const totalPaid = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.gross_total || 0), 0);
+  const outstanding = outstandingResult.invoices;
+  const overdueInvoices = overdueResult.invoices;
+  const totalOutstanding = outstandingResult.amount;
+  const totalOverdue = overdueResult.amount;
+  const totalPaid = collectedResult.amount;
 
   // Group outstanding by client for a quick debtor view
   const byClient = {};

@@ -19,12 +19,12 @@ export default function FinancialReconciliationWidget({ onNavigate }) {
   const jobs = allFin?.jobs || [];
   const finMap = allFin?.finMap || {};
 
-  // Invoiced per job (sum of non-void invoice net_totals)
+  // Invoiced per job (sum of non-void invoice gross_totals — unified with all financial surfaces)
   const invoicedByJob = useMemo(() => {
     const map = {};
     invoices.forEach(inv => {
       if (inv.status === 'void') return;
-      map[inv.job_id] = (map[inv.job_id] || 0) + (Number(inv.net_total) || 0);
+      map[inv.job_id] = (map[inv.job_id] || 0) + (Number(inv.gross_total) || 0);
     });
     return map;
   }, [invoices]);

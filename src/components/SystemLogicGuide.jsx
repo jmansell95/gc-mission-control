@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Loader2, BookOpen, ShieldCheck, TrendingUp, Sparkles, HardHat, FileClock, Clock, Activity, Zap, FileText, Radar, Users, MessageSquare, Camera, Mic, MapPin, CalendarClock, Layers, Boxes, Truck } from 'lucide-react';
+import { Download, Loader2, BookOpen, ShieldCheck, TrendingUp, Sparkles, HardHat, FileClock, Clock, Activity, Zap, FileText, Radar, Users, MessageSquare, Camera, Mic, MapPin, CalendarClock, Layers, Boxes, Truck, Inbox, ClipboardList, GraduationCap, ShoppingCart, QrCode, Database } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { EMBLEM_URL } from '@/components/Logo';
 
@@ -92,13 +92,20 @@ const SECTIONS = [
     title: 'Financial Logic',
     desc: 'How charges, WIP and realisation are calculated',
     items: [
+      { stat: 'Unified Financial KPIs', meaning: 'All financial stat boxes (Billing Hub, Admin Dashboard, Enterprise Financial Hub, Job Financials) now use a single shared calculation module (financialStats.js) so the numbers mean the same thing and add up correctly on every surface. Outstanding = sent + overdue invoices by gross_total. Overdue = status "overdue" OR status "sent" with due_date in the past, by gross_total. Collected/Revenue = paid invoices by gross_total. Total Invoiced = all non-void invoices by gross_total. Draft invoices are excluded from Outstanding everywhere.' },
+      { stat: 'Outstanding', meaning: 'Invoices where status is "sent" or "overdue" — the client has been billed but payment has not been received yet. Excludes draft (not yet sent), paid (settled), and void (cancelled). Calculated using gross_total (including VAT) so it matches the amount the client actually owes.' },
+      { stat: 'Overdue', meaning: 'Invoices where status is "overdue" OR status is "sent" with due_date in the past. This catches both invoices explicitly marked overdue and sent invoices whose payment deadline has passed without being flagged. Calculated using gross_total.' },
+      { stat: 'Collected / Revenue', meaning: 'Invoices where status is "paid" — money received from the client. Same calculation on every surface. Uses gross_total so it matches the cash actually received.' },
+      { stat: 'Total Invoiced', meaning: 'All non-void invoices (draft + sent + overdue + paid) by gross_total. This is the total value of all invoices ever issued, regardless of payment status. Void invoices are excluded because they are cancelled and represent no real obligation.' },
       { stat: 'Unbilled WIP', meaning: 'The sum of all JobCostItem amounts where the item has not been included on a paid invoice. This is "earned but unbilled" revenue — work that has been done and costed but not yet invoiced to the client.' },
       { stat: 'Realisation %', meaning: 'Invoiced amount ÷ earned amount across all active jobs. A dropping realisation rate is the earliest warning sign of billing leakage. The dashboard surfaces this as a live percentage.' },
       { stat: 'Charge Calculation', meaning: 'The calculateCharge function runs automatically on every approved InvestigationLog and submitted Timesheet. It matches the activity to a BillingRule (by task description or log type), applies the rate, and sets charge_amount and charge_breakdown on the record.' },
       { stat: 'Revenue Method', meaning: 'How a job earns money: "drilling_meterage" = £/metre, "groundworks_unit" = £/trial pit, "coring_unit" = £/core run, "day_rate" = fixed daily crew rate, "flat_fee" = single project fee. Set on the Team, inherited by the job.' },
       { stat: 'VAT Rate', meaning: 'Default 20% (UK standard rate). Applied to invoice net totals. Editable per job for zero-rated or exempt work. Falls back to the BusinessConfig default_vat_rate when not set on the job.' },
+      { stat: 'VAT Liability', meaning: 'The total VAT on outstanding (sent + overdue) invoices. This is money collected from the client (as part of the gross_total) but not yet paid to HMRC. Shown on the Financial Overview widget so finance can track their HMRC obligation.' },
       { stat: 'Asset Financial Lifecycle', meaning: 'The Financial tab on each Asset Passport shows the full ROI of an asset: total revenue earned (from approved JobCostItem billing records) vs total cost (maintenance + servicing + straight-line depreciation). The net profit and ROI percentage update in real time as new billing and service records are added.' },
       { stat: 'Auto-Detect Billing from Remarks', meaning: 'Each investigation log entry has an "Auto-Detect Billing" button that sends the log\'s remarks to an LLM. The AI identifies billable events mentioned in the driller diary (e.g. "extra casing installed", "made up 10m of rods") and auto-creates JobCostItem billing entries with the correct rate from the Master Price List.' },
+      { stat: 'Billable Items Quick Add', meaning: 'The BillableItemsQuickAdd component replaced the legacy multi-step billing wizard with an inline, single-panel entry form. Billing teams add cost items, labour, and hired equipment to a job in one panel — no wizard steps, no page navigation. Items are grouped by PO for tracking and flow directly into the AFP billing pipeline.' },
     ],
   },
   {
@@ -249,6 +256,60 @@ const SECTIONS = [
       { stat: 'Route Guards', meaning: 'RouteGuard checks canAccessRoute for every protected route. Scanner-only users see /scanner only. Drivers (field staff with delivery_dashboard_enabled) see /deliveries only. Subcontractors see /subcontractor only. Field staff see /staff-schedule, /staff-profile, /scanner. Office roles see everything. Onboarding-gated routes redirect new users to /onboarding first.' },
       { stat: 'Division Access Manifests', meaning: 'For finer control, DivisionAccessManifest records can override a group\'s base permissions per division — hiding specific elements, disabling specific features, or masking financial data for a particular group in a particular division. This is layered on top of the group\'s base permissions.' },
       { stat: 'Landing Page Resolution', meaning: 'After login, each user is routed to their landing page. Resolution order: per-staff default_landing_page override → scanner-only → /scanner, driver → /deliveries, subcontractor → /subcontractor, permission group landing_page (office → /admin, field → /staff-schedule), role-based fallback. This ensures every user lands in the right place for their job.' },
+    ],
+  },
+  {
+    id: 'inbox',
+    icon: Inbox,
+    title: 'Universal Inbox & Approval Routing',
+    desc: 'Centralised approvals, alerts, and SLA escalation across every hub',
+    items: [
+      { stat: 'Unified Inbox', meaning: 'The Universal Inbox (/inbox) consolidates every actionable item across all hubs into one list: approvals (AFP review, timesheets, access requests, early leave, delay logs, pricing reviews, off-hire), alerts (compliance expiring, invoices overdue, failed audits, zero-line AFPs, margin breaches), and notices (schedule published, new jobs, crew messages). Each item has a type, priority, status, and deep-link to the source record.' },
+      { stat: 'Approval Routing Config', meaning: 'Each approval type (AFP review, timesheet, access request, etc.) has an ApprovalRoutingConfig record that defines who receives it. Three approver modes: manager_chain (escalates from the requester\'s manager to fallback to super admins), permission_group (all staff in a named group), specific_staff (an explicit staff list). Configurable per-type in Settings → Approval Routing.' },
+      { stat: 'SLA Tracking', meaning: 'Every approval item gets an sla_due_at timestamp computed from the routing config\'s sla_hours. When the SLA passes without action, the SLA checker escalates: re-notifies the approver, then routes to the fallback approvers. Overdue items show a red badge in the inbox.' },
+      { stat: 'Hub Badge Counts', meaning: 'Each hub shows a live badge count of pending inbox items originating from that hub. The badge updates in real time via entity subscriptions so managers see at a glance which hubs need attention without opening the full inbox.' },
+      { stat: 'Inbox Engine', meaning: 'A shared backend module (inboxEngine.ts) handles all approval creation, routing resolution, SLA tracking, and email notification logic. Every approval flow (AFP, timesheet, access, early leave, delay, pricing, off-hire, compliance doc, debt collection) calls the same createApproval function so routing is consistent and auditable.' },
+      { stat: 'Delegation', meaning: 'Managers can delegate their pending approvals to another staff member for a set period. Delegated items show who delegated them and when delegation expires. On expiry, items automatically route back to the original approver.' },
+    ],
+  },
+  {
+    id: 'manager-dashboard',
+    icon: ClipboardList,
+    title: 'Manager Team Dashboard',
+    desc: 'Per-manager oversight of team assignments, compliance, and approvals',
+    items: [
+      { stat: 'Team View', meaning: 'The Manager Team Dashboard (/manager-team) gives each manager a focused view of their direct reports: who is on site today, who has pending timesheet approvals, who has expiring compliance, and who has upcoming schedule gaps. It filters to only show staff where manager_id matches the logged-in manager.' },
+      { stat: 'Approval Queue', meaning: 'Managers see their pending approvals (timesheets, early leave, delay logs, access requests) inline on their team dashboard — no need to open the full Universal Inbox. They can approve or reject directly from the dashboard, and the action flows through the same inboxEngine as the main inbox.' },
+      { stat: 'Compliance Gaps', meaning: 'The dashboard surfaces compliance gaps for the manager\'s team: staff with expiring training, missing qualifications for upcoming job assignments, and expired certifications. Each gap links to the staff member\'s compliance editor so it can be resolved quickly.' },
+    ],
+  },
+  {
+    id: 'training-autopilot',
+    icon: GraduationCap,
+    title: 'Training Compliance Autopilot',
+    desc: 'Automated daily + weekly training gap detection and booking suggestions',
+    items: [
+      { stat: 'Daily Gap Scan', meaning: 'The Training Compliance Autopilot runs a daily scan (integrated into the existing weekly/daily workflow) that checks every active staff member\'s training_category_ids against their expiring certifications. Staff with certifications expiring within 30 days are flagged as gaps.' },
+      { stat: 'Rota Cross-Reference', meaning: 'The scan cross-references each gap against the staff member\'s rota to find free days for training. It suggests optimal training slots that do not conflict with job assignments, so training can be booked without disrupting active work.' },
+      { stat: 'Dashboard Widget', meaning: 'A Training Gap Scheduler widget on the Admin Dashboard shows the count of staff with expiring certifications and the suggested training slots. Managers can click through to book the training directly from the widget.' },
+      { stat: 'Per-Staff Categories', meaning: 'Training requirements are assigned per-staff via training_category_ids on the Staff record (the single source of truth), not inherited from the team. This means two drillers on the same team can have different training requirements based on their individual qualifications.' },
+    ],
+  },
+  {
+    id: 'assets-new',
+    icon: Database,
+    title: 'Asset Hub — New Features',
+    desc: 'Push-to-Panda, QR labels, bulk actions, recently viewed, and advanced filtering',
+    items: [
+      { stat: 'Push to Panda', meaning: 'The "Push N → Panda" button in the fleet health strip sends all locally-created assets (those without a panda_asset_id) to Asset Panda as new objects. After the push, every asset has a panda_asset_id and there are no more local-only assets. This consolidates the full inventory into Asset Panda as the single source of truth.' },
+      { stat: 'QR Label Printing', meaning: 'The "QR Labels" button opens a bulk printing utility that generates printable A4 sheets of QR codes for selected assets. Each label shows the asset name, QR code, fleet number, and type — 12 labels per page (3 columns × 4 rows), evenly spaced for an A4 folder. Assets without a system QR code get one generated client-side.' },
+      { stat: 'Bulk Actions Bar', meaning: 'When selection mode is enabled on the inventory grid, a sticky BulkActionsBar appears at the bottom of the screen. It supports: Assign to Job, Set Inactive, Recertify, and View Certificates — all applied to the selected assets in one operation. "Select All" selects every asset matching the current filter.' },
+      { stat: 'Recently Viewed Strip', meaning: 'A horizontal strip at the top of the inventory view shows the last 5 assets the user opened, with quick-click navigation to reopen them. Tracked via localStorage so it persists across sessions. Clearable with a single click.' },
+      { stat: 'Deployment Filter', meaning: 'A filter dropdown on the inventory grid lets you filter by deployment status: All Locations, In Depot (storage location matches depot/yard/Dartford), On Site / Active (not in depot and is_active), or Inactive (is_active = false).' },
+      { stat: 'Lifecycle Filter', meaning: 'A filter dropdown for asset lifecycle stage: Active, Aging (past depreciation years), Due for Replacement (replacement date within 90 days), or Disposed (disposal date set or lifecycle_status = disposed).' },
+      { stat: 'Maintenance Filter', meaning: 'A filter dropdown for maintenance status: On Track, Due Soon, Overdue, or No Interval — matching the same logic as the maintenance gauge on each asset card.' },
+      { stat: 'Compact Mode', meaning: 'A toggle on the inventory grid switches between Detailed (full card with all stats) and Compact (condensed card for faster mobile scanning). Compact mode shows just the name, status badge, and key compliance indicator — ideal for warehouse floor scanning on a phone.' },
+      { stat: 'Full-Page Asset Detail', meaning: 'All asset views now route to the unified /assets/:id full-page detail view instead of opening a drawer. This gives more space for the compliance timeline, financial lifecycle, deployment history, and linked equipment — and makes the back button work naturally on mobile.' },
     ],
   },
 ];

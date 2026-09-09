@@ -7,6 +7,7 @@ import {
   Building2, Percent, Loader2,
 } from 'lucide-react';
 import { Skeleton } from '@/components/StateViews';
+import { getOutstanding, getOverdue, getCollected, getDraftInvoices, getVatLiability } from '@/utils/financialStats';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
 const fmtCompact = (n) => {
@@ -37,18 +38,23 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
   });
 
   const stats = useMemo(() => {
-    const outstanding = invoices.filter(i => i.status === 'sent' || i.status === 'overdue');
-    const overdue = invoices.filter(i => i.status === 'overdue');
-    const drafts = invoices.filter(i => i.status === 'draft');
-    const paid = invoices.filter(i => i.status === 'paid');
+    const outstandingResult = getOutstanding(invoices);
+    const overdueResult = getOverdue(invoices);
+    const draftResult = getDraftInvoices(invoices);
+    const collectedResult = getCollected(invoices);
 
-    const outstandingTotal = outstanding.reduce((s, i) => s + (i.gross_total || 0), 0);
-    const overdueTotal = overdue.reduce((s, i) => s + (i.gross_total || 0), 0);
-    const draftTotal = drafts.reduce((s, i) => s + (i.net_total || 0), 0);
-    const paidTotal = paid.reduce((s, i) => s + (i.net_total || 0), 0);
+    const outstanding = outstandingResult.invoices;
+    const overdue = overdueResult.invoices;
+    const drafts = draftResult.invoices;
+    const paid = collectedResult.invoices;
+
+    const outstandingTotal = outstandingResult.amount;
+    const overdueTotal = overdueResult.amount;
+    const draftTotal = draftResult.amount;
+    const paidTotal = collectedResult.amount;
 
     // VAT liability — sum of VAT on sent + overdue invoices (not yet paid to HMRC)
-    const vatLiability = outstanding.reduce((s, i) => s + (i.vat_total || 0), 0);
+    const vatLiability = getVatLiability(invoices);
 
     // Retention held — estimate from paid invoices (typically 5% retention)
     // In a full system this would come from a dedicated retention field; for now
@@ -72,7 +78,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const paidThisMonth = paid
       .filter(i => i.paid_at && new Date(i.paid_at) >= monthStart)
-      .reduce((s, i) => s + (i.net_total || 0), 0);
+      .reduce((s, i) => s + (i.gross_total || 0), 0);
 
     // 6-month revenue trend (paid invoices by month)
     const months = [];
@@ -84,7 +90,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
           const pd = inv.paid_at ? new Date(inv.paid_at) : (inv.issue_date ? new Date(inv.issue_date) : null);
           return pd && pd >= d && pd < next;
         })
-        .reduce((s, inv) => s + (inv.net_total || 0), 0);
+        .reduce((s, inv) => s + (inv.gross_total || 0), 0);
       months.push({ label: d.toLocaleDateString('en-GB', { month: 'short' }), value: total });
     }
 

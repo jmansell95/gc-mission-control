@@ -7,7 +7,7 @@ import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import { useDivision } from '@/contexts/DivisionContext';
 
-const gbp = (n) => n ? '\u00A3' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u00A30';
+const gbp = (n) => n != null ? '\u00A3' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u00A30';
 
 export default function EnterpriseFinancialHub() {
   const { permittedDivisions } = useDivision();
@@ -26,7 +26,7 @@ export default function EnterpriseFinancialHub() {
   const kpis = [
     { label: 'Revenue', value: gbp(g.totalRevenue), icon: TrendingUp, gradient: 'stat-gradient-emerald' },
     { label: 'Outstanding', value: gbp(g.totalOutstanding), icon: AlertTriangle, gradient: 'stat-gradient-rose' },
-    { label: 'Overdue Invoices', value: g.overdueInvoices || 0, icon: FileText, gradient: 'stat-gradient-amber' },
+    { label: 'Overdue', value: gbp(g.overdueAmount), icon: FileText, gradient: 'stat-gradient-amber' },
     { label: 'Total Invoiced', value: gbp(g.totalInvoiced), icon: PoundSterling, gradient: 'stat-gradient-blue' },
   ];
 

@@ -92,10 +92,13 @@ export default async function(req: Request): Promise<Response> {
         planningJobs: dJobs.filter(j => (j.status || 'planning') === 'planning').length,
         completedJobs: dJobs.filter(j => j.status === 'completed').length,
         outstanding: dInvoices
-          .filter(i => i.status && i.status !== 'paid' && i.status !== 'void')
+          .filter(i => i.status === 'sent' || i.status === 'overdue')
           .reduce((sum, i) => sum + (i.gross_total || 0), 0),
         revenue: dInvoices
           .filter(i => i.status === 'paid')
+          .reduce((sum, i) => sum + (i.gross_total || 0), 0),
+        overdueAmount: dInvoices
+          .filter(i => i.status === 'overdue' || (i.status === 'sent' && i.due_date && new Date(i.due_date + 'T00:00:00') < now))
           .reduce((sum, i) => sum + (i.gross_total || 0), 0),
         pendingDeliveries: dDeliveries.filter(dl => dl.status === 'pending' || dl.status === 'in_progress').length,
         openIncidents: dSafety.filter(sr => sr.status === 'open').length,
@@ -157,7 +160,7 @@ export default async function(req: Request): Promise<Response> {
       assetsExpiring: assets.filter(a => a.compliance_status === 'expiring' || a.compliance_status === 'expired').length,
       activeStaff: staff.filter(s => s.is_active !== false).length,
       totalOutstanding: invoices
-        .filter(i => i.status && i.status !== 'paid' && i.status !== 'void')
+        .filter(i => i.status === 'sent' || i.status === 'overdue')
         .reduce((sum, i) => sum + (i.gross_total || 0), 0),
       totalRevenue: invoices
         .filter(i => i.status === 'paid')
@@ -173,9 +176,14 @@ export default async function(req: Request): Promise<Response> {
         ? Math.round((vehicles.filter(v => v.current_operator_id).length / vehicles.length) * 100)
         : 0,
 
-      // Financial Performance
-      totalInvoiced: invoices.reduce((sum, i) => sum + (i.gross_total || 0), 0),
-      overdueInvoices: invoices.filter(i => i.status && i.status !== 'paid' && i.status !== 'void' && i.due_date && new Date(i.due_date) < now).length,
+      // Financial Performance — unified definitions matching financialStats.js
+      totalInvoiced: invoices
+        .filter(i => i.status && i.status !== 'void')
+        .reduce((sum, i) => sum + (i.gross_total || 0), 0),
+      overdueAmount: invoices
+        .filter(i => i.status === 'overdue' || (i.status === 'sent' && i.due_date && new Date(i.due_date + 'T00:00:00') < now))
+        .reduce((sum, i) => sum + (i.gross_total || 0), 0),
+      overdueInvoices: invoices.filter(i => i.status === 'overdue' || (i.status === 'sent' && i.due_date && new Date(i.due_date + 'T00:00:00') < now)).length,
       cashFlowProjected: cashFlow.reduce((sum, cf) => sum + (cf.amount || 0), 0),
 
       // Compliance & Safety
