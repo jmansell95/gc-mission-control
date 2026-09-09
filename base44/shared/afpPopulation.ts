@@ -366,7 +366,7 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
   const startDate = afp.period_start_date || '';
   const endDate = afp.period_end_date || new Date().toISOString().slice(0, 10);
 
-  const [logs, subcons, timesheets, deliveries, costs, assignments, costItems, boqVariations] = await Promise.all([
+  const [logs, subcons, timesheets, deliveries, costs, assignments, costItems, boqVariations, hotelBookings] = await Promise.all([
     base44.entities.InvestigationLog.filter({ job_id: afp.job_id }, '-created_date', 500),
     base44.entities.SubcontractorLog.filter({ job_id: afp.job_id }, '-created_date', 500),
     base44.entities.Timesheet.filter({ job_id: afp.job_id }, '-created_date', 500),
