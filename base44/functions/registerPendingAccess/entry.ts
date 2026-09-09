@@ -3,6 +3,7 @@ import {
   brandedWrapper, heading, p, ctaButton, infoTable, callout,
   getAppBaseUrl, BRAND,
 } from '../../shared/emailStyling.ts';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 // ============================================================
 // registerPendingAccess — called from AuthContext when a non-admin
@@ -62,6 +63,23 @@ export default async function(req: Request): Promise<Response> {
       } catch (e) {
         // If the update fails, still show the pending screen
       }
+
+      // Create inbox approval for each approver so they see it in their inbox
+      try {
+        const approverStaffIds = approverStaff.map((s: any) => s.id).filter(Boolean);
+        await createApproval(base44, {
+          approvalType: 'access_request',
+          requesterStaffId: null,
+          title: `Access request — ${user.full_name || user.email || 'new user'}`,
+          body: `${user.full_name || user.email || 'A new user'} has signed in and is waiting for access approval. Email: ${user.email || '—'}.`,
+          sourceHub: 'settings',
+          sourceEntity: 'User',
+          sourceId: user.id,
+          deepLink: '/admin?tab=pending-access',
+          priority: 'normal',
+          overrideApproverStaffIds: approverStaffIds.length > 0 ? approverStaffIds : null,
+        });
+      } catch (_) { /* don't block on inbox failure */ }
 
       // Send notification email to approvers
       if (approvers.length > 0) {

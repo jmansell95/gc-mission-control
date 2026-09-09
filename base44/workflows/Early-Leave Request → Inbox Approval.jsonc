@@ -1,0 +1,36 @@
+{
+  "name": "Early-Leave Request \u2192 Inbox Approval",
+  "description": "When a field crew member sets early_leave_status to 'pending' on their RotaAssignment, creates an inbox approval routed to their manager chain so the manager is notified to approve/reject the early-leave request.",
+  "trigger": {
+    "condition": "${ .data.early_leave_status == \"pending\" }",
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "update"
+      ],
+      "entity_name": "RotaAssignment"
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "early_leave_inbox_approval",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "createEarlyLeaveApproval",
+            "args": {
+              "assignmentId": "${ .data.id }"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}

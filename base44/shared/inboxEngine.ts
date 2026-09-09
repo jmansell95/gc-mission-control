@@ -109,8 +109,24 @@ export async function resolveApprovers(base44, approvalType, requesterStaffId) {
 // For alerts/notices, pass a single recipient via `recipients` instead.
 export async function createApproval(base44, opts) {
   // opts: { approvalType, requesterStaffId, title, body, sourceHub, sourceEntity,
-  //         sourceId, deepLink, priority }
-  const { approvers, slaHours, requiresMultiple } = await resolveApprovers(base44, opts.approvalType, opts.requesterStaffId);
+  //         sourceId, deepLink, priority, overrideApproverStaffIds }
+  // When overrideApproverStaffIds is provided, those staff are used directly
+  // (skips routing-config resolution — used by access_request where approvers
+  // are the is_approver-flagged staff, not a fixed config list).
+  let approvers, slaHours, requiresMultiple;
+  if (opts.overrideApproverStaffIds && opts.overrideApproverStaffIds.length > 0) {
+    approvers = [];
+    for (const sid of opts.overrideApproverStaffIds) {
+      const staff = (await base44.asServiceRole.entities.Staff.filter({ id: sid }))[0];
+      if (staff) approvers.push({ staffId: staff.id, userId: staff.user_id || null, name: staff.name || 'Approver', email: staff.email || null });
+    }
+    // Look up SLA from config if available, else default 24h
+    const configs = await base44.asServiceRole.entities.ApprovalRoutingConfig.filter({ approval_type: opts.approvalType });
+    slaHours = configs[0]?.sla_hours ?? 24;
+    requiresMultiple = !!configs[0]?.requires_multiple_signoffs;
+  } else {
+    ({ approvers, slaHours, requiresMultiple } = await resolveApprovers(base44, opts.approvalType, opts.requesterStaffId));
+  }
   if (approvers.length === 0) {
     return { created: 0, error: 'No approvers could be resolved for ' + opts.approvalType };
   }
