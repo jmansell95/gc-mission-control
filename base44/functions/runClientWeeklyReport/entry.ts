@@ -139,6 +139,7 @@ Keep it professional, factual, and under 200 words. Use £ for any monetary refe
         crew_days: crewDays,
         milestones_completed: completedMilestones,
         report_length: reportText.length,
+        email_sent_to: emailSentTo,
       });
     }
 
