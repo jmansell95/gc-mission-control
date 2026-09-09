@@ -5,6 +5,7 @@ import ProjectHealthDashboardWidget from '@/components/dashboard/ProjectHealthDa
 import BenchmarkComparisonsWidget from '@/components/dashboard/BenchmarkComparisonsWidget';
 import ClientFeedbackWidget from '@/components/dashboard/ClientFeedbackWidget';
 import ReportsHubWidget from '@/components/dashboard/ReportsHubWidget';
+import AFPHealthCheck from '@/components/billing/AFPHealthCheck';
 
 /**
  * BillingInsightsTab — the "Insights" view of the Financial Control Hub.
@@ -19,6 +20,7 @@ export default function BillingInsightsTab() {
 
   return (
     <div className="space-y-3 sm:space-y-4">
+      <AFPHealthCheck />
       <FinancialReconciliationWidget onNavigate={go} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
         <ProjectHealthDashboardWidget onNavigate={go} />
