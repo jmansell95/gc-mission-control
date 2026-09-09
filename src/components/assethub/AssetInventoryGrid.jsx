@@ -13,7 +13,7 @@ import RigUtilizationSparkline from '@/components/righub/RigUtilizationSparkline
 import AssetColourDot from '@/components/assethub/AssetColourDot';
 
 
-const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
+export const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
 const TYPE_GRADIENT = {
   rig: 'from-emerald-500 to-emerald-700', machinery: 'from-violet-500 to-purple-700',
   trailer: 'from-amber-500 to-orange-600', vehicle: 'from-slate-500 to-slate-700',
@@ -264,7 +264,8 @@ function StatPill({ icon: Icon, label, value, tone }) {
  */
 export default function AssetInventoryGrid({
   assets, rigs, category, search, compFilter, sourceFilter = 'all', depotOnly = false,
-  groupBy = 'none',
+  groupBy = 'none', compact = false,
+  deployFilter = 'all', lifecycleFilter = 'all', maintenanceFilter = 'all',
   selectionMode, selected, setSelected,
   onOpenRig, onOpenEquip, onCertVault, onUploadCert,
 }) {
@@ -285,20 +286,50 @@ export default function AssetInventoryGrid({
   const filteredRigs = useMemo(() => rigsByMaster.filter(({ rig, rollup }) => {
     if (depotOnly && !isInDepot(rig)) return false;
     if (!matchesSource(rig)) return false;
+    if (!matchesDeploy(rig)) return false;
+    if (!matchesLifecycle(rig)) return false;
+    if (!matchesMaintenance(rig)) return false;
     if (compFilter !== 'all' && rollup.master !== compFilter) return false;
     if (!q) return true;
     return (rig.name || '').toLowerCase().includes(q) || (rig.serial_number || '').toLowerCase().includes(q);
-  }), [rigsByMaster, q, compFilter, sourceFilter, depotOnly]);
+  }), [rigsByMaster, q, compFilter, sourceFilter, depotOnly, deployFilter, lifecycleFilter, maintenanceFilter]);
+
+  const matchesDeploy = (a) => {
+    if (deployFilter === 'all') return true;
+    if (deployFilter === 'in_depot') return isInDepot(a);
+    if (deployFilter === 'on_site') return !isInDepot(a) && a.is_active !== false;
+    if (deployFilter === 'inactive') return a.is_active === false;
+    return true;
+  };
+
+  const matchesLifecycle = (a) => {
+    if (lifecycleFilter === 'all') return true;
+    return deriveLifecycle(a) === lifecycleFilter;
+  };
+
+  const matchesMaintenance = (a) => {
+    if (maintenanceFilter === 'all') return true;
+    const hours = a.operating_hours || a.hours_used || 0;
+    const interval = a.service_interval_hours || 0;
+    if (maintenanceFilter === 'overdue') return interval > 0 && hours >= interval;
+    if (maintenanceFilter === 'due_soon') { const pct = interval > 0 ? (hours / interval) * 100 : 0; return pct >= 80 && pct < 100; }
+    if (maintenanceFilter === 'on_track') { const pct = interval > 0 ? (hours / interval) * 100 : 0; return pct < 80; }
+    if (maintenanceFilter === 'no_interval') return !interval;
+    return true;
+  };
 
   const filteredEquip = useMemo(() => assets.filter(a => {
     if (a.asset_type === 'rig') return false;
     if (depotOnly && !isInDepot(a)) return false;
     if (!matchesSource(a)) return false;
+    if (!matchesDeploy(a)) return false;
+    if (!matchesLifecycle(a)) return false;
+    if (!matchesMaintenance(a)) return false;
     if (category !== 'all' && a.asset_type !== category) return false;
     if (compFilter !== 'all' && derivedComplianceStatus(a) !== compFilter) return false;
     if (!q) return true;
     return (a.name || '').toLowerCase().includes(q) || (a.serial_number || '').toLowerCase().includes(q);
-  }).map(eq => ({ equip: eq, parentRig: findParentRig(eq.id, rigs) })), [assets, rigs, category, q, compFilter, sourceFilter, depotOnly]);
+  }).map(eq => ({ equip: eq, parentRig: findParentRig(eq.id, rigs) })), [assets, rigs, category, q, compFilter, sourceFilter, depotOnly, deployFilter, lifecycleFilter, maintenanceFilter]);
 
   const showRigs = category === 'all' || category === 'rig';
   const showEquip = category !== 'rig';
@@ -542,15 +573,15 @@ export default function AssetInventoryGrid({
               return (
                 <div key={equip.id} onClick={handleCardClick} className={`insight-card rounded-xl text-left relative ${statusAccent} ${selectionMode ? 'cursor-pointer' : 'cursor-pointer hover:shadow-lg'} ${isSel ? 'ring-2 ring-emerald-500' : ''} ${depotTagged ? 'ring-1 ring-emerald-200' : ''} overflow-hidden`}>
                   {selectionMode && <div className={`absolute top-2.5 right-2.5 w-6 h-6 rounded-md flex items-center justify-center border-2 transition z-20 ${isSel ? 'bg-emerald-500 border-emerald-500' : 'bg-white/80 border-slate-300'}`}>{isSel && <Check className="w-4 h-4 text-white" />}</div>}
-                  <AssetCardBanner asset={equip} heightClass="h-28" />
+                  <AssetCardBanner asset={equip} heightClass={compact ? 'h-16' : 'h-28'} />
                   {depotTagged && !selectionMode && (
                     <span className="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-0.5 shadow-sm z-10">
                       <Warehouse className="w-2.5 h-2.5" /> IN DEPOT
                     </span>
                   )}
-                  <div className="p-3.5">
+                  <div className={compact ? 'p-2.5' : 'p-3.5'}>
                     {/* Parent rig badge — prominent at the top so you see the link immediately */}
-                    {parentRig && !selectionMode && (
+                    {parentRig && !selectionMode && !compact && (
                       <button
                         onClick={(e) => { e.stopPropagation(); onOpenRig?.(parentRig); }}
                         className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition mb-2"
@@ -572,8 +603,8 @@ export default function AssetInventoryGrid({
                       {!selectionMode && <ChevronRight className="w-5 h-5 text-slate-300 flex-shrink-0" />}
                     </div>
                     {/* 3 spec chips */}
-                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                      {(equip.make || equip.model) && (
+                    <div className={`flex items-center gap-1.5 flex-wrap ${compact ? 'mb-1.5' : 'mb-2'}`}>
+                      {(equip.make || equip.model) && !compact && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 truncate max-w-[120px]">
                           {[equip.make, equip.model].filter(Boolean).join(' · ')}
                         </span>
@@ -594,25 +625,27 @@ export default function AssetInventoryGrid({
                         </span>
                       )}
                       <QuantityBadge available={equip.quantity_available} owned={equip.quantity_owned} />
-                      {equip.weight_kg != null && (
+                      {equip.weight_kg != null && !compact && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
                           <Weight className="w-2.5 h-2.5" /> {Math.round(equip.weight_kg)} kg
                         </span>
                       )}
                     </div>
                     {/* Financial + lifecycle + utilization strip */}
-                    <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-                      <FinancialChip asset={equip} />
-                      <LifecycleBadge asset={equip} />
-                    </div>
-                    {(equip.operating_hours || equip.service_interval_hours) && (
+                    {!compact && (
+                      <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                        <FinancialChip asset={equip} />
+                        <LifecycleBadge asset={equip} />
+                      </div>
+                    )}
+                    {!compact && (equip.operating_hours || equip.service_interval_hours) && (
                       <div className="mb-1.5">
                         <OperatingHoursStrip asset={equip} />
                       </div>
                     )}
                     {/* Footer: condition + source + parent rig + expiry */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      {equip.condition && (
+                      {equip.condition && !compact && (
                         <span className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${conditionTone(equip.condition)}`}>
                           <Gauge className="w-2.5 h-2.5" /> {equip.condition}
                         </span>
@@ -620,7 +653,7 @@ export default function AssetInventoryGrid({
                       {equip.panda_asset_id
                         ? <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200" title={syncTitle(equip)}><Database className="w-2.5 h-2.5" /> Panda</span>
                         : <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-500 border border-slate-200" title={syncTitle(equip)}><CircleDot className="w-2.5 h-2.5" /> Local</span>}
-                      {equip.panda_group_label && (
+                      {equip.panda_group_label && !compact && (
                         <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 truncate max-w-[140px]" title={`Asset Panda group: ${equip.panda_group_label}`}>
                           <Boxes className="w-2.5 h-2.5 flex-shrink-0" /> {equip.panda_group_label}
                         </span>
@@ -632,7 +665,7 @@ export default function AssetInventoryGrid({
                         <CalendarClock className="w-3 h-3" /> {d < 0 ? 'Expired' : `${d}d left`} · {safeFmt(equip.compliance_expiry_date)}
                       </p>
                     )}
-                    {!selectionMode && (
+                    {!selectionMode && !compact && (
                       <button type="button" onClick={(e) => { e.stopPropagation(); onUploadCert?.(equip); }} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A] hover:bg-[#244715] text-white rounded-lg text-[11px] font-semibold transition">
                         <Upload className="w-3.5 h-3.5" /> Upload Cert
                       </button>

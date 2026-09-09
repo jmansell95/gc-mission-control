@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Cog, Wrench, Package, Truck, Anchor, Plug,
   Plus, Search, Boxes, ScanLine, X, TrendingUp, TrendingDown, RefreshCw, Lock, ShieldCheck,
-  CheckSquare, Upload, Database, MapPin, QrCode, Trash2, CircleDot, Warehouse, AlertTriangle, Weight,
+  CheckSquare, Upload, Database, MapPin, QrCode, Trash2, CircleDot, Warehouse, AlertTriangle, Weight, LayoutGrid,
 } from 'lucide-react';
 import ConsumableInventoryManager from '@/components/settings/ConsumableInventoryManager';
 import ConsumablesView from '@/components/assethub/ConsumablesView';
@@ -31,6 +31,8 @@ import BulkWeightModal from '@/components/assethub/BulkWeightModal';
 import PATTestingPanel from '@/components/pat/PATTestingPanel';
 import ScrapPilePanel from '@/components/assetcommand/ScrapPilePanel';
 import AssetInventoryGrid from '@/components/assethub/AssetInventoryGrid';
+import RecentlyViewedStrip from '@/components/assethub/RecentlyViewedStrip';
+import BulkActionsBar from '@/components/assethub/BulkActionsBar';
 import PrintWeightRegister from '@/components/assethub/PrintWeightRegister';
 import AssetDeploymentsPanel from '@/components/assethub/AssetDeploymentsPanel';
 import PredictiveMaintenanceWidget from '@/components/vehicles/PredictiveMaintenanceWidget';
@@ -76,6 +78,10 @@ export default function AssetHub() {
   const [showBulkQR, setShowBulkQR] = useState(false);
   const [showBulkWeight, setShowBulkWeight] = useState(false);
   const [groupBy, setGroupBy] = useState('none');
+  const [compact, setCompact] = useState(false);
+  const [deployFilter, setDeployFilter] = useState('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState('all');
+  const [maintenanceFilter, setMaintenanceFilter] = useState('all');
 
   const { data: allAssets = [], isLoading } = useQuery({
     queryKey: ['site-assets'],
@@ -150,17 +156,31 @@ export default function AssetHub() {
 
   const openAdd = () => { setEditorAsset(null); setEditorOpen(true); };
 
-  // Bulk cert helpers
+  // Bulk cert helpers — mirrors the grid's filter logic so the bulk bar
+  // count matches what's visible on screen.
   const filteredEquipForBulk = useMemo(() => equipment.filter(a => {
     if (depotOnly && !(a.storage_location || '').toLowerCase().match(/depot|yard|dartford/)) return false;
     if (sourceFilter === 'panda' && !a.panda_asset_id) return false;
     if (sourceFilter === 'local' && a.panda_asset_id) return false;
     if (category !== 'all' && category !== 'rig' && a.asset_type !== category) return false;
     if (compFilter !== 'all' && (a.compliance_status || 'unknown') !== compFilter) return false;
+    // Deployment filter
+    const inDepot = (a.storage_location || '').toLowerCase().match(/depot|yard|dartford/);
+    if (deployFilter === 'in_depot' && !inDepot) return false;
+    if (deployFilter === 'on_site' && (inDepot || a.is_active === false)) return false;
+    if (deployFilter === 'inactive' && a.is_active !== false) return false;
+    // Lifecycle filter
+    if (lifecycleFilter !== 'all') {
+      const ls = a.lifecycle_status || 'active';
+      if (lifecycleFilter === 'due_for_replacement' && !(a.replacement_date && Math.floor((new Date(a.replacement_date) - new Date()) / 86400000) <= 90)) return false;
+      if (lifecycleFilter === 'disposed' && !a.disposal_date && ls !== 'disposed') return false;
+      if (lifecycleFilter === 'aging' && !(a.depreciation_years && a.acquisition_date && (Date.now() - new Date(a.acquisition_date).getTime()) / (365.25 * 86400000) >= a.depreciation_years)) return false;
+      if (lifecycleFilter === 'active' && (ls === 'disposed' || ls === 'due_for_replacement' || ls === 'aging')) return false;
+    }
     const q = search.toLowerCase().trim();
     if (!q) return true;
     return (a.name || '').toLowerCase().includes(q) || (a.serial_number || '').toLowerCase().includes(q);
-  }), [equipment, category, compFilter, search, sourceFilter, depotOnly]);
+  }), [equipment, category, compFilter, search, sourceFilter, depotOnly, deployFilter, lifecycleFilter]);
 
   const stats = assets.length > 0 ? [
     { icon: Boxes, label: 'Total Assets', value: assets.length, sublabel: 'Excl. vehicles', color: 'brand' },
@@ -308,6 +328,29 @@ export default function AssetHub() {
                     <option value="status">Group by Status</option>
                     <option value="panda_group">Group by Panda Group</option>
                   </select>
+                  <select value={deployFilter} onChange={(e) => setDeployFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                    <option value="all">All Locations</option>
+                    <option value="in_depot">In Depot</option>
+                    <option value="on_site">On Site / Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <select value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                    <option value="all">All Lifecycle</option>
+                    <option value="active">Active</option>
+                    <option value="aging">Aging</option>
+                    <option value="due_for_replacement">Due for Replacement</option>
+                    <option value="disposed">Disposed</option>
+                  </select>
+                  <select value={maintenanceFilter} onChange={(e) => setMaintenanceFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                    <option value="all">All Maintenance</option>
+                    <option value="on_track">On Track</option>
+                    <option value="due_soon">Due Soon</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="no_interval">No Interval</option>
+                  </select>
+                  <button onClick={() => setCompact(c => !c)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${compact ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`} title="Toggle compact card view">
+                    <LayoutGrid className="w-4 h-4" /> {compact ? 'Compact' : 'Detailed'}
+                  </button>
                   {category !== 'rig' && (
                     <button onClick={() => { setSelectionMode(m => !m); setSelected(new Set()); }} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${selectionMode ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
                       <CheckSquare className="w-4 h-4" /> {selectionMode ? 'Done' : 'Select'}
@@ -322,32 +365,39 @@ export default function AssetHub() {
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-40 w-full rounded-xl" />)}</div>
           ) : view === 'inventory' ? (
-            <AssetInventoryGrid
-              assets={assets}
-              rigs={rigs}
-              category={category}
-              search={search}
-              compFilter={compFilter}
-              sourceFilter={sourceFilter}
-              depotOnly={depotOnly}
-              groupBy={groupBy}
-              selectionMode={selectionMode}
-              selected={selected}
-              setSelected={setSelected}
-              onOpenRig={(rig) => navigate(`/assets/${rig.id}`)}
-              onOpenEquip={(equip) => navigate(`/assets/${equip.id}`)}
-              onCertVault={setCertVaultRig}
-              onUploadCert={(a) => setRecertAsset(a)}
-            />
+            <>
+              <RecentlyViewedStrip onOpen={(a) => navigate(`/assets/${a.id}`)} />
+              <AssetInventoryGrid
+                assets={assets}
+                rigs={rigs}
+                category={category}
+                search={search}
+                compFilter={compFilter}
+                sourceFilter={sourceFilter}
+                depotOnly={depotOnly}
+                groupBy={groupBy}
+                compact={compact}
+                deployFilter={deployFilter}
+                lifecycleFilter={lifecycleFilter}
+                maintenanceFilter={maintenanceFilter}
+                selectionMode={selectionMode}
+                selected={selected}
+                setSelected={setSelected}
+                onOpenRig={(rig) => navigate(`/assets/${rig.id}`)}
+                onOpenEquip={(equip) => navigate(`/assets/${equip.id}`)}
+                onCertVault={setCertVaultRig}
+                onUploadCert={(a) => setRecertAsset(a)}
+              />
+            </>
           ) : view === 'deployments' ? (
             <ErrorBoundary><AssetDeploymentsPanel assets={assets} /></ErrorBoundary>
           ) : view === 'compliance' ? (
             <ErrorBoundary>
               <div className="space-y-6">
-                <RecertPipeline assets={assets} onRecert={(a) => setRecertAsset(a)} onOpenAsset={(a) => a.asset_type === 'rig' ? setOpenRig(a) : setOpenEquip(a)} />
+                <RecertPipeline assets={assets} onRecert={(a) => setRecertAsset(a)} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
                 <div>
                   <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3 px-1">Certificate Vault</h3>
-                  <MasterCertificateVault assets={assets} onOpenAsset={(a) => a.asset_type === 'rig' ? setOpenRig(a) : setOpenEquip(a)} />
+                  <MasterCertificateVault assets={assets} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
                 </div>
               </div>
             </ErrorBoundary>
@@ -375,16 +425,16 @@ export default function AssetHub() {
             <ErrorBoundary><ScrapPilePanel /></ErrorBoundary>
           ) : null}
 
-          {/* Bulk cert action bar */}
+          {/* Bulk action bar */}
           {selectionMode && view === 'inventory' && filteredEquipForBulk.length > 0 && (
-            <div className="sticky bottom-4 z-30 bg-[#2E5A1A] text-white rounded-xl shadow-2xl px-4 py-3 flex items-center justify-between flex-wrap gap-2">
-              <span className="text-sm font-semibold">{selected.size} of {filteredEquipForBulk.length} selected</span>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setBulkCerts(filteredEquipForBulk.filter(a => selected.has(a.id)))} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-bold transition"><Lock className="w-3.5 h-3.5" /> View Certs</button>
-                <button onClick={() => setSelected(new Set(filteredEquipForBulk.map(a => a.id)))} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-semibold transition">Select All</button>
-                <button onClick={() => { setSelected(new Set()); setSelectionMode(false); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-semibold transition"><X className="w-3.5 h-3.5" /> Clear</button>
-              </div>
-            </div>
+            <BulkActionsBar
+              selectedAssets={filteredEquipForBulk.filter(a => selected.has(a.id))}
+              totalAvailable={filteredEquipForBulk.length}
+              onSelectAll={() => setSelected(new Set(filteredEquipForBulk.map(a => a.id)))}
+              onClear={() => { setSelected(new Set()); setSelectionMode(false); }}
+              onViewCerts={() => setBulkCerts(filteredEquipForBulk.filter(a => selected.has(a.id)))}
+              onRecert={selected.size === 1 ? () => setRecertAsset(filteredEquipForBulk.find(a => selected.has(a.id))) : undefined}
+            />
           )}
         </>
       )}

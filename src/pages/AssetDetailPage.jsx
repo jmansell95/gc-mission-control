@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -27,6 +27,7 @@ import AssetMovementHistory from '@/components/assetcommand/AssetMovementHistory
 import AssetPandaImageGallery from '@/components/assetdetail/AssetPandaImageGallery';
 import PATTestForm from '@/components/pat/PATTestForm';
 import { useAssetRealtime } from '@/hooks/useAssetRealtime';
+import { trackRecentlyViewedAsset } from '@/components/assethub/recentlyViewed';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Package },
@@ -61,6 +62,13 @@ export default function AssetDetailPage() {
     queryFn: () => base44.entities.SiteAsset.get(id),
     enabled: !!id,
   });
+
+  // Track this asset as recently viewed (for the AssetHub quick-reopen strip)
+  useEffect(() => {
+    if (asset?.id && asset?.name) {
+      trackRecentlyViewedAsset({ id: asset.id, name: asset.name, asset_type: asset.asset_type, colour: asset.colour });
+    }
+  }, [asset?.id]);
 
   const { data: allAssets = [] } = useQuery({
     queryKey: ['site-assets'],
