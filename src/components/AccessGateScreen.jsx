@@ -10,10 +10,11 @@ import Logo from '@/components/Logo';
  * The pending variant states the user has not been set up with permissions yet
  * and shows the configured approver contacts so they know who to reach out to.
  */
-export default function AccessGateScreen({ status, email, approvers = [], contactInstructions = '' }) {
+export default function AccessGateScreen({ status, email, approvers = [], contactInstructions = '', onLogout }) {
   const isRejected = status === 'rejected';
 
   const handleLogout = async () => {
+    if (onLogout) { onLogout(); return; }
     await base44.auth.logout('/login');
   };
 

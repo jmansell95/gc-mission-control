@@ -6,7 +6,7 @@ import { ShieldX } from 'lucide-react';
  * that is not on the allowed list (ground-control.co.uk). The session is
  * already cleared by AuthContext before this renders.
  */
-export default function DomainAccessError({ email }) {
+export default function DomainAccessError({ email, onBackToLogin }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
@@ -25,7 +25,7 @@ export default function DomainAccessError({ email }) {
             <p>Please sign out of that Microsoft account and sign in with your work email address.</p>
           </div>
           <button
-            onClick={() => { window.location.href = '/login'; }}
+            onClick={() => { if (onBackToLogin) { onBackToLogin(); return; } window.location.href = '/login'; }}
             className="mt-6 w-full h-11 text-sm font-semibold bg-[#2E5A1A] text-white rounded-xl hover:bg-[#1c4a12] transition"
           >
             Back to Login
