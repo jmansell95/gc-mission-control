@@ -122,9 +122,21 @@ export default async function(req: Request): Promise<Response> {
     const tightWeeks = weeklyForecast.filter((w) => w.projected_balance < 10000);
     if (tightWeeks.length > 0) {
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      const body = `The following weeks project a cash balance below £10,000:\n\n` +
-        tightWeeks.map((w) => `• Week of ${w.week_start}: projected balance £${w.projected_balance.toLocaleString()}`).join('\n') +
-        `\n\nReview the Cash Flow Forecast on the enterprise dashboard.\n\nGC Mission Control — Cash Flow Autopilot`;
+      const baseUrl = await getAppBaseUrl(base44);
+      const rows = tightWeeks.map((w) => [
+        w.week_start,
+        formatGBP(w.expected_income),
+        formatGBP(w.expected_cost),
+        formatGBP(w.net_cash),
+        formatGBP(w.projected_balance),
+      ]);
+      const content = heading('Cash Flow Alert') +
+        p(`${tightWeeks.length} week${tightWeeks.length !== 1 ? 's' : ''} project a cash balance below the £10,000 threshold. Review the forecast and take action to protect cash position.`) +
+        callout('Projected balance below £10,000 indicates a potential cash shortfall. Consider expediting invoice collections or deferring non-essential expenditure.', 'warning') +
+        dataTable(['Week Starting', 'Expected Income', 'Expected Cost', 'Net Cash', 'Projected Balance'], rows) +
+        (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/enterprise/financial', 'Open Cash Flow Forecast')}</div>` : '');
+
+      const html = brandedWrapper(content, { banner_subtitle: 'Cash Flow Autopilot', headerVariant: 'amber' });
 
       for (const admin of admins) {
         if (!admin.email) continue;
@@ -132,7 +144,7 @@ export default async function(req: Request): Promise<Response> {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: admin.email,
             subject: `Cash Flow Alert — ${tightWeeks.length} week${tightWeeks.length !== 1 ? 's' : ''} below threshold`,
-            body,
+            html,
           });
         } catch (_) {}
       }

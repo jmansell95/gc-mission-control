@@ -105,11 +105,20 @@ export default async function(req: Request): Promise<Response> {
     // 4. Send weekly digest email to admins
     if (digest.length > 0) {
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      const body = `The following staff qualifications expire within 60 days:\n\n` +
-        digest.map((d) =>
-          `• ${d.staff_name} — ${d.qualification} (expires ${d.expiry_date}) — ${d.providers_available} provider${d.providers_available !== 1 ? 's' : ''} available${d.provider_names.length > 0 ? ': ' + d.provider_names.join(', ') : ''}`
-        ).join('\n') +
-        `\n\n${bookingsDrafted.length} training booking${bookingsDrafted.length !== 1 ? 's' : ''} auto-drafted for manager review.\n\nGC Mission Control — Training Compliance Autopilot`;
+      const baseUrl = await getAppBaseUrl(base44);
+      const rows = digest.map((d) => [
+        d.staff_name,
+        d.qualification,
+        d.expiry_date,
+        `${d.providers_available} provider${d.providers_available !== 1 ? 's' : ''}${d.provider_names.length > 0 ? ': ' + d.provider_names.join(', ') : ''}`,
+      ]);
+      const content = heading('Training Compliance Digest') +
+        p(`${digest.length} staff qualification${digest.length !== 1 ? 's' : ''} expire within 60 days. ${bookingsDrafted.length} training booking${bookingsDrafted.length !== 1 ? 's' : ''} auto-drafted for manager review.`) +
+        callout('Book training before expiry to prevent staff being unable to work on site.', 'warning') +
+        dataTable(['Staff Member', 'Qualification', 'Expiry', 'Providers Available'], rows) +
+        (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/staff', 'Open People Hub')}</div>` : '');
+
+      const html = brandedWrapper(content, { banner_subtitle: 'Training Compliance Autopilot', headerVariant: 'amber' });
 
       for (const admin of admins) {
         if (!admin.email) continue;
@@ -117,7 +126,7 @@ export default async function(req: Request): Promise<Response> {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: admin.email,
             subject: `Training Compliance Digest — ${digest.length} qualification${digest.length !== 1 ? 's' : ''} expiring`,
-            body,
+            html,
           });
         } catch (_) {}
       }

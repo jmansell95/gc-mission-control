@@ -1,6 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
-
-function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+import { brandedWrapper, heading, p, dataTable, callout, escapeHtml as escHtml, getAppBaseUrl, ctaButton } from '../../shared/emailStyling.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -75,38 +74,26 @@ Deno.serve(async (req) => {
       return Response.json({ sent: false, reason: 'No admin recipients', checked: activeJobs.length, alerts });
     }
 
-    const alertRows = alerts.map(a =>
-      '<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-weight:600">' + escapeHtml(a.job_name) + '</td>' +
-      '<td style="padding:8px 12px;border-bottom:1px solid #e2e8f0">' + escapeHtml(a.asset_name) + '</td>' +
-      '<td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-transform:capitalize">' + escapeHtml(a.compliance_status) + '</td>' +
-      '<td style="padding:8px 12px;border-bottom:1px solid #e2e8f0">' + (a.expiry ? escapeHtml(a.expiry) : '\u2014') + '</td></tr>'
-    ).join('');
+    const baseUrl = await getAppBaseUrl(base44);
+    const rows = alerts.map(a => [
+      a.job_name,
+      a.asset_name,
+      a.compliance_status === 'expired' ? `<strong style="color:#e11d48">Expired</strong>` :
+      a.compliance_status === 'expiring' ? `<strong style="color:#d97706">Expiring</strong>` :
+      escHtml(a.compliance_status),
+      a.expiry || '—',
+    ]);
+    const content = heading('Asset Compliance Alert') +
+      p(`${alerts.length} non-compliant asset${alerts.length !== 1 ? 's' : ''} found across ${activeJobs.length} active job${activeJobs.length !== 1 ? 's' : ''}.`) +
+      callout('Expired or expiring assets may not be legally operable on site. Update compliance status in Settings → Assets.', 'warning') +
+      dataTable(['Job', 'Asset', 'Status', 'Expiry'], rows) +
+      (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/assets', 'Open Assets Hub')}</div>` : '');
 
-    var bodyHtml =
-      '<h2 style="margin:0 0 12px;color:#0e7a4f;font-size:16px">Asset Compliance Alert</h2>' +
-      '<p style="margin:0 0 16px;color:#475569;font-size:14px">' + alerts.length + ' non-compliant asset' + (alerts.length !== 1 ? 's' : '') +
-      ' found across ' + activeJobs.length + ' active job' + (activeJobs.length !== 1 ? 's' : '') + '.</p>' +
-      '<table style="width:100%;border-collapse:collapse;font-size:13px;font-family:Arial,Helvetica,sans-serif">' +
-      '<thead><tr style="background:#0e7a4f;color:#fff">' +
-      '<th style="padding:8px 12px;text-align:left">Job</th>' +
-      '<th style="padding:8px 12px;text-align:left">Asset</th>' +
-      '<th style="padding:8px 12px;text-align:left">Status</th>' +
-      '<th style="padding:8px 12px;text-align:left">Expiry</th>' +
-      '</tr></thead><tbody>' + alertRows + '</tbody></table>' +
-      '<p style="margin:18px 0 0;color:#94a3b8;font-size:12px">Check GC Compliance Manager for full details and update asset compliance status in Settings \u2192 Assets.</p>';
-
-    var emailHtml =
-      '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif">' +
-      '<table align="center" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;margin:24px auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;box-shadow:0 6px 24px rgba(15,42,31,0.08)">' +
-      '<tr><td style="background:#0e7a4f;padding:18px 24px"><h1 style="margin:0;color:#fff;font-size:18px">GC Mission Control</h1></td></tr>' +
-      '<tr><td style="padding:24px;color:#1e293b;font-size:14px;line-height:1.6">' + bodyHtml + '</td></tr>' +
-      '<tr><td style="padding:14px 24px;background:#f8fafc;color:#64748b;font-size:12px;border-top:1px solid #e2e8f0;text-align:center">GC Mission Control</td></tr>' +
-      '</table></body></html>';
-
-    var subject = 'Asset Compliance Alert \u2014 ' + alerts.length + ' non-compliant asset' + (alerts.length !== 1 ? 's' : '') + ' on active jobs';
+    const emailHtml = brandedWrapper(content, { banner_subtitle: 'Asset Compliance', headerVariant: 'amber' });
+    var subject = 'Asset Compliance Alert — ' + alerts.length + ' non-compliant asset' + (alerts.length !== 1 ? 's' : '') + ' on active jobs';
 
     for (const to of recipients) {
-      await base44.asServiceRole.integrations.Core.SendEmail({ to: to, subject: subject, body: emailHtml });
+      await base44.asServiceRole.integrations.Core.SendEmail({ to: to, subject: subject, html: emailHtml });
     }
 
     return Response.json({

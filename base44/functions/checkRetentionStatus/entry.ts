@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { brandedWrapper, heading, p, dataTable, callout, escapeHtml, formatGBP, getAppBaseUrl, ctaButton } from '../../shared/emailStyling.ts';
 
 // ============================================================
 // checkRetentionStatus — nightly check for retention release
@@ -95,19 +96,20 @@ export default async function(req: Request): Promise<Response> {
         const emails = adminUsers.map((u: any) => u.email).filter(Boolean);
         if (emails.length > 0) {
           const subject = `💰 ${updated} retention release${updated === 1 ? '' : 's'} ready for approval`;
-          const rows = eligibleContracts.filter(c => updated > 0).slice(0, updated).map(c =>
-            `  • ${c.job_name} — ${c.retention_percentage}% retention, £${Number(c.releasable).toLocaleString('en-GB')} releasable`
-          ).join('\n');
-          const emailBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-            <h2 style="color:#2E5A1A">💰 Retention Release Ready</h2>
-            <p>The following completed job${updated === 1 ? '' : 's'} have retention held that is now eligible for release:</p>
-            <div style="background:#f0fdf4;border-left:4px solid #2E5A1A;padding:14px;border-radius:6px;margin:14px 0">
-              <pre style="font-family:Arial;font-size:13px;white-space:pre-wrap;margin:0">${rows}</pre>
-            </div>
-            <p style="color:#666;font-size:12px">Review and release retention in the admin dashboard → Billing Contracts.</p>
-          </div>`;
+          const baseUrl = await getAppBaseUrl(base44);
+          const rows = eligibleContracts.filter(c => updated > 0).slice(0, updated).map(c => [
+            c.job_name,
+            `${c.retention_percentage}%`,
+            formatGBP(Number(c.releasable)),
+          ]);
+          const content = heading('Retention Release Ready') +
+            p(`The following completed job${updated === 1 ? '' : 's'} have retention held that is now eligible for release:`) +
+            callout('Retention can now be released for completed jobs. Review and approve in the Billing Contracts section.', 'success') +
+            dataTable(['Job', 'Retention %', 'Releasable Amount'], rows) +
+            (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/billing', 'Open Financial Hub')}</div>` : '');
+          const emailHtml = brandedWrapper(content, { banner_subtitle: 'Retention Release', headerVariant: 'emerald' });
           for (const email of emails) {
-            try { await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, body: emailBody }); } catch (_) {}
+            try { await base44.asServiceRole.integrations.Core.SendEmail({ to: email, subject, html: emailHtml }); } catch (_) {}
           }
         }
       } catch (_) {}

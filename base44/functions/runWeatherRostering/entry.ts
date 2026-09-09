@@ -86,9 +86,20 @@ export default async function(req: Request): Promise<Response> {
     // 6. Send a digest email to admins if any alerts were found
     if (alerts.length > 0) {
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      const summary = alerts.map((a) =>
-        `• ${a.job_name}: ${a.alert_level.toUpperCase()} — ${a.description} (${a.affected_assignments} crew affected)`
-      ).join('\n');
+      const baseUrl = await getAppBaseUrl(base44);
+      const rows = alerts.map((a) => [
+        a.job_name,
+        a.alert_level === 'red' ? `<strong style="color:#e11d48">RED</strong>` : `<strong style="color:#d97706">AMBER</strong>`,
+        a.description,
+        `${a.affected_assignments} crew`,
+      ]);
+      const content = heading('Weather Alert') +
+        p(`${alerts.length} active job${alerts.length !== 1 ? 's' : ''} ha${alerts.length !== 1 ? 've' : 's'} weather alerts in the next 48 hours. Delay logs have been auto-drafted. Review the Rota Builder to reassign affected crew.`) +
+        callout('Amber/Red weather alerts may make site work unsafe. Consider standing down crew or reassigning to indoor/depot duties.', 'warning') +
+        dataTable(['Job', 'Alert Level', 'Description', 'Crew Affected'], rows) +
+        (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/admin', 'Open Rota Builder')}</div>` : '');
+
+      const html = brandedWrapper(content, { banner_subtitle: 'Weather Autopilot', headerVariant: 'amber' });
 
       for (const admin of admins) {
         if (!admin.email) continue;
@@ -96,7 +107,7 @@ export default async function(req: Request): Promise<Response> {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: admin.email,
             subject: `Weather Alert — ${alerts.length} job${alerts.length !== 1 ? 's' : ''} affected`,
-            body: `The following active jobs have weather alerts in the next 48 hours:\n\n${summary}\n\nDelay logs have been auto-drafted. Review the Rota Builder to reassign affected crew.\n\nGC Mission Control — Weather Autopilot`,
+            html,
           });
         } catch (_) {}
       }

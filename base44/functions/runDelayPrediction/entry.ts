@@ -134,23 +134,23 @@ Only include jobs with risk_level "medium" or "high". Skip low-risk jobs.`;
     const highRisk = predictions.filter((p) => p.risk_level === 'high');
     const medRisk = predictions.filter((p) => p.risk_level === 'medium');
 
-    const body = `AI Delay Prediction Digest — ${new Date().toLocaleDateString('en-GB')}
+    const baseUrl = await getAppBaseUrl(base44);
+    const allPredictions = [...highRisk, ...medRisk];
+    const rows = allPredictions.map((p) => [
+      p.job_name,
+      p.predicted_delay_type,
+      `~${p.estimated_delay_days} days`,
+      p.risk_level === 'high' ? `<strong style="color:#e11d48">HIGH</strong>` : `<strong style="color:#d97706">MEDIUM</strong>`,
+      p.mitigation,
+    ]);
+    const content = heading('AI Delay Prediction Digest') +
+      p(`${new Date().toLocaleDateString('en-GB')} — ${highRisk.length} high-risk and ${medRisk.length} medium-risk jobs identified from ${activeJobs.length} active jobs.`) +
+      (highRisk.length > 0 ? callout(`${highRisk.length} high-risk job${highRisk.length !== 1 ? 's' : ''} require immediate attention.`, 'danger') : '') +
+      dataTable(['Job', 'Predicted Delay', 'Est. Days', 'Risk', 'Mitigation'], rows) +
+      p('Review these jobs in the Admin Dashboard and take proactive action where possible.') +
+      (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/admin', 'Open Dashboard')}</div>` : '');
 
-${highRisk.length} high-risk and ${medRisk.length} medium-risk jobs identified from ${activeJobs.length} active jobs.
-
-HIGH RISK:
-${highRisk.map((p) => `• ${p.job_name} — ${p.predicted_delay_type} (~${p.estimated_delay_days} days)
-  Reason: ${p.reasoning}
-  Mitigation: ${p.mitigation}`).join('\n\n')}
-
-MEDIUM RISK:
-${medRisk.map((p) => `• ${p.job_name} — ${p.predicted_delay_type} (~${p.estimated_delay_days} days)
-  Reason: ${p.reasoning}
-  Mitigation: ${p.mitigation}`).join('\n\n')}
-
-Review these jobs in the Admin Dashboard and take proactive action where possible.
-
-GC Mission Control — AI Delay Prediction`;
+    const html = brandedWrapper(content, { banner_subtitle: 'AI Delay Prediction', headerVariant: 'amber' });
 
     for (const admin of admins) {
       if (!admin.email) continue;
@@ -158,7 +158,7 @@ GC Mission Control — AI Delay Prediction`;
         await base44.asServiceRole.integrations.Core.SendEmail({
           to: admin.email,
           subject: `AI Delay Prediction — ${highRisk.length} high-risk, ${medRisk.length} medium-risk jobs`,
-          body,
+          html,
         });
       } catch (_) {}
     }

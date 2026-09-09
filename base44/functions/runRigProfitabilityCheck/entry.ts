@@ -95,12 +95,20 @@ export default async function(req: Request): Promise<Response> {
     // 6. Alert drilling supervisors
     if (underperforming.length > 0) {
       const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      const body = `The following rigs have been earning below their day-rate cost for 3 consecutive days:\n\n` +
-        underperforming.map((u) =>
-          `• ${u.rig_name}: earning below £${u.day_rate_cost}/day — estimated £${u.total_lost_margin} lost margin over 3 days\n` +
-          u.daily_earnings.map((d) => `   ${d.date}: £${d.revenue} (${d.meterage}m on ${d.job_name})`).join('\n')
-        ).join('\n\n') +
-        `\n\nReview the Rota Builder to swap underperforming rigs to higher-margin jobs or stand them down.\n\nGC Mission Control — Rig Profitability Autopilot`;
+      const baseUrl = await getAppBaseUrl(base44);
+      const rows = underperforming.map((u) => [
+        u.rig_name,
+        formatGBP(u.day_rate_cost) + '/day',
+        u.daily_earnings.map((d) => `${d.date}: ${formatGBP(d.revenue)} (${d.meterage}m)`).join(', '),
+        formatGBP(u.total_lost_margin),
+      ]);
+      const content = heading('Rig Profitability Alert') +
+        p(`${underperforming.length} rig${underperforming.length !== 1 ? 's' : ''} ha${underperforming.length !== 1 ? 've' : 's'} been earning below their day-rate cost for 3 consecutive days. Review the Rota Builder to swap underperforming rigs to higher-margin jobs or stand them down.`) +
+        callout('Estimated lost margin is calculated as the difference between the rig day-rate cost and actual revenue over the 3-day period.', 'warning') +
+        dataTable(['Rig', 'Day Rate Cost', 'Daily Earnings', 'Lost Margin'], rows) +
+        (baseUrl ? `<div style="margin-top:16px">${ctaButton(baseUrl.replace(/\/+$/, '') + '/admin', 'Open Rota Builder')}</div>` : '');
+
+      const html = brandedWrapper(content, { banner_subtitle: 'Rig Profitability Autopilot', headerVariant: 'rose' });
 
       for (const admin of admins) {
         if (!admin.email) continue;
@@ -108,7 +116,7 @@ export default async function(req: Request): Promise<Response> {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: admin.email,
             subject: `Rig Profitability Alert — ${underperforming.length} rig${underperforming.length !== 1 ? 's' : ''} underperforming`,
-            body,
+            html,
           });
         } catch (_) {}
       }
