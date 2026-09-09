@@ -589,7 +589,15 @@
 .absolute.inset-0[class*="bg-slate-9"]:not([class*="inset-auto"]),
 .absolute.inset-0[class*="bg-black"]:not([class*="inset-auto"]),
 .absolute.inset-0[class*="bg-blue-950"]:not([class*="inset-auto"]),
-.absolute.inset-0[class*="bg-gray-9"]:not([class*="inset-auto"]) {
+.absolute.inset-0[class*="bg-gray-9"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-zinc-9"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-neutral-9"]:not([class*="inset-auto"]),
+.absolute.inset-0[class*="bg-stone-9"]:not([class*="inset-auto"]) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   min-height: 100dvh;
   min-width: 100vw;
 }
@@ -629,31 +637,42 @@ html:has(.fixed.inset-y-0.right-0) {
 /* === Unified Full-Screen Blurred Backdrop ===
    Every popup, drawer, and modal across the entire site uses the same
    full-screen blurred dark background for visual consistency. This rule
-   normalises any custom modal backdrop (bg-black, bg-slate-950, etc.) to
-   the standard set by the shadcn Dialog/Sheet/Drawer overlays. */
-.absolute.inset-0[class*="bg-black"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
-.absolute.inset-0[class*="bg-slate-9"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
-.absolute.inset-0[class*="bg-gray-9"]:not([class*="bg-blue-950"]):not([class*="bg-white"]):not([class*="bg-background"]),
-.absolute.inset-0[class*="bg-blue-950"]:not([class*="bg-white"]):not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-black"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-slate-9"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-gray-9"]:not([class*="bg-blue-950"]):not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-slate-950"]:not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-blue-950"]:not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-black\/"]:not([class*="bg-background"]) {
-  background-color: rgba(8, 23, 48, 0.96) !important;
-  backdrop-filter: blur(8px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
-}
+   normalises ANY custom modal backdrop to the standard set by the shared
+   Dialog/Sheet/Drawer/Modal overlays.
 
-/* === Extended backdrop normalisation — catches zinc/neutral/stone dark overlays
-   and absolute-positioned full-screen popups that bypass the rules above === */
+   Key fixes vs the old version:
+   • Forces position: fixed on absolute-positioned overlays so they always
+     cover the full viewport (the old rules left them as position: absolute,
+     which meant a backdrop inside a scrolled/positioned container started
+     at the container's top — leaving the top of the page visible).
+   • Forces top/left/right/bottom: 0 so there is never a gap at the top.
+   • Catches 800-shade dark backgrounds (bg-slate-800, bg-gray-800, etc.)
+     in addition to 900/950 shades, and any opacity variant (bg-black\/50). */
+.absolute.inset-0[class*="bg-black"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-slate-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-slate-8"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-gray-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-gray-8"]:not([class*="bg-white"]):not([class*="bg-background"]),
 .absolute.inset-0[class*="bg-zinc-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
 .absolute.inset-0[class*="bg-neutral-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
 .absolute.inset-0[class*="bg-stone-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-blue-950"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.absolute.inset-0[class*="bg-indigo-9"]:not([class*="bg-white"]):not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-black"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-slate-9"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-slate-8"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-gray-9"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-gray-8"]:not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-zinc-9"]:not([class*="bg-background"]),
 .fixed.inset-0[class*="bg-neutral-9"]:not([class*="bg-background"]),
-.fixed.inset-0[class*="bg-stone-9"]:not([class*="bg-background"]) {
+.fixed.inset-0[class*="bg-stone-9"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-blue-950"]:not([class*="bg-background"]),
+.fixed.inset-0[class*="bg-indigo-9"]:not([class*="bg-background"]) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   background-color: rgba(8, 23, 48, 0.96) !important;
   backdrop-filter: blur(8px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
