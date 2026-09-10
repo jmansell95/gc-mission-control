@@ -303,6 +303,8 @@ export default async function(req: Request): Promise<Response> {
           if (!desc) continue;
 
           const timeImpactRaw = timeImpactCol >= 0 ? String(row[timeImpactCol] || '').toLowerCase().trim() : '';
+          const qty = qtyCol >= 0 ? toNum(row[qtyCol]) : 0;
+          const rate = rateCol >= 0 ? toNum(row[rateCol]) : 0;
           preview.variations.push({
             vo_ref: voRef,
             vo_date: dateCol >= 0 ? toDateStr(row[dateCol]) : null,
