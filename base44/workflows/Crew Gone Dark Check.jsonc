@@ -1,0 +1,45 @@
+{
+  "description": "Every 15 minutes during working hours, checks for crew members with an active shift whose last GPS fix is >15 min old. Creates an inbox alert and emails their manager so they can follow up.",
+  "name": "Crew Gone Dark Check",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/15 7-18 * * 1-5",
+      "one_time_date": null,
+      "timezone": "Europe/London",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "crew_gone_dark_check",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "check_dark_crew": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "checkDarkCrew",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Check for dark crew",
+            "description": "Find crew with no GPS fix for >15 min"
+          }
+        }
+      }
+    ]
+  }
+}

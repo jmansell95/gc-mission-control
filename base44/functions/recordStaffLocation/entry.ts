@@ -20,6 +20,8 @@ interface GpsPoint {
   heading?: number;
   recorded_at: string;
   is_moving?: boolean;
+  session_id?: string;
+  session_event?: string;
 }
 
 export default async function(req: Request): Promise<Response> {
@@ -32,6 +34,7 @@ export default async function(req: Request): Promise<Response> {
     const points: GpsPoint[] = Array.isArray(body?.points) ? body.points : [];
     const assignmentId: string = body?.assignment_id || "";
     const staffName: string = body?.staff_name || user.full_name || "";
+    const sessionId: string = body?.session_id || "";
 
     // Allow error-only payloads (no points) through to the error handler below
     if (points.length === 0 && !body?.error) {
@@ -85,6 +88,8 @@ export default async function(req: Request): Promise<Response> {
       heading: p.heading ?? null,
       recorded_at: p.recorded_at,
       is_moving: p.is_moving ?? false,
+      session_id: sessionId || p.session_id || null,
+      session_event: p.session_event || "fix",
     }));
 
     await base44.entities.StaffLocationLog.bulkCreate(logEntries);

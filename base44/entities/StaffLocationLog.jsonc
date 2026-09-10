@@ -16,11 +16,11 @@
     },
     "lat": {
       "type": "number",
-      "description": "GPS latitude at the time of reading."
+      "description": "GPS latitude at the time of reading. For gap markers (session_event='gap_start'), this is the last known position before the gap."
     },
     "lng": {
       "type": "number",
-      "description": "GPS longitude at the time of reading."
+      "description": "GPS longitude at the time of reading. For gap markers (session_event='gap_start'), this is the last known position before the gap."
     },
     "accuracy_m": {
       "type": "number",
@@ -42,6 +42,23 @@
       "type": "boolean",
       "default": false,
       "description": "True when the staff member was moving at the time of this reading (speed > 1 m/s or significant distance from previous point). Used by the live map to colour-code moving vs stationary crew pins."
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Tracking session ID \u2014 a UUID generated when tracking starts, shared across all points in that session. Groups consecutive fixes so gaps (app closed then reopened) are visible as breaks in the trail. When a session resumes after a gap, a 'resume' event is logged with the same session_id so the trail reconnects."
+    },
+    "session_event": {
+      "type": "string",
+      "enum": [
+        "session_start",
+        "fix",
+        "gap_start",
+        "gap_end",
+        "resume",
+        "session_end"
+      ],
+      "default": "fix",
+      "description": "The type of this log entry within the tracking session. 'session_start' = first fix of a new session; 'fix' = a normal GPS reading; 'gap_start' = no fix for >3 min (coverage hole begins); 'gap_end' = fix resumed after a gap; 'resume' = app reopened after being closed (session continues); 'session_end' = tracking stopped (shift ended or tracking disabled). Gap/resume events use the last known lat/lng so they render on the trail."
     }
   },
   "required": [
