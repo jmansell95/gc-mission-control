@@ -24,6 +24,7 @@ import VariationBreakdownTab from './VariationBreakdownTab';
 import EWRSheetTab from './EWRSheetTab';
 import AddVariationModal from './AddVariationModal';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import { useToast } from '@/components/ui/use-toast';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { maximumFractionDigits: 0 });
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -90,6 +91,7 @@ function monthKey(dateStr) {
 
 export default function AFPBuilder({ job }) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [selectedAfpId, setSelectedAfpId] = useState(null);
   const [granularity, setGranularity] = useState('week');
   const [showCreate, setShowCreate] = useState(false);
@@ -414,25 +416,42 @@ export default function AFPBuilder({ job }) {
     try {
       // Use the backend function which runs as service role to bypass RLS
       // (line items may have been created by the auto-populate service role)
-      await base44.functions.invoke('deleteAFP', { afp_id: confirmDeleteAfpId });
+      const res = await base44.functions.invoke('deleteAFP', { afp_id: confirmDeleteAfpId });
+      const data = res.data || res;
+      if (data.error) throw new Error(data.error);
       if (selectedAfpId === confirmDeleteAfpId) setSelectedAfpId(null);
       setConfirmDeleteAfpId(null);
       invalidate();
-    } catch (e) { console.error(e); }
+      toast({ title: 'AFP deleted', description: `${data.deleted_line_items || 0} line items removed.` });
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Failed to delete AFP', description: e.message || 'Please try again.', variant: 'destructive' });
+    }
     setDeletingAfp(false);
   };
 
   const handleBulkDeleteAll = async () => {
     if (afps.length === 0) return;
     setBulkDeleting(true);
-    try {
-      for (const afp of afps) {
-        await base44.functions.invoke('deleteAFP', { afp_id: afp.id });
+    let errors = 0;
+    for (const afp of afps) {
+      try {
+        const res = await base44.functions.invoke('deleteAFP', { afp_id: afp.id });
+        const data = res.data || res;
+        if (data.error) throw new Error(data.error);
+      } catch (e) {
+        errors++;
+        console.error(`Failed to delete AFP ${afp.afp_number}:`, e);
       }
-      setSelectedAfpId(null);
-      setShowBulkDelete(false);
-      invalidate();
-    } catch (e) { console.error(e); }
+    }
+    setSelectedAfpId(null);
+    setShowBulkDelete(false);
+    invalidate();
+    if (errors > 0) {
+      toast({ title: `${errors} AFP${errors !== 1 ? 's' : ''} failed to delete`, description: 'Some AFPs could not be removed — check the console for details.', variant: 'destructive' });
+    } else {
+      toast({ title: 'All AFPs deleted', description: `${afps.length} AFPs removed.` });
+    }
     setBulkDeleting(false);
   };
 
