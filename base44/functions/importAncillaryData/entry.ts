@@ -54,9 +54,38 @@ export default async function(req: Request): Promise<Response> {
 
         if (type === 'equipment_deliveries') {
           // ── Parse equipment delivery list ──
-          // Columns: col_1=Project, col_2=Date Delivered, col_3=Delivered by,
-          // col_4=Diameter, col_5=Lengths, col_6=Number Sent, col_7=Total Length (m),
-          // col_8=Individual weight, col_9=Total weight (KG), col_10=Total weight (Ton)
+          // Detect header row dynamically, then map columns by header name.
+
+          // Find the header row (contains 'Diameter' or 'Delivered by')
+          let headerRowIdx = -1;
+          let colMap: any = {};
+          for (let i = 0; i < Math.min(rows.length, 10); i++) {
+            const r = rows[i];
+            if (!r) continue;
+            const lower = r.map((c: any) => String(c || '').toLowerCase().trim());
+            if (lower.some((c: string) => c === 'diameter' || c === 'delivered by' || c === 'date delivered')) {
+              headerRowIdx = i;
+              for (let j = 0; j < r.length; j++) {
+                const h = String(r[j] || '').toLowerCase().trim();
+                if (h === 'date delivered' || h === 'date') colMap.date = j;
+                else if (h === 'delivered by' || h === 'delivered') colMap.deliveredBy = j;
+                else if (h === 'diameter' || h === 'diamater') colMap.diameter = j;
+                else if (h === 'lengths' || h === 'length') colMap.lengths = j;
+                else if (h === 'number sent' || h === 'number') colMap.numberSent = j;
+                else if (h.includes('total length') || h.includes('totel length')) colMap.totalLength = j;
+                else if (h.includes('individual weight')) colMap.individualWeight = j;
+                else if (h.includes('total weight') && h.includes('kg')) colMap.totalWeightKg = j;
+                else if (h.includes('total weight') && h.includes('ton')) colMap.totalWeightTon = j;
+                else if (h.includes('total weight') && !colMap.totalWeightKg) colMap.totalWeightKg = j;
+              }
+              break;
+            }
+          }
+
+          if (headerRowIdx === -1) {
+            results.push({ type: 'equipment_deliveries', file_name: source_file_name, error: 'Could not find header row' });
+            continue;
+          }
 
           // Check for existing equipment deliveries to avoid duplicates
           const existing = await base44.asServiceRole.entities.JobCostItem.filter(
@@ -69,19 +98,35 @@ export default async function(req: Request): Promise<Response> {
           const deliveries: any[] = [];
           let duplicatesSkipped = 0;
 
-          for (let i = 1; i < rows.length; i++) {
+          for (let i = headerRowIdx + 1; i < rows.length; i++) {
             const row = rows[i];
             if (!row) continue;
 
-            const dateDelivered = row[2] instanceof Date ? row[2].toISOString().slice(0, 10) : '';
-            const deliveredBy = String(row[3] || '').trim();
-            const diameter = String(row[4] || '').trim();
-            const lengths = String(row[5] || '').trim();
-            const numberSent = String(row[6] || '').trim();
-            const totalLength = String(row[7] || '').trim();
-            const individualWeight = toNum(row[8]);
-            const totalWeightKg = toNum(row[9]);
-            const totalWeightTon = toNum(row[10]);
+            const get = (key: string) => colMap[key] !== undefined ? row[colMap[key]] : undefined;
+
+            // Parse date
+            let dateDelivered = '';
+            const rawDate = get('date');
+            if (rawDate instanceof Date) {
+              dateDelivered = rawDate.toISOString().slice(0, 10);
+            } else if (typeof rawDate === 'number' && rawDate > 20000 && rawDate < 80000) {
+              const d = new Date(Date.UTC(1899, 11, 30) + rawDate * 86400000);
+              dateDelivered = d.toISOString().slice(0, 10);
+            } else if (typeof rawDate === 'string' && rawDate.trim()) {
+              const s = rawDate.trim();
+              const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+              if (isoMatch) dateDelivered = `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+              else { const d = new Date(s); if (!isNaN(d.getTime())) dateDelivered = d.toISOString().slice(0, 10); }
+            }
+
+            const deliveredBy = String(get('deliveredBy') || '').trim();
+            const diameter = String(get('diameter') || '').trim();
+            const lengths = String(get('lengths') || '').trim();
+            const numberSent = String(get('numberSent') || '').trim();
+            const totalLength = String(get('totalLength') || '').trim();
+            const individualWeight = toNum(get('individualWeight'));
+            const totalWeightKg = toNum(get('totalWeightKg'));
+            const totalWeightTon = toNum(get('totalWeightTon'));
 
             // Skip rows without actual equipment data
             if (!diameter && !lengths && !numberSent) continue;
