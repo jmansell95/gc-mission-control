@@ -20,7 +20,7 @@ import AssetPandaSettings from '@/components/AssetPandaSettings';
 import AssetManifestManager from '@/components/assetpanda/AssetManifestManager';
 import RateCardManager from '@/components/RateCardManager';
 import DropdownConfigManager from '@/components/DropdownConfigManager';
-import SettingsHubOverview from '@/components/SettingsHubOverview';
+import SettingsCommandHub from '@/components/settings/SettingsCommandHub';
 import AutopilotControlPanel from '@/components/autopilot/AutopilotControlPanel';
 import { accessibleSettingsItems } from '@/components/SettingsNav';
 import ComplianceManager from '@/components/ComplianceManager';
@@ -87,7 +87,6 @@ import ApprovalRoutingSettings from '@/components/settings/ApprovalRoutingSettin
 import ReadinessManager from '@/components/settings/ReadinessManager';
 import DivisionManager from '@/components/settings/DivisionManager';
 import SettingsAccessGuard from '@/components/settings/SettingsAccessGuard';
-import SettingsSidebar from '@/components/SettingsSidebar';
 import { useSettingsAccess } from '@/hooks/useSettingsAccess';
 import { useQuery } from '@tanstack/react-query';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -150,7 +149,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
     }
 
     // The 'hub' tab renders its own full-page overview — no shared banner.
-    if (activeTab === 'hub') return <SettingsHubOverview onNavigate={setActiveTab} items={items} />;
+    if (activeTab === 'hub') return <SettingsCommandHub onNavigate={setActiveTab} items={items} />;
 
     return (
       <div>
@@ -246,28 +245,21 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
   };
 
   return (
-    <div className="flex gap-hub-gap">
-      {!standalone && (
-        <div className="w-60 flex-shrink-0 hidden lg:block">
-          <SettingsSidebar activeTab={activeTab} onNavigate={setActiveTab} items={items} />
+    <div className="flex-1 min-w-0">
+      {!standalone && activeTab !== 'hub' && (
+        <div className="flex items-center gap-2 mb-hub-gap-sm">
+          <button
+            onClick={() => setActiveTab('hub')}
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Settings
+          </button>
         </div>
       )}
-      <div className="flex-1 min-w-0">
-        {!standalone && activeTab !== 'hub' && (
-          <div className="flex items-center gap-2 mb-hub-gap-sm lg:hidden">
-            <button
-              onClick={() => setActiveTab(isIntegration ? 'integrations' : 'hub')}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition shadow-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {isIntegration ? 'Integrations' : 'Settings'}
-            </button>
-          </div>
-        )}
-        <ErrorBoundary key={activeTab}>
-          {renderContent()}
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary key={activeTab}>
+        {renderContent()}
+      </ErrorBoundary>
     </div>
   );
 }

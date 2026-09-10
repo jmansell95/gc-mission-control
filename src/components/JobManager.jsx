@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
-import { Plus, Briefcase, Search, LayoutGrid, BarChart3, GitBranch } from 'lucide-react';
+import { Plus, Briefcase, Search, LayoutGrid, Download } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import HubEmptyState from '@/components/hubs/HubEmptyState';
 import HubLoadingState from '@/components/hubs/HubLoadingState';
@@ -12,11 +12,10 @@ import useJobPortfolioStats from '@/components/jobs/useJobPortfolioStats';
 import { JOBS_HELP_TOPICS, JOBS_ONBOARDING, JOBS_QUICK_LINKS } from '@/components/jobs/jobsHubContent';
 import JobDetail from '@/components/JobDetail';
 import JobWizardModal from '@/components/JobWizardModal';
-import SplitMultiSiteProjectsModal from '@/components/jobs/SplitMultiSiteProjectsModal';
 import ReGeocodeJobsButton from '@/components/jobs/ReGeocodeJobsButton';
-import PrintReportButton from '@/components/PrintReportButton';
 import JobCreatedModal from '@/components/JobCreatedModal';
-import JobKanbanBoard from '@/components/dashboard/JobKanbanBoard';
+import { jsPDF } from 'jspdf';
+import { addBrandHeader, addTable, addPageNumbers, formatDate } from '@/lib/pdfStyles';
 import { getJobPrimaryType, getJobTypeColor, getJobTypeLabel } from '@/utils/jobTeams';
 import DisciplinePills from '@/components/disciplines/DisciplinePills';
 import JobSummaryCard from '@/components/jobs/JobSummaryCard';
@@ -91,8 +90,6 @@ export default function JobManager({ onNavigateRota }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [createdJob, setCreatedJob] = useState(null);
   const [view, setView] = useState('jobs'); // 'jobs' | 'projects'
-  const [layoutView, setLayoutView] = useState('grid'); // 'grid' | 'kanban'
-  const [showSplitModal, setShowSplitModal] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -185,19 +182,16 @@ export default function JobManager({ onNavigateRota }) {
     }
   };
 
-  const buildJobsPrintHtml = () => {
+  const downloadJobsPDF = () => {
+    const doc = new jsPDF();
+    addBrandHeader(doc, 'Projects Report', `${jobs.length} projects · ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`);
     const rows = jobs.map(j => {
       const jt = getJobPrimaryType(j, teams) || '';
-      return `<tr><td>${j.name}</td><td>${j.location}</td><td>${getJobTypeLabel(jt, jobTypes)}</td><td>${(statusLabels[j.status]||'Planning')}</td><td>${j.start_date}</td><td>${j.end_date}</td></tr>`;
-    }).join('');
-    return `<!DOCTYPE html><html><head><title>Jobs Report</title>
-    <style>body{font-family:Arial,sans-serif;font-size:12px;margin:20px;color:#111}h1{font-size:16px;margin-bottom:4px}p{color:#555;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:#1a5c3a;color:white;padding:6px 8px;text-align:left;font-size:11px}td{padding:5px 8px;border-bottom:1px solid #e2e8f0}tr:nth-child(even) td{background:#f8fafb}@media print{body{margin:10mm}}</style>
-    </head><body>
-    <h1>Jobs Report</h1>
-    <p>${jobs.length} jobs &nbsp;&middot;&nbsp; Printed ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</p>
-    <table><thead><tr><th>Name</th><th>Location</th><th>Type</th><th>Status</th><th>Start</th><th>End</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    </body></html>`;
+      return [j.name || '', j.location || '', getJobTypeLabel(jt, jobTypes), statusLabels[j.status] || 'Planning', formatDate(j.start_date), formatDate(j.end_date)];
+    });
+    addTable(doc, ['Project', 'Location', 'Type', 'Status', 'Start', 'End'], rows, 50);
+    addPageNumbers(doc);
+    doc.save(`projects-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -232,24 +226,14 @@ export default function JobManager({ onNavigateRota }) {
       quickLinks={JOBS_QUICK_LINKS}
       actions={
         <>
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            <button type="button" onClick={() => setLayoutView('grid')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-ui-caption font-semibold transition ${layoutView === 'grid' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              <LayoutGrid className="w-3.5 h-3.5" /> Grid
-            </button>
-            <button type="button" onClick={() => setLayoutView('kanban')} className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-ui-caption font-semibold transition ${layoutView === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              <BarChart3 className="w-3.5 h-3.5" /> Kanban
-            </button>
-          </div>
-          <PrintReportButton buildHtml={buildJobsPrintHtml} label="Print Projects List" />
-          <ReGeocodeJobsButton />
           <button
             type="button"
-            onClick={() => setShowSplitModal(true)}
-            className="inline-flex items-center gap-1.5 h-9 px-3 bg-white text-violet-600 border border-violet-200 rounded-xl hover:bg-violet-50 transition text-ui-caption font-semibold shadow-sm"
-            title="Split existing multi-site jobs into standalone projects"
+            onClick={downloadJobsPDF}
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-white text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition text-ui-caption font-semibold shadow-sm"
           >
-            <GitBranch className="w-4 h-4" /> <span className="hidden sm:inline">Split Multi-Site</span>
+            <Download className="w-4 h-4" /> <span className="hidden sm:inline">Projects PDF</span>
           </button>
+          <ReGeocodeJobsButton />
           <button
             type="button"
             onClick={openWizard}
@@ -269,13 +253,6 @@ export default function JobManager({ onNavigateRota }) {
         />
       )}
 
-      {showSplitModal && (
-        <SplitMultiSiteProjectsModal
-          open={showSplitModal}
-          onClose={() => setShowSplitModal(false)}
-        />
-      )}
-
       {/* Workload Ownership — Direct vs Partner split */}
       {jobs.length > 0 && (
         <WorkloadOwnershipPanel />
@@ -292,13 +269,9 @@ export default function JobManager({ onNavigateRota }) {
         />
       )}
 
-      {/* Jobs Grid/Kanban */}
+      {/* Jobs Grid */}
       {view === 'jobs' && (
         <>
-          {layoutView === 'kanban' ? (
-            <JobKanbanBoard onSelectJob={(job) => setSelectedJob(job)} />
-          ) : (
-          <>
           {isLoading ? (
             <HubLoadingState variant="cards" count={6} />
           ) : isError ? (
@@ -331,8 +304,6 @@ export default function JobManager({ onNavigateRota }) {
                 );
               })}
             </div>
-          )}
-          </>
           )}
         </>
       )}
