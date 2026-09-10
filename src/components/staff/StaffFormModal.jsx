@@ -4,13 +4,16 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import { useConfigLists } from '@/hooks/useConfigLists';
 import { useAuth } from '@/lib/AuthContext';
-import { useDivision } from '@/contexts/DivisionContext';
 import FormModal from '@/components/ui/FormModal';
-import { Mail, Bell, Truck, ShieldCheck, MapPin } from 'lucide-react';
+import {
+  Mail, Bell, Truck, ShieldCheck, UserCircle2, Building2,
+  KeyRound, Users, Briefcase, UserCheck,
+} from 'lucide-react';
 
 /**
  * StaffFormModal — standardised popup for creating/editing a crew member.
- * Replaces the legacy inline Sheet form with the shared FormModal pattern.
+ * Larger 3xl modal with all staff information in one place: identity, crew &
+ * stream, personal, subcontractor details, notifications, and access control.
  */
 export default function StaffFormModal({ open, onClose, editing, staff, teams, vehicles, staffList }) {
   const { toast } = useToast();
@@ -19,7 +22,6 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   const workerTypeOptions = getOptions('worker_types');
   const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin';
-  const { activeDivisionId } = useDivision();
   const { data: permissionGroups = [] } = useQuery({
     queryKey: ['permission-groups-all'],
     queryFn: () => base44.entities.PermissionGroup.list('name', 100),
@@ -35,13 +37,17 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
 
   const emptyForm = {
     name: '', email: '', phone: '', date_of_birth: '', ni_number: '',
+    job_title: '',
     worker_type: 'direct_employee', team_id: '', default_vehicle_id: '',
     manager_id: '', email_notifications_enabled: true, delivery_dashboard_enabled: false,
-    system_role: 'field', phone_gps_consent: false,
     permission_group_id: '', default_landing_page: '',
     division_id: '',
     managed_division_ids: [],
     is_approver: false,
+    is_active: true,
+    company: '', lead_driller_name: '', lead_driller_phone: '',
+    second_man_name: '', second_man_phone: '',
+    market_dojo_onboarded: false,
   };
 
   const toggleManagedDivision = (divId) => {
@@ -59,7 +65,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   useEffect(() => {
     if (open) {
       if (editing) {
-        setForm({ ...emptyForm, ...staff, phone_gps_consent: staff?.phone_gps_consent ?? false });
+        setForm({ ...emptyForm, ...staff });
       } else {
         setForm(emptyForm);
         setInviteOnCreate(true);
@@ -68,13 +74,14 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
   }, [open, editing, staff]);
 
   const set = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
+  const isSubcontractor = form.worker_type === 'subcontractor' || form.worker_type === 'agency';
   const filteredTeams = form.division_id
     ? teams.filter(t => t.division_id === form.division_id)
     : teams;
 
   const cleanPayload = (data) => {
     const cleaned = { ...data };
-    ['default_vehicle_id', 'manager_id', 'system_role', 'permission_group_id', 'default_landing_page', 'division_id'].forEach(k => {
+    ['default_vehicle_id', 'manager_id', 'permission_group_id', 'default_landing_page', 'division_id', 'team_id'].forEach(k => {
       if (cleaned[k] === '') delete cleaned[k];
     });
     return cleaned;
@@ -85,9 +92,6 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     setSaving(true);
     try {
       const payload = cleanPayload(form);
-      // Access (permission group + business stream) is now managed on the
-      // dedicated Access Levels page. Inherit division_id from the selected
-      // crew's team so RLS scoping still works for new staff.
       if (!payload.division_id && payload.team_id) {
         const selectedTeam = teams.find(t => t.id === payload.team_id);
         if (selectedTeam?.division_id) payload.division_id = selectedTeam.division_id;
@@ -104,20 +108,12 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           payload.invite_sent = false;
         }
         await base44.entities.Staff.update(editing, payload);
-
-        // Sync linked User platform role + division from the assigned permission
-        // group (admin-level groups promote to platform 'admin', which RLS checks
-        // for the cross-division bypass). Runs server-side so it works regardless
-        // of the current admin's own role.
         try { await base44.functions.invoke('syncStaffUserRoles', { staff_ids: [editing] }); } catch (_) {}
         toast({ title: 'Crew member updated' });
       } else {
         const created = await base44.entities.Staff.create(payload);
         if (inviteOnCreate && form.email) {
           try {
-            // Register the user (creates account + sends OTP), then send the
-            // branded Ground Control invite email — works without a custom
-            // domain because the user is now a registered user.
             const tempPassword = 'GC' + Math.random().toString(36).slice(2, 10) + '!';
             let registered = false;
             try {
@@ -158,6 +154,8 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
 
   const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm';
   const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5';
+  const sectionTitle = 'text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5';
+  const gridCls = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
 
   return (
     <FormModal
@@ -166,16 +164,16 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
       icon={ShieldCheck}
       title={editing ? 'Edit Crew Member' : 'New Crew Member'}
       description={editing ? 'Update this crew member\'s details and access.' : 'Add a new crew member to the team.'}
-      size="xl"
+      size="3xl"
       saveLabel={editing ? 'Update' : 'Add Crew Member'}
       onSave={handleSave}
       saving={saving}
     >
-      <div className="space-y-5">
+      <div className="space-y-6">
         {/* Identity */}
-        <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Identity</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <section>
+          <p className={sectionTitle}><UserCircle2 className="w-3.5 h-3.5" /> Identity</p>
+          <div className={gridCls}>
             <div>
               <label className={labelCls}>Full Name *</label>
               <input type="text" value={form.name || ''} onChange={e => set('name', e.target.value)} required className={inputCls} />
@@ -194,7 +192,18 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 {workerTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
-            <div className="sm:col-span-2">
+            <div>
+              <label className={labelCls}>Job Title</label>
+              <input type="text" value={form.job_title || ''} onChange={e => set('job_title', e.target.value)} placeholder="e.g. Cable Percussion Driller" className={inputCls} />
+            </div>
+          </div>
+        </section>
+
+        {/* Crew & Stream */}
+        <section>
+          <p className={sectionTitle}><Users className="w-3.5 h-3.5" /> Crew & Stream</p>
+          <div className={gridCls}>
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className={labelCls}>Crew *</label>
               <select value={form.team_id || ''} onChange={e => set('team_id', e.target.value)} required className={inputCls}>
                 <option value="">Select Crew</option>
@@ -204,13 +213,38 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 })}
               </select>
             </div>
-          </div>
-        </div>
-
-        {/* Assignment */}
-        <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Assignment</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {isAdmin && (
+              <div>
+                <label className={labelCls}>Business Stream</label>
+                <select value={form.division_id || ''} onChange={e => set('division_id', e.target.value)} className={inputCls}>
+                  <option value="">Inherit from crew</option>
+                  {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </div>
+            )}
+            {isAdmin && (
+              <div>
+                <label className={labelCls}>Access Level</label>
+                <select value={form.permission_group_id || ''} onChange={e => set('permission_group_id', e.target.value)} className={inputCls}>
+                  <option value="">Default (Field Staff)</option>
+                  {permissionGroups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                </select>
+              </div>
+            )}
+            {isAdmin && (
+              <div>
+                <label className={labelCls}>Default Landing Page</label>
+                <select value={form.default_landing_page || ''} onChange={e => set('default_landing_page', e.target.value)} className={inputCls}>
+                  <option value="">Auto (from access level)</option>
+                  <option value="/admin">Admin Dashboard</option>
+                  <option value="/staff-schedule">My Schedule</option>
+                  <option value="/staff-profile">My Profile</option>
+                  <option value="/deliveries">Deliveries</option>
+                  <option value="/scanner">Scanner</option>
+                  <option value="/subcontractor">Subcontractor Hub</option>
+                </select>
+              </div>
+            )}
             <div>
               <label className={labelCls}>Default Vehicle</label>
               <select value={form.default_vehicle_id || ''} onChange={e => set('default_vehicle_id', e.target.value)} className={inputCls}>
@@ -225,20 +259,62 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 {staffList.filter(s => s.id !== editing).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
-            <div>
-              <label className={labelCls}>Date of Birth</label>
-              <input type="date" value={form.date_of_birth || ''} onChange={e => set('date_of_birth', e.target.value)} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>NI Number</label>
-              <input type="text" value={form.ni_number || ''} onChange={e => set('ni_number', e.target.value.toUpperCase())} placeholder="AB123456C" className={`${inputCls} font-mono uppercase`} />
-            </div>
           </div>
-        </div>
+        </section>
 
-        {/* Notifications */}
-        <div>
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Notifications</p>
+        {/* Personal — admin only */}
+        {isAdmin && (
+          <section>
+            <p className={sectionTitle}><Briefcase className="w-3.5 h-3.5" /> Personal</p>
+            <div className={gridCls}>
+              <div>
+                <label className={labelCls}>Date of Birth</label>
+                <input type="date" value={form.date_of_birth || ''} onChange={e => set('date_of_birth', e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>NI Number</label>
+                <input type="text" value={form.ni_number || ''} onChange={e => set('ni_number', e.target.value.toUpperCase())} placeholder="AB123456C" className={`${inputCls} font-mono uppercase`} />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Subcontractor / Agency Details — conditional */}
+        {isSubcontractor && (
+          <section>
+            <p className={sectionTitle}><Building2 className="w-3.5 h-3.5" /> Subcontractor / Agency Details</p>
+            <div className={gridCls}>
+              <div className="sm:col-span-2 lg:col-span-1">
+                <label className={labelCls}>Company</label>
+                <input type="text" value={form.company || ''} onChange={e => set('company', e.target.value)} placeholder="Company / agency name" className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Lead Driller Name</label>
+                <input type="text" value={form.lead_driller_name || ''} onChange={e => set('lead_driller_name', e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Lead Driller Phone</label>
+                <input type="tel" value={form.lead_driller_phone || ''} onChange={e => set('lead_driller_phone', e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Second Man Name</label>
+                <input type="text" value={form.second_man_name || ''} onChange={e => set('second_man_name', e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>Second Man Phone</label>
+                <input type="tel" value={form.second_man_phone || ''} onChange={e => set('second_man_phone', e.target.value)} className={inputCls} />
+              </div>
+              <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100 self-end">
+                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={e => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <span className="text-sm text-slate-700">Onboarded in Market Dojo</span>
+              </label>
+            </div>
+          </section>
+        )}
+
+        {/* Notifications & Flags */}
+        <section>
+          <p className={sectionTitle}><Bell className="w-3.5 h-3.5" /> Notifications & Flags</p>
           <div className="space-y-2.5">
             {!editing && (
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-blue-50/60 border border-blue-100">
@@ -256,17 +332,19 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               <input type="checkbox" checked={form.delivery_dashboard_enabled === true} onChange={e => set('delivery_dashboard_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
               <span className="text-sm text-slate-700 flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-blue-600" /> Driver — delivery dashboard access</span>
             </label>
-            <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
-              <input type="checkbox" checked={form.phone_gps_consent === true} onChange={e => set('phone_gps_consent', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
-              <span className="text-sm text-slate-700 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-emerald-600" /> Phone GPS consent — auto-detect site arrival/departure even when not in a tracked vehicle</span>
-            </label>
+            {editing && (
+              <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <input type="checkbox" checked={form.is_active !== false} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <span className="text-sm text-slate-700 flex items-center gap-1.5"><UserCheck className="w-3.5 h-3.5 text-slate-600" /> Active — appears in rota and staff lists</span>
+              </label>
+            )}
           </div>
-        </div>
+        </section>
 
-        {/* Access Control — super admins only */}
+        {/* Access Control — admin only */}
         {isAdmin && (
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-2.5">Access Control</p>
+          <section>
+            <p className={sectionTitle}><KeyRound className="w-3.5 h-3.5" /> Access Control</p>
             <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-purple-50/60 border border-purple-100">
               <input type="checkbox" checked={form.is_approver === true} onChange={e => set('is_approver', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
               <span className="text-sm text-slate-700 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-purple-600" /> Access Approver — receives notifications and can approve new users waiting for access</span>
@@ -300,7 +378,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 </div>
               </div>
             )}
-          </div>
+          </section>
         )}
       </div>
     </FormModal>
