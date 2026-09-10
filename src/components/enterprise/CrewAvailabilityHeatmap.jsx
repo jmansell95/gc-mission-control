@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek } from 'date-fns';
-import { Users, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, ArrowRight, Cog, MapPin, Wrench } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import { useCrewAvailability, HEATMAP_LEGEND } from '@/hooks/useCrewAvailability';
 
-/**
- * CrewAvailabilityHeatmap — compact dashboard widget showing a preview of the
- * crew availability heatmap. Capped at 12 staff with a "View all crew" link to
- * the full /enterprise/crew-availability page.
- */
 const PREVIEW_COUNT = 12;
 
 export default function CrewAvailabilityHeatmap() {
@@ -17,12 +14,33 @@ export default function CrewAvailabilityHeatmap() {
   const { staff, divMap, days, dayStrs, getCellStatus, stats } = useCrewAvailability(weekStart);
   const [selectedCell, setSelectedCell] = useState(null);
 
+  // Fetch today's rig deployment for the "Rigs in the Field" strip
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { data: rigMatrix } = useQuery({
+    queryKey: ['availability-matrix', new Date().getFullYear(), ''],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getAvailabilityMatrix', { year: new Date().getFullYear(), division_id: '' });
+      return res.data;
+    },
+  });
+
+  const rigStats = useMemo(() => {
+    if (!rigMatrix?.rigs) return { total: 0, onSite: 0, available: 0, maintenance: 0 };
+    let onSite = 0, available = 0, maintenance = 0;
+    for (const rig of rigMatrix.rigs) {
+      const todayAssignment = (rigMatrix.assignments || []).find(a => a.rig_asset_id === rig.id && a.assigned_date === today);
+      if (todayAssignment) onSite++;
+      else available++;
+    }
+    return { total: rigMatrix.rigs.length, onSite, available, maintenance };
+  }, [rigMatrix, today]);
+
   return (
     <div className="insight-card rounded-2xl p-4 sm:p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-            <Users className="w-4.5 h-4.5 text-white" />
+            <Users className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="font-bold text-slate-900 text-sm">Crew Availability Heatmap</h3>
@@ -42,6 +60,28 @@ export default function CrewAvailabilityHeatmap() {
         </div>
       </div>
 
+      {/* ── Rigs in the Field Today ── */}
+      <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-slate-50 to-blue-50/30 border border-slate-100">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Cog className="w-3.5 h-3.5 text-[#2E5A1A]" />
+            <span className="text-xs font-bold text-slate-700">Rigs in the Field Today</span>
+          </div>
+          <button
+            onClick={() => navigate('/enterprise/crew-availability')}
+            className="text-[10px] font-bold text-[#2E5A1A] hover:underline flex items-center gap-0.5"
+          >
+            View Heatmap <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <RigStatChip icon={MapPin} label="On Site" value={rigStats.onSite} color="text-emerald-700 bg-emerald-100" />
+          <RigStatChip icon={Cog} label="Available" value={rigStats.available} color="text-blue-700 bg-blue-100" />
+          <RigStatChip icon={Wrench} label="Total" value={rigStats.total} color="text-slate-700 bg-slate-100" />
+        </div>
+      </div>
+
+      {/* Crew stats */}
       <div className="flex gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
           <span className="w-2 h-2 rounded-full bg-emerald-500" /> On Job · {stats.onJobCount}
@@ -125,6 +165,18 @@ export default function CrewAvailabilityHeatmap() {
       >
         View all crew <ArrowRight className="w-4 h-4" />
       </button>
+    </div>
+  );
+}
+
+function RigStatChip({ icon: Icon, label, value, color }) {
+  return (
+    <div className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg ${color}`}>
+      <Icon className="w-3 h-3" />
+      <div className="min-w-0">
+        <p className="text-[8px] font-bold uppercase tracking-wide opacity-70">{label}</p>
+        <p className="text-sm font-extrabold tabular-nums leading-none">{value}</p>
+      </div>
     </div>
   );
 }
