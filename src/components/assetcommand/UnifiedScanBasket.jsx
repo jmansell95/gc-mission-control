@@ -297,8 +297,9 @@ export default function UnifiedScanBasket({
         )}
       </AnimatePresence>
 
-      {/* Collapsed sticky bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-[65] safe-area-bottom">
+      {/* Collapsed sticky bar — positioned above the FieldShell bottom nav
+          (bottom-16 = 64px) so it's visible, not hidden behind the tab bar */}
+      <div className="fixed bottom-16 left-0 right-0 z-[65]">
         <div className="max-w-3xl xl:max-w-4xl mx-auto px-4 pb-3">
           <button
             onClick={() => setExpanded(true)}

@@ -216,9 +216,9 @@ export default function StaffProfile() {
       <div>
         {/* Hero card */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="insight-card rounded-2xl p-5 md:p-6">
-            <div className="flex items-center gap-4">
-              <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={64} />
+          <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={56} />
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight break-words">{staff.name}</h1>
                 <p className="text-slate-500 text-sm font-medium mt-0.5">
@@ -276,51 +276,53 @@ export default function StaffProfile() {
         )}
 
         {/* Scrollable single-line tab bar */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-5">
-          <SubPills
-            pills={TABS.filter(t => !(t.key === 'crew' && !staff.team_id)).map(t => ({
-              id: t.key,
-              label: t.label,
-              icon: t.icon,
-              badge: t.key === 'timesheets' ? pendingCount : undefined,
-            }))}
-            active={activeTab}
-            onChange={setActiveTab}
-          />
+        <div className="sticky top-[3.75rem] z-30 mt-4 mb-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white/85 backdrop-blur-md rounded-xl border border-slate-200/70 shadow-sm">
+            <SubPills
+              pills={TABS.filter(t => !(t.key === 'crew' && !staff.team_id)).map(t => ({
+                id: t.key,
+                label: t.label,
+                icon: t.icon,
+                badge: t.key === 'timesheets' ? pendingCount : undefined,
+              }))}
+              active={activeTab}
+              onChange={setActiveTab}
+            />
+          </div>
         </div>
 
         {/* Tab Content — white rounded cards on off-white background */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
           {activeTab === 'performance' && (staff.id
             ? <div className="space-y-4">
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <StaffPerformanceCard staffId={staff.id} />
                 </div>
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <StaffPerformanceCharts staffId={staff.id} staffName={staff.name} />
                 </div>
               </div>
             : <NoCrewProfileState tab="performance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'earnings' && (staff.id
             ? <div className="space-y-4">
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <IncentiveDashboard staffId={staff.id} staffName={staff.name} teamId={staff.team_id} />
                 </div>
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <RewardsCatalogue staffId={staff.id} staffName={staff.name} />
                 </div>
               </div>
             : <NoCrewProfileState tab="earnings" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'timesheets' && (staff.id ? (
             <div className="space-y-4">
-              <div className="insight-card rounded-2xl p-5 md:p-6">
+              <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <StaffWeeklySignCard staffId={staff.id} staffName={staff.name} />
                 </div>
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <TimesheetHistory staffId={staff.id} />
                 </div>
               {upcomingAbsences.length > 0 && (
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                       <Clock className="w-4 h-4 text-amber-600" />
@@ -344,7 +346,7 @@ export default function StaffProfile() {
                   </div>
                 </div>
               )}
-              <div className="insight-card rounded-2xl p-5 md:p-6">
+              <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <div className="flex items-center gap-2.5 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                       <Wrench className="w-4 h-4 text-amber-600" />
@@ -357,10 +359,10 @@ export default function StaffProfile() {
           ) : <NoCrewProfileState tab="timesheets" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'compliance' && (staff.id
             ? <div className="space-y-4">
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <TrainingTab staffId={staff.id} staffName={staff.name} teamId={staff.team_id} canManageTeam={canAccessAdmin || isPlatformAdmin} />
                 </div>
-                <div className="insight-card rounded-2xl p-5 md:p-6">
+                <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                   <ComplianceWallet staffId={staff.id} staffName={staff.name} />
                 </div>
                 {!viewingOther && (
@@ -369,7 +371,7 @@ export default function StaffProfile() {
               </div>
             : <NoCrewProfileState tab="compliance" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
           {activeTab === 'crew' && (staff.team_id
-            ? <div className="insight-card rounded-2xl p-5 md:p-6">
+            ? <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
                 <TeamMiniFeed teamId={staff.team_id} currentStaffId={staff.id} />
               </div>
             : <NoCrewProfileState tab="crew" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -6,10 +6,13 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   ClipboardList, Printer, X, MapPin, Truck, User, Package,
   CheckCircle2, Circle, Clock, Navigation, FileText, AlertTriangle, PenLine,
+  Barcode, Loader2,
 } from 'lucide-react';
 import { buildPickListHtml, downloadPickListPDF, parsePickItems } from './pickListHtml';
 import { useToast } from '@/components/ui/use-toast';
 import SignaturePad from '@/components/staff/SignaturePad';
+import FullScreenScanner from '@/components/assetcommand/FullScreenScanner';
+import { playSuccess, playError } from '@/utils/scanFeedback';
 
 /**
  * Mobile-first full-screen Pick List modal with per-stage drawn-signature sign-off.
@@ -33,6 +36,10 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
   const [busy, setBusy] = useState(null);
   const [activeStage, setActiveStage] = useState(null); // which stage canvas is open
   const [currentSig, setCurrentSig] = useState(null); // drawn signature data URL for the active stage
+  const [scannedIndices, setScannedIndices] = useState(new Set());
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanBusy, setScanBusy] = useState(false);
+  const lastPickScanRef = useRef({ value: '', ts: 0 });
 
   const { data: fetchedJob } = useQuery({
     queryKey: ['picklist-job', delivery?.job_id],
@@ -55,6 +62,62 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
   }, [open, delivery, resolvedJob, resolvedVehicle, driverName]);
 
   const items = useMemo(() => parsePickItems(delivery), [delivery]);
+
+  const hasRealItems = items.length > 0 && items[0] !== '(no items listed)';
+  const allScanned = !hasRealItems || items.every((_, i) => scannedIndices.has(i));
+
+  // Match a scanned asset name to a pick list line (case-insensitive substring).
+  // Strips quantity suffixes like "x10" from the line so "Coreliners x10"
+  // still matches an asset named "Coreliner".
+  const matchAssetToItem = (assetName) => {
+    if (!assetName) return -1;
+    const norm = assetName.toLowerCase().trim();
+    for (let i = 0; i < items.length; i++) {
+      const line = items[i].toLowerCase().replace(/\s*x\d+\s*/g, ' ').trim();
+      if (!line || line === '(no items listed)') continue;
+      if (norm.includes(line) || line.includes(norm)) return i;
+    }
+    return -1;
+  };
+
+  const handlePickScan = async (val) => {
+    const q = val.trim();
+    if (!q) return;
+    const now = Date.now();
+    if (lastPickScanRef.current.value === q && now - lastPickScanRef.current.ts < 2000) return;
+    lastPickScanRef.current = { value: q, ts: now };
+    setScanBusy(true);
+    try {
+      const res = await base44.functions.invoke('resolveAssetByQR', { scan: q });
+      const data = res.data || res;
+      const found = data.asset;
+      if (!found) {
+        playError();
+        toast({ title: 'Not found', description: 'No asset matches this QR code', variant: 'destructive' });
+        return;
+      }
+      const idx = matchAssetToItem(found.name);
+      if (idx < 0) {
+        playError();
+        toast({ title: 'Not on pick list', description: `${found.name} isn't listed on this delivery`, variant: 'destructive' });
+        return;
+      }
+      if (scannedIndices.has(idx)) {
+        playSuccess();
+        toast({ title: 'Already scanned', description: found.name });
+        return;
+      }
+      playSuccess();
+      const newSize = scannedIndices.size + 1;
+      setScannedIndices(prev => new Set([...prev, idx]));
+      toast({ title: '✓ Checked off', description: `${found.name} · ${newSize}/${items.length}` });
+      if (newSize >= items.length) setShowScanner(false);
+    } catch (e) {
+      playError();
+      toast({ title: 'Scan failed', description: e.message, variant: 'destructive' });
+    }
+    setScanBusy(false);
+  };
 
   const signStages = useMemo(() => [
     {
@@ -177,23 +240,50 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
             )}
           </div>
 
-          {/* Items to pick */}
+          {/* Items to pick — scan to check off */}
           <div className="insight-card rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <Package className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Items to Pick ({items.length})</h4>
+              {hasRealItems && (
+                <span className={`ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${allScanned ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {allScanned ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                  {scannedIndices.size}/{items.length} scanned
+                </span>
+              )}
             </div>
+
+            {hasRealItems && (
+              <button
+                onClick={() => setShowScanner(true)}
+                disabled={allScanned}
+                className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition touch-manipulation min-h-[48px] ${allScanned ? 'bg-emerald-100 text-emerald-700 cursor-default' : 'bg-[#2E5A1A] text-white hover:bg-[#244715] active:scale-95'}`}
+              >
+                <Barcode className="w-4 h-4" /> {allScanned ? 'All Items Scanned' : 'Scan to Check Off'}
+              </button>
+            )}
+
             <div className="space-y-1.5">
-              {items.map((line, i) => (
-                <div key={i} className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-slate-50 transition">
-                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-[#2E5A1A] text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
-                  <span className="text-sm text-slate-700 flex-1">{line}</span>
-                  <span className="w-5 h-5 rounded border-1.5 border-slate-400 flex-shrink-0" />
-                  <span className="w-5 h-5 rounded border-1.5 border-slate-400 flex-shrink-0" />
-                </div>
-              ))}
+              {items.map((line, i) => {
+                const scanned = scannedIndices.has(i);
+                return (
+                  <div key={i} className={`flex items-center gap-3 py-2 px-2 rounded-lg transition ${scanned ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${scanned ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-[#2E5A1A]'}`}>{i + 1}</span>
+                    <span className={`text-sm flex-1 ${scanned ? 'text-emerald-800 font-medium' : 'text-slate-700'}`}>{line}</span>
+                    {scanned ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    ) : (
+                      <span className="w-5 h-5 rounded border-2 border-slate-300 flex-shrink-0" />
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <p className="text-[11px] text-slate-400 px-1">☐ Picked &nbsp; ☐ Loaded — tick on the printed sheet</p>
+            {hasRealItems && !allScanned && (
+              <p className="text-[11px] text-amber-600 px-1 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Scan all items before signing off each stage
+              </p>
+            )}
           </div>
 
           {/* Notes */}
@@ -225,9 +315,9 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                   <div key={stage.key} className={`rounded-xl border transition overflow-hidden ${stage.done ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'}`}>
                     {/* Stage header row */}
                     <button
-                      onClick={() => !stage.done && !busy && setActiveStage(isActive ? null : stage.key)}
-                      disabled={stage.done || busy}
-                      className={`w-full flex items-center gap-3 p-3 text-left touch-manipulation min-h-[56px] ${stage.done ? 'cursor-default' : 'cursor-pointer hover:border-[#2E5A1A] active:scale-[0.99]'} ${isActive ? 'border-b-0' : ''}`}
+                      onClick={() => !stage.done && !busy && allScanned && setActiveStage(isActive ? null : stage.key)}
+                      disabled={stage.done || busy || (!allScanned && hasRealItems)}
+                      className={`w-full flex items-center gap-3 p-3 text-left touch-manipulation min-h-[56px] ${stage.done ? 'cursor-default' : allScanned ? 'cursor-pointer hover:border-[#2E5A1A] active:scale-[0.99]' : 'cursor-not-allowed opacity-60'} ${isActive ? 'border-b-0' : ''}`}
                     >
                       <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stage.done ? 'bg-emerald-600' : 'bg-slate-100'}`}>
                         {stage.done ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-slate-500" />}
@@ -239,7 +329,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                             {stage.by} · {new Date(stage.at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
                           </p>
                         ) : (
-                          <p className="text-[11px] text-slate-400">Tap to sign as {myName}</p>
+                          <p className="text-[11px] text-slate-400">{allScanned ? `Tap to sign as ${myName}` : 'Scan all items first'}</p>
                         )}
                       </div>
                       {!stage.done && (isBusy ? (
@@ -305,6 +395,26 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           </button>
         </div>
       </div>
+
+      {/* QR scanner overlay — scan items to check them off the pick list */}
+      {showScanner && (
+        <FullScreenScanner
+          onScan={handlePickScan}
+          onClose={() => setShowScanner(false)}
+          resolving={scanBusy}
+          scanResult={null}
+          scanError=""
+          pendingPanda={null}
+          alreadyInBasket={false}
+          confirming={false}
+          refreshing={false}
+          onViewAsset={() => {}}
+          onScanNext={() => {}}
+          onAddToBasket={() => {}}
+          onConfirmPanda={() => {}}
+          onCancelPanda={() => {}}
+        />
+      )}
     </div>,
     document.body
   );
