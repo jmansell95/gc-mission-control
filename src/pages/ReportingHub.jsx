@@ -20,6 +20,7 @@ import CustomReportBuilder from '@/components/reports/CustomReportBuilder';
 import ComplianceChecksReport from '@/components/reports/ComplianceChecksReport';
 import SupplierSpendReport from '@/components/reports/SupplierSpendReport';
 import AvailabilityReport from '@/components/reports/AvailabilityReport';
+import RemainingWorkReport from '@/components/reports/RemainingWorkReport';
 import { useReportData, filterJobsByDate } from '@/hooks/useReportData';
 import { Bookmark, FileBarChart, Sparkles } from 'lucide-react';
 
@@ -46,7 +47,8 @@ export default function ReportingHub() {
   const isCrewPerf = category === 'crew_performance';
   const isSupplierSpend = category === 'supplier_spend';
   const isAvailability = category === 'availability';
-  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend || isAvailability;
+  const isRemainingWork = category === 'remaining_work';
+  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend || isAvailability || isRemainingWork;
 
   // Apply date preset to get actual date range
   const getEffectiveDateRange = () => {
@@ -180,7 +182,7 @@ export default function ReportingHub() {
       quickLinks={REPORTS_QUICK_LINKS}
     >
       {/* Summary stat tiles — hidden on special tabs */}
-      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && <ReportStatTiles data={data} />}
+      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && <ReportStatTiles data={data} />}
 
       {/* Filter bar — hidden on Templates and Custom Builder tabs */}
       {!isTemplates && (
@@ -199,7 +201,7 @@ export default function ReportingHub() {
 
         <div className="flex-1 min-w-0 space-y-4">
           {/* Save-as-template button for native categories */}
-          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && (
+          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:text-[#2E5A1A] text-slate-600 text-xs font-semibold transition">
@@ -214,6 +216,7 @@ export default function ReportingHub() {
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
             : isSupplierSpend ? <SupplierSpendReport filters={effectiveFilters} />
             : isAvailability ? <AvailabilityReport filters={effectiveFilters} />
+            : isRemainingWork ? <RemainingWorkReport filters={effectiveFilters} />
             : <>
               <ReportNativeSection hub={category} filters={effectiveFilters} />
               {category === 'compliance' && <ComplianceChecksReport filters={effectiveFilters} />}
