@@ -13,12 +13,12 @@ import What3WordsPill from '@/components/jobs/What3WordsPill';
 import LiveMarginBadge from '@/components/dashboard/LiveMarginBadge';
 
 const STATUS_META = {
-  planning: { label: 'Planning', icon: CircleDashed, grad: 'from-slate-500 to-slate-600', chip: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200' },
-  in_progress: { label: 'In Progress', icon: TrendingUp, grad: 'from-[#2E5A1A] to-[#4d7c2a]', chip: 'bg-[#2E5A1A]/15 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' },
-  decommissioning: { label: 'Decommissioning', icon: AlertTriangle, grad: 'from-orange-500 to-amber-600', chip: 'bg-orange-100 text-orange-700 ring-1 ring-orange-200' },
-  completed: { label: 'Completed', icon: CheckCircle2, grad: 'from-teal-500 to-cyan-600', chip: 'bg-teal-100 text-teal-700 ring-1 ring-teal-200' },
-  on_hold: { label: 'On Hold', icon: Clock, grad: 'from-amber-500 to-yellow-600', chip: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200' },
-  cancelled: { label: 'Cancelled', icon: AlertTriangle, grad: 'from-red-500 to-rose-600', chip: 'bg-red-100 text-red-700 ring-1 ring-red-200' },
+  planning: { label: 'Planning', icon: CircleDashed, grad: 'from-slate-500 to-slate-600', chip: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200', text: 'text-slate-700' },
+  in_progress: { label: 'In Progress', icon: TrendingUp, grad: 'from-[#2E5A1A] to-[#4d7c2a]', chip: 'bg-[#2E5A1A]/15 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20', text: 'text-[#2E5A1A]' },
+  decommissioning: { label: 'Decommissioning', icon: AlertTriangle, grad: 'from-orange-500 to-amber-600', chip: 'bg-orange-100 text-orange-700 ring-1 ring-orange-200', text: 'text-orange-700' },
+  completed: { label: 'Completed', icon: CheckCircle2, grad: 'from-teal-500 to-cyan-600', chip: 'bg-teal-100 text-teal-700 ring-1 ring-teal-200', text: 'text-teal-700' },
+  on_hold: { label: 'On Hold', icon: Clock, grad: 'from-amber-500 to-yellow-600', chip: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200', text: 'text-amber-700' },
+  cancelled: { label: 'Cancelled', icon: AlertTriangle, grad: 'from-red-500 to-rose-600', chip: 'bg-red-100 text-red-700 ring-1 ring-red-200', text: 'text-red-700' },
 };
 
 const fmtDateShort = (d) => {
@@ -91,20 +91,37 @@ export default function JobSummaryCard({
   return (
     <>
     <div
-      className="vibrant-card rounded-xl overflow-hidden flex flex-col group cursor-pointer"
+      className="relative rounded-2xl overflow-hidden flex flex-col group cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 bg-white border border-slate-200/80"
+      style={{ boxShadow: '0 1px 3px rgba(15,23,42,0.04), 0 4px 16px -4px rgba(15,23,42,0.06)' }}
       onClick={() => onView(job)}
     >
-      {/* Gradient header strip — status-colored */}
-      <div className={`h-2 bg-gradient-to-r ${status.grad}`} />
+      {/* Gradient header — status-colored with overlay pattern */}
+      <div className={`relative h-14 bg-gradient-to-r ${status.grad} overflow-hidden`}>
+        <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3), transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2), transparent 50%)' }} />
+        <div className="absolute inset-0 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/90 backdrop-blur-sm ${status.text}`}>
+              <StatusIcon className="w-3 h-3" /> {status.label}
+            </span>
+            {job.status === 'in_progress' && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> LIVE
+              </span>
+            )}
+          </div>
+          {job.job_reference && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-white/90 bg-white/15 backdrop-blur-sm px-2 py-1 rounded-md">
+              <FileText className="w-2.5 h-2.5" />{job.job_reference}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="p-4 flex-1 space-y-3">
         {/* Badges row */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap gap-1.5">
-              <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${status.chip}`}>
-                <StatusIcon className="w-3 h-3" /> {status.label}
-              </span>
               <DisciplinePills job={job} size="sm" />
               <LiveMarginBadge job={job} />
               {job.site_lat != null && job.site_lng != null && (
@@ -141,15 +158,6 @@ export default function JobSummaryCard({
                   <span className="opacity-30">·</span>
                   <span className="truncate">{client.name}</span>
                 </div>
-              </div>
-            )}
-            {/* Job Reference — prominent badge tucked just under the pills */}
-            {job.job_reference && (
-              <div className="inline-flex items-center gap-1.5 bg-[#2E5A1A]/8 text-[#2E5A1A] rounded-md px-2.5 py-1 text-xs font-bold tracking-wide w-fit">
-                <FileText className="w-3.5 h-3.5" />
-                <span className="text-[10px] uppercase opacity-60 font-semibold">Job Reference</span>
-                <span className="opacity-30">·</span>
-                {job.job_reference}
               </div>
             )}
           </div>

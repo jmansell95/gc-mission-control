@@ -3,8 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Grid3x3, Briefcase } from 'lucide-react';
 import { format } from 'date-fns';
-import BentoDashboard from '@/components/dashboard/BentoDashboard';
-import TrainingGapSchedulerWidget from '@/components/dashboard/TrainingGapSchedulerWidget';
+import CustomisableWidgetGrid from '@/components/dashboard/CustomisableWidgetGrid';
+import WidgetRenderer from '@/components/dashboard/WidgetRenderer';
 import { useJobFilter } from '@/components/dashboard/JobFilterContext';
 import JobSelectorBar from '@/components/dashboard/JobSelectorBar';
 import QuickActionBar from '@/components/dashboard/QuickActionBar';
@@ -109,18 +109,24 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
 
       <JobSelectorBar onSelectJob={onSelectJob} />
 
-      {/* ── Bento Dashboard — fixed modern widget grid ── */}
+      {/* ── Customisable Widget Grid — per-user drag/resize/add/remove ── */}
       {isAllJobs && (
-        <BentoDashboard
-          onNavigate={onNavigate}
-          onSelectJob={onSelectJob}
-          onOpenJobDrawer={openJobDrawer}
-          onJobBreakdown={(job) => onSelectJob?.(job, 'financials')}
+        <CustomisableWidgetGrid
+          renderWidget={(id) => (
+            <WidgetRenderer
+              widgetId={id}
+              onNavigate={onNavigate}
+              onSelectJob={onSelectJob}
+              onOpenJobDrawer={openJobDrawer}
+              onJobBreakdown={(job) => onSelectJob?.(job, 'financials')}
+            />
+          )}
+          canShowWidget={(id) => {
+            // All widgets are available in the All Jobs view
+            return true;
+          }}
         />
       )}
-
-      {/* ── Training Gap Scheduler — proactive compliance widget ── */}
-      {isAllJobs && <TrainingGapSchedulerWidget />}
 
       {/* Job Quick Drawer — slide-out drill-down without leaving the dashboard */}
       <JobQuickDrawer job={drawerJob} onClose={() => setDrawerJob(null)} onOpenFullDetails={onSelectJob} />
