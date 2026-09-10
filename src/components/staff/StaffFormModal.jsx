@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import FormModal from '@/components/ui/FormModal';
 import {
   Mail, Bell, Truck, ShieldCheck, UserCircle2, Building2,
-  KeyRound, Users, Briefcase, UserCheck,
+  KeyRound, Users, Briefcase, UserCheck, PoundSterling,
 } from 'lucide-react';
 
 /**
@@ -48,6 +48,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     company: '', lead_driller_name: '', lead_driller_phone: '',
     second_man_name: '', second_man_phone: '',
     market_dojo_onboarded: false,
+    day_rate: null,
   };
 
   const toggleManagedDivision = (divId) => {
@@ -274,6 +275,28 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               <div>
                 <label className={labelCls}>NI Number</label>
                 <input type="text" value={form.ni_number || ''} onChange={e => set('ni_number', e.target.value.toUpperCase())} placeholder="AB123456C" className={`${inputCls} font-mono uppercase`} />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Financial — admin only */}
+        {isAdmin && (
+          <section>
+            <p className={sectionTitle}><PoundSterling className="w-3.5 h-3.5" /> Financial</p>
+            <div className={gridCls}>
+              <div>
+                <label className={labelCls}>Day Rate (£)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.day_rate ?? ''}
+                  onChange={e => set('day_rate', e.target.value === '' ? null : Number(e.target.value))}
+                  placeholder="e.g. 180.00"
+                  className={inputCls}
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Internal cost per day in GBP. Used for labour cost calculations. Leave blank to fall back to the rate card.</p>
               </div>
             </div>
           </section>

@@ -64,6 +64,10 @@
       "type": "string",
       "description": "Staff member's job title / role (e.g. 'Cable Percussion Driller', 'Groundworker'). Derived from the crew section during spreadsheet import."
     },
+    "day_rate": {
+      "type": "number",
+      "description": "Day rate in GBP \u2014 the internal cost price per day for this staff member. Used by the financials engine for labour cost calculations. Blank = no day rate set (cost falls back to the rate card or job-level rate). Admin-only field."
+    },
     "lead_driller_name": {
       "type": "string",
       "description": "Lead Driller name for this subcontractor or agency crew. Captured in the Staff Hub Contacts tab Add/Edit modal. Shown as a sub-line on the rota grid and job details page. Blank for direct employees."
