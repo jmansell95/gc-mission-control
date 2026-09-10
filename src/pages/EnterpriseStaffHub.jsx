@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
+import KpiSkeleton from '@/components/enterprise/KpiSkeleton';
 import {
   Users, Search, Mail, Phone, Wrench, Building2,
   UserCheck, AlertCircle, ShieldCheck, HardHat, UserCog,
@@ -97,6 +98,7 @@ export default function EnterpriseStaffHub() {
       accent="#3b82f6"
     >
       {/* KPI Row */}
+      {isLoading ? <KpiSkeleton count={4} /> : (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
         <div className="stat-gradient-brand rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
           <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -135,6 +137,7 @@ export default function EnterpriseStaffHub() {
           </div>
         </div>
       </div>
+      )}
 
       <div className="space-y-4">
         {/* Search + Division filters */}

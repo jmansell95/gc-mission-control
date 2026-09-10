@@ -23,6 +23,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import CrossDivisionResourceBoard from '@/components/enterprise/CrossDivisionResourceBoard';
 import CrewAvailabilityHeatmap from '@/components/enterprise/CrewAvailabilityHeatmap';
 import { STATUS_STYLES, WIDGET_STORAGE_KEY, DEFAULT_WIDGETS } from '@/components/enterprise/enterpriseConstants';
+import KpiSkeleton from '@/components/enterprise/KpiSkeleton';
+import SectionTitle from '@/components/enterprise/SectionTitle';
 
 export default function EnterpriseDashboard() {
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ export default function EnterpriseDashboard() {
 
   const { data: myProfile } = useQuery({ queryKey: ['ent-my-profile'], queryFn: async () => { const res = await base44.functions.invoke('getMyStaffProfile'); return res.data; } });
 
-  const { data: statsData } = useQuery({
+  const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ['ent-stats'],
     queryFn: async () => { const res = await base44.functions.invoke('getEnterpriseStats'); return res.data; },
     refetchOnMount: true,
@@ -196,6 +198,7 @@ export default function EnterpriseDashboard() {
             </div>
 
             {/* Enterprise KPIs */}
+            {statsLoading ? <KpiSkeleton count={4} /> : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
               {[
                 { label: 'Business Units', value: hierarchy.businessUnits.length, icon: Layers, gradient: 'stat-gradient-brand' },
@@ -214,6 +217,7 @@ export default function EnterpriseDashboard() {
                 </div>
               ))}
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -460,20 +464,6 @@ export default function EnterpriseDashboard() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function SectionTitle({ icon: Icon, title, subtitle, gradient }) {
-  return (
-    <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
-      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-md flex-shrink-0`}>
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-      </div>
-      <div className="min-w-0">
-        <h2 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">{title}</h2>
-        {subtitle && <p className="text-[11px] sm:text-xs text-slate-500 truncate">{subtitle}</p>}
-      </div>
     </div>
   );
 }

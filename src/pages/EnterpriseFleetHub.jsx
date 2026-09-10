@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
+import KpiSkeleton from '@/components/enterprise/KpiSkeleton';
 import {
   Truck, Search, Building2, AlertCircle, Wrench,
   Car, Navigation, Gauge, Fuel, BadgeCheck,
@@ -147,6 +148,7 @@ export default function EnterpriseFleetHub() {
       accent="#0ea5e9"
     >
       {/* KPI Row */}
+      {isLoading ? <KpiSkeleton count={5} cols="sm:grid-cols-5" /> : (
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5">
         <div className="stat-gradient-teal rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2.5 shadow-lg">
           <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
@@ -194,6 +196,7 @@ export default function EnterpriseFleetHub() {
           </div>
         </div>
       </div>
+      )}
 
         {/* Search + filters */}
         <div className="insight-card rounded-2xl p-4 space-y-3">

@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { Activity, Truck, Package, Wrench, MapPin, Clock, CheckCircle2, AlertTriangle, TrendingUp, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
+import KpiSkeleton from '@/components/enterprise/KpiSkeleton';
+import SectionTitle from '@/components/enterprise/SectionTitle';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import { useDivision } from '@/contexts/DivisionContext';
 
@@ -40,6 +42,7 @@ export default function EnterpriseOperationsHub() {
       accent="#0ea5e9"
     >
       {/* KPI Row */}
+      {isLoading ? <KpiSkeleton count={4} /> : (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
         {kpis.map((k, i) => (
           <motion.div
@@ -62,6 +65,7 @@ export default function EnterpriseOperationsHub() {
           </motion.div>
         ))}
       </div>
+      )}
 
       {/* Delivery Status */}
       <div className="insight-card rounded-2xl p-4 sm:p-5">
@@ -106,20 +110,6 @@ export default function EnterpriseOperationsHub() {
         )}
       </div>
     </EnterpriseHubShell>
-  );
-}
-
-function SectionTitle({ icon: Icon, title, subtitle, gradient }) {
-  return (
-    <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
-      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-md flex-shrink-0`}>
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-      </div>
-      <div className="min-w-0">
-        <h2 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">{title}</h2>
-        {subtitle && <p className="text-[11px] sm:text-xs text-slate-500 truncate">{subtitle}</p>}
-      </div>
-    </div>
   );
 }
 
