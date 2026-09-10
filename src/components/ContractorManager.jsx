@@ -8,6 +8,7 @@ import CISBatchVerifyWidget from '@/components/contractors/CISBatchVerifyWidget'
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import ExpandableContacts from '@/components/staff/ExpandableContacts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const ACCENT = '#2E5A1A';
@@ -391,7 +392,7 @@ export default function ContractorManager() {
                   <div key={c.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition">
                     <div className="px-4 py-3 border-b border-slate-100 flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{c.name}</p>
+                        <p className="text-base font-extrabold text-slate-900 truncate">{c.name}</p>
                         {c.contact_name && <p className="text-xs text-slate-500 mt-0.5">{c.contact_name}</p>}
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
@@ -408,11 +409,11 @@ export default function ContractorManager() {
                       </div>
                     </div>
                     <div className="px-4 py-3 space-y-1.5">
-                      {c.contact_email && (
-                        <div className="flex items-center gap-2 text-xs text-slate-500"><Mail className="w-3.5 h-3.5 flex-shrink-0" /><span className="truncate">{c.contact_email}</span></div>
-                      )}
                       {c.contact_phone && (
-                        <div className="flex items-center gap-2 text-xs text-slate-500"><Phone className="w-3.5 h-3.5 flex-shrink-0" /><span>{c.contact_phone}</span></div>
+                        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700"><Phone className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" /><span>{c.contact_phone}</span></div>
+                      )}
+                      {c.contact_email && (
+                        <div className="flex items-center gap-2 text-xs text-slate-500"><Mail className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" /><span className="truncate">{c.contact_email}</span></div>
                       )}
                       {c.services_offered && c.services_offered.length > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1">
@@ -434,6 +435,7 @@ export default function ContractorManager() {
                           Insurance: {c.insurance_expiry}{insExp ? ' (expired)' : ''}
                         </div>
                       )}
+                      <ExpandableContacts contacts={c.contacts} label="contact" />
                     </div>
                     {cisMsg[c.id] && (
                       <div className={'mx-4 mt-2 rounded-lg px-2.5 py-1.5 text-[11px] ' + (cisMsg[c.id].ok ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700')}>

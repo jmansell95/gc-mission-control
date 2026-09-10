@@ -7,6 +7,7 @@ import MarketDojoPill from './MarketDojoPill';
 import AddressBookModal from './AddressBookModal';
 import CrewEditorModal from './CrewEditorModal';
 import AgencyWorkersModal from './AgencyWorkersModal';
+import ExpandableContacts from './ExpandableContacts';
 import { useConfigLists } from '@/hooks/useConfigLists';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase, Tag, Check,
@@ -150,6 +151,7 @@ export default function ContactsTab({ activeSub }) {
         onboarded: !!s.market_dojo_onboarded,
         crew_count: allCrews.filter(c => c.parent_staff_id === s.id).length,
         worker_count: 0, // populated below for agency
+        phone: s.phone || (s.contacts && s.contacts[0] && s.contacts[0].phone) || '',
         contacts: s.contacts || [],
         raw: s,
       }));
@@ -172,6 +174,7 @@ export default function ContactsTab({ activeSub }) {
           job_title: contact.role || '',
           company: c.name || '',
           onboarded: false,
+          phone: c.contact_phone || (c.contacts && c.contacts[0] && c.contacts[0].phone) || '',
           contacts: c.contacts || [],
           raw: c,
         };
@@ -497,15 +500,21 @@ export default function ContactsTab({ activeSub }) {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <p className="text-sm font-semibold text-slate-900 truncate">{rec.full_name || '—'}</p>
-                        {isStaffType && <MarketDojoPill onboarded={rec.onboarded} size="xs" />}
-                      </div>
-                      <p className="text-xs text-slate-500 truncate">{rec.job_title || 'No job title'}</p>
-                      <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
-                        <Building2 className="w-3 h-3 flex-shrink-0" /> {rec.company || 'No company'}
-                      </p>
+                      <p className="text-base font-extrabold text-slate-900 truncate">{rec.company || '—'}</p>
+                      {rec.phone && (
+                        <p className="text-xs text-slate-600 font-medium flex items-center gap-1 mt-0.5">
+                          <Phone className="w-3 h-3 flex-shrink-0 text-slate-400" /> {rec.phone}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 truncate mt-0.5">{rec.full_name || 'No contact name'}</p>
+                      {rec.job_title && <p className="text-xs text-slate-400 truncate">{rec.job_title}</p>}
+                      {isStaffType && (
+                        <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                          <MarketDojoPill onboarded={rec.onboarded} size="xs" />
+                        </div>
+                      )}
                       {isStaffType && crewBadge(rec)}
+                      <ExpandableContacts contacts={rec.contacts} label="contact" />
                     </>
                   )}
                 </div>

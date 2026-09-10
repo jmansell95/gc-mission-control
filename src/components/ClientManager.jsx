@@ -7,6 +7,7 @@ import SearchFilterBar from '@/components/SearchFilterBar';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useDivision } from '@/contexts/DivisionContext';
 import ContactsEditor from '@/components/ContactsEditor';
+import ExpandableContacts from '@/components/staff/ExpandableContacts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const inputCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 text-sm';
@@ -222,7 +223,7 @@ export default function ClientManager() {
                         <Building2 className="w-5 h-5 text-emerald-700" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-bold text-slate-900 truncate">{c.name}</h3>
+                        <h3 className="text-base font-extrabold text-slate-900 truncate">{c.name}</h3>
                         <div className="flex flex-wrap gap-1 mt-1">
                           {c.is_holding && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-700 text-white">
@@ -257,14 +258,14 @@ export default function ClientManager() {
                     </div>
                   </div>
                   <div className="space-y-1.5 text-sm">
+                    {c.contact_phone && (
+                      <div className="flex items-center gap-2 font-semibold text-slate-700"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{c.contact_phone}</span></div>
+                    )}
                     {c.contact_name && (
-                      <div className="flex items-center gap-2 text-slate-600"><User className="w-3.5 h-3.5 text-slate-400" /><span>{c.contact_name}</span></div>
+                      <div className="flex items-center gap-2 text-slate-600 text-xs"><User className="w-3.5 h-3.5 text-slate-400" /><span>{c.contact_name}</span></div>
                     )}
                     {c.contact_email && (
                       <div className="flex items-center gap-2 text-slate-500 text-xs"><Mail className="w-3.5 h-3.5 text-slate-400" /><span className="truncate">{c.contact_email}</span></div>
-                    )}
-                    {c.contact_phone && (
-                      <div className="flex items-center gap-2 text-slate-500 text-xs"><Phone className="w-3.5 h-3.5 text-slate-400" /><span>{c.contact_phone}</span></div>
                     )}
                     {c.lat != null && c.lng != null && (
                       <div className="flex items-center gap-2 text-blue-600 font-medium text-xs">
@@ -272,7 +273,8 @@ export default function ClientManager() {
                         {c.geofence_radius_override && <span className="text-slate-400 font-normal">· {c.geofence_radius_override}m radius</span>}
                       </div>
                     )}
-                    {!c.contact_name && !c.contact_email && !c.contact_phone && !(c.lat != null && c.lng != null) && (
+                    <ExpandableContacts contacts={c.contacts} label="contact" />
+                    {!c.contact_name && !c.contact_email && !c.contact_phone && !(c.lat != null && c.lng != null) && (c.contacts || []).length === 0 && (
                       <p className="text-xs text-slate-400">No contact details</p>
                     )}
                   </div>
