@@ -34,8 +34,9 @@ const MIN_DISTANCE_M = 10;           // 10m distance filter while moving
 const NO_FIX_TIMEOUT_MS = 180_000;   // 3 min with no fix → gap detection
 const GAP_THRESHOLD_MS = 180_000;    // 3 min gap → log gap_start
 const TICK_MS = 15_000;              // check every 15s, flush adaptively
+const MAX_BATCH = 200;               // max points to keep in memory on flush failure
 
-const RECORD_URL = 'https://gc-mission-control.base44.app/functions/recordStaffLocation';
+const RECORD_URL = (typeof window !== 'undefined' ? window.location.origin : 'https://gc-mission-control.base44.app') + '/functions/recordStaffLocation';
 
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -97,6 +98,7 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
   const errorLoggedRef = useRef(false);
   const bgPluginRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const staffNameRef = useRef(null);
   const lastFixTimeRef = useRef(null);
   const lastFlushTimeRef = useRef(0);
   const isMovingRef = useRef(false);
@@ -108,6 +110,9 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
   const hasAssignment = !!activeAssignment?.id;
   const shouldTrack = enabled && consentGranted && hasAssignment;
 
+  // Keep staff name in a ref so it doesn't tear down the GPS watch when it changes
+  useEffect(() => { staffNameRef.current = staff?.name || ''; }, [staff?.name]);
+
   // Log a capture error to the backend so managers see "consented but no GPS"
   const logCaptureError = useCallback(async (type) => {
     if (errorLoggedRef.current) return;
@@ -115,14 +120,14 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
     try {
       await base44.functions.invoke('recordStaffLocation', {
         assignment_id: activeAssignment?.id,
-        staff_name: staff?.name,
+        staff_name: staffNameRef.current,
         error: type,
         points: [],
       });
     } catch {
       // non-fatal — the error is still shown locally to the crew member
     }
-  }, [activeAssignment?.id, staff?.name]);
+  }, [activeAssignment?.id]);
 
   // Flush the batched points to the backend
   const flushBatch = useCallback(async () => {
@@ -134,41 +139,39 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
     try {
       await base44.functions.invoke('recordStaffLocation', {
         assignment_id: activeAssignment?.id,
-        staff_name: staff?.name,
+        staff_name: staffNameRef.current,
         session_id: sessionIdRef.current,
         points: batch,
       });
     } catch (err) {
-      // On failure, re-queue the points so they're not lost
-      batchRef.current = [...batch, ...batchRef.current];
+      // On failure, re-queue the points so they're not lost (capped at MAX_BATCH)
+      batchRef.current = [...batch, ...batchRef.current].slice(0, MAX_BATCH);
       setPointsQueued(batchRef.current.length);
     }
-  }, [activeAssignment?.id, staff?.name]);
+  }, [activeAssignment?.id]);
 
   // Log a session event (gap_start, gap_end, resume, session_start, session_end)
-  const logSessionEvent = useCallback(async (event, posOverride = null) => {
+  const logSessionEvent = useCallback((event, posOverride = null) => {
     const pos = posOverride || lastKnownPosRef.current;
     if (!pos) return; // need a position for the log entry
-    try {
-      await base44.functions.invoke('recordStaffLocation', {
-        assignment_id: activeAssignment?.id,
-        staff_name: staff?.name,
-        session_id: sessionIdRef.current,
-        points: [{
-          lat: pos.lat,
-          lng: pos.lng,
-          accuracy_m: pos.accuracy_m ?? null,
-          speed_mps: null,
-          heading: null,
-          recorded_at: new Date().toISOString(),
-          is_moving: false,
-          session_event: event,
-        }],
-      });
-    } catch {
-      // non-fatal
-    }
-  }, [activeAssignment?.id, staff?.name]);
+    // Queue the session event into the batch instead of making an individual
+    // API call — reduces network requests and ensures events are ordered
+    // correctly relative to fix points in the same flush.
+    batchRef.current.push({
+      lat: pos.lat,
+      lng: pos.lng,
+      accuracy_m: pos.accuracy_m ?? null,
+      speed_mps: null,
+      heading: null,
+      recorded_at: new Date().toISOString(),
+      is_moving: false,
+      session_event: event,
+    });
+    setPointsQueued(batchRef.current.length);
+    // Trigger immediate flush so the event is sent right away (not waiting
+    // for the next timer tick — gap markers need to appear on the map ASAP)
+    flushBatch();
+  }, [flushBatch]);
 
   // Screen Wake Lock — keeps the GPS watch alive while the crew member is
   // on shift so screen-sleep doesn't suspend the geolocation watch.
@@ -471,7 +474,7 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
       setSessionId(null);
       hasFixRef.current = false;
     };
-  }, [shouldTrack, flushBatch, acquireWakeLock, releaseWakeLock, logCaptureError, logSessionEvent, activeAssignment?.id, staff?.name]);
+  }, [shouldTrack, flushBatch, acquireWakeLock, releaseWakeLock, logCaptureError, logSessionEvent, activeAssignment?.id]);
 
   return { isTracking, hasFix, lastPoint, pointsQueued, error, errorType, sessionId };
 }
