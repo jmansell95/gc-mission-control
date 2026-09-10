@@ -8,10 +8,11 @@ import AddressBookModal from './AddressBookModal';
 import CrewEditorModal from './CrewEditorModal';
 import AgencyWorkersModal from './AgencyWorkersModal';
 import ExpandableContacts from './ExpandableContacts';
+import ClientFormModal from './ClientFormModal';
 import { useConfigLists } from '@/hooks/useConfigLists';
 import {
   Plus, Search, X, Loader2, Building2, Briefcase, Tag, Check,
-  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw, Users,
+  Wrench, UserCog, Trash2, Edit2, CheckCircle2, BookUser, Phone, HardHat, RefreshCw, Users, Star,
 } from 'lucide-react';
 
 const CATEGORY_PILL_CLASSES = {
@@ -50,6 +51,7 @@ export default function ContactsTab({ activeSub }) {
   const [addressBook, setAddressBook] = useState(null);
   const [crewEditor, setCrewEditor] = useState(null);
   const [workersEditor, setWorkersEditor] = useState(null);
+  const [clientModal, setClientModal] = useState(null);
   const [migrating, setMigrating] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [addingCategory, setAddingCategory] = useState(false);
@@ -176,6 +178,10 @@ export default function ContactsTab({ activeSub }) {
           onboarded: false,
           phone: c.contact_phone || (c.contacts && c.contacts[0] && c.contacts[0].phone) || '',
           contacts: c.contacts || [],
+          is_partner: c.is_partner || false,
+          is_holding: c.is_holding || false,
+          partner_color: c.partner_color || '',
+          parent_client_id: c.parent_client_id || '',
           raw: c,
         };
       });
@@ -275,6 +281,10 @@ export default function ContactsTab({ activeSub }) {
   };
 
   const openEdit = (rec) => {
+    if (meta.key === 'client') {
+      setClientModal({ editing: rec.raw });
+      return;
+    }
     setEditForm({
       kind: isStaffType ? 'staff' : meta.key,
       id: rec.id,
@@ -416,7 +426,14 @@ export default function ContactsTab({ activeSub }) {
               </button>
             )}
             <button
-              onClick={() => { setAddForm(emptyForm); setShowAdd(true); }}
+              onClick={() => {
+                if (meta.key === 'client') {
+                  setClientModal({ editing: null });
+                } else {
+                  setAddForm(emptyForm);
+                  setShowAdd(true);
+                }
+              }}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm"
             >
               <Plus className="w-4 h-4" /> Add {meta.singular}
@@ -501,6 +518,34 @@ export default function ContactsTab({ activeSub }) {
                   ) : (
                     <>
                       <p className="text-base font-extrabold text-slate-900 truncate">{rec.company || '—'}</p>
+                      {meta.key === 'client' && (rec.is_partner || rec.is_holding || rec.parent_client_id) && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {rec.is_holding && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-700 text-white">
+                              <Building2 className="w-3 h-3" /> Holding Group
+                            </span>
+                          )}
+                          {rec.is_partner && (
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide"
+                              style={{
+                                backgroundColor: (rec.partner_color || '#2563eb') + '15',
+                                color: rec.partner_color || '#2563eb',
+                              }}
+                            >
+                              <Star className="w-3 h-3" /> Partner
+                            </span>
+                          )}
+                          {rec.parent_client_id && (() => {
+                            const parent = clients.find(p => p.id === rec.parent_client_id);
+                            return parent ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
+                                ↳ {parent.name}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
+                      )}
                       {rec.phone && (
                         <p className="text-xs text-slate-600 font-medium flex items-center gap-1 mt-0.5">
                           <Phone className="w-3 h-3 flex-shrink-0 text-slate-400" /> {rec.phone}
@@ -813,6 +858,14 @@ export default function ContactsTab({ activeSub }) {
           parentDivisionId={workersEditor.divisionId}
         />
       )}
+
+      {/* Client form modal — full client create/edit (replaces the standalone ClientManager) */}
+      <ClientFormModal
+        open={!!clientModal}
+        onClose={() => setClientModal(null)}
+        editing={clientModal?.editing || null}
+        clients={clients}
+      />
     </div>
   );
 }

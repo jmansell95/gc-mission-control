@@ -19,7 +19,7 @@ export const HUB_MIGRATED_ITEMS = new Set([
   'absences', 'holiday-accrual', 'staff-reviews',
   'timesheet-delegation',
   // → Items with their own dedicated hubs (People, Fleet, Logistics)
-  'clients', 'contractors', 'suppliers', 'teams', 'staff', 'vehicles', 'timesheets',
+  'contractors', 'suppliers', 'teams', 'staff', 'vehicles', 'timesheets',
 ]);
 
 export const settingsGroups = [
@@ -133,7 +133,6 @@ export const settingsGroups = [
       { id: 'staff-reviews', label: 'Performance Reviews', icon: Star, desc: 'Manage staff performance reviews' },
       { id: 'timesheet-delegation', label: 'Approval Delegation', icon: UserCheck, desc: 'Manage timesheet approval delegations' },
       { id: 'vehicles', label: 'Vehicles', icon: Truck, desc: 'Manage vehicle fleet' },
-      { id: 'clients', label: 'Clients', icon: Building2, desc: 'Manage clients' },
       { id: 'contractors', label: 'Subcontractors', icon: HardHat, desc: 'Manage subcontractors' },
       { id: 'suppliers', label: 'Suppliers', icon: Package, desc: 'Manage suppliers' },
       { id: 'teams', label: 'Crew Types', icon: Users, desc: 'Manage crew types / teams' },

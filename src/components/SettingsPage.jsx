@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 import StaffCommand from '@/components/StaffCommand';
 import VehicleManager from '@/components/VehicleManager';
 import ContractorManager from '@/components/ContractorManager';
-import ClientManager from '@/components/ClientManager';
 import AbsenceManager from '@/components/AbsenceManager';
 import EmailAlertsSettings from '@/components/EmailAlertsSettings';
 import GlobalBrandingSettings from '@/components/GlobalBrandingSettings';
@@ -171,7 +171,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'asset-panda': return <AssetPandaSettings />;
       case 'asset-manifests': return <AssetManifestManager />;
       case 'vehicles': return <VehicleManager />;
-      case 'clients': return <ClientManager />;
+      case 'clients': return <Navigate to="/staff" state={{ initialTab: 'clients' }} replace />;
       case 'contractors': return <ContractorManager />;
       case 'suppliers': return <SupplierManager />;
       case 'absences': return <AbsenceManager />;
