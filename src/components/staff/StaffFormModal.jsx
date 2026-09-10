@@ -174,12 +174,13 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
       icon={ShieldCheck}
       title={editing ? 'Edit Crew Member' : 'New Crew Member'}
       description={editing ? 'Update this crew member\'s details and access.' : 'Add a new crew member to the team.'}
-      size="3xl"
+      size="full"
       saveLabel={editing ? 'Update' : 'Add Crew Member'}
       onSave={handleSave}
       saving={saving}
     >
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
         {/* Identity */}
         <section>
           <p className={sectionTitle}><UserCircle2 className="w-3.5 h-3.5" /> Identity</p>
@@ -344,6 +345,8 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           </section>
         )}
 
+        </div>
+        <div className="space-y-6">
         {/* Notifications & Flags */}
         <section>
           <p className={sectionTitle}><Bell className="w-3.5 h-3.5" /> Notifications & Flags</p>
@@ -412,6 +415,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
             )}
           </section>
         )}
+        </div>
       </div>
     </FormModal>
   );

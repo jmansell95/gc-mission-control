@@ -49,7 +49,10 @@ export function extractAuditFields(audit: any): any {
   const siteName = String(deepGet(audit, 'audit_data.site.name', 'site.name', 'audit_data.site', 'site', 'audit.header_items.site', 'header_items.site', 'location') || '');
   const conductedAt = String(deepGet(audit, 'audit_data.date_started', 'date_started', 'created_at', 'audit.audit_started_at', 'audit_started_at') || '');
   const completedAt = String(deepGet(audit, 'audit_data.date_completed', 'date_completed', 'modified_at', 'audit.audit_completed_at', 'audit_completed_at', 'completed_at') || '');
+  const auditId = String(audit.audit_id || audit.id || '');
   const reportUrl = String(deepGet(audit, 'audit_data.report_url', 'report_url', 'pdf_url', 'audit.report_url') || '');
+  // Always build the Mitti/SafetyCulture web report URL from the audit_id
+  const webReportUrl = auditId ? `https://app.safetyculture.com/audits/${auditId}` : reportUrl;
 
   const overallScore = num(deepGet(audit, 'audit_data.score', 'score', 'audit.score'));
   const maxScore = num(deepGet(audit, 'audit_data.total_score', 'total_score', 'max_score', 'audit.max_score'));
@@ -57,7 +60,6 @@ export function extractAuditFields(audit: any): any {
   const itemsPassed = num(deepGet(audit, 'audit_data.items_passed', 'items_passed', 'audit.items_passed'));
   const itemsFailed = num(deepGet(audit, 'audit_data.items_failed', 'items_failed', 'audit.items_failed'));
   const passFailRaw = String(deepGet(audit, 'audit_data.pass_fail', 'pass_fail', 'result', 'audit.audit_data.pass_fail') || '').toLowerCase();
-  const passFail = passFailRaw === 'pass' ? 'pass' : passFailRaw === 'fail' ? 'fail' : 'pending';
 
   // Action items — best-effort extraction
   const actionItems: any[] = [];
@@ -77,6 +79,24 @@ export function extractAuditFields(audit: any): any {
   const auditCategory = classifyAudit(templateName, auditTitle);
   const computedPct = scorePct != null ? scorePct : (overallScore != null && maxScore && maxScore > 0 ? Math.round((overallScore / maxScore) * 10000) / 100 : null);
 
+  // Classify pass/fail: use explicit Mitti field if present, otherwise infer
+  // from score percentage and item-level fail counts. Fixes the bug where
+  // every audit was left as 'pending' because Mitti doesn't send pass_fail.
+  let passFail: string;
+  if (passFailRaw === 'pass') {
+    passFail = 'pass';
+  } else if (passFailRaw === 'fail') {
+    passFail = 'fail';
+  } else if (itemsFailed != null && itemsFailed > 0) {
+    passFail = 'fail';
+  } else if (computedPct != null && computedPct >= 80) {
+    passFail = 'pass';
+  } else if (computedPct != null && computedPct < 50) {
+    passFail = 'fail';
+  } else {
+    passFail = 'pending';
+  }
+
   return {
     audit_category: auditCategory,
     template_id: templateId,
@@ -91,7 +111,7 @@ export function extractAuditFields(audit: any): any {
     max_score: maxScore,
     score_percentage: computedPct,
     pass_fail: passFail,
-    audit_report_url: reportUrl,
+    audit_report_url: webReportUrl,
     items_failed: itemsFailed || 0,
     items_passed: itemsPassed || 0,
     action_items: actionItems,
@@ -117,6 +137,61 @@ export function matchStaffByEmail(email: string, allStaff: any[]): string | null
   const lc = email.toLowerCase();
   const matched = allStaff.find((s: any) => s.email && s.email.toLowerCase() === lc);
   return matched ? matched.id : null;
+}
+
+// Match an auditor name to a Staff record (fallback when email is unavailable).
+// The Mitti API often returns only the author's display name, not their email.
+export function matchStaffByName(name: string, allStaff: any[]): { staffId: string | null; divisionId: string | null } {
+  if (!name || allStaff.length === 0) return { staffId: null, divisionId: null };
+  const lc = name.toLowerCase().trim();
+  const exact = allStaff.find((s: any) => s.name && s.name.toLowerCase() === lc);
+  if (exact) return { staffId: exact.id, divisionId: exact.division_id || null };
+  // Partial match — last resort
+  const partial = allStaff.find((s: any) => s.name && (s.name.toLowerCase().includes(lc) || lc.includes(s.name.toLowerCase())));
+  return partial ? { staffId: partial.id, divisionId: partial.division_id || null } : { staffId: null, divisionId: null };
+}
+
+// Detect whether a Mitti audit is a toolbox talk by template/title keywords.
+export function isToolboxTalk(templateName: string, auditTitle: string): boolean {
+  const hay = `${templateName} ${auditTitle}`.toLowerCase();
+  return ['toolbox talk', 'tool box talk', 'toolbox', 'tool box', 'toolbox meeting', 'weekly toolbox', 'tbt'].some(k => hay.includes(k));
+}
+
+// Sync a Mitti toolbox-talk audit into the in-app ToolboxTalk entity (upsert by source_audit_id).
+export async function syncToolboxTalk(
+  base44: any,
+  audit: any,
+  fields: any,
+  auditorStaffId: string | null,
+  jobId: string | null,
+  jobName: string,
+): Promise<boolean> {
+  const auditId = String(audit.audit_id || audit.id || '');
+  if (!auditId) return false;
+  try {
+    const existing = await base44.asServiceRole.entities.ToolboxTalk.filter({ source_audit_id: auditId });
+    const talkData: any = {
+      title: fields.audit_template_name || fields.audit_title || 'Toolbox Talk (Mitti)',
+      topic_category: 'general_safety',
+      description: fields.audit_title || '',
+      scheduled_date: fields.conducted_at ? new Date(fields.conducted_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+      delivered_by_name: fields.auditor_name || '',
+      delivered_by_id: auditorStaffId || null,
+      status: 'delivered',
+      source: 'mitti_sync',
+      source_audit_id: auditId,
+      job_id: jobId || null,
+      job_name: jobName || '',
+    };
+    if (existing && existing[0]) {
+      await base44.asServiceRole.entities.ToolboxTalk.update(existing[0].id, talkData);
+    } else {
+      await base44.asServiceRole.entities.ToolboxTalk.create(talkData);
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 // Process a full Mitti audit: extract fields, match to jobs/staff/contractors,
@@ -158,8 +233,19 @@ export async function processAndStoreAudit(
     ? matchJob(fields.site_name, jobs)
     : { jobId: null, jobName: '' };
 
-  // Match auditor to Staff
-  const auditorStaffId = matchStaffByEmail(fields.auditor_email, allStaff);
+  // Match auditor to Staff — try email first, then name as fallback
+  // (Mitti often returns only the author's display name, not their email)
+  let auditorStaffId = matchStaffByEmail(fields.auditor_email, allStaff);
+  let resolvedDivisionId = divisionId || null;
+  if (!auditorStaffId && fields.auditor_name) {
+    const nameMatch = matchStaffByName(fields.auditor_name, allStaff);
+    if (nameMatch.staffId) {
+      auditorStaffId = nameMatch.staffId;
+      if (!resolvedDivisionId && nameMatch.divisionId) {
+        resolvedDivisionId = nameMatch.divisionId;
+      }
+    }
+  }
 
   // Fallback: if site-name matching failed but the auditor is a known staff
   // member, use their RotaAssignment for the audit date to infer the job.
@@ -190,7 +276,7 @@ export async function processAndStoreAudit(
     safetyculture_audit_id: auditId,
     ...fields,
     auditor_staff_id: auditorStaffId,
-    division_id: divisionId || null,
+    division_id: resolvedDivisionId,
     job_id: jobId || null,
     job_name: jobName,
     contractor_id: contractorId,
@@ -235,6 +321,12 @@ export async function processAndStoreAudit(
     } catch (e) { /* best-effort */ }
   }
 
+  // Sync toolbox talk if the template matches toolbox-talk keywords
+  let toolboxTalkSynced = false;
+  if (isToolboxTalk(fields.audit_template_name, fields.audit_title)) {
+    toolboxTalkSynced = await syncToolboxTalk(base44, audit, fields, auditorStaffId, jobId, jobName);
+  }
+
   return {
     stored: !existingId,
     updated: !!existingId,
@@ -244,6 +336,7 @@ export async function processAndStoreAudit(
     auditCategory: fields.audit_category,
     actionItemCount: fields.action_items.length,
     stampedAssignments,
+    toolboxTalkSynced,
   };
 }
 

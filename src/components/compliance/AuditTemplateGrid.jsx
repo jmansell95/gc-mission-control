@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { FileText, ChevronRight, AlertTriangle, TrendingUp, Clock } from 'lucide-react';
+import { FileText, ChevronRight, AlertTriangle, TrendingUp, Clock, Settings } from 'lucide-react';
 import { getCategoryMeta, fmtRelative } from './auditConstants';
+import TemplateManagePanel from './TemplateManagePanel';
 
 // Mini sparkline — shows weekly audit count as a tiny bar chart
 function MiniSparkline({ data }) {
@@ -22,6 +23,7 @@ function MiniSparkline({ data }) {
 }
 
 export default function AuditTemplateGrid({ onSelectTemplate }) {
+  const [showManage, setShowManage] = useState(false);
   const { data: reports = [], isLoading } = useQuery({
     queryKey: ['safety-reports-all-templates'],
     queryFn: () => base44.entities.SafetyReport.list('-created_date', 500),
@@ -93,9 +95,22 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
       });
     }
 
-    // Sort: most audits first, then synced templates with zero audits
-    result.sort((a, b) => b.auditCount - a.auditCount);
-    return result;
+    // Sort: pinned first, then by audit count desc
+    const hiddenSet = new Set((config?.hidden_templates || []));
+    const pinnedSet = new Set((config?.pinned_templates || []));
+    result.sort((a, b) => {
+      const aPinned = pinnedSet.has(a.template_id) ? 1 : 0;
+      const bPinned = pinnedSet.has(b.template_id) ? 1 : 0;
+      if (aPinned !== bPinned) return bPinned - aPinned;
+      return b.auditCount - a.auditCount;
+    });
+    // Filter: show if (has audits OR is pinned) AND NOT hidden
+    return result.filter(t => {
+      if (hiddenSet.has(t.template_id)) return false;
+      if (t.auditCount > 0) return true;
+      if (pinnedSet.has(t.template_id)) return true;
+      return false;
+    });
   }, [reports, config]);
 
   if (isLoading) {
@@ -125,7 +140,20 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-slate-500">
+          Showing {templates.length} template{templates.length === 1 ? '' : 's'} with audits
+        </p>
+        <button
+          onClick={() => setShowManage(true)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
+        >
+          <Settings className="w-3.5 h-3.5" />
+          Manage Templates
+        </button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {templates.map(t => {
         const meta = getCategoryMeta(t.category);
         const Icon = meta.icon;
@@ -184,6 +212,15 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
           </button>
         );
       })}
-    </div>
+      </div>
+      {showManage && (
+        <TemplateManagePanel
+          config={config}
+          templates={config?.synced_templates || []}
+          reports={reports}
+          onClose={() => setShowManage(false)}
+        />
+      )}
+    </>
   );
 }

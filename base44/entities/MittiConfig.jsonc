@@ -119,6 +119,22 @@
       "default": [],
       "description": "All audit templates/forms synced from the Mitti API (GET /templates/search). Refreshed on every syncMitti run so the form list stays current. Each entry has the template ID (form number), name, and timestamps. Used by the compliance UI to show the full list of available Mitti forms."
     },
+    "hidden_templates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Template IDs that are explicitly hidden from the Audit Dashboard template grid. These templates never appear in the Compliance Hub regardless of whether they have audits. Managed via the 'Manage Templates' panel in the Audit Dashboard. Use this to hide the hundreds of sample/unused templates that come from the Mitti API."
+    },
+    "pinned_templates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Template IDs that are always shown in the Audit Dashboard template grid, even when they have zero audits. These are the templates your business actively uses and wants to see at a glance. Managed via the 'Manage Templates' panel. Pinned templates sort to the top of the grid."
+    },
     "last_templates_sync_at": {
       "type": "string",
       "description": "ISO timestamp of the last time templates were pulled from the Mitti API."

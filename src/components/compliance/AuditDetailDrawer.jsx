@@ -6,8 +6,6 @@ import {
   ClipboardList, Loader2, MapPin, PenTool, FileText, ChevronDown,
   Clock, Siren, Save, MinusCircle, Image as ImageIcon, Download,
 } from 'lucide-react';
-import { jsPDF } from 'jspdf';
-import { addBrandHeader, addSectionHeader, addTable, addPageNumbers } from '@/lib/pdfStyles';
 import { getCategoryMeta, getStatusMeta, fmtDateTime, PRIORITY_TONE } from './auditConstants';
 import PhotoGalleryLightbox from './PhotoGalleryLightbox';
 import CreateIncidentFromAuditModal from './CreateIncidentFromAuditModal';
@@ -205,44 +203,11 @@ export default function AuditDetailDrawer({ audit, onClose }) {
     setActionDraft(prev => ({ ...prev, [index]: { ...(prev[index] || {}), [field]: value } }));
   };
 
-  const downloadAuditPDF = () => {
-    const doc = new jsPDF();
-    const subtitle = `${meta.label} · ${fmtDateTime(conductedAt)}`;
-    addBrandHeader(doc, auditTitle || 'Audit Report', subtitle);
-
-    let y = 50;
-    y = addSectionHeader(doc, 'Score Summary', y);
-    y = addTable(doc, ['Metric', 'Value'], [
-      ['Pass/Fail', failed ? 'Failed' : passed ? 'Passed' : 'Pending'],
-      ['Score', scorePct != null ? `${scorePct}%` : '—'],
-      ['Items Passed', String(itemsPassed)],
-      ['Items Failed', String(itemsFailed)],
-      ['Total Items', String(statusCounts.total)],
-    ], y);
-
-    y += 5;
-    y = addSectionHeader(doc, 'Audit Details', y);
-    y = addTable(doc, ['Field', 'Value'], [
-      ['Auditor', auditorName],
-      ['Conducted', fmtDateTime(conductedAt)],
-      ['Job/Site', jobName || '—'],
-      ['Template', templateName],
-    ], y);
-
-    y += 5;
-    if (actionItems.length > 0) {
-      y = addSectionHeader(doc, 'Action Items', y);
-      y = addTable(doc, ['Priority', 'Description', 'Assignee', 'Due', 'Status'], actionItems.map(a => [
-        (a.priority || 'medium').toUpperCase(),
-        (a.description || 'Untitled').substring(0, 60),
-        a.assignee || '—',
-        a.due_date || '—',
-        a.status || 'open',
-      ]), y);
-    }
-
-    addPageNumbers(doc);
-    doc.save(`audit-${(auditTitle || 'report').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`);
+  const openMittiReport = () => {
+    const auditId = audit?.safetyculture_audit_id;
+    if (!auditId) return;
+    // Open the actual Mitti/SafetyCulture web report for full visibility
+    window.open(`https://app.safetyculture.com/audits/${auditId}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -274,15 +239,9 @@ export default function AuditDetailDrawer({ audit, onClose }) {
 
             {/* Action buttons row */}
             <div className="px-5 pb-3 flex items-center gap-2">
-              {reportUrl && (
-                <a href={reportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold hover:bg-[#244715] transition shadow-sm">
-                  <ExternalLink className="w-4 h-4" />
-                  Open in Mitti
-                </a>
-              )}
-              <button onClick={downloadAuditPDF} className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-50 transition shadow-sm">
-                <Download className="w-4 h-4" />
-                Download PDF
+              <button onClick={openMittiReport} className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold hover:bg-[#244715] transition shadow-sm">
+                <ExternalLink className="w-4 h-4" />
+                View Mitti Report
               </button>
               {(failed || itemsFailed > 0) && (
                 <button onClick={() => setShowIncidentModal('whole')} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-sm font-bold hover:bg-rose-700 transition shadow-sm">

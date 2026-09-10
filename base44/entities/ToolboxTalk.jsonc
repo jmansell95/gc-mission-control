@@ -111,6 +111,19 @@
       },
       "default": [],
       "description": "Follow-up actions arising from the talk."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "mitti_sync"
+      ],
+      "default": "manual",
+      "description": "Where this toolbox talk record came from. 'manual' = created in-app by a manager; 'mitti_sync' = automatically imported from a Mitti/SafetyCulture audit whose template name matches toolbox-talk keywords. Mitti-synced talks are upserted by source_audit_id to prevent duplicates on re-sync."
+    },
+    "source_audit_id": {
+      "type": "string",
+      "description": "The Mitti/SafetyCulture audit ID this talk was synced from. Used as the dedup key \u2014 re-running syncMitti updates the existing record instead of creating a duplicate. Blank for manually-created talks."
     }
   },
   "required": [
