@@ -163,3 +163,54 @@ export function printPickListHtml(html) {
   win.focus();
   setTimeout(() => win.print(), 600);
 }
+
+// Download a styled PDF pick list using the shared brand styling.
+import { jsPDF } from 'jspdf';
+import { addBrandHeader, addSectionHeader, addTable, addKpiRow, addPageNumbers } from '@/lib/pdfStyles';
+
+export function downloadPickListPDF({ delivery, job, vehicle, driverName }) {
+  const doc = new jsPDF();
+  const dateStr = delivery?.scheduled_date
+    ? new Date(delivery.scheduled_date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  addBrandHeader(doc, 'Warehouse Pick List', `Ground Control — ${dateStr}`);
+
+  let y = addKpiRow(doc, [
+    { label: 'Job', value: (delivery?.job_name || job?.name || '—').substring(0, 18) },
+    { label: 'Driver', value: (driverName || delivery?.driver_staff_name || '—').substring(0, 18) },
+    { label: 'Vehicle', value: (vehicle?.name || '—').substring(0, 18) },
+    { label: 'Drop #', value: delivery?.optimized_sequence_index || '—' },
+  ], 48);
+
+  y = addSectionHeader(doc, 'Delivery Details', y);
+  y = addTable(doc, ['Field', 'Value'], [
+    ['Job Ref', delivery?.job_reference || job?.job_reference || '—'],
+    ['Pick Up From', (delivery?.pickup_address || 'Depot / Yard').substring(0, 50)],
+    ['Deliver To', (delivery?.delivery_address || '—').substring(0, 50)],
+    ['Site Contact', (job?.site_contact_name || delivery?.contact_name || '—').substring(0, 40)],
+    ['Scheduled', delivery?.scheduled_date || '—'],
+    ['PO / Ref', delivery?.po_number || '—'],
+  ], y);
+
+  y += 5;
+  y = addSectionHeader(doc, 'Items to Pick', y);
+  const items = parsePickItems(delivery);
+  y = addTable(doc, ['#', 'Item Description', 'Picked', 'Loaded'], items.map((line, i) => [
+    String(i + 1), line.substring(0, 55), '☐', '☐',
+  ]), y);
+
+  if (delivery?.notes) {
+    y += 5;
+    if (y > doc.internal.pageSize.getHeight() - 30) { doc.addPage(); y = 20; }
+    y = addSectionHeader(doc, 'Driver / Special Instructions', y);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(51, 65, 85);
+    const lines = doc.splitTextToSize(delivery.notes, doc.internal.pageSize.getWidth() - 28);
+    lines.forEach(line => { doc.text(line, 14, y); y += 5; });
+  }
+
+  addPageNumbers(doc);
+  doc.save(`pick-list-${(delivery?.job_name || 'drop').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`);
+}

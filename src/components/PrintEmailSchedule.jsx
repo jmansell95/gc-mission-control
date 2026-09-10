@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Printer, Mail } from 'lucide-react';
+import { Download, Mail } from 'lucide-react';
 import { format, startOfWeek } from 'date-fns';
 
 export default function PrintEmailSchedule({ weekStart, staffId, staffName }) {
@@ -73,10 +73,10 @@ export default function PrintEmailSchedule({ weekStart, staffId, staffName }) {
         <button
           onClick={handlePrint}
           disabled={loading}
-          className="flex items-center justify-center md:justify-start gap-2 px-4 py-2 md:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 text-sm md:text-base font-medium active:scale-95 flex-1 sm:flex-none"
+          className="flex items-center justify-center md:justify-start gap-2 px-4 py-2 md:py-3 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#244715] transition disabled:opacity-50 text-sm md:text-base font-medium active:scale-95 flex-1 sm:flex-none"
         >
-          <Printer className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-          <span className="hidden md:inline">Print</span>
+          <Download className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+          <span className="hidden md:inline">Download</span>
         </button>
 
         <button

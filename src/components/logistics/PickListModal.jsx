@@ -7,7 +7,7 @@ import {
   ClipboardList, Printer, X, MapPin, Truck, User, Package,
   CheckCircle2, Circle, Clock, Navigation, FileText, AlertTriangle, PenLine,
 } from 'lucide-react';
-import { buildPickListHtml, printPickListHtml, parsePickItems } from './pickListHtml';
+import { buildPickListHtml, downloadPickListPDF, parsePickItems } from './pickListHtml';
 import { useToast } from '@/components/ui/use-toast';
 import SignaturePad from '@/components/staff/SignaturePad';
 
@@ -298,10 +298,10 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
             Close
           </button>
           <button
-            onClick={() => printPickListHtml(html)}
+            onClick={() => downloadPickListPDF({ delivery, job: resolvedJob, vehicle: resolvedVehicle, driverName })}
             className="flex-[2] inline-flex items-center justify-center gap-2 py-3 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition shadow-sm touch-manipulation min-h-[48px]"
           >
-            <Printer className="w-4 h-4" /> Print Pick Sheet
+            <Printer className="w-4 h-4" /> Download PDF
           </button>
         </div>
       </div>
