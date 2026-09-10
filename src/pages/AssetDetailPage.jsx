@@ -93,7 +93,7 @@ export default function AssetDetailPage() {
 
   // For equipment (non-rig): find the parent rig this item is linked to
   const parentRig = useMemo(
-    () => asset?.asset_type !== 'rig' ? allAssets.find(r => r.asset_type === 'rig' && (r.linked_equipment_ids || []).includes(asset.id)) : null,
+    () => !asset || asset.asset_type === 'rig' ? null : allAssets.find(r => r.asset_type === 'rig' && (r.linked_equipment_ids || []).includes(asset.id)),
     [asset, allAssets]
   );
 
