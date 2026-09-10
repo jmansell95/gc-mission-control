@@ -204,10 +204,15 @@ export default function AuditDetailDrawer({ audit, onClose }) {
   };
 
   const openMittiReport = () => {
+    // Use the report URL from the fetched detail data (points to app.mitti.com).
+    // Fall back to constructing the Mitti URL from the audit ID.
+    if (reportUrl) {
+      window.open(reportUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     const auditId = audit?.safetyculture_audit_id;
     if (!auditId) return;
-    // Open the actual Mitti/SafetyCulture web report for full visibility
-    window.open(`https://app.safetyculture.com/audits/${auditId}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://app.mitti.com/audits/${auditId}`, '_blank', 'noopener,noreferrer');
   };
 
   return (

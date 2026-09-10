@@ -51,8 +51,9 @@ export function extractAuditFields(audit: any): any {
   const completedAt = String(deepGet(audit, 'audit_data.date_completed', 'date_completed', 'modified_at', 'audit.audit_completed_at', 'audit_completed_at', 'completed_at') || '');
   const auditId = String(audit.audit_id || audit.id || '');
   const reportUrl = String(deepGet(audit, 'audit_data.report_url', 'report_url', 'pdf_url', 'audit.report_url') || '');
-  // Always build the Mitti/SafetyCulture web report URL from the audit_id
-  const webReportUrl = auditId ? `https://app.safetyculture.com/audits/${auditId}` : reportUrl;
+  // Build the Mitti web report URL from the audit_id (Mitti migrated from
+  // SafetyCulture — the old app.safetyculture.com URLs show "nothing to see").
+  const webReportUrl = auditId ? `https://app.mitti.com/audits/${auditId}` : reportUrl;
 
   const overallScore = num(deepGet(audit, 'audit_data.score', 'score', 'audit.score'));
   const maxScore = num(deepGet(audit, 'audit_data.total_score', 'total_score', 'max_score', 'audit.max_score'));
