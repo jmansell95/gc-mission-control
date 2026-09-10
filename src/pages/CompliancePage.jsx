@@ -59,7 +59,7 @@ export default function CompliancePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const isPlatformAdmin = user?.role === 'admin';
-  const [tab, setTab] = useState('audit-dashboard');
+  const [tab, setTab] = useState('mitti');
   const [subTab, setSubTab] = useState('overview');
   const [profile, setProfile] = useState(null);
 

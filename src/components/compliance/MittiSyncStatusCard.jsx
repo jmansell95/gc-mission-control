@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { RefreshCw, CheckCircle2, AlertCircle, Loader2, FileStack, Clock } from 'lucide-react';
@@ -19,6 +19,17 @@ export default function MittiSyncStatusCard() {
     try { await base44.functions.invoke('syncMitti'); queryClient.invalidateQueries({ queryKey: ['mitti-config'] }); queryClient.invalidateQueries({ queryKey: ['safety-reports'] }); } catch {}
     setSyncing(false);
   };
+
+  // Auto-sync once on mount when Mitti is connected
+  const autoSynced = useRef(false);
+  useEffect(() => {
+    if (autoSynced.current) return;
+    if (config === undefined) return; // still loading
+    if (isConnected) {
+      autoSynced.current = true;
+      handleSync();
+    }
+  }, [config, isConnected]);
   return (
     <HubCard icon={isConnected ? CheckCircle2 : AlertCircle} title="Mitti Sync Status" subtitle="Template & audit sync from Mitti API" tone={isConnected ? 'brand' : 'amber'}
       action={<button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-60">{syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Sync Now</button>}>
