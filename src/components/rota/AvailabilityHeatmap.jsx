@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   Search, ChevronLeft, ChevronRight, Download, Loader2, Grid3x3, Users, Cog,
-  Calendar, TrendingUp, Coffee, Wrench, CalendarPlus, Zap,
+  Calendar, Zap,
 } from 'lucide-react';
-import { startOfWeek, addWeeks, addMonths, format } from 'date-fns';
+import { startOfWeek, addWeeks, format } from 'date-fns';
 import { useDivision } from '@/contexts/DivisionContext';
 import {
   STATUS_CONFIG, STATUS_ORDER, buildStatusMaps, getYearDays, getMonthDays, getWeekDays,

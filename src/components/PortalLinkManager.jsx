@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Link2, Copy, Check, ExternalLink, Eye, EyeOff, RefreshCw, Mail, MessageCircle,
-  Loader2, Settings, HardHat, Clock, ShieldCheck, UserPlus, Send, Ban, RotateCw,
+  Loader2, Settings, HardHat, Clock, ShieldCheck, UserPlus, Ban, RotateCw,
   Building2, Lock, Zap,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
