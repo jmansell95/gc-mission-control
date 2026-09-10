@@ -30,8 +30,10 @@ import { useAuth } from '@/lib/AuthContext';
 const SC_URL = 'https://app.safetyculture.com';
 
 const TABS = [
-  { id: 'audit-dashboard', label: 'Audit Dashboard', icon: BarChart3, sub: [
+  { id: 'mitti', label: 'Mitti Audits', icon: BarChart3, sub: [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+  ]},
+  { id: 'compliance-checks', label: 'Compliance Checks', icon: ShieldCheck, sub: [
     { id: 'staff-compliance', label: 'Staff Compliance', icon: Users },
     { id: 'crew-checks', label: 'Crew Checks', icon: Users },
     { id: 'job-packs', label: 'Job Packs', icon: FileText },
@@ -160,9 +162,12 @@ export default function CompliancePage() {
     >
       <SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} />
 
-      {tab === 'audit-dashboard' && (
+      {tab === 'mitti' && (
+        <AuditDashboardTab />
+      )}
+
+      {tab === 'compliance-checks' && (
         <>
-          {subTab === 'overview' && <AuditDashboardTab />}
           {subTab === 'staff-compliance' && <StaffComplianceDirectory />}
           {subTab === 'crew-checks' && <CrewShiftStatusWidget />}
           {subTab === 'job-packs' && <JobPacksTab />}

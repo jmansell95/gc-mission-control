@@ -45,9 +45,10 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
     queryFn: () => base44.entities.SafetyReport.list('-created_date', 500),
   });
 
-  // Filter to just this template's audits
+  // Filter to just this template's audits, only from known staff
   const templateReports = useMemo(() => {
     return reports.filter(r => {
+      if (!r.auditor_staff_id) return false;
       const tid = r.template_id || r.audit_template_name || 'unknown';
       return tid === template.template_id;
     });

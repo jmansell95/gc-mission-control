@@ -40,9 +40,12 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
       synced: true,
     }));
 
+    // Filter to only audits from known staff (auditor_staff_id is non-null)
+    const staffReports = reports.filter(r => r.auditor_staff_id);
+
     // Group reports by template_id
     const byTemplate = {};
-    for (const r of reports) {
+    for (const r of staffReports) {
       const tid = r.template_id || r.audit_template_name || 'unknown';
       if (!byTemplate[tid]) byTemplate[tid] = [];
       byTemplate[tid].push(r);
@@ -98,13 +101,18 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
     // Sort: pinned first, then by audit count desc
     const hiddenSet = new Set((config?.hidden_templates || []));
     const pinnedSet = new Set((config?.pinned_templates || []));
+    const pinnedCodes = (config?.pinned_template_codes || []).map(c => c.toUpperCase());
     result.sort((a, b) => {
       const aPinned = pinnedSet.has(a.template_id) ? 1 : 0;
       const bPinned = pinnedSet.has(b.template_id) ? 1 : 0;
       if (aPinned !== bPinned) return bPinned - aPinned;
       return b.auditCount - a.auditCount;
     });
-    // Filter: show if (has audits OR is pinned) AND NOT hidden
+    // When pinned_template_codes is set, ONLY show templates whose name contains one of the codes
+    if (pinnedCodes.length > 0) {
+      return result.filter(t => pinnedCodes.some(code => t.name.toUpperCase().includes(code)));
+    }
+    // Otherwise: show if (has audits OR is pinned) AND NOT hidden
     return result.filter(t => {
       if (hiddenSet.has(t.template_id)) return false;
       if (t.auditCount > 0) return true;
@@ -143,7 +151,9 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
     <>
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs text-slate-500">
-          Showing {templates.length} template{templates.length === 1 ? '' : 's'} with audits
+          Showing {templates.length} template{templates.length === 1 ? '' : 's'}
+          {(config?.pinned_template_codes || []).length > 0 ? ' matching your GC codes' : ' with audits'}
+          {' · staff auditors only'}
         </p>
         <button
           onClick={() => setShowManage(true)}

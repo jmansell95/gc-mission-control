@@ -18,6 +18,8 @@ export default function TemplateManagePanel({ config, templates, reports, onClos
   const [search, setSearch] = useState('');
   const [hidden, setHidden] = useState(new Set(config?.hidden_templates || []));
   const [pinned, setPinned] = useState(new Set(config?.pinned_templates || []));
+  const [codes, setCodes] = useState(new Set(config?.pinned_template_codes || []));
+  const [newCode, setNewCode] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Count audits per template
@@ -77,12 +79,24 @@ export default function TemplateManagePanel({ config, templates, reports, onClos
     });
   };
 
+  const addCode = () => {
+    const c = newCode.trim().toUpperCase();
+    if (!c) return;
+    setCodes(prev => new Set([...prev, c]));
+    setNewCode('');
+  };
+
+  const removeCode = (c) => {
+    setCodes(prev => { const next = new Set(prev); next.delete(c); return next; });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await base44.entities.MittiConfig.update(config.id, {
         hidden_templates: Array.from(hidden),
         pinned_templates: Array.from(pinned),
+        pinned_template_codes: Array.from(codes),
       });
       queryClient.invalidateQueries({ queryKey: ['mitti-config'] });
       toast({ title: 'Template preferences saved' });
@@ -97,6 +111,7 @@ export default function TemplateManagePanel({ config, templates, reports, onClos
     total: allTemplates.length,
     pinned: pinned.size,
     hidden: hidden.size,
+    codes: codes.size,
     withAudits: allTemplates.filter(t => t.auditCount > 0).length,
   };
 
@@ -108,7 +123,7 @@ export default function TemplateManagePanel({ config, templates, reports, onClos
           <div>
             <h2 className="text-lg font-bold text-slate-900">Manage Templates</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              {stats.total} templates · {stats.withAudits} with audits · {stats.pinned} pinned · {stats.hidden} hidden
+              {stats.total} templates · {stats.withAudits} with audits · {stats.pinned} pinned · {stats.hidden} hidden · {stats.codes} codes
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-100 transition">
@@ -132,6 +147,34 @@ export default function TemplateManagePanel({ config, templates, reports, onClos
             <span className="flex items-center gap-1.5"><Pin className="w-3 h-3 text-[#2E5A1A]" /> Pinned = always visible</span>
             <span className="flex items-center gap-1.5"><EyeOff className="w-3 h-3 text-slate-400" /> Hidden = never visible</span>
             <span className="flex items-center gap-1.5"><Eye className="w-3 h-3 text-slate-400" /> Default = visible only with audits</span>
+          </div>
+        </div>
+
+        {/* Pinned GC Codes */}
+        <div className="px-5 py-3 border-b border-slate-100 bg-emerald-50/30">
+          <p className="text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
+            <Pin className="w-3.5 h-3.5 text-[#2E5A1A]" /> Pinned GC Template Codes
+          </p>
+          <p className="text-[11px] text-slate-500 mb-2.5">When codes are set, only templates whose name contains one of these codes appear in the grid. External contractor audits are always hidden.</p>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {Array.from(codes).map(c => (
+              <span key={c} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#2E5A1A] text-white text-xs font-bold">
+                {c}
+                <button onClick={() => removeCode(c)} className="hover:bg-white/20 rounded p-0.5"><X className="w-3 h-3" /></button>
+              </span>
+            ))}
+            {codes.size === 0 && <span className="text-[11px] text-slate-400 italic">No codes set — all templates with staff audits are shown.</span>}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newCode}
+              onChange={e => setNewCode(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCode(); } }}
+              placeholder="e.g. GC03EXT29"
+              className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] uppercase"
+            />
+            <button onClick={addCode} className="px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#244715] transition">Add Code</button>
           </div>
         </div>
 

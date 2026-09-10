@@ -23,7 +23,7 @@ export default function AuditTrendChart() {
   const { data: reports = [] } = useQuery({ queryKey: ['safety-reports-trend'], queryFn: () => base44.entities.SafetyReport.list('-created_date', 300) });
 
   const chartData = useMemo(() => {
-    const scored = reports.filter(r => r.pass_fail === 'pass' || r.pass_fail === 'fail');
+    const scored = reports.filter(r => r.auditor_staff_id && (r.pass_fail === 'pass' || r.pass_fail === 'fail'));
     const byWeek = {};
     scored.forEach(r => {
       const d = r.conducted_at || r.created_date;

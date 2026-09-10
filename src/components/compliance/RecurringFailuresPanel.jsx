@@ -27,6 +27,7 @@ export default function RecurringFailuresPanel() {
   const recurringFailures = useMemo(() => {
     const labelCounts = {};
     for (const r of reports) {
+      if (!r.auditor_staff_id) continue;
       if (!r.raw_payload) continue;
       try {
         const payload = JSON.parse(r.raw_payload);

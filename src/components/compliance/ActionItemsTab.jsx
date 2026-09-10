@@ -41,6 +41,7 @@ export default function ActionItemsTab() {
   const allActionItems = useMemo(() => {
     const items = [];
     for (const r of reports) {
+      if (!r.auditor_staff_id) continue;
       const actions = r.action_items || [];
       for (let i = 0; i < actions.length; i++) {
         const a = actions[i];

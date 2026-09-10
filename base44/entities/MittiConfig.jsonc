@@ -135,6 +135,14 @@
       "default": [],
       "description": "Template IDs that are always shown in the Audit Dashboard template grid, even when they have zero audits. These are the templates your business actively uses and wants to see at a glance. Managed via the 'Manage Templates' panel. Pinned templates sort to the top of the grid."
     },
+    "pinned_template_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "GC reference codes (e.g. 'GC03EXT29') that filter the Audit Dashboard template grid. When non-empty, ONLY templates whose name contains one of these codes are shown \u2014 all other templates are hidden regardless of whether they have audits. This takes precedence over the pinned_templates / hidden_templates / has-audits filters. Add or remove codes via the 'Manage Templates' panel. When empty, the grid falls back to showing all templates that have audits from known staff."
+    },
     "last_templates_sync_at": {
       "type": "string",
       "description": "ISO timestamp of the last time templates were pulled from the Mitti API."

@@ -10,7 +10,7 @@ export default function FailedAuditBanner({ onView }) {
     queryFn: async () => {
       const all = await base44.entities.SafetyReport.list('-created_date', 100);
       const weekAgo = new Date(Date.now() - 7 * 86400000);
-      return all.filter(r => r.pass_fail === 'fail' && r.conducted_at && new Date(r.conducted_at) >= weekAgo);
+      return all.filter(r => r.pass_fail === 'fail' && r.auditor_staff_id && r.conducted_at && new Date(r.conducted_at) >= weekAgo);
     },
   });
   if (dismissed || reports.length === 0) return null;
