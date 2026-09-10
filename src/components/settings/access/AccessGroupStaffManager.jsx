@@ -22,6 +22,7 @@ export default function AccessGroupStaffManager({ group, groups }) {
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
   const [addSearch, setAddSearch] = useState('');
+  const [divisionFilter, setDivisionFilter] = useState('all');
 
   // Fetch ALL staff (high limit — covers all divisions)
   const { data: allStaff = [], isLoading } = useQuery({
@@ -29,18 +30,23 @@ export default function AccessGroupStaffManager({ group, groups }) {
     queryFn: async () => (await base44.entities.Staff.list('-created_date', 5000)),
   });
 
-  // Staff in THIS group
+  // Staff in THIS group (filtered by division if a division filter is selected)
   const groupStaff = useMemo(() => {
-    return allStaff.filter(s => s.permission_group_id === group.id);
-  }, [allStaff, group.id]);
+    return allStaff.filter(s => {
+      if (s.permission_group_id !== group.id) return false;
+      if (divisionFilter !== 'all' && s.division_id !== divisionFilter) return false;
+      return true;
+    });
+  }, [allStaff, group.id, divisionFilter]);
 
-  // Staff NOT in this group (for the add panel)
+  // Staff NOT in this group (for the add panel, also filtered by division)
   const availableStaff = useMemo(() => {
     const q = addSearch.toLowerCase().trim();
     return allStaff
       .filter(s => s.permission_group_id !== group.id)
+      .filter(s => divisionFilter !== 'all' ? s.division_id === divisionFilter : true)
       .filter(s => !q || (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.job_title || '').toLowerCase().includes(q));
-  }, [allStaff, group.id, addSearch]);
+  }, [allStaff, group.id, addSearch, divisionFilter]);
 
   // Filtered group staff by search
   const filteredGroupStaff = useMemo(() => {
@@ -161,16 +167,28 @@ export default function AccessGroupStaffManager({ group, groups }) {
         </div>
       )}
 
-      {/* Search */}
-      <div className="relative mb-3">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search staff in this group..."
-          className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
-        />
+      {/* Search + Division filter */}
+      <div className="flex gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search staff..."
+            className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+          />
+        </div>
+        <select
+          value={divisionFilter}
+          onChange={(e) => setDivisionFilter(e.target.value)}
+          className="px-2.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 bg-white flex-shrink-0"
+        >
+          <option value="all">All Streams</option>
+          {divisions.map(d => (
+            <option key={d.id} value={d.id}>{d.name}</option>
+          ))}
+        </select>
       </div>
 
       {/* Staff list */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pencil, Trash2, Lock, Users, Building2, ShieldCheck, Eye, Crown, Layers } from 'lucide-react';
-import { normalizePermissions } from '@/utils/permissions';
+import { normalizePermissions, PERMISSION_MODULES } from '@/utils/permissions';
 
 const TIER_BADGES = {
   full: { label: 'Full Access', cls: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' },
@@ -52,6 +52,24 @@ export default function AccessGroupCard({ group, staffCount, teamCount, division
       </div>
 
       <p className="text-xs text-slate-500 line-clamp-2 mb-3 flex-1 leading-relaxed">{group.description || 'No description'}</p>
+
+      {/* Visual hub access dots — coloured by access level (green/amber/red) */}
+      <div className="flex flex-wrap gap-1 mb-2">
+        {PERMISSION_MODULES.map(m => {
+          const level = p[m.key] || 'none';
+          return (
+            <span
+              key={m.key}
+              className={`w-2.5 h-2.5 rounded-full transition ${
+                level === 'write' ? 'bg-emerald-500' :
+                level === 'read' ? 'bg-amber-500' :
+                'bg-rose-300'
+              }`}
+              title={`${m.label}: ${level === 'write' ? 'Full Access' : level === 'read' ? 'Read Only' : 'No Access'}`}
+            />
+          );
+        })}
+      </div>
 
       {/* Permission bar */}
       <div className="mb-3">

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
+import { useLocationLogs } from '@/hooks/useLocationLogs';
 import CrewDetailDrawer from './CrewDetailDrawer';
 
 const UK_CENTER = [52.3, -1.5];
@@ -107,36 +108,38 @@ export default function LiveCrewTab() {
   const [filterJob, setFilterJob] = useState('all');
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Fetch recent staff location logs (last 2 hours)
-  const { data: locationLogs = [], isLoading, isFetching, dataUpdatedAt, refetch } = useQuery({
-    queryKey: ['crew-location-recent', activeDivision?.id],
-    queryFn: async () => {
-      if (!activeDivision?.id) return [];
-      const all = await base44.entities.StaffLocationLog.filter(
-        { division_id: activeDivision.id },
-        '-recorded_at',
-        500,
-      );
-      const twoHrAgo = Date.now() - 2 * 60 * 60 * 1000;
-      return all.filter(l => l.recorded_at && new Date(l.recorded_at).getTime() > twoHrAgo);
-    },
-    refetchInterval: 30000,
-    enabled: !!activeDivision?.id,
+  // Fetch recent staff location logs (last 2 hours) using the shared hook
+  // with built-in realtime subscription + server-side date filtering.
+  // divisionId null = all divisions (enterprise admin view).
+  const twoHrAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const nowIso = new Date().toISOString();
+  const { data: locationLogs = [], isLoading, isFetching, dataUpdatedAt, refetch } = useLocationLogs({
+    divisionId: activeDivision?.id || null,
+    startDate: twoHrAgo,
+    endDate: nowIso,
+    limit: 500,
+    enabled: true,
   });
 
-  // Fetch staff list for this division
+  // Fetch staff list — all divisions for enterprise admins, scoped for division managers
   const { data: staffList = [] } = useQuery({
     queryKey: ['crew-map-staff', activeDivision?.id],
-    queryFn: () => base44.entities.Staff.filter({ division_id: activeDivision?.id, is_active: true }),
-    enabled: !!activeDivision?.id,
+    queryFn: () => base44.entities.Staff.filter(
+      activeDivision?.id
+        ? { division_id: activeDivision.id, is_active: true }
+        : { is_active: true }
+    ),
   });
 
-  // Fetch today's assignments
+  // Fetch today's assignments — all divisions for enterprise admins
   const today = new Date().toISOString().slice(0, 10);
   const { data: todayAssignments = [] } = useQuery({
     queryKey: ['crew-map-assignments', activeDivision?.id, today],
-    queryFn: () => base44.entities.RotaAssignment.filter({ division_id: activeDivision?.id, assigned_date: today }),
-    enabled: !!activeDivision?.id,
+    queryFn: () => base44.entities.RotaAssignment.filter(
+      activeDivision?.id
+        ? { division_id: activeDivision.id, assigned_date: today }
+        : { assigned_date: today }
+    ),
   });
 
   // Fetch jobs for job names

@@ -6,6 +6,7 @@ import HubTabBar from '@/components/hubs/HubTabBar';
 import HubLoadingState from '@/components/hubs/HubLoadingState';
 import HubErrorState from '@/components/hubs/HubErrorState';
 import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 /**
  * HubShell — the one layout every hub renders through (Phase 0 design system).
@@ -65,7 +66,7 @@ export default function HubShell({
         ) : loading ? (
           <HubLoadingState />
         ) : (
-          children
+          <ErrorBoundary>{children}</ErrorBoundary>
         )}
       </div>
     </div>

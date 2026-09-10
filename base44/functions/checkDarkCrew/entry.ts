@@ -32,21 +32,19 @@ export default async function(req: Request): Promise<Response> {
     const allStaff = await base44Admin.entities.Staff.list("-created_date", 500);
     const staffById = new Map(allStaff.map(s => [s.id, s]));
 
-    // Get recent location logs (last 30 min) to check who has a fresh fix
-    const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    // Get recent location logs (last 30 min) — server-side date filter so we
+    // only fetch records within the window, not all records then filter client-side
+    const thirtyMinAgoISO = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
     const recentLogs = await base44Admin.entities.StaffLocationLog.filter(
-      {},
+      { recorded_at: { $gte: thirtyMinAgoISO } },
       "-recorded_at",
       500,
     );
-    // Filter to last 30 min
     const recentByStaff = new Map();
     for (const log of recentLogs) {
       if (!log.staff_id) continue;
-      if (log.recorded_at && new Date(log.recorded_at).getTime() > now.getTime() - 30 * 60 * 1000) {
-        if (!recentByStaff.has(log.staff_id) || new Date(log.recorded_at) > new Date(recentByStaff.get(log.staff_id).recorded_at)) {
-          recentByStaff.set(log.staff_id, log);
-        }
+      if (!recentByStaff.has(log.staff_id) || new Date(log.recorded_at) > new Date(recentByStaff.get(log.staff_id).recorded_at)) {
+        recentByStaff.set(log.staff_id, log);
       }
     }
 

@@ -11,6 +11,8 @@ import {
   defaultPermissions, normalizePermissions,
 } from '@/utils/permissions';
 import SettingsLockdownManager from '@/components/settings/SettingsLockdownManager';
+import PermissionMatrixGrid from '@/components/settings/access/PermissionMatrixGrid';
+import { getAllPermissionKeysForHub } from '@/utils/subTabRegistry';
 import TabBar from '@/components/TabBar';
 
 export default function PermissionGroupManager({ profile }) {
@@ -333,6 +335,24 @@ function GroupCard({ group, staffCount, teamCount, onEdit, onDelete }) {
 
       <p className="text-xs text-slate-500 line-clamp-2 mb-3 flex-1">{group.description || 'No description'}</p>
 
+      {/* Visual hub access dots — coloured by access level (green/amber/red) */}
+      <div className="flex flex-wrap gap-1 mb-3">
+        {PERMISSION_MODULES.map(m => {
+          const level = p[m.key] || 'none';
+          return (
+            <span
+              key={m.key}
+              className={`w-2.5 h-2.5 rounded-full transition ${
+                level === 'write' ? 'bg-emerald-500' :
+                level === 'read' ? 'bg-amber-500' :
+                'bg-rose-300'
+              }`}
+              title={`${m.label}: ${level === 'write' ? 'Full Access' : level === 'read' ? 'Read Only' : 'No Access'}`}
+            />
+          );
+        })}
+      </div>
+
       {/* Permission summary */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{writeCount} full</span>
@@ -382,6 +402,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
     staff_type: group.staff_type || 'flexible',
     landing_page: group.landing_page || 'auto',
     permissions: normalizePermissions(group.permissions),
+    sub_tab_permissions: group.sub_tab_permissions || {},
   }));
 
   const setLevel = (key, level) => setForm(f => ({ ...f, permissions: { ...f.permissions, [key]: level } }));
@@ -390,6 +411,16 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
     const newPerms = {};
     PERMISSION_MODULES.forEach(m => { newPerms[m.key] = level; });
     setForm(f => ({ ...f, permissions: newPerms }));
+  };
+
+  // Sub-tab permission handlers
+  const setSubTabLevel = (permKey, level) =>
+    setForm(f => ({ ...f, sub_tab_permissions: { ...f.sub_tab_permissions, [permKey]: level } }));
+  const setHubSubTabs = (hubKey, level) => {
+    const keys = getAllPermissionKeysForHub(hubKey);
+    const newSubs = { ...form.sub_tab_permissions };
+    for (const k of keys) newSubs[k] = level;
+    setForm(f => ({ ...f, sub_tab_permissions: newSubs }));
   };
 
   return (
@@ -490,45 +521,22 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
         </div>
       </div>
 
-      {/* Module Permissions */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-4 py-3 border-b border-slate-100">
+      {/* Module Permissions — Visual Matrix Grid */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Shield className="w-4 h-4 text-[#2E5A1A]" />
           <h3 className="font-bold text-slate-900 text-sm">Module Permissions</h3>
-          <p className="text-xs text-slate-500">Choose the access level for each part of the platform.</p>
+          <p className="text-xs text-slate-500 ml-1">Click a cell to toggle — red = none, amber = read, green = write</p>
         </div>
-        <div className="divide-y divide-slate-100">
-          {PERMISSION_MODULES.map(m => (
-            <div key={m.key} className="flex items-center justify-between px-4 py-2.5">
-              <div className="flex items-center gap-2.5 min-w-0">
-                {m.sensitive && <span className="w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0" title="Sensitive module" />}
-                <span className="text-sm font-medium text-slate-700 truncate">{m.label}</span>
-              </div>
-              <div className="flex gap-1 flex-shrink-0">
-                {ACCESS_LEVELS.map(lvl => {
-                  const active = (form.permissions[m.key] || 'none') === lvl.value;
-                  const effectiveRead = form.is_read_only && lvl.value === 'write';
-                  return (
-                    <button
-                      key={lvl.value}
-                      onClick={() => setLevel(m.key, lvl.value)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${
-                        active
-                          ? effectiveRead
-                            ? 'bg-amber-100 text-amber-700'
-                            : lvl.value === 'write' ? 'bg-[#2E5A1A] text-white'
-                              : lvl.value === 'read' ? 'bg-amber-500 text-white'
-                                : 'bg-slate-200 text-slate-600'
-                          : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
-                      }`}
-                    >
-                      {effectiveRead && active ? 'Read (locked)' : lvl.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+        <PermissionMatrixGrid
+          permissions={form.permissions}
+          isReadOnly={form.is_read_only}
+          onChange={setLevel}
+          onSetAll={setAll}
+          subTabPermissions={form.sub_tab_permissions}
+          onSubTabChange={setSubTabLevel}
+          onSetHubSubTabs={setHubSubTabs}
+        />
       </div>
 
       {/* Actions */}

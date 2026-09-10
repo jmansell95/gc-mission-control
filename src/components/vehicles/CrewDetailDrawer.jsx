@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { useLocationLogs } from '@/hooks/useLocationLogs';
 import {
   X, Navigation, Clock, MapPin, Briefcase, ShieldCheck, AlertCircle,
   WifiOff, Smartphone, Activity, Radio, Gauge, Loader2, Route,
@@ -43,20 +44,14 @@ function TrailBoundsFitter({ points }) {
 export default function CrewDetailDrawer({ crew, open, onClose }) {
   const [showTrail, setShowTrail] = useState(true);
 
-  // Fetch this crew member's location logs for today
-  const { data: trailLogs = [], isLoading } = useQuery({
-    queryKey: ['crew-trail', crew?.staffId],
-    queryFn: async () => {
-      if (!crew?.staffId) return [];
-      const all = await base44.entities.StaffLocationLog.filter(
-        { staff_id: crew.staffId },
-        '-recorded_at',
-        500,
-      );
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      return all.filter(l => l.recorded_at && new Date(l.recorded_at).getTime() > todayStart.getTime());
-    },
+  // Fetch today's trail using the shared hook with realtime subscription
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const { data: trailLogs = [], isLoading } = useLocationLogs({
+    staffId: crew?.staffId,
+    startDate: todayStart.toISOString(),
+    endDate: new Date().toISOString(),
+    limit: 500,
     enabled: !!crew?.staffId && open,
   });
 
