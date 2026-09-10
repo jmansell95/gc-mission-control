@@ -114,3 +114,102 @@ export function getYearDays(year) {
     };
   });
 }
+
+// Build the days array for a single month
+export function getMonthDays(year, month) {
+  const start = new Date(year, month, 1);
+  const numDays = new Date(year, month + 1, 0).getDate();
+  return Array.from({ length: numDays }).map((_, i) => {
+    const date = addDays(start, i);
+    return {
+      dateStr: format(date, 'yyyy-MM-dd'),
+      date,
+      day: format(date, 'd'),
+      weekday: format(date, 'EEE'),
+      weekdayNum: date.getDay(),
+      monthNum: date.getMonth(),
+      isWeekend: isWeekend(date),
+      isToday: format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'),
+    };
+  });
+}
+
+// Build the days array for a single week (starting Monday)
+export function getWeekDays(weekStart) {
+  return Array.from({ length: 7 }).map((_, i) => {
+    const date = addDays(weekStart, i);
+    return {
+      dateStr: format(date, 'yyyy-MM-dd'),
+      date,
+      day: format(date, 'd'),
+      dayNum: date.getDate(),
+      weekday: format(date, 'EEE'),
+      weekdayNum: date.getDay(),
+      monthNum: date.getMonth(),
+      isWeekend: isWeekend(date),
+      isToday: format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd'),
+    };
+  });
+}
+
+// Compute analytics for a set of resources across a range of days.
+// Returns team-wide counts + per-resource stats with utilization %.
+export function computeRangeAnalytics(staffRows, rigRows, staffStatus, rigStatus, days) {
+  let jobCount = 0, leaveCount = 0, availableCount = 0, maintenanceCount = 0;
+  const resourceStats = [];
+
+  const allRows = [
+    ...staffRows.map(s => ({ resource: s, statusMap: staffStatus.get(s.id) || new Map(), isRig: false })),
+    ...rigRows.map(r => ({ resource: r, statusMap: rigStatus.get(r.id) || new Map(), isRig: true })),
+  ];
+
+  for (const { resource, statusMap, isRig } of allRows) {
+    let job = 0, leave = 0, available = 0, maintenance = 0;
+    for (const d of days) {
+      if (d.isWeekend) continue;
+      const s = statusMap.get(d.dateStr);
+      if (s) {
+        if (s.type === 'job') job++;
+        else if (s.type === 'maintenance') maintenance++;
+        else leave++;
+      } else {
+        available++;
+      }
+    }
+    jobCount += job; leaveCount += leave; availableCount += available; maintenanceCount += maintenance;
+    const workDays = job + available;
+    const util = workDays > 0 ? Math.round((job / workDays) * 100) : 0;
+    resourceStats.push({ resource, isRig, job, leave, available, maintenance, util });
+  }
+
+  const totalWorkable = jobCount + availableCount;
+  const utilPct = totalWorkable > 0 ? Math.round((jobCount / totalWorkable) * 100) : 0;
+  return { jobCount, leaveCount, availableCount, maintenanceCount, utilPct, resourceStats };
+}
+
+// Find resources that are completely free (no assignment) across a date range.
+export function findAvailableResources(staffRows, rigRows, staffStatus, rigStatus, dateFrom, dateTo) {
+  if (!dateFrom || !dateTo) return [];
+  const days = [];
+  let d = new Date(dateFrom + 'T00:00:00');
+  const end = new Date(dateTo + 'T00:00:00');
+  while (d <= end) {
+    days.push(d.toISOString().slice(0, 10));
+    d = addDays(d, 1);
+  }
+
+  const results = [];
+  for (const s of staffRows) {
+    const sm = staffStatus.get(s.id) || new Map();
+    if (days.every(ds => !sm.has(ds) || sm.get(ds)?.type === 'available')) {
+      results.push({ ...s, type: 'staff' });
+    }
+  }
+  for (const r of rigRows) {
+    const rm = rigStatus.get(r.id) || new Map();
+    if (days.every(ds => !rm.has(ds) || rm.get(ds)?.type === 'available')) {
+      results.push({ ...r, type: 'rig' });
+    }
+  }
+  return results;
+}

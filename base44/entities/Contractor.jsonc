@@ -216,6 +216,14 @@
     "cis_verified_by": {
       "type": "string",
       "description": "Name of the user who last ran CIS verification for this sub-contractor."
+    },
+    "portal_user_id": {
+      "type": "string",
+      "description": "The platform user ID linked to this contractor's contact for secure portal login. Set when the contractor is invited via the secure-login mode in the job Links tab. When set, the user can log in and see all jobs where they are the contractor."
+    },
+    "portal_invited_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the secure portal login invite was last sent to this contractor's contact."
     }
   },
   "required": [

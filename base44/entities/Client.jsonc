@@ -88,6 +88,14 @@
     "partner_color": {
       "type": "string",
       "description": "Brand accent colour (hex) for this partner client's badges and dashboard widgets. Defaults to a brand-appropriate colour when not set."
+    },
+    "portal_user_id": {
+      "type": "string",
+      "description": "The platform user ID linked to this client's contact for secure portal login. Set when the client is invited via the secure-login mode in the job Links tab. When set, the user can log in and see all jobs where they are the client."
+    },
+    "portal_invited_at": {
+      "type": "string",
+      "description": "ISO timestamp of when the secure portal login invite was last sent to this client's contact."
     }
   },
   "required": [

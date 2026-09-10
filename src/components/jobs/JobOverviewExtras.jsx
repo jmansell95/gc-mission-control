@@ -18,7 +18,7 @@ const weatherIcon = (code) => {
   return Sun;
 };
 
-export default function JobOverviewExtras({ job, client, contractor, invLogs, canSeeCosts, fin }) {
+export default function JobOverviewExtras({ job, client, contractor, invLogs, canSeeCosts, fin, isDrillingJob }) {
   // Live weather from the getJobWeatherStatus backend function
   const { data: weather, isLoading: weatherLoading } = useQuery({
     queryKey: ['job-weather-status', job.id],
@@ -187,7 +187,8 @@ export default function JobOverviewExtras({ job, client, contractor, invLogs, ca
         </div>
       </div>
 
-      {/* Progress Stats */}
+      {/* Progress Stats — drilling jobs only */}
+      {isDrillingJob && (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
@@ -249,6 +250,7 @@ export default function JobOverviewExtras({ job, client, contractor, invLogs, ca
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

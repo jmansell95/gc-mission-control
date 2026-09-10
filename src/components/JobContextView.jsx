@@ -8,14 +8,13 @@ import {
   Activity, FileText, MessageSquare, Target, AlertTriangle,
   Truck, HardHat, ShieldCheck, Building2, Phone, User, FolderOpen,
   Loader2, RefreshCw, Gauge, ArrowRightLeft, Receipt,
-  Send, CheckCircle2, CalendarClock, UsersRound, StickyNote, Briefcase, UserPlus,
+  Send, CheckCircle2, CalendarClock, UsersRound,   Briefcase, UserPlus,
   ChevronRight, Navigation,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { getJobTypeLabel } from '@/utils/jobTeams';
 import { getTotalMetres } from '@/utils/geotechBilling';
-import LogReviewQuickStat from '@/components/investigation/LogReviewQuickStat';
-import PortalLinkManager from '@/components/PortalLinkManager';
+
 import QuickAssignStaffModal from '@/components/jobs/QuickAssignStaffModal';
 import DecommissioningBanner from '@/components/decommissioning/DecommissioningBanner';
 import DisciplinePills from '@/components/disciplines/DisciplinePills';
@@ -234,7 +233,7 @@ function SetupChecklist({ job, rotas, hotelBookings }) {
  * Duplicate info already shown in the hero header (location, dates, budget,
  * status, type, name) is omitted here.
  */
-export default function JobContextView({ job, primaryType, assignedStaff, rotas, allStaff, client, contractor, suppliers, vehicles, hotelBookings, canSeeCosts, isDrillingJob, colors, statusBadge: sb, statusLabels: sl, startDate, endDate, jobTypes, subTab = 'overview' }) {
+export default function JobContextView({ job, primaryType, assignedStaff, rotas, allStaff, client, contractor, suppliers, vehicles, hotelBookings, canSeeCosts, isDrillingJob, colors, statusBadge: sb, statusLabels: sl, startDate, endDate, jobTypes }) {
   const navigate = useNavigate();
   const [activeActivity, setActiveActivity] = useState('all');
   const [showAssignStaff, setShowAssignStaff] = useState(false);
@@ -303,7 +302,6 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
 
   return (
     <div className="space-y-3">
-      {subTab === 'overview' && (
       <>
       {/* Setup checklist for planning jobs */}
       {job.status === 'planning' && (
@@ -348,7 +346,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
       <SubcontractorCrewCard job={job} />
 
       {/* Enriched overview: contacts, site info, weather, progress stats */}
-      <JobOverviewExtras job={job} client={client} contractor={contractor} invLogs={allInvLogs} canSeeCosts={canSeeCosts} fin={fin} />
+      <JobOverviewExtras job={job} client={client} contractor={contractor} invLogs={allInvLogs} canSeeCosts={canSeeCosts} fin={fin} isDrillingJob={isDrillingJob} />
 
       {/* Main 3-pane grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
@@ -612,27 +610,6 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
         </div>
       </div>
       </>
-      )}
-
-      {subTab === 'links' && (
-      <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <LogReviewQuickStat job={job} />
-        <PortalLinkManager job={job} />
-      </div>
-
-      {/* Full notes */}
-      {job.notes && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <StickyNote className="w-4 h-4 text-slate-500" />
-            <h3 className="font-semibold text-slate-900 text-sm">Notes</h3>
-          </div>
-          <p className="text-sm text-slate-600 whitespace-pre-wrap">{job.notes}</p>
-        </div>
-      )}
-      </>
-      )}
 
       {/* Quick assign staff modal */}
       <QuickAssignStaffModal open={showAssignStaff} onClose={() => setShowAssignStaff(false)} job={job} allStaff={allStaff} rotas={rotas} />

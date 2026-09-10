@@ -62,6 +62,7 @@ import AzureMigrationPlan from './pages/AzureMigrationPlan';
 import DepotPickLists from './pages/DepotPickLists';
 import PowerAppsMigrationRoadmap from './pages/PowerAppsMigrationRoadmap';
 import PowerAppsBuildHub from './pages/PowerAppsBuildHub';
+import PortalDashboard from './pages/PortalDashboard';
 
 
 import StaffPage from './pages/StaffPage';
@@ -86,7 +87,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
   useJobRealtimeSync();
 
-  const isClientPortalRoute = window.location.pathname.includes('/client-portal/');
+  const isClientPortalRoute = window.location.pathname.includes('/client-portal/') || window.location.pathname === '/portal';
 
   // Skip auth checks for public client portal routes
   if (!isClientPortalRoute && (isLoadingPublicSettings || isLoadingAuth)) {
@@ -141,6 +142,7 @@ const AuthenticatedApp = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/portal" element={<PortalDashboard />} />
         <Route element={<AppShell />}>
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />

@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Boxes, PoundSterling, FolderOpen, FileText, Eye, Download, Activity, Mountain,
   LayoutGrid, CalendarDays, ShieldCheck, Users, Truck, Hotel,
-  Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList, FileBarChart, ArrowUpRight
+  Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList, FileBarChart, ArrowUpRight, StickyNote
 } from 'lucide-react';
 import { getSiteActivityDeepLink } from '@/utils/investigationDeepLink';
 import HubDeepLink from '@/components/hubs/HubDeepLink';
@@ -28,7 +28,7 @@ import GeotechDataTab from '@/components/geotech/GeotechDataTab';
 import SiteActivitySummary from '@/components/jobs/SiteActivitySummary';
 import TabStatRibbon from '@/components/TabStatRibbon';
 import JobFinancialsTab from '@/components/afp/JobFinancialsTab';
-import ProcurementPipeline from '@/components/enterprise/ProcurementPipeline';
+import PortalLinkManager from '@/components/PortalLinkManager';
 import CrewComplianceSummary from '@/components/jobs/CrewComplianceSummary';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -55,7 +55,6 @@ export default function JobDetailTabs({
   startDate, endDate, jobTypes = [], initialTab
 }) {
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
-  const [summarySub, setSummarySub] = useState('overview');
   const [scheduleSub, setScheduleSub] = useState('daily');
   const [activitySub, setActivitySub] = useState('logs');
   const [docsSub, setDocsSub] = useState('photos');
@@ -106,6 +105,7 @@ export default function JobDetailTabs({
           <TabsTrigger value="activity" className={triggerClass}><Activity className="w-4 h-4 shrink-0" />Site Activity</TabsTrigger>
           <TabsTrigger value="equipment" className={triggerClass}><Boxes className="w-4 h-4 shrink-0" />Equipment</TabsTrigger>
           {canSeeCosts && <TabsTrigger value="financials" className={triggerClass}><PoundSterling className="w-4 h-4 shrink-0" />Financials</TabsTrigger>}
+          <TabsTrigger value="links" className={triggerClass}><Link2 className="w-4 h-4 shrink-0" />Links</TabsTrigger>
           <TabsTrigger value="documents" className={triggerClass}><FolderOpen className="w-4 h-4 shrink-0" />Documents</TabsTrigger>
         </TabsList>
         {/* Edge fade — visual cue that more tabs scroll into view */}
@@ -119,61 +119,26 @@ export default function JobDetailTabs({
           <HubDeepLink to="/fleet" jobId={job.id} label="Tracking Hub" icon={Truck} />
           <HubDeepLink to="/assets" jobId={job.id} label="Assets Hub" icon={Boxes} />
         </div>
-        <SubTabNav
-          tabs={[
-            { id: 'overview', label: 'Overview', icon: LayoutGrid },
-            { id: 'links', label: 'Links & Notes', icon: Link2 },
-          ]}
-          activeTab={summarySub}
-          onChange={setSummarySub}
+        <JobContextView
+          job={job}
+          primaryType={primaryType}
+          assignedStaff={assignedStaff}
+          rotas={rotas}
+          allStaff={allStaff}
+          client={client}
+          contractor={contractor}
+          suppliers={suppliers}
+          vehicles={vehicles}
+          hotelBookings={hotelBookings}
+          canSeeCosts={canSeeCosts}
+          isDrillingJob={isDrillingJob}
+          colors={colors}
+          statusBadge={statusBadge}
+          statusLabels={statusLabels}
+          startDate={startDate}
+          endDate={endDate}
+          jobTypes={jobTypes}
         />
-        {summarySub === 'overview' ? (
-          <>
-            <JobContextView
-              job={job}
-              primaryType={primaryType}
-              assignedStaff={assignedStaff}
-              rotas={rotas}
-              allStaff={allStaff}
-              client={client}
-              contractor={contractor}
-              suppliers={suppliers}
-              vehicles={vehicles}
-              hotelBookings={hotelBookings}
-              canSeeCosts={canSeeCosts}
-              isDrillingJob={isDrillingJob}
-              colors={colors}
-              statusBadge={statusBadge}
-              statusLabels={statusLabels}
-              startDate={startDate}
-              endDate={endDate}
-              jobTypes={jobTypes}
-              subTab="overview"
-            />
-          </>
-        ) : (
-          <JobContextView
-            job={job}
-            primaryType={primaryType}
-            assignedStaff={assignedStaff}
-            rotas={rotas}
-            allStaff={allStaff}
-            client={client}
-            contractor={contractor}
-            suppliers={suppliers}
-            vehicles={vehicles}
-            hotelBookings={hotelBookings}
-            canSeeCosts={canSeeCosts}
-            isDrillingJob={isDrillingJob}
-            colors={colors}
-            statusBadge={statusBadge}
-            statusLabels={statusLabels}
-            startDate={startDate}
-            endDate={endDate}
-            jobTypes={jobTypes}
-            subTab="links"
-          />
-        )}
       </TabsContent>
 
       {/* ── Schedule & Crew ── */}
@@ -278,7 +243,6 @@ export default function JobDetailTabs({
           ]}
         />
         <JobLogisticsHub jobId={job.id} job={job} suppliers={suppliers} contractors={contractors} canSeeCosts={canSeeCosts} isDrillingJob={isDrillingJob} />
-        {canSeeCosts && <ProcurementPipeline jobId={job.id} job={job} />}
       </TabsContent>
 
       {/* ── Financials ── */}
@@ -290,6 +254,20 @@ export default function JobDetailTabs({
           <JobFinancialsTab job={job} canSeeCosts={canSeeCosts} />
         </TabsContent>
       )}
+
+      {/* ── Links ── */}
+      <TabsContent value="links" className="space-y-4 mt-0">
+        <PortalLinkManager job={job} />
+        {job.notes && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <StickyNote className="w-4 h-4 text-slate-500" />
+              <h3 className="font-semibold text-slate-900 text-sm">Notes</h3>
+            </div>
+            <p className="text-sm text-slate-600 whitespace-pre-wrap">{job.notes}</p>
+          </div>
+        )}
+      </TabsContent>
 
       {/* ── Documents ── */}
       <TabsContent value="documents" className="space-y-4 mt-0">
