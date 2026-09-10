@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Boxes, PoundSterling, FolderOpen, FileText, Eye, Download, Activity, Mountain,
   LayoutGrid, CalendarDays, ShieldCheck, Users, Truck, Hotel,
-  Camera, Clock, FlaskConical, Link2, AlertTriangle, ClipboardList, FileBarChart, ArrowUpRight, StickyNote
+  Camera, Clock, FlaskConical, Link2, AlertTriangle, FileBarChart, ArrowUpRight, StickyNote
 } from 'lucide-react';
 import { getSiteActivityDeepLink } from '@/utils/investigationDeepLink';
 import HubDeepLink from '@/components/hubs/HubDeepLink';
@@ -14,9 +14,7 @@ import BoreholeDrillDown from '@/components/BoreholeDrillDown';
 import JobHotelBookings from '@/components/JobHotelBookings';
 import JobPhotoGallery from '@/components/JobPhotoGallery';
 import DocumentManager from '@/components/DocumentManager';
-import JobCommentsViewer from '@/components/JobCommentsViewer';
-import JobWorkLog from '@/components/JobWorkLog';
-import MilestoneManager from '@/components/MilestoneManager';
+import JobPortalComments from '@/components/JobPortalComments';
 import JobScheduleOverview from '@/components/JobScheduleOverview';
 import PermanentCrewCard from '@/components/jobs/PermanentCrewCard';
 import JobRotaManager from '@/components/jobs/JobRotaManager';
@@ -43,7 +41,8 @@ import { base44 } from '@/api/base44Client';
  *   3. Site Activity  — investigation logs, hazard map, boreholes, geotech (drilling)
  *   4. Equipment      — rig & gear, hire items, deliveries
  *   5. Financials      — AFP, CVR, costs, billing
- *   6. Documents       — photos, files, comments, work log, milestones
+ *   6. Portals         — portal links (quick share + secure login), client comments, notes
+ *   7. Documents       — photos, files
  *
  * Drilling-only sections (Boreholes, Geotech) live as sub-tabs under Site
  * Activity so non-drilling jobs get a cleaner, shorter tab bar.
@@ -105,7 +104,7 @@ export default function JobDetailTabs({
           <TabsTrigger value="activity" className={triggerClass}><Activity className="w-4 h-4 shrink-0" />Site Activity</TabsTrigger>
           <TabsTrigger value="equipment" className={triggerClass}><Boxes className="w-4 h-4 shrink-0" />Equipment</TabsTrigger>
           {canSeeCosts && <TabsTrigger value="financials" className={triggerClass}><PoundSterling className="w-4 h-4 shrink-0" />Financials</TabsTrigger>}
-          <TabsTrigger value="links" className={triggerClass}><Link2 className="w-4 h-4 shrink-0" />Links</TabsTrigger>
+          <TabsTrigger value="links" className={triggerClass}><Link2 className="w-4 h-4 shrink-0" />Portals</TabsTrigger>
           <TabsTrigger value="documents" className={triggerClass}><FolderOpen className="w-4 h-4 shrink-0" />Documents</TabsTrigger>
         </TabsList>
         {/* Edge fade — visual cue that more tabs scroll into view */}
@@ -255,9 +254,10 @@ export default function JobDetailTabs({
         </TabsContent>
       )}
 
-      {/* ── Links ── */}
+      {/* ── Portals ── */}
       <TabsContent value="links" className="space-y-4 mt-0">
         <PortalLinkManager job={job} />
+        <JobPortalComments job={job} />
         {job.notes && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -278,9 +278,6 @@ export default function JobDetailTabs({
           tabs={[
             { id: 'photos', label: 'Photos', icon: Camera },
             { id: 'files', label: 'Documents', icon: FolderOpen },
-            { id: 'comments', label: 'Comments', icon: FileText },
-            { id: 'worklog', label: 'Work Log', icon: ClipboardList },
-            { id: 'milestones', label: 'Milestones', icon: Clock },
           ]}
           activeTab={docsSub}
           onChange={setDocsSub}
@@ -303,9 +300,6 @@ export default function JobDetailTabs({
             )}
           </>
         )}
-        {docsSub === 'comments' && <JobCommentsViewer job={job} />}
-        {docsSub === 'worklog' && <JobWorkLog job={job} />}
-        {docsSub === 'milestones' && <MilestoneManager job={job} />}
       </TabsContent>
     </Tabs>
   );

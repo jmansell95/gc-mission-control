@@ -121,7 +121,7 @@ export const hubTour = [
     icon: 'ClipboardList',
     summary: 'Jobs, rota, scheduling and site activity — the operational backbone connecting crews to jobs to billing.',
     talkingPoints: [
-      'Job management — from creation to completion with milestones, delays and comments',
+      'Job management — from creation to completion with delays, site activity and client portal links',
       'Unified rota builder — weekly schedule with crew-rig assignment and conflict detection',
       'Site activity logs — driller remarks, trial pit logs, samples and borehole progress',
       'Weather-aware rota flags — dangerous conditions show red before crews arrive',
