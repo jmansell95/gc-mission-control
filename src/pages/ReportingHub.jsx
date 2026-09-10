@@ -226,7 +226,7 @@ export default function ReportingHub() {
       {showCustom && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm overflow-y-auto" onClick={() => setShowCustom(false)}>
           <div className="min-h-full flex items-start justify-center p-4">
-            <div className="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-6xl my-8 animate-pop-in" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl my-8 animate-pop-in" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-2xl z-10">
                 <h2 className="text-lg font-bold text-slate-900">Custom Report Builder</h2>
                 <button onClick={() => setShowCustom(false)} className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition">Close</button>
