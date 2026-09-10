@@ -21,6 +21,7 @@ import DecommissioningBanner from '@/components/decommissioning/DecommissioningB
 import DisciplinePills from '@/components/disciplines/DisciplinePills';
 import DisciplineEditorModal from '@/components/disciplines/DisciplineEditorModal';
 import SubcontractorCrewCard from '@/components/jobs/SubcontractorCrewCard';
+import JobOverviewExtras from '@/components/jobs/JobOverviewExtras';
 import { Pencil } from 'lucide-react';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -345,6 +346,9 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
 
       {/* Subcontractors & agency staff from the Subcontractors wizard step */}
       <SubcontractorCrewCard job={job} />
+
+      {/* Enriched overview: contacts, site info, weather, progress stats */}
+      <JobOverviewExtras job={job} client={client} contractor={contractor} invLogs={allInvLogs} canSeeCosts={canSeeCosts} fin={fin} />
 
       {/* Main 3-pane grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronDown, FileText, Calendar, Package, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import LogisticsItemRow from '@/components/logistics/LogisticsItemRow';
+import { CategoryBadges } from '@/components/logistics/CategoryBadges';
 import { billingTotal, fmt } from '@/components/equipment/shared';
 
 /**
@@ -74,6 +75,7 @@ export default function PoGroupedAccordion({
                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full flex-shrink-0">
                     {group.itemCount} item{group.itemCount !== 1 ? 's' : ''}
                   </span>
+                  <CategoryBadges items={group.items} />
                 </div>
                 <div className="flex items-center gap-2.5 mt-0.5 flex-wrap text-[11px] text-slate-500">
                   {group.supplier && (

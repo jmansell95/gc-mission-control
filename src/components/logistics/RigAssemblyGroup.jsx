@@ -21,7 +21,7 @@ const gearLocConfig = {
 };
 
 export default function RigAssemblyGroup({ rigItem, linkedItems, asset, suppliers, contractors, canSeeCosts, canEdit, selectedIds, onToggleSelect, onEdit, onDeleteItem, onDeleteAssembly, onOffHire, onLocationUpdate, updatingIds, assetMap, complianceByAssetId = {} }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const assemblyTotal = billingTotal(rigItem) + linkedItems.reduce((s, li) => s + billingTotal(li), 0);
   const rigAsset = rigItem.site_asset_id ? assetMap[rigItem.site_asset_id] : null;
   const complianceStatus = rigAsset?.compliance_status || 'unknown';
@@ -41,6 +41,7 @@ export default function RigAssemblyGroup({ rigItem, linkedItems, asset, supplier
           <p className="text-sm font-bold text-slate-900 truncate">{rigItem.description}</p>
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className="text-[10px] text-blue-600 font-medium uppercase tracking-wide">Rig Assembly · {linkedItems.length + 1} items</p>
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700">Internal</span>
             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 ${cb.cls}`}>
               <ComplianceIcon className="w-2.5 h-2.5" /> {cb.label}
             </span>

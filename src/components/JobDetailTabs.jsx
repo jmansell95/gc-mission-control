@@ -25,10 +25,14 @@ import DelayLogManager from '@/components/DelayLogManager';
 import JobHazardMap from '@/components/JobHazardMap';
 import JobContextView from '@/components/JobContextView';
 import GeotechDataTab from '@/components/geotech/GeotechDataTab';
+import SiteActivitySummary from '@/components/jobs/SiteActivitySummary';
 import TabStatRibbon from '@/components/TabStatRibbon';
 import JobFinancialsTab from '@/components/afp/JobFinancialsTab';
 import ProcurementPipeline from '@/components/enterprise/ProcurementPipeline';
+import CrewComplianceSummary from '@/components/jobs/CrewComplianceSummary';
 import { useAuth } from '@/lib/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 /**
  * JobDetailTabs — consolidated, progressive-disclosure tab structure.
@@ -58,6 +62,19 @@ export default function JobDetailTabs({
   const [siteActivitySelectedLogId, setSiteActivitySelectedLogId] = useState(null);
   const { user: authUser } = useAuth();
   const isManager = authUser?.role === 'admin';
+
+  // Fetch investigation logs and financials for the Site Activity summary
+  const { data: invLogs = [] } = useQuery({
+    queryKey: ['investigation-logs', job?.id],
+    queryFn: () => base44.entities.InvestigationLog.filter({ job_id: job?.id }),
+    enabled: !!job?.id,
+  });
+  const { data: fin } = useQuery({
+    queryKey: ['auto-job-financials-tabs', job?.id],
+    queryFn: async () => { const res = await base44.functions.invoke('calculateJobFinancials', { job_id: job?.id }); return res.data; },
+    enabled: !!job?.id && canSeeCosts,
+    retry: 0,
+  });
 
   // Bidirectional deep-link: when a manager clicks "Open on Job Site Activity"
   // from the Investigation Hub, the target log id is stashed in sessionStorage.
@@ -188,6 +205,7 @@ export default function JobDetailTabs({
               ]}
             />
             <PermanentCrewCard job={job} />
+            <CrewComplianceSummary assignedStaff={assignedStaff} rotas={rotas} canSeeCosts={canSeeCosts} />
             <JobScheduleOverview job={job} primaryType={primaryType} assignedStaff={assignedStaff} rotas={rotas} allStaff={allStaff} vehicles={vehicles} rotasByDate={rotasByDate} sortedDates={sortedDates} />
             {isManager && <JobRotaManager job={job} allStaff={allStaff} vehicles={vehicles} rotas={rotas} />}
           </>
@@ -224,6 +242,7 @@ export default function JobDetailTabs({
                 { icon: ShieldCheck, value: rotas.filter(r => r.briefing_signed).length, label: 'Briefings Signed', iconColor: 'text-amber-600' },
               ]}
             />
+            <SiteActivitySummary job={job} invLogs={invLogs} canSeeCosts={canSeeCosts} fin={fin} />
             <InvestigationLogManager job={job} isDrillingJob={isDrillingJob} assignedStaff={assignedStaff} allStaff={allStaff} canSeeCosts={canSeeCosts} onViewBoreholes={() => setActivitySub('boreholes')} selectedLogId={siteActivitySelectedLogId} />
           </>
         ) : activitySub === 'delays' ? (

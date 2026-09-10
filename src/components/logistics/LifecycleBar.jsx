@@ -11,7 +11,12 @@ const locationConfig = {
 const locationOrder = ['yard', 'in_transit', 'site', 'returned'];
 
 export default function LifecycleBar({ items, isDecommissioning, onBulkCollect }) {
-  const logisticsItems = items.filter(i => i.category !== 'contractor_supplied' && (i.hire_status || 'active') !== 'off_hired');
+  const logisticsItems = items.filter(i =>
+    i.category !== 'contractor_supplied' &&
+    i.category !== 'labour' &&
+    i.category !== 'client_supplied' &&
+    (i.hire_status || 'active') !== 'off_hired'
+  );
   const counts = locationOrder.reduce((acc, loc) => {
     acc[loc] = logisticsItems.filter(i => (i.current_location || 'yard') === loc).length;
     return acc;

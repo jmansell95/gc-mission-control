@@ -19,6 +19,7 @@ import RigGearPickerModal from '@/components/logistics/RigGearPickerModal';
 import AddBillableItemsWizard from '@/components/logistics/wizard/AddBillableItemsWizard';
 import BillableItemsQuickAdd from '@/components/logistics/BillableItemsQuickAdd';
 import PoGroupedAccordion from '@/components/logistics/PoGroupedAccordion';
+import { CategoryBadges } from '@/components/logistics/CategoryBadges';
 import HubDeepLink from '@/components/hubs/HubDeepLink';
 import { findRigRateCardItem } from '@/components/logistics/rigRateMatcher';
 import SiteManifestPDF from '@/components/logistics/SiteManifestPDF';
@@ -709,6 +710,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
                     <User className="w-3.5 h-3.5 text-slate-400" />
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{person}</p>
                     <span className="text-xs text-slate-400">({personItems.length})</span>
+                    <CategoryBadges items={personItems} />
                     {canSeeCosts && <span className="ml-auto text-xs font-bold text-[#2E5A1A]">{fmt(personItems.reduce((s, c) => s + billingTotal(c), 0))}</span>}
                   </div>
                   <div className="space-y-2">
