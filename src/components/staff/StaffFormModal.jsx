@@ -30,6 +30,15 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     queryKey: ['divisions-all-staff-form'],
     queryFn: () => base44.entities.Division.list('name', 50),
   });
+  // Load the current user's Staff profile so we can grant day-rate editing
+  // to management-level users, not just platform admins.
+  const { data: myProfileArr } = useQuery({
+    queryKey: ['my-staff-profile-staff-form', currentUser?.id],
+    queryFn: () => base44.entities.Staff.filter({ user_id: currentUser.id }, '-created_date', 1),
+    enabled: !!currentUser?.id,
+  });
+  const mySystemRole = myProfileArr?.[0]?.system_role;
+  const canEditFinancials = isAdmin || mySystemRole === 'admin' || mySystemRole === 'super_admin' || mySystemRole === 'management';
 
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -280,8 +289,8 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           </section>
         )}
 
-        {/* Financial — admin only */}
-        {isAdmin && (
+        {/* Financial — admin + management */}
+        {canEditFinancials && (
           <section>
             <p className={sectionTitle}><PoundSterling className="w-3.5 h-3.5" /> Financial</p>
             <div className={gridCls}>

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import CrewProfileEditorDrawer from '@/components/staff/CrewProfileEditorDrawer';
+import CrewEditorModal from '@/components/staff/CrewEditorModal';
 import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
 import {
   Users, Search, ChevronDown, ChevronRight, Plus, ShieldCheck, ShieldOff,
@@ -33,6 +34,7 @@ export default function PeopleDirectory() {
   const [editing, setEditing] = useState(null);
   const [actioningId, setActioningId] = useState(null);
   const [permissionStaff, setPermissionStaff] = useState(null);
+  const [crewEditor, setCrewEditor] = useState(null);
 
   const { data: teams = [], isLoading: teamsLoading } = useQuery({
     queryKey: ['teams'],
@@ -389,6 +391,7 @@ export default function PeopleDirectory() {
                           onOpenMember={(s) => setEditing(s)}
                           onOpenPermissions={(s) => setPermissionStaff(s)}
                           onSendInvite={handleSendInvite}
+                          onManageCrews={(s) => setCrewEditor(s)}
                           actioningId={actioningId}
                         />
                       ))
@@ -457,6 +460,16 @@ export default function PeopleDirectory() {
         onSaved={refresh}
       />
 
+      {/* Crew editor modal — manage 2-man drilling crews for a subcontractor */}
+      {crewEditor && (
+        <CrewEditorModal
+          open={!!crewEditor}
+          onClose={() => setCrewEditor(null)}
+          parentStaff={crewEditor}
+          parentDivisionId={crewEditor?.division_id}
+        />
+      )}
+
       {/* Quick permission popup */}
       {permissionStaff && (
         <StaffPermissionPopup staff={permissionStaff} onClose={() => setPermissionStaff(null)} />
@@ -466,7 +479,7 @@ export default function PeopleDirectory() {
 }
 
 /** Crew Profile card — Level 2, with members listed underneath (Level 3). */
-function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvite, actioningId }) {
+function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvite, onManageCrews, actioningId }) {
   const [open, setOpen] = useState(true);
 
   const profileIcon = () => {
@@ -479,9 +492,9 @@ function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvit
   return (
     <div className="bg-white rounded-xl border border-slate-200/70 overflow-hidden">
       {/* Profile header */}
-      <button
+      <div
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50/50 transition text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50/50 transition text-left cursor-pointer"
       >
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
           profile.type === 'drilling_crew' ? 'bg-indigo-50' :
@@ -498,8 +511,17 @@ function CrewProfileCard({ profile, onOpenMember, onOpenPermissions, onSendInvit
             {profile.subtitle} · {profile.members.length} member{profile.members.length !== 1 ? 's' : ''}
           </p>
         </div>
+        {profile.type === 'subcontractor' && profile.parentStaff && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onManageCrews?.(profile.parentStaff); }}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-semibold transition flex-shrink-0"
+            title="Manage 2-man drilling crews"
+          >
+            <HardHat className="w-3 h-3" /> Crews
+          </button>
+        )}
         {open ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-      </button>
+      </div>
 
       {/* Members list — Level 3 */}
       {open && (

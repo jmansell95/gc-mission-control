@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/use-toast';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
-import { Save, Loader2, UserCog, Mail, Phone, Briefcase, Users, Calendar, Hash, Shield, ShieldCheck, Truck, Bell, Camera, Trash2, KeyRound } from 'lucide-react';
+import { Save, Loader2, UserCog, Mail, Phone, Briefcase, Users, Calendar, Hash, Shield, ShieldCheck, Truck, Bell, Camera, Trash2, KeyRound, PoundSterling, Building2 } from 'lucide-react';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import ImageCropper from '@/components/ImageCropper';
 import StaffPermissionPopup from '@/components/access/StaffPermissionPopup';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
  * Full admin editor for a crew (Staff) profile — all fields editable.
@@ -25,6 +26,19 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
     queryKey: ['permission-groups'],
     queryFn: () => base44.entities.PermissionGroup.list(),
   });
+  const { data: divisions = [] } = useQuery({
+    queryKey: ['divisions-all-crew-drawer'],
+    queryFn: () => base44.entities.Division.list('name', 50),
+  });
+  const { user: currentUser } = useAuth();
+  const isPlatformAdmin = currentUser?.role === 'admin';
+  const { data: myProfileArr } = useQuery({
+    queryKey: ['my-staff-profile-crew-drawer', currentUser?.id],
+    queryFn: () => base44.entities.Staff.filter({ user_id: currentUser.id }, '-created_date', 1),
+    enabled: !!currentUser?.id,
+  });
+  const mySystemRole = myProfileArr?.[0]?.system_role;
+  const canEditFinancials = isPlatformAdmin || mySystemRole === 'admin' || mySystemRole === 'super_admin' || mySystemRole === 'management';
 
   const currentGroupName = permissionGroups.find((g) => g.id === staff?.permission_group_id)?.name || '';
 
@@ -40,6 +54,14 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
         date_of_birth: staff.date_of_birth || '',
         ni_number: staff.ni_number || '',
         permission_group_id: staff.permission_group_id || '',
+        division_id: staff.division_id || '',
+        day_rate: staff.day_rate ?? null,
+        company: staff.company || '',
+        lead_driller_name: staff.lead_driller_name || '',
+        lead_driller_phone: staff.lead_driller_phone || '',
+        second_man_name: staff.second_man_name || '',
+        second_man_phone: staff.second_man_phone || '',
+        market_dojo_onboarded: staff.market_dojo_onboarded === true,
         delivery_dashboard_enabled: staff.delivery_dashboard_enabled === true,
         email_notifications_enabled: staff.email_notifications_enabled !== false,
         is_active: staff.is_active !== false,
@@ -56,20 +78,32 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
   const handleSave = async () => {
     setSaving(true);
     try {
-      await base44.entities.Staff.update(staff.id, {
+      const payload = {
         name: form.name,
         email: form.email,
         phone: form.phone,
         job_title: form.job_title,
         worker_type: form.worker_type,
-        team_id: form.team_id,
+        team_id: form.team_id || null,
         date_of_birth: form.date_of_birth || null,
         ni_number: form.ni_number,
+        permission_group_id: form.permission_group_id || null,
+        division_id: form.division_id || null,
+        day_rate: form.day_rate,
+        company: form.company,
+        lead_driller_name: form.lead_driller_name,
+        lead_driller_phone: form.lead_driller_phone,
+        second_man_name: form.second_man_name,
+        second_man_phone: form.second_man_phone,
+        market_dojo_onboarded: form.market_dojo_onboarded,
         delivery_dashboard_enabled: form.delivery_dashboard_enabled,
         email_notifications_enabled: form.email_notifications_enabled,
         is_active: form.is_active,
         avatar_url: form.avatar_url,
-      });
+      };
+      await base44.entities.Staff.update(staff.id, payload);
+      // Sync platform user roles when access-level or division changes
+      try { await base44.functions.invoke('syncStaffUserRoles', { staff_ids: [staff.id] }); } catch (_) {}
       // SSO auto-link: if this staff member has an email but no linked user
       // account, silently link them if a matching platform user already exists.
       if (form.email && !form.user_id) {
@@ -194,7 +228,72 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
                 {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             </Field>
+            <Field icon={KeyRound} label="Access Level">
+              <select value={form.permission_group_id} onChange={(e) => set('permission_group_id', e.target.value)} className={inputCls}>
+                <option value="">Default (Field Staff)</option>
+                {permissionGroups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              </select>
+            </Field>
+            {isPlatformAdmin && (
+              <Field icon={Building2} label="Business Stream">
+                <select value={form.division_id} onChange={(e) => set('division_id', e.target.value)} className={inputCls}>
+                  <option value="">Inherit from crew</option>
+                  {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+              </Field>
+            )}
           </div>
+
+          {/* Financial — admin + management */}
+          {canEditFinancials && (
+            <div className="insight-card rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2.5 mb-1">
+                <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
+                <p className="text-sm font-semibold text-slate-700">Financial</p>
+              </div>
+              <Field icon={PoundSterling} label="Day Rate (£)">
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.day_rate ?? ''}
+                  onChange={(e) => set('day_rate', e.target.value === '' ? null : Number(e.target.value))}
+                  placeholder="e.g. 180.00"
+                  className={inputCls}
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Internal cost per day in GBP. Used for labour cost calculations. Leave blank to fall back to the rate card.</p>
+              </Field>
+            </div>
+          )}
+
+          {/* Subcontractor / Agency Details — conditional */}
+          {(form.worker_type === 'subcontractor' || form.worker_type === 'agency') && (
+            <div className="insight-card rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2.5 mb-1">
+                <Building2 className="w-4 h-4 text-[#2E5A1A]" />
+                <p className="text-sm font-semibold text-slate-700">Subcontractor / Agency Details</p>
+              </div>
+              <Field icon={Building2} label="Company">
+                <input value={form.company} onChange={(e) => set('company', e.target.value)} placeholder="Company / agency name" className={inputCls} />
+              </Field>
+              <Field icon={UserCog} label="Lead Driller Name">
+                <input value={form.lead_driller_name} onChange={(e) => set('lead_driller_name', e.target.value)} className={inputCls} />
+              </Field>
+              <Field icon={Phone} label="Lead Driller Phone">
+                <input type="tel" value={form.lead_driller_phone} onChange={(e) => set('lead_driller_phone', e.target.value)} className={inputCls} />
+              </Field>
+              <Field icon={UserCog} label="Second Man Name">
+                <input value={form.second_man_name} onChange={(e) => set('second_man_name', e.target.value)} className={inputCls} />
+              </Field>
+              <Field icon={Phone} label="Second Man Phone">
+                <input type="tel" value={form.second_man_phone} onChange={(e) => set('second_man_phone', e.target.value)} className={inputCls} />
+              </Field>
+              <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
+                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={(e) => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <span className="text-sm text-slate-700">Onboarded in Market Dojo</span>
+              </label>
+            </div>
+          )}
 
           {/* Permissions — managed on the dedicated Access Levels page */}
           <div className="insight-card rounded-xl p-4">
