@@ -5,10 +5,13 @@ import RoadmapTimeline from '@/components/settings/migration/RoadmapTimeline';
 import ParityMatrixSummary from '@/components/settings/migration/ParityMatrixSummary';
 import IntegrationRiskMap from '@/components/settings/migration/IntegrationRiskMap';
 import RecommendationCard from '@/components/settings/migration/RecommendationCard';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
+import { Database } from 'lucide-react';
 
 export default function MigrationHubTab() {
   return (
     <div className="space-y-5">
+      <SettingsSectionHeader icon={Database} title="Migration Hub" description="Power Apps migration financial comparison, build-effort estimates, roadmap timeline, parity matrix & integration risk map" />
       <FinancialComparison />
       <BuildEffortTable />
       <RoadmapTimeline />

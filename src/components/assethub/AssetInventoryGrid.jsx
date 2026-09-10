@@ -278,22 +278,6 @@ export default function AssetInventoryGrid({
     return true;
   };
 
-  const rigsByMaster = useMemo(() => rigs.map(rig => {
-    const linked = (rig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean);
-    return { rig, linked, rollup: rollupCompliance(rig, linked) };
-  }), [rigs, assets]);
-
-  const filteredRigs = useMemo(() => rigsByMaster.filter(({ rig, rollup }) => {
-    if (depotOnly && !isInDepot(rig)) return false;
-    if (!matchesSource(rig)) return false;
-    if (!matchesDeploy(rig)) return false;
-    if (!matchesLifecycle(rig)) return false;
-    if (!matchesMaintenance(rig)) return false;
-    if (compFilter !== 'all' && rollup.master !== compFilter) return false;
-    if (!q) return true;
-    return (rig.name || '').toLowerCase().includes(q) || (rig.serial_number || '').toLowerCase().includes(q);
-  }), [rigsByMaster, q, compFilter, sourceFilter, depotOnly, deployFilter, lifecycleFilter, maintenanceFilter]);
-
   const matchesDeploy = (a) => {
     if (deployFilter === 'all') return true;
     if (deployFilter === 'in_depot') return isInDepot(a);
@@ -317,6 +301,22 @@ export default function AssetInventoryGrid({
     if (maintenanceFilter === 'no_interval') return !interval;
     return true;
   };
+
+  const rigsByMaster = useMemo(() => rigs.map(rig => {
+    const linked = (rig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean);
+    return { rig, linked, rollup: rollupCompliance(rig, linked) };
+  }), [rigs, assets]);
+
+  const filteredRigs = useMemo(() => rigsByMaster.filter(({ rig, rollup }) => {
+    if (depotOnly && !isInDepot(rig)) return false;
+    if (!matchesSource(rig)) return false;
+    if (!matchesDeploy(rig)) return false;
+    if (!matchesLifecycle(rig)) return false;
+    if (!matchesMaintenance(rig)) return false;
+    if (compFilter !== 'all' && rollup.master !== compFilter) return false;
+    if (!q) return true;
+    return (rig.name || '').toLowerCase().includes(q) || (rig.serial_number || '').toLowerCase().includes(q);
+  }), [rigsByMaster, q, compFilter, sourceFilter, depotOnly, deployFilter, lifecycleFilter, maintenanceFilter]);
 
   const filteredEquip = useMemo(() => assets.filter(a => {
     if (a.asset_type === 'rig') return false;

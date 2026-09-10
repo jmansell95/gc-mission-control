@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Save, Loader2, Info, UserCog } from 'lucide-react';
+import { Save, Loader2, Info, UserCog, KeyRound } from 'lucide-react';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import LoginFlowPreview from '@/components/settings/LoginFlowPreview';
 
 /**
@@ -67,6 +68,7 @@ export default function AccessGateSettings() {
 
   return (
     <div className="space-y-5">
+      <SettingsSectionHeader icon={KeyRound} title="Access Gate Settings" description="Configure who can approve new user access requests — the approver group shown to pending users and email notification recipients" />
       {/* Info banner */}
       <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 border border-blue-200">
         <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />

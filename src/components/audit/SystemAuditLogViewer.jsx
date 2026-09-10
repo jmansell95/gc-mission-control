@@ -6,6 +6,7 @@ import {
   ShieldCheck, Search, ChevronDown, ChevronRight, Hash, User, Clock,
   FileText, AlertTriangle, CheckCircle2, Loader2,
 } from 'lucide-react';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
 function StatTile({ label, value }) {
   return (
@@ -63,6 +64,7 @@ export default function SystemAuditLogViewer() {
 
   return (
     <div className="space-y-4">
+      <SettingsSectionHeader icon={ShieldCheck} title="System Audit Log" description="ISO 27001 tamper-evident audit trail with SHA-256 record hashing & chain linking for non-repudiation" />
       {/* Context banner — distinguishes this from the Job Pack Audit Trail */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5">
         <Hash className="w-4 h-4 text-slate-500 flex-shrink-0" />

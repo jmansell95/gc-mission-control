@@ -200,7 +200,7 @@ const AuthenticatedApp = () => {
             <Route path="/reports" element={<RouteGuard><HubReadinessGate featureId="reports"><ReportingHub /></HubReadinessGate></RouteGuard>} />
             <Route path="/staff" element={<RouteGuard><HubReadinessGate featureId="staff"><StaffPage /></HubReadinessGate></RouteGuard>} />
             <Route path="/safety" element={<Navigate to="/compliance" replace />} />
-            <Route path="/assets" element={<RouteGuard><HubReadinessGate featureId="assets"><AssetHub /></HubReadinessGate></RouteGuard>} />
+            <Route path="/assets" element={<RouteGuard><HubReadinessGate featureId="assets"><ErrorBoundary><AssetHub /></ErrorBoundary></HubReadinessGate></RouteGuard>} />
             <Route path="/assets/:id" element={<RouteGuard><ErrorBoundary><AssetDetailPage /></ErrorBoundary></RouteGuard>} />
             <Route path="/fleet" element={<RouteGuard><HubReadinessGate featureId="fleet"><FleetHub /></HubReadinessGate></RouteGuard>} />
             <Route path="/timesheets" element={<Navigate to="/staff" replace />} />

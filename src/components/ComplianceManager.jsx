@@ -8,6 +8,7 @@ import TrainingGapAnalysis from '@/components/compliance/TrainingGapAnalysis';
 import SkillsMatrix from '@/components/compliance/SkillsMatrix';
 import RAMSManager from '@/components/compliance/RAMSManager';
 import AssetComplianceReport from '@/components/compliance/AssetComplianceReport';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
 const tabs = [
   { id: 'tracking', label: 'Tracking', icon: ShieldCheck },
@@ -24,6 +25,7 @@ export default function ComplianceManager() {
 
   return (
     <div className="space-y-4">
+      <SettingsSectionHeader icon={ShieldCheck} title="Compliance" description="Compliance management" />
       <TabBar tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-5">
         {activeTab === 'tracking' && <ComplianceTracking />}

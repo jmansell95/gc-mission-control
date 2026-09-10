@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { ShieldCheck, Search, ChevronDown, ChevronRight, FileText } from 'lucide-react';
 import JobPackView from '@/components/audit/JobPackView';
 import GeneratePackButton from '@/components/audit/GeneratePackButton';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
 /**
  * ISO-compliant Audit Trail hub.
@@ -50,6 +51,7 @@ export default function AuditTrailHub() {
 
   return (
     <div className="space-y-4">
+      <SettingsSectionHeader icon={History} title="Audit Trail & Job Packs" description="ISO-compliant audit trail — search for a job and expand its full Job Pack" />
       {/* Context banner — distinguishes this from the System Audit Log */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 flex items-center gap-2.5">
         <FileText className="w-4 h-4 text-slate-500 flex-shrink-0" />

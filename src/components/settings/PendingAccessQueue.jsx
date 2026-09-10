@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import {
   UserCheck, UserX, Clock, Mail, Loader2, Search, CheckCircle2, XCircle,
 } from 'lucide-react';
+import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
 /**
  * PendingAccessQueue — admin Settings page showing all platform users
@@ -63,6 +64,7 @@ export default function PendingAccessQueue() {
 
   return (
     <div className="space-y-4">
+      <SettingsSectionHeader icon={UserCheck} title="Pending Access Queue" description="Approve or reject users who have signed in via Microsoft SSO and are waiting for access to the app" />
       {/* Summary */}
       <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
