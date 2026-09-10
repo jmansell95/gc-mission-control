@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import {
   X, Users, Drill, PoundSterling, CalendarClock, TrendingUp, Loader2,
-  ChevronRight, AlertCircle, CheckCircle2, ChevronDown, ChevronRight as ChevronRightIcon,
+  ChevronRight, AlertCircle, CheckCircle2, ChevronDown,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -152,7 +152,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
                             })}
                             className="w-full flex items-center gap-2 px-3 py-2 text-left"
                           >
-                            {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> : <ChevronRightIcon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
+                            {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
                             <span className="text-xs font-bold text-slate-700 flex-shrink-0 min-w-[70px]">{m.month}</span>
                             <span className="text-[10px] text-slate-400 flex-shrink-0">{m.working_days}d</span>
                             <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 flex-shrink-0">
