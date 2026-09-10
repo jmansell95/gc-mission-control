@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Cog, ChevronLeft, ChevronRight, Search, Users } from 'lucide-react';
+import { Cog, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
 import { useCrewAvailability, HEATMAP_LEGEND } from '@/hooks/useCrewAvailability';
@@ -12,37 +12,24 @@ import { useDivision } from '@/contexts/DivisionContext';
 
 export default function EnterpriseCrewAvailabilityPage() {
   const { activeDivision } = useDivision();
-  const [primaryView, setPrimaryView] = useState('resources'); // 'resources' | 'crew'
   const [showGapFinder, setShowGapFinder] = useState(false);
 
   const { data: divisions = [] } = useQuery({ queryKey: ['divisions'], queryFn: () => base44.entities.Division.list() });
   const divMap = useMemo(() => Object.fromEntries(divisions.map(d => [d.id, d])), [divisions]);
 
+  // Rigs are a geotechnical asset — only show the rig-centric resource heatmap
+  // for the Geotechnical division. Every other division auto-falls back to the
+  // crew availability view (no rig UI shown).
+  const isGeotech = (activeDivision?.name || '').toLowerCase().includes('geotech');
+
   return (
     <EnterpriseHubShell
       title="Resource Availability"
-      subtitle="See exactly what rigs are in the field and where the gaps are"
+      subtitle={isGeotech ? "See exactly what rigs are in the field and where the gaps are" : "Crew availability across the week"}
       icon={Cog}
       accent="#6366f1"
     >
-      {/* View toggle */}
-      <div className="insight-card rounded-2xl p-2 flex items-center gap-1.5 sticky top-2 z-20">
-        <button
-          onClick={() => setPrimaryView('resources')}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition ${primaryView === 'resources' ? 'command-gradient text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-        >
-          <Cog className="w-4 h-4" /> Resource Heatmap
-        </button>
-        <button
-          onClick={() => setPrimaryView('crew')}
-          className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition ${primaryView === 'crew' ? 'command-gradient text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-        >
-          <Users className="w-4 h-4" /> Crew Availability
-        </button>
-      </div>
-
-      {/* Resource view */}
-      {primaryView === 'resources' && (
+      {isGeotech ? (
         <>
           <AnimatePresence>
             {showGapFinder && (
@@ -58,10 +45,9 @@ export default function EnterpriseCrewAvailabilityPage() {
             onFindGap={() => setShowGapFinder(v => !v)}
           />
         </>
+      ) : (
+        <CrewAvailabilityContent />
       )}
-
-      {/* Crew view (legacy) */}
-      {primaryView === 'crew' && <CrewAvailabilityContent />}
     </EnterpriseHubShell>
   );
 }
