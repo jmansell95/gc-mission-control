@@ -138,6 +138,15 @@ export default function JobDetailTabs({
           endDate={endDate}
           jobTypes={jobTypes}
         />
+        {job.notes && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <StickyNote className="w-4 h-4 text-slate-500" />
+              <h3 className="font-semibold text-slate-900 text-sm">Notes</h3>
+            </div>
+            <p className="text-sm text-slate-600 whitespace-pre-wrap">{job.notes}</p>
+          </div>
+        )}
       </TabsContent>
 
       {/* ── Schedule & Crew ── */}
@@ -258,15 +267,6 @@ export default function JobDetailTabs({
       <TabsContent value="links" className="space-y-4 mt-0">
         <PortalLinkManager job={job} />
         <JobPortalComments job={job} />
-        {job.notes && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <StickyNote className="w-4 h-4 text-slate-500" />
-              <h3 className="font-semibold text-slate-900 text-sm">Notes</h3>
-            </div>
-            <p className="text-sm text-slate-600 whitespace-pre-wrap">{job.notes}</p>
-          </div>
-        )}
       </TabsContent>
 
       {/* ── Documents ── */}
@@ -282,7 +282,7 @@ export default function JobDetailTabs({
           activeTab={docsSub}
           onChange={setDocsSub}
         />
-        {docsSub === 'photos' && <JobPhotoGallery job={job} />}
+        {docsSub === 'photos' && <JobPhotoGallery job={job} canUpload={isManager} />}
         {docsSub === 'files' && (
           <>
             <DocumentManager job={job} />
