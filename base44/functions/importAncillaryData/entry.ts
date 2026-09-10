@@ -132,12 +132,42 @@ export default async function(req: Request): Promise<Response> {
 
         } else if (type === 'weekly_costs') {
           // ── Parse weekly cost sheet (EWR format) ──
-          // Columns: col_1=Project, col_2=Date, col_3=Labour, col_4=Job Description,
-          // col_5=Cost, col_6=Overnight Accommodation Y/N, col_7=Accom Cost, col_8=Total Cost
+          // Detect header row dynamically, then map columns by header name.
 
-          // Check for existing daily costs from this source to avoid duplicates
+          // Find the header row (contains 'Labour' or 'Project')
+          let headerRowIdx = -1;
+          let colMap: any = {};
+          for (let i = 0; i < Math.min(rows.length, 10); i++) {
+            const r = rows[i];
+            if (!r) continue;
+            const lower = r.map((c: any) => String(c || '').toLowerCase().trim());
+            if (lower.some((c: string) => c === 'labour' || c === 'project')) {
+              headerRowIdx = i;
+              for (let j = 0; j < r.length; j++) {
+                const h = String(r[j] || '').toLowerCase().trim();
+                if (h === 'date' || h === 'date ') colMap.date = j;
+                else if (h === 'labour') colMap.labour = j;
+                else if (h === 'job description' || h === 'job_description') colMap.jobDesc = j;
+                else if (h === 'cost' || h === 'cost ') {
+                  // First 'Cost' column = labour cost; second = accommodation cost
+                  if (colMap.cost === undefined) colMap.cost = j;
+                  else colMap.accomCost = j;
+                }
+                else if (h.includes('overnight') || h.includes('accomodation') || h.includes('accommodation')) colMap.overnight = j;
+                else if (h === 'total cost' || h === 'total_cost') colMap.totalCost = j;
+              }
+              break;
+            }
+          }
+
+          if (headerRowIdx === -1 || colMap.labour === undefined) {
+            results.push({ type: 'weekly_costs', file_name: source_file_name, error: 'Could not find header row with Labour column' });
+            continue;
+          }
+
+          // Check for existing daily costs to avoid duplicates
           const existing = await base44.asServiceRole.entities.DailyCost.filter(
-            { job_id, category: 'misc' }, null, 2000
+            { job_id, category: { $in: ['misc', 'subsistence'] } }, null, 2000
           );
           const existingKeys = new Set(existing.map((e: any) =>
             `${e.date || ''}|${String(e.staff_name || '').toLowerCase().trim()}|${String(e.description || '').toLowerCase().trim()}`
@@ -146,13 +176,13 @@ export default async function(req: Request): Promise<Response> {
           const costs: any[] = [];
           let duplicatesSkipped = 0;
 
-          for (let i = 1; i < rows.length; i++) {
+          for (let i = headerRowIdx + 1; i < rows.length; i++) {
             const row = rows[i];
             if (!row) continue;
 
-            // Parse date — handle Date objects, strings, and Excel serials
+            // Parse date from the mapped column
             let date = '';
-            const rawDate = row[2];
+            const rawDate = colMap.date !== undefined ? row[colMap.date] : undefined;
             if (rawDate instanceof Date) {
               date = rawDate.toISOString().slice(0, 10);
             } else if (typeof rawDate === 'number' && rawDate > 20000 && rawDate < 80000) {
@@ -164,12 +194,12 @@ export default async function(req: Request): Promise<Response> {
               if (isoMatch) date = `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
               else { const d = new Date(s); if (!isNaN(d.getTime())) date = d.toISOString().slice(0, 10); }
             }
-            const labour = String(row[3] || '').trim();
-            const jobDesc = String(row[4] || '').trim();
-            const cost = toNum(row[5]);
-            const overnightAccom = String(row[6] || '').trim();
-            const accomCost = toNum(row[7]);
-            const totalCost = toNum(row[8]);
+
+            const labour = colMap.labour !== undefined ? String(row[colMap.labour] || '').trim() : '';
+            const jobDesc = colMap.jobDesc !== undefined ? String(row[colMap.jobDesc] || '').trim() : '';
+            const cost = colMap.cost !== undefined ? toNum(row[colMap.cost]) : 0;
+            const overnightAccom = colMap.overnight !== undefined ? String(row[colMap.overnight] || '').trim() : '';
+            const accomCost = colMap.accomCost !== undefined ? toNum(row[colMap.accomCost]) : 0;
 
             if (!labour) continue;
 
