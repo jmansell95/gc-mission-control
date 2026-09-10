@@ -4,8 +4,10 @@ import { base44 } from '@/api/base44Client';
 import {
   X, CheckCircle2, XCircle, AlertTriangle, ExternalLink, Briefcase, User, Calendar,
   ClipboardList, Loader2, MapPin, PenTool, FileText, ChevronDown,
-  Clock, Siren, Save, MinusCircle, Image as ImageIcon,
+  Clock, Siren, Save, MinusCircle, Image as ImageIcon, Download,
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { addBrandHeader, addSectionHeader, addTable, addPageNumbers } from '@/lib/pdfStyles';
 import { getCategoryMeta, getStatusMeta, fmtDateTime, PRIORITY_TONE } from './auditConstants';
 import PhotoGalleryLightbox from './PhotoGalleryLightbox';
 import CreateIncidentFromAuditModal from './CreateIncidentFromAuditModal';
@@ -203,11 +205,51 @@ export default function AuditDetailDrawer({ audit, onClose }) {
     setActionDraft(prev => ({ ...prev, [index]: { ...(prev[index] || {}), [field]: value } }));
   };
 
+  const downloadAuditPDF = () => {
+    const doc = new jsPDF();
+    const subtitle = `${meta.label} · ${fmtDateTime(conductedAt)}`;
+    addBrandHeader(doc, auditTitle || 'Audit Report', subtitle);
+
+    let y = 50;
+    y = addSectionHeader(doc, 'Score Summary', y);
+    y = addTable(doc, ['Metric', 'Value'], [
+      ['Pass/Fail', failed ? 'Failed' : passed ? 'Passed' : 'Pending'],
+      ['Score', scorePct != null ? `${scorePct}%` : '—'],
+      ['Items Passed', String(itemsPassed)],
+      ['Items Failed', String(itemsFailed)],
+      ['Total Items', String(statusCounts.total)],
+    ], y);
+
+    y += 5;
+    y = addSectionHeader(doc, 'Audit Details', y);
+    y = addTable(doc, ['Field', 'Value'], [
+      ['Auditor', auditorName],
+      ['Conducted', fmtDateTime(conductedAt)],
+      ['Job/Site', jobName || '—'],
+      ['Template', templateName],
+    ], y);
+
+    y += 5;
+    if (actionItems.length > 0) {
+      y = addSectionHeader(doc, 'Action Items', y);
+      y = addTable(doc, ['Priority', 'Description', 'Assignee', 'Due', 'Status'], actionItems.map(a => [
+        (a.priority || 'medium').toUpperCase(),
+        (a.description || 'Untitled').substring(0, 60),
+        a.assignee || '—',
+        a.due_date || '—',
+        a.status || 'open',
+      ]), y);
+    }
+
+    addPageNumbers(doc);
+    doc.save(`audit-${(auditTitle || 'report').replace(/[^a-z0-9]/gi, '-').toLowerCase()}.pdf`);
+  };
+
   return (
     <>
-      <div className="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-md flex justify-end" onClick={onClose}>
+      <div className="fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4" onClick={onClose}>
         <div
-          className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto animate-drawer-slide-in"
+          className="bg-white w-full max-w-2xl max-h-[calc(100dvh-2rem)] rounded-2xl shadow-2xl overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
           {/* Sticky header */}
@@ -233,15 +275,19 @@ export default function AuditDetailDrawer({ audit, onClose }) {
             {/* Action buttons row */}
             <div className="px-5 pb-3 flex items-center gap-2">
               {reportUrl && (
-                <a href={reportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition shadow-sm">
+                <a href={reportUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold hover:bg-[#244715] transition shadow-sm">
                   <ExternalLink className="w-4 h-4" />
-                  Open Full Mitti Report
+                  Open in Mitti
                 </a>
               )}
+              <button onClick={downloadAuditPDF} className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-50 transition shadow-sm">
+                <Download className="w-4 h-4" />
+                Download PDF
+              </button>
               {(failed || itemsFailed > 0) && (
                 <button onClick={() => setShowIncidentModal('whole')} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-sm font-bold hover:bg-rose-700 transition shadow-sm">
                   <Siren className="w-4 h-4" />
-                  Create Incident
+                  Incident
                 </button>
               )}
             </div>
@@ -367,18 +413,12 @@ export default function AuditDetailDrawer({ audit, onClose }) {
               </div>
             )}
 
-            {/* Check items — the full report flowing section by section */}
+            {/* Check items summary — full report available in Mitti */}
             {!detailLoading && checkItems.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <FileText className="w-4 h-4 text-[#2E5A1A]" />
-                  <h4 className="text-sm font-bold text-slate-900">Check Items ({checkItems.length})</h4>
-                </div>
-                <div className="space-y-2.5">
-                  {itemsBySection.map(([section, items]) => (
-                    <ReportSection key={section} section={section} items={items} onCreateIncident={(item) => setShowIncidentModal(item)} />
-                  ))}
-                </div>
+              <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 text-center">
+                <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-700">{checkItems.length} check items across {itemsBySection.length} sections</p>
+                <p className="text-xs text-slate-400 mt-1">For the full item-level report, open in Mitti or download the PDF above.</p>
               </div>
             )}
 

@@ -200,7 +200,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="absolute inset-0 bg-slate-950/60" onClick={onClose} />
-      <div className="relative ml-auto h-full w-full sm:max-w-[1200px] bg-slate-50/50 shadow-2xl flex flex-col animate-drawer-slide-in">
+      <div className="relative ml-auto h-full w-full sm:max-w-[1200px] bg-white shadow-2xl flex flex-col animate-drawer-slide-in">
         {/* ── Sticky summary header ── */}
         <div className="hub-glass px-5 py-4 flex-shrink-0 border-b border-slate-200">
           <div className="flex items-start justify-between gap-3">
@@ -262,7 +262,7 @@ export default function VehicleDetailDrawer({ vehicle, onClose }) {
         {/* ── Body: sidebar + scrollable content ── */}
         <div className="flex-1 flex min-h-0">
           {!isMobile && (
-            <aside className="w-[200px] flex-shrink-0 bg-white/60 border-r border-slate-200 p-3 overflow-y-auto">
+            <aside className="w-[200px] flex-shrink-0 bg-white border-r border-slate-200 p-3 overflow-y-auto">
               <SidebarNav />
             </aside>
           )}

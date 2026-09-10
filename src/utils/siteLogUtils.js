@@ -48,6 +48,22 @@ export function londonDateStr(offsetDays = 0) {
   }).format(d);
 }
 
+// Format a date string (YYYY-MM-DD) as a readable UK date (e.g. "Mon, 9 Sep 2026")
+export function formatLondonDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/London',
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(dateStr + 'T00:00:00'));
+  } catch {
+    return dateStr;
+  }
+}
+
 // Merge logs that share the same borehole_ref + start_time into a single
 // virtual row for display. Combines descriptions and raw_remarks, keeps the
 // longest duration / latest end time. Display-only — stored records are not
