@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import {
   X, Users, Drill, PoundSterling, CalendarClock, TrendingUp, Loader2,
-  ChevronRight, AlertCircle, CheckCircle2,
+  ChevronRight, AlertCircle, CheckCircle2, ChevronDown, ChevronRight as ChevronRightIcon,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -24,6 +24,7 @@ const STATUS_CONFIG = {
 export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
   const [finData, setFinData] = useState(null);
   const [loadingFin, setLoadingFin] = useState(true);
+  const [expandedMonths, setExpandedMonths] = useState(new Set());
 
   // Load detailed financial breakdown (crew day rates, rig day rates) via calculateJobFinancials
   useEffect(() => {
@@ -101,57 +102,125 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
 
           {/* Monthly projection chart */}
           <div className="insight-card rounded-2xl p-4">
-            <h4 className="text-sm font-bold text-slate-900 mb-3">Monthly Projected Earnings</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-bold text-slate-900">Monthly Projected Earnings</h4>
+              {job.using_fallback && (
+                <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded-full">
+                  Flat-rate fallback (no day rates found)
+                </span>
+              )}
+            </div>
             {monthlyData.length === 0 ? (
               <div className="py-8 text-center text-sm text-slate-400">No remaining months — job has ended or no end date set.</div>
             ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={monthlyData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false}
-                    tickFormatter={(v) => '£' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
-                  <Tooltip
-                    formatter={(v) => [fmtMoney(v), 'Projected']}
-                    labelFormatter={(l) => `Month: ${l}`}
-                    contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '12px' }}
-                  />
-                  <Bar dataKey="projected" radius={[6, 6, 0, 0]}>
-                    {monthlyData.map((_, i) => (
-                      <Cell key={i} fill={i === 0 ? '#2E5A1A' : '#5A8C1E'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-            {monthlyData.length > 0 && (
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-slate-400 text-[10px] uppercase">
-                      <th className="text-left py-1.5">Month</th>
-                      <th className="text-right py-1.5">Work Days</th>
-                      <th className="text-right py-1.5">Projected</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {monthlyData.map((m, i) => (
-                      <tr key={i} className="border-t border-slate-100">
-                        <td className="py-1.5 font-medium text-slate-700">{m.month}</td>
-                        <td className="py-1.5 text-right tabular-nums text-slate-500">{m.working_days}</td>
-                        <td className="py-1.5 text-right tabular-nums font-bold text-[#2E5A1A]">{fmtMoney(m.projected)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-[#8DC63F] bg-[#8DC63F]/10">
-                      <td className="py-1.5 font-bold text-[#2E5A1A]">Total</td>
-                      <td className="py-1.5 text-right font-bold tabular-nums text-[#2E5A1A]">{monthlyData.reduce((s, m) => s + m.working_days, 0)}</td>
-                      <td className="py-1.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(monthlyData.reduce((s, m) => s + m.projected, 0))}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
+              <>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={monthlyData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false}
+                      tickFormatter={(v) => '£' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v)} />
+                    <Tooltip
+                      formatter={(v) => [fmtMoney(v), 'Projected']}
+                      labelFormatter={(l) => `Month: ${l}`}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '12px' }}
+                    />
+                    <Bar dataKey="projected" radius={[6, 6, 0, 0]}>
+                      {monthlyData.map((m, i) => (
+                        <Cell key={i} fill={m.is_gap_month ? '#f59e0b' : i === 0 ? '#2E5A1A' : '#5A8C1E'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+
+                {/* Per-month resource detail table */}
+                <div className="mt-4">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">
+                    Monthly Resource Breakdown — tap a month to see crew & rig detail
+                  </p>
+                  <div className="space-y-1.5">
+                    {monthlyData.map((m, i) => {
+                      const isExpanded = expandedMonths.has(i);
+                      const hasGap = m.is_gap_month;
+                      return (
+                        <div key={i} className={`rounded-xl border ${hasGap ? 'border-amber-200 bg-amber-50/40' : 'border-slate-200 bg-white'}`}>
+                          <button
+                            onClick={() => setExpandedMonths(prev => {
+                              const next = new Set(prev);
+                              if (next.has(i)) next.delete(i); else next.add(i);
+                              return next;
+                            })}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-left"
+                          >
+                            {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" /> : <ChevronRightIcon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
+                            <span className="text-xs font-bold text-slate-700 flex-shrink-0 min-w-[70px]">{m.month}</span>
+                            <span className="text-[10px] text-slate-400 flex-shrink-0">{m.working_days}d</span>
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 flex-shrink-0">
+                              <Users className="w-3 h-3" /> {m.crew_count || '—'}
+                            </span>
+                            <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 flex-shrink-0">
+                              <Drill className="w-3 h-3" /> {m.rig_count || '—'}
+                            </span>
+                            {hasGap && (
+                              <span className="text-[9px] text-amber-600 font-bold flex-shrink-0">⚠ NO CREW</span>
+                            )}
+                            <span className="ml-auto text-xs font-bold text-[#2E5A1A] tabular-nums flex-shrink-0">{fmtMoney(m.projected)}</span>
+                          </button>
+                          {isExpanded && (
+                            <div className="px-3 pb-3 pt-1 border-t border-slate-100 space-y-2">
+                              {/* Crew detail */}
+                              <div>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Crew ({m.crew_count})</p>
+                                {m.crew_detail.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {m.crew_detail.map((c, ci) => (
+                                      <div key={ci} className="flex items-center justify-between text-[11px]">
+                                        <span className="text-slate-700 font-medium truncate">{c.staff_name}</span>
+                                        <span className="text-slate-500 tabular-nums flex-shrink-0 ml-2">
+                                          {c.day_rate > 0 ? `${fmtMoney(c.day_rate)}/day` : <span className="text-amber-500">No rate</span>}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-[11px] text-amber-600">No crew scheduled this month — rota gap.</p>
+                                )}
+                              </div>
+                              {/* Rig detail */}
+                              <div>
+                                <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Rigs ({m.rig_count})</p>
+                                {m.rig_detail.length > 0 ? (
+                                  <div className="space-y-0.5">
+                                    {m.rig_detail.map((r, ri) => (
+                                      <div key={ri} className="flex items-center justify-between text-[11px]">
+                                        <div className="min-w-0">
+                                          <span className="text-slate-700 font-medium truncate">{r.rig_name}</span>
+                                          {r.rig_type && <span className="text-[9px] text-slate-400 ml-1 uppercase">{r.rig_type}</span>}
+                                        </div>
+                                        <span className="text-slate-500 tabular-nums flex-shrink-0 ml-2">
+                                          {r.day_rate > 0 ? `${fmtMoney(r.day_rate)}/day` : <span className="text-amber-500">No rate</span>}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-[11px] text-slate-400">No rigs active this month.</p>
+                                )}
+                              </div>
+                              {/* Calculation summary */}
+                              <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                                <span>Daily rate: <span className="font-bold text-slate-700">{fmtMoney(m.daily_rate_total)}</span></span>
+                                <span>× {m.working_days} days</span>
+                                <span className="font-bold text-[#2E5A1A]">= {fmtMoney(m.projected)}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 

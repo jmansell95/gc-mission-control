@@ -9,6 +9,7 @@ import { downloadStructuredCsv } from '@/utils/csvExport';
 import { generateReportPdf, buildFilterSummary } from '@/utils/reportPdf';
 import { useToast } from '@/components/ui/use-toast';
 import RemainingWorkDrillDown from './RemainingWorkDrillDown';
+import PortfolioMonthlyChart from './PortfolioMonthlyChart';
 
 const STATUS_CONFIG = {
   planning: { label: 'Planning', pill: 'bg-blue-100 text-blue-700 border-blue-300', dot: 'bg-blue-500' },
@@ -78,6 +79,9 @@ export default function RemainingWorkReport({ filters }) {
     if (!data || data.jobs.length === 0) { toast({ title: 'No data', variant: 'destructive' }); return; }
     setExporting('csv');
     try {
+      // Build per-job rows with monthly columns appended
+      const monthKeys = (data.portfolio_monthly || []).map(m => m.month_key);
+      const monthLabels = (data.portfolio_monthly || []).map(m => m.month);
       const columns = [
         { key: 'job_name', label: 'Job' },
         { key: 'status', label: 'Status' },
@@ -92,16 +96,25 @@ export default function RemainingWorkReport({ filters }) {
         { key: 'daily_run_rate', label: 'Daily Run-Rate (£)' },
         { key: 'projected_earnings', label: 'Projected Earnings (£)' },
         { key: 'variance', label: 'Variance (£)' },
+        ...monthLabels.map((ml, i) => ({ key: `month_${monthKeys[i]}`, label: `${ml} (£)` })),
       ];
-      const rows = data.jobs.map(j => ({
-        ...j,
-        status: STATUS_CONFIG[j.status]?.label || j.status,
-        crew_names: undefined,
-        rig_names: undefined,
-        monthly_projection: undefined,
-      }));
+      const rows = data.jobs.map(j => {
+        const row = {
+          ...j,
+          status: STATUS_CONFIG[j.status]?.label || j.status,
+          crew_names: undefined,
+          rig_names: undefined,
+          monthly_projection: undefined,
+        };
+        // Add per-month projected income columns
+        for (const mk of monthKeys) {
+          const m = (j.monthly_projection || []).find(mp => mp.month_key === mk);
+          row[`month_${mk}`] = m ? m.projected : 0;
+        }
+        return row;
+      });
       downloadStructuredCsv('remaining-work-report.csv', columns, rows);
-      toast({ title: 'CSV exported', description: `${rows.length} jobs.` });
+      toast({ title: 'CSV exported', description: `${rows.length} jobs with ${monthKeys.length} monthly columns.` });
     } catch (e) { toast({ title: 'CSV export failed', variant: 'destructive' }); }
     setExporting(null);
   };
@@ -144,7 +157,28 @@ export default function RemainingWorkReport({ filters }) {
         title: 'Remaining Work Value Report',
         subtitle: `Projected from ${fmtDate(asOfDate)}`,
         filterSummary,
-        sections: [{ title: 'Per-Job Projection', columns, rows, totals }],
+        sections: [
+          { title: 'Per-Job Projection', columns, rows, totals },
+          ...(data.portfolio_monthly && data.portfolio_monthly.length > 0 ? [{
+            title: 'Monthly Income Projection (Portfolio)',
+            columns: [
+              { label: 'Month', align: 'left', width: 1.5 },
+              { label: 'Work Days', align: 'right', width: 1 },
+              { label: 'Crew', align: 'right', width: 0.8 },
+              { label: 'Rigs', align: 'right', width: 0.8 },
+              { label: 'Projected', align: 'right', width: 1.5 },
+            ],
+            rows: data.portfolio_monthly.map(m => [
+              m.month, m.working_days, m.crew_count, m.rig_count, fmtMoney(m.projected),
+            ]),
+            totals: [
+              'Total',
+              data.portfolio_monthly.reduce((s, m) => s + m.working_days, 0),
+              '', '',
+              fmtMoney(data.portfolio_monthly.reduce((s, m) => s + m.projected, 0)),
+            ],
+          }] : []),
+        ],
       });
       toast({ title: 'PDF exported', description: `${data.jobs.length} jobs.` });
     } catch (e) { toast({ title: 'PDF export failed', variant: 'destructive' }); }
@@ -196,6 +230,9 @@ export default function RemainingWorkReport({ filters }) {
         ignoreDateRange={ignoreDateRange} setIgnoreDateRange={setIgnoreDateRange}
         onExportCsv={handleCsv} onExportPdf={handlePdf} exporting={exporting}
       />
+
+      {/* Portfolio monthly chart */}
+      {data.portfolio_monthly && <PortfolioMonthlyChart portfolioMonthly={data.portfolio_monthly} />}
 
       {/* Job table */}
       <div className="insight-card rounded-2xl overflow-hidden">
