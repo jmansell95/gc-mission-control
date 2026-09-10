@@ -120,6 +120,11 @@ export default async function(req: Request): Promise<Response> {
     const buStats = businessUnitDivisions.map(bu => {
       const childIds = divisions.filter(d => d.parent_division_id === bu.id).map(d => d.id);
       const childStatEntries = divisionStats.filter(ds => childIds.includes(ds.division.id));
+      // Include the BU's own divisionStats entry so invoices assigned directly
+      // to the BU (not a child stream) are counted in the rollup. Without this,
+      // a BU with its own invoices but child streams with none shows 0 outstanding.
+      const buOwnStat = divisionStats.find(ds => ds.division.id === bu.id);
+      const allStatEntries = buOwnStat ? [buOwnStat, ...childStatEntries] : childStatEntries;
       return {
         businessUnit: {
           id: bu.id,
@@ -131,14 +136,14 @@ export default async function(req: Request): Promise<Response> {
           tagline: bu.tagline,
         },
         streamCount: childIds.length,
-        totalStaff: childStatEntries.reduce((s, c) => s + (c.staffCount || 0), 0),
-        totalActiveStaff: childStatEntries.reduce((s, c) => s + (c.activeStaff || 0), 0),
-        totalActiveJobs: childStatEntries.reduce((s, c) => s + (c.activeJobs || 0), 0),
-        totalVehicles: childStatEntries.reduce((s, c) => s + (c.vehiclesCount || 0), 0),
-        totalOutstanding: childStatEntries.reduce((s, c) => s + (c.outstanding || 0), 0),
-        totalRevenue: childStatEntries.reduce((s, c) => s + (c.revenue || 0), 0),
-        totalOpenIncidents: childStatEntries.reduce((s, c) => s + (c.openIncidents || 0), 0),
-        totalExpiredCompliance: childStatEntries.reduce((s, c) => s + (c.expiredCompliance || 0), 0),
+        totalStaff: allStatEntries.reduce((s, c) => s + (c.staffCount || 0), 0),
+        totalActiveStaff: allStatEntries.reduce((s, c) => s + (c.activeStaff || 0), 0),
+        totalActiveJobs: allStatEntries.reduce((s, c) => s + (c.activeJobs || 0), 0),
+        totalVehicles: allStatEntries.reduce((s, c) => s + (c.vehiclesCount || 0), 0),
+        totalOutstanding: allStatEntries.reduce((s, c) => s + (c.outstanding || 0), 0),
+        totalRevenue: allStatEntries.reduce((s, c) => s + (c.revenue || 0), 0),
+        totalOpenIncidents: allStatEntries.reduce((s, c) => s + (c.openIncidents || 0), 0),
+        totalExpiredCompliance: allStatEntries.reduce((s, c) => s + (c.expiredCompliance || 0), 0),
         streams: childStatEntries,
       };
     });

@@ -32,10 +32,10 @@ const SETTINGS_CATEGORIES = [
     ],
   },
   {
-    label: 'Finance',
+    label: 'Finance & Performance',
     icon: Banknote,
-    description: 'Expense defaults & rewards',
-    itemIds: ['expense-defaults', 'rewards'],
+    description: 'KPIs, incentives, expense defaults & rewards',
+    itemIds: ['performance-kpis', 'expense-defaults', 'rewards'],
   },
   {
     label: 'Operations',

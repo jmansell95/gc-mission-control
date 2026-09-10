@@ -93,6 +93,7 @@ export const settingsGroups = [
       { id: 'incremental-import', label: 'Incremental Import', icon: Layers, desc: 'Non-destructive smart imports' },
       { id: 'system-guide', label: 'System Logic Guide', icon: BookOpen, desc: 'Download a PDF explaining every stat, rule and automation in the system', roles: ['admin', 'manager', 'viewer'] },
       { id: 'rewards', label: 'Rewards Manager', icon: Gift, desc: 'Create gift cards & rewards for the points catalogue, and fulfil staff redemptions', roles: ['admin'] },
+      { id: 'performance-kpis', label: 'Performance & Incentives', icon: TrendingUp, desc: 'Create custom KPI sets per role — drillers, depot staff, managers. Each staff member\'s profile shows only their role\'s metrics with a live incentive score', roles: ['admin'] },
       { id: 'expense-defaults', label: 'Expense Defaults', icon: Receipt, desc: 'Global default amounts & VAT rates per expense category — pre-fill every staff expense entry so crews only adjust when their spend differs', roles: ['admin'] },
       { id: 'coming-soon-manager', label: 'Coming Soon Manager', icon: Clock, desc: 'Control which integrations display as "Coming Soon" on the Settings overview — display flag only, does not disable functionality', roles: ['admin'] },
     ],

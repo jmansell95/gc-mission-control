@@ -78,6 +78,7 @@ import OpenGroundSettings from '@/components/settings/OpenGroundSettings';
 import RewardsManager from '@/components/settings/RewardsManager';
 import ComingSoonManager from '@/components/settings/ComingSoonManager';
 import ComingSoonLock from '@/components/settings/ComingSoonLock';
+import PerformanceKpiManager from '@/components/settings/PerformanceKpiManager';
 import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfigManager';
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
 import PendingAccessQueue from '@/components/settings/PendingAccessQueue';
@@ -234,6 +235,7 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'incremental-import': return <IncrementalImportSettings />;
       case 'openground-sync': return <OpenGroundSettings />;
       case 'rewards': return <RewardsManager />;
+      case 'performance-kpis': return <PerformanceKpiManager />;
       case 'coming-soon-manager': return <ComingSoonManager />;
       case 'pending-access': return <PendingAccessQueue />;
       case 'access-gate': return <AccessGateSettings />;

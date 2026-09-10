@@ -64,6 +64,8 @@ export default function KeyLogActivityCard({
   const chip = SOURCE_CHIP[src] || SOURCE_CHIP.staff;
   const chipLabel = src === 'staff' ? (log.staff_name || 'Manual') : chip.label;
   const loggedAt = loggedAtTime(log.created_date || log.created_at);
+  // Logger name — prefer staff_name, fall back to first crew member
+  const loggerName = log.staff_name || (Array.isArray(log.crew_names) && log.crew_names.length > 0 ? log.crew_names[0] : null);
 
   const handleDeepLink = (e) => {
     e.stopPropagation();
@@ -99,6 +101,11 @@ export default function KeyLogActivityCard({
             <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium border ${chip.cls}`}>{chipLabel}</span>
           </div>
           <p className="text-xs text-slate-700 leading-snug line-clamp-2">{log.description || '—'}</p>
+          {loggerName && (
+            <p className="text-[10px] text-slate-400 inline-flex items-center gap-1 mt-0.5">
+              <User className="w-2.5 h-2.5" /> {loggerName}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {hasTimes && (

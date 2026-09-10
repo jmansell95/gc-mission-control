@@ -60,6 +60,10 @@ export default async function (req) {
       }
       const group = s.permission_group_id ? groupMap[s.permission_group_id] : null;
       const targetRole = isAdminLevelGroup(group) ? 'admin' : 'user';
+      // Business Stream Admins get is_enterprise_admin + managed_division_ids so
+      // they can switch between their assigned BUs/BSs and the enterprise dashboard.
+      const isBsAdmin = group && group.name === 'Business Stream Admin';
+      const managedIds = Array.isArray(s.managed_division_ids) ? s.managed_division_ids : [];
 
       let u;
       try {
@@ -72,6 +76,17 @@ export default async function (req) {
       const updates = {};
       if (u.role !== targetRole) updates.role = targetRole;
       if (s.division_id && u.division_id !== s.division_id) updates.division_id = s.division_id;
+      // Sync enterprise admin flag + managed divisions for BS Admins
+      const targetIsEnterprise = isBsAdmin;
+      if (targetIsEnterprise !== !!u.is_enterprise_admin) updates.is_enterprise_admin = targetIsEnterprise;
+      if (isBsAdmin) {
+        const existingManaged = Array.isArray(u.managed_division_ids) ? u.managed_division_ids : [];
+        if (JSON.stringify(existingManaged) !== JSON.stringify(managedIds)) {
+          updates.managed_division_ids = managedIds;
+        }
+      } else if (Array.isArray(u.managed_division_ids) && u.managed_division_ids.length > 0) {
+        updates.managed_division_ids = [];
+      }
 
       if (Object.keys(updates).length === 0) {
         results.push({ staff_id: s.id, user_id: s.user_id, role: targetRole, changed: false });

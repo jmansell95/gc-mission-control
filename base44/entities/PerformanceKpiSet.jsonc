@@ -1,0 +1,121 @@
+{
+  "name": "PerformanceKpiSet",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of this KPI set (e.g. 'Cable Percussion Driller', 'Depot Operative', 'Office Manager')."
+    },
+    "role_key": {
+      "type": "string",
+      "description": "Stable role key this set applies to (e.g. 'cp_driller', 'depot_operative'). Used to match against Staff.job_title or a custom role field. Lowercase, snake_case."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short description of what this role does and how performance is measured."
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "field",
+        "depot",
+        "office",
+        "logistics",
+        "management"
+      ],
+      "default": "field",
+      "description": "Which department this role belongs to. Drives the icon and colour coding in the settings manager and profile dashboard."
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "System-tracked metric key (e.g. 'meterage', 'on_time_arrival', 'safety_checks', 'timesheet_compliance', 'dispatch_accuracy', 'stock_checks', 'vehicle_prep', 'hours_worked', 'boreholes_count'). Must match a key in src/utils/kpiMetrics.js."
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label shown on the profile KPI card."
+          },
+          "weight": {
+            "type": "number",
+            "default": 1,
+            "description": "Weighting (1-10) \u2014 how much this metric counts toward the overall incentive score. Higher = more important."
+          },
+          "target": {
+            "type": "number",
+            "description": "Target value for this metric (e.g. 100 metres/week, 95% on-time). The incentive score is calculated as actual / target, capped at 100%."
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit label shown after the value (e.g. 'm', '%', 'checks', 'hrs')."
+          },
+          "incentive_threshold": {
+            "type": "number",
+            "description": "The percentage of target the staff member must hit to earn the incentive bonus (e.g. 80 = 80% of target)."
+          },
+          "bonus_amount": {
+            "type": "number",
+            "description": "The bonus amount in GBP paid when the staff member hits the incentive threshold for this metric."
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "weight",
+          "target"
+        ]
+      },
+      "default": [],
+      "description": "The list of system-tracked metrics in this KPI set, each with its own weighting, target, incentive threshold and bonus. The profile dashboard calculates each metric live from system data and rolls up a weighted incentive score."
+    },
+    "assigned_staff_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Specific Staff IDs assigned to this KPI set. When non-empty, only these staff see this set on their profile. When empty, the set is matched to staff by role_key against their job_title (case-insensitive contains)."
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#2E5A1A",
+      "description": "Accent colour for this KPI set's cards and progress bars on the profile dashboard."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this KPI set is active. Inactive sets are hidden from assignment and the profile."
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Display order in the settings manager."
+    }
+  },
+  "required": [
+    "name",
+    "role_key",
+    "department"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -197,6 +197,17 @@ export const SYSTEM_GROUPS = [
     landing_page: '/scanner',
     permissions: Object.fromEntries(PERMISSION_MODULES.map(m => [m.key, 'none'])),
   },
+  {
+    name: 'Business Stream Admin',
+    description: 'Manages one or more business streams. Lands inside their assigned business stream and can switch between their assigned BUs/BSs and the enterprise dashboard. Set managed divisions on the staff record. Full hub access except Settings.',
+    is_system: true,
+    is_read_only: false,
+    staff_type: 'office',
+    landing_page: '/admin',
+    permissions: Object.fromEntries(
+      PERMISSION_MODULES.map(m => [m.key, m.key === 'settings' ? 'read' : 'write'])
+    ),
+  },
 ];
 
 // Resolve the effective access level for a module given a profile + platform flag.

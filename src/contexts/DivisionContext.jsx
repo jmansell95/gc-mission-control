@@ -24,8 +24,11 @@ export function DivisionProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
   const isSuperAdmin = user?.role === 'admin';
   const isDirector = user?.role === 'director';
-  // Enterprise admin = anyone who can access the Enterprise Selector and switch
-  const isEnterpriseAdmin = isSuperAdmin || isDirector || user?.is_enterprise_admin === true;
+  // Enterprise admin = anyone who can access the Enterprise Selector and switch.
+  // Includes Business Stream Admins (users with managed_division_ids set) —
+  // they can switch between their assigned BUs/BSs and the enterprise dashboard.
+  const managedDivisionIds = user?.managed_division_ids || [];
+  const isEnterpriseAdmin = isSuperAdmin || isDirector || user?.is_enterprise_admin === true || managedDivisionIds.length > 0;
 
   const { data: divisions = [], isLoading: divisionsLoading } = useQuery({
     queryKey: ['divisions'],
@@ -40,7 +43,6 @@ export function DivisionProvider({ children }) {
   });
 
   const myDivisionId = profile?.division_id || user?.division_id || null;
-  const managedDivisionIds = user?.managed_division_ids || [];
 
   const [activeDivisionId, setActiveDivisionIdState] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) || null; } catch { return null; }
@@ -127,6 +129,16 @@ export function DivisionProvider({ children }) {
     const val = activeDivision.settings[key];
     return val === undefined ? fallback : val;
   };
+
+  // Apply the active division's accent colour as a CSS variable so per-BS
+  // theming (badges, active states) works without hardcoding. Falls back to
+  // the brand green when no division is active (enterprise overview) or the
+  // division has no colour set.
+  useEffect(() => {
+    const color = activeDivision?.color || '#2E5A1A';
+    document.documentElement.style.setProperty('--division-accent', color);
+    return () => { document.documentElement.style.removeProperty('--division-accent'); };
+  }, [activeDivision?.color]);
 
   const value = {
     divisions,

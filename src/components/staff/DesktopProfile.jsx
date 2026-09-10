@@ -18,6 +18,7 @@ import TimesheetHistory from '@/components/staff/TimesheetHistory';
 import StaffBookings from '@/components/staff/StaffBookings';
 import StaffPerformanceCard from '@/components/staff/StaffPerformanceCard';
 import StaffPerformanceCharts from '@/components/staff/StaffPerformanceCharts';
+import RolePerformanceDashboard from '@/components/staff/RolePerformanceDashboard';
 import IncentiveDashboard from '@/components/staff/IncentiveDashboard';
 import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import ProfileStats from '@/components/staff/ProfileStats';
@@ -313,7 +314,7 @@ export default function DesktopProfile() {
           {activeSection === 'performance' && (staff.id ? (
             <div className="space-y-4">
               <div className="hub-glass rounded-2xl p-5 md:p-6">
-                <StaffPerformanceCard staffId={staff.id} />
+                <RolePerformanceDashboard staffId={staff.id} staffName={staff.name} jobTitle={staff.job_title} />
               </div>
               <div className="hub-glass rounded-2xl p-5 md:p-6">
                 <StaffPerformanceCharts staffId={staff.id} staffName={staff.name} />
