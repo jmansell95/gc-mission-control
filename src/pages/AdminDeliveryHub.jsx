@@ -8,16 +8,13 @@ import { format, isToday, isFuture, isPast } from 'date-fns';
 import DeliveryBoard from '@/components/admin/DeliveryBoard';
 import DeliveryTable from '@/components/admin/DeliveryTable';
 import RouteOptimizeBar from '@/components/delivery/RouteOptimizeBar';
-import BulkDeliveryReconciliation from '@/components/delivery/BulkDeliveryReconciliation';
 import GoodsInPanel from '@/components/logistics/GoodsInPanel';
-import ConsumableInventoryManager from '@/components/settings/ConsumableInventoryManager';
 import DeliveryDetailDrawer from '@/components/logistics/DeliveryDetailDrawer';
 import DriverRunBoard from '@/components/admin/DriverRunBoard';
 import DriverDayPlan from '@/components/admin/DriverDayPlan';
 import SampleRunDrawer from '@/components/geotech/SampleRunDrawer';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import HubShell from '@/components/HubShell';
-import SubPills from '@/components/SubPills';
 import { LOGISTICS_HELP_TOPICS, LOGISTICS_ONBOARDING, LOGISTICS_QUICK_LINKS } from '@/components/logistics/logisticsHubContent';
 
 const typeFilters = [
@@ -38,8 +35,7 @@ const dateFilters = [
 
 export default function AdminDeliveryHub() {
   const location = useLocation();
-  const [group, setGroup] = useState('operations');
-  const [sub, setSub] = useState('board');
+  const [group, setGroup] = useState('board');
   const [view, setView] = useState('board');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -110,11 +106,12 @@ export default function AdminDeliveryHub() {
       subtitle="Delivery board, collections, route optimisation & driver handovers"
       breadcrumbs={[{ label: 'Logistics Hub' }]}
       tabs={[
-        { id: 'operations', label: 'Operations', icon: LayoutGrid },
-        { id: 'inventory', label: 'Inventory', icon: Boxes },
+        { id: 'board', label: 'Delivery Board', icon: LayoutGrid },
+        { id: 'day-plan', label: 'Day Plan', icon: Clock },
+        { id: 'goods-in', label: 'Goods In', icon: Store },
       ]}
       activeTab={group}
-      onTabChange={(g) => { setGroup(g); setSub(g === 'operations' ? 'board' : 'goods-in'); }}
+      onTabChange={(g) => setGroup(g)}
       stats={[
         { icon: Clock, label: 'Today', value: stats.today, color: 'amber' },
         { icon: PlayCircle, label: 'In Transit', value: stats.inTransit, color: 'blue' },
@@ -126,32 +123,16 @@ export default function AdminDeliveryHub() {
       onboarding={LOGISTICS_ONBOARDING}
       quickLinks={LOGISTICS_QUICK_LINKS}
     >
-      <SubPills active={sub} onChange={setSub} pills={
-        group === 'operations'
-          ? [{ id: 'board', label: 'Delivery Board', icon: LayoutGrid }, { id: 'day-plan', label: 'Day Plan', icon: Clock }, { id: 'reconcile', label: 'Reconcile', icon: CheckCircle2 }]
-          : [{ id: 'goods-in', label: 'Goods In', icon: Store }, { id: 'stock', label: 'Consumable Stock', icon: Boxes }]
-      } />
-
       {/* Driver Day-Plan tab — per-driver vertical timeline of today's stops */}
-      {sub === 'day-plan' && (
+      {group === 'day-plan' && (
         <DriverDayPlan deliveries={deliveries} jobs={jobs} drivers={staff} onSelectDelivery={setSelected} />
       )}
 
-      {/* Reconciliation tab — bulk proof-of-delivery approval */}
-      {sub === 'reconcile' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 md:p-5">
-          <BulkDeliveryReconciliation />
-        </div>
-      )}
-
       {/* Goods In tab — gatekeeper verification of received stock */}
-      {sub === 'goods-in' && <GoodsInPanel />}
-
-      {/* Stock tab — consumable inventory catalog management */}
-      {sub === 'stock' && <ConsumableInventoryManager />}
+      {group === 'goods-in' && <GoodsInPanel />}
 
       {/* Board tab content */}
-      {sub === 'board' && (
+      {group === 'board' && (
       <>
       {/* Filter bar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-3 md:p-4 space-y-3">

@@ -7,7 +7,6 @@ import { Truck, Satellite, Wrench } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import HubJobBreadcrumb from '@/components/hubs/HubJobBreadcrumb';
 import RunReportButton from '@/components/reports/RunReportButton';
-import FleetCommandHeader from '@/components/vehicles/FleetCommandHeader';
 import LiveTrackingTab from '@/components/vehicles/LiveTrackingTab';
 import Vehicles from '@/pages/Vehicles';
 import VehicleMaintenanceManager from '@/components/VehicleMaintenanceManager';
@@ -77,7 +76,6 @@ export default function FleetHub() {
           <RunReportButton hub="fleet" />
         </div>
       }
-      kpiStrip={<FleetCommandHeader vehicles={vehicles} liveByVehicle={liveByVehicle} />}
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={setActiveTab}

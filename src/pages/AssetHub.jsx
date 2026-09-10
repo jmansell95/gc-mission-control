@@ -138,14 +138,6 @@ export default function AssetHub() {
       { id: 'compliance', label: 'Recert & Vaults', icon: ShieldCheck, badge: recertCount },
       { id: 'pat_testing', label: 'PAT Testing', icon: Plug, badge: categoryCounts.portable_appliance },
     ]},
-    { id: 'performance', label: 'Performance & Lifecycle', icon: TrendingUp, sub: [
-      { id: 'performance', label: 'Performance', icon: TrendingUp },
-      { id: 'lifecycle', label: 'Lifecycle', icon: TrendingDown },
-      { id: 'scrap', label: 'Scrap Pile', icon: Trash2 },
-    ]},
-    { id: 'tools', label: 'Tools', icon: Wrench, sub: [
-      { id: 'tools', label: 'Tools', icon: Wrench },
-    ]},
   ];
   const activeGroup = TAB_GROUPS.find(g => g.id === group) || TAB_GROUPS[0];
   const handleGroupChange = (g) => {
@@ -223,31 +215,7 @@ export default function AssetHub() {
     >
       <SubPills active={view} onChange={setView} pills={activeGroup?.sub || []} />
 
-      {/* Tools tab — bulk upload / smart import / QR labels */}
-      {view === 'tools' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button onClick={() => setShowBulkUpload(true)} className="insight-card rounded-2xl p-5 text-left hover:shadow-md transition">
-            <div className="w-11 h-11 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center mb-3"><Upload className="w-5 h-5 text-[#2E5A1A]" /></div>
-            <p className="font-bold text-slate-900">Bulk Upload</p>
-            <p className="text-xs text-slate-500 mt-0.5">Import assets from a spreadsheet</p>
-          </button>
-          <button onClick={() => setShowSmartImport(true)} className="insight-card rounded-2xl p-5 text-left hover:shadow-md transition">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><ScanLine className="w-5 h-5 text-blue-600" /></div>
-            <p className="font-bold text-slate-900">Smart Cert Import</p>
-            <p className="text-xs text-slate-500 mt-0.5">Pull certificates from email</p>
-          </button>
-          <button onClick={() => setShowBulkQR(true)} className="insight-card rounded-2xl p-5 text-left hover:shadow-md transition">
-            <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center mb-3"><QrCode className="w-5 h-5 text-violet-600" /></div>
-            <p className="font-bold text-slate-900">QR Labels</p>
-            <p className="text-xs text-slate-500 mt-0.5">Print asset QR codes</p>
-          </button>
-          <button onClick={() => setShowBulkWeight(true)} className="insight-card rounded-2xl p-5 text-left hover:shadow-md transition">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><Weight className="w-5 h-5 text-blue-600" /></div>
-            <p className="font-bold text-slate-900">Bulk Weights</p>
-            <p className="text-xs text-slate-500 mt-0.5">Set weight (kg) for payload checks</p>
-          </button>
-        </div>
-      ) : view === 'consumables' ? (
+      {view === 'consumables' ? (
         <ErrorBoundary><ConsumablesView /></ErrorBoundary>
       ) : (
         <>

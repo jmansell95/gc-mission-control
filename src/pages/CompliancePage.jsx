@@ -34,23 +34,22 @@ const TABS = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'staff-compliance', label: 'Staff Compliance', icon: Users },
     { id: 'crew-checks', label: 'Crew Checks', icon: Users },
-  ]},
-  { id: 'job-packs', label: 'Job Packs', icon: FileText, sub: [
-    { id: 'packs', label: 'Auditor Packs', icon: FileText },
+    { id: 'job-packs', label: 'Job Packs', icon: FileText },
+    { id: 'readiness', label: 'Readiness Gate', icon: ShieldCheck },
   ]},
   { id: 'incidents', label: 'Incidents', icon: Siren, sub: [
     { id: 'timeline', label: 'Timeline', icon: Siren },
     { id: 'report', label: 'Report Incident', icon: AlertTriangle },
     { id: 'riddor', label: 'H&S Stats', icon: BarChart3 },
   ]},
-  { id: 'readiness', label: 'Readiness', icon: ShieldCheck, sub: [
-    { id: 'gate', label: 'Readiness Gate', icon: ShieldCheck },
-    { id: 'calendar', label: 'Calendar', icon: CalendarDays },
+  { id: 'training', label: 'Training', icon: HardHat, sub: [
+    { id: 'toolbox', label: 'Toolbox Talks', icon: HardHat },
+    { id: 'calendar', label: 'Compliance Calendar', icon: CalendarDays },
     { id: 'certs', label: 'Cert Pulse', icon: Users },
   ]},
-  { id: 'training-env', label: 'Training & Env', icon: HardHat, sub: [
-    { id: 'toolbox', label: 'Toolbox Talks', icon: HardHat },
-    { id: 'environmental', label: 'Environmental', icon: Leaf },
+  { id: 'environmental', label: 'Environmental', icon: Leaf, sub: [
+    { id: 'carbon', label: 'Carbon Footprint', icon: Leaf },
+    { id: 'by-project', label: 'By Project', icon: BarChart3 },
   ]},
 ];
 
@@ -166,12 +165,13 @@ export default function CompliancePage() {
           {subTab === 'overview' && <AuditDashboardTab />}
           {subTab === 'staff-compliance' && <StaffComplianceDirectory />}
           {subTab === 'crew-checks' && <CrewShiftStatusWidget />}
-        </>
-      )}
-
-      {tab === 'job-packs' && (
-        <>
-          {subTab === 'packs' && <JobPacksTab />}
+          {subTab === 'job-packs' && <JobPacksTab />}
+          {subTab === 'readiness' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <SiteReadinessGateWidget onNavigate={navToAdmin} />
+              <CrewCertificationPulseWidget onNavigate={navToAdmin} />
+            </div>
+          )}
         </>
       )}
 
@@ -183,28 +183,18 @@ export default function CompliancePage() {
         </>
       )}
 
-      {tab === 'readiness' && (
+      {tab === 'training' && (
         <>
-          {subTab === 'gate' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <SiteReadinessGateWidget onNavigate={navToAdmin} />
-              <CrewCertificationPulseWidget onNavigate={navToAdmin} />
-            </div>
-          )}
+          {subTab === 'toolbox' && <ToolboxTalkManager />}
           {subTab === 'calendar' && <ComplianceCalendar />}
           {subTab === 'certs' && <CrewCertificationPulseWidget onNavigate={navToAdmin} />}
         </>
       )}
 
-      {tab === 'training-env' && (
+      {tab === 'environmental' && (
         <>
-          {subTab === 'toolbox' && <ToolboxTalkManager />}
-          {subTab === 'environmental' && (
-            <div className="space-y-4">
-              <CarbonFootprintWidget onNavigate={navToAdmin} />
-              <CarbonFootprintByProject />
-            </div>
-          )}
+          {subTab === 'carbon' && <CarbonFootprintWidget onNavigate={navToAdmin} />}
+          {subTab === 'by-project' && <CarbonFootprintByProject />}
         </>
       )}
     </HubShell>
