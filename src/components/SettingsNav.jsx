@@ -20,6 +20,8 @@ export const HUB_MIGRATED_ITEMS = new Set([
   'timesheet-delegation',
   // → Items with their own dedicated hubs (People, Fleet, Logistics)
   'contractors', 'suppliers', 'teams', 'staff', 'vehicles', 'timesheets',
+  // → Items rendered inside their operational hubs (not shown in Settings)
+  'audit-trail', 'invoicing', 'compliance',
 ]);
 
 export const settingsGroups = [
