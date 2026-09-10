@@ -4,9 +4,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 // A group is "admin-level" only when it grants full write access to ALL of them
 // (i.e. the built-in Super Admin / Admin groups, or a custom full-access group).
 const MODULE_KEYS = [
-  'overview', 'jobs', 'rota', 'calendar', 'scheduling', 'timesheets', 'compliance',
-  'safety', 'log-qc', 'audit-trail', 'teams', 'staff', 'billing', 'assets',
-  'logistics', 'settings', 'ags_import',
+  'overview', 'jobs', 'scheduling', 'staff', 'logistics', 'assets',
+  'fleet', 'investigation', 'compliance', 'billing', 'reports', 'settings',
 ];
 
 function isAdminLevelGroup(group) {
