@@ -31,6 +31,19 @@ export default async function (req: Request): Promise<Response> {
     if (!afp) return Response.json({ skipped: 'no_data' });
     if (afp.status && afp.status !== 'draft') return Response.json({ skipped: 'not_draft' });
 
+    // EWR jobs: the uploaded AFP Excel file IS the AFP data — skip auto-populate
+    // from field data (which creates legacy sheet_name='drilling' items that
+    // don't appear in the EWR-specific sheet tabs).
+    if (afp.job_id) {
+      try {
+        const jobs = await b.entities.Job.filter({ id: afp.job_id });
+        const job = jobs[0];
+        if (job && /\b(ewr|east\s*west\s*rail)\b/i.test(job.name || '')) {
+          return Response.json({ skipped: 'ewr_job' });
+        }
+      } catch (_) { /* if job lookup fails, proceed with normal populate */ }
+    }
+
     const result = await bulkPopulateAFP(b, afpId, 'System (auto-populate)');
     return Response.json({ success: true, ...result });
   } catch (error) {

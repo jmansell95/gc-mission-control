@@ -112,6 +112,8 @@ export default function AFPBuilder({ job }) {
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [confirmDeleteAfpId, setConfirmDeleteAfpId] = useState(null);
   const [deletingAfp, setDeletingAfp] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showAddVariation, setShowAddVariation] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -410,20 +412,28 @@ export default function AFPBuilder({ job }) {
     if (!confirmDeleteAfpId) return;
     setDeletingAfp(true);
     try {
-      // Delete all line items belonging to this AFP, then the AFP itself
-      const items = await base44.entities.AFPLineItem.filter({ afp_id: confirmDeleteAfpId }, null, 1000);
-      if (items.length > 0) {
-        await Promise.all(items.map(li => base44.entities.AFPLineItem.delete(li.id)));
-      }
-      await base44.entities.AFP.delete(confirmDeleteAfpId);
-      // Clear the chain link from any AFP that pointed to the deleted one
-      const chainLinks = await base44.entities.AFP.filter({ next_afp_id: confirmDeleteAfpId }, null, 50);
-      await Promise.all(chainLinks.map(a => base44.entities.AFP.update(a.id, { next_afp_id: '' })));
+      // Use the backend function which runs as service role to bypass RLS
+      // (line items may have been created by the auto-populate service role)
+      await base44.functions.invoke('deleteAFP', { afp_id: confirmDeleteAfpId });
       if (selectedAfpId === confirmDeleteAfpId) setSelectedAfpId(null);
       setConfirmDeleteAfpId(null);
       invalidate();
     } catch (e) { console.error(e); }
     setDeletingAfp(false);
+  };
+
+  const handleBulkDeleteAll = async () => {
+    if (afps.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      for (const afp of afps) {
+        await base44.functions.invoke('deleteAFP', { afp_id: afp.id });
+      }
+      setSelectedAfpId(null);
+      setShowBulkDelete(false);
+      invalidate();
+    } catch (e) { console.error(e); }
+    setBulkDeleting(false);
   };
 
   const toggleDispute = (id) => {
@@ -642,6 +652,14 @@ export default function AFPBuilder({ job }) {
           >
             <Plus className="w-3.5 h-3.5" /> New
           </button>
+          {afps.length > 0 && (
+            <button
+              onClick={() => setShowBulkDelete(true)}
+              className="flex-shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition active:scale-95"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Delete All
+            </button>
+          )}
         </div>
       </div>
 
@@ -1444,6 +1462,39 @@ export default function AFPBuilder({ job }) {
           saving={savingDates}
           regenerating={regenerating}
         />
+      )}
+
+      {showBulkDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4" onClick={() => !bulkDeleting && setShowBulkDelete(false)}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 animate-pop-in" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Delete All AFPs?</h3>
+                <p className="text-xs text-slate-500 mt-0.5">This permanently deletes all {afps.length} AFPs and their line items for this job.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowBulkDelete(false)}
+                disabled={bulkDeleting}
+                className="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 transition disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDeleteAll}
+                disabled={bulkDeleting}
+                className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-600 text-white rounded-lg text-xs font-bold transition active:scale-95 disabled:opacity-50"
+              >
+                {bulkDeleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                Delete All ({afps.length})
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showUpload && <AFPUploadModal job={job} onClose={() => setShowUpload(false)} />}
