@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Calendar, BookOpen, Building2, Settings, Sparkles, Plus, X, Edit2, Trash2, GripVertical,
-  IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap,
+  IdCard, Car, Award, CreditCard, FileText, ShieldCheck, GraduationCap, ClipboardCheck,
 } from 'lucide-react';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 import TrainingStaffCardGrid from '@/components/training/TrainingStaffCardGrid';
@@ -12,6 +12,7 @@ import AssignTrainingModal from '@/components/staff/AssignTrainingModal';
 import TrainingProvidersTab from '@/components/staff/TrainingProvidersTab';
 import BulkTrainingImportModal from '@/components/staff/BulkTrainingImportModal';
 import TrainingManager from '@/components/TrainingManager';
+import PendingReviewQueue from '@/components/training/PendingReviewQueue';
 import AutoBookerModal from '@/components/staff/AutoBookerModal';
 import { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
 import SubPills from '@/components/SubPills';
@@ -22,6 +23,7 @@ const TRAINING_VIEWS = [
   { id: 'cards', label: 'Cards', icon: Users },
   { id: 'calendar', label: 'Calendar', icon: Calendar },
   { id: 'courses', label: 'Courses', icon: BookOpen },
+  { id: 'reviews', label: 'Reviews', icon: ClipboardCheck },
   { id: 'providers', label: 'Providers', icon: Building2 },
 ];
 
@@ -49,6 +51,7 @@ export default function TrainingMatrixHub() {
         {view === 'cards' && <CardsView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
         {view === 'calendar' && <CalendarView onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
         {view === 'courses' && <TrainingManager onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
+        {view === 'reviews' && <PendingReviewQueue />}
         {view === 'providers' && <TrainingProvidersTab onBulkImport={() => setShowBulkImport(true)} onManage={() => setShowManage(true)} />}
       </div>
       {showManage && <ManageCategoriesModal onClose={() => setShowManage(false)} />}

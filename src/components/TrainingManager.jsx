@@ -6,7 +6,6 @@ import { format, isPast, isFuture } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 import TrainingOutcomeModal from '@/components/TrainingOutcomeModal';
-import PendingReviewQueue from '@/components/training/PendingReviewQueue';
 import CourseFormModal from '@/components/training/CourseFormModal';
 import AddStaffToCourseModal from '@/components/training/AddStaffToCourseModal';
 import { ViewHeader, PRIMARY_BTN, SECONDARY_BTN } from '@/components/training/TrainingHubRail';
@@ -213,8 +212,6 @@ export default function TrainingManager({ onBulkImport, onManage }) {
         <button onClick={onBulkImport} className={SECONDARY_BTN} type="button"><Sparkles className="w-4 h-4" /> Bulk Import</button>
         <button onClick={onManage} className={SECONDARY_BTN} type="button"><Settings className="w-4 h-4" /> Categories</button>
       </ViewHeader>
-
-      <PendingReviewQueue />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
