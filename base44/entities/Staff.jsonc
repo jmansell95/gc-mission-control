@@ -10,6 +10,14 @@
       "type": "string",
       "description": "The business stream this staff member belongs to. Set from the Business Stream selector in the staff edit form (the single source of truth for division-scoped RLS). Kept as a denormalized cache so RLS rules (which reference data.division_id) continue to work."
     },
+    "managed_division_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Additional business streams this staff member can access as an enterprise admin (e.g. a director who oversees Land & Water AND Surveys). When non-empty, the staff member is treated as an enterprise admin \u2014 they can switch between their home division and every division listed here, and see the enterprise dashboard rollup. Synced to the platform user's managed_division_ids and is_enterprise_admin flags by syncStaffUserRoles. Blank for regular staff (single-division access only)."
+    },
     "email": {
       "type": "string",
       "description": "Staff member email address"

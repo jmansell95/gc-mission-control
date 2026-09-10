@@ -40,7 +40,20 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     system_role: 'field', phone_gps_consent: false,
     permission_group_id: '', default_landing_page: '',
     division_id: '',
+    managed_division_ids: [],
     is_approver: false,
+  };
+
+  const toggleManagedDivision = (divId) => {
+    setForm(prev => {
+      const current = prev.managed_division_ids || [];
+      return {
+        ...prev,
+        managed_division_ids: current.includes(divId)
+          ? current.filter(id => id !== divId)
+          : [...current, divId],
+      };
+    });
   };
 
   useEffect(() => {
@@ -258,6 +271,35 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
               <input type="checkbox" checked={form.is_approver === true} onChange={e => set('is_approver', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500" />
               <span className="text-sm text-slate-700 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-purple-600" /> Access Approver — receives notifications and can approve new users waiting for access</span>
             </label>
+
+            {/* Enterprise admin — additional business streams */}
+            {divisions.length > 1 && (
+              <div className="mt-3 p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+                <p className="text-xs font-semibold text-slate-700 mb-1">Enterprise Admin — Additional Business Streams</p>
+                <p className="text-[11px] text-slate-500 mb-2.5">Grant access to other business streams beyond this person's home stream. When any are selected, they can switch between streams and see the enterprise dashboard rollup.</p>
+                <div className="flex flex-wrap gap-2">
+                  {divisions
+                    .filter(d => d.id !== form.division_id)
+                    .map(d => {
+                      const selected = (form.managed_division_ids || []).includes(d.id);
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => toggleManagedDivision(d.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                            selected
+                              ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
+                              : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400'
+                          }`}
+                        >
+                          {d.name}
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

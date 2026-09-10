@@ -54,13 +54,16 @@ export function DivisionProvider({ children }) {
   );
 
   // Permitted divisions based on role:
-  // Super Admin → all, Director → managed_division_ids, User → single division
+  // Super Admin → all, Enterprise Admin (director or BS admin with managed_division_ids)
+  // → home division + all managed divisions, Standard User → single division only.
   const permittedDivisions = useMemo(() => {
     if (isSuperAdmin) return divisions;
-    if (isDirector) return divisions.filter(d => managedDivisionIds.includes(d.id));
+    if (managedDivisionIds.length > 0) {
+      return divisions.filter(d => d.id === myDivisionId || managedDivisionIds.includes(d.id));
+    }
     // Standard user: only their own division
     return divisions.filter(d => d.id === myDivisionId);
-  }, [divisions, isSuperAdmin, isDirector, managedDivisionIds, myDivisionId]);
+  }, [divisions, isSuperAdmin, managedDivisionIds, myDivisionId]);
 
   const permittedDivisionIds = useMemo(
     () => permittedDivisions.map(d => d.id),
@@ -83,8 +86,8 @@ export function DivisionProvider({ children }) {
     if (divisionsLoading || !isAuthenticated || !divisions.length) return;
     if (!activeDivisionId) return; // null = enterprise overview, valid for enterprise admins
     if (isEnterpriseAdmin) {
-      // Directors: must be in managed list. Super admins: anything is fine.
-      if (isDirector && !permittedDivisionIds.includes(activeDivisionId)) {
+      // Non-super-admin enterprise admins: must be in permitted list. Super admins: anything is fine.
+      if (!isSuperAdmin && activeDivisionId && !permittedDivisionIds.includes(activeDivisionId)) {
         setActiveDivisionIdState(null);
         try { localStorage.removeItem(STORAGE_KEY); } catch {}
       }
@@ -100,8 +103,8 @@ export function DivisionProvider({ children }) {
   const setActiveDivision = (id) => {
     // Block standard users from switching
     if (!isEnterpriseAdmin && id && id !== myDivisionId) return;
-    // Block directors from switching to non-managed divisions
-    if (isDirector && id && !managedDivisionIds.includes(id)) return;
+    // Block non-super-admin enterprise admins from switching to non-permitted divisions
+    if (!isSuperAdmin && id && !permittedDivisionIds.includes(id)) return;
     setActiveDivisionIdState(id);
     try { localStorage.setItem(STORAGE_KEY, id || ''); } catch {}
   };

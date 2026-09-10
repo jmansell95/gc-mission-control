@@ -95,7 +95,8 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
               <button
                 key={d.id}
                 onClick={() => select(d.id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium hover:bg-slate-50 transition text-left ${activeDivisionId === d.id ? 'bg-emerald-50' : ''}`}>
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium hover:bg-slate-50 transition text-left"
+                style={activeDivisionId === d.id ? { background: `${d.color || '#2E5A1A'}14` } : undefined}>
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: d.color || '#2E5A1A' }}>
                   <Building2 className="w-3.5 h-3.5 text-white" />
                 </div>
@@ -103,7 +104,7 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
                   <p className="text-slate-800 truncate">{d.name}</p>
                   <p className="text-[10px] text-slate-400 uppercase tracking-wide">{d.code || d.division_type}</p>
                 </div>
-                {activeDivisionId === d.id && <Check className="w-4 h-4 text-emerald-600" />}
+                {activeDivisionId === d.id && <Check className="w-4 h-4" style={{ color: d.color || '#2E5A1A' }} />}
               </button>
             ))}
           </div>
