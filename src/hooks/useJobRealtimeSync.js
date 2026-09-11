@@ -76,14 +76,38 @@ export default function useJobRealtimeSync() {
 
   useEffect(() => {
     const unsubs = [];
+    // Debounce invalidations: collect all entity events within a 500ms window
+    // and invalidate once. This prevents refetch storms when bulk operations
+    // fire dozens of realtime events in rapid succession.
+    let pendingKeys = new Set();
+    let flushTimer = null;
+
+    const scheduleFlush = () => {
+      if (flushTimer) return;
+      flushTimer = setTimeout(() => {
+        flushTimer = null;
+        const keys = pendingKeys;
+        pendingKeys = new Set();
+        for (const key of keys) {
+          queryClient.invalidateQueries({ queryKey: key });
+        }
+      }, 500);
+    };
+
+    const enqueueKeys = (keys) => {
+      for (const key of keys) {
+        // Store as JSON string so Set deduplicates overlapping key arrays
+        pendingKeys.add(JSON.stringify(key));
+      }
+      scheduleFlush();
+    };
+
     for (const entityName of Object.keys(ENTITY_QUERY_KEYS)) {
       try {
         const keys = ENTITY_QUERY_KEYS[entityName];
         const unsub = base44.entities[entityName]?.subscribe((event) => {
           if (!event || !event.type) return;
-          for (const key of keys) {
-            queryClient.invalidateQueries({ queryKey: key });
-          }
+          enqueueKeys(keys);
         });
         if (typeof unsub === 'function') unsubs.push(unsub);
       } catch {
@@ -91,6 +115,7 @@ export default function useJobRealtimeSync() {
       }
     }
     return () => {
+      if (flushTimer) clearTimeout(flushTimer);
       for (const unsub of unsubs) {
         try { unsub(); } catch {}
       }
