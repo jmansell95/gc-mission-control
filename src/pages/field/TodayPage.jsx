@@ -9,7 +9,7 @@ import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
 import EndOfDayCard from '@/components/staff/EndOfDayCard';
 import { useToast } from '@/components/ui/use-toast';
 import { saveOrQueue } from '@/utils/offlineSync';
-import { isWithinSiteHours, isBeforeSiteOpen, SITE_OPEN_TIME, SITE_CLOSE_TIME } from '@/utils/siteHours';
+import { isWithinSiteHours, isBeforeSiteOpen, isWithinSubmissionWindow, isAfterSubmissionClose, SITE_OPEN_TIME, SITE_SUBMISSION_CLOSE_TIME } from '@/utils/siteHours';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 import OutsideSiteHours from '@/components/staff/OutsideSiteHours';
 import ShiftWizard from '@/components/staff/ShiftWizard';
@@ -344,10 +344,12 @@ export default function TodayPage() {
     );
   }
 
-  if (!isWithinSiteHours() && !isBeforeSiteOpen() && !staff?.is_admin && !isPlatformAdmin) {
-    return <OutsideSiteHours openTime={SITE_OPEN_TIME} closeTime={SITE_CLOSE_TIME} />;
+  // After 10pm (or before 6am) → fully locked. Between 5pm–10pm → submission-only mode.
+  if (isAfterSubmissionClose() && !staff?.is_admin && !isPlatformAdmin) {
+    return <OutsideSiteHours openTime={SITE_OPEN_TIME} closeTime={SITE_SUBMISSION_CLOSE_TIME} mode="closed" />;
   }
-  const canPerformActions = isWithinSiteHours() || staff?.is_admin || isPlatformAdmin;
+  const inSubmissionWindow = isWithinSubmissionWindow() && !staff?.is_admin && !isPlatformAdmin;
+  const canPerformActions = (isWithinSiteHours() || staff?.is_admin || isPlatformAdmin) && !inSubmissionWindow;
 
   // ── Derived ──
   const visibleWeekStarts = rotaWeeks.filter(w => w.status === 'published' && !w.superseded).map(w => w.week_start);
@@ -421,6 +423,15 @@ export default function TodayPage() {
 
       <FieldContainer>
         <OfflineBanner />
+        {inSubmissionWindow && (
+          <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
+            <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-amber-900">Submission only — check-in closed</p>
+              <p className="text-xs text-amber-700 mt-0.5">Shift check-in is closed for today. You can still log travel home, expenses, and submit your timesheet until 10pm.</p>
+            </div>
+          </div>
+        )}
         <SyncHUD />
         <TrackingConsentCard staff={staff} onSignNow={() => setShowConsentModal(true)} />
         <KeyLogBookPromptBanner staff={staff} />

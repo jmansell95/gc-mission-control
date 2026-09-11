@@ -193,6 +193,7 @@ export default function LiveCrewTab() {
         assignmentId: assignment?.id || null,
         trackingEnabled: staff?.tracking_enabled,
         lastCaptureError: staff?.last_capture_error,
+        lastCaptureErrorAt: staff?.last_capture_error_at,
         consentSigned: !!staff?.tracking_consent_signed_at,
       });
     }
@@ -219,6 +220,7 @@ export default function LiveCrewTab() {
         assignmentId: assignment?.id || null,
         trackingEnabled: staff.tracking_enabled,
         lastCaptureError: staff.last_capture_error,
+        lastCaptureErrorAt: staff.last_capture_error_at,
         consentSigned: !!staff.tracking_consent_signed_at,
       });
     }
@@ -434,6 +436,15 @@ export default function LiveCrewTab() {
                     {!cr.timestamp && cr.status === 'dark' && <span className="flex items-center gap-0.5 text-rose-500"><WifiOff className="w-3 h-3" /> No GPS</span>}
                     {!cr.timestamp && cr.status === 'off' && <span className="flex items-center gap-0.5 text-slate-400"><WifiOff className="w-3 h-3" /> Off</span>}
                   </div>
+                  {cr.lastCaptureError && (
+                    <div className="flex items-center gap-1 mt-1 text-[10px] text-rose-500">
+                      <AlertCircle className="w-3 h-3" />
+                      <span className="truncate">{cr.lastCaptureError === 'permission_denied' || cr.lastCaptureError === 'permanently_denied' ? 'Location denied' : cr.lastCaptureError === 'no_fix_timeout' ? 'No GPS fix' : 'GPS error'}</span>
+                      {cr.lastCaptureErrorAt && (
+                        <span className="text-rose-300">· {Math.round((Date.now() - new Date(cr.lastCaptureErrorAt).getTime()) / 60000)}m ago</span>
+                      )}
+                    </div>
+                  )}
                 </button>
               ))}
             </div>

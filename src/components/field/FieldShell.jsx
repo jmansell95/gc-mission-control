@@ -1,39 +1,34 @@
-import React, { useState } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import { useMobileApp } from '@/contexts/MobileAppContext';
 import { FieldDataProvider } from '@/components/field/FieldDataProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import OfflineBanner from '@/components/field/OfflineBanner';
-import FieldDrawer from '@/components/field/FieldDrawer';
+import UnifiedMobileDrawer from '@/components/mobile/UnifiedMobileDrawer';
 import FieldCommsButton from '@/components/field/FieldCommsButton';
 
 /**
  * Shared layout route for all field crew pages. Provides:
  *  - FieldDataProvider (shared data context)
- *  - A floating hamburger button (top-left) → FieldDrawer (slide-out left nav)
+ *  - UnifiedMobileDrawer (hamburger + slide-out nav) — only when NOT
+ *    inside the PWA/APK shell (MobileAppShell already renders it).
  *  - The fresh field background
  *  - ErrorBoundary wrapping all content
  *  - OfflineBanner
  *
- * The old 5-tab bottom bar (Today/Upcoming/Scan/Profile/More) is replaced
- * by the FieldHomeHub card grid (at /staff-schedule) + the FieldDrawer.
- * The floating hamburger sits over each page's own header (FieldPageShell
- * or custom), so there's no double-header conflict.
+ * When isMobileApp is true, MobileAppShell wraps this route and already
+ * provides the UnifiedMobileDrawer — so FieldShell skips its own to
+ * avoid a double hamburger. When isMobileApp is false (mobile browser),
+ * FieldShell renders the UnifiedMobileDrawer itself.
  */
 export default function FieldShell({ children }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const { isMobileApp } = useMobileApp();
 
   return (
     <FieldDataProvider>
       <div className="h-[100dvh] field-bg flex flex-col overflow-hidden safe-area-top">
-        {/* Floating hamburger button — always visible, top-left */}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="absolute top-3 left-3 z-30 w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center transition active:scale-95 touch-manipulation hover:bg-white/90"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="w-5 h-5 text-slate-700" />
-        </button>
+        {/* UnifiedMobileDrawer — only when not already provided by MobileAppShell */}
+        {!isMobileApp && <UnifiedMobileDrawer />}
 
         <OfflineBanner />
 
@@ -51,9 +46,6 @@ export default function FieldShell({ children }) {
           </ErrorBoundary>
         </main>
       </div>
-
-      {/* Slide-out drawer */}
-      <FieldDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
       {/* Always-active comms button (floating, bottom-right) */}
       <FieldCommsButton />

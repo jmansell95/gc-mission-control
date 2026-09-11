@@ -4,9 +4,10 @@ import { MapContainer, TileLayer, Polyline, CircleMarker, Popup, useMap } from '
 import { useLocationLogs } from '@/hooks/useLocationLogs';
 import {
   X, Navigation, Clock, MapPin, Briefcase, ShieldCheck, AlertCircle,
-  WifiOff, Smartphone, Activity, Radio, Gauge, Loader2, Route,
+  WifiOff, Smartphone, Activity, Radio, Gauge, Loader2, Route, Trash2,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 
 const STATUS_COLORS = {
@@ -22,6 +23,25 @@ const STATUS_LABELS = {
   dark: 'Gone dark · no fix',
   off: 'Off shift / not tracking',
 };
+
+// Human-readable explanations for each capture error type
+const ERROR_EXPLANATIONS = {
+  permission_denied: 'Location permission denied on their phone — they need to enable it in browser/phone Settings.',
+  permanently_denied: 'Location permanently denied — they must enable it in phone Settings → Location → browser app.',
+  position_unavailable: 'GPS unavailable — likely no signal or poor GPS coverage on their device.',
+  no_fix_timeout: 'Waiting for GPS fix — no location received yet. May be indoors or have GPS disabled.',
+};
+
+function formatErrorAge(errorAt) {
+  if (!errorAt) return null;
+  const mins = Math.round((Date.now() - new Date(errorAt).getTime()) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  if (hrs < 24) return `${hrs}h ${remMins}m ago`;
+  return format(new Date(errorAt), 'dd MMM HH:mm');
+}
 
 // ── Map helper: fit bounds to trail ──
 function TrailBoundsFitter({ points }) {
@@ -42,7 +62,26 @@ function TrailBoundsFitter({ points }) {
  * active job, and tracking health.
  */
 export default function CrewDetailDrawer({ crew, open, onClose }) {
+  const queryClient = useQueryClient();
   const [showTrail, setShowTrail] = useState(true);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearError = async () => {
+    if (!crew?.staffId) return;
+    setClearing(true);
+    try {
+      await base44.entities.Staff.update(crew.staffId, {
+        last_capture_error: null,
+        last_capture_error_at: null,
+      });
+      queryClient.invalidateQueries({ queryKey: ['crew-map-staff'] });
+      queryClient.invalidateQueries({ queryKey: ['crew-map-assignments'] });
+      onClose();
+    } catch (e) {
+      console.error('Failed to clear error:', e);
+    }
+    setClearing(false);
+  };
 
   // Fetch today's trail using the shared hook with realtime subscription
   const todayStart = new Date();
@@ -172,12 +211,30 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
               </div>
             </div>
             {crew.lastCaptureError && (
-              <div className="bg-rose-50 border border-rose-200 rounded-lg p-2 flex items-start gap-2">
-                <AlertCircle className="w-3.5 h-3.5 text-rose-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[10px] font-bold text-rose-700">Capture Error</p>
-                  <p className="text-[11px] text-rose-600">{crew.lastCaptureError}</p>
+              <div className="bg-rose-50 border border-rose-200 rounded-lg p-2.5 space-y-2">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-500 flex-shrink-0 mt-0.5" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold text-rose-700">Capture Error</p>
+                    <p className="text-[11px] text-rose-600 leading-snug">
+                      {ERROR_EXPLANATIONS[crew.lastCaptureError] || crew.lastCaptureError}
+                    </p>
+                    {crew.lastCaptureErrorAt && (
+                      <p className="text-[10px] text-rose-400 mt-1 flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" /> Last reported: {formatErrorAge(crew.lastCaptureErrorAt)}
+                      </p>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={handleClearError}
+                  disabled={clearing}
+                  className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-rose-200 text-rose-600 text-[10px] font-bold hover:bg-rose-50 active:scale-95 transition disabled:opacity-50"
+                >
+                  {clearing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                  Clear Error
+                </button>
+                <p className="text-[9px] text-rose-400 text-center leading-tight">Use once {crew.staffName?.split(' ')[0] || 'they'} confirm they've fixed it on their phone.</p>
               </div>
             )}
           </div>
