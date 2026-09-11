@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, addDays } from 'date-fns';
 import {
-  Plane, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X,
+  Plane, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X, Trash2,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ShiftSwapBoard from './ShiftSwapBoard';
@@ -61,6 +61,22 @@ function RequestsTab({ staff, divisionId }) {
   const queryClient = useQueryClient();
   const [holiday, setHoliday] = useState({ start: format(addDays(new Date(), 7), 'yyyy-MM-dd'), end: format(addDays(new Date(), 10), 'yyyy-MM-dd'), reason: 'holiday', notes: '' });
   const [submitting, setSubmitting] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const handleDeleteRequest = async (reqId) => {
+    setDeletingId(reqId);
+    try {
+      await base44.entities.StaffRequest.delete(reqId);
+      queryClient.invalidateQueries({ queryKey: ['my-staff-requests', staff?.id] });
+      queryClient.invalidateQueries({ queryKey: ['comms-my-requests', staff?.id, divisionId] });
+      toast({ title: 'Request deleted', description: 'Your pending request has been removed.' });
+      setConfirmDeleteId(null);
+    } catch (e) {
+      toast({ title: 'Failed to delete', description: e.message, variant: 'destructive' });
+    }
+    setDeletingId(null);
+  };
 
   const { data: myAbsences = [] } = useQueryAbsences(staff?.id);
   const { data: myStaffRequests = [] } = useQuery({
@@ -154,20 +170,51 @@ function RequestsTab({ staff, divisionId }) {
         </div>
       )}
 
-      {/* My office requests — payslip/expense/equipment/general */}
+      {/* My office requests — equipment/general (expense/payslip creation removed) */}
       {myStaffRequests.length > 0 && (
         <div className="bg-white border border-slate-200 rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-2">My Office Requests</h3>
           <div className="space-y-2">
             {myStaffRequests.slice(0, 10).map(r => {
               const statusTint = r.status === 'fulfilled' ? 'bg-emerald-50 text-emerald-700' : r.status === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700';
+              const canDelete = r.status === 'pending';
+              const isConfirming = confirmDeleteId === r.id;
               return (
                 <div key={r.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50">
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-slate-800 capitalize">{r.request_type}</p>
                     <p className="text-xs text-slate-400 truncate">{r.subject}</p>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${statusTint}`}>{r.status.replace('_', ' ')}</span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${statusTint}`}>{r.status.replace('_', ' ')}</span>
+                    {canDelete && (
+                      isConfirming ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleDeleteRequest(r.id)}
+                            disabled={deletingId === r.id}
+                            className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold transition active:scale-95 disabled:opacity-50"
+                          >
+                            {deletingId === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Yes'}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="px-2 py-1 rounded-lg bg-slate-200 text-slate-600 text-[10px] font-bold transition active:scale-95"
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(r.id)}
+                          className="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center transition active:scale-90 hover:bg-rose-100"
+                          aria-label="Delete request"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )
+                    )}
+                  </div>
                 </div>
               );
             })}

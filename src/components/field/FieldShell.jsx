@@ -17,9 +17,9 @@ import FieldCommsButton from '@/components/field/FieldCommsButton';
  *  - OfflineBanner
  *
  * When isMobileApp is true, MobileAppShell wraps this route and already
- * provides the UnifiedMobileDrawer — so FieldShell skips its own to
- * avoid a double hamburger. When isMobileApp is false (mobile browser),
- * FieldShell renders the UnifiedMobileDrawer itself.
+ * provides the MobileNavShell — so FieldShell skips its own to avoid a
+ * double bottom bar. When isMobileApp is false (mobile browser),
+ * FieldShell renders the MobileNavShell itself.
  */
 export default function FieldShell({ children }) {
   const { isMobileApp } = useMobileApp();

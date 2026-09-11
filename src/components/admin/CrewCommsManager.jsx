@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import {
   MessageSquare, ArrowLeftRight, FileText, Plane,
-  Check, X, Loader2, Send, AlertCircle,
+  Check, X, Loader2, Send, AlertCircle, Trash2,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useDivision } from '@/contexts/DivisionContext';
@@ -440,6 +440,18 @@ function RequestsTab({ divisionId }) {
     setProcessing(null);
   };
 
+  const handleDelete = async (reqId) => {
+    setProcessing(reqId);
+    try {
+      await base44.entities.StaffRequest.delete(reqId);
+      queryClient.invalidateQueries({ queryKey: ['admin-crew-requests', divisionId] });
+      toast({ title: 'Request deleted', description: 'The request has been permanently removed.' });
+    } catch (e) {
+      toast({ title: 'Failed to delete', description: e.message, variant: 'destructive' });
+    }
+    setProcessing(null);
+  };
+
   if (isLoading) return <LoadingSpinner />;
 
   const pending = requests.filter(r => r.status === 'pending' || r.status === 'in_progress');
@@ -458,7 +470,7 @@ function RequestsTab({ divisionId }) {
           </h3>
           <div className="space-y-2">
             {pending.map(req => (
-              <RequestCard key={req.id} req={req} onFulfill={() => handleRespond(req, 'fulfilled')} onReject={() => handleRespond(req, 'rejected')} processing={processing === req.id} responseDraft={responseDraft[req.id] || ''} onDraftChange={v => setResponseDraft(d => ({ ...d, [req.id]: v }))} />
+              <RequestCard key={req.id} req={req} onFulfill={() => handleRespond(req, 'fulfilled')} onReject={() => handleRespond(req, 'rejected')} onDelete={() => handleDelete(req.id)} processing={processing === req.id} responseDraft={responseDraft[req.id] || ''} onDraftChange={v => setResponseDraft(d => ({ ...d, [req.id]: v }))} />
             ))}
           </div>
         </div>
@@ -468,7 +480,7 @@ function RequestsTab({ divisionId }) {
           <h3 className="text-sm font-bold text-slate-500 mb-2">Resolved</h3>
           <div className="space-y-2">
             {resolved.slice(0, 15).map(req => (
-              <RequestCard key={req.id} req={req} readOnly />
+              <RequestCard key={req.id} req={req} readOnly onDelete={() => handleDelete(req.id)} processing={processing === req.id} />
             ))}
           </div>
         </div>
@@ -477,23 +489,54 @@ function RequestsTab({ divisionId }) {
   );
 }
 
-function RequestCard({ req, onFulfill, onReject, processing, responseDraft, onDraftChange, readOnly }) {
+function RequestCard({ req, onFulfill, onReject, onDelete, processing, responseDraft, onDraftChange, readOnly }) {
   const typeMeta = REQUEST_TYPE_META[req.request_type] || REQUEST_TYPE_META.general;
   const statusMeta = REQUEST_STATUS_META[req.status] || REQUEST_STATUS_META.pending;
   const TypeIcon = typeMeta.icon;
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-4">
+    <div className="relative bg-white border border-slate-200 rounded-2xl p-4">
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${typeMeta.tint}`}>
           <TypeIcon className="w-5 h-5" />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pr-8">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-bold text-slate-900">{req.staff_name || 'Staff member'}</span>
             <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase ${typeMeta.tint}`}>{typeMeta.label}</span>
             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ring-1 ${statusMeta.tint}`}>{statusMeta.label}</span>
           </div>
+          {/* Delete button — admin can delete any request regardless of status */}
+          {onDelete && (
+            <div className="absolute top-3 right-3">
+              {confirmDelete ? (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={onDelete}
+                    disabled={processing}
+                    className="px-2 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-bold transition active:scale-95 disabled:opacity-50 inline-flex items-center gap-1"
+                  >
+                    {processing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />} Delete
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-2 py-1 rounded-lg bg-slate-200 text-slate-600 text-[10px] font-bold transition active:scale-95"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center transition active:scale-90 hover:bg-rose-100"
+                  aria-label="Delete request"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
           {req.subject && <p className="text-sm font-semibold text-slate-800 mt-1">{req.subject}</p>}
           {req.body && <p className="text-sm text-slate-600 mt-0.5 break-words">{req.body}</p>}
           {req.amount && <p className="text-sm font-bold text-amber-700 mt-1">£{req.amount.toFixed(2)}</p>}

@@ -47,7 +47,7 @@ export default function FieldCommsButton() {
       {/* Floating button — bottom-right */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] shadow-lg shadow-[#2E5A1A]/30 flex items-center justify-center transition active:scale-90 touch-manipulation hover:shadow-xl hover:shadow-[#2E5A1A]/40 safe-area-bottom"
+        className="fixed bottom-20 right-5 z-30 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] shadow-lg shadow-[#2E5A1A]/30 flex items-center justify-center transition active:scale-90 touch-manipulation hover:shadow-xl hover:shadow-[#2E5A1A]/40 safe-area-bottom"
         aria-label="Open crew comms"
       >
         <MessageSquare className="w-6 h-6 text-white" />
