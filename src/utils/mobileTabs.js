@@ -3,7 +3,7 @@
 // per user without new routing — each tab points to an existing route.
 
 import {
-  Grid3x3, CalendarDays, Truck, Car, Menu, ScanLine, Briefcase, FlaskConical,
+  Grid3x3, CalendarDays, Truck, Car, Menu, ScanLine, Briefcase, FlaskConical, Wrench,
 } from 'lucide-react';
 import { resolveRole, isDriver, isScannerOnly } from '@/utils/access';
 
@@ -44,8 +44,9 @@ export function resolveMobileTabs(profile, isPlatformAdmin) {
   if (role === 'field') {
     return [
       { id: 'schedule', label: 'Today', icon: CalendarDays, path: '/staff-schedule' },
-      { id: 'deliveries', label: 'Deliveries', icon: Truck, path: '/deliveries' },
+      { id: 'tools', label: 'Tools', icon: Wrench, path: '/tools' },
       { id: 'scanner', label: 'Scan', icon: ScanLine, path: '/scanner' },
+      { id: 'deliveries', label: 'Deliveries', icon: Truck, path: '/deliveries' },
       { id: 'more', label: 'More', icon: Menu, isMore: true },
     ];
   }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, startOfWeek } from 'date-fns';
+import { motion } from 'framer-motion';
 import {
   Receipt, Camera, ScanLine, ClipboardList, CalendarClock, Clock,
   PoundSterling, ChevronRight, ShieldCheck, AlertTriangle, Inbox,
@@ -11,6 +12,7 @@ import {
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import { useInbox } from '@/hooks/useInbox';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
+import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import TodayJobHero from './TodayJobHero';
 import ReceiptCaptureModal from './ReceiptCaptureModal';
 import { complianceDaysUntil } from '@/utils/complianceDate';
@@ -24,11 +26,6 @@ const fmtDur = (mins) => {
   return m > 0 ? `${r}m` : '0h';
 };
 
-/**
- * FieldDashboard — the redesigned personal cockpit for field staff.
- * Replaces the old card grid with a live stats overview, today's job hero,
- * quick-action chips, compliance pills, and upcoming shifts.
- */
 export default function FieldDashboard() {
   const navigate = useNavigate();
   const ctx = useFieldData();
@@ -43,14 +40,12 @@ export default function FieldDashboard() {
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 
-  // This week's timesheets
   const { data: myTimesheets = [] } = useQuery({
     queryKey: ['my-week-timesheets', staff?.id, weekStart],
     queryFn: () => base44.entities.Timesheet.filter({ staff_id: staff.id }),
     enabled: !!staff?.id,
   });
 
-  // This week's daily costs (receipts)
   const { data: myCosts = [] } = useQuery({
     queryKey: ['my-week-costs', staff?.id, weekStart],
     queryFn: () => base44.entities.DailyCost.filter({ staff_id: staff.id }),
@@ -71,9 +66,7 @@ export default function FieldDashboard() {
   const hourlyRate = staff?.day_rate ? staff.day_rate / 8 : 0;
   const weekEarnings = weekHours * hourlyRate;
   const pendingReceipts = weekCosts.filter(c => c.status === 'submitted').length;
-  const submittedCount = weekTimesheets.filter(t => t.status === 'submitted' || t.status === 'approved').length;
 
-  // Compliance pills
   const complianceStats = useMemo(() => {
     const myItems = (myCompliance || []).filter(i => i.reference_id === staff?.id || i.reference_name === staff?.name);
     const expired = myItems.filter(i => {
@@ -89,18 +82,11 @@ export default function FieldDashboard() {
     return { expired: expired.length, expiring: expiring.length };
   }, [myCompliance, staff]);
 
-  const todayCount = todaysAssignments?.length || 0;
-  const upcomingCount = upcomingAssignments?.length || 0;
-  const inboxCount = inboxCounts?.total || 0;
-  const isAdmin = isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(staff?.system_role);
-
-  // Today's next assignment for hero card
   const todaysSorted = [...(todaysAssignments || [])].sort((a, b) => (a.start_time || '23:59').localeCompare(b.start_time || '23:59'));
   const nextAssignment = todaysSorted.find(a => (a.status || 'assigned') !== 'completed') || todaysSorted[0];
   const nextJob = jobs?.find(j => j.id === nextAssignment?.job_id);
   const nextClient = clients?.find(c => c.id === nextJob?.client_id);
 
-  // Quick action chips
   const quickActions = [
     { id: 'receipt', label: 'Upload Receipt', icon: Camera, onClick: () => setShowReceiptModal(true), gradient: 'from-amber-500 to-orange-500' },
     { id: 'scan', label: 'Scan Asset', icon: ScanLine, onClick: () => navigate('/scanner'), gradient: 'from-[#2E5A1A] to-[#1c4a12]' },
@@ -108,7 +94,6 @@ export default function FieldDashboard() {
     { id: 'schedule', label: 'Schedule', icon: CalendarClock, onClick: () => navigate('/today-schedule'), gradient: 'from-teal-500 to-teal-600' },
   ];
 
-  // Upcoming preview (next 3)
   const upcomingPreview = [...(upcomingAssignments || [])]
     .sort((a, b) => new Date(a.assigned_date) - new Date(b.assigned_date))
     .slice(0, 3);
@@ -120,76 +105,86 @@ export default function FieldDashboard() {
     return 'Evening';
   })();
 
+  const inboxCount = inboxCounts?.total || 0;
+  const isAdmin = isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(staff?.system_role);
+
   return (
     <div className="min-h-full pb-6">
-      {/* Greeting header */}
-      <div className="px-4 sm:px-6 pt-4 pb-4">
-        <div className="flex items-center gap-3">
+      {/* Greeting header — animated gradient */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="hero-gradient rounded-3xl mx-4 sm:mx-6 mt-4 p-5 text-white relative overflow-hidden"
+      >
+        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
+        <div className="absolute -bottom-6 -left-6 w-20 h-20 rounded-full bg-white/5 blur-lg pointer-events-none" />
+        <div className="relative flex items-center gap-3">
           {staff?.avatar_url ? (
-            <img src={staff.avatar_url} alt="" className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white shadow-md" />
+            <img src={staff.avatar_url} alt="" className="w-12 h-12 rounded-2xl object-cover ring-2 ring-white/30 shadow-md flex-shrink-0" />
           ) : (
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-lg shadow-md">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-white font-bold text-lg shadow-md flex-shrink-0">
               {(staff?.name || '?').charAt(0).toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-ui-caption text-slate-500 font-medium">{greeting}</p>
-            <h1 className="text-ui-heading font-bold text-slate-900 truncate">{staff?.name || 'Field Crew'}</h1>
+            <p className="text-ui-caption text-white/70 font-medium">{greeting}</p>
+            <h1 className="text-ui-heading font-bold text-white truncate">{staff?.name || 'Field Crew'}</h1>
           </div>
-          <div className="text-right">
-            <p className="text-ui-caption text-slate-400">{format(new Date(), 'EEEE')}</p>
-            <p className="text-sm font-bold text-slate-700">{format(new Date(), 'dd MMM')}</p>
+          <div className="text-right flex-shrink-0">
+            <p className="text-ui-caption text-white/60">{format(new Date(), 'EEEE')}</p>
+            <p className="text-sm font-bold text-white/90">{format(new Date(), 'dd MMM')}</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="px-4 sm:px-6 space-y-4">
-        {/* Stats row — 3 gradient tiles */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="stat-gradient-brand rounded-2xl p-3 text-white relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }} className="px-4 sm:px-6 mt-4 space-y-4">
+        {/* Stats row — 3 animated gradient tiles */}
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-3 gap-2.5">
+          <motion.div variants={slideUp} className="stat-gradient-brand rounded-2xl p-3 text-white relative overflow-hidden">
             <Clock className="w-4 h-4 text-white/40 absolute top-2 right-2" />
             <p className="text-[9px] font-bold uppercase tracking-wide text-white/70">Hours</p>
             <p className="text-xl font-extrabold mt-0.5 tabular-nums">
               <AnimatedNumber value={weekHours} format={v => fmtDur(v * 60)} />
             </p>
             <p className="text-[9px] text-white/60 mt-0.5">this week</p>
-          </div>
-          <div className="stat-gradient-emerald rounded-2xl p-3 text-white relative overflow-hidden">
+          </motion.div>
+          <motion.div variants={slideUp} className="stat-gradient-emerald rounded-2xl p-3 text-white relative overflow-hidden">
             <PoundSterling className="w-4 h-4 text-white/40 absolute top-2 right-2" />
             <p className="text-[9px] font-bold uppercase tracking-wide text-white/70">Earnings</p>
             <p className="text-xl font-extrabold mt-0.5 tabular-nums">
               {staff?.day_rate ? <AnimatedNumber value={weekEarnings} format={fmtMoney} /> : '—'}
             </p>
             <p className="text-[9px] text-white/60 mt-0.5">est. this week</p>
-          </div>
-          <div className={`rounded-2xl p-3 text-white relative overflow-hidden ${pendingReceipts > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate'}`}>
+          </motion.div>
+          <motion.div variants={slideUp} className={`rounded-2xl p-3 text-white relative overflow-hidden ${pendingReceipts > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate'}`}>
             <Receipt className="w-4 h-4 text-white/40 absolute top-2 right-2" />
             <p className="text-[9px] font-bold uppercase tracking-wide text-white/70">Receipts</p>
             <p className="text-xl font-extrabold mt-0.5 tabular-nums">
               <AnimatedNumber value={pendingReceipts} />
             </p>
             <p className="text-[9px] text-white/60 mt-0.5">pending</p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Today's job hero */}
         <TodayJobHero assignment={nextAssignment} job={nextJob} client={nextClient} staffName={staff?.name} />
 
         {/* Quick action chips */}
-        <div className="grid grid-cols-4 gap-2">
+        <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-4 gap-2">
           {quickActions.map(qa => {
             const Icon = qa.icon;
             return (
-              <button key={qa.id} onClick={qa.onClick} type="button"
-                className="flex flex-col items-center gap-1.5 p-2.5 field-card active:scale-95 transition touch-manipulation">
+              <motion.button key={qa.id} variants={slideUp} whileTap={{ scale: 0.9 }} onClick={qa.onClick} type="button"
+                className="flex flex-col items-center gap-1.5 p-2.5 field-card transition touch-manipulation">
                 <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${qa.gradient} flex items-center justify-center shadow-md`}>
                   <Icon className="w-4 h-4 text-white" strokeWidth={2.5} />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700 text-center leading-tight">{qa.label}</span>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Compliance pills */}
         {(complianceStats.expired > 0 || complianceStats.expiring > 0) && (
@@ -317,7 +312,7 @@ export default function FieldDashboard() {
             </div>
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Receipt capture modal */}
       <ReceiptCaptureModal

@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { CalendarDays } from 'lucide-react';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import WeeklyRotaView from '@/components/staff/WeeklyRotaView';
@@ -37,12 +38,14 @@ export default function UpcomingPage() {
             <EmptyState icon={CalendarDays} title="No shifts scheduled" message="Check back later — your manager will assign you to upcoming jobs." />
           </div>
         ) : (
-          <WeeklyRotaView
-            assignments={visibleAssignments}
-            jobs={jobs}
-            vehicles={vehicles}
-            staff={staff}
-          />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+            <WeeklyRotaView
+              assignments={visibleAssignments}
+              jobs={jobs}
+              vehicles={vehicles}
+              staff={staff}
+            />
+          </motion.div>
         )}
       </FieldContainer>
     </FieldPageShell>

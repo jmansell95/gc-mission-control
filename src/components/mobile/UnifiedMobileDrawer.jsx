@@ -4,7 +4,7 @@ import {
   CalendarClock, ClipboardList, ScanLine, UserCircle, Truck, Inbox,
   LayoutDashboard, Users, HelpCircle, X, ChevronRight, LogOut,
   Grid3x3, Briefcase, Calendar, Boxes, Car, FlaskConical, ShieldCheck,
-  PoundSterling, FileBarChart, Settings, ArrowLeftRight, Sparkles,
+  PoundSterling, FileBarChart, Settings, ArrowLeftRight, Sparkles, Wrench,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -121,6 +121,7 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
         { label: "Today's Schedule", icon: CalendarClock, path: '/today-schedule', active: isActive('/today-schedule') },
         { label: 'Upcoming', icon: CalendarClock, path: '/upcoming', active: isActive('/upcoming') },
         { label: 'My Duties', icon: ClipboardList, path: '/my-duties', active: isActive('/my-duties') },
+        { label: 'Field Tools', icon: Wrench, path: '/tools', active: isActive('/tools') },
         { label: 'Scan Asset', icon: ScanLine, path: '/scanner', active: isActive('/scanner') },
         { label: 'My Profile', icon: UserCircle, path: '/staff-profile', active: isActive('/staff-profile') },
         ...(profile?.delivery_dashboard_enabled ? [{ label: 'Deliveries', icon: Truck, path: '/deliveries', active: isActive('/deliveries') }] : []),

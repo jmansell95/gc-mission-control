@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox, Users } from 'lucide-react';
+import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import { useInbox } from '@/hooks/useInbox';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
@@ -94,12 +96,25 @@ export default function MorePage() {
       <FieldContainer space="4">
         <QuickActionsBar />
         {/* Quick link tiles — 2 col on phone, 3 on tablet, 4 on desktop */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5"
+        >
           {tiles.map((tile) => {
             const Icon = tile.icon;
             return (
-              <button key={tile.label} onClick={tile.onClick} type="button"
-                className={`rounded-2xl flex flex-col items-center gap-3 p-5 hover:shadow-lg active:scale-95 transition touch-manipulation ${tile.className}`}>
+              <motion.button
+                key={tile.label}
+                variants={slideUp}
+                whileTap={{ scale: 0.94 }}
+                whileHover={{ scale: 1.04 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                onClick={tile.onClick}
+                type="button"
+                className={`rounded-2xl flex flex-col items-center gap-3 p-5 hover:shadow-lg transition touch-manipulation ${tile.className}`}
+              >
                 <div className={`relative w-14 h-14 rounded-2xl flex items-center justify-center ${tile.iconBg}`}>
                   <Icon className={`w-7 h-7 ${tile.iconColor}`} strokeWidth={2.5} />
                   {tile.badge > 0 && (
@@ -109,10 +124,10 @@ export default function MorePage() {
                   )}
                 </div>
                 <span className={`text-base font-bold ${tile.textClass}`}>{tile.label}</span>
-              </button>
+              </motion.button>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Live Crew Map */}
         <div className="field-card p-4">

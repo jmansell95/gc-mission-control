@@ -7,6 +7,8 @@ import {
   CheckCircle2, AlertTriangle, ChevronRight, Calendar, Truck,
   Wrench, Leaf, Award, RefreshCw, Loader2, ExternalLink,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
@@ -73,7 +75,7 @@ function DutyCard({ item, mittiUrls, onAction }) {
   };
 
   return (
-    <div className={`field-card rounded-2xl p-3.5 border ${status.border} ${status.bg} transition`}>
+    <motion.div variants={slideUp} whileTap={{ scale: 0.97 }} className={`field-card rounded-2xl p-3.5 border ${status.border} ${status.bg} transition`}>
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center flex-shrink-0 shadow-sm`}>
           <Icon className={`w-5 h-5 ${status.iconColor}`} strokeWidth={2.5} />
@@ -126,7 +128,7 @@ function DutyCard({ item, mittiUrls, onAction }) {
           )}
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -234,11 +236,11 @@ export default function MyDutiesPage() {
                   {items.filter(i => i.due_status === 'done' || i.due_status === 'on_track').length}/{items.length} done
                 </span>
               </div>
-              <div className="space-y-2.5">
+              <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-2.5">
                 {items.map((item, i) => (
                   <DutyCard key={`${cycle.key}-${i}`} item={item} mittiUrls={mittiUrls} onAction={navigate} />
                 ))}
-              </div>
+              </motion.div>
             </div>
           );
         })}

@@ -43,6 +43,7 @@ import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import QuickActionsBar from '@/components/field/QuickActionsBar';
+import CelebrationOverlay from '@/components/field/CelebrationOverlay';
 
 export default function TodayPage() {
   const navigate = useNavigate();
@@ -71,6 +72,7 @@ export default function TodayPage() {
   const [showTravelModal, setShowTravelModal] = useState(false);
   const [travelAssignment, setTravelAssignment] = useState(null);
   const [travelDayType, setTravelDayType] = useState('monday');
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // ── Handlers (preserved exactly from StaffDashboard) ──
   const handleStartJob = async (assignmentId) => {
@@ -248,6 +250,7 @@ export default function TodayPage() {
       if (remaining.length > 0) {
         setShowNextJobPrompt(true);
       } else {
+        setShowCelebration(true);
         toast({ title: 'Shift completed', description: navigator.onLine ? 'Your timesheet has been submitted for approval.' : 'Saved offline — your timesheet will be submitted when you reconnect.' });
       }
     } catch (error) {
@@ -735,6 +738,7 @@ export default function TodayPage() {
           onClose={() => setShowScheduleSummary(false)}
         />
       )}
+      <CelebrationOverlay show={showCelebration} message="Shift Complete!" onClose={() => setShowCelebration(false)} />
     </FieldPageShell>
   );
 }
