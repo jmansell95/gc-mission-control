@@ -15,6 +15,7 @@ import PeopleInsights from '@/components/staff/PeopleInsights';
 import TrainingMatrixHub from '@/components/staff/TrainingMatrixHub';
 import RunReportButton from '@/components/reports/RunReportButton';
 import ContactsTab from '@/components/staff/ContactsTab';
+import StaffTasksTab from '@/components/staff/StaffTasksTab';
 
 // Map legacy tab IDs onto the new structure so deep links don't break.
 // Crew Members / Crew Profiles / Crew Types are merged into 'directory'.
@@ -57,6 +58,7 @@ const TABS = [
     ],
   },
   { id: 'training', label: 'Training', icon: GraduationCap },
+  { id: 'tasks', label: 'Tasks', icon: ClipboardList },
   {
     id: 'contacts', label: 'Contacts', icon: Building2, sub: [
       { id: 'clients', label: 'Clients', icon: Building2 },
@@ -125,6 +127,8 @@ export default function StaffPage() {
 
       {tab === 'training' ? (
         <TrainingMatrixHub />
+      ) : tab === 'tasks' ? (
+        <StaffTasksTab />
       ) : tab === 'people' && renderTab === 'staff' ? (
         <StaffListTab />
       ) : tab === 'people' && renderTab === 'crews' ? (

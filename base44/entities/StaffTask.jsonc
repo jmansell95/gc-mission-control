@@ -1,0 +1,293 @@
+{
+  "name": "StaffTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Task title \u2014 short summary shown on the field app task card."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed instructions for the task \u2014 what needs to be done, any special notes."
+    },
+    "assigned_to_staff_id": {
+      "type": "string",
+      "description": "Staff member this task is assigned to. Drives field app visibility via RLS."
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Assignee display name (denormalised for the Staff Hub task list without joining Staff records)."
+    },
+    "assigned_by_staff_id": {
+      "type": "string",
+      "description": "Staff member who created/assigned this task. Used for completion notifications back to the assigner."
+    },
+    "assigned_by_name": {
+      "type": "string",
+      "description": "Assigner display name (denormalised for the task card 'Assigned by' label)."
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the task is due. Drives the due_status grouping (overdue, due_today, due_this_week, on_track) on the field app."
+    },
+    "due_time": {
+      "type": "string",
+      "description": "Optional due time (HH:MM) for same-day time-sensitive tasks. Blank = end of day."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium",
+      "description": "Priority level. 'urgent' = red badge + push notification, 'high' = orange, 'medium' = blue, 'low' = grey."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "ad_hoc",
+        "recurring",
+        "vehicle_check",
+        "equipment_check",
+        "site_inspection",
+        "paperwork",
+        "training",
+        "other"
+      ],
+      "default": "ad_hoc",
+      "description": "Task category for grouping and icon mapping. 'ad_hoc' = one-off manager-assigned, 'recurring' = generated from a RecurringDutyTemplate, the rest are system-generated from existing flows."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "overdue",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "Task lifecycle. 'pending' = assigned, not started; 'in_progress' = staff marked started; 'completed' = ticked off; 'overdue' = past due_date and not completed; 'cancelled' = manager cancelled before completion."
+    },
+    "completed_at": {
+      "type": "string",
+      "description": "ISO timestamp when the staff member marked the task complete."
+    },
+    "completed_by": {
+      "type": "string",
+      "description": "Name of the staff member who completed the task (denormalised for the manager's task list)."
+    },
+    "completed_by_id": {
+      "type": "string",
+      "description": "Staff/user ID of the person who completed the task."
+    },
+    "completion_note": {
+      "type": "string",
+      "description": "Optional note the staff member added when completing the task (e.g. 'Done \u2014 3 items checked, all pass')."
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "URL of a photo attached by the manager when creating the task (e.g. a photo of the area/equipment to check)."
+    },
+    "completion_photo_url": {
+      "type": "string",
+      "description": "URL of a photo attached by the staff member when completing the task as proof of completion."
+    },
+    "attachment_url": {
+      "type": "string",
+      "description": "URL of an attached document (PDF, form, etc.) the staff member needs to review."
+    },
+    "linked_job_id": {
+      "type": "string",
+      "description": "Optional linked job \u2014 the task is specific to this project."
+    },
+    "linked_job_name": {
+      "type": "string",
+      "description": "Linked job name (denormalised for display)."
+    },
+    "linked_vehicle_id": {
+      "type": "string",
+      "description": "Optional linked vehicle \u2014 the task is specific to this vehicle (e.g. vehicle check)."
+    },
+    "linked_vehicle_name": {
+      "type": "string",
+      "description": "Linked vehicle name/registration (denormalised for display)."
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when this task was auto-generated from a RecurringDutyTemplate. Completion triggers generation of the next cycle instance."
+    },
+    "recurring_template_id": {
+      "type": "string",
+      "description": "ID of the RecurringDutyTemplate this task was generated from. Blank for ad-hoc tasks."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this task belongs to (inherited from the assigner or the template). Drives division-scoped RLS so managers only see their own division's tasks."
+    },
+    "cancelled_at": {
+      "type": "string",
+      "description": "ISO timestamp when the manager cancelled the task."
+    },
+    "cancelled_by": {
+      "type": "string",
+      "description": "Name of the manager who cancelled the task."
+    },
+    "cancel_reason": {
+      "type": "string",
+      "description": "Reason the task was cancelled."
+    },
+    "started_at": {
+      "type": "string",
+      "description": "ISO timestamp when the staff member marked the task as in_progress."
+    }
+  },
+  "required": [
+    "title",
+    "assigned_to_staff_id",
+    "due_date",
+    "priority"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.assigned_to_staff_id": "{{user.id}}"
+        },
+        {
+          "data.assigned_by_staff_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.assigned_to_staff_id": "{{user.id}}"
+        },
+        {
+          "data.assigned_by_staff_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.assigned_by_staff_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

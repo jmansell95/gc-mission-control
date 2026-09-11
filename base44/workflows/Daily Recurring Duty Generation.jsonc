@@ -1,0 +1,45 @@
+{
+  "description": "Runs every morning at 6am to generate StaffTask instances from all active RecurringDutyTemplate records whose next_due_date is today or past. Advances each template's next_due_date to the next cycle.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_recurring_duty_generation",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "generate_duties": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateRecurringDuties",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Generate recurring duties",
+            "description": "Create StaffTask instances from active templates due today"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "Europe/London",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Daily Recurring Duty Generation"
+}

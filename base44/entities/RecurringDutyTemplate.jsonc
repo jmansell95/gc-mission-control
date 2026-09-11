@@ -1,0 +1,253 @@
+{
+  "name": "RecurringDutyTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Template name \u2014 shown in the Staff Hub template picker and as the generated task title."
+    },
+    "description": {
+      "type": "string",
+      "description": "Template description \u2014 used as the generated task description. Explains what the duty involves."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "vehicle_check",
+        "equipment_check",
+        "site_inspection",
+        "paperwork",
+        "training",
+        "depot",
+        "other"
+      ],
+      "default": "other",
+      "description": "Duty category \u2014 drives the icon and color coding on the field app task cards."
+    },
+    "frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "yearly"
+      ],
+      "default": "weekly",
+      "description": "How often this duty recurs. 'daily' = every day, 'weekly' = on the specified day_of_week, 'monthly' = on the specified day_of_month, 'yearly' = on the specified month/day."
+    },
+    "day_of_week": {
+      "type": "number",
+      "description": "For weekly frequency: day of week (1=Mon \u2026 7=Sun). For daily frequency: ignored (generates every day)."
+    },
+    "day_of_month": {
+      "type": "number",
+      "description": "For monthly frequency: day of month (1-31). For yearly: combined with month_of_year."
+    },
+    "month_of_year": {
+      "type": "number",
+      "description": "For yearly frequency: month of year (1-12)."
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium",
+      "description": "Default priority for tasks generated from this template."
+    },
+    "assigned_staff_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Specific Staff IDs assigned to this recurring duty. When non-empty, tasks are generated for each listed staff member. When empty, tasks are generated for all staff matching the assigned_role_keys."
+    },
+    "assigned_role_keys": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Role keys (matched against Staff.job_title, case-insensitive contains) to auto-assign this duty to. Used when assigned_staff_ids is empty \u2014 generates tasks for all active staff whose job title contains one of these keys."
+    },
+    "due_time": {
+      "type": "string",
+      "description": "Optional due time (HH:MM) for generated tasks. Blank = end of due_date."
+    },
+    "linked_job_id": {
+      "type": "string",
+      "description": "Optional linked job \u2014 generated tasks are specific to this project."
+    },
+    "linked_vehicle_id": {
+      "type": "string",
+      "description": "Optional linked vehicle \u2014 generated tasks are specific to this vehicle."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "True while this template is generating tasks. Set to false to pause generation without deleting the template."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this template belongs to. Drives division-scoped RLS so managers only see their own division's templates."
+    },
+    "last_generated_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last time the generateRecurringDuties workflow created tasks from this template. Used to prevent duplicate generation on the same cycle."
+    },
+    "next_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The next date tasks should be generated for. Computed by the generation workflow after each cycle \u2014 for daily it's tomorrow, for weekly it's next week on day_of_week, etc."
+    },
+    "created_by_name": {
+      "type": "string",
+      "description": "Name of the manager who created this template."
+    }
+  },
+  "required": [
+    "name",
+    "frequency",
+    "is_active"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.assigned_staff_ids": {
+                "$in": [
+                  "{{user.id}}"
+                ]
+              }
+            },
+            {
+              "data.is_active": true
+            }
+          ]
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

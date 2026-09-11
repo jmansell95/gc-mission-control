@@ -478,14 +478,14 @@ export default function AssetScannerPage() {
         </div>
       </header>
 
-      {/* Unified TabBar — replaces the old dual mode-toggles + FieldHubTabs */}
+      {/* Unified TabBar — horizontally scrollable, all tabs visible */}
       <div className="field-header-glass border-b border-slate-200/80 px-3 py-2 flex-shrink-0">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
           <TabBar
             tabs={[
               { id: 'scan', label: 'Scan', icon: ScanLine },
               { id: 'mygear', label: 'My Gear', icon: Wrench },
               { id: 'pick-lists', label: 'Pick Lists', icon: ClipboardList },
+              { id: 'use-stock', label: 'Use Stock', icon: Package },
               ...(isHubAdmin ? [{ id: 'goods-in', label: 'Goods In', icon: Store }] : []),
               { id: 'collect', label: 'Collect', icon: PackageOpen },
             ]}
@@ -494,11 +494,11 @@ export default function AssetScannerPage() {
               if (tabId === 'scan') { setMode('assets'); setHubTab('scan'); }
               else if (tabId === 'mygear') { setMode('assets'); setHubTab('mygear'); }
               else if (tabId === 'pick-lists') setMode('pick-lists');
+              else if (tabId === 'use-stock') { setShowConsumableModal(true); }
               else if (tabId === 'goods-in') setMode('goods-in');
               else if (tabId === 'collect') setMode('site-collect');
             }}
           />
-        </div>
       </div>
 
       {/* Main content */}
@@ -584,16 +584,6 @@ export default function AssetScannerPage() {
               {basket.length > 0 && (
                 <InlineBasketList items={basket} onRemove={removeFromBasket} />
               )}
-
-              {/* Quick actions — Use Stock moved here from the tab bar row */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowConsumableModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition active:scale-95 bg-slate-100 text-slate-600 hover:bg-slate-200 touch-manipulation"
-                >
-                  <Package className="w-4 h-4" /> Use Stock
-                </button>
-              </div>
 
               {/* Scanner + My Gear split (tablet) / stacked (mobile) */}
               <div className="md:grid md:grid-cols-2 md:gap-hub-gap">

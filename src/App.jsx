@@ -36,6 +36,7 @@ import StaffDashboard from './pages/StaffDashboard';
 import ProfileRouter from '@/components/staff/ProfileRouter';
 import DesktopProfile from '@/components/staff/DesktopProfile';
 import FieldShell from '@/components/field/FieldShell';
+import FieldHomeHub from '@/components/field/FieldHomeHub';
 import TodayPage from './pages/field/TodayPage';
 import UpcomingPage from './pages/field/UpcomingPage';
 import MorePage from './pages/field/MorePage';
@@ -158,13 +159,17 @@ const AuthenticatedApp = () => {
           <Route path="/m/staff-profile" element={<RouteGuard><ProfileRouter /></RouteGuard>} />
           {/* Field crew routes — shared FieldShell with persistent bottom bar, fully responsive */}
           <Route element={<FieldShell />}>
-            <Route path="/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
+            {/* Home hub — the card-based landing page (replaces the old bottom tab bar) */}
+            <Route path="/staff-schedule" element={<RouteGuard><FieldHomeHub /></RouteGuard>} />
+            {/* Actual schedule detail (was at /staff-schedule, now at /today-schedule) */}
+            <Route path="/today-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
             <Route path="/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
             <Route path="/more" element={<RouteGuard><MorePage /></RouteGuard>} />
             <Route path="/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />
             <Route path="/scanner" element={<RouteGuard><AssetScannerPage /></RouteGuard>} />
             {/* Mobile /m/ tree — same components, FieldShell handles mobile layout */}
-            <Route path="/m/staff-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
+            <Route path="/m/staff-schedule" element={<RouteGuard><FieldHomeHub /></RouteGuard>} />
+            <Route path="/m/today-schedule" element={<RouteGuard><TodayPage /></RouteGuard>} />
             <Route path="/m/upcoming" element={<RouteGuard><UpcomingPage /></RouteGuard>} />
             <Route path="/m/more" element={<RouteGuard><MorePage /></RouteGuard>} />
             <Route path="/m/my-duties" element={<RouteGuard><MyDutiesPage /></RouteGuard>} />

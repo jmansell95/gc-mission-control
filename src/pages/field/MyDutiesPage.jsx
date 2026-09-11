@@ -12,6 +12,7 @@ import FieldContainer from '@/components/field/FieldContainer';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useFieldData } from '@/components/field/FieldDataProvider';
+import StaffTaskList from '@/components/field/StaffTaskList';
 
 const CATEGORY_ICONS = {
   vehicle_check: Car,
@@ -199,6 +200,20 @@ export default function MyDutiesPage() {
             <p className="text-xs text-slate-400 mt-1">Please try again in a moment.</p>
           </div>
         )}
+
+        {/* Assigned tasks (ad-hoc + recurring from StaffTask entity) */}
+        <div>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center">
+              <ClipboardCheck className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-slate-900">Assigned Tasks</h2>
+              <p className="text-[10px] text-slate-400">Tasks from your manager</p>
+            </div>
+          </div>
+          <StaffTaskList />
+        </div>
 
         {/* Duty cycles */}
         {data && CYCLE_CONFIG.map((cycle) => {
