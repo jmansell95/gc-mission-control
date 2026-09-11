@@ -39,6 +39,9 @@ export const APPROVAL_TYPES = [
   { key: 'compliance_doc',     label: 'Compliance Document Review', hub: 'compliance',  defaultSlaHours: 48, defaultMode: 'manager_chain' },
   { key: 'debt_collection',   label: 'Debt Collection Handoff',     hub: 'billing',     defaultSlaHours: 72, defaultMode: 'manager_chain' },
   { key: 'toolbox_talk',       label: 'Toolbox Talk Acknowledgement',hub: 'compliance',  defaultSlaHours: 0,  defaultMode: 'manager_chain' },
+  { key: 'shift_swap',         label: 'Shift Swap Claim',            hub: 'scheduling',  defaultSlaHours: 24, defaultMode: 'manager_chain' },
+  { key: 'staff_request',      label: 'Staff Request (Equipment/General)', hub: 'staff', defaultSlaHours: 48, defaultMode: 'manager_chain' },
+  { key: 'training_request',   label: 'Training Request',            hub: 'staff',      defaultSlaHours: 48, defaultMode: 'manager_chain' },
 ];
 
 // ── Approver resolution ───────────────────────────────────────────────────

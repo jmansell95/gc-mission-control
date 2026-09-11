@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { escapeHtml, linkBlock, styledHtml, getAppBaseUrl } from '../../shared/emailStyling.ts';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 const TYPE_LABELS = {
   cscs_card: 'CSCS Card',
@@ -82,6 +83,21 @@ Keep it realistic for the UK construction industry.`;
       staff_name,
       status: 'booked',
     });
+
+    // Create inbox approval for the manager to approve/decline the training request
+    try {
+      await createApproval(base44, {
+        approvalType: 'training_request',
+        requesterStaffId: staff_id,
+        title: `Training request — ${staff_name}: ${course.title || docType}`,
+        body: `${staff_name} requested training: ${course.title || docType}.${course.provider ? ' Provider: ' + course.provider : ''} Suggested date: ${startDate}.${request_text ? ' Request: ' + request_text : ''} Please approve or reject this training booking.`,
+        sourceHub: 'staff',
+        sourceEntity: 'TrainingBooking',
+        sourceId: booking.id,
+        deepLink: '/staff?tab=training',
+        priority: 'normal',
+      });
+    } catch (_) { /* don't block on inbox failure */ }
 
     // Notify admins so they can confirm/arrange — uses the email template system
     try {

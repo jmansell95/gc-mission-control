@@ -81,6 +81,71 @@ export default async function(req: Request): Promise<Response> {
       }
     }
 
+    // ── Shift swap approval handling ──────────────────────────────────
+    if (
+      item.approval_type === 'shift_swap' &&
+      item.source_entity === 'ShiftSwap' &&
+      item.source_id &&
+      (decision === 'approved' || decision === 'rejected')
+    ) {
+      const sr = base44.asServiceRole;
+      try {
+        const swaps = await sr.entities.ShiftSwap.filter({ id: item.source_id });
+        const swap = swaps[0];
+        if (swap && swap.status === 'claimed') {
+          await sr.entities.ShiftSwap.update(item.source_id, {
+            status: decision === 'approved' ? 'approved' : 'rejected',
+            approved_by: user.full_name || user.email || 'Manager',
+            approved_at: new Date().toISOString(),
+            manager_note: note || undefined,
+          });
+          if (decision === 'approved' && swap.assignment_id && swap.claiming_staff_id) {
+            await sr.entities.RotaAssignment.update(swap.assignment_id, {
+              staff_id: swap.claiming_staff_id,
+            });
+          }
+        }
+      } catch (_) { /* best-effort */ }
+    }
+
+    // ── Staff request approval handling ───────────────────────────────
+    if (
+      item.approval_type === 'staff_request' &&
+      item.source_entity === 'StaffRequest' &&
+      item.source_id &&
+      (decision === 'approved' || decision === 'rejected')
+    ) {
+      const sr = base44.asServiceRole;
+      try {
+        await sr.entities.StaffRequest.update(item.source_id, {
+          status: decision === 'approved' ? 'in_progress' : 'rejected',
+          responded_by: user.id,
+          responded_by_name: user.full_name || user.email || 'Manager',
+          responded_at: new Date().toISOString(),
+          response: note || (decision === 'approved' ? 'Approved' : 'Rejected'),
+        });
+      } catch (_) { /* best-effort */ }
+    }
+
+    // ── Training request approval handling ────────────────────────────
+    if (
+      item.approval_type === 'training_request' &&
+      item.source_entity === 'TrainingBooking' &&
+      item.source_id &&
+      (decision === 'approved' || decision === 'rejected')
+    ) {
+      const sr = base44.asServiceRole;
+      try {
+        if (decision === 'rejected') {
+          await sr.entities.TrainingBooking.update(item.source_id, {
+            status: 'failed',
+            failure_reason: 'Manager rejected training request' + (note ? ': ' + note : ''),
+          });
+        }
+        // On approval, the booking stays as 'booked' (already created by requestStaffTraining)
+      } catch (_) { /* best-effort */ }
+    }
+
     return Response.json(result);
   } catch (error) {
     const msg = (error && error.message) ? error.message : String(error);

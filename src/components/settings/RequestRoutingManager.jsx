@@ -24,8 +24,6 @@ import { UserCheck, Save, Loader2, Plus, Trash2, Info } from 'lucide-react';
 const REQUEST_TYPES = [
   { key: 'equipment', label: 'Equipment Request', desc: 'Crew requesting gear, tools or plant' },
   { key: 'general', label: 'General Request', desc: 'Anything else crew need from the office' },
-  { key: 'payslip', label: 'Payslip Request', desc: 'Request for latest payslip' },
-  { key: 'expense', label: 'Expense Claim', desc: 'Expense reimbursement claim' },
 ];
 
 export default function RequestRoutingManager() {
@@ -111,7 +109,7 @@ export default function RequestRoutingManager() {
       <SettingsSectionHeader
         icon={UserCheck}
         title="Request Routing"
-        description="Route staff requests (equipment, general, payslip, expense) to the right people — specific staff or by role — straight into their inbox"
+        description="Route staff requests (equipment, general) to the right people — specific staff or by role — straight into their inbox"
         actions={
           <button onClick={handleSave} disabled={saving}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold transition active:scale-95 shadow-sm disabled:opacity-50">

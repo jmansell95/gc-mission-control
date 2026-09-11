@@ -3,6 +3,7 @@ import {
   brandedWrapper, escapeHtml, getAppBaseUrl, ctaButton, linkBlock,
   infoTable, sectionCard, helpTip, heading, p, callout, html
 } from '../../shared/emailStyling.ts';
+import { createApproval } from '../../shared/inboxEngine.ts';
 
 /**
  * routeStaffRequest — reads the request routing config (AppSetting key
@@ -123,45 +124,29 @@ Deno.serve(async (req) => {
       helpTip('What to do next', 'Open your inbox to action this request. You can fulfil it, respond, or reject it from there.') +
       linkBlock(baseUrl, deepLink, 'Open Inbox');
 
-    // Create inbox items + send emails
-    let notified = 0;
-    for (const r of recipients) {
-      // Create InboxItem
-      try {
-        await base44.asServiceRole.entities.InboxItem.create({
-          type: 'alert',
-          category: `staff_request_${requestType}`,
-          title: subjectLine,
-          body: `${requesterName} requested: ${staffReq.subject || typeLabel}.${staffReq.body ? ' ' + staffReq.body : ''}`,
-          source_hub: 'staff',
-          source_entity: 'StaffRequest',
-          source_id: staffReq.id,
-          deep_link: deepLink,
-          priority: 'normal',
-          status: 'pending',
-          assigned_to_staff_id: r.staffId || undefined,
-          assigned_to_user_id: r.userId || undefined,
-          assigned_to_name: r.name,
-          requester_staff_id: staffReq.staff_id || undefined,
-          requester_user_id: undefined,
-          requester_name: requesterName,
-        });
-      } catch (_) { /* don't block on inbox failure */ }
+    // Create a proper approval-type inbox item via the approval engine so the
+    // manager can approve/reject from the inbox. Uses the request_routing
+    // config's resolved staff IDs as override approvers when available; falls
+    // back to the staff_request routing config (manager chain → super admins).
+    try {
+      const approverStaffIds = recipients
+        .map(r => r.staffId)
+        .filter(Boolean);
+      await createApproval(base44, {
+        approvalType: 'staff_request',
+        requesterStaffId: staffReq.staff_id || null,
+        title: subjectLine,
+        body: `${requesterName} requested: ${staffReq.subject || typeLabel}.${staffReq.body ? ' ' + staffReq.body : ''}${staffReq.amount ? ` Amount: £${Number(staffReq.amount).toFixed(2)}` : ''}`,
+        sourceHub: 'staff',
+        sourceEntity: 'StaffRequest',
+        sourceId: staffReq.id,
+        deepLink: `/inbox?request=${staffReq.id}`,
+        priority: 'normal',
+        overrideApproverStaffIds: approverStaffIds.length > 0 ? approverStaffIds : null,
+      });
+    } catch (_) { /* don't block on inbox failure */ }
 
-      // Send email
-      if (r.email) {
-        try {
-          await base44.asServiceRole.integrations.Core.SendEmail({
-            to: r.email,
-            subject: subjectLine,
-            body: brandedWrapper(bodyHtml, { headerVariant: 'brand', banner_subtitle: 'Staff Request' }),
-          });
-          notified++;
-        } catch (_) {}
-      }
-    }
-
-    return Response.json({ sent: true, notified, recipients: recipients.length });
+    return Response.json({ sent: true, recipients: recipients.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

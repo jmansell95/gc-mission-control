@@ -68,13 +68,8 @@ export default function ShiftSwapBoard({ staff, divisionId, myAssignments = [], 
 
   const handleClaim = async (swap) => {
     try {
-      await base44.entities.ShiftSwap.update(swap.id, {
-        status: 'claimed',
-        claiming_staff_id: staff.id,
-        claiming_staff_name: staff.name,
-        claimed_at: new Date().toISOString(),
-      });
-      toast({ title: 'Shift claimed', description: 'Awaiting manager approval.' });
+      await base44.functions.invoke('claimShiftSwap', { swap_id: swap.id });
+      toast({ title: 'Shift claimed', description: 'Awaiting manager approval — your manager has been notified.' });
       queryClient.invalidateQueries({ queryKey: ['shift-swaps', divisionId] });
     } catch (e) {
       toast({ title: 'Failed to claim', description: e.message, variant: 'destructive' });
