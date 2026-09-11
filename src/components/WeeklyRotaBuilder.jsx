@@ -743,11 +743,11 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
               <button onClick={handleSmartFill} disabled={smartFillLoading}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-ui-caption font-semibold disabled:opacity-50">
                 <Copy className="w-4 h-4" /> <span className="hidden sm:inline">{smartFillLoading ? '...' : 'Copy Last Week'}</span>
               </button>
               <button onClick={() => setModal({ isOpen: true, assignment: null, defaultStaffId: '', defaultDate: '' })}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition text-ui-caption font-semibold shadow-sm">
                 <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Shift</span>
               </button>
               <TodayCrewPopup
@@ -761,21 +761,21 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
               <RotaSuggestionsPopup warnings={rotaWarnings} />
               <button onClick={handleCleanupDuplicates} disabled={cleaningUp}
                 title="Remove duplicate assignments (keep one shift per staff per day; drivers exempt)"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium disabled:opacity-50">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-white text-red-600 border border-red-200 hover:bg-red-50 transition text-ui-caption font-semibold disabled:opacity-50">
                 {cleaningUp ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} <span className="hidden sm:inline">{cleaningUp ? 'Cleaning…' : 'Clean Duplicates'}</span>
               </button>
               <button onClick={handleSaveDraft} disabled={savingDraft}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition text-ui-caption font-semibold disabled:opacity-50">
                 {savingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} <span className="hidden sm:inline">Draft</span>
               </button>
               <button onClick={() => handleSubmitWeek()} disabled={publishing}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-400 transition text-sm font-semibold disabled:opacity-50 shadow-sm">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-amber-500 text-white hover:bg-amber-400 transition text-ui-caption font-semibold disabled:opacity-50 shadow-sm">
                 {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} <span className="hidden sm:inline">{isPublished ? 'Resend' : 'Publish'}</span>
               </button>
               {weekRecord && !isPublished && (
                 <button onClick={handleDeleteDraft} disabled={deletingDraft || rotas.length === 0}
                   title={rotas.length === 0 ? 'No assignments to delete' : 'Delete this draft rota and all its assignments'}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed">
+                  className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-white text-red-600 border border-red-200 hover:bg-red-50 transition text-ui-caption font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
                   {deletingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />} <span className="hidden sm:inline">Delete Draft</span>
                 </button>
               )}

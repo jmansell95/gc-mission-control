@@ -26,7 +26,7 @@ export default function RotaSuggestionsPopup({ warnings = [] }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg transition text-sm font-semibold shadow-sm ${
+        className={`inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl transition text-ui-caption font-semibold shadow-sm ${
           hasCritical ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100' : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
         }`}
       >
