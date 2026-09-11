@@ -88,7 +88,7 @@ export default function MittiSyncStatusCard() {
       setSyncStep(2);
       let processed = 0;
       let totalStored = 0, totalUpdated = 0, totalErrors = 0;
-      const batchSize = 10;
+      const batchSize = 25;
       for (let i = 0; i < auditEntries.length; i += batchSize) {
         const batch = auditEntries.slice(i, i + batchSize);
         addLog(`Fetching batch ${Math.floor(i / batchSize) + 1} (${batch.length} audits)…`);

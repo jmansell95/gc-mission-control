@@ -37,31 +37,62 @@ export default async function(req: Request): Promise<Response> {
       ? config.last_pull_sync_at
       : new Date(Date.now() - syncWindowDays * 24 * 60 * 60 * 1000).toISOString();
 
-    // Search for audits modified since the cursor
-    const searchUrl = `https://api.mitti.com/audits/search?field=audit_id&field=modified_at&field=template_id&modified_after=${encodeURIComponent(modifiedAfter)}&order=asc&limit=100`;
+    // Search for audits modified since the cursor — paginate with limit=1000
+    // and order=asc, looping until a page returns <1000 entries (caught up).
+    // The cursor advances to the last entry's modified_at + 1ms to break the
+    // inclusive-modified_after pin that previously stuck the sync at 19th June.
+    const PAGE_LIMIT = 1000;
+    const MAX_PAGES = 10; // safety cap (10,000 audits per sync)
+    let allEntries: any[] = [];
+    let cursor = modifiedAfter;
+    let pageCount = 0;
 
-    const resp = await fetch(searchUrl, {
-      headers: {
-        'Authorization': `Bearer ${config.api_token}`,
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!resp.ok) {
-      const errText = await resp.text().catch(() => '');
-      return Response.json({
-        error: `Mitti API returned ${resp.status}`,
-        details: errText.slice(0, 500),
-      }, { status: 502 });
+    while (pageCount < MAX_PAGES) {
+      const searchUrl = `https://api.mitti.com/audits/search?field=audit_id&field=modified_at&field=template_id&modified_after=${encodeURIComponent(cursor)}&order=asc&limit=${PAGE_LIMIT}`;
+      const resp = await fetch(searchUrl, {
+        headers: {
+          'Authorization': `Bearer ${config.api_token}`,
+          'Accept': 'application/json',
+        },
+      });
+      if (!resp.ok) {
+        const errText = await resp.text().catch(() => '');
+        return Response.json({
+          error: `Mitti API returned ${resp.status}`,
+          details: errText.slice(0, 500),
+        }, { status: 502 });
+      }
+      const page = await resp.json();
+      const entries = Array.isArray(page.audits) ? page.audits : [];
+      allEntries = allEntries.concat(entries);
+      pageCount++;
+      if (entries.length < PAGE_LIMIT) break; // caught up
+      // Advance cursor to the last entry's modified_at to fetch the next page
+      const lastMod = entries[entries.length - 1]?.modified_at;
+      if (!lastMod) break;
+      cursor = lastMod;
     }
 
-    const page = await resp.json();
-    const auditEntries = Array.isArray(page.audits) ? page.audits : [];
+    // Deduplicate by audit_id (pages may overlap at the cursor boundary)
+    const seen = new Set<string>();
+    const auditEntries = allEntries.filter((e: any) => {
+      const id = String(e.audit_id || '');
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
 
-    // The newest modified_at in this batch (order=asc → last entry is newest)
-    const latestModified = auditEntries.length > 0
-      ? String(auditEntries[auditEntries.length - 1].modified_at || new Date().toISOString())
-      : new Date().toISOString();
+    // Advance cursor +1ms to break the inclusive modified_after pin
+    let latestModified = new Date().toISOString();
+    if (auditEntries.length > 0) {
+      const lastMod = auditEntries[auditEntries.length - 1].modified_at;
+      if (lastMod) {
+        const d = new Date(lastMod);
+        if (!isNaN(d.getTime())) {
+          latestModified = new Date(d.getTime() + 1).toISOString();
+        }
+      }
+    }
 
     return Response.json({
       status: 'success',

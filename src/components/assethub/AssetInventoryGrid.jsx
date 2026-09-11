@@ -187,7 +187,7 @@ function AssetCardBanner({ asset, heightClass = 'h-28' }) {
     }
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       const res = await base44.functions.invoke('pushAssetPhotoToPanda', {
         site_asset_id: asset.id, action: 'upload', file_url, file_name: file.name,
       });
@@ -210,20 +210,19 @@ function AssetCardBanner({ asset, heightClass = 'h-28' }) {
           className="w-full h-full object-cover"
           onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
       ) : null}
-      <div className="w-full h-full bg-slate-200 flex flex-col items-center justify-center gap-1 px-2" style={{ display: imgUrl ? 'none' : 'flex' }}>
-        <Icon className="w-5 h-5 text-slate-400" />
-        <p className="text-[9px] font-semibold text-slate-400 text-center leading-tight">
-          {hasPanda ? 'No image on Asset Panda' : 'Not linked to Asset Panda'}
+      <div
+        className="w-full h-full bg-slate-50 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-1.5 px-2 cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 transition"
+        style={{ display: imgUrl ? 'none' : 'flex' }}
+        onClick={(e) => { e.stopPropagation(); if (hasPanda) fileRef.current?.click(); }}
+      >
+        <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center border border-slate-200 shadow-sm">
+          {uploading ? <Loader2 className="w-5 h-5 text-slate-500 animate-spin" /> : <Upload className="w-5 h-5 text-slate-400" />}
+        </div>
+        <p className="text-[10px] font-semibold text-slate-500 text-center leading-tight">
+          {hasPanda ? 'No picture' : 'Not linked to Asset Panda'}
         </p>
         {hasPanda && (
-          <button
-            onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}
-            disabled={uploading}
-            className="w-7 h-7 rounded-full bg-white/80 hover:bg-white border border-slate-300 flex items-center justify-center transition disabled:opacity-50 shadow-sm"
-            title="Upload photo to Asset Panda"
-          >
-            {uploading ? <Loader2 className="w-3.5 h-3.5 text-slate-500 animate-spin" /> : <Plus className="w-4 h-4 text-slate-600" />}
-          </button>
+          <p className="text-[9px] text-slate-400 text-center leading-tight">Click to upload</p>
         )}
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
       </div>

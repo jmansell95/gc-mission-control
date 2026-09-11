@@ -8,6 +8,7 @@ import { safeFormat } from '@/utils/format';
 import { COMPLIANCE_META, ASSET_TYPE_META, daysUntil } from '@/utils/rigRollup';
 import ServiceHistoryPanel from '@/components/compliance/ServiceHistoryPanel';
 import CertificateVault from '@/components/righub/CertificateVault';
+import RigCertificateHero from '@/components/righub/RigCertificateHero';
 import AssetPandaInfoPanel from '@/components/righub/AssetPandaInfoPanel';
 
 const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
@@ -76,6 +77,9 @@ export default function EquipmentDetailDrawer({ equipment, parentRig, onClose, o
         </div>
 
         <div className="p-5 space-y-4">
+          {/* Certificate hero — front and centre compliance status */}
+          <RigCertificateHero asset={equipment} />
+
           {/* Depot / ready banner */}
           {depotTagged && (
             <div className="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 bg-emerald-50/50">

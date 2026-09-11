@@ -11,6 +11,8 @@ import { safeFormat } from '@/utils/format';
 import { rollupCompliance, COMPLIANCE_META, ASSET_TYPE_META, daysUntil } from '@/utils/rigRollup';
 import ServiceHistoryPanel from '@/components/compliance/ServiceHistoryPanel';
 import CertificateVault from '@/components/righub/CertificateVault';
+import RigCertificateHero from '@/components/righub/RigCertificateHero';
+import LinkedAssetMiniCard from '@/components/righub/LinkedAssetMiniCard';
 import AssetPandaInfoPanel from '@/components/righub/AssetPandaInfoPanel';
 
 const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, vehicle: Truck, lifting: Anchor, portable_appliance: Plug };
@@ -81,6 +83,42 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
     } catch (e) { /* bubble */ }
   };
 
+  // ── Child assets (certificate drill-down) ──
+  const [showChildLinker, setShowChildLinker] = useState(false);
+  const [pendingChildren, setPendingChildren] = useState([]);
+
+  const childAssets = useMemo(
+    () => (rig.child_asset_ids || []).map(id => allAssets.find(a => a.id === id)).filter(Boolean),
+    [rig, allAssets]
+  );
+
+  const linkableChildren = allAssets.filter(a =>
+    a.id !== rig.id && !(rig.child_asset_ids || []).includes(a.id) && a.is_active !== false
+  );
+
+  const togglePendingChild = (id) => setPendingChildren(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const saveChildren = async () => {
+    if (pendingChildren.length === 0) { setShowChildLinker(false); return; }
+    setSaving(true);
+    try {
+      const newIds = [...(rig.child_asset_ids || []), ...pendingChildren];
+      await base44.entities.SiteAsset.update(rig.id, { child_asset_ids: newIds });
+      queryClient.invalidateQueries({ queryKey: ['site-assets'] });
+      setPendingChildren([]);
+      setShowChildLinker(false);
+    } catch (e) { /* bubble */ }
+    setSaving(false);
+  };
+
+  const unlinkChild = async (childId) => {
+    const newIds = (rig.child_asset_ids || []).filter(id => id !== childId);
+    try {
+      await base44.entities.SiteAsset.update(rig.id, { child_asset_ids: newIds });
+      queryClient.invalidateQueries({ queryKey: ['site-assets'] });
+    } catch (e) { /* bubble */ }
+  };
+
   const depotTagged = (rig.storage_location || '').toLowerCase().match(/depot|yard|dartford/);
 
   const printQrLabel = async () => {
@@ -138,6 +176,9 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
         </div>
 
         <div className="p-5 space-y-4">
+          {/* Rig Certificate Hero — front and centre compliance status */}
+          <RigCertificateHero asset={rig} />
+
           {/* Compliance rollup strip — vibrant stat tiles */}
           <div className="grid grid-cols-4 gap-2.5">
             {[
@@ -283,8 +324,67 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
             </div>
           </div>
 
+          {/* Child Assets — certificate drill-down view */}
+          <div className="rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center border bg-white border-slate-200">
+                <Layers className="w-3.5 h-3.5 text-emerald-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-800">Child Assets</p>
+                <p className="text-[10px] text-slate-400">{childAssets.length} linked — click any to drill into its certificate</p>
+              </div>
+              <button onClick={() => setShowChildLinker(s => !s)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-xs font-semibold transition">
+                <Plus className="w-3.5 h-3.5" /> Link
+              </button>
+            </div>
+
+            {showChildLinker && (
+              <div className="p-3 bg-emerald-50/40 border-b border-emerald-100">
+                <p className="text-[11px] font-medium text-slate-600 mb-2">Select assets to link as children:</p>
+                <div className="max-h-44 overflow-y-auto space-y-1.5">
+                  {linkableChildren.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">No unlinked assets available.</p>
+                  ) : linkableChildren.map(a => {
+                    const Icon = TYPE_ICON[a.asset_type] || Wrench;
+                    const checked = pendingChildren.includes(a.id);
+                    return (
+                      <label key={a.id} className="flex items-center gap-2.5 p-2 bg-white rounded-lg border border-slate-200 cursor-pointer hover:border-emerald-300 transition">
+                        <input type="checkbox" checked={checked} onChange={() => togglePendingChild(a.id)} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                        <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium text-slate-800 truncate">{a.name}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{a.equipment_type || a.asset_type}{a.serial_number ? ` · ${a.serial_number}` : ''}</p>
+                        </div>
+                        <span className={`w-2 h-2 rounded-full ${COMPLIANCE_META[a.compliance_status || 'unknown'].dot} flex-shrink-0`} />
+                      </label>
+                    );
+                  })}
+                </div>
+                {pendingChildren.length > 0 && (
+                  <button onClick={saveChildren} disabled={saving}
+                    className="mt-2.5 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] text-white rounded-lg text-xs font-semibold hover:brightness-110 transition disabled:opacity-60">
+                    <Save className="w-3.5 h-3.5" /> {saving ? 'Linking…' : `Link ${pendingChildren.length} child asset${pendingChildren.length !== 1 ? 's' : ''}`}
+                  </button>
+                )}
+              </div>
+            )}
+
+            <div className="p-3">
+              {childAssets.length === 0 ? (
+                <p className="text-xs text-slate-400 italic text-center py-3">No child assets linked yet. Use <strong>Link</strong> to add assets for the certificate drill-down.</p>
+              ) : (
+                <div className="space-y-1.5">
+                  {childAssets.map(child => (
+                    <LinkedAssetMiniCard key={child.id} asset={child} onClick={onOpenEquipment} onUnlink={unlinkChild} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Certificate vault — rig + all linked */}
-          <CertificateVault assetIds={[rig.id, ...linkedItems.map(i => i.id)]} assetNames={assetNames} />
+          <CertificateVault assetIds={[rig.id, ...linkedItems.map(i => i.id), ...childAssets.map(i => i.id)]} assetNames={assetNames} />
 
           {/* Service history for the rig itself */}
           <div className="rounded-xl border border-slate-200 overflow-hidden">

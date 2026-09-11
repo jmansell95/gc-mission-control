@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import {
   ShieldCheck, ShieldAlert, AlertTriangle, BarChart3, HardHat,
   CalendarDays, ExternalLink, Lock, Siren, Leaf, Users,
-  FileX, FileText, Clock, TrendingUp, XCircle,
+  FileX, FileText, Clock, TrendingUp, XCircle, Route,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
@@ -24,6 +24,7 @@ import CarbonFootprintWidget from '@/components/dashboard/CarbonFootprintWidget'
 import CarbonFootprintByProject from '@/components/dashboard/CarbonFootprintByProject';
 import CrewShiftStatusWidget from '@/components/compliance/CrewShiftStatusWidget';
 import RunReportButton from '@/components/reports/RunReportButton';
+import MittiActionRoutingManager from '@/components/compliance/MittiActionRoutingManager';
 import { resolveRole } from '@/utils/access';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -32,6 +33,7 @@ const SC_URL = 'https://app.safetyculture.com';
 const TABS = [
   { id: 'mitti', label: 'Mitti Audits', icon: BarChart3, sub: [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'routing', label: 'Action Routing', icon: Route },
   ]},
   { id: 'compliance-checks', label: 'Compliance Checks', icon: ShieldCheck, sub: [
     { id: 'staff-compliance', label: 'Staff Compliance', icon: Users },
@@ -163,7 +165,10 @@ export default function CompliancePage() {
       <SubPills active={subTab} onChange={setSubTab} pills={activeTab?.sub || []} />
 
       {tab === 'mitti' && (
-        <AuditDashboardTab />
+        <>
+          {subTab === 'overview' && <AuditDashboardTab />}
+          {subTab === 'routing' && <MittiActionRoutingManager />}
+        </>
       )}
 
       {tab === 'compliance-checks' && (

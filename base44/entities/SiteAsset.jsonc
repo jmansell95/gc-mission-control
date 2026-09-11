@@ -308,6 +308,14 @@
       "default": [],
       "description": "IDs of SiteAsset equipment (lifting gear, machinery, trailers) linked to this rig \u2014 shown when assigning the rig to a job for quick bulk assignment."
     },
+    "child_asset_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "IDs of child SiteAsset records manually linked to this asset for the rig certificate drill-down view. Each linked child appears as a mini-card with its own compliance status in the rig's certificate hero. Managed via the 'Link Child Assets' panel in the asset detail drawer."
+    },
     "is_active": {
       "type": "boolean",
       "default": true,

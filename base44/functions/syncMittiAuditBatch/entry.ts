@@ -26,8 +26,8 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'audit_entries array is required' }, { status: 422 });
     }
 
-    // Cap at 10 per call to avoid timeout
-    const batch = auditEntries.slice(0, 10);
+    // Cap at 25 per call (up from 10) — each fetch ~0.7s → ~17.5s per batch
+    const batch = auditEntries.slice(0, 25);
 
     // Load config
     let config: any = null;

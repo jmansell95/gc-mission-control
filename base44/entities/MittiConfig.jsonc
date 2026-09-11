@@ -24,6 +24,54 @@
       "default": true,
       "description": "When true, incoming audit reports are automatically matched to a job by site name / job reference found in the audit metadata."
     },
+    "action_routing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "repair",
+              "fault",
+              "safety",
+              "general"
+            ],
+            "default": "general",
+            "description": "Action item category this routing rule applies to. 'repair' = broken/needs fixing, 'fault' = defect/failure, 'safety' = hazard/risk, 'general' = catch-all."
+          },
+          "recipient_staff_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Specific Staff IDs to notify for this category."
+          },
+          "job_title_keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Job-title keywords (case-insensitive contains) to auto-match staff for this category (e.g. ['fitter', 'warehouse', 'mechanic'])."
+          },
+          "notify_emails": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Additional email addresses to notify (used for the daily digest email)."
+          }
+        },
+        "required": [
+          "category"
+        ]
+      },
+      "default": [],
+      "description": "Configurable routing rules mapping Mitti audit action-item categories to recipients. When an audit is stored, each action item is classified (repair/fault/safety/general) and an InboxItem is created for each matching recipient. Managed via the Mitti Action Routing manager in the Compliance Hub."
+    },
     "vehicle_check_url": {
       "type": "string",
       "description": "Direct SafetyCulture/Mitti inspection link for the daily vehicle walk-round check. Shown to crew in the ShiftWizard Checks step (before they leave for site). When blank, falls back to the built-in default SafetyCulture audit link."

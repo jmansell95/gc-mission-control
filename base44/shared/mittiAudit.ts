@@ -330,6 +330,17 @@ export async function processAndStoreAudit(
     toolboxTalkSynced = await syncToolboxTalk(base44, audit, fields, auditorStaffId, jobId, jobName);
   }
 
+  // Route action items to recipients' inbox based on configurable routing
+  let actionItemsRouted = 0;
+  if (fields.action_items.length > 0) {
+    try {
+      actionItemsRouted = await routeActionItems(
+        base44, fields.action_items, config, allStaff, auditId,
+        fields.audit_title || auditId, existingId || null,
+      );
+    } catch (e) { /* best-effort */ }
+  }
+
   return {
     stored: !existingId,
     updated: !!existingId,
@@ -338,9 +349,89 @@ export async function processAndStoreAudit(
     auditorStaffId,
     auditCategory: fields.audit_category,
     actionItemCount: fields.action_items.length,
+    actionItemsRouted,
     stampedAssignments,
     toolboxTalkSynced,
   };
+}
+
+// Classify an action item into a routing category based on its description.
+export function classifyActionItem(description: string, priority: string): string {
+  const hay = `${description} ${priority}`.toLowerCase();
+  if (hay.includes('repair') || hay.includes('fix') || hay.includes('broken') || hay.includes('replace') || hay.includes('service')) return 'repair';
+  if (hay.includes('safety') || hay.includes('hazard') || hay.includes('risk') || hay.includes('danger')) return 'safety';
+  if (hay.includes('fault') || hay.includes('defect') || hay.includes('fail')) return 'fault';
+  return 'general';
+}
+
+// Route audit action items to the right people's inbox based on the
+// configurable action_routing rules in MittiConfig. For each action item,
+// classify it (repair/fault/safety/general), find matching routing rules,
+// resolve recipients (by staff IDs or job-title keywords), and create an
+// InboxItem for each recipient.
+export async function routeActionItems(
+  base44: any,
+  actionItems: any[],
+  config: any,
+  allStaff: any[],
+  auditId: string,
+  auditTitle: string,
+  reportId: string | null,
+): Promise<number> {
+  if (!actionItems || actionItems.length === 0) return 0;
+  const routingRules = config?.action_routing;
+  if (!Array.isArray(routingRules) || routingRules.length === 0) return 0;
+
+  let created = 0;
+  for (const item of actionItems) {
+    const category = classifyActionItem(item.description || '', item.priority || '');
+    // Find matching routing rules (specific category + general catch-all)
+    const matchingRules = routingRules.filter((r: any) => r.category === category || r.category === 'general');
+    if (matchingRules.length === 0) continue;
+
+    // Resolve recipients
+    const recipientStaffIds = new Set<string>();
+    for (const rule of matchingRules) {
+      for (const sid of (rule.recipient_staff_ids || [])) {
+        recipientStaffIds.add(String(sid));
+      }
+      if (rule.job_title_keywords && rule.job_title_keywords.length > 0) {
+        for (const staff of allStaff) {
+          if (staff.is_active === false) continue;
+          const title = String(staff.job_title || '').toLowerCase();
+          if (rule.job_title_keywords.some((kw: string) => title.includes(String(kw).toLowerCase()))) {
+            recipientStaffIds.add(staff.id);
+          }
+        }
+      }
+    }
+
+    // Create an InboxItem for each recipient
+    const desc = String(item.description || 'Action required').slice(0, 200);
+    for (const staffId of recipientStaffIds) {
+      const staff = allStaff.find((s: any) => s.id === staffId);
+      if (!staff) continue;
+      try {
+        await base44.asServiceRole.entities.InboxItem.create({
+          type: 'alert',
+          category: `mitti_action_${category}`,
+          title: `Audit action: ${desc}`,
+          body: `From audit "${auditTitle}" — ${item.description || 'Action required'}${item.assignee ? ` (assignee: ${item.assignee})` : ''}${item.due_date ? ` (due: ${item.due_date})` : ''}`,
+          source_hub: 'compliance',
+          source_entity: 'SafetyReport',
+          source_id: reportId || auditId,
+          deep_link: `/compliance?audit=${reportId || auditId}`,
+          priority: item.priority === 'high' || item.priority === 'critical' ? 'urgent' : 'normal',
+          status: 'pending',
+          assigned_to_staff_id: staffId,
+          assigned_to_user_id: staff.user_id || null,
+          assigned_to_name: staff.name || '',
+        });
+        created++;
+      } catch (e) { /* best-effort */ }
+    }
+  }
+  return created;
 }
 
 // Fetch a full audit from the Mitti API by ID.

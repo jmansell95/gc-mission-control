@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
     ? config.last_pull_sync_at
     : new Date(Date.now() - syncWindowDays * 24 * 60 * 60 * 1000).toISOString();
 
-  const searchUrl = `https://api.mitti.com/audits/search?field=audit_id&field=modified_at&field=template_id&modified_after=${encodeURIComponent(modifiedAfter)}&order=asc&limit=100`;
+  const searchUrl = `https://api.mitti.com/audits/search?field=audit_id&field=modified_at&field=template_id&modified_after=${encodeURIComponent(modifiedAfter)}&order=asc&limit=1000`;
 
   let auditEntries: any[] = [];
   try {
@@ -126,8 +126,9 @@ Deno.serve(async (req) => {
   }
 
   // ── Step 3: Fetch full audit data ──
-  // Cap individual fetches to avoid timeout (each fetch ~0.7s)
-  const MAX_FETCHES = 50;
+  // Cap at 60 fetches per run (each ~0.7s → ~42s, within the function timeout).
+  // The 30-min workflow loops across runs to catch up when there are more pending.
+  const MAX_FETCHES = 60;
   const toFetch = auditEntries.slice(0, MAX_FETCHES);
   const fullAudits: any[] = [];
 
@@ -205,11 +206,16 @@ Deno.serve(async (req) => {
 
   // Advance the sync cursor to the newest modified_at in this batch
   // (order=asc means the last entry has the newest timestamp)
+  // Advance cursor +1ms past the last FETCHED audit (not the last searched)
+  // to avoid skipping unfetched audits when MAX_FETCHES < search results.
   let latestModified = new Date().toISOString();
-  if (auditEntries.length > 0) {
-    const lastEntry = auditEntries[auditEntries.length - 1];
-    if (lastEntry?.modified_at) {
-      latestModified = lastEntry.modified_at;
+  const lastFetched = toFetch[toFetch.length - 1];
+  if (lastFetched?.modified_at) {
+    const d = new Date(lastFetched.modified_at);
+    if (!isNaN(d.getTime())) {
+      latestModified = new Date(d.getTime() + 1).toISOString();
+    } else {
+      latestModified = lastFetched.modified_at;
     }
   }
 
