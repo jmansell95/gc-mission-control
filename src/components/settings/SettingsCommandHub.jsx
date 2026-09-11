@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import {
   Settings as SettingsIcon, CheckCircle2, EyeOff, Search, X,
   ChevronRight, ExternalLink, Link2, Link2Off, Eye, Loader2, SlidersHorizontal,
-  Settings2, Database,
+  Settings2, Database, FileText,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';

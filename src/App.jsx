@@ -129,8 +129,10 @@ const AuthenticatedApp = () => {
     return <AccessGateScreen status="rejected" email={authError.email} />;
   }
 
-  // Render the main app
+  // Render the main app — wrapped in ErrorBoundary so any provider/route
+  // crash shows a diagnostic error card instead of a blank white screen.
   return (
+    <ErrorBoundary>
     <MobileAppProvider>
     <StaffAssistantProvider>
       <SchedulingAssistantProvider>
@@ -241,6 +243,7 @@ const AuthenticatedApp = () => {
       </SchedulingAssistantProvider>
     </StaffAssistantProvider>
     </MobileAppProvider>
+    </ErrorBoundary>
   );
 };
 
@@ -248,6 +251,7 @@ const AuthenticatedApp = () => {
 function App() {
 
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
@@ -259,6 +263,7 @@ function App() {
         <Toaster />
       </QueryClientProvider>
     </AuthProvider>
+    </ErrorBoundary>
   )
 }
 
