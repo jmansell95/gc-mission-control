@@ -63,6 +63,15 @@ function RequestsTab({ staff, divisionId }) {
   const [submitting, setSubmitting] = useState(null);
 
   const { data: myAbsences = [] } = useQueryAbsences(staff?.id);
+  const { data: myStaffRequests = [] } = useQuery({
+    queryKey: ['my-staff-requests', staff?.id],
+    queryFn: async () => {
+      if (!staff?.id) return [];
+      const all = await base44.entities.StaffRequest.filter({ staff_id: staff.id });
+      return all.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+    },
+    enabled: !!staff?.id,
+  });
 
   const submitHoliday = async () => {
     if (!holiday.start || !holiday.end || submitting) return;
@@ -138,6 +147,27 @@ function RequestsTab({ staff, divisionId }) {
                     <p className="text-xs text-slate-400">{format(new Date(a.start_date + 'T00:00:00'), 'dd MMM')} — {format(new Date(a.end_date + 'T00:00:00'), 'dd MMM')}</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${statusTint}`}>{a.status}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* My office requests — payslip/expense/equipment/general */}
+      {myStaffRequests.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-4">
+          <h3 className="text-sm font-bold text-slate-800 mb-2">My Office Requests</h3>
+          <div className="space-y-2">
+            {myStaffRequests.slice(0, 10).map(r => {
+              const statusTint = r.status === 'fulfilled' ? 'bg-emerald-50 text-emerald-700' : r.status === 'rejected' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700';
+              return (
+                <div key={r.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 capitalize">{r.request_type}</p>
+                    <p className="text-xs text-slate-400 truncate">{r.subject}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${statusTint}`}>{r.status.replace('_', ' ')}</span>
                 </div>
               );
             })}

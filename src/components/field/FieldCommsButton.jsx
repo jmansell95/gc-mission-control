@@ -63,19 +63,19 @@ export default function FieldCommsButton() {
       </button>
 
       {/* Bottom sheet */}
-      {open && <CommsSheet onClose={() => setOpen(false)} ctx={ctx} />}
+      {open && <CommsSheet onClose={() => setOpen(false)} ctx={ctx} unreadMessages={messages} pendingRequests={myRequests} />}
     </>
   );
 }
 
-function CommsSheet({ onClose, ctx }) {
-  const [tab, setTab] = useState('messages');
+function CommsSheet({ onClose, ctx, unreadMessages = [], pendingRequests = [] }) {
+  const [tab, setTab] = useState(unreadMessages.length > 0 ? 'messages' : pendingRequests.length > 0 ? 'requests' : 'messages');
   const { staff, activeDivision, allStaff, visibleAssignments, jobs, isPlatformAdmin } = ctx || {};
 
   const tabs = [
-    { key: 'messages', label: 'Messages', icon: MessageSquare },
+    { key: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessages.length },
     { key: 'swap', label: 'Shift Swap', icon: ArrowLeftRight },
-    { key: 'requests', label: 'Requests', icon: FileText },
+    { key: 'requests', label: 'Requests', icon: FileText, badge: pendingRequests.length },
   ];
 
   return (
@@ -104,7 +104,7 @@ function CommsSheet({ onClose, ctx }) {
         <div className="flex items-center justify-between px-4 py-2 flex-shrink-0">
           <div>
             <h2 className="text-base font-extrabold text-slate-900">Crew Comms</h2>
-            <p className="text-xs text-slate-400">Message your team, swap shifts, request payslips</p>
+            <p className="text-xs text-slate-400">Message your team, swap shifts, request time off</p>
           </div>
           <button
             onClick={onClose}
@@ -123,12 +123,17 @@ function CommsSheet({ onClose, ctx }) {
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition active:scale-95 ${
+                className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition active:scale-95 ${
                   active ? 'bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white shadow-sm' : 'text-slate-500 hover:bg-white'
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 {t.label}
+                {t.badge > 0 && (
+                  <span className="absolute top-1 right-1.5 min-w-[16px] h-4 px-1 bg-[#8DC63F] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {t.badge > 9 ? '9+' : t.badge}
+                  </span>
+                )}
               </button>
             );
           })}

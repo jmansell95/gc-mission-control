@@ -71,6 +71,26 @@ export default function StaffMessenger({ staff, divisionStaff = [], divisionId }
     });
   }, [messages, activeChannel, staff?.id]);
 
+  // Unread counts per channel for badge display
+  const crewUnread = messages.filter(m => m.channel === 'crew' && m.sender_id !== staff?.id && !m.read_at).length;
+  const directUnreadFor = (peerId) => messages.filter(m => m.channel === 'direct' && m.sender_id === peerId && m.recipient_id === staff?.id && !m.read_at).length;
+
+  // Mark messages as read when a channel is opened
+  useEffect(() => {
+    if (!activeChannel || !staff?.id || !divisionId) return;
+    const unread = messages.filter(m => {
+      if (m.sender_id === staff.id || m.read_at) return false;
+      if (activeChannel.type === 'crew') return m.channel === 'crew';
+      if (activeChannel.type === 'direct') return m.channel === 'direct' && m.sender_id === activeChannel.peerId;
+      return false;
+    });
+    if (unread.length === 0) return;
+    Promise.all(unread.map(m => base44.entities.StaffMessage.update(m.id, { read_at: new Date().toISOString() })))
+      .then(() => queryClient.invalidateQueries({ queryKey: ['staff-messages', staff?.id, divisionId] }))
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChannel]);
+
   const handleSend = async () => {
     const body = draft.trim();
     if (!body || !activeChannel || sending) return;
@@ -108,11 +128,19 @@ export default function StaffMessenger({ staff, divisionStaff = [], divisionId }
             <p className="text-sm font-bold text-slate-900">Crew Channel</p>
             <p className="text-xs text-slate-400 truncate">Everyone in your division</p>
           </div>
-          <MessageCircle className="w-4 h-4 text-slate-300 flex-shrink-0" />
+          {crewUnread > 0 ? (
+            <span className="min-w-[20px] h-5 px-1.5 bg-[#8DC63F] text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+              {crewUnread > 9 ? '9+' : crewUnread}
+            </span>
+          ) : (
+            <MessageCircle className="w-4 h-4 text-slate-300 flex-shrink-0" />
+          )}
         </button>
 
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Direct Messages</p>
-        {divisionStaff.filter(s => s.id !== staff?.id).slice(0, 20).map(peer => (
+        {divisionStaff.filter(s => s.id !== staff?.id).slice(0, 20).map(peer => {
+          const unread = directUnreadFor(peer.id);
+          return (
           <button
             key={peer.id}
             onClick={() => setActiveChannel({ type: 'direct', peerId: peer.id, peerName: peer.name })}
@@ -123,8 +151,14 @@ export default function StaffMessenger({ staff, divisionStaff = [], divisionId }
               <p className="text-sm font-bold text-slate-900 truncate">{peer.name}</p>
               <p className="text-xs text-slate-400 truncate">{peer.job_title || 'Crew'}</p>
             </div>
+            {unread > 0 && (
+              <span className="min-w-[20px] h-5 px-1.5 bg-[#8DC63F] text-white text-[10px] font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
           </button>
-        ))}
+          );
+        })}
         {divisionStaff.length <= 1 && (
           <p className="text-center text-xs text-slate-400 py-4">No other crew in your division yet</p>
         )}
