@@ -22,7 +22,6 @@ import RolePerformanceDashboard from '@/components/staff/RolePerformanceDashboar
 import IncentiveDashboard from '@/components/staff/IncentiveDashboard';
 import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import ProfileStats from '@/components/staff/ProfileStats';
-import AutoTimesheetStatus from '@/components/staff/AutoTimesheetStatus';
 import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
 import { resolveRole } from '@/utils/access';
 
@@ -247,13 +246,6 @@ export default function DesktopProfile() {
                   </div>
                 </div>
               </div>
-
-              {staff.id && !viewingOther && (
-                <div className="hub-glass rounded-2xl p-5 md:p-6">
-                  <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4">Today's Timesheet</h2>
-                  <AutoTimesheetStatus staffId={staff.id} />
-                </div>
-              )}
 
               {upcomingAbsences.length > 0 && (
                 <div className="hub-glass rounded-2xl p-5 md:p-6">

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarDays, User, HelpCircle, LogOut, ChevronDown, Truck } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { canAccessSection } from '@/utils/access';
+import { isFieldStaff } from '@/utils/access';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
 export default function DashboardUserMenu() {
@@ -27,7 +27,7 @@ export default function DashboardUserMenu() {
 
   const displayName = profile?.name || authUser?.full_name || authUser?.email || 'User';
   const displayAvatar = profile?.avatar_url || null;
-  const canViewSchedule = canAccessSection(profile, 'staff_schedule');
+  const isField = isFieldStaff(profile, authUser?.role === 'admin');
 
   const handleLogout = async () => { await base44.auth.logout('/'); };
 
@@ -55,7 +55,7 @@ export default function DashboardUserMenu() {
             {(profile?.email || authUser?.email) && <p className="text-xs text-slate-500 truncate mt-0.5">{profile?.email || authUser?.email}</p>}
           </div>
           <div className="py-1">
-            {canViewSchedule && (
+            {isField && (
               <button onClick={() => { navigate('/staff-schedule'); setOpen(false); }} type="button"
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                 <CalendarDays className="w-4 h-4 text-slate-400" /> My Schedule
