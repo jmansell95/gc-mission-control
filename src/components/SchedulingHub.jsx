@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import UnifiedRotaBuilder from '@/components/rota/UnifiedRotaBuilder';
 import CalendarView from '@/components/CalendarView';
 import ResourcePlanner from '@/components/rota/ResourcePlanner';
-import { Calendar, CalendarDays, CalendarClock, Grid3x3, Users, AlertTriangle, CheckCircle2, Coffee } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Grid3x3, Users, AlertTriangle, CheckCircle2, Coffee, Drill, Navigation2, Loader2 } from 'lucide-react';
 import { useSchedulingAssistant } from '@/components/SchedulingAssistantChat';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
+import { useToast } from '@/components/ui/use-toast';
 import HubShell from '@/components/HubShell';
 import { SCHEDULING_HELP_TOPICS, SCHEDULING_ONBOARDING, SCHEDULING_QUICK_LINKS } from '@/components/scheduling/schedulingHubContent';
 
@@ -17,7 +18,29 @@ import { SCHEDULING_HELP_TOPICS, SCHEDULING_ONBOARDING, SCHEDULING_QUICK_LINKS }
 export default function SchedulingHub({ initialTab = 'rota' }) {
   const [tab, setTab] = useState(initialTab);
   const { openChat } = useSchedulingAssistant();
+  const { toast } = useToast();
+  const [syncing, setSyncing] = useState(false);
   useEffect(() => { if (initialTab) setTab(initialTab); }, [initialTab]);
+
+  const handleCrewRig = () => {
+    window.dispatchEvent(new CustomEvent('gc-open-crew-rig'));
+  };
+
+  const handleGeotabSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await base44.functions.invoke('syncGeotabTimesheets', { date: new Date().toISOString().slice(0, 10) });
+      if (res.data?.ok) {
+        toast({ title: 'GPS Timesheet Sync', description: res.data.message || 'Synced.' });
+      } else {
+        toast({ title: 'Sync failed', description: res.data?.error || 'Could not sync GPS timesheets.', variant: 'destructive' });
+      }
+    } catch (e) {
+      toast({ title: 'Sync failed', description: e.message || 'Could not sync GPS timesheets.', variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const [selectedWeek, setSelectedWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const selectedWeekStartStr = format(selectedWeek, 'yyyy-MM-dd');
@@ -85,12 +108,26 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
       activeTab={tab}
       onTabChange={setTab}
       actions={
-        <button onClick={openChat} type="button"
-          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
-          <CalendarClock className="w-4 h-4" />
-          <span className="hidden sm:inline">Schedule Assistant</span>
-          <span className="sm:hidden">Assistant</span>
-        </button>
+        <>
+          <button onClick={handleCrewRig} type="button"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-amber-600 text-white text-ui-caption font-semibold hover:bg-amber-700 active:scale-[0.97] transition shadow-sm">
+            <Drill className="w-4 h-4" />
+            <span className="hidden sm:inline">Assign Crew to Rig</span>
+            <span className="sm:hidden">Crew</span>
+          </button>
+          <button onClick={handleGeotabSync} type="button" disabled={syncing}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-blue-600 text-white text-ui-caption font-semibold hover:bg-blue-700 active:scale-[0.97] transition shadow-sm disabled:opacity-60">
+            {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation2 className="w-4 h-4" />}
+            <span className="hidden sm:inline">Sync GPS Timesheets</span>
+            <span className="sm:hidden">GPS</span>
+          </button>
+          <button onClick={openChat} type="button"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
+            <CalendarClock className="w-4 h-4" />
+            <span className="hidden sm:inline">Schedule Assistant</span>
+            <span className="sm:hidden">Assistant</span>
+          </button>
+        </>
       }
     >
       {tab === 'rota' && <UnifiedRotaBuilder selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} />}
