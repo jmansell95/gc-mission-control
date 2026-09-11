@@ -146,7 +146,8 @@ function CommsSheet({ onClose, ctx }) {
               location: jobs.find(j => j.id === a.job_id)?.location,
             }))}
             isManager={staff?.is_admin || isPlatformAdmin}
-            initialTab={tab}
+            activeTab={tab}
+            onTabChange={setTab}
           />
         </div>
       </div>

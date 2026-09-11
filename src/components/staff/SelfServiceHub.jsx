@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, addDays } from 'date-fns';
 import {
-  Plane, Receipt, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X,
+  Plane, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ShiftSwapBoard from './ShiftSwapBoard';
@@ -13,8 +13,10 @@ import StaffMessenger from './StaffMessenger';
  * SelfServiceHub — self-service requests for field staff.
  * Pill-based sub-nav: Requests (holiday/expense/payslip) · Shift Swap · Messages
  */
-export default function SelfServiceHub({ staff, divisionId, divisionStaff = [], myAssignments = [], isManager = false, initialTab = 'requests' }) {
-  const [subTab, setSubTab] = useState(initialTab);
+export default function SelfServiceHub({ staff, divisionId, divisionStaff = [], myAssignments = [], isManager = false, initialTab = 'requests', activeTab: controlledTab, onTabChange }) {
+  const [internalTab, setInternalTab] = useState(initialTab);
+  const isControlled = controlledTab !== undefined;
+  const subTab = isControlled ? controlledTab : internalTab;
 
   const tabs = [
     { key: 'requests', label: 'Requests', icon: FileText },
@@ -24,25 +26,28 @@ export default function SelfServiceHub({ staff, divisionId, divisionStaff = [], 
 
   return (
     <div className="space-y-4">
-      {/* Sub-nav pills */}
-      <div className="flex bg-white rounded-2xl border border-slate-200 p-1.5 gap-1">
-        {tabs.map(t => {
-          const Icon = t.icon;
-          const active = subTab === t.key;
-          return (
-            <button
-              key={t.key}
-              onClick={() => setSubTab(t.key)}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition active:scale-95 ${
-                active ? 'bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Sub-nav pills — only shown when uncontrolled (e.g. StaffDashboard).
+          When used inside FieldCommsButton, the parent sheet provides its own tab bar. */}
+      {!isControlled && (
+        <div className="flex bg-white rounded-2xl border border-slate-200 p-1.5 gap-1">
+          {tabs.map(t => {
+            const Icon = t.icon;
+            const active = subTab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setInternalTab(t.key)}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-[11px] font-bold transition active:scale-95 ${
+                  active ? 'bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {subTab === 'requests' && <RequestsTab staff={staff} divisionId={divisionId} />}
       {subTab === 'swap' && <ShiftSwapBoard staff={staff} divisionId={divisionId} myAssignments={myAssignments} isManager={isManager} />}
@@ -81,44 +86,6 @@ function RequestsTab({ staff, divisionId }) {
       toast({ title: 'Holiday requested', description: 'Your manager will review this request.' });
       setHoliday(h => ({ ...h, notes: '' }));
       queryClient.invalidateQueries({ queryKey: ['my-absences', staff?.id] });
-    } catch (e) {
-      toast({ title: 'Failed', description: e.message, variant: 'destructive' });
-    }
-    setSubmitting(null);
-  };
-
-  const submitExpense = async () => {
-    setSubmitting('expense');
-    try {
-      await base44.entities.StaffRequest.create({
-        staff_id: staff.id,
-        staff_name: staff.name,
-        division_id: divisionId,
-        request_type: 'expense',
-        subject: 'Expense claim',
-        body: `${staff.name} has submitted an expense claim for review.`,
-        status: 'pending',
-      });
-      toast({ title: 'Expense submitted', description: 'The office has been notified.' });
-    } catch (e) {
-      toast({ title: 'Failed', description: e.message, variant: 'destructive' });
-    }
-    setSubmitting(null);
-  };
-
-  const submitPayslip = async () => {
-    setSubmitting('payslip');
-    try {
-      await base44.entities.StaffRequest.create({
-        staff_id: staff.id,
-        staff_name: staff.name,
-        division_id: divisionId,
-        request_type: 'payslip',
-        subject: 'Payslip request',
-        body: `${staff.name} has requested their latest payslip.`,
-        status: 'pending',
-      });
-      toast({ title: 'Payslip requested', description: 'Payroll has been notified.' });
     } catch (e) {
       toast({ title: 'Failed', description: e.message, variant: 'destructive' });
     }
@@ -178,21 +145,6 @@ function RequestsTab({ staff, divisionId }) {
         </div>
       )}
 
-      {/* Expense & Payslip quick actions */}
-      <div className="grid grid-cols-2 gap-3">
-        <button onClick={submitExpense} disabled={submitting === 'expense'} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-amber-300 hover:shadow-sm transition active:scale-95 disabled:opacity-50">
-          <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center">
-            {submitting === 'expense' ? <Loader2 className="w-5 h-5 animate-spin text-amber-600" /> : <Receipt className="w-5 h-5 text-amber-600" />}
-          </div>
-          <span className="text-sm font-bold text-slate-800">Submit Expense</span>
-        </button>
-        <button onClick={submitPayslip} disabled={submitting === 'payslip'} className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col items-center gap-2 hover:border-violet-300 hover:shadow-sm transition active:scale-95 disabled:opacity-50">
-          <div className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center">
-            {submitting === 'payslip' ? <Loader2 className="w-5 h-5 animate-spin text-violet-600" /> : <FileText className="w-5 h-5 text-violet-600" />}
-          </div>
-          <span className="text-sm font-bold text-slate-800">Request Payslip</span>
-        </button>
-      </div>
     </div>
   );
 }
