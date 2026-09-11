@@ -43,10 +43,22 @@ export default function AuditTemplateGrid({ onSelectTemplate }) {
     // Filter to only audits from known staff (auditor_staff_id is non-null)
     const staffReports = reports.filter(r => r.auditor_staff_id);
 
-    // Group reports by template_id
+    // Build a name→template_id map from synced templates so old reports
+    // (which have audit_template_name but no template_id) can be matched
+    // to the correct synced template by name.
+    const nameToTemplateId = {};
+    for (const t of (config?.synced_templates || [])) {
+      if (t.name) nameToTemplateId[t.name.toLowerCase()] = t.template_id;
+    }
+
+    // Group reports by template_id, falling back to name→ID matching
     const byTemplate = {};
     for (const r of staffReports) {
-      const tid = r.template_id || r.audit_template_name || 'unknown';
+      let tid = r.template_id;
+      if (!tid && r.audit_template_name) {
+        tid = nameToTemplateId[r.audit_template_name.toLowerCase()] || r.audit_template_name;
+      }
+      tid = tid || 'unknown';
       if (!byTemplate[tid]) byTemplate[tid] = [];
       byTemplate[tid].push(r);
     }

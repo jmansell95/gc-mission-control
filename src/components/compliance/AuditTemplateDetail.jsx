@@ -44,15 +44,28 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
     queryKey: ['safety-reports-template', template.template_id],
     queryFn: () => base44.entities.SafetyReport.list('-created_date', 500),
   });
+  const { data: config } = useQuery({
+    queryKey: ['mitti-config'],
+    queryFn: async () => { const l = await base44.entities.MittiConfig.filter({ key: 'global' }); return l?.[0] || null; },
+  });
 
-  // Filter to just this template's audits, only from known staff
+  // Filter to just this template's audits, only from known staff.
+  // Falls back to name→ID matching for old reports without template_id.
   const templateReports = useMemo(() => {
+    const nameToTemplateId = {};
+    for (const t of (config?.synced_templates || [])) {
+      if (t.name) nameToTemplateId[t.name.toLowerCase()] = t.template_id;
+    }
     return reports.filter(r => {
       if (!r.auditor_staff_id) return false;
-      const tid = r.template_id || r.audit_template_name || 'unknown';
+      let tid = r.template_id;
+      if (!tid && r.audit_template_name) {
+        tid = nameToTemplateId[r.audit_template_name.toLowerCase()] || r.audit_template_name;
+      }
+      tid = tid || 'unknown';
       return tid === template.template_id;
     });
-  }, [reports, template.template_id]);
+  }, [reports, template.template_id, config]);
 
   // Build auditor list for the filter dropdown
   const auditors = useMemo(() => {
