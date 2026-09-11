@@ -297,14 +297,6 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
     <div className="mb-4 rounded-2xl bg-gradient-to-br from-[#2E5A1A] via-[#1c4a12] to-[#2E5A1A] px-4 sm:px-5 py-4 shadow-lg overflow-hidden relative">
       {/* Animated mesh overlay */}
       <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 15% 50%, rgba(141,198,63,0.5), transparent 40%), radial-gradient(circle at 85% 50%, rgba(74,222,128,0.3), transparent 40%)' }} />
-      {/* Live pulse indicator */}
-      <div className="absolute top-4 right-4 flex items-center gap-1.5">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
-        </span>
-        <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">Live</span>
-      </div>
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 relative z-10">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0 ring-1 ring-white/20 shadow-lg">
@@ -314,6 +306,14 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
             <div className="flex items-baseline gap-2">
               <h2 className="text-lg font-bold text-white tracking-tight leading-tight">Active Sites</h2>
               <span className="text-2xl font-extrabold text-[#8DC63F] tabular-nums leading-none">{scopedJobs.length}</span>
+              {/* Live pulse indicator — inline next to count (was absolute, overlapped filters) */}
+              <span className="inline-flex items-center gap-1.5 ml-1">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
+                </span>
+                <span className="text-[10px] font-bold text-white/80 uppercase tracking-wider">Live</span>
+              </span>
             </div>
             <p className="text-xs text-white/60 mt-0.5 hidden sm:block">Live snapshot — rigs, crew, gear, weather & risk flags at a glance</p>
           </div>
