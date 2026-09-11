@@ -459,6 +459,14 @@
     font-feature-settings: "tnum";
   }
 
+  /* === Planning Block — striped amber background for tentative job blocks ===
+     Distinct from solid status colours so planners can immediately tell
+     a tentative block from a confirmed job at a glance. */
+  .bg-planning {
+    background: #fef3c7;
+    background-image: repeating-linear-gradient(45deg, transparent 0, transparent 2px, #fbbf24 2px, #fbbf24 3px);
+  }
+
   /* === Shimmer Loading === */
   .shimmer {
     background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);

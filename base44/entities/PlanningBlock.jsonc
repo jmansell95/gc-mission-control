@@ -1,0 +1,121 @@
+{
+  "name": "PlanningBlock",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Tentative job / block name shown on the heatmap ghost cells and in the manager notification."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this planning block belongs to. Drives division-scoped RLS and filtering so managers only see their own division's tentative plans."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Block start date \u2014 the first day the tentative job would run."
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Block end date \u2014 the last day the tentative job would run."
+    },
+    "rig_asset_id": {
+      "type": "string",
+      "description": "Tentative rig (SiteAsset ID) the block would use. Shown as a ghost cell on the rig's heatmap row so planners can see rig availability at a glance."
+    },
+    "rig_type": {
+      "type": "string",
+      "enum": [
+        "cp",
+        "rotary",
+        "mixed",
+        "not_applicable"
+      ],
+      "default": "not_applicable",
+      "description": "Rig type needed for the tentative job. 'cp' = cable percussion, 'rotary' = rotary drilling, 'mixed' = both, 'not_applicable' = non-drilling. Used to filter the crew multi-select to only show staff with the matching qualification."
+    },
+    "tentative_crew_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Staff IDs tentatively planned for this block. Each crew member gets a ghost cell on their heatmap row for the block's date range so planners can visualise who's being held for the potential job."
+    },
+    "location": {
+      "type": "string",
+      "description": "Tentative site location / address for the potential job."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Planning notes \u2014 client details, potential scope, pricing thoughts, any context for the reviewing manager."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "reviewed",
+        "confirmed",
+        "promoted",
+        "cancelled"
+      ],
+      "default": "draft",
+      "description": "Planning block lifecycle. 'draft' = newly created, managers notified for review; 'reviewed' = a manager has reviewed and left notes; 'confirmed' = manager approved the tentative plan, ready to promote; 'promoted' = converted to a real Job with RotaAssignments (promoted_job_id set); 'cancelled' = abandoned, no longer being planned."
+    },
+    "created_by_name": {
+      "type": "string",
+      "description": "Name of the planner who created this block."
+    },
+    "created_by_id": {
+      "type": "string",
+      "description": "User ID of the planner who created this block."
+    },
+    "promoted_job_id": {
+      "type": "string",
+      "description": "The Job ID created when this block was promoted. Set by the promotePlanningBlock function so the block can link to the live job it became."
+    }
+  },
+  "required": [
+    "name",
+    "start_date",
+    "end_date"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": null
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

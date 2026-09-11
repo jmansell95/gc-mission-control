@@ -1,25 +1,32 @@
 import React, { useState, useMemo } from 'react';
-import { Users, Cog, ChevronDown } from 'lucide-react';
-import { STATUS_CONFIG, getRowSummary } from './heatmapUtils';
+import { Users, Cog, ChevronDown, HardHat, Building2, Briefcase } from 'lucide-react';
+import { STATUS_CONFIG, getRowSummary, groupStaffByWorkerType } from './heatmapUtils';
+import StaffBadges from './StaffBadges';
 import HeatmapCellPopover from './HeatmapCellPopover';
 
 const CELL_WIDTH = 36;
 const CELL_HEIGHT = 36;
-const NAME_WIDTH = 190;
+const NAME_WIDTH = 220;
 
 const STATUS_LETTER = {
   job: 'J', annual_leave: 'AL', sick: 'S', training: 'T',
-  yard_depot: 'D', maintenance: 'M', available: '',
+  yard_depot: 'D', maintenance: 'M', planning: 'P', available: '',
 };
 
-export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus }) {
+export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick }) {
   const [popover, setPopover] = useState(null);
-  const [collapsedStaff, setCollapsedStaff] = useState(false);
+  const [collapsedDirect, setCollapsedDirect] = useState(false);
+  const [collapsedSub, setCollapsedSub] = useState(false);
+  const [collapsedAgency, setCollapsedAgency] = useState(false);
   const [collapsedRigs, setCollapsedRigs] = useState(false);
 
   const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   const handleCellClick = (resource, dateStr, status, isRig) => {
+    if (status?.type === 'planning' && status.block_id && onPlanningBlockClick) {
+      onPlanningBlockClick(status.block_id);
+      return;
+    }
     setPopover({ resource: { ...resource, type: isRig ? 'rig' : 'staff' }, dateStr, status });
   };
 
@@ -35,6 +42,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
             {initials}
           </div>
           <p className="text-[11px] font-semibold text-slate-700 truncate flex-1">{resource.name}</p>
+          {!isRig && <StaffBadges staff={resource} compact />}
           <span className={`text-[8px] font-bold tabular-nums px-1 rounded ${util >= 80 ? 'bg-emerald-100 text-emerald-700' : util >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>{util}%</span>
         </div>
         <div className="flex">
@@ -85,14 +93,30 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
             ))}
           </div>
 
-          {/* Staff section */}
-          {staffRows.length > 0 && renderSectionHeader('Staff', Users, staffRows.length, 'text-[#2E5A1A]', collapsedStaff, () => setCollapsedStaff(v => !v))}
-          {staffRows.length > 0 && !collapsedStaff && staffRows.map(s => renderRow(s, staffStatus.get(s.id) || new Map(), false))}
-          {staffRows.length > 0 && collapsedStaff && (
-            <div className="flex items-center justify-center bg-slate-50 text-[10px] text-slate-400 py-1 border-b border-slate-100" style={{ height: '24px' }}>
-              {staffRows.length} staff hidden — click header to expand
-            </div>
-          )}
+          {/* Staff sections grouped by worker type */}
+          {(() => {
+            const grouped = groupStaffByWorkerType(staffRows);
+            const groups = [
+              { key: 'direct_employee', label: 'Direct Employees', Icon: HardHat, color: 'text-[#2E5A1A]', collapsed: collapsedDirect, setCollapsed: setCollapsedDirect },
+              { key: 'subcontractor', label: 'Subcontractors', Icon: Building2, color: 'text-amber-600', collapsed: collapsedSub, setCollapsed: setCollapsedSub },
+              { key: 'agency', label: 'Agency Workers', Icon: Briefcase, color: 'text-violet-600', collapsed: collapsedAgency, setCollapsed: setCollapsedAgency },
+            ];
+            return groups.map(g => {
+              const rows = grouped[g.key] || [];
+              if (rows.length === 0) return null;
+              return (
+                <React.Fragment key={g.key}>
+                  {renderSectionHeader(g.label, g.Icon, rows.length, g.color, g.collapsed, () => g.setCollapsed(v => !v))}
+                  {!g.collapsed && rows.map(s => renderRow(s, staffStatus.get(s.id) || new Map(), false))}
+                  {g.collapsed && (
+                    <div className="flex items-center justify-center bg-slate-50 text-[10px] text-slate-400 py-1 border-b border-slate-100" style={{ height: '24px' }}>
+                      {rows.length} hidden — click to expand
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            });
+          })()}
 
           {/* Rigs section */}
           {rigRows.length > 0 && renderSectionHeader('Rigs', Cog, rigRows.length, 'text-blue-600', collapsedRigs, () => setCollapsedRigs(v => !v))}

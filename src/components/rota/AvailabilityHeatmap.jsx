@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   Search, ChevronLeft, ChevronRight, Download, Loader2, Grid3x3, Users, Cog,
-  Calendar, Zap,
+  Calendar, Zap, CalendarPlus,
 } from 'lucide-react';
 import { startOfWeek, addWeeks, format } from 'date-fns';
 import { useDivision } from '@/contexts/DivisionContext';
@@ -15,6 +15,7 @@ import {
 import YearHeatmapGrid from './YearHeatmapGrid';
 import MonthHeatmapGrid from './MonthHeatmapGrid';
 import WeekListView from './WeekListView';
+import PlanningBlockModal from './PlanningBlockModal';
 
 export default function AvailabilityHeatmap() {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ export default function AvailabilityHeatmap() {
   const [showGapFinder, setShowGapFinder] = useState(false);
   const [gapFrom, setGapFrom] = useState('');
   const [gapTo, setGapTo] = useState('');
+  const [blockModalOpen, setBlockModalOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['availability-matrix', year, activeDivision?.id],
@@ -106,6 +109,15 @@ export default function AvailabilityHeatmap() {
 
   const handleExport = () => {
     navigate(`/reports?hub=availability&dateFrom=${year}-01-01&dateTo=${year}-12-31`);
+  };
+
+  // Open a planning block for editing when its ghost cell is clicked
+  const handleOpenBlock = (blockId) => {
+    const block = (data?.planning_blocks || []).find(pb => pb.id === blockId);
+    if (block) {
+      setEditingBlock(block);
+      setBlockModalOpen(true);
+    }
   };
 
   const handlePrev = () => {
@@ -192,6 +204,12 @@ export default function AvailabilityHeatmap() {
         <button onClick={() => setShowGapFinder(v => !v)}
           className={`inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-bold transition ${showGapFinder ? 'bg-violet-600 text-white' : 'bg-violet-50 text-violet-700 hover:bg-violet-100'}`}>
           <Zap className="w-3.5 h-3.5" /> Find Free
+        </button>
+
+        {/* Plan Block button — creates a tentative planning block */}
+        <button onClick={() => { setEditingBlock(null); setBlockModalOpen(true); }}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition shadow-sm flex-shrink-0">
+          <CalendarPlus className="w-3.5 h-3.5" /> Plan Block
         </button>
 
         <button onClick={handleExport}
@@ -300,6 +318,15 @@ export default function AvailabilityHeatmap() {
             </div>
           );
         })}
+        {/* Qualification + gap badges legend */}
+        <div className="flex items-center gap-2 ml-2 pl-3 border-l border-slate-200">
+          <span className="text-[8px] font-bold px-1 rounded bg-blue-100 text-blue-700">CP</span>
+          <span className="text-xs text-slate-500">Cable Percussion</span>
+          <span className="text-[8px] font-bold px-1 rounded bg-orange-100 text-orange-700">Rot</span>
+          <span className="text-xs text-slate-500">Rotary trained</span>
+          <span className="text-[8px] font-bold px-1 rounded bg-amber-100 text-amber-700">⚠</span>
+          <span className="text-xs text-slate-500">Training gap</span>
+        </div>
       </div>
 
       {/* Grid */}
@@ -316,14 +343,25 @@ export default function AvailabilityHeatmap() {
         </div>
       ) : viewMode === 'year' ? (
         <YearHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
       ) : viewMode === 'month' ? (
         <MonthHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
       ) : (
         <WeekListView days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
       )}
+
+      {/* Planning Block Modal */}
+      <PlanningBlockModal
+        open={blockModalOpen}
+        onClose={() => { setBlockModalOpen(false); setEditingBlock(null); }}
+        block={editingBlock}
+        rigs={showRigs ? filteredRigs : (data?.rigs || [])}
+        staff={showStaff ? filteredStaff : (data?.staff || [])}
+        divisionId={activeDivision?.id || ''}
+        onSaved={() => {}}
+      />
     </div>
   );
 }

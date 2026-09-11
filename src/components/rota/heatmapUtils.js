@@ -9,9 +9,10 @@ export const STATUS_CONFIG = {
   yard_depot:   { bg: 'bg-slate-400',   label: 'Depot',       hex: '#64748b' },
   maintenance:  { bg: 'bg-violet-500',  label: 'Maintenance', hex: '#8b5cf6' },
   available:    { bg: 'bg-slate-100',   label: 'Available',   hex: '#e2e8f0' },
+  planning:     { bg: 'bg-planning',    label: 'Planning',   hex: '#f59e0b' },
 };
 
-export const STATUS_ORDER = ['job', 'annual_leave', 'sick', 'training', 'yard_depot', 'maintenance', 'available'];
+export const STATUS_ORDER = ['job', 'annual_leave', 'sick', 'training', 'yard_depot', 'maintenance', 'planning', 'available'];
 
 // Build per-resource per-day status maps from the backend matrix data.
 // Priority: non-job assignment > absence > job assignment > available.
@@ -81,12 +82,38 @@ export function buildStatusMaps(data) {
     }
   });
 
+  // 5. Planning blocks — lowest priority, only fill empty gaps.
+  //    Tentative crew + tentative rig get a 'planning' ghost cell so planners
+  //    can see where a potential job might sit without committing a real rota.
+  (data.planning_blocks || []).forEach(pb => {
+    if (!pb.start_date || !pb.end_date) return;
+    let d = new Date(pb.start_date + 'T00:00:00');
+    const e = new Date(pb.end_date + 'T00:00:00');
+    while (d <= e) {
+      const ds = d.toISOString().slice(0, 10);
+      (pb.tentative_crew_ids || []).forEach(sid => {
+        if (!staffStatus.has(sid)) return;
+        const sm = staffStatus.get(sid);
+        if (!sm.has(ds)) {
+          sm.set(ds, { type: 'planning', label: 'Planning', job_name: pb.name || 'Tentative', block_id: pb.id, block_name: pb.name || '' });
+        }
+      });
+      if (pb.rig_asset_id && rigStatus.has(pb.rig_asset_id)) {
+        const rm = rigStatus.get(pb.rig_asset_id);
+        if (!rm.has(ds)) {
+          rm.set(ds, { type: 'planning', label: 'Planning', job_name: pb.name || 'Tentative', block_id: pb.id, block_name: pb.name || '' });
+        }
+      }
+      d = addDays(d, 1);
+    }
+  });
+
   return { staffStatus, rigStatus };
 }
 
 // Count days in each status category for a resource
 export function getRowSummary(statusMap, days) {
-  const counts = { job: 0, annual_leave: 0, sick: 0, training: 0, yard_depot: 0, maintenance: 0, available: 0 };
+  const counts = { job: 0, annual_leave: 0, sick: 0, training: 0, yard_depot: 0, maintenance: 0, planning: 0, available: 0 };
   days.forEach(d => {
     const s = statusMap.get(d.dateStr);
     if (s) counts[s.type] = (counts[s.type] || 0) + 1;
@@ -171,6 +198,7 @@ export function computeRangeAnalytics(staffRows, rigRows, staffStatus, rigStatus
       if (s) {
         if (s.type === 'job') job++;
         else if (s.type === 'maintenance') maintenance++;
+        else if (s.type === 'planning') available++; // tentative blocks don't count as booked
         else leave++;
       } else {
         available++;
@@ -212,4 +240,23 @@ export function findAvailableResources(staffRows, rigRows, staffStatus, rigStatu
     }
   }
   return results;
+}
+
+// ── Worker-type grouping for the Resource Planner ──────────────────────────
+// Staff rows are grouped into three collapsible sections: Direct Employees,
+// Subcontractors, Agency Workers — each with a count badge.
+export const WORKER_TYPE_GROUPS = [
+  { key: 'direct_employee', label: 'Direct Employees', shortLabel: 'Direct', color: 'text-[#2E5A1A]' },
+  { key: 'subcontractor', label: 'Subcontractors', shortLabel: 'Subbies', color: 'text-amber-600' },
+  { key: 'agency', label: 'Agency Workers', shortLabel: 'Agency', color: 'text-violet-600' },
+];
+
+export function groupStaffByWorkerType(staffRows) {
+  const groups = { direct_employee: [], subcontractor: [], agency: [] };
+  (staffRows || []).forEach(s => {
+    const wt = s.worker_type || 'direct_employee';
+    if (groups[wt]) groups[wt].push(s);
+    else groups.direct_employee.push(s);
+  });
+  return groups;
 }
