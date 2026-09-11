@@ -6,6 +6,7 @@ import html2canvas from 'html2canvas';
 import CodeSnippetBlock from '@/components/powerapps/CodeSnippetBlock';
 import DeveloperPackPage from '@/components/powerapps/DeveloperPackPage';
 import ClaudeScriptBookletPage from '@/components/powerapps/ClaudeScriptBookletPage';
+import FeatureAuditTable from '@/components/powerapps/FeatureAuditTable';
 import { PHASE_SNIPPETS, getCompactFlow } from '@/utils/powerapps/phaseSnippets';
 
 const BRAND_DARK = '#2E5A1A';
@@ -831,6 +832,11 @@ export default function PowerAppsMigrationRoadmap() {
           <div className="mt-4 rounded-xl px-4 py-3 text-white text-center" style={{ background: `linear-gradient(135deg, ${BRAND_DARK}, #1c4a12 50%, ${BRAND_LEAF})` }}>
             <p className="text-xs sm:text-[10px] font-semibold">GC Mission Control · Microsoft Power Apps Migration Roadmap · Generated {new Date().toLocaleDateString('en-GB')} · A4 Booklet</p>
           </div>
+        </section>
+
+        {/* === Feature Compatibility Audit page === */}
+        <section className="print-page mb-6 sm:mb-0 print:page-break-before" style={{ printBreakBefore: 'always' }}>
+          <FeatureAuditTable />
         </section>
 
         {/* === Developer Pack page — generate & download the full importable pack === */}

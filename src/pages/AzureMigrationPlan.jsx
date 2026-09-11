@@ -8,6 +8,7 @@ import {
 import PageHeader from '@/components/PageHeader';
 import MigrationRoadmap from '@/components/azure/MigrationRoadmap';
 import ParityMatrix from '@/components/azure/ParityMatrix';
+import FeatureAuditTable from '@/components/powerapps/FeatureAuditTable';
 import { generateA3WallChart } from '@/utils/azureWallChartPdf';
 
 const PHASE_ICONS = {
@@ -292,6 +293,11 @@ export default function AzureMigrationPlan() {
             )}
           </>
         )}
+
+        {/* Feature Compatibility Audit — always visible, included in all PDF exports */}
+        <div className="audit-section-wrapper print:mt-6">
+          <FeatureAuditTable />
+        </div>
       </div>
     </div>
   );
