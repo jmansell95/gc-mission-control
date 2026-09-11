@@ -27,7 +27,6 @@ import IncentiveDashboard from '@/components/staff/IncentiveDashboard';
 import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import TrainingTab from '@/components/staff/TrainingTab';
 import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
-import AutoTimesheetStatus from '@/components/staff/AutoTimesheetStatus';
 import TrackingSettings from '@/components/staff/TrackingSettings';
 import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import StaffMovementTimeline from '@/components/staff/StaffMovementTimeline';
@@ -214,8 +213,8 @@ export default function StaffProfile() {
 
       {/* ── Premium card stack on vibrant background (matches StaffDashboard) ── */}
       <div>
-        {/* Hero card */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <FieldContainer space="4">
+          {/* Hero card */}
           <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
             <div className="flex items-center gap-3 sm:gap-4">
               <ProfileAvatar name={staff.name} avatarUrl={staff.avatar_url} size={56} />
@@ -254,26 +253,15 @@ export default function StaffProfile() {
               </>)}
             </div>
           </div>
-        </div>
 
-        {/* Quick Stats — 2x2 grid of white cards */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
+          {/* Quick Stats — 2x2 grid of white cards */}
           <ProfileStats staffId={staff.id} jobType={staff.team?.job_type} />
-        </div>
 
-        {/* Zero-touch timesheet status — shows today's auto-built timesheet */}
-        {!viewingOther && staff?.id && (
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
-            <AutoTimesheetStatus staffId={staff.id} />
-          </div>
-        )}
-
-        {/* Today's GPS movements — geofence timeline + breadcrumb trail */}
-        {staff?.id && (
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-3">
+          {/* Today's GPS movements — geofence timeline + breadcrumb trail */}
+          {staff?.id && (
             <StaffMovementTimeline staffId={staff.id} staffName={staff.name} />
-          </div>
-        )}
+          )}
+        </FieldContainer>
 
         {/* Scrollable single-line tab bar */}
         <div className="sticky top-[3.75rem] z-30 mt-4 mb-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -292,7 +280,7 @@ export default function StaffProfile() {
         </div>
 
         {/* Tab Content — white rounded cards on off-white background */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}>
+        <FieldContainer space="4" mt="mt-4" className="pb-24">
           {activeTab === 'performance' && (staff.id
             ? <div className="space-y-4">
                 <div className="insight-card rounded-2xl p-4 sm:p-5 md:p-6">
@@ -375,7 +363,7 @@ export default function StaffProfile() {
                 <TeamMiniFeed teamId={staff.team_id} currentStaffId={staff.id} />
               </div>
             : <NoCrewProfileState tab="crew" onGoAdmin={() => navigate('/admin')} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
-        </div>
+        </FieldContainer>
       </div>
 
       {/* Approvals Sheet */}
