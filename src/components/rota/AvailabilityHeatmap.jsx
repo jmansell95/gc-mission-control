@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import {
   Search, ChevronLeft, ChevronRight, Download, Loader2, Grid3x3, Users, Cog,
-  Calendar, Zap, CalendarPlus,
+  Calendar, Zap, CalendarPlus, SlidersHorizontal, X, Eye, EyeOff,
 } from 'lucide-react';
 import { startOfWeek, addWeeks, format } from 'date-fns';
 import { useDivision } from '@/contexts/DivisionContext';
 import {
   STATUS_CONFIG, STATUS_ORDER, buildStatusMaps, getYearDays, getMonthDays, getWeekDays,
-  computeRangeAnalytics, findAvailableResources,
+  computeRangeAnalytics, findAvailableResources, groupStaffByWorkerType,
 } from './heatmapUtils';
 import YearHeatmapGrid from './YearHeatmapGrid';
 import MonthHeatmapGrid from './MonthHeatmapGrid';
@@ -30,8 +30,16 @@ export default function AvailabilityHeatmap() {
   const [showGapFinder, setShowGapFinder] = useState(false);
   const [gapFrom, setGapFrom] = useState('');
   const [gapTo, setGapTo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [blockModalOpen, setBlockModalOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState(null);
+
+  // ── Filter state ──
+  const [statusFilter, setStatusFilter] = useState(new Set()); // empty = all
+  const [workerTypeFilter, setWorkerTypeFilter] = useState(new Set(['direct_employee', 'subcontractor', 'agency']));
+  const [qualFilter, setQualFilter] = useState('all'); // all | cp | rotary | gaps
+  const [showWeekends, setShowWeekends] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['availability-matrix', year, activeDivision?.id],
@@ -44,15 +52,42 @@ export default function AvailabilityHeatmap() {
   const { staffStatus, rigStatus } = useMemo(() => buildStatusMaps(data), [data]);
 
   const q = search.trim().toLowerCase();
+
+  // ── Apply all filters to staff ──
   const filteredStaff = useMemo(() => {
     if (!data?.staff) return [];
-    if (!q) return data.staff;
-    return data.staff.filter(s =>
-      (s.name || '').toLowerCase().includes(q) ||
-      (s.job_title || '').toLowerCase().includes(q) ||
-      (s.team_name || '').toLowerCase().includes(q)
-    );
-  }, [data, q]);
+    let result = data.staff;
+
+    // Search filter
+    if (q) {
+      result = result.filter(s =>
+        (s.name || '').toLowerCase().includes(q) ||
+        (s.job_title || '').toLowerCase().includes(q) ||
+        (s.team_name || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Inactive filter
+    if (!showInactive) {
+      result = result.filter(s => s.is_active !== false);
+    }
+
+    // Worker type filter
+    if (workerTypeFilter.size < 3) {
+      result = result.filter(s => workerTypeFilter.has(s.worker_type || 'direct_employee'));
+    }
+
+    // Qualification filter
+    if (qualFilter === 'cp') {
+      result = result.filter(s => s.has_cp);
+    } else if (qualFilter === 'rotary') {
+      result = result.filter(s => s.has_rotary);
+    } else if (qualFilter === 'gaps') {
+      result = result.filter(s => (s.training_gap_count || 0) > 0);
+    }
+
+    return result;
+  }, [data, q, showInactive, workerTypeFilter, qualFilter]);
 
   const filteredRigs = useMemo(() => {
     if (!data?.rigs) return [];
@@ -111,7 +146,6 @@ export default function AvailabilityHeatmap() {
     navigate(`/reports?hub=availability&dateFrom=${year}-01-01&dateTo=${year}-12-31`);
   };
 
-  // Open a planning block for editing when its ghost cell is clicked
   const handleOpenBlock = (blockId) => {
     const block = (data?.planning_blocks || []).find(pb => pb.id === blockId);
     if (block) {
@@ -140,6 +174,43 @@ export default function AvailabilityHeatmap() {
     if (viewMode === 'month') return format(new Date(year, monthIdx, 1), 'MMMM yyyy');
     return `Week of ${format(weekStart, 'dd MMM yyyy')}`;
   }, [viewMode, year, monthIdx, weekStart]);
+
+  // Count active filters for the badge
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (statusFilter.size > 0) count++;
+    if (workerTypeFilter.size < 3) count++;
+    if (qualFilter !== 'all') count++;
+    if (!showWeekends) count++;
+    if (showInactive) count++;
+    return count;
+  }, [statusFilter, workerTypeFilter, qualFilter, showWeekends, showInactive]);
+
+  const toggleStatusFilter = (key) => {
+    setStatusFilter(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const toggleWorkerTypeFilter = (key) => {
+    setWorkerTypeFilter(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const clearAllFilters = () => {
+    setStatusFilter(new Set());
+    setWorkerTypeFilter(new Set(['direct_employee', 'subcontractor', 'agency']));
+    setQualFilter('all');
+    setShowWeekends(true);
+    setShowInactive(false);
+  };
 
   return (
     <div className="space-y-3">
@@ -200,13 +271,20 @@ export default function AvailabilityHeatmap() {
           })}
         </div>
 
+        {/* Filters toggle */}
+        <button onClick={() => setShowFilters(v => !v)}
+          className={`inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-bold transition ${showFilters ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} ${activeFilterCount > 0 ? 'ring-2 ring-[#2E5A1A] ring-offset-1' : ''}`}>
+          <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
+          {activeFilterCount > 0 && <span className="bg-[#2E5A1A] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{activeFilterCount}</span>}
+        </button>
+
         {/* Gap finder toggle */}
         <button onClick={() => setShowGapFinder(v => !v)}
           className={`inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-bold transition ${showGapFinder ? 'bg-violet-600 text-white' : 'bg-violet-50 text-violet-700 hover:bg-violet-100'}`}>
           <Zap className="w-3.5 h-3.5" /> Find Free
         </button>
 
-        {/* Plan Block button — creates a tentative planning block */}
+        {/* Plan Block button */}
         <button onClick={() => { setEditingBlock(null); setBlockModalOpen(true); }}
           className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition shadow-sm flex-shrink-0">
           <CalendarPlus className="w-3.5 h-3.5" /> Plan Block
@@ -217,6 +295,111 @@ export default function AvailabilityHeatmap() {
           <Download className="w-3.5 h-3.5" /> Export
         </button>
       </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="insight-card rounded-2xl p-4 space-y-3 animate-slide-up">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <SlidersHorizontal className="w-4 h-4 text-[#2E5A1A]" /> Filters
+            </h3>
+            {activeFilterCount > 0 && (
+              <button onClick={clearAllFilters} className="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1">
+                <X className="w-3 h-3" /> Clear all
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Status filter */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Status Highlight</p>
+              <p className="text-[10px] text-slate-400 mb-2">Dim cells not matching</p>
+              <div className="flex flex-wrap gap-1">
+                {STATUS_ORDER.filter(k => k !== 'available').map(key => {
+                  const cfg = STATUS_CONFIG[key];
+                  const active = statusFilter.has(key);
+                  return (
+                    <button key={key} onClick={() => toggleStatusFilter(key)}
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition border ${active ? 'border-[#2E5A1A] bg-[#2E5A1A]/10 text-slate-700' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
+                      <div className={`w-2.5 h-2.5 rounded ${cfg.bg}`} />
+                      {cfg.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Worker type filter */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Worker Type</p>
+              <p className="text-[10px] text-slate-400 mb-2">Show only selected types</p>
+              <div className="flex flex-wrap gap-1">
+                {[
+                  { key: 'direct_employee', label: 'Direct' },
+                  { key: 'subcontractor', label: 'Subcontractor' },
+                  { key: 'agency', label: 'Agency' },
+                ].map(opt => {
+                  const active = workerTypeFilter.has(opt.key);
+                  return (
+                    <button key={opt.key} onClick={() => toggleWorkerTypeFilter(opt.key)}
+                      className={`px-2 py-1 rounded-lg text-[10px] font-bold transition border ${active ? 'border-[#2E5A1A] bg-[#2E5A1A]/10 text-slate-700' : 'border-slate-200 bg-white text-slate-400 hover:bg-slate-50'}`}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Qualification filter */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Qualification</p>
+              <p className="text-[10px] text-slate-400 mb-2">Filter staff by training</p>
+              <div className="flex flex-wrap gap-1">
+                {[
+                  { key: 'all', label: 'All' },
+                  { key: 'cp', label: 'CP Trained' },
+                  { key: 'rotary', label: 'Rotary Trained' },
+                  { key: 'gaps', label: 'Has Gaps' },
+                ].map(opt => (
+                  <button key={opt.key} onClick={() => setQualFilter(opt.key)}
+                    className={`px-2 py-1 rounded-lg text-[10px] font-bold transition border ${qualFilter === opt.key ? 'border-[#2E5A1A] bg-[#2E5A1A]/10 text-slate-700' : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'}`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Toggles */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1.5">Display Options</p>
+              <p className="text-[10px] text-slate-400 mb-2">Toggle visibility</p>
+              <div className="space-y-1.5">
+                <button onClick={() => setShowWeekends(v => !v)}
+                  className={`w-full inline-flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition border ${showWeekends ? 'border-[#2E5A1A] bg-[#2E5A1A]/10 text-slate-700' : 'border-slate-200 bg-white text-slate-400'}`}>
+                  <span className="flex items-center gap-1.5">
+                    {showWeekends ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    Weekends
+                  </span>
+                  <span className={`w-7 h-3.5 rounded-full relative transition ${showWeekends ? 'bg-[#2E5A1A]' : 'bg-slate-300'}`}>
+                    <span className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition ${showWeekends ? 'left-3.5' : 'left-0.5'}`} />
+                  </span>
+                </button>
+                <button onClick={() => setShowInactive(v => !v)}
+                  className={`w-full inline-flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition border ${showInactive ? 'border-[#2E5A1A] bg-[#2E5A1A]/10 text-slate-700' : 'border-slate-200 bg-white text-slate-400'}`}>
+                  <span className="flex items-center gap-1.5">
+                    {showInactive ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    Inactive Staff
+                  </span>
+                  <span className={`w-7 h-3.5 rounded-full relative transition ${showInactive ? 'bg-[#2E5A1A]' : 'bg-slate-300'}`}>
+                    <span className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition ${showInactive ? 'left-3.5' : 'left-0.5'}`} />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analytics strip */}
       {!isLoading && (filteredStaff.length > 0 || filteredRigs.length > 0) && (
@@ -339,17 +522,25 @@ export default function AvailabilityHeatmap() {
         <div className="insight-card rounded-2xl p-12 text-center">
           <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No resources found</p>
-          <p className="text-xs text-slate-400 mt-1">Try a different search or year.</p>
+          <p className="text-xs text-slate-400 mt-1">Try a different search, year, or adjust your filters.</p>
+          {activeFilterCount > 0 && (
+            <button onClick={clearAllFilters} className="mt-3 text-xs font-semibold text-[#2E5A1A] hover:underline">
+              Clear all filters
+            </button>
+          )}
         </div>
       ) : viewMode === 'year' ? (
         <YearHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
+          statusFilter={statusFilter} showWeekends={showWeekends} />
       ) : viewMode === 'month' ? (
         <MonthHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
+          statusFilter={statusFilter} showWeekends={showWeekends} />
       ) : (
         <WeekListView days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
-          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock} />
+          staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
+          statusFilter={statusFilter} showWeekends={showWeekends} />
       )}
 
       {/* Planning Block Modal */}

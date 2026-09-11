@@ -42,8 +42,8 @@ export default function ResourcePlanner() {
       <AvailabilityHeatmap />
 
       {showGapFinder && isGeotech && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm overflow-y-auto p-4 sm:p-6">
-          <div className="max-w-3xl mx-auto my-auto">
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-3xl my-auto">
             <ResourceGapFinder
               divisionId={activeDivision?.id || ''}
               divMap={divMap}

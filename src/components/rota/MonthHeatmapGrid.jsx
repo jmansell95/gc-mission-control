@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Cog, ChevronDown, HardHat, Building2, Briefcase } from 'lucide-react';
 import { STATUS_CONFIG, getRowSummary, groupStaffByWorkerType } from './heatmapUtils';
 import StaffBadges from './StaffBadges';
@@ -13,7 +14,8 @@ const STATUS_LETTER = {
   yard_depot: 'D', maintenance: 'M', planning: 'P', available: '',
 };
 
-export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick }) {
+export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends }) {
+  const navigate = useNavigate();
   const [popover, setPopover] = useState(null);
   const [collapsedDirect, setCollapsedDirect] = useState(false);
   const [collapsedSub, setCollapsedSub] = useState(false);
@@ -50,9 +52,10 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
             const s = statusMap.get(d.dateStr);
             const cfg = STATUS_CONFIG[s?.type] || STATUS_CONFIG.available;
             const letter = STATUS_LETTER[s?.type] || '';
+            const dimmed = (statusFilter?.size > 0 && s?.type && !statusFilter.has(s.type)) || (d.isWeekend && !showWeekends);
             return (
               <div key={d.dateStr} onClick={() => handleCellClick(resource, d.dateStr, s, isRig)}
-                className={`${cfg.bg} ${d.isWeekend ? 'opacity-60' : ''} ${d.isToday ? 'ring-2 ring-[#2E5A1A] ring-inset' : ''} cursor-pointer hover:brightness-110 transition-all flex items-center justify-center`}
+                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-60' : 'opacity-10') : ''} ${d.isToday ? 'ring-2 ring-[#2E5A1A] ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-110 transition-all flex items-center justify-center`}
                 style={{ width: `${CELL_WIDTH}px`, height: '100%', flexShrink: 0 }}>
                 {letter && <span className="text-[9px] font-bold text-white/90">{letter}</span>}
               </div>
@@ -85,7 +88,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
               Resource
             </div>
             {days.map(d => (
-              <div key={d.dateStr} className={`flex flex-col items-center justify-center border-r border-slate-200/60 ${d.isWeekend ? 'bg-slate-200/50' : ''} ${d.isToday ? 'bg-[#2E5A1A]/10' : ''}`}
+              <div key={d.dateStr} className={`flex flex-col items-center justify-center border-r border-slate-200/60 ${d.isWeekend ? (showWeekends ? 'bg-slate-200/50' : 'opacity-30') : ''} ${d.isToday ? 'bg-[#2E5A1A]/10' : ''}`}
                 style={{ width: `${CELL_WIDTH}px`, flexShrink: 0 }}>
                 <span className="text-[8px] font-bold text-slate-400 uppercase">{d.weekday}</span>
                 <span className={`text-xs font-bold ${d.isToday ? 'text-[#2E5A1A]' : 'text-slate-700'}`}>{d.day}</span>
@@ -131,7 +134,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
 
       {popover && (
         <HeatmapCellPopover resource={popover.resource} dateStr={popover.dateStr} status={popover.status}
-          onClose={() => setPopover(null)} onAssign={() => { window.location.href = '/admin?section=scheduling'; }} />
+          onClose={() => setPopover(null)} onAssign={() => navigate('/admin?section=scheduling')} />
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Users, Cog, ChevronDown, HardHat, Building2, Briefcase } from 'lucide-react';
 import { STATUS_CONFIG, getRowSummary, groupStaffByWorkerType } from './heatmapUtils';
 import StaffBadges from './StaffBadges';
@@ -9,7 +10,8 @@ const ROW_HEIGHT = 28;
 const NAME_WIDTH = 220;
 const BUFFER = 15;
 
-export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick }) {
+export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends }) {
+  const navigate = useNavigate();
   const scrollRef = useRef(null);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [viewportW, setViewportW] = useState(800);
@@ -94,9 +96,10 @@ export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus,
           {visibleDays.map(d => {
             const s = statusMap.get(d.dateStr);
             const cfg = STATUS_CONFIG[s?.type] || STATUS_CONFIG.available;
+            const dimmed = (statusFilter?.size > 0 && s?.type && !statusFilter.has(s.type)) || (d.isWeekend && !showWeekends);
             return (
               <div key={d.dateStr} onClick={() => handleCellClick(resource, d.dateStr, s, isRig)}
-                className={`${cfg.bg} ${d.isWeekend ? 'opacity-50' : ''} ${d.isToday ? 'ring-1 ring-[#2E5A1A] ring-inset' : ''} cursor-pointer hover:brightness-125 hover:scale-y-110 transition-all rounded-sm`}
+                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-50' : 'opacity-10') : ''} ${d.isToday ? 'ring-1 ring-[#2E5A1A] ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-125 hover:scale-y-110 transition-all rounded-sm`}
                 style={{ width: `${CELL_WIDTH}px`, height: '100%', flexShrink: 0 }}
                 title={`${resource.name} · ${d.dateStr} · ${cfg.label}${s?.job_name ? ` · ${s.job_name}` : ''}`} />
             );
@@ -178,7 +181,7 @@ export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus,
 
       {popover && (
         <HeatmapCellPopover resource={popover.resource} dateStr={popover.dateStr} status={popover.status}
-          onClose={() => setPopover(null)} onAssign={() => { window.location.href = '/admin?section=scheduling'; }} />
+          onClose={() => setPopover(null)} onAssign={() => navigate('/admin?section=scheduling')} />
       )}
     </div>
   );

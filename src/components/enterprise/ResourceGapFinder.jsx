@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Calendar, Cog, CheckCircle2, AlertTriangle, X,
   ArrowRight, Layers, MapPin, Wrench,
@@ -46,12 +45,7 @@ export default function ResourceGapFinder({ divisionId = '', divMap = {}, onClos
   const handleSearch = () => setSearched(true);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      className="insight-card rounded-2xl overflow-hidden"
-    >
+    <div className="insight-card rounded-2xl overflow-hidden animate-pop-in">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E]">
         <div className="flex items-center gap-2">
@@ -181,7 +175,7 @@ export default function ResourceGapFinder({ divisionId = '', divMap = {}, onClos
           onClose={() => setRequestModal(null)}
         />
       )}
-    </motion.div>
+    </div>
   );
 }
 
