@@ -64,47 +64,7 @@ export default function LocationPermissionGate() {
 
   return (
     <AnimatePresence>
-      {/* Desktop — top banner */}
-      <motion.div
-        key="desktop"
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -80, opacity: 0 }}
-        transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-        className={`hidden sm:flex fixed top-0 left-0 right-0 z-40 items-center gap-3 px-4 py-2.5 shadow-lg ${
-          isDenied ? 'bg-amber-50/95 backdrop-blur-md border-b border-amber-200' : 'bg-[#2E5A1A]/95 backdrop-blur-md border-b border-[#1c4a12]'
-        }`}
-      >
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isDenied ? 'bg-amber-100' : 'bg-white/15'}`}>
-          {isDenied ? <Settings className="w-4 h-4 text-amber-600" /> : <MapPin className="w-4 h-4 text-white" />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className={`text-sm font-bold leading-tight ${isDenied ? 'text-amber-900' : 'text-white'}`}>
-            {isDenied ? 'Location permission denied' : 'Enable location tracking'}
-          </p>
-          <p className={`text-xs leading-tight truncate ${isDenied ? 'text-amber-700' : 'text-white/80'}`}>
-            {isDenied ? settingsInstructions : 'Required for GPS tracking during shifts and automated timesheets.'}
-          </p>
-        </div>
-        <button
-          onClick={handleAction}
-          disabled={busy}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold active:scale-95 transition touch-manipulation flex-shrink-0 disabled:opacity-60 ${
-            isDenied ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-white text-[#2E5A1A] hover:bg-white/90'
-          }`}
-        >
-          <ActionIcon className={`w-3.5 h-3.5 ${busy ? 'animate-spin' : ''}`} />
-          {actionLabel}
-        </button>
-        <button
-          onClick={handleDismiss}
-          className={`w-7 h-7 rounded-lg flex items-center justify-center transition touch-manipulation flex-shrink-0 ${isDenied ? 'hover:bg-amber-100' : 'hover:bg-white/15'}`}
-        >
-          <X className={`w-4 h-4 ${isDenied ? 'text-amber-600' : 'text-white/80'}`} />
-        </button>
-      </motion.div>
-
-      {/* Mobile — bottom sheet */}
+      {/* Mobile — bottom sheet (desktop tracking removed — not worth doing on desktop) */}
       <motion.div
         key="mobile"
         initial={{ y: 120, opacity: 0 }}
