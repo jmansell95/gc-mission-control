@@ -78,6 +78,7 @@ import { DivisionProvider } from '@/contexts/DivisionContext';
 import { AutopilotToastProvider } from '@/components/autopilot/AutopilotToastProvider';
 import RouteLoadingOverlay from '@/components/RouteLoadingOverlay';
 import AppBaseUrlSync from '@/components/AppBaseUrlSync';
+import LocationPermissionGate from '@/components/LocationPermissionGate';
 import AssetScannerPage from './pages/AssetScannerPage';
 import KioskScannerRedirect from '@/components/KioskScannerRedirect';
 import MobileFieldRedirect from '@/components/MobileFieldRedirect';
@@ -139,6 +140,7 @@ const AuthenticatedApp = () => {
         <AutopilotToastProvider>
         <AppBaseUrlSync />
         <RouteLoadingOverlay />
+        {!isClientPortalRoute && <LocationPermissionGate />}
         <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/oauth/consent" element={<OAuthConsent />} />

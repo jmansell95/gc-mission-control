@@ -39,6 +39,8 @@ Deno.serve(async (req) => {
     pick('tracking_consent_signature_data_url');
     pick('tracking_consent_version');
     pick('tracking_consent_declined_at');
+    pick('last_capture_error');
+    pick('last_capture_error_at');
 
     if (Object.keys(allowed).length === 0) {
       return Response.json({ error: 'No updatable fields provided' }, { status: 400 });
