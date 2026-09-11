@@ -394,6 +394,18 @@
       "type": "string",
       "description": "Label shown alongside the client billing total on the portal (e.g. 'Agreed quote', 'Project Investment')"
     },
+    "sharepoint_folder_path": {
+      "type": "string",
+      "description": "Server-relative URL of this job's dedicated SharePoint folder under the Drilling Team library (e.g. '/sites/UtilityARB/Shared Documents/Drilling Team/PRJ-001 - Cambridge North'). Set on first sync. Used by the push/pull sync to know where to upload/download files."
+    },
+    "sharepoint_folder_url": {
+      "type": "string",
+      "description": "Full web URL to this job's SharePoint folder (e.g. 'https://gcontrol365.sharepoint.com/sites/UtilityARB/Shared Documents/Drilling Team/PRJ-001 - Cambridge North'). Shown as a link in the Document Manager."
+    },
+    "sharepoint_last_sync_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last SharePoint pull sync for this job. Updated by the scheduled workflow and manual 'Sync Now' button."
+    },
     "permanent_crew": {
       "type": "array",
       "items": {

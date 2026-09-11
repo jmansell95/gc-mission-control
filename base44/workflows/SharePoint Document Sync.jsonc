@@ -1,0 +1,47 @@
+{
+  "name": "SharePoint Document Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "sharepoint_document_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_all": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncSharePointDocuments",
+            "args": {
+              "action": "sync_all"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync all jobs with SharePoint",
+            "description": "Push pending docs + pull new files for all active jobs"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/30 * * * *",
+      "one_time_date": null,
+      "timezone": "Europe/London",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Two-way sync of job documents between the app and SharePoint (Drilling Team library). Pushes pending app uploads to SharePoint and pulls new/modified files from SharePoint into the app every 30 minutes."
+}

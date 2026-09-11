@@ -92,6 +92,45 @@
     "client_approved_by_name": {
       "type": "string",
       "description": "Name of the client representative who approved this document"
+    },
+    "sharepoint_file_url": {
+      "type": "string",
+      "description": "Direct URL to the file in SharePoint (the job's SharePoint folder). Set after a successful push or pull sync."
+    },
+    "sharepoint_file_id": {
+      "type": "string",
+      "description": "SharePoint unique file ID (UniqueId GUID). Used to match files pulled from SharePoint back to existing JobDocument records on re-sync."
+    },
+    "sharepoint_etag": {
+      "type": "string",
+      "description": "SharePoint etag of the last synced version. Compared on pull to detect whether the SharePoint file has changed since the last sync (avoids re-downloading unchanged files)."
+    },
+    "sharepoint_modified_at": {
+      "type": "string",
+      "description": "ISO timestamp of the file's last modified time in SharePoint. Used alongside etag for change detection on pull."
+    },
+    "sharepoint_synced_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last successful SharePoint sync for this document (push or pull)."
+    },
+    "sharepoint_sync_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "synced",
+        "conflict",
+        "error"
+      ],
+      "default": "pending",
+      "description": "SharePoint sync state. 'pending' = uploaded in app, not yet pushed to SharePoint; 'synced' = successfully mirrored to/from SharePoint; 'conflict' = both sides changed since last sync (needs manual resolution); 'error' = last sync attempt failed."
+    },
+    "sharepoint_sync_direction": {
+      "type": "string",
+      "enum": [
+        "push",
+        "pull"
+      ],
+      "description": "Which direction created/last updated this document's SharePoint copy. 'push' = originated in the app, pushed to SharePoint; 'pull' = originated in SharePoint, pulled into the app."
     }
   },
   "required": [
