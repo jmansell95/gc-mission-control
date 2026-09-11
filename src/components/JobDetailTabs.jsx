@@ -223,18 +223,7 @@ export default function JobDetailTabs({
         ) : activitySub === 'hazards' ? (
           <JobHazardMap job={job} />
         ) : activitySub === 'boreholes' && isDrillingJob ? (
-          <>
-            <TabStatRibbon
-              icon={Mountain}
-              title="Drilling Progress"
-              stats={[
-                { icon: Users, value: assignedStaff.length, label: 'Crew', iconColor: 'text-emerald-600' },
-                { icon: Mountain, value: `${(totalMeterage || 0).toFixed(1)}m`, label: 'Total Drilled', iconColor: 'text-blue-600' },
-                { icon: CalendarDays, value: rotas.length, label: 'Shifts Logged', iconColor: 'text-amber-600' },
-              ]}
-            />
-            <BoreholeDrillDown job={job} jobType={primaryType} />
-          </>
+          <BoreholeDrillDown job={job} jobType={primaryType} />
         ) : activitySub === 'geotech' && isDrillingJob ? (
           <GeotechDataTab job={job} allStaff={allStaff} suppliers={suppliers} assets={undefined} />
         ) : null}

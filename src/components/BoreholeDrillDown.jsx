@@ -15,6 +15,10 @@ import BoreholeDetailModal from '@/components/borehole/BoreholeDetailModal';
 import BoreholeSummaryPanel from '@/components/borehole/BoreholeSummaryPanel';
 import { BOREHOLE_STATUS_CONFIG, MISSING_DATA_GROUPS } from '@/components/investigation/boreholeStatusConfig';
 import { DRILLING_METHOD_CONFIG } from '@/components/investigation/boreholeStatusConfig';
+import RigDrillDownModal from '@/components/borehole/RigDrillDownModal';
+import { computeBoreholeEarnings, computeRigEarnings } from '@/utils/rigEarnings';
+import { getSorDepthBands } from '@/utils/geotechBilling';
+import { PoundSterling, Cog } from 'lucide-react';
 
 export default function BoreholeDrillDown({ job, jobType }) {
   const { data: allLogs = [], isLoading } = useQuery({
@@ -26,6 +30,13 @@ export default function BoreholeDrillDown({ job, jobType }) {
   const { data: sorItems = [] } = useQuery({
     queryKey: ['investigation-sor', job.id],
     queryFn: () => base44.entities.InvestigationSOR.list('-created_date', 500),
+  });
+
+  // Staff list for RigDrillDownModal logger resolution
+  const { data: staffList = [] } = useQuery({
+    queryKey: ['staff-borehole-drilldown'],
+    queryFn: () => base44.entities.Staff.list(),
+    staleTime: 60000,
   });
 
   // Only show borehole data from KeyLogBook AGS imports — drillers record
@@ -54,7 +65,28 @@ export default function BoreholeDrillDown({ job, jobType }) {
     return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
   }, [logs]);
 
+  // SOR depth bands + per-borehole earnings + rig grouping
+  const sorDepthBands = useMemo(() => getSorDepthBands(sorItems), [sorItems]);
+  const boreholeEarningsMap = useMemo(() => {
+    const map = {};
+    computeBoreholeEarnings(logs, job, sorDepthBands).forEach(e => { map[e.ref] = e; });
+    return map;
+  }, [logs, job, sorDepthBands]);
+  const { perRig } = useMemo(() => computeRigEarnings({ logs, sorItems, job }), [logs, sorItems, job]);
+  const boreholeRigMap = useMemo(() => {
+    const map = {};
+    boreholes.forEach(([ref, refLogs]) => {
+      const device = refLogs.find(l => l.device_name)?.device_name;
+      const driller = refLogs.find(l => l.staff_name)?.staff_name;
+      const rigKey = device || driller || 'Unassigned';
+      const rig = perRig.find(r => r.key === rigKey);
+      if (rig) map[ref] = rig;
+    });
+    return map;
+  }, [boreholes, perRig]);
+
   const [selectedRef, setSelectedRef] = useState(null);
+  const [selectedRig, setSelectedRig] = useState(null);
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -272,6 +304,31 @@ export default function BoreholeDrillDown({ job, jobType }) {
                     </div>
                   )}
 
+                  {/* Earnings — £ amount with breakdown tooltip */}
+                  {(() => {
+                    const ed = boreholeEarningsMap[ref];
+                    if (!ed || !ed.hasRate) return null;
+                    const b = ed.breakdown || {};
+                    const parts = [];
+                    if (b.meterage > 0) parts.push(`Meterage: £${Math.round(b.meterage).toLocaleString('en-GB')}`);
+                    if (b.sorBands > 0) parts.push(`SOR bands: £${Math.round(b.sorBands).toLocaleString('en-GB')}`);
+                    if (b.charges > 0) parts.push(`Charges: £${Math.round(b.charges).toLocaleString('en-GB')}`);
+                    return (
+                      <div className="relative group/earnings mb-2" title={parts.join('\n')}>
+                        <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100 cursor-help">
+                          <PoundSterling className="w-3 h-3" />
+                          {fmtGBP(ed.earnings)}
+                        </div>
+                        {parts.length > 0 && (
+                          <div className="absolute bottom-full left-0 mb-1 hidden group-hover/earnings:block z-20 bg-slate-900 text-white text-[10px] rounded-lg px-2.5 py-2 shadow-lg whitespace-nowrap pointer-events-none">
+                            <div className="font-semibold mb-1 text-white/80">Earnings breakdown</div>
+                            {parts.map((p, i) => <div key={i}>{p}</div>)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Mini strata visual bar */}
                   {!hideStrata && s.strataLogs.length > 0 && (
                     <div className="mb-2">
@@ -345,13 +402,23 @@ export default function BoreholeDrillDown({ job, jobType }) {
                     </div>
                   )}
 
-                  {/* Link to Investigation Hub — deep-links pre-filtered to this job + borehole */}
-                  <button
-                    onClick={() => navigateToInvestigationHub(job.id, null, ref)}
-                    className="w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-[#2E5A1A] font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
-                  >
-                    <ExternalLink className="w-3 h-3" /> View in Investigation Hub
-                  </button>
+                  {/* Rig view + Investigation Hub links */}
+                  <div className="flex gap-1.5">
+                    {boreholeRigMap[ref] && (
+                      <button
+                        onClick={() => setSelectedRig(boreholeRigMap[ref])}
+                        className="flex-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-emerald-700 font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
+                      >
+                        <Cog className="w-3 h-3" /> Rig View
+                      </button>
+                    )}
+                    <button
+                      onClick={() => navigateToInvestigationHub(job.id, null, ref)}
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-[#2E5A1A] font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
+                    >
+                      <ExternalLink className="w-3 h-3" /> Investigation Hub
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -359,7 +426,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Borehole detail modal */}
       {selectedRef && (
         <BoreholeDetailModal
           boreholeRef={selectedRef}
@@ -371,10 +438,28 @@ export default function BoreholeDrillDown({ job, jobType }) {
           onNavigateRef={(ref) => setSelectedRef(ref)}
         />
       )}
+
+      {/* Rig drill-down modal — opened from borehole card 'Rig View' link */}
+      {selectedRig && (
+        <RigDrillDownModal
+          rigName={selectedRig.name}
+          isDrillerFallback={selectedRig.isDrillerFallback}
+          logs={selectedRig.logs}
+          sorItems={sorItems}
+          job={job}
+          staffList={staffList}
+          boreholeCount={selectedRig.boreholeCount}
+          totalMetres={selectedRig.totalMetres}
+          earnings={selectedRig.earnings}
+          onClose={() => setSelectedRig(null)}
+        />
+      )}
       </div>
     </div>
   );
 }
+
+const fmtGBP = (v) => '£' + Math.round(v || 0).toLocaleString('en-GB');
 
 function Chip({ icon: Icon, count, color }) {
   const colors = {

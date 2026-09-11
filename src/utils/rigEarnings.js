@@ -134,16 +134,24 @@ export function computeBoreholeEarnings(logs, job, sorDepthBands) {
 
   const meterageRate = Number(job?.meterage_rate) || 0;
   return Object.values(byRef).map((b) => {
+    const breakdown = { meterage: 0, charges: 0, sorBands: 0 };
     let earnings = 0;
     let hasRate = false;
-    if (meterageRate > 0 && b.maxDepth > 0) { earnings += b.maxDepth * meterageRate; hasRate = true; }
-    earnings += b.charges;
+    if (meterageRate > 0 && b.maxDepth > 0) {
+      breakdown.meterage = Math.round(b.maxDepth * meterageRate * 100) / 100;
+      earnings += breakdown.meterage;
+      hasRate = true;
+    }
+    breakdown.charges = Math.round(b.charges * 100) / 100;
+    earnings += breakdown.charges;
     if (b.charges > 0) hasRate = true;
     if (sorDepthBands && sorDepthBands.length > 0 && b.maxDepth > 0) {
       allocateDepthBands(b.maxDepth).forEach((band) => {
         const sor = sorDepthBands.find((s) => s.from === band.from && s.to === band.to);
-        if (sor?.price != null) { earnings += band.metres * sor.price; hasRate = true; }
+        if (sor?.price != null) { breakdown.sorBands += band.metres * sor.price; hasRate = true; }
       });
+      breakdown.sorBands = Math.round(breakdown.sorBands * 100) / 100;
+      earnings += breakdown.sorBands;
     }
     const sortedDates = [...b.dates].sort();
     return {
@@ -151,6 +159,7 @@ export function computeBoreholeEarnings(logs, job, sorDepthBands) {
       maxDepth: Math.round(b.maxDepth * 100) / 100,
       earnings: Math.round(earnings * 100) / 100,
       hasRate,
+      breakdown,
       logCount: b.logs.length,
       firstDate: sortedDates[0] || null,
       lastDate: sortedDates[sortedDates.length - 1] || null,
