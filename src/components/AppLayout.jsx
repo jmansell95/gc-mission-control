@@ -6,7 +6,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { STANDALONE_ROUTES, ROUTE_TO_SECTION } from '@/utils/standaloneRoutes';
-import UnifiedMobileDrawer from '@/components/mobile/UnifiedMobileDrawer';
+import MobileNavShell from '@/components/mobile/MobileNavShell';
 
 // Maps standalone routes to the closest AdminNav section so the
 // sidebar highlights the right item when on a non-dashboard page.
@@ -58,11 +58,11 @@ export default function AppLayout() {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen page-bg-vibrant">
-      {/* Mobile browser: UnifiedMobileDrawer provides hamburger + slide-out nav.
-          Hidden on desktop (lg+) where AdminNav sidebar is visible.
-          Hidden when isMobileApp (MobileAppShell provides its own). */}
+      {/* Mobile browser: MobileNavShell provides the bottom Menu bar + slide-out nav.
+           Hidden on desktop (lg+) where AdminNav sidebar is visible.
+           Hidden when isMobileApp (MobileAppShell provides its own). */}
       <div className="lg:hidden">
-        <UnifiedMobileDrawer />
+        <MobileNavShell />
       </div>
       <AdminNav activeSection={activeSection} setActiveSection={setActiveSection} onSettingsTabClick={(tab) => navigate('/admin', { state: { section: 'settings', settingsTab: tab } })} />
       <div className="flex-1 flex flex-col min-h-0">
@@ -74,7 +74,7 @@ export default function AppLayout() {
           <DivisionIdentityBar />
           {/* Responsive hub canvas: phone = stacked + bottom-nav clearance,
               tablet = condensed gutters, desktop = breathable + sidebar. */}
-          <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-3 lg:pt-6 pb-8 w-full max-w-[1600px] mx-auto">
+          <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-3 lg:pt-6 pb-24 lg:pb-8 w-full max-w-[1600px] mx-auto">
             <Breadcrumbs />
             <Outlet />
           </div>

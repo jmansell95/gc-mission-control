@@ -44,14 +44,13 @@ const ALL_HUBS = [
  * mounted per mobile view — MobileAppShell renders it for PWA/APK builds,
  * and FieldShell renders it for mobile-browser field routes.
  */
-export default function UnifiedMobileDrawer() {
+export default function UnifiedMobileDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user: authUser } = useAuth();
   const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
   const { counts: inboxCounts } = useInbox();
   const { openHub } = useAIHub();
-  const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
@@ -77,11 +76,11 @@ export default function UnifiedMobileDrawer() {
 
   const handleNavigate = (path, state) => {
     navigate(path, state ? { state } : undefined);
-    setOpen(false);
+    onClose();
   };
 
   const handleHubClick = (hubId) => {
-    setOpen(false);
+    onClose();
     if (STANDALONE_ROUTES[hubId]) {
       navigate(STANDALONE_ROUTES[hubId]);
     } else {
@@ -90,7 +89,7 @@ export default function UnifiedMobileDrawer() {
   };
 
   const handleSignOut = async () => {
-    setOpen(false);
+    onClose();
     try {
       await base44.auth.logout('/login');
     } catch {
@@ -136,7 +135,7 @@ export default function UnifiedMobileDrawer() {
           { label: 'Inbox', icon: Inbox, path: '/inbox', active: isActive('/inbox'), badge: inboxCount },
           { label: 'Admin Dashboard', icon: LayoutDashboard, path: '/admin', active: isActive('/admin') },
           { label: 'My Team', icon: Users, path: '/manager-team', active: isActive('/manager-team') },
-          { label: 'AI Hubs', icon: Sparkles, onClick: () => { setOpen(false); openHub(); } },
+          { label: 'AI Hubs', icon: Sparkles, onClick: () => { onClose(); openHub(); } },
         ],
       });
       // Hub links
@@ -167,23 +166,12 @@ export default function UnifiedMobileDrawer() {
 
   return (
     <>
-      {/* Floating hamburger button — top-left */}
-      <button
-        onClick={() => setOpen(true)}
-        className="absolute top-3 left-3 z-30 w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md shadow-md flex items-center justify-center transition active:scale-95 touch-manipulation hover:bg-white/90"
-        aria-label="Open navigation menu"
-      >
-        <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-
-      {/* Drawer */}
+      {/* Drawer — controlled by parent (MobileNavShell) */}
       {open && (
         <>
           <div
             className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm animate-slide-up"
-            onClick={() => setOpen(false)}
+            onClick={onClose}
             style={{ animationDuration: '0.2s' }}
           />
           <div className="fixed top-0 left-0 bottom-0 z-50 w-[85vw] max-w-sm field-bg shadow-2xl animate-drawer-slide-in flex flex-col safe-area-top">
@@ -197,7 +185,7 @@ export default function UnifiedMobileDrawer() {
                 </div>
               </div>
               <button
-                onClick={() => setOpen(false)}
+                onClick={onClose}
                 className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition flex-shrink-0 active:scale-95"
               >
                 <X className="w-5 h-5 text-slate-600" />
@@ -208,7 +196,7 @@ export default function UnifiedMobileDrawer() {
             {(isSuperAdmin || permittedDivisions.length > 1) && (
               <div className="px-3 pt-3">
                 <button
-                  onClick={() => { setOpen(false); navigate('/enterprise'); }}
+                  onClick={() => { onClose(); navigate('/enterprise'); }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/50 ring-1 ring-amber-200 text-amber-800 active:scale-[0.98] transition"
                 >
                   <ArrowLeftRight className="w-5 h-5 text-amber-600" />
