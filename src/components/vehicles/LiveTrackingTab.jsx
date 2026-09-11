@@ -3,16 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, CircleMarker, Popup, Polyline, Marker, Tooltip, useMap } from 'react-leaflet';
 import {
   Satellite, Loader2, RefreshCw, Navigation, Gauge, Clock, Car, Filter, Zap,
-  MapPin, Calendar, Route, GitCompare, ShieldAlert, ChevronLeft, X, Users,
+  MapPin, Calendar, Route, GitCompare, ShieldAlert, ChevronLeft, X,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import TripPlaybackScrubber from './TripPlaybackScrubber';
 import SafetyEventsLayer from './SafetyEventsLayer';
 import VehicleLiveDialog from './VehicleLiveDialog';
 import RouteComparisonDialog from './RouteComparisonDialog';
-import StaffMapLayer from './StaffMapLayer';
-import TrackingPresenceStrip from './TrackingPresenceStrip';
-import { useDivision } from '@/contexts/DivisionContext';
 
 const UK_CENTER = [52.3, -1.5];
 const KM_TO_MI = 0.621371;
@@ -87,13 +84,11 @@ export default function LiveTrackingTab({ initialVehicleId }) {
   const [selectedTripIndex, setSelectedTripIndex] = useState(0);
   const [playbackIndex, setPlaybackIndex] = useState(0);
   const [showEvents, setShowEvents] = useState(true);
-  const [showCrew, setShowCrew] = useState(true); // staff GPS overlay on live map
   const [filterMoving, setFilterMoving] = useState('all');
   const [dialogVehicle, setDialogVehicle] = useState(null);
   const [routeComparisonTrip, setRouteComparisonTrip] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState(null);
-  const { activeDivision } = useDivision();
 
   // ── Live locations ──
   const { data: liveData, isLoading: liveLoading, refetch: refetchLive, dataUpdatedAt, isFetching } = useQuery({
@@ -261,9 +256,6 @@ export default function LiveTrackingTab({ initialVehicleId }) {
 
   return (
     <div className="space-y-3">
-      {/* ── Crew tracking presence (who has the app open) ── */}
-      {isLiveMode && <TrackingPresenceStrip divisionId={activeDivision?.id} />}
-
       {/* ── Controls bar ── */}
       <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
@@ -271,7 +263,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
             <Satellite className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-slate-800">Live Tracking</p>
+            <p className="text-sm font-bold text-slate-800">Live Vehicle Map</p>
             <p className="text-[11px] text-slate-500">{trackedCount} tracked · {movingCount} moving · {stoppedCount} stopped</p>
             <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
               <span className={`w-1.5 h-1.5 rounded-full ${isFetching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
@@ -299,17 +291,6 @@ export default function LiveTrackingTab({ initialVehicleId }) {
               </button>
             ))}
           </div>
-        )}
-
-        {/* Show crew toggle (live mode only) — overlays staff GPS pins on the map */}
-        {isLiveMode && (
-          <button
-            onClick={() => setShowCrew(s => !s)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition ${showCrew ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-500'}`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            {showCrew ? 'Crew On' : 'Crew Off'}
-          </button>
         )}
 
         {/* Date picker (history mode) */}
@@ -411,10 +392,6 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   {isLiveMode && mapMarkers.map(v => (
                     <VehicleMarker key={v.vehicle_id || v.registration_number} vehicle={v} onClick={handleVehicleClick} />
                   ))}
-                  {/* Live staff GPS overlay */}
-                  {isLiveMode && (
-                    <StaffMapLayer divisionId={activeDivision?.id} show={showCrew} />
-                  )}
                   {/* Breadcrumb trail */}
                   {!isLiveMode && breadcrumbPath.length > 1 && (
                     <Polyline positions={breadcrumbPath} pathOptions={{ color: '#2E5A1A', weight: 4, opacity: 0.7 }} />
@@ -460,16 +437,6 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                     <div className="flex items-center gap-1.5">
                       <div className="w-4 h-4 rounded-full bg-slate-400 border-2 border-white" />
                       <span className="text-slate-600">Vehicle (engine off)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
-                        <svg width="7" height="7" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/></svg>
-                      </div>
-                      <span className="text-slate-600">Staff (phone GPS)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-dashed border-white" />
-                      <span className="text-slate-600">Staff (via vehicle)</span>
                     </div>
                   </div>
                 )}

@@ -46,8 +46,8 @@ export default function FleetHub() {
   }, [liveLocations]);
 
   const tabs = [
-    { id: 'live', label: 'Live Tracking', icon: Satellite },
-    { id: 'crew', label: 'Live Crew', icon: Users },
+    { id: 'live', label: 'Live Vehicle Map', icon: Satellite },
+    { id: 'crew', label: 'Live Crew Map', icon: Users },
     { id: 'fleet', label: 'Vehicles', icon: Truck },
     { id: 'maintenance', label: 'Maintenance', icon: Wrench },
   ];
@@ -63,8 +63,8 @@ export default function FleetHub() {
       help={{
         title: 'Tracking Hub — how it works',
         topics: [
-          { title: 'Live Tracking', summary: 'Where every vehicle and crew phone is right now.', body: 'Solid pins are vehicles from Geotab. Dashed blue pins are crew shown **via their vehicle** — the driver is the Geotab keeper, their rota vehicle, or their default vehicle. Phone GPS always takes priority when available.' },
-          { title: 'Live Crew', summary: 'Real-time crew phone GPS with status colours and gap detection.', body: 'Green = live fix under 2 min, amber = stale (2-15 min), red = gone dark (over 15 min), grey = off shift. Tap a crew member to see their day trail (dashed segments show GPS gaps), active job, and tracking health. The engine flushes every 30s while moving and logs coverage gaps so managers can see exactly where signal was lost.' },
+          { title: 'Live Vehicle Map', summary: 'Where every vehicle is right now.', body: 'Solid pins are vehicles from Geotab — green with arrow when engine on, grey when off. Click a vehicle for live status, or open route history for trip playback, safety events, and route comparison.' },
+          { title: 'Live Crew Map', summary: 'Real-time crew phone GPS with status colours and gap detection.', body: 'Green = live fix under 2 min, amber = stale (2-15 min), red = gone dark (over 15 min), grey = off shift. Tap a crew member to see their day trail (dashed segments show GPS gaps), active job, and tracking health. The engine flushes every 30s while moving and logs coverage gaps so managers can see exactly where signal was lost.' },
           { title: 'Vehicles', summary: 'Specs, mileage, engine hours and keeper links.', body: 'Open a vehicle to see its Geotab keeper, MOT/service history and live status. Link a keeper so that driver appears on the live map automatically.' },
           { title: 'Maintenance', summary: 'Bookings, MOT and service planning.', body: 'Book maintenance with a provider, track the matrix of upcoming work, and receive alerts before anything falls due.' },
         ],
