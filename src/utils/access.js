@@ -10,11 +10,11 @@ import { SECTION_TO_MODULE, normalizePermissions, resolveModuleLevel, canWriteMo
 // assigned permission group). When a permission group IS assigned, these are
 // bypassed in favour of the group's per-module permissions.
 export const ROLE_SECTIONS = {
-  super_admin: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'teams', 'billing', 'performance', 'settings', 'ags-import', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'staff', 'contacts', 'automations', 'price-list', 'reports', 'import', 'audit', 'investigation'],
-  admin: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'teams', 'billing', 'performance', 'settings', 'ags-import', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'staff', 'contacts', 'automations', 'price-list', 'reports', 'import', 'audit', 'investigation'],
-  management: ['overview', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'billing', 'performance', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'reports', 'audit', 'staff', 'settings', 'investigation'],
-  user: ['overview', 'jobs', 'calendar', 'logistics', 'audit-trail', 'audit', 'compliance', 'staff'],
-  read_only: ['overview', 'jobs', 'calendar', 'logistics', 'audit-trail', 'audit', 'compliance', 'staff'],
+  super_admin: ['overview', 'crew-comms', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'teams', 'billing', 'performance', 'settings', 'ags-import', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'staff', 'contacts', 'automations', 'price-list', 'reports', 'import', 'audit', 'investigation'],
+  admin: ['overview', 'crew-comms', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'teams', 'billing', 'performance', 'settings', 'ags-import', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'staff', 'contacts', 'automations', 'price-list', 'reports', 'import', 'audit', 'investigation'],
+  management: ['overview', 'crew-comms', 'jobs', 'rota', 'calendar', 'scheduling', 'logistics', 'timesheets', 'compliance', 'log-qc', 'audit-trail', 'billing', 'performance', 'safety', 'safety-hub', 'assets', 'fleet', 'vehicles', 'project-financials', 'reports', 'audit', 'staff', 'settings', 'investigation'],
+  user: ['overview', 'crew-comms', 'jobs', 'calendar', 'logistics', 'audit-trail', 'audit', 'compliance', 'staff'],
+  read_only: ['overview', 'crew-comms', 'jobs', 'calendar', 'logistics', 'audit-trail', 'audit', 'compliance', 'staff'],
 };
 
 // Resolve the effective role from profile + platform admin flag.

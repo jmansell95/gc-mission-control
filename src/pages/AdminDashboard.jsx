@@ -20,10 +20,12 @@ import { JobFilterProvider } from '@/components/dashboard/JobFilterContext';
 import PageLoadingOverlay from '@/components/PageLoadingOverlay';
 import ReadinessGate from '@/components/ReadinessGate';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
+import CrewCommsManager from '@/components/admin/CrewCommsManager';
 import { useReadiness } from '@/hooks/useReadiness';
 
 const SECTION_LABELS = {
   overview: 'Dashboard',
+  'crew-comms': 'Crew Comms',
   'job-detail': 'Project Detail',
   jobs: 'Projects Hub',
   scheduling: 'Scheduling Hub',
@@ -182,6 +184,9 @@ export default function AdminDashboard() {
                   />
                 </JobFilterProvider>
               </ReadinessGate>
+            )}
+            {activeSection === 'crew-comms' && (
+              <CrewCommsManager />
             )}
             {activeSection === 'job-detail' && selectedJob && (
               <JobDetail job={selectedJob} initialTab={jobInitialTab} onBack={() => setActiveSection('overview')} />

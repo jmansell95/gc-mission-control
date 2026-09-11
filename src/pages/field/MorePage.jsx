@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox, Users } from 'lucide-react';
-import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import { useInbox } from '@/hooks/useInbox';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
@@ -113,23 +112,6 @@ export default function MorePage() {
               </button>
             );
           })}
-        </div>
-
-        {/* Self-Service Hub */}
-        <div className="field-card p-4">
-          <h3 className="text-sm font-extrabold text-slate-900 mb-1">Self-Service & Comms</h3>
-          <p className="text-xs text-slate-500 mb-3">Request time off, swap shifts, message your crew</p>
-          <SelfServiceHub
-            staff={staff}
-            divisionId={activeDivision?.id}
-            divisionStaff={allStaff}
-            myAssignments={visibleAssignments.map(a => ({
-              ...a,
-              jobName: jobs.find(j => j.id === a.job_id)?.name,
-              location: jobs.find(j => j.id === a.job_id)?.location,
-            }))}
-            isManager={staff?.is_admin || isPlatformAdmin}
-          />
         </div>
 
         {/* Live Crew Map */}

@@ -5,6 +5,7 @@ import { FieldDataProvider } from '@/components/field/FieldDataProvider';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import OfflineBanner from '@/components/field/OfflineBanner';
 import FieldDrawer from '@/components/field/FieldDrawer';
+import FieldCommsButton from '@/components/field/FieldCommsButton';
 
 /**
  * Shared layout route for all field crew pages. Provides:
@@ -53,6 +54,9 @@ export default function FieldShell({ children }) {
 
       {/* Slide-out drawer */}
       <FieldDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {/* Always-active comms button (floating, bottom-right) */}
+      <FieldCommsButton />
     </FieldDataProvider>
   );
 }

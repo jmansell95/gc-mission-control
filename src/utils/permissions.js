@@ -38,6 +38,7 @@ export const PERMISSION_MODULES = [
 // log-qc, audit-trail, teams, ags_import) are now mapped to their parent hub.
 export const SECTION_TO_MODULE = {
   overview: 'overview',
+  'crew-comms': 'staff',
   jobs: 'jobs',
   investigation: 'investigation',
   scheduling: 'scheduling',

@@ -1,0 +1,147 @@
+{
+  "name": "StaffRequest",
+  "type": "object",
+  "properties": {
+    "staff_id": {
+      "type": "string",
+      "description": "Staff member who submitted this request."
+    },
+    "staff_name": {
+      "type": "string",
+      "description": "Staff name (denormalised for display)."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "Division scope \u2014 only staff in the same division and admins see this request. Drives division-scoped RLS."
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "payslip",
+        "expense",
+        "equipment",
+        "general"
+      ],
+      "default": "general",
+      "description": "Type of request. 'payslip' = request for latest payslip, 'expense' = expense claim submission, 'equipment' = request for equipment/gear, 'general' = anything else."
+    },
+    "subject": {
+      "type": "string",
+      "description": "Short subject line for the request (e.g. 'Payslip for August', 'Fuel receipt \u00a345')."
+    },
+    "body": {
+      "type": "string",
+      "description": "Detailed request body \u2014 what the staff member needs and any context."
+    },
+    "amount": {
+      "type": "number",
+      "description": "For expense requests \u2014 the claimed amount in GBP. Blank for non-financial requests."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "fulfilled",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Request lifecycle. 'pending' = new, awaiting office response; 'in_progress' = office acknowledged and is working on it; 'fulfilled' = request completed (payslip sent, expense paid, etc.); 'rejected' = request declined."
+    },
+    "response": {
+      "type": "string",
+      "description": "Office response note \u2014 what was done, why rejected, or any follow-up info. Shown to the staff member."
+    },
+    "responded_by": {
+      "type": "string",
+      "description": "User ID of the admin/office staff member who responded."
+    },
+    "responded_by_name": {
+      "type": "string",
+      "description": "Name of the admin/office staff member who responded (denormalised for display)."
+    },
+    "responded_at": {
+      "type": "string",
+      "description": "ISO timestamp when the office responded to this request."
+    }
+  },
+  "required": [
+    "staff_id",
+    "division_id",
+    "request_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.staff_id": "{{user.id}}"
+        },
+        {
+          "data.division_id": "{{user.data.division_id}}"
+        },
+        {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
+          }
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.staff_id": "{{user.id}}"
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "is_enterprise_admin": true
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.division_id": "{{user.data.division_id}}"
+                },
+                {
+                  "data.division_id": {
+                    "$in": "{{user.data.managed_division_ids}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.staff_id": "{{user.id}}"
+        }
+      ]
+    }
+  }
+}

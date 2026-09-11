@@ -6,6 +6,14 @@
       "type": "string",
       "description": "Staff member"
     },
+    "staff_name": {
+      "type": "string",
+      "description": "Staff name (denormalised for display in the admin Crew Comms Center without joining Staff records)."
+    },
+    "division_id": {
+      "type": "string",
+      "description": "The division this absence belongs to (inherited from the staff member). Drives division-scoped filtering in the admin Crew Comms Center so managers only see their own division's holiday requests."
+    },
     "start_date": {
       "type": "string",
       "format": "date",
@@ -40,6 +48,14 @@
       ],
       "default": "pending",
       "description": "Approval status"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Name of the manager who approved/rejected this absence."
+    },
+    "approved_at": {
+      "type": "string",
+      "description": "ISO timestamp when the manager decision was made."
     },
     "bob_request_id": {
       "type": "string",

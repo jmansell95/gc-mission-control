@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Briefcase, Calendar, CalendarDays, Grid3x3, LogOut, Settings, Bell, Sparkles, Menu, HelpCircle, Receipt, User, Truck, Boxes, Car, Clock, ShieldCheck, PoundSterling, ShieldAlert, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, Wrench, Warehouse, Users, Contact, Zap, FileBarChart, FileUp, ClipboardCheck, FlaskConical,   Crown, ArrowLeftRight, TrendingUp, ScanLine, Inbox } from 'lucide-react';
+import { Briefcase, Calendar, CalendarDays, Grid3x3, LogOut, Settings, Bell, Sparkles, Menu, HelpCircle, Receipt, User, Truck, Boxes, Car, Clock, ShieldCheck, PoundSterling, ShieldAlert, ChevronRight, ChevronDown, PanelLeftClose, PanelLeftOpen, Wrench, Warehouse, Users, Contact, Zap, FileBarChart, FileUp, ClipboardCheck, FlaskConical, Crown, ArrowLeftRight, TrendingUp, ScanLine, Inbox, MessageSquare } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import NotificationCenter from '@/components/NotificationCenter';
@@ -92,6 +92,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
 
   const allNavItems = [
     { id: 'overview', label: 'Dashboard', icon: Grid3x3 },
+    { id: 'crew-comms', label: 'Crew Comms', icon: MessageSquare },
     { id: 'jobs', label: 'Projects Hub', icon: Briefcase },
     { id: 'scheduling', label: 'Scheduling Hub', icon: Calendar },
     { id: 'staff', label: 'People Hub', icon: Users },

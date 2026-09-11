@@ -13,8 +13,8 @@ import StaffMessenger from './StaffMessenger';
  * SelfServiceHub — self-service requests for field staff.
  * Pill-based sub-nav: Requests (holiday/expense/payslip) · Shift Swap · Messages
  */
-export default function SelfServiceHub({ staff, divisionId, divisionStaff = [], myAssignments = [], isManager = false }) {
-  const [subTab, setSubTab] = useState('requests');
+export default function SelfServiceHub({ staff, divisionId, divisionStaff = [], myAssignments = [], isManager = false, initialTab = 'requests' }) {
+  const [subTab, setSubTab] = useState(initialTab);
 
   const tabs = [
     { key: 'requests', label: 'Requests', icon: FileText },
@@ -69,6 +69,8 @@ function RequestsTab({ staff, divisionId }) {
     try {
       await base44.entities.Absence.create({
         staff_id: staff.id,
+        staff_name: staff.name,
+        division_id: divisionId,
         start_date: holiday.start,
         end_date: holiday.end,
         reason: holiday.reason,
@@ -87,16 +89,17 @@ function RequestsTab({ staff, divisionId }) {
 
   const submitExpense = async () => {
     setSubmitting('expense');
-    // Expenses route to the manager as a crew-channel message for now
     try {
-      await base44.entities.StaffMessage.create({
-        sender_id: staff.id,
-        sender_name: staff.name,
+      await base44.entities.StaffRequest.create({
+        staff_id: staff.id,
+        staff_name: staff.name,
         division_id: divisionId,
-        channel: 'crew',
-        body: `[Expense Request] ${staff.name} has submitted an expense claim. Please review in the admin dashboard.`,
+        request_type: 'expense',
+        subject: 'Expense claim',
+        body: `${staff.name} has submitted an expense claim for review.`,
+        status: 'pending',
       });
-      toast({ title: 'Expense submitted', description: 'Your manager has been notified.' });
+      toast({ title: 'Expense submitted', description: 'The office has been notified.' });
     } catch (e) {
       toast({ title: 'Failed', description: e.message, variant: 'destructive' });
     }
@@ -106,12 +109,14 @@ function RequestsTab({ staff, divisionId }) {
   const submitPayslip = async () => {
     setSubmitting('payslip');
     try {
-      await base44.entities.StaffMessage.create({
-        sender_id: staff.id,
-        sender_name: staff.name,
+      await base44.entities.StaffRequest.create({
+        staff_id: staff.id,
+        staff_name: staff.name,
         division_id: divisionId,
-        channel: 'crew',
-        body: `[Payslip Request] ${staff.name} has requested their latest payslip.`,
+        request_type: 'payslip',
+        subject: 'Payslip request',
+        body: `${staff.name} has requested their latest payslip.`,
+        status: 'pending',
       });
       toast({ title: 'Payslip requested', description: 'Payroll has been notified.' });
     } catch (e) {
