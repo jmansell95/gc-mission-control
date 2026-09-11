@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 import { actionItem } from '../../shared/inboxEngine.ts';
+import {
+  brandedWrapper, heading, p, ctaButton, callout, getAppBaseUrl,
+} from '../../shared/emailStyling.ts';
 
 // ============================================================
 // actionInboxItem — Approve / reject / dismiss an inbox item
@@ -37,6 +40,46 @@ export default async function(req: Request): Promise<Response> {
       note: note || '',
       actionedByName: user.full_name || user.email || 'Manager',
     });
+
+    // ── Access request special handling ───────────────────────────────
+    // When an access_request approval is actioned, update the pending
+    // user's access_status to approved/rejected and send a welcome email
+    // on approve — mirroring the old approveUserAccess function.
+    if (
+      item.approval_type === 'access_request' &&
+      item.source_entity === 'User' &&
+      item.source_id &&
+      (decision === 'approved' || decision === 'rejected')
+    ) {
+      const sr = base44.asServiceRole;
+      const newStatus = decision === 'approved' ? 'approved' : 'rejected';
+      try {
+        await sr.entities.User.update(item.source_id, { access_status: newStatus });
+      } catch (_) { /* don't fail the inbox action on user update error */ }
+
+      if (decision === 'approved') {
+        try {
+          const targetUser: any = await sr.entities.User.get(item.source_id);
+          if (targetUser?.email) {
+            const baseUrl = await getAppBaseUrl(base44);
+            const loginUrl = baseUrl || '';
+            const html = brandedWrapper(
+              heading('Your Access Has Been Approved') +
+              p(`Hi ${targetUser.full_name || targetUser.email},`) +
+              p('Your access to GC Mission Control has been approved. You can now sign in and complete your onboarding.') +
+              (loginUrl ? `<div style="margin-top:20px">${ctaButton(loginUrl, 'Sign In to GC Mission Control')}</div>` : '') +
+              callout('If you experience any issues signing in, please contact your administrator.', 'info'),
+              { banner_subtitle: 'Access Approved', headerVariant: 'emerald' }
+            );
+            await base44.integrations.Core.SendEmail({
+              to: targetUser.email,
+              subject: 'Access Approved — GC Mission Control',
+              html,
+            });
+          }
+        } catch (_) { /* best-effort email */ }
+      }
+    }
 
     return Response.json(result);
   } catch (error) {

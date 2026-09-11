@@ -81,8 +81,6 @@ import ComingSoonLock from '@/components/settings/ComingSoonLock';
 import PerformanceKpiManager from '@/components/settings/PerformanceKpiManager';
 import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfigManager';
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
-import PendingAccessQueue from '@/components/settings/PendingAccessQueue';
-import AccessGateSettings from '@/components/settings/AccessGateSettings';
 import ApprovalRoutingSettings from '@/components/settings/ApprovalRoutingSettings';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
@@ -237,8 +235,6 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'rewards': return <RewardsManager />;
       case 'performance-kpis': return <PerformanceKpiManager />;
       case 'coming-soon-manager': return <ComingSoonManager />;
-      case 'pending-access': return <PendingAccessQueue />;
-      case 'access-gate': return <AccessGateSettings />;
       case 'approval-routing': return <ApprovalRoutingSettings />;
       case 'division-check-config': return <DivisionCheckConfigManager />;
       case 'migration-hub': return <MigrationHubTab />;

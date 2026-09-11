@@ -75,7 +75,7 @@ export default async function(req: Request): Promise<Response> {
           sourceHub: 'settings',
           sourceEntity: 'User',
           sourceId: user.id,
-          deepLink: '/admin?tab=pending-access',
+          deepLink: '/inbox',
           priority: 'normal',
           overrideApproverStaffIds: approverStaffIds.length > 0 ? approverStaffIds : null,
         });
@@ -84,7 +84,7 @@ export default async function(req: Request): Promise<Response> {
       // Send notification email to approvers
       if (approvers.length > 0) {
         const baseUrl = await getAppBaseUrl(base44);
-        const queueUrl = baseUrl ? baseUrl.replace(/\/+$/, '') + '/admin?tab=pending-access' : '';
+        const queueUrl = baseUrl ? baseUrl.replace(/\/+$/, '') + '/inbox' : '';
         const userName = user.full_name || user.email || 'A new user';
 
         for (const approver of approvers) {
@@ -97,8 +97,8 @@ export default async function(req: Request): Promise<Response> {
                 ['Email', user.email || '—'],
                 ['Requested', new Date().toLocaleString('en-GB')],
               ]) +
-              (queueUrl ? `<div style="margin-top:20px">${ctaButton(queueUrl, 'Review in Pending Access Queue')}</div>` : '') +
-              callout('If you recognise this person, approve them from the Pending Access queue. If not, reject them.', 'info'),
+              (queueUrl ? `<div style="margin-top:20px">${ctaButton(queueUrl, 'Review in Your Inbox')}</div>` : '') +
+              callout('If you recognise this person, approve them from your inbox. If not, reject them.', 'info'),
               { banner_subtitle: 'Access Request' }
             );
             await base44.integrations.Core.SendEmail({

@@ -23,7 +23,9 @@ import IncentiveDashboard from '@/components/staff/IncentiveDashboard';
 import RewardsCatalogue from '@/components/staff/RewardsCatalogue';
 import ProfileStats from '@/components/staff/ProfileStats';
 import NoCrewProfileState from '@/components/staff/NoCrewProfileState';
+import SelfServiceHub from '@/components/staff/SelfServiceHub';
 import { resolveRole } from '@/utils/access';
+import { FileText } from 'lucide-react';
 
 const SECTIONS = [
   { key: 'overview', label: 'Personal Details', icon: UserCircle },
@@ -31,6 +33,7 @@ const SECTIONS = [
   { key: 'training', label: 'Training', icon: GraduationCap },
   { key: 'timesheets', label: 'Timesheets', icon: ClipboardList },
   { key: 'performance', label: 'Performance & Incentives', icon: TrendingUp },
+  { key: 'requests', label: 'My Requests', icon: FileText },
 ];
 
 export default function DesktopProfile() {
@@ -319,6 +322,31 @@ export default function DesktopProfile() {
               </div>
             </div>
           ) : <NoCrewProfileState tab="performance" onGoAdmin={null} onCreateProfile={isPlatformAdmin ? handleCreateCrewProfile : null} creating={creatingProfile} />)}
+
+          {/* My Requests — Self-service hub (holiday, expense, payslip, shift swap, messages) */}
+          {activeSection === 'requests' && (staff.id ? (
+            <SelfServiceHub
+              staff={staff}
+              divisionId={staff.division_id}
+              isManager={isPlatformAdmin}
+              initialTab="requests"
+            />
+          ) : (
+            <div className="hub-glass rounded-2xl p-5 md:p-6">
+              <div className="text-center py-8">
+                <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-slate-600">No crew profile</p>
+                <p className="text-xs text-slate-400 mt-1 mb-4">Create your crew profile to submit and manage requests.</p>
+                {isPlatformAdmin && (
+                  <button onClick={handleCreateCrewProfile} disabled={creatingProfile}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50">
+                    {creatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                    Create Crew Profile
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

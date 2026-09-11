@@ -79,8 +79,6 @@ export const settingsGroups = [
   {
     label: 'System Configuration',
     items: [
-      { id: 'pending-access', label: 'Pending Access Queue', icon: UserCheck, desc: 'Approve or reject users who have signed in via Microsoft SSO and are waiting for access to the app', roles: ['admin'] },
-      { id: 'access-gate', label: 'Access Gate Settings', icon: KeyRound, desc: 'Configure who can approve new user access requests — the approver group shown to pending users and email notification recipients', roles: ['admin'] },
       { id: 'approval-routing', label: 'Approval Routing', icon: UserCheck, desc: 'Configure who receives each approval type — AFPs, timesheets, access, leave, disputes & more. Set approvers, fallbacks, SLA timers and multi-signoff per type', roles: ['admin'] },
       { id: 'division-check-config', label: 'Compliance Check Config', icon: ShieldCheck, desc: 'Configure which Mitti safety checks each division requires — vehicle, POWRA, equipment & general audits. Assign specific Mitti templates per division', roles: ['admin'] },
       { id: 'request-routing', label: 'Request Routing', icon: UserCheck, desc: 'Route staff requests (equipment, general, payslip, expense) to the right people — specific staff or by role — straight into their inbox', roles: ['admin'] },
