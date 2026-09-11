@@ -8,7 +8,13 @@
  * service role so RLS never blocks a user from getting their own profile.
  */
 export async function buildMyProfile(base44, user) {
-  const allStaff = await base44.asServiceRole.entities.Staff.list('-created_date', 500);
+  let allStaff: any[] = [];
+  try {
+    allStaff = await base44.asServiceRole.entities.Staff.list('-created_date', 500);
+  } catch {
+    // If the Staff list fails (transient DB issue), fall through to the
+    // synthetic profile below so the app still loads instead of 500-ing.
+  }
 
   // Match by user_id first, then case-insensitive email.
   let staff = [];

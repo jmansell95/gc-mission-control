@@ -33,19 +33,25 @@ export default async function(req: Request): Promise<Response> {
       return out;
     };
 
+    // Fetch every entity in parallel, but isolate failures so one slow/errored
+    // entity doesn't wipe out the entire dashboard. Each fetch returns [] on
+    // error so the aggregation still produces partial stats.
+    const safeFetch = async (fn, fallback = []) => {
+      try { return await fn(); } catch { return fallback; }
+    };
     const [divisions, staff, jobs, vehicles, invoices, timesheets, compliance, assets, snapshots, deliveries, safetyReports, cashFlow] = await Promise.all([
-      sr.entities.Division.list('-sort_order', 500),
-      fetchAll('Staff'),
-      fetchAll('Job'),
-      fetchAll('Vehicle'),
-      fetchAll('Invoice'),
-      fetchAll('Timesheet'),
-      fetchAll('ComplianceItem'),
-      fetchAll('SiteAsset'),
-      sr.entities.DivisionSnapshot.list('-created_date', 500),
-      fetchAll('DeliveryLog'),
-      fetchAll('SafetyReport'),
-      fetchAll('CashFlowEntry'),
+      safeFetch(() => sr.entities.Division.list('-sort_order', 500)),
+      safeFetch(() => fetchAll('Staff')),
+      safeFetch(() => fetchAll('Job')),
+      safeFetch(() => fetchAll('Vehicle')),
+      safeFetch(() => fetchAll('Invoice')),
+      safeFetch(() => fetchAll('Timesheet')),
+      safeFetch(() => fetchAll('ComplianceItem')),
+      safeFetch(() => fetchAll('SiteAsset')),
+      safeFetch(() => sr.entities.DivisionSnapshot.list('-created_date', 500)),
+      safeFetch(() => fetchAll('DeliveryLog')),
+      safeFetch(() => fetchAll('SafetyReport')),
+      safeFetch(() => fetchAll('CashFlowEntry')),
     ]);
 
     const now = new Date();
