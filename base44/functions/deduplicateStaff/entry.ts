@@ -12,6 +12,10 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
  *
  * Guard: if any duplicate has MORE linked data than the selected kept record,
  * the group is aborted and logged — we never delete the wrong record.
+ *
+ * Optional payload: { delete_user_account_id } — when provided, also deletes
+ * ALL Staff records linked to that user_id AND deletes the User account itself.
+ * Used to remove a legacy account (e.g. jordanbmansell@gmail.com) entirely.
  */
 
 const LIST_LIMIT = 1000;
@@ -22,6 +26,17 @@ export default async function(req: Request): Promise<Response> {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
+
+    // Parse optional payload for account deletion
+    let deleteUserAccountId: string | null = null;
+    try {
+      const body = await req.json();
+      if (body && body.delete_user_account_id) {
+        deleteUserAccountId = String(body.delete_user_account_id);
+      }
+    } catch (_) {
+      // No JSON body — standard dedup-only mode
+    }
 
     // Fetch all Staff and linked entities in parallel.
     const [staff, rotas, compliance, timesheets] = await Promise.all([
@@ -120,9 +135,79 @@ export default async function(req: Request): Promise<Response> {
       }
     }
 
-    const message = recordsDeleted === 0
+    // ── Optional: delete a legacy User account and all its Staff records ──
+    let userAccountDeleted = false;
+    let userStaffDeleted = 0;
+    let deletedUserEmail: string | null = null;
+
+    if (deleteUserAccountId) {
+      // Find all Staff records linked to this user_id
+      const legacyStaff = staff.filter((s) => s.user_id === deleteUserAccountId);
+      for (const s of legacyStaff) {
+        // Re-point any linked data to nothing (orphan cleanup) then delete
+        const lRotas = rotas.filter((r) => r.staff_id === s.id);
+        for (const r of lRotas) {
+          await base44.asServiceRole.entities.RotaAssignment.update(r.id, { staff_id: '' });
+        }
+        const lComp = compliance.filter((c) => c.reference_id === s.id);
+        for (const c of lComp) {
+          await base44.asServiceRole.entities.ComplianceItem.update(c.id, { reference_id: '' });
+        }
+        const lTs = timesheets.filter((t) => t.staff_id === s.id);
+        for (const t of lTs) {
+          await base44.asServiceRole.entities.Timesheet.update(t.id, { staff_id: '' });
+        }
+        await base44.asServiceRole.entities.Staff.delete(s.id);
+        userStaffDeleted++;
+        await base44.asServiceRole.functions.invoke('logSystemAudit', {
+          entity_name: 'Staff',
+          entity_id: s.id,
+          action: 'delete',
+          source: 'manual',
+          actor_name: user.full_name || user.email || 'admin',
+          record_summary: `Account cleanup: deleted Staff record "${s.name}" (${s.email}) linked to legacy user ${deleteUserAccountId}`,
+        });
+      }
+
+      // Delete the User account itself
+      try {
+        // Fetch the user email before deletion for the response
+        const legacyUser = await base44.asServiceRole.entities.User.filter({ id: deleteUserAccountId });
+        if (legacyUser[0]) {
+          deletedUserEmail = legacyUser[0].email || null;
+        }
+        await base44.asServiceRole.entities.User.delete(deleteUserAccountId);
+        userAccountDeleted = true;
+        await base44.asServiceRole.functions.invoke('logSystemAudit', {
+          entity_name: 'User',
+          entity_id: deleteUserAccountId,
+          action: 'delete',
+          source: 'manual',
+          actor_name: user.full_name || user.email || 'admin',
+          record_summary: `Account cleanup: deleted legacy User account ${deletedUserEmail || deleteUserAccountId} and ${userStaffDeleted} Staff record(s)`,
+        });
+      } catch (e) {
+        // User may already be deleted — log and continue
+        await base44.asServiceRole.functions.invoke('logSystemAudit', {
+          entity_name: 'User',
+          entity_id: deleteUserAccountId,
+          action: 'delete',
+          source: 'manual',
+          actor_name: user.full_name || user.email || 'admin',
+          record_summary: `Account cleanup: attempted to delete User ${deleteUserAccountId} but failed: ${e.message || e}`,
+        });
+      }
+    }
+
+    let message = recordsDeleted === 0
       ? 'No duplicate staff records found. Each person already has one record.'
       : `Processed ${groupsProcessed} duplicate group(s). Deleted ${recordsDeleted} duplicate record(s). Re-pointed ${assignmentsRepointed} rota assignment(s), ${complianceRepointed} compliance item(s), ${timesheetsRepointed} timesheet(s).`;
+
+    if (deleteUserAccountId) {
+      message += userAccountDeleted
+        ? ` Also deleted User account ${deletedUserEmail || deleteUserAccountId} and ${userStaffDeleted} Staff record(s).`
+        : ` Also deleted ${userStaffDeleted} Staff record(s) for user ${deleteUserAccountId} (User account deletion failed or already gone).`;
+    }
 
     return Response.json({
       groupsProcessed,
@@ -131,6 +216,10 @@ export default async function(req: Request): Promise<Response> {
       complianceRepointed,
       timesheetsRepointed,
       skippedGroups,
+      deleteUserAccountId,
+      userAccountDeleted,
+      userStaffDeleted,
+      deletedUserEmail,
       message,
     });
   } catch (error) {

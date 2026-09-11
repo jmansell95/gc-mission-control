@@ -8,25 +8,45 @@
  * service role so RLS never blocks a user from getting their own profile.
  */
 export async function buildMyProfile(base44, user) {
-  let allStaff: any[] = [];
+  // Server-side filter by user_id — faster and avoids loading the entire
+  // Staff table. Falls back to email match if no user_id match is found.
+  let staff: any[] = [];
   try {
-    allStaff = await base44.asServiceRole.entities.Staff.list('-created_date', 500);
+    if (user.id) {
+      staff = await base44.asServiceRole.entities.Staff.filter({ user_id: user.id });
+    }
+    if (staff.length === 0 && user.email) {
+      const lc = user.email.toLowerCase();
+      const byEmail = await base44.asServiceRole.entities.Staff.filter({ email: user.email });
+      // filter() may be case-sensitive on some backends — double-check client-side
+      staff = byEmail.filter((s) => s.email && s.email.toLowerCase() === lc);
+    }
   } catch {
-    // If the Staff list fails (transient DB issue), fall through to the
+    // If the filter fails (transient DB issue), fall through to the
     // synthetic profile below so the app still loads instead of 500-ing.
   }
 
-  // Match by user_id first, then case-insensitive email.
-  let staff = [];
-  if (user.id) {
-    staff = allStaff.filter((s) => s.user_id && s.user_id === user.id);
-  }
-  if (staff.length === 0 && user.email) {
-    const lc = user.email.toLowerCase();
-    staff = allStaff.filter((s) => s.email && s.email.toLowerCase() === lc);
-  }
-
   const isAdmin = user.role === 'admin';
+
+  // Deduplication guard: if multiple Staff records exist for the same
+  // user_id (caused by a race condition in the old list+filter approach),
+  // keep the oldest one and delete the rest before proceeding. This runs
+  // on every login so duplicates are self-healing.
+  if (staff.length > 1 && user.id) {
+    const sorted = [...staff].sort((a, b) =>
+      String(a.created_date || '').localeCompare(String(b.created_date || ''))
+    );
+    const kept = sorted[0];
+    const extras = sorted.slice(1);
+    for (const dup of extras) {
+      try {
+        await base44.asServiceRole.entities.Staff.delete(dup.id);
+      } catch (_) {
+        // best-effort — don't fail the profile resolution
+      }
+    }
+    staff = [kept];
+  }
 
   // Auto-provision: no matching Staff record → create a minimal one.
   if (staff.length === 0) {
