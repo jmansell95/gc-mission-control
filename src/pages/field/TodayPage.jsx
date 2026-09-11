@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play, Car } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play, Car, PoundSterling, Receipt } from 'lucide-react';
+import { format, startOfWeek } from 'date-fns';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
 import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
@@ -28,7 +28,6 @@ import StaffAlerts from '@/components/staff/StaffAlerts';
 import ActiveJobCard from '@/components/staff/ActiveJobCard';
 import IncentiveQuickLook from '@/components/staff/IncentiveQuickLook';
 import DrillingWeatherWidget from '@/components/DrillingWeatherWidget';
-import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import RigSignInScanner from '@/components/staff/RigSignInScanner';
 import OfflineBanner from '@/components/field/OfflineBanner';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
@@ -42,6 +41,7 @@ import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
 import { useFieldData } from '@/components/field/FieldDataProvider';
+import { useQuery } from '@tanstack/react-query';
 import QuickActionsBar from '@/components/field/QuickActionsBar';
 import CelebrationOverlay from '@/components/field/CelebrationOverlay';
 
@@ -73,6 +73,33 @@ export default function TodayPage() {
   const [travelAssignment, setTravelAssignment] = useState(null);
   const [travelDayType, setTravelDayType] = useState('monday');
   const [showCelebration, setShowCelebration] = useState(false);
+
+  // ── Week stats for the greeting header (moved from FieldDashboard) ──
+  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const { data: myTimesheets = [] } = useQuery({
+    queryKey: ['my-week-timesheets', staff?.id, weekStart],
+    queryFn: () => base44.entities.Timesheet.filter({ staff_id: staff.id }),
+    enabled: !!staff?.id,
+  });
+  const { data: myCosts = [] } = useQuery({
+    queryKey: ['my-week-costs', staff?.id, weekStart],
+    queryFn: () => base44.entities.DailyCost.filter({ staff_id: staff.id }),
+    enabled: !!staff?.id,
+  });
+  const _weekMinutes = (myTimesheets || [])
+    .filter(t => t.week_start === weekStart && t.status !== 'deleted' && t.status !== 'rejected' && t.status !== 'merged')
+    .reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
+  const _weekHours = _weekMinutes / 60;
+  const _hourlyRate = staff?.day_rate ? staff.day_rate / 8 : 0;
+  const _weekEarnings = _weekHours * _hourlyRate;
+  const _pendingReceipts = (myCosts || []).filter(c => c.week_start === weekStart && c.status === 'submitted').length;
+  const _fmtDur = (mins) => { const m = Math.round(Number(mins) || 0); const h = Math.floor(m / 60), r = m % 60; return h && r ? `${h}h ${r}m` : h ? `${h}h` : m > 0 ? `${r}m` : '0h'; };
+  const _fmtMoney = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const _headerStats = [
+    { label: 'Hours', value: _fmtDur(_weekMinutes), icon: Clock, gradient: 'stat-gradient-brand' },
+    { label: 'Earnings', value: staff?.day_rate ? _fmtMoney(_weekEarnings) : '—', icon: PoundSterling, gradient: 'stat-gradient-emerald' },
+    { label: 'Receipts', value: _pendingReceipts, icon: Receipt, gradient: _pendingReceipts > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
+  ];
 
   // ── Handlers (preserved exactly from StaffDashboard) ──
   const handleStartJob = async (assignmentId) => {
@@ -407,10 +434,8 @@ export default function TodayPage() {
 
   return (
     <FieldPageShell
-      title="My Schedule"
-      subtitle={`${new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, ${staff?.name?.split(' ')[0] || 'Team'} · ${format(new Date(), 'EEE dd MMM')}`}
-      meta={format(new Date(), 'HH:mm')}
-      icon={Calendar}
+      staff={staff}
+      stats={_headerStats}
       transparent
       actions={(
         <div className="flex items-center gap-2">
@@ -421,7 +446,6 @@ export default function TodayPage() {
       contentClassName="pb-24"
       accentColor={activeDivision?.color}
     >
-      <DivisionIdentityBar />
       <RedAlertBanner />
 
       <FieldContainer>

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wrench, CloudSun, MoveHorizontal, Compass, Flashlight, Ruler,
-  Calculator, ArrowLeftRight, Gauge, MapPin, CircleDot, X, ChevronRight,
+  Calculator, ArrowLeftRight, Gauge, MapPin, CircleDot, ChevronRight,
 } from 'lucide-react';
-import GradientFieldHeader from '@/components/field/GradientFieldHeader';
+import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
+import { useFieldData } from '@/components/field/FieldDataProvider';
 import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import WeatherTool from '@/components/field/tools/WeatherTool';
 import SpiritLevelTool from '@/components/field/tools/SpiritLevelTool';
@@ -33,6 +34,8 @@ const TOOLS = [
 export default function ToolsPage() {
   const [activeTool, setActiveTool] = useState(null);
   const ActiveComponent = TOOLS.find(t => t.id === activeTool)?.Component;
+  const ctx = useFieldData();
+  const { staff, activeDivision } = ctx || {};
 
   return (
     <div className="min-h-full">
@@ -56,11 +59,7 @@ export default function ToolsPage() {
             exit={{ opacity: 0 }}
             className="p-4 space-y-4"
           >
-            <GradientFieldHeader
-              title="Field Tools"
-              subtitle="Pro surveyor kit — 10 tools"
-              icon={Wrench}
-            />
+            <FieldGreetingHeader staff={staff} accentColor={activeDivision?.color} />
 
             <motion.div
               variants={staggerContainer}

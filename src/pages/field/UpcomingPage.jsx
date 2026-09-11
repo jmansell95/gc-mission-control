@@ -5,7 +5,6 @@ import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import WeeklyRotaView from '@/components/staff/WeeklyRotaView';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
-import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 
 export default function UpcomingPage() {
@@ -14,14 +13,12 @@ export default function UpcomingPage() {
 
   return (
     <FieldPageShell
-      title="Upcoming"
-      subtitle="Your future shifts"
-      icon={CalendarDays}
+      staff={staff}
+      stats={visibleAssignments.length > 0 ? [{ label: 'Upcoming', value: visibleAssignments.length, icon: CalendarDays, gradient: 'stat-gradient-brand' }] : []}
       transparent
       contentClassName="pb-24"
       accentColor={activeDivision?.color}
     >
-      <DivisionIdentityBar />
       <FieldContainer>
         {assignmentsLoading ? (
           <div className="space-y-4">

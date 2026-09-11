@@ -4,9 +4,10 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import {
   ScanLine, Package, CheckCircle2, AlertTriangle,
-  Lock, Unlock, ArrowLeft, Layers, Store, PackageOpen,
+  Lock, Unlock, Layers, Store, PackageOpen,
   Wrench, ShieldCheck, Undo2, Barcode, ClipboardList,
 } from 'lucide-react';
+import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
 import UnifiedScanBasket from '@/components/assetcommand/UnifiedScanBasket';
 import InlineBasketList from '@/components/assetcommand/InlineBasketList';
 import AssetCommandDrawer from '@/components/assetcommand/AssetCommandDrawer';
@@ -418,21 +419,8 @@ export default function AssetScannerPage() {
     return (
       <>
         <div className="fixed top-0 left-0 right-0 bottom-16 field-bg flex flex-col">
-          <header className="hero-gradient border-b border-white/10 px-4 py-3 flex items-center justify-between flex-shrink-0 safe-area-top relative overflow-hidden">
-            <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
-            <div className="relative flex items-center gap-2.5">
-              <button onClick={() => setMode('assets')} className="p-2.5 text-white hover:bg-white/20 rounded-xl transition active:scale-95">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                <PackageOpen className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-hub-title font-bold text-white leading-tight">Site Collection</h1>
-                <p className="text-hub-caption text-white/70">Scan QR codes to collect items from site</p>
-              </div>
-            </div>
-          </header>
+          <FieldGreetingHeader staff={staffProfile} />
+
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-3xl xl:max-w-4xl mx-auto w-full p-4">
               <SiteCollectMode staff={staffProfile} onOpenScanner={(d) => setScanDelivery(d)} />
@@ -450,35 +438,22 @@ export default function AssetScannerPage() {
 
   return (
     <div className="fixed top-0 left-0 right-0 bottom-16 field-bg flex flex-col">
-      {/* Header */}
-      <header className="hero-gradient border-b border-white/10 px-4 py-3 flex items-center justify-between flex-shrink-0 safe-area-top relative overflow-hidden">
-        <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-white/10 blur-xl pointer-events-none" />
-        <div className="relative flex items-center gap-2.5 min-w-0">
-          {!kioskLocked && (
-            <button onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(isHubAdmin ? '/admin' : '/staff-schedule'))} className="w-9 h-9 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition flex-shrink-0 active:scale-95 touch-manipulation">
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </button>
-          )}
-          <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
-            <ScanLine className="w-4 h-4 text-white" />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-hub-title font-bold text-white leading-tight">Asset Scanner</h1>
-            <p className="text-hub-caption text-white/70">{basket.length} item{basket.length !== 1 ? 's' : ''} · {isSignOut ? 'Sign Out' : 'Return'} mode</p>
-          </div>
-        </div>
-        <div className="relative flex items-center gap-1.5 flex-shrink-0">
-          {isHubAdmin && (
-            <button
-              onClick={toggleKiosk}
-              className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition active:scale-95 ${kioskLocked ? 'bg-amber-400 text-amber-900' : 'bg-white/20 text-white'}`}
-            >
-              {kioskLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-              <span className="hidden sm:inline">{kioskLocked ? 'Kiosk On' : 'Kiosk'}</span>
-            </button>
-          )}
-        </div>
-      </header>
+      <FieldGreetingHeader
+        staff={staffProfile}
+        stats={[
+          { label: 'Basket', value: basket.length, icon: Package, gradient: basket.length > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
+          { label: 'Mode', value: isSignOut ? 'Sign Out' : 'Return', icon: ScanLine, gradient: 'stat-gradient-brand' },
+        ]}
+        actions={isHubAdmin ? (
+          <button
+            onClick={toggleKiosk}
+            type="button"
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95 ${kioskLocked ? 'bg-amber-400 text-amber-900' : 'bg-white/20 text-white'}`}
+          >
+            {kioskLocked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+          </button>
+        ) : null}
+      />
 
       {/* Unified TabBar — horizontally scrollable, all tabs visible */}
       <div className="field-header-glass border-b border-slate-200/80 px-3 py-2 flex-shrink-0">

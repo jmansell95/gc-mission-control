@@ -35,7 +35,7 @@ import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
 import SubPills from '@/components/SubPills';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
-import DivisionIdentityBar from '@/components/DivisionIdentityBar';
+
 
 const ABSENCE_REASONS = [
   { value: 'holiday', label: 'Holiday' },
@@ -195,21 +195,16 @@ export default function StaffProfile() {
 
   return (
     <FieldPageShell
-      title="My Profile"
-      subtitle={`${staff.name}${staff.team?.name ? ' · ' + staff.team.name : ''}`}
-      icon={UserCircle}
-      fixedHeader
+      staff={staff}
       transparent
-      onBack={() => navigate(-1)}
       contentClassName="pb-24"
       actions={
         <button onClick={() => setShowEditDrawer(true)} type="button"
-          className="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center transition active:scale-95 touch-manipulation hover:shadow-md">
-          <UserCog className="w-4 h-4 text-slate-600" />
+          className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center transition active:scale-95 touch-manipulation">
+          <UserCog className="w-4 h-4 text-white" />
         </button>
       }
     >
-      <DivisionIdentityBar />
       <RedAlertBanner />
 
       {/* ── Premium card stack on vibrant background (matches StaffDashboard) ── */}

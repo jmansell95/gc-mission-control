@@ -43,7 +43,7 @@ export function resolveMobileTabs(profile, isPlatformAdmin) {
   // Field crew
   if (role === 'field') {
     return [
-      { id: 'schedule', label: 'Today', icon: CalendarDays, path: '/staff-schedule' },
+      { id: 'schedule', label: 'Home', icon: CalendarDays, path: '/staff-schedule' },
       { id: 'tools', label: 'Tools', icon: Wrench, path: '/tools' },
       { id: 'scanner', label: 'Scan', icon: ScanLine, path: '/scanner' },
       { id: 'deliveries', label: 'Deliveries', icon: Truck, path: '/deliveries' },

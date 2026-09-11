@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Flashlight, AlertCircle } from 'lucide-react';
+import { X, Flashlight, AlertCircle } from 'lucide-react';
 
 export default function FlashlightTool({ onClose }) {
   const [on, setOn] = useState(false);
@@ -43,7 +43,7 @@ export default function FlashlightTool({ onClose }) {
     <div className="min-h-full flex flex-col">
       <div className="stat-gradient-amber rounded-3xl m-4 p-5 text-white flex items-center gap-3">
         <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </button>
         <h1 className="text-xl font-bold">Flashlight</h1>
       </div>

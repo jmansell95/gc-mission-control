@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MapPin, Copy, Check, Loader2, Navigation } from 'lucide-react';
+import { X, MapPin, Copy, Check, Loader2, Navigation } from 'lucide-react';
 
 export default function GpsCoordinatesTool({ onClose }) {
   const [coords, setCoords] = useState(null);
@@ -46,7 +46,7 @@ export default function GpsCoordinatesTool({ onClose }) {
     <div className="min-h-full flex flex-col">
       <div className="stat-gradient-indigo rounded-3xl m-4 p-5 text-white flex items-center gap-3">
         <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </button>
         <h1 className="text-xl font-bold">GPS Coordinates</h1>
       </div>

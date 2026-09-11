@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CloudSun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog, Sun, Wind, Droplets, Thermometer, MapPin, Loader2 } from 'lucide-react';
+import { X, CloudSun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudDrizzle, CloudFog, Sun, Wind, Droplets, Thermometer, MapPin, Loader2 } from 'lucide-react';
 
 const WMO_ICONS = {
   0: { icon: Sun, label: 'Clear sky', color: 'text-amber-500' },
@@ -55,7 +55,7 @@ export default function WeatherTool({ onClose }) {
     <div className="min-h-full flex flex-col">
       <div className="hero-vibrant-blue p-5 text-white flex items-center gap-3">
         <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </button>
         <h1 className="text-xl font-bold">Weather</h1>
       </div>

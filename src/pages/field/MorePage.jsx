@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, LayoutGrid, ClipboardList, Inbox, Users } from 'lucide-react';
+import { LayoutDashboard, Truck, UserCircle, CalendarDays, HelpCircle, ClipboardList, Inbox, Users } from 'lucide-react';
 import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import { useInbox } from '@/hooks/useInbox';
 import LiveCrewMap from '@/components/staff/LiveCrewMap';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
-import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import QuickActionsBar from '@/components/field/QuickActionsBar';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import { format } from 'date-fns';
@@ -85,14 +84,12 @@ export default function MorePage() {
 
   return (
     <FieldPageShell
-      title="More"
-      subtitle="Self-service, comms & quick links"
-      icon={LayoutGrid}
+      staff={staff}
+      stats={(inboxCounts?.total || 0) > 0 ? [{ label: 'Inbox', value: inboxCounts.total, icon: Inbox, gradient: 'stat-gradient-rose' }] : []}
       transparent
       contentClassName="pb-24"
       accentColor={activeDivision?.color}
     >
-      <DivisionIdentityBar />
       <FieldContainer space="4">
         <QuickActionsBar />
         {/* Quick link tiles — 2 col on phone, 3 on tablet, 4 on desktop */}

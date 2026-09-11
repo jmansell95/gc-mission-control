@@ -11,7 +11,6 @@ import { motion } from 'framer-motion';
 import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
-import DivisionIdentityBar from '@/components/DivisionIdentityBar';
 import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import StaffTaskList from '@/components/field/StaffTaskList';
@@ -151,14 +150,16 @@ export default function MyDutiesPage() {
 
   return (
     <FieldPageShell
-      title="My Duties"
-      subtitle="Everything you need to do — daily, weekly, monthly, yearly"
-      icon={ClipboardCheck}
+      staff={staff}
+      stats={data ? [
+        { label: 'Overdue', value: data.summary.overdue, icon: AlertTriangle, gradient: data.summary.overdue > 0 ? 'stat-gradient-rose' : 'stat-gradient-slate' },
+        { label: 'Due Today', value: data.summary.due_today, icon: Clock, gradient: data.summary.due_today > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
+        { label: 'This Week', value: data.summary.due_this_week, icon: Calendar, gradient: 'stat-gradient-blue' },
+      ] : []}
       transparent
       contentClassName="pb-24"
       accentColor={activeDivision?.color}
     >
-      <DivisionIdentityBar />
       <FieldContainer space="5">
         {/* Summary banner */}
         {data && (

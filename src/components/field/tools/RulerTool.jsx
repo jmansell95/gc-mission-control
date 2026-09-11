@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Ruler } from 'lucide-react';
+import { X, Ruler } from 'lucide-react';
 
 export default function RulerTool({ onClose }) {
   const [unit, setUnit] = useState('cm');
@@ -27,7 +27,7 @@ export default function RulerTool({ onClose }) {
     <div className="min-h-full flex flex-col">
       <div className="stat-gradient-violet rounded-3xl m-4 p-5 text-white flex items-center gap-3">
         <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center active:scale-90 transition">
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5" />
         </button>
         <h1 className="text-xl font-bold flex-1">Ruler</h1>
         <div className="flex rounded-xl bg-white/20 overflow-hidden">
