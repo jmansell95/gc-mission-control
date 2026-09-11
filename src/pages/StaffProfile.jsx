@@ -32,6 +32,7 @@ import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import StaffMovementTimeline from '@/components/staff/StaffMovementTimeline';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import SubPills from '@/components/SubPills';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import DivisionIdentityBar from '@/components/DivisionIdentityBar';
