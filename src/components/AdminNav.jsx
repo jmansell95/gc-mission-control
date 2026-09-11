@@ -226,9 +226,17 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
           );
         })}
       </div>
-      {/* Action cluster — search + collapse toggle (Scan Asset & AI Hubs moved to profile dropdown) */}
+      {/* Action cluster — search + AI Hubs + collapse toggle */}
       <div className={`${effectiveCollapsed ? 'px-1.5' : 'px-3'} pt-2 pb-2 border-t border-white/10 space-y-2`}>
         {!effectiveCollapsed && <GlobalSearch />}
+        {/* AI Hubs — opens the AI agent picker modal */}
+        <div className={`${effectiveCollapsed ? 'px-0' : 'px-0'}`}>
+          <button type="button" onClick={() => openHub()} title={effectiveCollapsed ? 'AI Hubs' : undefined}
+            className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-violet-500/20 to-indigo-500/10 text-violet-200 hover:from-violet-500/30 hover:to-indigo-500/20 ring-1 ring-violet-400/30`}>
+            <Sparkles className="w-[18px] h-[18px] flex-shrink-0 text-violet-300" />
+            {!effectiveCollapsed && <span className="flex-1 text-left">AI Hubs</span>}
+          </button>
+        </div>
         {/* Collapse toggle — desktop only (hidden on tablet where icon-rail is always on) */}
         {!isTablet && (
           <button onClick={toggleCollapsed} type="button" title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

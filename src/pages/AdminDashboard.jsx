@@ -158,7 +158,7 @@ export default function AdminDashboard() {
       <PageLoadingOverlay isLoading={pageLoading} pageName={SECTION_LABELS[activeSection]} />
       <AdminNav activeSection={activeSection} setActiveSection={handleSetActiveSection} onSettingsTabClick={(tab) => { setSettingsTab(tab); setActiveSection('settings'); }} />
       <div className="flex-1 flex flex-col min-h-0">
-      <main className="flex-1 overflow-auto safe-area-top lg:pt-4">
+      <main className="flex-1 overflow-auto safe-area-top lg:pt-0">
         <RedAlertBanner />
         <DivisionIdentityBar />
         <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-3 lg:pt-6 pb-10 lg:pb-8 w-full max-w-[1600px] mx-auto">

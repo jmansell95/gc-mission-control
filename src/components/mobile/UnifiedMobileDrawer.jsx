@@ -4,12 +4,13 @@ import {
   CalendarClock, ClipboardList, ScanLine, UserCircle, Truck, Inbox,
   LayoutDashboard, Users, HelpCircle, X, ChevronRight, LogOut,
   Grid3x3, Briefcase, Calendar, Boxes, Car, FlaskConical, ShieldCheck,
-  PoundSterling, FileBarChart, Settings, ArrowLeftRight,
+  PoundSterling, FileBarChart, Settings, ArrowLeftRight, Sparkles,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useInbox } from '@/hooks/useInbox';
+import { useAIHub } from '@/components/ai/AIHub';
 import { canAccessSection } from '@/utils/access';
 import { STANDALONE_ROUTES } from '@/utils/standaloneRoutes';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
@@ -49,6 +50,7 @@ export default function UnifiedMobileDrawer() {
   const { user: authUser } = useAuth();
   const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
   const { counts: inboxCounts } = useInbox();
+  const { openHub } = useAIHub();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState(null);
 
@@ -134,6 +136,7 @@ export default function UnifiedMobileDrawer() {
           { label: 'Inbox', icon: Inbox, path: '/inbox', active: isActive('/inbox'), badge: inboxCount },
           { label: 'Admin Dashboard', icon: LayoutDashboard, path: '/admin', active: isActive('/admin') },
           { label: 'My Team', icon: Users, path: '/manager-team', active: isActive('/manager-team') },
+          { label: 'AI Hubs', icon: Sparkles, onClick: () => { setOpen(false); openHub(); } },
         ],
       });
       // Hub links

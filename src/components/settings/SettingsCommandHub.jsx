@@ -5,10 +5,10 @@ import { base44 } from '@/api/base44Client';
 import {
   Settings as SettingsIcon, CheckCircle2, EyeOff, Search, X,
   ChevronRight, ExternalLink, Link2, Link2Off, Eye, Loader2, SlidersHorizontal,
-  Banknote, Settings2, KeyRound, Palette, ShieldCheck, Database,
+  Settings2, Database,
 } from 'lucide-react';
 import HubShell from '@/components/HubShell';
-import { allSettingsItems, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
+import { settingsGroups, HUB_MIGRATED_ITEMS } from '@/components/SettingsNav';
 import { useToast } from '@/components/ui/use-toast';
 
 const INTEGRATION_IDS = new Set([
@@ -18,56 +18,66 @@ const INTEGRATION_IDS = new Set([
   'microsoft-365', 'zapier-webhooks', 'ags-import', 'openground-sync',
 ]);
 
-// 7 category groups — the single source of truth for the settings command hub layout
-const SETTINGS_CATEGORIES = [
-  {
-    label: 'Integrations',
-    icon: Link2,
-    description: 'Connect external services to this business stream',
-    itemIds: [
-      'geotab-sync', 'holman-sync', 'asset-panda', 'bob-hr', 'concur-sync',
-      'safety-culture', 'cis-verification', 'payroll-export', 'met-office',
-      'google-maps', 'whatsapp', 'accounting-sync', 'payment-gateway',
-      'microsoft-365', 'zapier-webhooks', 'ags-import', 'openground-sync',
-    ],
-  },
-  {
-    label: 'Finance & Performance',
-    icon: Banknote,
-    description: 'KPIs, incentives, expense defaults & rewards',
-    itemIds: ['performance-kpis', 'expense-defaults', 'rewards'],
-  },
-  {
-    label: 'Operations',
-    icon: Settings2,
-    description: 'Autopilot, automations, checklists & dropdowns',
-    itemIds: ['autopilot', 'automations', 'daily-checklists', 'dropdowns', 'incremental-import'],
-  },
-  {
-    label: 'Access & Permissions',
-    icon: KeyRound,
-    description: 'User access, approval routing & gate settings',
-    itemIds: ['pending-access', 'access-gate', 'approval-routing'],
-  },
-  {
-    label: 'Branding & Communications',
-    icon: Palette,
-    description: 'Email templates, login & portal branding',
-    itemIds: ['global-branding', 'login-branding', 'portal-branding', 'email-templates', 'report-templates', 'email-alerts'],
-  },
-  {
-    label: 'Compliance & Safety',
-    icon: ShieldCheck,
-    description: 'Mitti check config & system logic guide',
-    itemIds: ['division-check-config', 'system-guide'],
-  },
-  {
-    label: 'Data & Migration',
-    icon: Database,
-    description: 'Migration tools, briefing packs & coming soon manager',
-    itemIds: ['azure-migration', 'migration-hub', 'presentation-pack', 'coming-soon-manager'],
-  },
-];
+// Category metadata (icon + description) keyed by settingsGroups label.
+// The item membership is derived dynamically from settingsGroups so new items
+// added to SettingsNav automatically appear here without manual edits.
+const CATEGORY_META = {
+  'Autopilot': { icon: Settings2, description: 'Autonomous agents & automations', sortKey: 3 },
+  'Ground Investigation': { icon: Link2, description: 'KeyLogBook & OpenGround sync', sortKey: 1 },
+  'Integrations': { icon: Link2, description: 'Connect external services to this business stream', sortKey: 0 },
+  'Planning & Briefing': { icon: Database, description: 'Migration tools & briefing packs', sortKey: 6 },
+  'System Configuration': { icon: Settings2, description: 'Access, branding, checklists, dropdowns & more', sortKey: 4 },
+};
+
+// Fallback category for items whose settingsGroups label isn't in CATEGORY_META
+const DEFAULT_CATEGORY = { icon: Settings2, description: 'General settings', sortKey: 5 };
+
+// Build categories dynamically from settingsGroups, excluding migrated items
+// and the 'hub' overview item (which is the command hub itself).
+function buildCategories() {
+  const groups = settingsGroups
+    .filter(g => g.label !== '_hidden_migrated' && g.label !== 'Overview')
+    .map(g => {
+      const meta = CATEGORY_META[g.label] || DEFAULT_CATEGORY;
+      const items = g.items.filter(i =>
+        !HUB_MIGRATED_ITEMS.has(i.id) && i.id !== 'hub'
+      );
+      return {
+        label: g.label,
+        icon: meta.icon,
+        description: meta.description,
+        sortKey: meta.sortKey,
+        items,
+      };
+    })
+    .filter(g => g.items.length > 0)
+    .sort((a, b) => (a.sortKey || 99) - (b.sortKey || 99));
+
+  // Remap labels to the user-facing category names where they differ
+  const labelMap = {
+    'Ground Investigation': 'Integrations',
+    'Integrations': 'Integrations',
+    'Autopilot': 'Operations',
+    'System Configuration': 'System Configuration',
+    'Planning & Briefing': 'Data & Migration',
+  };
+
+  // Merge groups that map to the same display label (e.g. Ground Investigation
+  // and Integrations both go under "Integrations")
+  const merged = {};
+  for (const g of groups) {
+    const displayLabel = labelMap[g.label] || g.label;
+    if (!merged[displayLabel]) {
+      merged[displayLabel] = { ...g, label: displayLabel, items: [...g.items] };
+    } else {
+      merged[displayLabel].items.push(...g.items);
+    }
+  }
+
+  return Object.values(merged).sort((a, b) => (a.sortKey || 99) - (b.sortKey || 99));
+}
+
+const SETTINGS_CATEGORIES = buildCategories();
 
 export default function SettingsCommandHub({ onNavigate, items }) {
   const navigate = useNavigate();
@@ -127,8 +137,7 @@ export default function SettingsCommandHub({ onNavigate, items }) {
   const categories = useMemo(() => {
     const q = query.toLowerCase().trim();
     return SETTINGS_CATEGORIES.map(cat => {
-      const catItems = cat.itemIds
-        .map(id => allSettingsItems.find(i => i.id === id))
+      const catItems = cat.items
         .filter(i => i && itemMap[i.id] && !HUB_MIGRATED_ITEMS.has(i.id));
 
       const searched = q
