@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat, KeyRound, BarChart3, ClipboardList, UserCog, CalendarClock, CalendarX, Package } from 'lucide-react';
+import { Users, Clock, UsersRound, Building2, GraduationCap, UserCheck, HardHat, KeyRound, BarChart3, ClipboardList, UserCog, CalendarClock, CalendarX, Package, Receipt } from 'lucide-react';
 import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
 import SettingsPage from '@/components/SettingsPage';
@@ -16,6 +16,7 @@ import TrainingMatrixHub from '@/components/staff/TrainingMatrixHub';
 import RunReportButton from '@/components/reports/RunReportButton';
 import ContactsTab from '@/components/staff/ContactsTab';
 import StaffTasksTab from '@/components/staff/StaffTasksTab';
+import FieldExpenseManagement from '@/components/staff/FieldExpenseManagement';
 
 // Map legacy tab IDs onto the new structure so deep links don't break.
 // Crew Members / Crew Profiles / Crew Types are merged into 'directory'.
@@ -59,6 +60,7 @@ const TABS = [
   },
   { id: 'training', label: 'Training', icon: GraduationCap },
   { id: 'tasks', label: 'Tasks', icon: ClipboardList },
+  { id: 'expenses', label: 'Expenses', icon: Receipt },
   {
     id: 'contacts', label: 'Contacts', icon: Building2, sub: [
       { id: 'clients', label: 'Clients', icon: Building2 },
@@ -129,6 +131,8 @@ export default function StaffPage() {
         <TrainingMatrixHub />
       ) : tab === 'tasks' ? (
         <StaffTasksTab />
+      ) : tab === 'expenses' ? (
+        <FieldExpenseManagement />
       ) : tab === 'people' && renderTab === 'staff' ? (
         <StaffListTab />
       ) : tab === 'people' && renderTab === 'crews' ? (

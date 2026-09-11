@@ -6,6 +6,7 @@ import {
   Package, Car, Wrench, PoundSterling, FileText, X, ChevronRight, AlertCircle, Sparkles,
 } from 'lucide-react';
 import { useExpenseDefaults } from '@/hooks/useExpenseDefaults';
+import ConcurReminderBanner from './ConcurReminderBanner';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -118,6 +119,9 @@ export default function DailyExpenseStep({ job, staffId, assignment, expenses, s
           <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">Fuel, subsistence, materials — tap a quick-add or enter a custom cost. Receipts can be photographed.</p>
         </div>
       </div>
+
+      {/* SAP Concur reminder */}
+      <ConcurReminderBanner compact />
 
       {/* Quick-add presets */}
       {presets.length > 0 && (
