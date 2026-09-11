@@ -212,7 +212,7 @@ export default function AuditDetailDrawer({ audit, onClose }) {
     }
     const auditId = audit?.safetyculture_audit_id;
     if (!auditId) return;
-    window.open(`https://app.mitti.com/audits/${auditId}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://app.mitti.com/report/audit/${auditId}`, '_blank', 'noopener,noreferrer');
   };
 
   return (

@@ -41,7 +41,7 @@ export function classifyAudit(templateName: string, auditTitle: string): string 
 // Returns a partial SafetyReport record (without raw_payload, which the
 // caller should add separately to control size).
 export function extractAuditFields(audit: any): any {
-  const templateId = String(deepGet(audit, 'template_id') || '');
+  const templateId = String(deepGet(audit, 'template_id', 'template_data.id', 'template.id', 'template.template_id') || '');
   const templateName = String(deepGet(audit, 'template_data.metadata.name', 'template_data.name', 'template.name', 'template_name') || '');
   const auditTitle = String(deepGet(audit, 'audit_data.name', 'name', 'audit.name', 'audit.title') || '');
   const auditorName = String(deepGet(audit, 'audit_data.authorship.author', 'authorship.author', 'audit_data.authorship.owner', 'authorship.owner', 'audit.author.name', 'author.name') || '');
@@ -51,9 +51,11 @@ export function extractAuditFields(audit: any): any {
   const completedAt = String(deepGet(audit, 'audit_data.date_completed', 'date_completed', 'modified_at', 'audit.audit_completed_at', 'audit_completed_at', 'completed_at') || '');
   const auditId = String(audit.audit_id || audit.id || '');
   const reportUrl = String(deepGet(audit, 'audit_data.report_url', 'report_url', 'pdf_url', 'audit.report_url') || '');
-  // Build the Mitti web report URL from the audit_id (Mitti migrated from
-  // SafetyCulture — the old app.safetyculture.com URLs show "nothing to see").
-  const webReportUrl = auditId ? `https://app.mitti.com/audits/${auditId}` : reportUrl;
+  // Build the Mitti web report URL from the audit_id. Mitti's deep link format
+  // for viewing an inspection report is /report/audit/<id> (confirmed from
+  // https://help.mitti.com/000149). The old /audits/<id> path shows "nothing
+  // to view here" because it's the edit-inspection URL, not the report URL.
+  const webReportUrl = auditId ? `https://app.mitti.com/report/audit/${auditId}` : reportUrl;
 
   const overallScore = num(deepGet(audit, 'audit_data.score', 'score', 'audit.score'));
   const maxScore = num(deepGet(audit, 'audit_data.total_score', 'total_score', 'max_score', 'audit.max_score'));
