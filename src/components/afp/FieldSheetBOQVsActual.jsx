@@ -123,7 +123,7 @@ export default function FieldSheetBOQVsActual({ afp, lineItems }) {
                 return (
                   <tr key={li.id} className={`hover:bg-slate-50/40 ${meta.bg}`}>
                     <td className="px-2 py-2 text-slate-400 font-mono text-[10px]">{li.item_ref || '—'}</td>
-                    <td className="px-2 py-2 text-slate-700 font-medium max-w-[220px] truncate" title={li.item}>{li.item}</td>
+                    <td className="px-2 py-2 text-slate-700 font-medium whitespace-normal break-words" title={li.item}>{li.item}</td>
                     <td className="px-2 py-2 text-slate-500">{li.unit || '—'}</td>
                     <td className="px-2 py-2 text-right tabular-nums text-slate-600 bg-slate-50/30">{fmtQty(contractedQty)}</td>
                     <td className="px-2 py-2 text-right tabular-nums text-slate-600 bg-slate-50/30">{fmt(contractedAmount)}</td>

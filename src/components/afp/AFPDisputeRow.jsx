@@ -252,7 +252,7 @@ export default function AFPDisputeRow({ item, canEdit, canDispute, canSelect, se
         </td>
 
         {/* Description */}
-        <td className="px-3 py-2 text-slate-700 max-w-[200px] truncate">
+        <td className="px-3 py-2 text-slate-700 whitespace-normal break-words" title={item.item}>
           {item.item}
           {item.source_date && (
             <span className="block text-[9px] text-slate-400">{new Date(item.source_date).toLocaleDateString('en-GB')}</span>
