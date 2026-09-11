@@ -3,16 +3,13 @@ import { startOfWeek, addDays, format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import UnifiedRotaBuilder from '@/components/rota/UnifiedRotaBuilder';
 import CalendarView from '@/components/CalendarView';
-import AvailabilityHeatmap from '@/components/rota/AvailabilityHeatmap';
+import ResourcePlanner from '@/components/rota/ResourcePlanner';
 import TemplateWeekCopy from '@/components/rota/TemplateWeekCopy';
-import ResourceAvailabilityHeatmap from '@/components/enterprise/ResourceAvailabilityHeatmap';
-import ResourceGapFinder from '@/components/enterprise/ResourceGapFinder';
-import { Calendar, CalendarDays, CalendarClock, Navigation2, Loader2, Grid3x3, Users, AlertTriangle, CheckCircle2, Coffee, Search, Cog } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarClock, Navigation2, Loader2, Grid3x3, Users, AlertTriangle, CheckCircle2, Coffee } from 'lucide-react';
 import { useSchedulingAssistant } from '@/components/SchedulingAssistantChat';
 import { base44 } from '@/api/base44Client';
 import { useScopedEntity } from '@/hooks/useScopedEntity';
 import { useToast } from '@/components/ui/use-toast';
-import { useDivision } from '@/contexts/DivisionContext';
 import HubShell from '@/components/HubShell';
 import { SCHEDULING_HELP_TOPICS, SCHEDULING_ONBOARDING, SCHEDULING_QUICK_LINKS } from '@/components/scheduling/schedulingHubContent';
 
@@ -22,13 +19,8 @@ import { SCHEDULING_HELP_TOPICS, SCHEDULING_ONBOARDING, SCHEDULING_QUICK_LINKS }
 export default function SchedulingHub({ initialTab = 'rota' }) {
   const [tab, setTab] = useState(initialTab);
   const [syncing, setSyncing] = useState(false);
-  const [showGapFinder, setShowGapFinder] = useState(false);
   const { openChat } = useSchedulingAssistant();
   const { toast } = useToast();
-  const { activeDivision } = useDivision();
-  // Rigs are a geotechnical asset — the 'Resources' tab and 'Find Rigs'
-  // header button only surface for the Geotechnical business stream.
-  const isGeotech = (activeDivision?.name || '').toLowerCase().includes('geotech');
   useEffect(() => { if (initialTab) setTab(initialTab); }, [initialTab]);
 
   const handleGeotabSync = async () => {
@@ -53,8 +45,6 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
   const [leaveFilter, setLeaveFilter] = useState('all');
   const { data: weekAssignments = [] } = useScopedEntity('RotaAssignment', { queryKey: ['rota-week-scheduling', selectedWeekStartStr], filter: { week_start: selectedWeekStartStr }, sort: '-created_date', limit: 500 });
   const { data: absences = [] } = useQuery({ queryKey: ['absences-scheduling'], queryFn: () => base44.entities.Absence.list() });
-  const { data: divisions = [] } = useQuery({ queryKey: ['divisions'], queryFn: () => base44.entities.Division.list() });
-  const divMap = useMemo(() => Object.fromEntries(divisions.map(d => [d.id, d])), [divisions]);
 
   const leaveFilterOrder = ['all', 'annual', 'sick', 'training'];
   const leaveFilterLabels = { all: 'All leave · click to filter', annual: 'Annual leave', sick: 'Sick', training: 'Training' };
@@ -90,8 +80,7 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
 
   const tabs = [
     { id: 'rota', label: 'Rota Builder', icon: Calendar },
-    { id: 'heatmap', label: 'Availability Heatmap', icon: Grid3x3 },
-    ...(isGeotech ? [{ id: 'resources', label: 'Resources', icon: Cog }] : []),
+    { id: 'resource-planner', label: 'Resource Planner', icon: Grid3x3 },
     { id: 'calendar', label: 'Calendar', icon: CalendarDays },
   ];
 
@@ -120,14 +109,6 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
       actions={
         <>
           <TemplateWeekCopy targetWeekStart={currentWeekStart} />
-          {isGeotech && (
-            <button onClick={() => setShowGapFinder(true)} type="button"
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-violet-600 text-white text-ui-caption font-semibold hover:bg-violet-700 active:scale-[0.97] transition shadow-sm">
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Find Rigs</span>
-              <span className="sm:hidden">Rigs</span>
-            </button>
-          )}
           <button onClick={handleGeotabSync} disabled={syncing} type="button"
             className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-blue-600 text-white text-ui-caption font-semibold hover:bg-blue-700 active:scale-[0.97] transition shadow-sm disabled:opacity-60">
             {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation2 className="w-4 h-4" />}
@@ -144,23 +125,8 @@ export default function SchedulingHub({ initialTab = 'rota' }) {
       }
     >
       {tab === 'rota' && <UnifiedRotaBuilder selectedWeek={selectedWeek} setSelectedWeek={setSelectedWeek} />}
-      {tab === 'heatmap' && <AvailabilityHeatmap />}
-      {tab === 'resources' && isGeotech && (
-        <ResourceAvailabilityHeatmap divisionId={activeDivision?.id || ''} onFindGap={() => setShowGapFinder(true)} />
-      )}
+      {tab === 'resource-planner' && <ResourcePlanner />}
       {tab === 'calendar' && <CalendarView />}
-
-      {showGapFinder && isGeotech && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm overflow-y-auto p-4 sm:p-6">
-          <div className="max-w-3xl mx-auto my-auto">
-            <ResourceGapFinder
-              divisionId={activeDivision?.id || ''}
-              divMap={divMap}
-              onClose={() => setShowGapFinder(false)}
-            />
-          </div>
-        </div>
-      )}
     </HubShell>
   );
 }

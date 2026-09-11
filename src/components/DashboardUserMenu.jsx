@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarDays, User, HelpCircle, LogOut, ChevronDown, Truck } from 'lucide-react';
+import { CalendarDays, User, HelpCircle, LogOut, ChevronDown, Truck, FileText } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { isFieldStaff } from '@/utils/access';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import SelfServiceHub from '@/components/staff/SelfServiceHub';
 
 export default function DashboardUserMenu() {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
+  const [showRequests, setShowRequests] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -61,6 +64,10 @@ export default function DashboardUserMenu() {
                 <CalendarDays className="w-4 h-4 text-slate-400" /> My Schedule
               </button>
             )}
+            <button onClick={() => { setShowRequests(true); setOpen(false); }} type="button"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+              <FileText className="w-4 h-4 text-slate-400" /> My Requests
+            </button>
             <button onClick={() => { navigate('/staff-profile'); setOpen(false); }} type="button"
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition text-left">
               <User className="w-4 h-4 text-slate-400" /> My Profile
@@ -84,6 +91,18 @@ export default function DashboardUserMenu() {
           </div>
         </div>
       )}
+
+      {/* My Requests side sheet — SelfServiceHub for office staff */}
+      <Sheet open={showRequests} onOpenChange={setShowRequests}>
+        <SheetContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+          <SheetHeader className="px-5 py-4 border-b border-slate-100 sticky top-0 bg-background z-10">
+            <SheetTitle className="text-lg font-bold text-slate-900">My Requests</SheetTitle>
+          </SheetHeader>
+          <div className="p-5">
+            <SelfServiceHub staff={profile} divisionId={profile?.division_id} initialTab="requests" />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

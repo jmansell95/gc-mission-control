@@ -1,7 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
-import { ShieldCheck, CheckCircle2, Square, Camera, Info, ExternalLink, Loader2, ClipboardCheck, Car } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShieldCheck, CheckCircle2, Square, Camera, Info, ClipboardCheck, Car } from 'lucide-react';
 import { format } from 'date-fns';
 import MittiSafetyPrompt from '@/components/staff/MittiSafetyPrompt';
 import MittiVerificationBadge from '@/components/staff/MittiVerificationBadge';
@@ -13,10 +11,9 @@ import { useVehicleCheckFrequency } from '@/hooks/useVehicleCheckFrequency';
 /**
  * DailyChecksStep — the pre-work checklist step of the ShiftWizard.
  *
- * Shows a configurable checklist (managed via ConfigList key 'daily_checklists')
- * with tick-boxes and optional photo evidence. Includes a prominent Mitti
- * hand-off banner telling crew to complete checks in Mitti first, then come
- * back here to confirm.
+ * Shows a fixed pre-work checklist with tick-boxes and optional photo
+ * evidence. Includes a prominent Mitti hand-off banner telling crew to
+ * complete checks in Mitti first, then come back here to confirm.
  *
  * The Continue button stays disabled until all required items are ticked.
  * On completion, the checklist state is saved to the RotaAssignment.
@@ -36,41 +33,14 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
     staffId: staff?.id,
   });
 
-  // Fetch the daily checklist config
-  const { data: checklistConfig, isLoading } = useQuery({
-    queryKey: ['config-list', 'daily_checklists'],
-    queryFn: () => base44.entities.ConfigList.filter({ key: 'daily_checklists' }),
-  });
-
-  // Determine which checklist applies — based on the staff member's team/crew type
-  const checklistItems = useMemo(() => {
-    if (!checklistConfig || checklistConfig.length === 0) return [];
-    const config = checklistConfig[0];
-    const options = config.options || [];
-
-    // Try to match by crew type / team
-    const crewType = staff?.team_id || staff?.worker_type || 'default';
-    const matched = options.find(o => o.value === crewType || o.value === 'default');
-    if (matched?.items?.length) return matched.items;
-
-    // Fall back to a flat list of all options as checklist items
-    return options.map(o => ({
-      id: o.value,
-      label: o.label,
-      required: o.critical !== false,
-      photo_required: false,
-    }));
-  }, [checklistConfig, staff]);
-
-  // Default checklist if no config exists
-  const defaultItems = [
+  // Fixed pre-work checklist items (admin-configured safety forms are shown
+  // via SafetyFormsList below; Mitti handles the actual vehicle/plant checks)
+  const allItems = [
     { id: 'vehicle_walkround', label: 'Vehicle walk-round check (oil, tyres, lights, damage)', required: true, photo_required: false },
     { id: 'plant_power', label: 'Plant / power equipment check', required: true, photo_required: false },
     { id: 'ppe', label: 'PPE inspected and worn (hard hat, boots, hi-vis, gloves)', required: true, photo_required: false },
     { id: 'mitti_completed', label: 'All checks completed in Mitti', required: true, photo_required: false },
   ];
-
-  const allItems = checklistItems.length > 0 ? checklistItems : defaultItems;
   // When Mitti is connected, the vehicle check is auto-verified by Mitti —
   // remove it from the manual tick list so crew only tick the remaining
   // items (plant, PPE). When not connected, all items are manual.
@@ -101,14 +71,6 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
 
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
   const progress = requiredItems.length > 0 ? Math.round((requiredItems.filter(i => checkedItems[i.id]).length / requiredItems.length) * 100) : 0;
-
-  if (isLoading) {
-    return (
-      <div className="px-5 py-8 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-slate-300 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4 px-5 py-2">

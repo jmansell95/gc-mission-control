@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, addDays } from 'date-fns';
 import {
-  Plane, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X, Trash2,
+  Plane, FileText, ArrowLeftRight, MessageSquare, Loader2, Check, X, Trash2, Send,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ShiftSwapBoard from './ShiftSwapBoard';
@@ -63,6 +63,7 @@ function RequestsTab({ staff, divisionId }) {
   const [submitting, setSubmitting] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [officeReq, setOfficeReq] = useState({ request_type: 'equipment', subject: '', body: '' });
 
   const handleDeleteRequest = async (reqId) => {
     setDeletingId(reqId);
@@ -117,8 +118,57 @@ function RequestsTab({ staff, divisionId }) {
     setSubmitting(null);
   };
 
+  const submitOfficeRequest = async () => {
+    if (!officeReq.subject.trim() || submitting) return;
+    setSubmitting('office');
+    try {
+      const created = await base44.entities.StaffRequest.create({
+        staff_id: staff.id,
+        staff_name: staff.name,
+        division_id: divisionId,
+        request_type: officeReq.request_type,
+        subject: officeReq.subject,
+        body: officeReq.body || undefined,
+        status: 'pending',
+      });
+      // Route to configured recipients
+      try { await base44.functions.invoke('routeStaffRequest', { request_id: created.id }); } catch (_) {}
+      toast({ title: 'Request submitted', description: 'Your request has been sent to the team for action.' });
+      setOfficeReq({ request_type: 'equipment', subject: '', body: '' });
+      queryClient.invalidateQueries({ queryKey: ['my-staff-requests', staff?.id] });
+    } catch (e) {
+      toast({ title: 'Failed', description: e.message, variant: 'destructive' });
+    }
+    setSubmitting(null);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Equipment / general request */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+            <Send className="w-4 h-4 text-emerald-600" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-800">Submit a Request</h3>
+        </div>
+        <select value={officeReq.request_type} onChange={e => setOfficeReq(r => ({ ...r, request_type: e.target.value }))}
+          className="w-full mb-2.5 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300">
+          <option value="equipment">Equipment / Gear</option>
+          <option value="general">General Request</option>
+        </select>
+        <input type="text" value={officeReq.subject} onChange={e => setOfficeReq(r => ({ ...r, subject: e.target.value }))}
+          placeholder="Subject (e.g. Need new drill bit)" maxLength={120}
+          className="w-full mb-2.5 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+        <textarea value={officeReq.body} onChange={e => setOfficeReq(r => ({ ...r, body: e.target.value }))}
+          placeholder="Details (what do you need and why?)…" rows={3}
+          className="w-full mb-3 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-300" />
+        <button onClick={submitOfficeRequest} disabled={submitting === 'office' || !officeReq.subject.trim()}
+          className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold active:scale-95 transition disabled:opacity-50 inline-flex items-center justify-center gap-2">
+          {submitting === 'office' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Submit Request
+        </button>
+      </div>
+
       {/* Holiday request */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
