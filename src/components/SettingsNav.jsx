@@ -91,7 +91,6 @@ export const settingsGroups = [
     items: [
       { id: 'approval-routing', label: 'Approval Routing', icon: UserCheck, desc: 'Configure who receives each approval type — AFPs, timesheets, access, leave, disputes & more. Set approvers, fallbacks, SLA timers and multi-signoff per type', roles: ['admin'] },
       { id: 'division-check-config', label: 'Compliance Check Config', icon: ShieldCheck, desc: 'Configure which Mitti safety checks each division requires — vehicle, POWRA, equipment & general audits. Assign specific Mitti templates per division', roles: ['admin'] },
-      { id: 'request-routing', label: 'Request Routing', icon: UserCheck, desc: 'Route staff requests (equipment, general, payslip, expense) to the right people — specific staff or by role — straight into their inbox', roles: ['admin'] },
       { id: 'dropdowns', label: 'Dropdown Manager', icon: ListChecks, desc: 'Add, rename, reorder or remove options in every dropdown — qualifications, asset types, revenue streams & more' },
       { id: 'global-branding', label: 'Global Branding', icon: Palette, desc: 'Default colours, banner and footer for all automated emails' },
       { id: 'login-branding', label: 'Login Page Customiser', icon: Palette, desc: 'Customise the staff login page — background, colours, logo, welcome text & live preview', roles: ['admin'] },
