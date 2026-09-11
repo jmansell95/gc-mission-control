@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { detectDeviceType } from '@/utils/deviceDetect';
 
 /**
  * useStaffTracking — captures the crew member's phone GPS during an active
@@ -98,6 +99,7 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
   const errorLoggedRef = useRef(false);
   const bgPluginRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const deviceTypeRef = useRef('phone');
   const staffNameRef = useRef(null);
   const lastFixTimeRef = useRef(null);
   const lastFlushTimeRef = useRef(0);
@@ -110,8 +112,9 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
   const hasAssignment = !!activeAssignment?.id;
   const shouldTrack = enabled && consentGranted && hasAssignment;
 
-  // Keep staff name in a ref so it doesn't tear down the GPS watch when it changes
+  // Keep staff name + device type in refs so they don't tear down the GPS watch
   useEffect(() => { staffNameRef.current = staff?.name || ''; }, [staff?.name]);
+  useEffect(() => { deviceTypeRef.current = detectDeviceType(); }, []);
 
   // Log a capture error to the backend so managers see "consented but no GPS"
   const logCaptureError = useCallback(async (type) => {
@@ -121,6 +124,7 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
       await base44.functions.invoke('recordStaffLocation', {
         assignment_id: activeAssignment?.id,
         staff_name: staffNameRef.current,
+        device_type: deviceTypeRef.current,
         error: type,
         points: [],
       });
@@ -140,6 +144,7 @@ export function useStaffTracking({ staff, activeAssignment, enabled = true }) {
       await base44.functions.invoke('recordStaffLocation', {
         assignment_id: activeAssignment?.id,
         staff_name: staffNameRef.current,
+        device_type: deviceTypeRef.current,
         session_id: sessionIdRef.current,
         points: batch,
       });

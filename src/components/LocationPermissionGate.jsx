@@ -71,7 +71,7 @@ export default function LocationPermissionGate() {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 120, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className={`sm:hidden fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl shadow-2xl safe-area-bottom ${isDenied ? 'bg-amber-50' : 'bg-white'}`}
+        className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 rounded-t-3xl shadow-2xl safe-area-bottom ${isDenied ? 'bg-amber-50' : 'bg-white'}`}
       >
         <div className="flex justify-center pt-2.5 pb-1">
           <div className={`w-10 h-1.5 rounded-full ${isDenied ? 'bg-amber-200' : 'bg-slate-200'}`} />

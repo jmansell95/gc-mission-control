@@ -59,6 +59,15 @@
       ],
       "default": "fix",
       "description": "The type of this log entry within the tracking session. 'session_start' = first fix of a new session; 'fix' = a normal GPS reading; 'gap_start' = no fix for >3 min (coverage hole begins); 'gap_end' = fix resumed after a gap; 'resume' = app reopened after being closed (session continues); 'session_end' = tracking stopped (shift ended or tracking disabled). Gap/resume events use the last known lat/lng so they render on the trail."
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "phone",
+        "tablet",
+        "desktop"
+      ],
+      "description": "The type of device the GPS reading was captured on. 'phone' = mobile phone, 'tablet' = tablet/iPad, 'desktop' = desktop/laptop browser. Detected from user agent + viewport width at capture time. Shown in the Tracking Hub so managers can see what device each crew member is carrying."
     }
   },
   "required": [

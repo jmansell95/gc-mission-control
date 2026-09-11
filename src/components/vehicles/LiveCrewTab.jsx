@@ -4,8 +4,9 @@ import { MapContainer, TileLayer, CircleMarker, Popup, Marker, Tooltip, useMap, 
 import {
   Users, Loader2, RefreshCw, Filter, MapPin, Navigation, Clock,
   WifiOff, AlertCircle, Smartphone, ChevronLeft, X, Activity,
-  ShieldCheck, Briefcase, Gauge, Radio,
+  ShieldCheck, Briefcase, Gauge, Radio, Tablet, Monitor,
 } from 'lucide-react';
+import { deviceTypeLabel } from '@/utils/deviceDetect';
 import { base44 } from '@/api/base44Client';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useLocationLogs } from '@/hooks/useLocationLogs';
@@ -78,6 +79,7 @@ function CrewMarker({ crew, onClick }) {
             {crew.status === 'live' ? 'Live · streaming' : crew.status === 'stale' ? 'Stale · recent gap' : crew.status === 'dark' ? 'Gone dark · no fix' : 'Off shift'}
           </p>
           {crew.jobName && <p className="flex items-center gap-1 text-slate-600"><Briefcase className="w-3 h-3" /> {crew.jobName}</p>}
+          {crew.deviceType && <p className="flex items-center gap-1 text-slate-500">{crew.deviceType === 'tablet' ? <Tablet className="w-3 h-3" /> : crew.deviceType === 'desktop' ? <Monitor className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />} {deviceTypeLabel(crew.deviceType)}</p>}
           <p className="flex items-center gap-1 text-slate-500">
             {crew.isMoving ? <Navigation className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
             {crew.isMoving ? 'Moving' : 'Stationary'}
@@ -195,6 +197,7 @@ export default function LiveCrewTab() {
         lastCaptureError: staff?.last_capture_error,
         lastCaptureErrorAt: staff?.last_capture_error_at,
         consentSigned: !!staff?.tracking_consent_signed_at,
+        deviceType: log.device_type || null,
       });
     }
 
@@ -433,6 +436,12 @@ export default function LiveCrewTab() {
                   <div className="flex items-center gap-3 mt-1.5 text-[10px] text-slate-400">
                     {cr.isMoving && <span className="flex items-center gap-0.5"><Navigation className="w-3 h-3" /> Moving</span>}
                     {cr.timestamp && <span className="flex items-center gap-0.5"><Clock className="w-3 h-3" /> {new Date(cr.timestamp).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>}
+                    {cr.deviceType && (
+                      <span className="flex items-center gap-0.5 text-slate-500" title={deviceTypeLabel(cr.deviceType)}>
+                        {cr.deviceType === 'tablet' ? <Tablet className="w-3 h-3" /> : cr.deviceType === 'desktop' ? <Monitor className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
+                        {deviceTypeLabel(cr.deviceType)}
+                      </span>
+                    )}
                     {!cr.timestamp && cr.status === 'dark' && <span className="flex items-center gap-0.5 text-rose-500"><WifiOff className="w-3 h-3" /> No GPS</span>}
                     {!cr.timestamp && cr.status === 'off' && <span className="flex items-center gap-0.5 text-slate-400"><WifiOff className="w-3 h-3" /> Off</span>}
                   </div>

@@ -35,6 +35,7 @@ export default async function(req: Request): Promise<Response> {
     const assignmentId: string = body?.assignment_id || "";
     const staffName: string = body?.staff_name || user.full_name || "";
     const sessionId: string = body?.session_id || "";
+    const deviceType: string = body?.device_type || "phone";
 
     // Allow error-only payloads (no points) through to the error handler below
     if (points.length === 0 && !body?.error) {
@@ -90,6 +91,7 @@ export default async function(req: Request): Promise<Response> {
       is_moving: p.is_moving ?? false,
       session_id: sessionId || p.session_id || null,
       session_event: p.session_event || "fix",
+      device_type: deviceType,
     }));
 
     await base44.entities.StaffLocationLog.bulkCreate(logEntries);
