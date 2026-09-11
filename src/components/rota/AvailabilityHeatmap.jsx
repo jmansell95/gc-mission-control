@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
@@ -16,6 +16,8 @@ import YearHeatmapGrid from './YearHeatmapGrid';
 import MonthHeatmapGrid from './MonthHeatmapGrid';
 import WeekListView from './WeekListView';
 import PlanningBlockModal from './PlanningBlockModal';
+import DayDetailModal from './DayDetailModal';
+import DayDetailDrawer from './DayDetailDrawer';
 
 export default function AvailabilityHeatmap() {
   const navigate = useNavigate();
@@ -40,6 +42,19 @@ export default function AvailabilityHeatmap() {
   const [qualFilter, setQualFilter] = useState('all'); // all | cp | rotary | gaps
   const [showWeekends, setShowWeekends] = useState(true);
   const [showInactive, setShowInactive] = useState(false);
+
+  // ── Responsive breakpoint: < 1024px = compact (mobile/tablet) ──
+  const [isCompact, setIsCompact] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1024);
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 1023px)');
+    const onChange = () => setIsCompact(mql.matches);
+    mql.addEventListener('change', onChange);
+    setIsCompact(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  // ── Selected day cell (for detail modal/drawer) ──
+  const [selectedCell, setSelectedCell] = useState(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['availability-matrix', year, activeDivision?.id],
@@ -532,15 +547,15 @@ export default function AvailabilityHeatmap() {
       ) : viewMode === 'year' ? (
         <YearHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
           staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
-          statusFilter={statusFilter} showWeekends={showWeekends} />
+          statusFilter={statusFilter} showWeekends={showWeekends} onCellClick={setSelectedCell} isCompact={isCompact} />
       ) : viewMode === 'month' ? (
         <MonthHeatmapGrid days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
           staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
-          statusFilter={statusFilter} showWeekends={showWeekends} />
+          statusFilter={statusFilter} showWeekends={showWeekends} onCellClick={setSelectedCell} isCompact={isCompact} />
       ) : (
         <WeekListView days={visibleDays} staffRows={showStaff ? filteredStaff : []} rigRows={showRigs ? filteredRigs : []}
           staffStatus={staffStatus} rigStatus={rigStatus} onPlanningBlockClick={handleOpenBlock}
-          statusFilter={statusFilter} showWeekends={showWeekends} />
+          statusFilter={statusFilter} showWeekends={showWeekends} onCellClick={setSelectedCell} isCompact={isCompact} />
       )}
 
       {/* Planning Block Modal */}
@@ -553,6 +568,25 @@ export default function AvailabilityHeatmap() {
         divisionId={activeDivision?.id || ''}
         onSaved={() => {}}
       />
+
+      {/* Day detail panel — centered modal on mobile/tablet, side drawer on desktop */}
+      {selectedCell && (
+        isCompact ? (
+          <DayDetailModal
+            resource={selectedCell.resource}
+            dateStr={selectedCell.dateStr}
+            status={selectedCell.status}
+            onClose={() => setSelectedCell(null)}
+          />
+        ) : (
+          <DayDetailDrawer
+            resource={selectedCell.resource}
+            dateStr={selectedCell.dateStr}
+            status={selectedCell.status}
+            onClose={() => setSelectedCell(null)}
+          />
+        )
+      )}
     </div>
   );
 }

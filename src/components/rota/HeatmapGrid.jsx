@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Users, Cog, ChevronDown } from 'lucide-react';
 import { STATUS_CONFIG, getRowSummary } from './heatmapUtils';
-import HeatmapCellPopover from './HeatmapCellPopover';
+import DayDetailModal from './DayDetailModal';
 
 const CELL_WIDTH = 7;
 const ROW_HEIGHT = 28;
@@ -179,7 +179,7 @@ export default function HeatmapGrid({ days, staffRows, rigRows, staffStatus, rig
       </div>
 
       {popover && (
-        <HeatmapCellPopover
+        <DayDetailModal
           resource={popover.resource}
           dateStr={popover.dateStr}
           status={popover.status}

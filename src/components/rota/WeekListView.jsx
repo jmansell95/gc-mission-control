@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Users, Cog, ChevronDown, CalendarPlus, HardHat, Building2, Briefcase } from 'lucide-react';
 import { STATUS_CONFIG, getRowSummary, groupStaffByWorkerType } from './heatmapUtils';
 import StaffBadges from './StaffBadges';
-import HeatmapCellPopover from './HeatmapCellPopover';
-
-const NAME_WIDTH = 220;
 
 const STATUS_LABEL = {
   job: 'On Job', annual_leave: 'AL', sick: 'Sick', training: 'Training',
   yard_depot: 'Depot', maintenance: 'Service', planning: 'Planning', available: 'Free',
 };
 
-export default function WeekListView({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends }) {
-  const navigate = useNavigate();
-  const [popover, setPopover] = useState(null);
+export default function WeekListView({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends, onCellClick, isCompact }) {
+  const NAME_WIDTH = isCompact ? 130 : 220;
   const [collapsedDirect, setCollapsedDirect] = useState(false);
   const [collapsedSub, setCollapsedSub] = useState(false);
   const [collapsedAgency, setCollapsedAgency] = useState(false);
@@ -25,7 +20,7 @@ export default function WeekListView({ days, staffRows, rigRows, staffStatus, ri
       onPlanningBlockClick(status.block_id);
       return;
     }
-    setPopover({ resource: { ...resource, type: isRig ? 'rig' : 'staff' }, dateStr, status });
+    onCellClick?.({ resource: { ...resource, type: isRig ? 'rig' : 'staff' }, dateStr, status });
   };
 
   const renderRow = (resource, statusMap, isRig) => {
@@ -131,10 +126,6 @@ export default function WeekListView({ days, staffRows, rigRows, staffStatus, ri
         </div>
       </div>
 
-      {popover && (
-        <HeatmapCellPopover resource={popover.resource} dateStr={popover.dateStr} status={popover.status}
-          onClose={() => setPopover(null)} onAssign={() => navigate('/admin?section=scheduling')} />
-      )}
     </div>
   );
 }

@@ -1,22 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Users, Cog, ChevronDown, HardHat, Building2, Briefcase } from 'lucide-react';
 import { STATUS_CONFIG, getRowSummary, groupStaffByWorkerType } from './heatmapUtils';
 import StaffBadges from './StaffBadges';
-import HeatmapCellPopover from './HeatmapCellPopover';
-
-const CELL_WIDTH = 36;
-const CELL_HEIGHT = 36;
-const NAME_WIDTH = 220;
 
 const STATUS_LETTER = {
   job: 'J', annual_leave: 'AL', sick: 'S', training: 'T',
   yard_depot: 'D', maintenance: 'M', planning: 'P', available: '',
 };
 
-export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends }) {
-  const navigate = useNavigate();
-  const [popover, setPopover] = useState(null);
+export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus, rigStatus, onPlanningBlockClick, statusFilter, showWeekends, onCellClick, isCompact }) {
+  const CELL_WIDTH = isCompact ? 28 : 36;
+  const CELL_HEIGHT = isCompact ? 32 : 36;
+  const NAME_WIDTH = isCompact ? 130 : 220;
   const [collapsedDirect, setCollapsedDirect] = useState(false);
   const [collapsedSub, setCollapsedSub] = useState(false);
   const [collapsedAgency, setCollapsedAgency] = useState(false);
@@ -29,7 +24,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
       onPlanningBlockClick(status.block_id);
       return;
     }
-    setPopover({ resource: { ...resource, type: isRig ? 'rig' : 'staff' }, dateStr, status });
+    onCellClick?.({ resource: { ...resource, type: isRig ? 'rig' : 'staff' }, dateStr, status });
   };
 
   const renderRow = (resource, statusMap, isRig) => {
@@ -132,10 +127,6 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
         </div>
       </div>
 
-      {popover && (
-        <HeatmapCellPopover resource={popover.resource} dateStr={popover.dateStr} status={popover.status}
-          onClose={() => setPopover(null)} onAssign={() => navigate('/admin?section=scheduling')} />
-      )}
     </div>
   );
 }
