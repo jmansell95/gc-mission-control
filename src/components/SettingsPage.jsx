@@ -81,6 +81,12 @@ import ComingSoonLock from '@/components/settings/ComingSoonLock';
 import PerformanceKpiManager from '@/components/settings/PerformanceKpiManager';
 import DivisionCheckConfigManager from '@/components/settings/DivisionCheckConfigManager';
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
+import PowerAppsMigrationRoadmap from '@/pages/PowerAppsMigrationRoadmap';
+import PowerAppsBuildHub from '@/pages/PowerAppsBuildHub';
+import AzureMigrationPlan from '@/pages/AzureMigrationPlan';
+import Microsoft365SetupGuide from '@/pages/Microsoft365SetupGuide';
+import ImprovementRoadmap from '@/pages/ImprovementRoadmap';
+import KeyLogBookDocs from '@/pages/KeyLogBookDocs';
 import ApprovalRoutingSettings from '@/components/settings/ApprovalRoutingSettings';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
@@ -238,6 +244,12 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'approval-routing': return <ApprovalRoutingSettings />;
       case 'division-check-config': return <DivisionCheckConfigManager />;
       case 'migration-hub': return <MigrationHubTab />;
+      case 'powerapps-roadmap': return <PowerAppsMigrationRoadmap />;
+      case 'powerapps-build-hub': return <PowerAppsBuildHub />;
+      case 'azure-migration': return <AzureMigrationPlan />;
+      case 'm365-setup-guide': return <Microsoft365SetupGuide />;
+      case 'improvement-roadmap': return <ImprovementRoadmap />;
+      case 'keylogbook-docs': return <KeyLogBookDocs />;
       default: return null;
     }
   };

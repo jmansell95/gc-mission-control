@@ -25,7 +25,8 @@ const CATEGORY_META = {
   'Autopilot': { icon: Settings2, description: 'Autonomous agents & automations', sortKey: 3 },
   'Ground Investigation': { icon: Link2, description: 'KeyLogBook & OpenGround sync', sortKey: 1 },
   'Integrations': { icon: Link2, description: 'Connect external services to this business stream', sortKey: 0 },
-  'Planning & Briefing': { icon: Database, description: 'Migration tools & briefing packs', sortKey: 6 },
+  'Data & Migration': { icon: Database, description: 'Power Apps & Azure migration tools, build hub & roadmap', sortKey: 6 },
+  'Planning & Briefing': { icon: FileText, description: 'Team briefing pack & presentation tools', sortKey: 7 },
   'System Configuration': { icon: Settings2, description: 'Access, branding, checklists, dropdowns & more', sortKey: 4 },
 };
 

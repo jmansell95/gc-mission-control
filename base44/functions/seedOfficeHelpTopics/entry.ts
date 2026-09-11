@@ -1292,8 +1292,10 @@ Data is isolated by division:
 ## Access Approver
 
 Designate staff as **Access Approvers** by toggling the flag on their staff card (super admins only). Approvers receive:
-- Inbox notifications when a new user signs in
-- Their name/email shown to the pending user on the access gate screen
+- An inbox item in the Universal Inbox (/inbox) when a new user signs in — approve or reject directly from the inbox
+- Their name/email shown to the pending user on the waiting screen
+
+Access requests are no longer managed from a standalone settings page — the Universal Inbox is the single approval surface for every request type.
 
 ## Syncing Roles
 

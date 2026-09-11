@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift, Bot } from 'lucide-react';
+import { Search, Users, Truck, Building2, HardHat, Package, CalendarX, Timer, Mail, Zap, Wrench, Tag, Banknote, Boxes,   Palette, Database, Receipt, TrendingUp, TrendingDown, LayoutGrid, ListChecks,   ShieldCheck, KeyRound, FlaskConical, Clock, FileUp, ShieldAlert, Scale, Sparkles, Gauge, BookOpen, Settings2, Landmark, FileSpreadsheet, ScrollText, History, Radio, ArrowUpDown, Satellite, QrCode, Link2, Cloud, MapPin, MessageCircle, CreditCard, GitBranch, FileText, FileBarChart, Star, CalendarDays, UserCheck, Warehouse, AlertOctagon, Coins, Bell, Webhook, Layers, Activity, Gift, Bot, Code, Rocket } from 'lucide-react';
 import { normalizePermissions } from '@/utils/permissions';
 
 // Items that have migrated to operational hubs (Financial Control, Compliance,
@@ -69,10 +69,20 @@ export const settingsGroups = [
     ],
   },
   {
+    label: 'Data & Migration',
+    items: [
+      { id: 'migration-hub', label: 'Migration Hub', icon: Database, desc: 'Power Apps migration financial comparison, build-effort estimates, roadmap timeline, parity matrix & integration risk map', roles: ['admin'] },
+      { id: 'powerapps-roadmap', label: 'Power Apps Migration Roadmap', icon: GitBranch, desc: '8-phase Power Apps migration roadmap — Dataverse schema, canvas apps, model-driven apps, Power Automate flows & Power BI dashboards', roles: ['admin'] },
+      { id: 'powerapps-build-hub', label: 'Power Apps Build Hub', icon: Code, desc: 'Generate Dataverse schemas, Power Automate flow bundles, PowerFx source, integration guides & Claude build scripts', roles: ['admin'] },
+      { id: 'azure-migration', label: 'Azure Migration Plan', icon: Cloud, desc: '13-week 1:1 migration roadmap to Azure-native architecture with A3 wall chart and parity matrix', roles: ['admin'] },
+      { id: 'm365-setup-guide', label: 'M365 Setup Guide', icon: CalendarDays, desc: 'Microsoft 365 & Entra ID setup guide — SSO, SharePoint, Teams & OneDrive configuration for the migration', roles: ['admin'] },
+      { id: 'improvement-roadmap', label: 'Improvement Roadmap', icon: Rocket, desc: 'Known issues, next priority actions and the long-term improvement roadmap', roles: ['admin'] },
+      { id: 'keylogbook-docs', label: 'KeyLogBook Docs', icon: FileUp, desc: 'KeyLogBook AGS webhook integration documentation — endpoints, auth, payload format & troubleshooting', roles: ['admin'] },
+    ],
+  },
+  {
     label: 'Planning & Briefing',
     items: [
-      { id: 'azure-migration', label: 'Azure Migration Plan', icon: Cloud, desc: '13-week 1:1 migration roadmap to Azure-native architecture with A3 wall chart and parity matrix', external: '/azure-migration-plan', roles: ['admin'] },
-      { id: 'migration-hub', label: 'Migration Hub', icon: Database, desc: 'Power Apps migration financial comparison, build-effort estimates, roadmap timeline, parity matrix & integration risk map', roles: ['admin'] },
       { id: 'presentation-pack', label: 'Team Briefing Pack', icon: FileText, desc: 'Full platform walkthrough — why we built it, every hub, and recent major work. Download a print-ready PDF', external: '/presentation-pack', roles: ['admin'] },
     ],
   },

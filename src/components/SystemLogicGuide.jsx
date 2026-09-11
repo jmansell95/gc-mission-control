@@ -312,6 +312,56 @@ const SECTIONS = [
       { stat: 'Full-Page Asset Detail', meaning: 'All asset views now route to the unified /assets/:id full-page detail view instead of opening a drawer. This gives more space for the compliance timeline, financial lifecycle, deployment history, and linked equipment — and makes the back button work naturally on mobile.' },
     ],
   },
+  {
+    id: 'access-inbox',
+    icon: Inbox,
+    title: 'Access Approvals via Universal Inbox',
+    desc: 'How new-user access requests now route through the inbox — and the pages that were removed',
+    items: [
+      { stat: 'Inbox-Based Access Requests', meaning: 'When a non-admin user signs in for the first time, registerPendingAccess sets their access_status to "pending" and creates an InboxItem for every staff member flagged as an approver (is_approver = true). Approvers see the request in their Universal Inbox (/inbox) alongside every other approval — no separate queue page. They click Approve or Reject directly from the inbox card.' },
+      { stat: 'actionInboxItem — Access Handling', meaning: 'When an approver acts on an access_request inbox item, actionInboxItem updates the user\'s access_status to "approved" (or "rejected") using the service role, then sends a branded welcome email to approved users via sendWelcomeEmail. The inbox item is closed and the approver is recorded. No manual user-management page is needed — the inbox is the single approval surface.' },
+      { stat: 'Removed: Pending Access Queue', meaning: 'The standalone PendingAccessQueue settings page has been removed. Its functionality is fully replaced by the Universal Inbox — every pending access request appears as an inbox item with a deep-link to /inbox. The old route (/pending-access) still exists for the end-user waiting screen, but admin management is inbox-only.' },
+      { stat: 'Removed: Access Gate Settings', meaning: 'The AccessGateSettings page (which configured contact instructions and approver lists) has been removed. Approvers are now designated via the is_approver flag on each Staff record (toggled in the staff edit form, super admins only). The contact instructions field has been dropped — the inbox card itself shows the requester\'s email and sign-in time.' },
+      { stat: 'Approver Designation', meaning: 'To make someone an access approver, edit their Staff record and tick "Is this person an access approver?" (super admins only). When ticked, the staff member receives email notifications when a new user signs in and is waiting for approval, and their name appears on the pending user\'s waiting screen as a contact. Synced to the platform user role by syncStaffUserRoles.' },
+    ],
+  },
+  {
+    id: 'my-requests',
+    icon: FileText,
+    title: 'My Requests — Profile Self-Service Tab',
+    desc: 'How staff submit and track holiday, expense, payslip and shift-swap requests from their profile',
+    items: [
+      { stat: 'My Requests Tab', meaning: 'Every staff profile (/admin/profile) now has a "My Requests" tab alongside Personal Details, Compliance Wallet, Training, Timesheets and Performance. It renders the SelfServiceHub component — a one-stop panel for holiday requests, expense claims, payslip requests, equipment requests, general requests and shift swaps. Staff no longer need to call the office or navigate to a separate page.' },
+      { stat: 'Request Types', meaning: 'Four request types: holiday (date range + reason, notifies the manager for approval), expense (amount + description, saved as a cost record linked to the job), payslip (request the latest payslip), and equipment/general (free-text request for gear or anything else). Each request is a StaffRequest record with a status lifecycle: pending → in_progress → fulfilled / rejected.' },
+      { stat: 'Shift Swap Marketplace', meaning: 'A second tab inside My Requests where field staff can offer up an assigned shift for swap. Colleagues in the same division see the offer and can claim it. The offering staff member\'s manager approves or rejects the claim; on approval the RotaAssignment is automatically reassigned to the claiming staff member.' },
+      { stat: 'Deletion of Pending Requests', meaning: 'Both staff and admins can delete a request while it is still in "pending" status. This lets staff cancel a mistake or withdraw a request that is no longer needed without waiting for the office to reject it. Fulfilled or rejected requests cannot be deleted (they remain for the audit trail).' },
+      { stat: 'Status Timeline', meaning: 'Every request shows its current status and, once the office responds, the response note and responder name. The SelfServiceHub polls the StaffRequest entity so the status updates as soon as the office acts — no refresh needed.' },
+    ],
+  },
+  {
+    id: 'powerapps-migration',
+    icon: GitBranch,
+    title: 'Power Apps Migration',
+    desc: 'The roadmap, build hub and feature audit for migrating to Microsoft Power Apps',
+    items: [
+      { stat: 'Migration Roadmap', meaning: 'An 8-phase roadmap (accessible from Settings → Data & Migration → Power Apps Migration Roadmap) that rebuilds the platform on Microsoft Power Apps: Phase 0 Foundation (environment, Dataverse, Entra ID SSO), Phase 1 Core Data Schema (90+ entities as Dataverse tables with RLS), Phase 2 Model-Driven App (admin back office), Phase 3 Canvas Apps (field mobile apps), Phase 4 Power Automate (180+ functions as cloud flows), Phase 5 Power BI (embedded dashboards), Phase 6 Data Migration (CSV → Dataflows), Phase 7 Cutover (parallel run, go-live, decommission). Each phase has a downloadable code pack.' },
+      { stat: 'Build Hub', meaning: 'The Power Apps Build Hub (Settings → Data & Migration → Power Apps Build Hub) generates five downloadable volumes: the Dataverse Schema Pack (every entity as a table definition), the Power Automate Flow Bundle (every backend function as a flow definition), the PowerFx Source (formula logic for canvas apps), the Integration Guide (how each external system connects), and the Claude Build Script (a conversation script that walks an AI builder through constructing each component). One click downloads the complete developer handoff pack.' },
+      { stat: 'Feature Compatibility Audit', meaning: 'A live audit matrix (embedded in both the Azure Migration Plan and the Power Apps Migration Roadmap pages) that scores every platform feature for transferability: Full Transfer (native Power Apps equivalent), Partial (needs custom work), Rebuild (no equivalent), or Not Available. It covers every module — Dashboard, Jobs, Scheduling, Staff, Assets, Fleet, Compliance, Financial, Logistics, Reports, Settings — and produces a print-ready report showing the percentage that transfers cleanly. This informs the build-effort estimates and the migration timeline.' },
+      { stat: 'Data & Migration Settings Section', meaning: 'All migration pages are now consolidated under Settings → Data & Migration: Migration Hub (financial comparison, build-effort, roadmap timeline, parity matrix, risk map), Power Apps Migration Roadmap, Power Apps Build Hub, Azure Migration Plan, M365 Setup Guide, Improvement Roadmap, and KeyLogBook Docs. They render as embedded tabs inside the settings shell — no navigating away to a standalone route. Admins review migration content and return to the settings overview with the standard back button.' },
+    ],
+  },
+  {
+    id: 'office-help',
+    icon: BookOpen,
+    title: 'Office Help Guides',
+    desc: '25 seeded help topics covering every office-facing module — accessible from Help → Help Guides',
+    items: [
+      { stat: 'Seeded Topics', meaning: 'The seedOfficeHelpTopics backend function creates 25 comprehensive HelpTopic records for office staff, covering: Dashboard, Jobs, Scheduling & Rota, Staff Management, Assets & Equipment, Fleet & Vehicles, Compliance & Safety, Billing & Invoicing, Reports, Settings, AFP Builder, CVR, Invoicing, Rate Cards, AFP Disputes, Payroll, Geotab, Asset Panda, Mitti, Bob HR, Concur, CIS, Inbox & Approvals, Permissions, and the Client Portal. Each topic has a title, category, and rich-text body.' },
+      { stat: 'Access', meaning: 'Office help guides are accessible from the Help page (/help) which filters by audience = "office". Field staff see a separate set of field-audience guides at /help-field. The Help Guide page renders topics grouped by category with a search bar. No PDF download is needed — everything is searchable on screen.' },
+      { stat: 'Keeping Guides in Sync', meaning: 'When a feature is added, removed, or changed, the corresponding HelpTopic record should be updated (or re-seeded via seedOfficeHelpTopics) so the guides stay accurate. The System Logic & Stats Guide (this PDF) is the companion reference — update both when adding new stats or features so the user-facing guides and the technical reference stay aligned.' },
+      { stat: 'Removed Page References', meaning: 'The help guides have been reviewed and corrected for references to the removed Pending Access Queue and Access Gate Settings pages. Any guide that previously directed admins to those pages now points to the Universal Inbox (/inbox) for access approval management instead.' },
+    ],
+  },
 ];
 
 export default function SystemLogicGuide() {
