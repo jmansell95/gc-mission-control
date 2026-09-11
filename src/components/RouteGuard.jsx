@@ -7,7 +7,11 @@ import { canAccessRoute, resolveRoleLandingPage } from '@/utils/access';
 // Routes where a brand-new user who hasn't finished their first-login profile
 // setup should be redirected to /onboarding. Deep-linking to these would
 // otherwise bypass the onboarding gate that Home.jsx applies.
-const ONBOARDING_GATED_ROUTES = ['/staff-schedule', '/staff-profile', '/admin', '/deliveries', '/scanner'];
+const ONBOARDING_GATED_ROUTES = [
+  '/staff-schedule', '/today-schedule', '/upcoming', '/more', '/my-duties',
+  '/staff-profile', '/admin', '/deliveries', '/scanner',
+  '/m/staff-schedule', '/m/today-schedule', '/m/upcoming', '/m/more', '/m/my-duties',
+];
 
 // Route-level guard that enforces the site-wide lockdown.
 // Drivers see deliveries only, field staff see schedule + profile only,
