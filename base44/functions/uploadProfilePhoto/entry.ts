@@ -29,7 +29,7 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const res = await base44.asServiceRole.integrations.Core.UploadFile({ file });
+    const res = await base44.asServiceRole.integrations.Core.UploadPublicFile({ file });
     return Response.json({ file_url: res.file_url });
   } catch (error) {
     const msg = (error && typeof error === 'object' && error.message) ? error.message : String(error);

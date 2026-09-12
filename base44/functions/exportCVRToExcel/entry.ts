@@ -125,7 +125,7 @@ export default async function(req: Request): Promise<Response> {
     const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const file = new File([blob], fileName, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-    const uploadRes = await base44.integrations.Core.UploadFile({ file });
+    const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
     const fileUrl = uploadRes.file_url;
 
     return Response.json({ file_url: fileUrl, file_name: fileName });
