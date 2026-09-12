@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, LogOut, HelpCircle, User, CalendarDays, Truck, Bell, Crown, ScanLine, Sparkles } from 'lucide-react';
+import { X, LogOut, HelpCircle, User, CalendarDays, Truck, Bell, Crown, ScanLine, Sparkles, ShieldAlert } from 'lucide-react';
 import Logo from '@/components/Logo';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import DivisionSwitcher from '@/components/DivisionSwitcher';
 import GlobalSearch from '@/components/GlobalSearch';
 
-export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSection, onNavigate, onLogout, onHelp, onProfile, onDeliveries, onNotifications, notifCount = 0, profile, onEnterprise, onScan, onAIHub }) {
+export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSection, onNavigate, onLogout, onHelp, onProfile, onDeliveries, onNotifications, notifCount = 0, profile, onEnterprise, onScan, onAIHub, onSecurity }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -119,6 +119,13 @@ export default function MobileNavDrawer({ isOpen, onClose, navItems, activeSecti
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition touch-manipulation select-none">
                   <HelpCircle className="w-5 h-5 flex-shrink-0" />
                   <span>Help Guides</span>
+                </button>
+              )}
+              {onSecurity && (
+                <button type="button" onClick={() => { onSecurity(); onClose(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-emerald-200 hover:bg-emerald-500/10 transition touch-manipulation select-none">
+                  <ShieldAlert className="w-5 h-5 flex-shrink-0 text-emerald-300" />
+                  <span>Security Hub</span>
                 </button>
               )}
               {onLogout && (

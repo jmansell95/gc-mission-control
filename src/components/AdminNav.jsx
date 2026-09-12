@@ -229,6 +229,14 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
       {/* Action cluster — search + AI Hubs + collapse toggle */}
       <div className={`${effectiveCollapsed ? 'px-1.5' : 'px-3'} pt-2 pb-2 border-t border-white/10 space-y-2`}>
         {!effectiveCollapsed && <GlobalSearch />}
+        {/* Security & Governance Hub — cyber security risk mitigation */}
+        <div className={`${effectiveCollapsed ? 'px-0' : 'px-0'}`}>
+          <button type="button" onClick={() => navigate('/security')} title={effectiveCollapsed ? 'Security & Governance' : undefined}
+            className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-emerald-500/20 to-teal-500/10 text-emerald-200 hover:from-emerald-500/30 hover:to-teal-500/20 ring-1 ring-emerald-400/30`}>
+            <ShieldAlert className="w-[18px] h-[18px] flex-shrink-0 text-emerald-300" />
+            {!effectiveCollapsed && <span className="flex-1 text-left">Security Hub</span>}
+          </button>
+        </div>
         {/* AI Hubs — opens the AI agent picker modal */}
         <div className={`${effectiveCollapsed ? 'px-0' : 'px-0'}`}>
           <button type="button" onClick={() => openHub()} title={effectiveCollapsed ? 'AI Hubs' : undefined}
@@ -327,6 +335,10 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                       className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
                       <HelpCircle className="w-4 h-4 text-slate-400" /> Help Guides
                     </button>
+                    <button onClick={() => { navigate('/security'); setProfileMenuOpen(false); }} type="button"
+                      className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
+                      <ShieldAlert className="w-4 h-4 text-emerald-500" /> Security Hub
+                    </button>
                   </div>
                   <div className="border-t border-slate-100 py-1">
                     <button onClick={() => { handleLogout(); setProfileMenuOpen(false); }} type="button"
@@ -364,6 +376,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
         onEnterprise={() => { navigate('/enterprise'); setDrawerOpen(false); }}
         onScan={() => openScanner()}
         onAIHub={() => openHub()}
+        onSecurity={() => navigate('/security')}
         profile={profile ? { ...profile, name: displayName, avatar_url: displayAvatar } : (authUser ? { name: displayName, avatar_url: displayAvatar, email: authUser.email } : null)}
       />
 
