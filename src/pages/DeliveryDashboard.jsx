@@ -169,7 +169,7 @@ export default function DeliveryDashboard() {
         for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
         const blob = new Blob([arr], { type: mime });
         const file = new File([blob], `delivery_sig_${deliveryId}.png`, { type: 'image/png' });
-        const res = await base44.integrations.Core.UploadFile({ file });
+        const res = await base44.integrations.Core.UploadPublicFile({ file });
         signatureUrl = res.file_url;
       }
 
@@ -185,7 +185,7 @@ export default function DeliveryDashboard() {
           for (let j = 0; j < bytes.length; j++) arr[j] = bytes.charCodeAt(j);
           const blob = new Blob([arr], { type: mime });
           const file = new File([blob], `delivery_photo_${deliveryId}_${i}.png`, { type: 'image/png' });
-          const res = await base44.integrations.Core.UploadFile({ file });
+          const res = await base44.integrations.Core.UploadPublicFile({ file });
           uploaded.push(res.file_url);
         }
         photoUrls = uploaded.join(',');

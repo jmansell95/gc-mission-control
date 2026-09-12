@@ -100,7 +100,7 @@ export default function StaffComplianceEditor({ staffId, staffName }) {
     if (side === 'front') setUploadingFront(true);
     else setUploadingBack(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       if (side === 'front') {
         setForm(prev => ({ ...prev, document_url: res.file_url, document_name: file.name }));
       } else {

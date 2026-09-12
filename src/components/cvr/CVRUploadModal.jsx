@@ -31,7 +31,7 @@ export default function CVRUploadModal({ job, onClose }) {
     setStage('uploading');
     setError('');
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const url = res.file_url;
       setFileUrl(url);
       setStage('parsing');

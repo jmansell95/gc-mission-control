@@ -29,7 +29,7 @@ export default function AFPTemplateUploader({ onClose }) {
     setUploading(true);
     setError('');
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setUploading(false);
       setParsing(true);
       const res = await base44.functions.invoke('parseAFPUpload', { file_url });

@@ -60,7 +60,7 @@ export default function SmartCertificateUpload({ staffId, staffName, categories 
     setStage('uploading');
     setDetected(null);
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       setFileUrl(uploadRes.file_url);
       setFileName(file.name);
 

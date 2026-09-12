@@ -69,7 +69,7 @@ export default function PurchasedEquipmentFields({ form, setForm, suppliers = []
     setExtractedFields(null);
     setUploading(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const fileUrl = res.file_url;
       setForm({ ...form, order_slip_url: fileUrl, order_slip_name: file.name });
       // Auto-extract data from the uploaded document

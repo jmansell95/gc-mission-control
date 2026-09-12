@@ -224,7 +224,7 @@ export default function JobBriefingModal({ assignment, job, client, staff, crewA
 
       const blob = await (await fetch(signatureDataUrl)).blob();
       const file = new File([blob], `signature_${assignment.id}.png`, { type: 'image/png' });
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
 
       await base44.entities.BriefingSignature.create({
         assignment_id: assignment.id,

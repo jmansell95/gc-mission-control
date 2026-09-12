@@ -68,7 +68,7 @@ export default function QualificationDetailSheet({
     if (!file) return;
     setUploading(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       setDocUrl(res.file_url);
       setDocName(file.name);
       toast({ title: 'File uploaded', description: file.name });

@@ -33,7 +33,7 @@ export default function ConfirmQuoteModal({ item, jobId, onClose }) {
     setUploading(true);
     setExtractedPrice(null);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setExistingDocUrl(file_url);
       setExistingDocName(file.name);
       setQuoteFile(null);

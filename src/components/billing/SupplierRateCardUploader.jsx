@@ -68,7 +68,7 @@ export default function SupplierRateCardUploader({ open, onClose, onIngested }) 
 
     setStage('ingesting');
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       await base44.entities.Supplier.update(supplierId, {
         rate_card_file_url: uploadRes.file_url,
         rate_card_file_name: file.name,

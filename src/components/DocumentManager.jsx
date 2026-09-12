@@ -65,7 +65,7 @@ export default function DocumentManager({ job }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       const created = await base44.entities.JobDocument.create({
         job_id: job.id,
         document_url: file_url,
@@ -98,7 +98,7 @@ export default function DocumentManager({ job }) {
     if (!file || !versioningFor) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       // Mark all existing versions in this group as superseded
       const groupDocs = docGroups[versioningFor] || [];
       const newVersion = Math.max(...groupDocs.map(d => d.version || 1)) + 1;

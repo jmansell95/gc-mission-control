@@ -40,7 +40,7 @@ export default function ESignatureModal({
       // Upload the signature image
       const blob = await (await fetch(signatureData)).blob();
       const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const signatureUrl = uploadRes.file_url;
 
       const now = new Date().toISOString();

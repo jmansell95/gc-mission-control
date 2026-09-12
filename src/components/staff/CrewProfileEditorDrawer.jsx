@@ -139,7 +139,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
     setAvatarSrc(null);
     setUploadingAvatar(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file: croppedFile });
+      const res = await base44.integrations.Core.UploadPublicFile({ file: croppedFile });
       set('avatar_url', res.file_url);
     } catch (e) {
       toast({ title: 'Upload failed', description: e?.message, variant: 'destructive' });

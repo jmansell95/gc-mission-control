@@ -47,7 +47,7 @@ export default function EnablingLogForm({ staffId, jobId, job, staffName }) {
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const existing = form[field] ? form[field].split(',').filter(Boolean) : [];
       existing.push(res.file_url);
       setForm({ ...form, [field]: existing.join(',') });

@@ -134,7 +134,7 @@ export default function VendorInvoiceReconciliation() {
     setAutoMatching(true);
     try {
       // Upload the file first
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const fileUrl = uploadRes?.file_url || uploadRes?.data?.file_url;
       if (!fileUrl) throw new Error('Upload failed');
 

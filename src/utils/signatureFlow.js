@@ -23,7 +23,7 @@ export async function submitSignature({ dataUrl, tier, signerType, context = {} 
   const file = new File([blob], fileName, { type: 'image/png' });
 
   // 2. Upload the signature image.
-  const { file_url } = await base44.integrations.Core.UploadFile({ file });
+  const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
   if (!file_url) throw new Error('Signature upload failed');
 
   // 3. Persist the Signature record.

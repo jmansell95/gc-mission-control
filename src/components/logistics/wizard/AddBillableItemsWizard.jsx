@@ -90,7 +90,7 @@ export default function AddBillableItemsWizard({
     setUploading(true);
     try {
       // 1. Upload the file
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       // 2. Extract raw rows + detected columns (no matching yet — the user
       //    maps columns in the review step first, then we match).
       const res = await base44.functions.invoke('parseQuoteUpload', {

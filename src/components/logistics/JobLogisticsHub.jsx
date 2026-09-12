@@ -253,7 +253,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
         try {
           const blob = await (await fetch(formData.on_site_signature)).blob();
           const sigFile = new File([blob], `onsite-receipt-${Date.now()}.png`, { type: 'image/png' });
-          const uploadRes = await base44.integrations.Core.UploadFile({ file: sigFile });
+          const uploadRes = await base44.integrations.Core.UploadPublicFile({ file: sigFile });
           onSiteSignatureUrl = uploadRes.file_url;
           onSiteSignedAt = new Date().toISOString();
           const me = await base44.auth.me().catch(() => null);
@@ -524,7 +524,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
     setUploadingOffHire(true);
     try {
       let noteUrl = '', noteName = '';
-      if (offHireFile) { const res = await base44.integrations.Core.UploadFile({ file: offHireFile }); noteUrl = res.file_url; noteName = offHireFile.name; }
+      if (offHireFile) { const res = await base44.integrations.Core.UploadPublicFile({ file: offHireFile }); noteUrl = res.file_url; noteName = offHireFile.name; }
       await base44.entities.JobCostItem.update(offHiringId, { hire_status: 'off_hired', off_hire_date: offHireDate, off_hire_note_url: noteUrl, off_hire_note_name: noteName });
       queryClient.invalidateQueries({ queryKey: ['job-cost-items', jobId] });
       setOffHiringId(null); setOffHireFile(null);

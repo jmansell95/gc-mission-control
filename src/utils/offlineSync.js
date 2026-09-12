@@ -41,7 +41,7 @@ function dataURLtoFile(dataURL, filename) {
 // Upload a data URL and return the hosted file_url
 async function uploadDataURL(dataURL, filename) {
   const file = dataURLtoFile(dataURL, filename);
-  const res = await base44.integrations.Core.UploadFile({ file });
+  const res = await base44.integrations.Core.UploadPublicFile({ file });
   return res.file_url;
 }
 

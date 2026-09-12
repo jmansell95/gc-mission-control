@@ -73,7 +73,7 @@ export default function ServiceHistoryPanel({ assetId, assetName, assetType }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       set('certificate_url', file_url);
       set('certificate_name', file.name);
     } catch (e) {

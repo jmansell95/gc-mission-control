@@ -93,7 +93,7 @@ export default function JobRateCardManager() {
     }
     setUploading(true);
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const res = await base44.functions.invoke('processEWRRateCardUpload', {
         file_url: uploadRes.file_url,
         job_id: effectiveJobId,

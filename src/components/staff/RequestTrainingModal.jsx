@@ -60,7 +60,7 @@ export default function RequestTrainingModal({ staffId, staffName, onClose }) {
       // ComplianceItem so the manager can confirm it in the Training tab.
       if (attachedFile) {
         try {
-          const uploadRes = await base44.integrations.Core.UploadFile({ file: attachedFile });
+          const uploadRes = await base44.integrations.Core.UploadPublicFile({ file: attachedFile });
           await base44.entities.ComplianceItem.create({
             category: 'staff',
             title: selected?.label || 'Training Document',

@@ -38,7 +38,7 @@ export default function SubcontractorLogForm({ staffId, staffName, jobs }) {
     if (!file) return;
     setUploading(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const existing = form.photo_urls ? form.photo_urls.split(',').filter(Boolean) : [];
       existing.push(res.file_url);
       setForm(prev => ({ ...prev, photo_urls: existing.join(',') }));

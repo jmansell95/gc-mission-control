@@ -229,7 +229,7 @@ function CalibrationFormModal({ calibration, job, assets, saving, onSave, onClos
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setForm(prev => ({ ...prev, calibration_certificate_url: file_url, calibration_certificate_name: file.name }));
     } catch (err) {
       // Fallback for published site — multipart upload

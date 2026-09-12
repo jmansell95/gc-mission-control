@@ -82,7 +82,7 @@ export default function DailyExpenseStep({ job, staffId, assignment, expenses, s
   const handleReceiptUpload = async (tempId, file) => {
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setExpenses(expenses.map(e => e._temp_id === tempId ? { ...e, receipt_url: file_url } : e));
       queryClient.invalidateQueries({ queryKey: ['daily-costs'] });
     } catch (e) { console.error(e); }

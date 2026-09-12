@@ -26,7 +26,7 @@ export default function TrainingOutcomeModal({ booking, course, staff, courses =
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setCertificateUrl(file_url);
       setCertificateName(file.name);
       setCertificateFile(file);

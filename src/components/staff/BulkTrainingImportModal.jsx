@@ -70,7 +70,7 @@ export default function BulkTrainingImportModal({ onClose }) {
       const uploaded = [];
       for (const file of Array.from(fileList)) {
         try {
-          const res = await base44.integrations.Core.UploadFile({ file });
+          const res = await base44.integrations.Core.UploadPublicFile({ file });
           uploaded.push({ file_url: res.file_url, file_name: file.name });
         } catch (e) { /* skip failed */ }
       }

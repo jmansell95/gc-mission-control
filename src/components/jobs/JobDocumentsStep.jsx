@@ -50,7 +50,7 @@ export default function JobDocumentsStep({ jobId, stagedFiles = [], onStagedFile
     if (jobId) {
       setUploading(true);
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
         await base44.entities.JobDocument.create({
           job_id: jobId,
           document_url: file_url,

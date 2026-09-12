@@ -348,7 +348,7 @@ export default function EquipmentManager({ jobId, job, items: externalItems, onI
     try {
       let noteUrl = '', noteName = '';
       if (offHireFile) {
-        const res = await base44.integrations.Core.UploadFile({ file: offHireFile });
+        const res = await base44.integrations.Core.UploadPublicFile({ file: offHireFile });
         noteUrl = res.file_url; noteName = offHireFile.name;
         // Auto-extract return date from the off-hire note
         setExtractingOffHire(true);

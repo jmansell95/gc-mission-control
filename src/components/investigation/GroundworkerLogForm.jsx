@@ -83,7 +83,7 @@ export default function GroundworkerLogForm({ staffId, jobId, job, staffName }) 
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const existing = form.photo_urls ? form.photo_urls.split(',').filter(Boolean) : [];
       existing.push(res.file_url);
       setForm({ ...form, photo_urls: existing.join(',') });
@@ -251,7 +251,7 @@ export default function GroundworkerLogForm({ staffId, jobId, job, staffName }) 
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const existing = form.verification_photo_urls ? form.verification_photo_urls.split(',').filter(Boolean) : [];
       existing.push(res.file_url);
       setForm({ ...form, verification_photo_urls: existing.join(',') });

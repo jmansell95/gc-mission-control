@@ -41,7 +41,7 @@ export default function SmartUploadWizard({ staffId, staffName, onClose }) {
   const requiresBack = docType?.requiresFrontBack;
 
   const uploadFile = async (file) => {
-    const res = await base44.integrations.Core.UploadFile({ file });
+    const res = await base44.integrations.Core.UploadPublicFile({ file });
     return res.file_url;
   };
 

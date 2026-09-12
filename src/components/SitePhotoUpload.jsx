@@ -64,7 +64,7 @@ export default function SitePhotoUpload({ jobId, staffName }) {
       const gps = autoTagging ? await captureGPS() : null;
       for (let i = 0; i < files.length; i++) {
         setTaggingStatus(`Uploading ${i + 1} of ${files.length}…`);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: files[i] });
+        const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: files[i] });
 
         let tags = '';
         let activity = '';

@@ -104,7 +104,7 @@ export default function FinancialDataExchange() {
     setBusy('boq-import');
     try {
       // Upload the file first
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const fileUrl = uploadRes.file_url;
 
       // Fetch the job to get project_id

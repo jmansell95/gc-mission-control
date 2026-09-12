@@ -90,7 +90,7 @@ export default function ComplianceTracking() {
     if (!file) return;
     setUploading(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       setForm(prev => ({ ...prev, document_url: res.file_url, document_name: file.name }));
     } catch (err) { console.error(err); alert('Upload failed: ' + (err.message || 'Unknown error')); }
     setUploading(false);

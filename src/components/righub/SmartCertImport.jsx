@@ -150,7 +150,7 @@ export default function SmartCertImport({ onClose }) {
 
   // === Per-file processing (same logic, stores file ref for retry) ===
   const processFile = async (file) => {
-    const uploadRes = await base44.integrations.Core.UploadFile({ file });
+    const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
     const fileUrl = uploadRes.file_url;
     const extractRes = await base44.integrations.Core.ExtractDataFromUploadedFile({
       file_url: fileUrl,

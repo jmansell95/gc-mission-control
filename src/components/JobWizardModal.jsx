@@ -349,7 +349,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
         const failed = [];
         for (const sf of stagedDocs) {
           try {
-            const { file_url } = await base44.integrations.Core.UploadFile({ file: sf.file });
+            const { file_url } = await base44.integrations.Core.UploadPublicFile({ file: sf.file });
             await base44.entities.JobDocument.create({
               job_id: jobId,
               document_url: file_url,

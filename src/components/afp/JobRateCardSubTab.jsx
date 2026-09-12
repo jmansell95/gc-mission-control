@@ -88,7 +88,7 @@ export default function JobRateCardSubTab({ job }) {
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       await base44.functions.invoke('processRateCardUpload', {
         file_url,
         job_id: job.id,

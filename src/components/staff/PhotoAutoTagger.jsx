@@ -40,7 +40,7 @@ export default function PhotoAutoTagger({ jobId, jobName, onUploaded }) {
     setTagging(true);
     try {
       // Upload file first
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
       setTags(prev => ({ ...prev, file_url }));
 
       // Use InvokeLLM with vision to auto-tag the photo

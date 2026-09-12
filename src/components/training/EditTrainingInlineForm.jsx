@@ -70,7 +70,7 @@ export default function EditTrainingInlineForm({ complianceItem, booking, catego
     if (!file) return;
     setUploadingSide(side);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       if (side === 'back') {
         setForm(prev => ({ ...prev, back_url: res.file_url, back_name: file.name }));
       } else {

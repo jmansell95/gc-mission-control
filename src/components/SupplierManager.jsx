@@ -151,7 +151,7 @@ export default function SupplierManager() {
     if (!file || !uploadTargetId) return;
     setIngestingId(uploadTargetId);
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       await base44.entities.Supplier.update(uploadTargetId, {
         rate_card_file_url: uploadRes.file_url,
         rate_card_file_name: file.name

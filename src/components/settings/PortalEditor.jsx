@@ -72,7 +72,7 @@ export default function PortalEditor() {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       setBranding(b => ({ ...b, logo_url: res.file_url, logo_name: file.name, show_logo: true }));
     } catch (err) {
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });

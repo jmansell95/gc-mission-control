@@ -114,7 +114,7 @@ export default function DrillerLogForm({ staffId, jobId, job, staffName }) {
     if (!file) return;
     setUploadingPhoto(true);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       const existing = form.photo_urls ? form.photo_urls.split(',').filter(Boolean) : [];
       existing.push(res.file_url);
       setForm({ ...form, photo_urls: existing.join(',') });

@@ -84,7 +84,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
     if (!file) return;
     setUploadingSide(side);
     try {
-      const res = await base44.integrations.Core.UploadFile({ file });
+      const res = await base44.integrations.Core.UploadPublicFile({ file });
       if (side === 'back') {
         setForm(prev => ({ ...prev, back_certificate_url: res.file_url, back_certificate_name: file.name }));
       } else {

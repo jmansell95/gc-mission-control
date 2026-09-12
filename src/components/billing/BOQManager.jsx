@@ -205,7 +205,7 @@ export default function BOQManager({ job }) {
     e.target.value = '';
     setImporting(true);
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const res = await base44.functions.invoke('boqImportExport', {
         mode: 'import',
         file_url: uploadRes.file_url,

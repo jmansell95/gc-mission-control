@@ -207,7 +207,7 @@ export default function SORRateCardManager() {
     if (!file) return;
     setUploading(true);
     try {
-      const uploadRes = await base44.integrations.Core.UploadFile({ file });
+      const uploadRes = await base44.integrations.Core.UploadPublicFile({ file });
       const fileUrl = uploadRes.file_url;
       const res = await base44.functions.invoke('processSORUpload', { file_url: fileUrl, year: 2026 });
       toast({
