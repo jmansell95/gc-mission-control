@@ -36,12 +36,6 @@ export default function Login() {
           Continue with Microsoft
         </button>
 
-        <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-center">
-          <p className="text-xs text-emerald-800 leading-relaxed">
-            Use the email your supervisor set up for you. We'll match it to your
-            profile and take you straight to your dashboard — no password needed.
-          </p>
-        </div>
       </div>
 
       {/* Trust badges */}

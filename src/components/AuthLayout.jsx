@@ -40,7 +40,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
           ) : (
             <img src={EMBLEM_URL} alt="Ground Control" className="mx-auto h-16 w-auto mb-4 object-contain drop-shadow-lg" />
           )}
-          <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">{displayTitle}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-sm whitespace-pre-line">{displayTitle}</h1>
           {displaySubtitle && <p className="text-white/80 mt-2 drop-shadow-sm">{displaySubtitle}</p>}
         </div>
         <div className={`rounded-2xl p-8 ${cardCls}`}>
