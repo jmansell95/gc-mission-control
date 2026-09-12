@@ -4,6 +4,7 @@ import { buildShiftCrewMap, buildBoreholeCrewMap, buildBoreholeDrillTimeMap, par
 import { inferBoreholeStatus } from '../../shared/boreholeStatus.ts';
 import { loadJobRateCardItems, resolveJobCharge } from '../../shared/jobRateMatcher.ts';
 import { generateKeyLogBookTimesheet } from '../../shared/keylogbookTimesheet.ts';
+import { enrichLogMetadata, isSptLog, buildSptDescription, buildSampleDescription } from '../../shared/agsLogMetadata.ts';
 
 // HMAC-SHA256 for KeyLogBook webhook request signing verification.
 // KLB sends X-Hole-Signature: sha256=<hex> when request signing is enabled.
@@ -1381,16 +1382,17 @@ Deno.serve(async (req) => {
         const dFrom = num(pick(r, 'SAMP_TOP', 'SAMP_DEP', 'SAMP_DEPTH', 'TOP', 'DEPTH', 'DEPTH_FROM', 'DEP', 'FROM'));
         const dTo = num(pick(r, 'SAMP_BOT', 'SAMP_BASE', 'SAMP_BOTTOM', 'BASE', 'BOT', 'TO', 'DEPTH_TO'));
         const collectionDate = resolveDate(ref);
-        const logAdded = addLog({
+        const sampleLog: any = {
           job_id: job.id, staff_id: staffId, staff_name: staffName, date: collectionDate,
           log_type: 'sample_collection', borehole_ref: ref,
           sample_id: sampId, depth_from: dFrom || null,
           sample_type: mapSampleType(sampType),
-          description: `Imported from KeyLogBook AGS — sample ${sampId} (${sampType}).`,
           source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
           completed_by_name: completedByName,
           manager_review_status: 'approved', chargeable: false,
-        });
+        };
+        sampleLog.description = buildSampleDescription(sampleLog);
+        const logAdded = addLog(sampleLog);
         if (logAdded) {
           counts.samples++;
           // Stage a Sample entity record — the driver's collection list is built from these.
@@ -1435,16 +1437,21 @@ Deno.serve(async (req) => {
           const ref = resolveLocaRef(r);
           const dFrom = num(pick(r, 'SPT_TOP', 'SPT_DEPTH', 'DENS_TOP', 'TOP', 'DEPTH_FROM', 'DEP', 'FROM'));
           const dTo = num(pick(r, 'SPT_BASE', 'SPT_BOT', 'DENS_BASE', 'DENS_BOT', 'BASE', 'BOT', 'DEPTH_TO', 'TO'));
-          if (addLog({
+          // SPTs are point tests (depth_from only, no depth_to range).
+          // Tag as 'spt' so the financials engine bills them as SOR items
+          // (per test) rather than meterage (per metre). Use the shared
+          // description builder for a meaningful, human-readable label.
+          const sptLog: any = {
             job_id: job.id, staff_id: staffId, staff_name: staffName, date: resolveDate(ref),
-            log_type: 'borehole_progress', borehole_ref: ref,
+            log_type: 'spt', borehole_ref: ref,
             depth_from: dFrom || null, depth_to: dTo || null,
             spt_blows: blows, spt_n_value: nval,
-            description: `Imported from KeyLogBook AGS — SPT (N=${nval != null ? nval : 'n/a'}).`,
             source: 'ags_import', logged_by_role: drillerRole, completed_by_type: 'internal_staff',
             completed_by_name: completedByName,
             manager_review_status: 'approved', chargeable: false,
-          })) counts.spt++;
+          };
+          sptLog.description = buildSptDescription(sptLog);
+          if (addLog(sptLog)) counts.spt++;
         }
       }
     }

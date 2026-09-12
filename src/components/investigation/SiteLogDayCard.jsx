@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Clock, CheckCircle2, ChevronDown, User, MapPin, Edit2, X, Save, Loader2, RotateCcw, ExternalLink, FileText, PenLine } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import SiteLogTimelineBar from './SiteLogTimelineBar';
+import BillingBadge from './BillingBadge';
 import { detectActivityType, TAG_COLORS } from '@/utils/siteLogUtils';
 import { navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 
@@ -198,6 +199,7 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
             <ActivityTag description={log.description} />
+            <BillingBadge log={log} size="xs" />
             {log.raw_remarks && log.raw_remarks.trim() && log.raw_remarks.trim() !== (log.description || '').trim() && !selectMode && (
               <button
                 onClick={(e) => {

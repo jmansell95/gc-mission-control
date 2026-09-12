@@ -69,11 +69,16 @@ export function buildFromInvestigationLog(afpId: string, jobId: string, log: any
   // readings) are data points — NOT billable per metre. Skip them entirely
   // when they have no stamped charge amount (KeyLogBook imports have none).
   // This prevents hundreds of zero-rated clutter items in the AFP.
+  // 'spt' logs are billable as SOR items (per test), not meterage — they
+  // pass through here with a stamped charge_amount from the rate card.
   const isDrillingAdvance = log.log_type === 'borehole_progress' || log.log_type === 'core_inspection';
+  const isSpt = log.log_type === 'spt';
   const chargeAmount = toNum(log.charge_amount);
   const breakdown = parseBreakdown(log.charge_breakdown);
   const rateCardItemId = breakdown.rate_card_item_id || null;
-  if (!isDrillingAdvance && chargeAmount === 0 && !rateCardItemId) return null;
+  // SPTs are billable SOR items — include them even with no stamped charge
+  // (the AFP pricing step will resolve the rate from the rate card).
+  if (!isDrillingAdvance && !isSpt && chargeAmount === 0 && !rateCardItemId) return null;
   // Skip drilling-advance logs with no valid depth range and no stamped charge
   // — these are incomplete logs (e.g. borehole_progress with depth_to=null)
   // that can't be priced and just create zero-rated clutter.
@@ -88,13 +93,16 @@ export function buildFromInvestigationLog(afpId: string, jobId: string, log: any
     ? (toNum(log.metres_drilled) ||
        (log.depth_to != null && log.depth_from != null ? toNum(log.depth_to) - toNum(log.depth_from) : 0))
     : 0;
-  const units = isDrillingAdvance ? (toNum(log.units_completed) || metres || 1) : 0;
+  const units = isDrillingAdvance ? (toNum(log.units_completed) || metres || 1) : (isSpt ? 1 : 0);
   const rate = chargeAmount > 0 && units > 0 ? Math.round((chargeAmount / units) * 100) / 100 : (breakdown.unit_price || 0);
-  const isNoCharge = log.billing_status === 'no_charge' || (chargeAmount === 0 && !rateCardItemId);
+  const isNoCharge = log.billing_status === 'no_charge' || (chargeAmount === 0 && !rateCardItemId && !isSpt);
+  const itemLabel = isSpt
+    ? (log.description || `SPT — ${log.borehole_ref || 'Borehole'}`)
+    : (log.description || `Drilling — ${log.borehole_ref || 'Borehole'}`);
   return {
-    afp_id: afpId, job_id: jobId, sheet_name: 'drilling', category: 'drilling',
-    item: log.description || `Drilling — ${log.borehole_ref || 'Borehole'}`,
-    unit: metres > 0 ? 'm' : (log.units_label || 'nr'),
+    afp_id: afpId, job_id: jobId, sheet_name: isSpt ? 'drilling' : 'drilling', category: isSpt ? 'spt' : 'drilling',
+    item: itemLabel,
+    unit: metres > 0 ? 'm' : (isSpt ? 'nr' : (log.units_label || 'nr')),
     qty: units, rate, amount: chargeAmount,
     source: 'driller_log', source_date: log.date, source_id: log.id,
     is_manual: false, dispute_status: 'none',

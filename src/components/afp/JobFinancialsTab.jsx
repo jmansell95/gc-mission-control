@@ -10,6 +10,7 @@ import AFPVariationLifecycleTab from '@/components/afp/AFPVariationLifecycleTab'
 import JobRateCardSubTab from '@/components/afp/JobRateCardSubTab';
 import AFPPortfolioSummary from '@/components/afp/AFPPortfolioSummary';
 import PricingReviewBanner from '@/components/billing/PricingReviewBanner';
+import UnmatchedRevenueWarning from '@/components/afp/UnmatchedRevenueWarning';
 
 /**
  * JobFinancialsTab — the Financials tab for job details.
@@ -39,6 +40,7 @@ export default function JobFinancialsTab({ job, canSeeCosts }) {
 
       {finSub === 'afp-builder' && (
         <>
+          <UnmatchedRevenueWarning job={job} />
           <PricingReviewBanner jobId={job?.id} />
           <AFPBuilder job={job} />
         </>

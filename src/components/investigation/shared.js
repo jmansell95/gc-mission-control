@@ -168,6 +168,7 @@ export const logTypeConfig = {
   geophysical_probing: { label: 'Geophysical Probing', icon: 'Radar', badge: 'bg-violet-100 text-violet-700' },
   borehole_decommissioning: { label: 'Decommissioning', icon: 'Ban', badge: 'bg-stone-100 text-stone-700' },
   core_inspection: { label: 'Core Inspection', icon: 'Boxes', badge: 'bg-fuchsia-100 text-fuchsia-700' },
+  spt: { label: 'SPT', icon: 'Gauge', badge: 'bg-amber-100 text-amber-700' },
   other: { label: 'Other', icon: 'ClipboardList', badge: 'bg-slate-100 text-slate-600' },
 };
 

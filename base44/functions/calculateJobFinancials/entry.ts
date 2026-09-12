@@ -201,6 +201,7 @@ export default async function(req: Request): Promise<Response> {
       borehole_decommissioning: ['decommission', 'backfill', 'seal', 'grout'],
       geophysical_probing: ['probing', 'geophysical', 'cone', 'cpt'],
       window_sampling: ['window sampling', 'window sample', 'dynamic sampling'],
+      spt: ['spt', 'standard penetration test', 'spt standards', 'spt in rotary', 'penetration test', 'blow count'],
     };
 
     // Per-borehole meterage tracking (with depth-band split)
@@ -234,9 +235,13 @@ export default async function(req: Request): Promise<Response> {
       if (boreholeMethodMap[ref]) bhMap[ref].method = boreholeMethodMap[ref];
 
       // ── SOR line matching (non-drilling-advance activities) ──
-      // Skip borehole_progress and core_inspection — those are priced by per-metre drilling rate,
-      // not as individual SOR lines (they'd double-count the drilling revenue)
-      if (log.log_type === 'borehole_progress' || log.log_type === 'core_inspection') continue;
+      // Skip borehole_progress and core_inspection ONLY when they have a valid
+      // depth range — those are drilling advance, priced by per-metre rate.
+      // Depthless borehole_progress logs (SPTs misclassified before the 'spt'
+      // type existed, or point tests) pass through to SOR matching so they
+      // can be billed as individual test items instead of being silently dropped.
+      const hasValidDepthRange = dTo > dFrom && (log.log_type === 'borehole_progress' || log.log_type === 'core_inspection');
+      if (hasValidDepthRange) continue;
 
       const rawDesc = log.description || log.strata_description_detail || '';
       const keywords = logTypeKeywords[log.log_type] || [];

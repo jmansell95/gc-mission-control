@@ -10,6 +10,7 @@ import {
 import {
   BOREHOLE_STATUS_CONFIG, DRILLING_METHOD_CONFIG,
 } from '@/components/investigation/boreholeStatusConfig';
+import BillingBadge from './BillingBadge';
 
 /**
  * Borehole detail level — organized sections showing all geotechnical data
@@ -169,6 +170,7 @@ function LogRow({ log, onSelectLog, bulkMode, bulkSelected, toggleBulkSelect, sh
       )}
       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${rc.badge}`}>{rc.label}</span>
       {showType && typeConfig && <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 hidden sm:inline ${typeConfig.badge}`}>{typeConfig.label}</span>}
+      <BillingBadge log={log} size="xs" />
       {log.depth_from != null && log.depth_to != null && (
         <span className="text-[10px] text-slate-500 inline-flex items-center gap-0.5 flex-shrink-0"><Ruler className="w-2.5 h-2.5" /> {log.depth_from}–{log.depth_to}m</span>
       )}
