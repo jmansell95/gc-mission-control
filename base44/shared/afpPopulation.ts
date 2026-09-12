@@ -63,20 +63,32 @@ export async function resolveDraftAfpForJob(base44: any, jobId: string, recordDa
 // ── Pure builders: map a source record to an AFPLineItem object ──
 // Return null when the record is not billable and should be skipped.
 
-export function buildFromInvestigationLog(afpId: string, jobId: string, log: any): any {
+export function buildFromInvestigationLog(afpId: string, jobId: string, log: any): any | null {
   // Only borehole_progress and core_inspection represent drilling advance
   // (metres drilled). Other log types (strata, SPT, samples, installations,
-  // readings) are data points — NOT billable per metre. Pricing them as
-  // drilling metres caused zero-rated clutter and double-counted revenue.
+  // readings) are data points — NOT billable per metre. Skip them entirely
+  // when they have no stamped charge amount (KeyLogBook imports have none).
+  // This prevents hundreds of zero-rated clutter items in the AFP.
   const isDrillingAdvance = log.log_type === 'borehole_progress' || log.log_type === 'core_inspection';
+  const chargeAmount = toNum(log.charge_amount);
+  const breakdown = parseBreakdown(log.charge_breakdown);
+  const rateCardItemId = breakdown.rate_card_item_id || null;
+  if (!isDrillingAdvance && chargeAmount === 0 && !rateCardItemId) return null;
+  // Skip drilling-advance logs with no valid depth range and no stamped charge
+  // — these are incomplete logs (e.g. borehole_progress with depth_to=null)
+  // that can't be priced and just create zero-rated clutter.
+  if (isDrillingAdvance && chargeAmount === 0) {
+    const dFrom = toNum(log.depth_from);
+    const dTo = toNum(log.depth_to);
+    const hasMetres = toNum(log.metres_drilled) > 0 || (dTo > dFrom);
+    if (!hasMetres) return null;
+  }
+
   const metres = isDrillingAdvance
     ? (toNum(log.metres_drilled) ||
        (log.depth_to != null && log.depth_from != null ? toNum(log.depth_to) - toNum(log.depth_from) : 0))
     : 0;
   const units = isDrillingAdvance ? (toNum(log.units_completed) || metres || 1) : 0;
-  const chargeAmount = toNum(log.charge_amount);
-  const breakdown = parseBreakdown(log.charge_breakdown);
-  const rateCardItemId = breakdown.rate_card_item_id || null;
   const rate = chargeAmount > 0 && units > 0 ? Math.round((chargeAmount / units) * 100) / 100 : (breakdown.unit_price || 0);
   const isNoCharge = log.billing_status === 'no_charge' || (chargeAmount === 0 && !rateCardItemId);
   return {
