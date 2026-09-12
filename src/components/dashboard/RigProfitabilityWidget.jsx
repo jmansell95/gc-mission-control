@@ -202,7 +202,7 @@ export default function RigProfitabilityWidget({ onSelectJob }) {
 
   if (isLoading) {
     return (
-      <div className="card-modern rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <Skeleton className="h-6 w-56 mb-4" />
         <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>
       </div>
@@ -217,7 +217,7 @@ export default function RigProfitabilityWidget({ onSelectJob }) {
   };
 
   return (
-    <div className="card-modern rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm flex-shrink-0">

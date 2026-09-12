@@ -77,7 +77,7 @@ export default function NeedsAttentionPanel({ onNavigate }) {
 
       {items.length === 0 ? (
         <motion.div variants={itemAnim}
-          className="card-modern rounded-2xl p-5 flex items-center gap-3">
+          className="hub-glass rounded-2xl p-5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
           </div>
@@ -94,7 +94,7 @@ export default function NeedsAttentionPanel({ onNavigate }) {
             return (
               <motion.button key={it.key} variants={itemAnim}
                 onClick={() => onNavigate(it.nav)}
-                className={`card-modern rounded-2xl p-4 flex items-start gap-3 text-left hover:shadow-lg transition group min-w-[85%] sm:min-w-0 snap-start flex-shrink-0 sm:flex-shrink`}>
+                className={`hub-glass rounded-2xl p-4 flex items-start gap-3 text-left hover:shadow-lg transition group min-w-[85%] sm:min-w-0 snap-start flex-shrink-0 sm:flex-shrink`}>
                 <div className={`w-10 h-10 rounded-xl ${t.iconBg} flex items-center justify-center flex-shrink-0`}>
                   <Icon className={`w-5 h-5 ${t.iconText}`} />
                 </div>

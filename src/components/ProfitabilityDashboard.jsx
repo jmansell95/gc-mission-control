@@ -91,7 +91,7 @@ export default function ProfitabilityDashboard({ onSelectJob }) {
 
   if (jobsLoading) {
     return (
-      <div className="card-modern rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <Skeleton className="h-6 w-48 mb-4" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           {[1,2,3,4].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
@@ -109,7 +109,7 @@ export default function ProfitabilityDashboard({ onSelectJob }) {
   ];
 
   return (
-    <div className="card-modern rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">

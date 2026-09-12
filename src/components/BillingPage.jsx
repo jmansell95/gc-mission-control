@@ -431,7 +431,7 @@ export default function BillingPage({ onSelectJob }) {
       )}
 
       {/* Toolbar */}
-      <div className="card-modern rounded-2xl p-4 mb-4">
+      <div className="hub-glass rounded-2xl p-4 mb-4">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -454,7 +454,7 @@ export default function BillingPage({ onSelectJob }) {
       </div>
 
       {/* Table */}
-      <div className="card-modern rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="p-5 space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)}</div>
         ) : filtered.length === 0 ? (

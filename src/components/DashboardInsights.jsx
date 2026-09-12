@@ -49,7 +49,7 @@ export default function DashboardInsights() {
   };
 
   return (
-    <div className="card-modern rounded-2xl p-5">
+    <div className="hub-glass rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center shadow-sm">

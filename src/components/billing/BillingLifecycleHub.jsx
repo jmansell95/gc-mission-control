@@ -164,7 +164,7 @@ export default function BillingLifecycleHub({ onSelectJob }) {
       </div>
 
       {/* Collected revenue */}
-      <div className="card-modern rounded-2xl p-5 mb-6 flex items-center gap-4">
+      <div className="hub-glass rounded-2xl p-5 mb-6 flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl stat-gradient-brand flex items-center justify-center">
           <PoundSterling className="w-6 h-6 text-white" />
         </div>
@@ -181,7 +181,7 @@ export default function BillingLifecycleHub({ onSelectJob }) {
           if (stageJobs.length === 0) return null;
           const Icon = stage.icon;
           return (
-            <div key={stage.id} className="card-modern rounded-2xl overflow-hidden">
+            <div key={stage.id} className="hub-glass rounded-2xl overflow-hidden">
               <div className={`flex items-center gap-2 px-5 py-3 border-b border-slate-100 ${toneClasses[stage.tone]}`}>
                 <Icon className="w-4 h-4" />
                 <h3 className="text-sm font-bold">{stage.label}</h3>

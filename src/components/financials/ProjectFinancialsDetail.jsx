@@ -158,7 +158,7 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
       />
 
       {/* Project selector */}
-      <div className="card-modern rounded-2xl p-4 mb-4">
+      <div className="hub-glass rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
           <Building2 className="w-5 h-5 text-[#2E5A1A] flex-shrink-0" />
           <select
@@ -251,7 +251,7 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
       </div>
 
       {/* Invoicing status */}
-      <div className="card-modern rounded-2xl p-4 mb-4">
+      <div className="hub-glass rounded-2xl p-4 mb-4">
         <div className="grid grid-cols-3 gap-3 mb-3">
           <div className="bg-slate-50 rounded-lg p-3 text-center">
             <p className="text-[10px] text-slate-400 uppercase font-medium">Earned</p>
@@ -276,7 +276,7 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
       </div>
 
       {/* Per-job breakdown table */}
-      <div className="card-modern rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-800">Per-Job Breakdown</h3>
           <p className="text-xs text-slate-400 mt-0.5">Click a row to expand the full cost & revenue breakdown</p>

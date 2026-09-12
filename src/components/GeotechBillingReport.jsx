@@ -135,7 +135,7 @@ export default function GeotechBillingReport({ onSelectJob }) {
       </div>
 
       {/* Search */}
-      <div className="card-modern rounded-2xl p-4 mb-4">
+      <div className="hub-glass rounded-2xl p-4 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -151,7 +151,7 @@ export default function GeotechBillingReport({ onSelectJob }) {
         {isLoading ? (
           [...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl" />)
         ) : filtered.length === 0 ? (
-          <div className="card-modern rounded-2xl text-center py-16 text-slate-400 text-sm">
+          <div className="hub-glass rounded-2xl text-center py-16 text-slate-400 text-sm">
             <Mountain className="w-10 h-10 text-slate-200 mx-auto mb-3" />
             No jobs with KeyLogBook borehole data yet.
             <p className="text-xs mt-1">Import an AGS file via Settings → AGS Import to populate this report.</p>
@@ -187,7 +187,7 @@ function GeotechJobCard({ row, expanded, onToggle, onSelectJob }) {
   const chartData = g.depthBands.map((b) => ({ name: `${b.from}-${b.to}m`, metres: b.metres }));
 
   return (
-    <div className="card-modern rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Header row */}
       <button onClick={onToggle} className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-emerald-50/30 transition">
         {expanded ? <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />}
