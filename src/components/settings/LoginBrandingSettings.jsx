@@ -1,350 +1,394 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Palette, Save, Loader2, Upload, Eye, Trash2, Image as ImageIcon, Type, Layout, Monitor } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Palette, Eye, Save, Upload, X, Plus, Trash2,
+  Monitor, Sparkles, Waves, Wind, Grid3x3, ImageOff,
+  ChevronRight, ChevronLeft, Clock, Zap,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import SettingsSectionHeader from '@/components/SettingsSectionHeader';
+import DivisionLoginAnimation from '@/components/login/DivisionLoginAnimation';
+import { EMBLEM_URL } from '@/components/Logo';
 
-const COLOR_PRESETS = [
-  { name: 'Ground Control', primary: '#2E5A1A', secondary: '#1c4a12' },
-  { name: 'Ocean Blue', primary: '#1d4ed8', secondary: '#1e3a8a' },
-  { name: 'Sunset Amber', primary: '#d97706', secondary: '#92400e' },
-  { name: 'Royal Purple', primary: '#7c3aed', secondary: '#5b21b6' },
-  { name: 'Slate Pro', primary: '#475569', secondary: '#1e293b' },
-  { name: 'Crimson', primary: '#be123c', secondary: '#881337' },
+const ANIMATION_TYPES = [
+  { key: 'themed_scene', label: 'Themed Scene', icon: Monitor, description: 'Division-specific SVG scene (drilling rig, water waves, etc.)' },
+  { key: 'particle_field', label: 'Particle Field', icon: Sparkles, description: 'Floating particles in brand colours' },
+  { key: 'flowing_lines', label: 'Flowing Lines', icon: Wind, description: 'Animated flowing lines across the screen' },
+  { key: 'gradient_mesh', label: 'Gradient Mesh', icon: Grid3x3, description: 'Animated gradient mesh background' },
+  { key: 'none', label: 'Static', icon: ImageOff, description: 'Static gradient only, no animation' },
 ];
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600";
+const TRANSITION_STYLES = [
+  { key: 'fade', label: 'Fade' },
+  { key: 'slide_up', label: 'Slide Up' },
+  { key: 'zoom', label: 'Zoom' },
+  { key: 'slide_right', label: 'Slide Right' },
+];
 
-function LoginPreview({ cfg }) {
-  const bgStyle = cfg.background_type === 'image' && cfg.background_image_url
-    ? { backgroundImage: `url(${cfg.background_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : cfg.background_type === 'solid'
-      ? { background: cfg.primary_color || '#2E5A1A' }
-      : { background: `linear-gradient(135deg, ${cfg.primary_color || '#2E5A1A'} 0%, ${cfg.secondary_color || '#1c4a12'} 100%)` };
-
-  const overlay = cfg.background_type === 'image' && cfg.background_image_url
-    ? { background: `rgba(0,0,0,${cfg.overlay_opacity ?? 0.75})` }
-    : {};
-
-  const cardCls = cfg.card_style === 'glass'
-    ? 'bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl'
-    : cfg.card_style === 'bordered'
-      ? 'bg-white border-2 border-slate-200 shadow-sm'
-      : 'bg-white border border-slate-200 shadow-xl';
-
-  return (
-    <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm" style={{ minHeight: '420px', ...bgStyle }}>
-      <div className="flex items-center justify-center min-h-[420px] p-6" style={overlay}>
-        <div className="w-full max-w-xs">
-          <div className="text-center mb-6">
-            {cfg.show_logo && cfg.logo_url ? (
-              <img src={cfg.logo_url} alt="Logo" className="mx-auto h-14 w-auto mb-3 object-contain" />
-            ) : (
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3" style={{ background: cfg.primary_color || '#2E5A1A' }}>
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-6 6m6-6a6 6 0 00-6-6m6 6H9m6 6v3a3 3 0 01-3 3H6a3 3 0 01-3-3v-1m6-6h12" />
-                </svg>
-              </div>
-            )}
-            <h3 className="text-lg font-bold text-white drop-shadow-sm">{cfg.welcome_title || 'Welcome back'}</h3>
-            <p className="text-xs text-white/80 mt-0.5">{cfg.welcome_subtitle || 'Log in to your account'}</p>
-          </div>
-          <div className={`rounded-2xl p-5 ${cardCls}`}>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] font-medium text-slate-500 mb-1">Email</label>
-                <div className="px-3 py-2 rounded-lg bg-slate-100 text-xs text-slate-400">you@example.com</div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-medium text-slate-500 mb-1">Password</label>
-                <div className="px-3 py-2 rounded-lg bg-slate-100 text-xs text-slate-400">••••••••</div>
-              </div>
-              <button className="w-full py-2.5 rounded-lg text-white text-sm font-semibold" style={{ background: cfg.primary_color || '#2E5A1A' }}>
-                Log in
-              </button>
-            </div>
-          </div>
-          {cfg.footer_text && (
-            <p className="text-center text-[10px] text-white/70 mt-3">{cfg.footer_text}</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function LoginBrandingSettings() {
+/**
+ * LoginBrandingSettings — Enterprise Settings tab for configuring per-division
+ * login animation and branding. Admins choose an animation type, set brand
+ * colours, upload a logo, configure welcome text, and preview the result live.
+ */
+export default function LoginBrandingSettings({ divisions, canEditAll }) {
   const { toast } = useToast();
-  const [draft, setDraft] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const [selectedDivisionId, setSelectedDivisionId] = useState(null);
+  const [config, setConfig] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [uploadingBg, setUploadingBg] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [emailDomainInput, setEmailDomainInput] = useState('');
 
-  useEffect(() => { load(); }, []);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const records = await base44.entities.LoginBranding.list('-updated_date', 1);
-      setDraft(records[0] || {
-        background_type: 'gradient',
-        primary_color: '#2E5A1A',
-        secondary_color: '#1c4a12',
-        card_style: 'solid',
-        welcome_title: 'Welcome back',
-        welcome_subtitle: 'Log in to your account',
-        show_logo: false,
-        overlay_opacity: 0.75,
-      });
-    } catch (e) {
-      toast({ title: 'Error loading branding', description: e.message, variant: 'destructive' });
-    } finally {
-      setLoading(false);
+  // Select first division by default
+  useEffect(() => {
+    if (!selectedDivisionId && divisions.length > 0) {
+      setSelectedDivisionId(canEditAll ? divisions[0].id : divisions.find(d => d.is_active !== false)?.id || divisions[0]?.id);
     }
-  };
+  }, [divisions, selectedDivisionId, canEditAll]);
+
+  const selectedDivision = divisions.find(d => d.id === selectedDivisionId);
+
+  // Load the division's current config
+  useEffect(() => {
+    if (!selectedDivision) { setConfig(null); return; }
+    const cfg = selectedDivision.login_animation_config || {};
+    setConfig({
+      animation_type: cfg.animation_type || 'themed_scene',
+      primary_color: cfg.primary_color || selectedDivision.color || '#2E5A1A',
+      secondary_color: cfg.secondary_color || '#1c4a12',
+      accent_color: cfg.accent_color || '#8DC63F',
+      logo_url: cfg.logo_url || selectedDivision.logo_url || '',
+      welcome_text: cfg.welcome_text || `Welcome to ${selectedDivision.name}`,
+      tagline: cfg.tagline || selectedDivision.tagline || '',
+      duration_ms: cfg.duration_ms || 2500,
+      transition_style: cfg.transition_style || 'fade',
+      show_progress_bar: cfg.show_progress_bar !== false,
+    });
+    setEmailDomainInput('');
+  }, [selectedDivisionId, selectedDivision]);
+
+  const update = (field, value) => setConfig(prev => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
+    if (!selectedDivision) return;
     setSaving(true);
     try {
-      const { id, created_date, updated_date, created_by_id, ...payload } = draft;
-      if (draft.id) {
-        await base44.entities.LoginBranding.update(draft.id, payload);
-      } else {
-        await base44.entities.LoginBranding.create(payload);
-      }
-      toast({ title: 'Login branding saved', description: 'Staff will see the new design on their next visit to the login page.' });
-      await load();
-    } catch (e) {
-      toast({ title: 'Error saving', description: e.message, variant: 'destructive' });
-    } finally {
-      setSaving(false);
+      const emailDomains = selectedDivision.email_domains || [];
+      const loginConfig = { ...config };
+      await base44.entities.Division.update(selectedDivision.id, {
+        login_animation_config: loginConfig,
+        email_domains: emailDomains,
+      });
+      // Audit log
+      await base44.functions.invoke('logSystemAudit', {
+        action: 'update_login_branding',
+        entity_type: 'Division',
+        entity_id: selectedDivision.id,
+        details: `Updated login animation & branding for ${selectedDivision.name}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['divisions-for-login'] });
+      queryClient.invalidateQueries({ queryKey: ['divisions-for-login-picker'] });
+      toast({ title: 'Saved', description: `Login branding for ${selectedDivision.name} updated.` });
+    } catch (err) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }
+    setSaving(false);
   };
 
-  const handleUploadBg = async (file) => {
+  const handleLogoUpload = async (file) => {
     if (!file) return;
-    setUploadingBg(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setDraft({ ...draft, background_image_url: file_url, background_image_name: file.name, background_type: 'image' });
-      toast({ title: 'Background uploaded' });
-    } catch (e) {
-      toast({ title: 'Upload failed', description: e.message, variant: 'destructive' });
-    } finally {
-      setUploadingBg(false);
-    }
-  };
-
-  const handleUploadLogo = async (file) => {
-    if (!file) return;
-    setUploadingLogo(true);
-    try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setDraft({ ...draft, logo_url: file_url, logo_name: file.name, show_logo: true });
+      const { file_url } = await base44.integrations.Core.UploadPublicFile({ file });
+      update('logo_url', file_url);
       toast({ title: 'Logo uploaded' });
-    } catch (e) {
-      toast({ title: 'Upload failed', description: e.message, variant: 'destructive' });
-    } finally {
-      setUploadingLogo(false);
+    } catch (err) {
+      toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
     }
   };
 
-  if (loading || !draft) {
-    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-emerald-600 animate-spin" /></div>;
+  const addEmailDomain = () => {
+    if (!emailDomainInput.trim()) return;
+    const domains = selectedDivision.email_domains || [];
+    if (domains.includes(emailDomainInput.trim())) return;
+    base44.entities.Division.update(selectedDivision.id, {
+      email_domains: [...domains, emailDomainInput.trim()],
+    }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['divisions-for-login'] });
+      setEmailDomainInput('');
+      toast({ title: 'Email domain added' });
+    });
+  };
+
+  const removeEmailDomain = (domain) => {
+    const domains = (selectedDivision.email_domains || []).filter(d => d !== domain);
+    base44.entities.Division.update(selectedDivision.id, { email_domains: domains }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['divisions-for-login'] });
+      toast({ title: 'Email domain removed' });
+    });
+  };
+
+  if (!selectedDivision || !config) {
+    return <div className="hub-glass rounded-2xl p-8 text-center text-sm text-slate-400">No divisions available</div>;
   }
 
-  const cfg = draft;
+  // Build preview config
+  const previewConfig = {
+    division: selectedDivision,
+    animationType: config.animation_type,
+    primaryColor: config.primary_color,
+    secondaryColor: config.secondary_color,
+    accentColor: config.accent_color,
+    logoUrl: config.logo_url || null,
+    welcomeText: config.welcome_text,
+    tagline: config.tagline,
+    durationMs: config.duration_ms,
+    transitionStyle: config.transition_style,
+    showProgressBar: config.show_progress_bar,
+  };
 
   return (
-    <div className="space-y-6">
-      <SettingsSectionHeader icon={Palette} title="Login Page Customiser" description="Customise the background, colours, logo and text on the staff login, register and password reset pages" />
-
-      <div className="grid lg:grid-cols-2 gap-0 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        {/* Left: Controls */}
-        <div className="p-5 space-y-5 lg:border-r border-slate-100">
-          {/* Background type */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <span className="inline-flex items-center gap-1.5"><Layout className="w-4 h-4 text-slate-400" /> Background style</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { v: 'gradient', label: 'Gradient' },
-                { v: 'image', label: 'Image' },
-                { v: 'solid', label: 'Solid' },
-              ].map(opt => (
-                <button key={opt.v} type="button" onClick={() => setDraft({ ...cfg, background_type: opt.v })}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium border transition ${cfg.background_type === opt.v ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}>
-                  {opt.label}
-                </button>
+    <div className="space-y-4">
+      {/* Division selector */}
+      {canEditAll && divisions.length > 1 && (
+        <div className="hub-glass rounded-2xl p-4">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Division:</span>
+            <select
+              value={selectedDivisionId || ''}
+              onChange={e => setSelectedDivisionId(e.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:border-primary"
+            >
+              {divisions.map(d => (
+                <option key={d.id} value={d.id}>{d.name}</option>
               ))}
+            </select>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="outline" size="sm" onClick={() => setShowPreview(true)}>
+                <Eye className="w-3.5 h-3.5" /> Preview
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={saving}>
+                <Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save'}
+              </Button>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Colour presets */}
-          {cfg.background_type !== 'image' && (
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Colour presets</label>
-              <div className="flex items-center gap-2 flex-wrap">
-                {COLOR_PRESETS.map(p => (
-                  <button key={p.name} type="button" onClick={() => setDraft({ ...cfg, primary_color: p.primary, secondary_color: p.secondary })}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ${cfg.primary_color === p.primary ? 'border-slate-900 ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300'}`}
-                    title={p.name}>
-                    <span className="w-4 h-4 rounded-full" style={{ background: `linear-gradient(135deg, ${p.primary}, ${p.secondary})` }} />
-                    {p.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Custom colours */}
-          {cfg.background_type !== 'image' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Primary colour</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={cfg.primary_color || '#2E5A1A'} onChange={e => setDraft({ ...cfg, primary_color: e.target.value })}
-                    className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer p-0.5" />
-                  <input type="text" value={cfg.primary_color || ''} onChange={e => setDraft({ ...cfg, primary_color: e.target.value })}
-                    placeholder="#2E5A1A" className={inputCls} />
-                </div>
-              </div>
-              {cfg.background_type === 'gradient' && (
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Secondary colour</label>
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={cfg.secondary_color || '#1c4a12'} onChange={e => setDraft({ ...cfg, secondary_color: e.target.value })}
-                      className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer p-0.5" />
-                    <input type="text" value={cfg.secondary_color || ''} onChange={e => setDraft({ ...cfg, secondary_color: e.target.value })}
-                      placeholder="#1c4a12" className={inputCls} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left: Animation type gallery */}
+        <div className="hub-glass rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-primary" />
+            <h3 className="text-sm font-bold text-slate-900">Animation Type</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {ANIMATION_TYPES.map(at => {
+              const Icon = at.icon;
+              const active = config.animation_type === at.key;
+              return (
+                <button
+                  key={at.key}
+                  onClick={() => update('animation_type', at.key)}
+                  className={`text-left p-3 rounded-xl border transition ${
+                    active ? 'border-primary bg-primary/5 ring-2 ring-primary/20' : 'border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${active ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-bold text-slate-800">{at.label}</span>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Image upload */}
-          {cfg.background_type === 'image' && (
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                <span className="inline-flex items-center gap-1.5"><ImageIcon className="w-4 h-4 text-slate-400" /> Background image</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <label className="flex-1 cursor-pointer">
-                  <input type="file" accept="image/*" className="hidden" onChange={e => handleUploadBg(e.target.files[0])} />
-                  <div className="flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-emerald-400 hover:text-emerald-600 transition">
-                    {uploadingBg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {cfg.background_image_name || 'Upload image'}
-                  </div>
-                </label>
-                {cfg.background_image_url && (
-                  <button type="button" onClick={() => setDraft({ ...cfg, background_image_url: '', background_image_name: '', background_type: 'gradient' })}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              {cfg.background_image_url && (
-                <div className="mt-2">
-                  <label className="block text-xs font-medium text-slate-600 mb-1">Overlay opacity: {Math.round((cfg.overlay_opacity ?? 0.75) * 100)}%</label>
-                  <input type="range" min="0" max="1" step="0.05" value={cfg.overlay_opacity ?? 0.75} onChange={e => setDraft({ ...cfg, overlay_opacity: parseFloat(e.target.value) })}
-                    className="w-full accent-emerald-600" />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Card style */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <span className="inline-flex items-center gap-1.5"><Monitor className="w-4 h-4 text-slate-400" /> Card style</span>
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { v: 'solid', label: 'Solid' },
-                { v: 'glass', label: 'Glass' },
-                { v: 'bordered', label: 'Minimal' },
-              ].map(opt => (
-                <button key={opt.v} type="button" onClick={() => setDraft({ ...cfg, card_style: opt.v })}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium border transition ${cfg.card_style === opt.v ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}>
-                  {opt.label}
+                  <p className="text-xs text-slate-400 leading-snug">{at.description}</p>
                 </button>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* Brand colours */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Brand Colours</h4>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs text-slate-500 font-medium mb-1 block">Primary</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={config.primary_color} onChange={e => update('primary_color', e.target.value)} className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer" />
+                  <input type="text" value={config.primary_color} onChange={e => update('primary_color', e.target.value)} className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 font-medium mb-1 block">Secondary</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={config.secondary_color} onChange={e => update('secondary_color', e.target.value)} className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer" />
+                  <input type="text" value={config.secondary_color} onChange={e => update('secondary_color', e.target.value)} className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 font-medium mb-1 block">Accent</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={config.accent_color} onChange={e => update('accent_color', e.target.value)} className="w-9 h-9 rounded-lg border border-slate-200 cursor-pointer" />
+                  <input type="text" value={config.accent_color} onChange={e => update('accent_color', e.target.value)} className="flex-1 px-2 py-1.5 text-xs border border-slate-200 rounded-lg" />
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Right: Text, logo, timing */}
+        <div className="hub-glass rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <Eye className="w-5 h-5 text-primary" />
+            <h3 className="text-sm font-bold text-slate-900">Content & Timing</h3>
           </div>
 
           {/* Logo */}
-          <div className="pt-3 border-t border-slate-100">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <label className="text-sm font-semibold text-slate-700">Company logo</label>
-              <button type="button" onClick={() => setDraft({ ...cfg, show_logo: !cfg.show_logo })}
-                className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                <input type="checkbox" checked={cfg.show_logo} readOnly className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-emerald-600 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-transform peer-checked:after:translate-x-5" />
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Logo</label>
+            <div className="flex items-center gap-3">
+              {config.logo_url ? (
+                <img src={config.logo_url} alt="Logo" className="h-12 w-auto object-contain rounded-lg border border-slate-200 p-1" />
+              ) : (
+                <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center">
+                  <ImageOff className="w-5 h-5 text-slate-300" />
+                </div>
+              )}
+              <label className="cursor-pointer">
+                <input type="file" accept="image/*" className="hidden" onChange={e => handleLogoUpload(e.target.files?.[0])} />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition">
+                  <Upload className="w-3.5 h-3.5" /> Upload
+                </span>
+              </label>
+              {config.logo_url && (
+                <button onClick={() => update('logo_url', '')} className="text-xs text-rose-500 hover:text-rose-600 font-semibold">Remove</button>
+              )}
+            </div>
+          </div>
+
+          {/* Welcome text */}
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Welcome Text</label>
+            <input
+              value={config.welcome_text}
+              onChange={e => update('welcome_text', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          {/* Tagline */}
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">Tagline</label>
+            <input
+              value={config.tagline}
+              onChange={e => update('tagline', e.target.value)}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          {/* Duration */}
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" /> Duration: {(config.duration_ms / 1000).toFixed(1)}s
+            </label>
+            <input
+              type="range" min="1000" max="5000" step="500"
+              value={config.duration_ms}
+              onChange={e => update('duration_ms', parseInt(e.target.value))}
+              className="w-full accent-primary"
+            />
+          </div>
+
+          {/* Transition style */}
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5" /> Transition Style
+            </label>
+            <div className="flex gap-2">
+              {TRANSITION_STYLES.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => update('transition_style', t.key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                    config.transition_style === t.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Progress bar toggle */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.show_progress_bar}
+              onChange={e => update('show_progress_bar', e.target.checked)}
+              className="w-4 h-4 rounded accent-primary"
+            />
+            <span className="text-sm text-slate-600">Show progress bar</span>
+          </label>
+        </div>
+      </div>
+
+      {/* Email domains */}
+      <div className="hub-glass rounded-2xl p-5 space-y-3">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900">Email Domain Auto-Detection</h3>
+          <p className="text-xs text-slate-400 mt-0.5">When a user enters an email on the login page, the system auto-selects the division whose email domains match.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            value={emailDomainInput}
+            onChange={e => setEmailDomainInput(e.target.value)}
+            placeholder="e.g. ground-control.co.uk"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
+            onKeyDown={e => e.key === 'Enter' && addEmailDomain()}
+          />
+          <Button size="sm" onClick={addEmailDomain}>
+            <Plus className="w-3.5 h-3.5" /> Add
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(selectedDivision.email_domains || []).map(domain => (
+            <span key={domain} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+              {domain}
+              <button onClick={() => removeEmailDomain(domain)} className="text-slate-400 hover:text-rose-500">
+                <X className="w-3.5 h-3.5" />
               </button>
-            </div>
-            {cfg.show_logo && (
-              <div className="flex items-center gap-2">
-                <label className="flex-1 cursor-pointer">
-                  <input type="file" accept="image/*" className="hidden" onChange={e => handleUploadLogo(e.target.files[0])} />
-                  <div className="flex items-center justify-center gap-2 px-3 py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-sm text-slate-500 hover:border-emerald-400 hover:text-emerald-600 transition">
-                    {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                    {cfg.logo_name || 'Upload logo'}
-                  </div>
-                </label>
-                {cfg.logo_url && (
-                  <button type="button" onClick={() => setDraft({ ...cfg, logo_url: '', logo_name: '', show_logo: false })}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+            </span>
+          ))}
+          {(selectedDivision.email_domains || []).length === 0 && (
+            <span className="text-xs text-slate-400">No email domains configured — users will see the default division animation.</span>
+          )}
+        </div>
+      </div>
 
-          {/* Text customisation */}
-          <div className="pt-3 border-t border-slate-100 space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                <span className="inline-flex items-center gap-1"><Type className="w-3.5 h-3.5 text-slate-400" /> Welcome title</span>
-              </label>
-              <input type="text" value={cfg.welcome_title || ''} onChange={e => setDraft({ ...cfg, welcome_title: e.target.value })}
-                placeholder="Welcome back" className={inputCls} />
+      {/* Preview modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
+          <div className="relative w-full max-w-3xl h-[60vh] rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <DivisionLoginAnimation config={previewConfig} fullScreen />
+            <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+              {config.logo_url ? (
+                <img src={config.logo_url} alt="Logo" className="h-20 w-auto object-contain drop-shadow-2xl mb-6" />
+              ) : (
+                <img src={EMBLEM_URL} alt="Ground Control" className="h-20 w-auto object-contain drop-shadow-2xl mb-6" />
+              )}
+              <h1 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-lg">{config.welcome_text}</h1>
+              {config.tagline && <p className="text-lg text-white/70 mt-2 font-medium drop-shadow-sm">{config.tagline}</p>}
+              {config.show_progress_bar && (
+                <div className="mt-8 w-48 h-1 rounded-full bg-white/20 overflow-hidden">
+                  <div className="h-full rounded-full bg-white" style={{ width: '60%' }} />
+                </div>
+              )}
             </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                <span className="inline-flex items-center gap-1"><Type className="w-3.5 h-3.5 text-slate-400" /> Welcome subtitle</span>
-              </label>
-              <input type="text" value={cfg.welcome_subtitle || ''} onChange={e => setDraft({ ...cfg, welcome_subtitle: e.target.value })}
-                placeholder="Log in to your account" className={inputCls} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Footer text (optional)</label>
-              <input type="text" value={cfg.footer_text || ''} onChange={e => setDraft({ ...cfg, footer_text: e.target.value })}
-                placeholder="e.g. Ground Control Geotechnical" className={inputCls} />
-            </div>
-          </div>
-
-          {/* Save */}
-          <div className="pt-2">
-            <button onClick={handleSave} disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 disabled:opacity-50 transition text-sm font-medium">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save branding
+            <button onClick={() => setShowPreview(false)} className="absolute top-4 right-4 z-20 p-2 rounded-lg bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition">
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
-
-        {/* Right: Live preview */}
-        <div className="bg-slate-50 p-5">
-          <div className="flex items-center gap-2 mb-3 text-sm font-semibold text-slate-600">
-            <Eye className="w-4 h-4 text-emerald-600" /> Live preview
-          </div>
-          <LoginPreview cfg={cfg} />
-          <p className="text-xs text-slate-400 mt-2">This is how the login page will look for your staff. Changes apply after you click Save.</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

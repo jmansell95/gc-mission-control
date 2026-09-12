@@ -83,6 +83,205 @@
       "type": "string",
       "description": "Default route users land on when entering this division (e.g. '/admin', '/staff-schedule'). When blank, field teams land on /staff-schedule and managers on /admin."
     },
+    "email_domains": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Email domains that auto-map to this division on the login page (e.g. ['ground-control.co.uk', 'geotechnical.co.uk']). When a user enters an email on the login page, the system checks all divisions' email_domains and auto-selects the matching division's branding/animation. When empty or no match, the default division branding is used. Managed in Enterprise Settings \u2192 Login & Branding."
+    },
+    "dashboard_config": {
+      "type": "object",
+      "description": "Per-division dashboard configuration managed by enterprise/division admins in Enterprise Settings \u2192 Division Dashboard. Controls which widgets are available to this division, the default layout per role, and custom KPI tile definitions.",
+      "properties": {
+        "enabled_widgets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Widget IDs from the WIDGET_REGISTRY that are available to users in this division. When empty, all widgets are available (backward compatible). When non-empty, only the listed widgets appear in the widget picker for this division's users."
+        },
+        "role_defaults": {
+          "type": "object",
+          "description": "Default widget layouts per role. Keys are role keys ('field', 'office', 'management', 'admin'). Values are ordered arrays of widget IDs that form the default layout for users with that role on first visit. When a user has no saved layout, their role's default is used. Managed in Enterprise Settings \u2192 Division Dashboard \u2192 Role Defaults.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "default": {}
+        },
+        "custom_kpi_tiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique tile ID (e.g. 'custom-kpi-1'). Used as the widget ID in the dashboard layout."
+              },
+              "label": {
+                "type": "string",
+                "description": "Display label shown on the KPI tile (e.g. 'Active Boreholes', 'Overdue Invoices')."
+              },
+              "entity_name": {
+                "type": "string",
+                "description": "The entity to query (e.g. 'Job', 'Invoice', 'RotaAssignment'). Must match a base44 entity name."
+              },
+              "aggregation": {
+                "type": "string",
+                "enum": [
+                  "count",
+                  "sum",
+                  "avg",
+                  "min",
+                  "max"
+                ],
+                "default": "count",
+                "description": "Aggregation function. 'count' = number of matching records, 'sum' = sum of the value_field, 'avg' = average of the value_field, etc."
+              },
+              "value_field": {
+                "type": "string",
+                "description": "The field to aggregate (for sum/avg/min/max). Blank for count."
+              },
+              "filter": {
+                "type": "object",
+                "description": "Simple filter conditions (field-value pairs applied as equality). E.g. {\"status\": \"in_progress\"} filters to records where status = 'in_progress'.",
+                "additionalProperties": true
+              },
+              "icon": {
+                "type": "string",
+                "description": "Lucide icon name (e.g. 'Briefcase', 'DollarSign'). Rendered by the CustomKPITile component."
+              },
+              "color": {
+                "type": "string",
+                "description": "Hex colour for the tile's icon background and accent (e.g. '#2E5A1A')."
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "number",
+                  "currency",
+                  "percent",
+                  "raw"
+                ],
+                "default": "number",
+                "description": "How to format the aggregated value. 'currency' = \u00a3 prefix with 2dp, 'percent' = % suffix, 'number' = thousand separators, 'raw' = as-is."
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "entity_name",
+              "aggregation"
+            ]
+          },
+          "default": [],
+          "description": "Custom KPI tile definitions for this division. Each tile is built by an admin (entity \u2192 aggregation \u2192 filter \u2192 display) and rendered by the CustomKPITile component. Users can add these tiles to their dashboard like any other widget."
+        }
+      },
+      "default": {}
+    },
+    "login_animation_config": {
+      "type": "object",
+      "description": "Per-division login animation and branding configuration. Controls the animated background on the login page and the full-screen loading animation that plays after sign-in. Managed in Enterprise Settings \u2192 Login & Branding.",
+      "properties": {
+        "animation_type": {
+          "type": "string",
+          "enum": [
+            "themed_scene",
+            "particle_field",
+            "flowing_lines",
+            "gradient_mesh",
+            "none"
+          ],
+          "default": "themed_scene",
+          "description": "The animation style. 'themed_scene' = the division-type-specific SVG scene (drilling rig, water waves, etc.); 'particle_field' = floating particles in brand colours; 'flowing_lines' = animated flowing lines; 'gradient_mesh' = animated gradient mesh background; 'none' = static gradient only."
+        },
+        "primary_color": {
+          "type": "string",
+          "description": "Primary brand colour for the login animation background (hex). Defaults to the division's color field."
+        },
+        "secondary_color": {
+          "type": "string",
+          "description": "Secondary brand colour for the login animation gradient (hex)."
+        },
+        "accent_color": {
+          "type": "string",
+          "description": "Accent colour for animation particles and highlights (hex)."
+        },
+        "logo_url": {
+          "type": "string",
+          "description": "Division logo shown on the login page and loading screen. Overrides the division's logo_url field for login contexts."
+        },
+        "welcome_text": {
+          "type": "string",
+          "description": "Welcome text shown on the login page (e.g. 'Welcome to Geotechnical')."
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Tagline shown below the welcome text on the login page and loading screen."
+        },
+        "duration_ms": {
+          "type": "number",
+          "default": 2500,
+          "description": "How long the post-login loading animation plays before transitioning to the app (milliseconds). Default 2500ms (2.5 seconds)."
+        },
+        "transition_style": {
+          "type": "string",
+          "enum": [
+            "fade",
+            "slide_up",
+            "zoom",
+            "slide_right"
+          ],
+          "default": "fade",
+          "description": "How the loading animation transitions into the app. 'fade' = smooth opacity fade, 'slide_up' = slides up to reveal the app, 'zoom' = zooms in, 'slide_right' = slides right."
+        },
+        "show_progress_bar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to show a progress bar during the post-login loading animation."
+        }
+      },
+      "default": {}
+    },
+    "branding_config": {
+      "type": "object",
+      "description": "Per-division branding overrides that cascade through the app via CSS custom properties. When set, users in this division see these colours instead of the global defaults. Managed in Enterprise Settings \u2192 Login & Branding.",
+      "properties": {
+        "accent_color": {
+          "type": "string",
+          "description": "Override for the --primary CSS variable. When set, every bg-primary, text-primary, and border-primary surface in the app uses this colour for users in this division."
+        },
+        "accent_foreground_color": {
+          "type": "string",
+          "description": "Override for the --primary-foreground CSS variable (the text colour on top of the primary)."
+        },
+        "secondary_accent_color": {
+          "type": "string",
+          "description": "Override for the --accent CSS variable."
+        },
+        "sidebar_color": {
+          "type": "string",
+          "description": "Override for the sidebar background colour."
+        },
+        "card_style": {
+          "type": "string",
+          "enum": [
+            "default",
+            "glass",
+            "solid"
+          ],
+          "default": "default",
+          "description": "Card surface style for this division. 'default' = the global hub-glass, 'glass' = stronger glass-morphism, 'solid' = opaque white."
+        }
+      },
+      "default": {}
+    },
     "settings": {
       "type": "object",
       "description": "Division-specific operational settings that override platform defaults for this division's users. Configured in Settings \u2192 Divisions \u2192 Edit \u2192 Settings. Integrations are no longer managed here \u2014 they are managed centrally from Enterprise Settings \u2192 Integrations.",

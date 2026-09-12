@@ -5,12 +5,14 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   ArrowLeft, Settings, Database, Layers, Building2,
-  ShieldCheck, Server, HardDrive,
+  ShieldCheck, Server, HardDrive, LayoutGrid, Palette,
 } from 'lucide-react';
 import EnterpriseHeader from '@/components/EnterpriseHeader';
 import DivisionManager from '@/components/settings/DivisionManager';
 import BusinessUnitManager from '@/components/settings/BusinessUnitManager';
 import BackupRestoreHub from '@/components/settings/BackupRestoreHub';
+import DivisionDashboardSettings from '@/components/settings/DivisionDashboardSettings';
+import LoginBrandingSettings from '@/components/settings/LoginBrandingSettings';
 
 const TABS = [
   {
@@ -26,6 +28,20 @@ const TABS = [
     icon: Building2,
     gradient: 'from-blue-600 to-cyan-700',
     description: 'Configure individual business streams and their access manifests',
+  },
+  {
+    id: 'division-dashboard',
+    label: 'Division Dashboard',
+    icon: LayoutGrid,
+    gradient: 'from-violet-600 to-purple-700',
+    description: 'Configure widget library, role-based layouts, and custom KPI tiles per division',
+  },
+  {
+    id: 'login-branding',
+    label: 'Login & Branding',
+    icon: Palette,
+    gradient: 'from-rose-600 to-orange-700',
+    description: 'Configure login animation, brand colours, logo, and email domain auto-detection per division',
   },
   {
     id: 'backup',
@@ -44,8 +60,8 @@ export default function EnterpriseSettings() {
 
   useEffect(() => { setActiveDivision(null); }, [setActiveDivision]);
 
-  // Enterprise-level stats for the informative header strip
-  const { data: stats } = useQuery({
+  // Enterprise-level stats + full division list for the new tabs
+  const { data: stats, data: fullData } = useQuery({
     queryKey: ['enterprise-settings-stats-v2'],
     queryFn: async () => {
       const [divisions, snapshots] = await Promise.all([
@@ -54,6 +70,7 @@ export default function EnterpriseSettings() {
       ]);
       const parentIds = new Set(divisions.filter(d => d.parent_division_id).map(d => d.parent_division_id));
       return {
+        _divisions: divisions,
         businessUnits: divisions.filter(d => !d.parent_division_id && parentIds.has(d.id)).length,
         divisions: divisions.length,
         activeDivisions: divisions.filter(d => d.status === 'active').length,
@@ -63,10 +80,14 @@ export default function EnterpriseSettings() {
     staleTime: 30000,
   });
 
+  const allDivisions = fullData?._divisions || [];
+
   const renderTab = () => {
     switch (activeTab) {
       case 'business-units': return <BusinessUnitManager />;
       case 'divisions': return <DivisionManager />;
+      case 'division-dashboard': return <DivisionDashboardSettings divisions={allDivisions} canEditAll={true} />;
+      case 'login-branding': return <LoginBrandingSettings divisions={allDivisions} canEditAll={true} />;
       case 'backup': return <BackupRestoreHub />;
       default: return null;
     }
@@ -144,7 +165,7 @@ export default function EnterpriseSettings() {
         </div>
 
         {/* Tab bar — card-style with descriptions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
           {TABS.map(t => {
             const Icon = t.icon;
             const active = activeTab === t.id;

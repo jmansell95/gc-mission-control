@@ -6,6 +6,68 @@
       "type": "string",
       "description": "Staff member this dashboard layout belongs to"
     },
+    "division_id": {
+      "type": "string",
+      "description": "The division context this layout was created in. A user can have different layouts per division. When blank, the layout applies to all divisions without a specific layout."
+    },
+    "edit_mode": {
+      "type": "string",
+      "enum": [
+        "simple",
+        "advanced"
+      ],
+      "default": "simple",
+      "description": "The user's preferred edit mode. 'simple' = structured add/remove/reorder with up/down arrows in fixed responsive columns. 'advanced' = free-form drag-and-drop on a CSS grid with resize handles."
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Widget ID from the WIDGET_REGISTRY or a custom KPI tile ID."
+          },
+          "visible": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this widget is currently shown on the dashboard."
+          },
+          "order": {
+            "type": "number",
+            "description": "Display order index (simple mode). Lower = first."
+          },
+          "position_x": {
+            "type": "number",
+            "description": "Grid column position (advanced mode only). 0-indexed on a 12-column grid."
+          },
+          "position_y": {
+            "type": "number",
+            "description": "Grid row position (advanced mode only). 0-indexed."
+          },
+          "size_w": {
+            "type": "number",
+            "default": 4,
+            "description": "Width in grid columns (advanced mode). 1-12 on a 12-col grid. In simple mode, maps to sm=3, md=6, lg=9, xl=12."
+          },
+          "size_h": {
+            "type": "number",
+            "default": 1,
+            "description": "Height in grid rows (advanced mode). In simple mode, always 1."
+          },
+          "custom_config": {
+            "type": "object",
+            "description": "Per-widget configuration overrides (e.g. custom filter, date range). Opaque to the layout engine \u2014 passed to the widget renderer.",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "default": [],
+      "description": "Per-user widget configuration array (v2 system). Each entry defines a widget's visibility, position, size, and custom config. In simple mode, only 'order' and 'visible' are used; in advanced mode, 'position_x', 'position_y', 'size_w', 'size_h' are also used."
+    },
     "section_layout": {
       "type": "object",
       "description": "Command Centre section layout \u2014 maps each section ID ('operations', 'financial', 'safety') to an ordered array of block IDs in that section. Controls which blocks appear in which section and their order. Blocks can be dragged between sections via the Customise Dashboard editor.",

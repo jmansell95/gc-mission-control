@@ -83,6 +83,8 @@ import LocationPermissionGate from '@/components/LocationPermissionGate';
 import AssetScannerPage from './pages/AssetScannerPage';
 import KioskScannerRedirect from '@/components/KioskScannerRedirect';
 import MobileFieldRedirect from '@/components/MobileFieldRedirect';
+import PostLoginAnimation from '@/components/login/PostLoginAnimation';
+import DivisionBrandingApplier from '@/components/DivisionBrandingApplier';
 import MobileFieldShell from '@/components/MobileFieldShell';
 import useJobRealtimeSync from '@/hooks/useJobRealtimeSync';
 
@@ -143,6 +145,8 @@ const AuthenticatedApp = () => {
         <AutopilotToastProvider>
         <AppBaseUrlSync />
         <RouteLoadingOverlay />
+        {!isClientPortalRoute && <PostLoginAnimation />}
+        {!isClientPortalRoute && <DivisionBrandingApplier />}
         {!isClientPortalRoute && <LocationPermissionGate />}
         <Routes>
         <Route path="/login" element={<Login />} />
