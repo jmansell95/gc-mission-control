@@ -84,6 +84,22 @@ export function computeRigEarnings({ logs, sorItems = [], job = null }) {
       earnings += breakdown.sorBands;
     }
 
+    // SPT per-test billing — match SPT logs to per-test SOR items
+    const sptLogs = rig.logs.filter((l) => l.log_type === 'spt' || (l.spt_n_value != null && l.log_type !== 'borehole_progress'));
+    if (sptLogs.length > 0) {
+      const sptSor = (sorItems || []).find((item) => {
+        const desc = (item.description || '').toLowerCase();
+        return (desc.includes('spt') || desc.includes('standard penetration')) &&
+               item.price != null && Number(item.price) > 0 &&
+               ['nr', 'each', 'no', 'test'].includes((item.unit || '').toLowerCase());
+      });
+      if (sptSor) {
+        breakdown.spt = Math.round(sptLogs.length * Number(sptSor.price) * 100) / 100;
+        earnings += breakdown.spt;
+        hasRate = true;
+      }
+    }
+
     return {
       key: rig.key,
       name: rig.name,

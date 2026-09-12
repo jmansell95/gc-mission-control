@@ -63,7 +63,11 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
   }, []);
 
   const isPlatformAdmin = authUser?.role === 'admin' || authUser?.role === 'director';
-  const isAdmin = isPlatformAdmin || profile?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(profile?.system_role);
+  // Enterprise admins (directors, BS admins with managed_division_ids) get full
+  // hub access — without this, a non-platform-admin enterprise user whose profile
+  // loads with system_role='field' would see all hub links vanish from the drawer.
+  const isAdminFlag = isPlatformAdmin || isEnterpriseAdmin;
+  const isAdmin = isAdminFlag || profile?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(profile?.system_role);
   const inboxCount = inboxCounts?.total || 0;
 
   // Lock body scroll when open
@@ -102,12 +106,12 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
   // Accessible admin hubs (filtered by role + division + readiness)
   const accessibleHubs = useMemo(() => {
     return ALL_HUBS.filter((hub) => {
-      if (!canAccessSection(profile, hub.id, isPlatformAdmin)) return false;
+      if (!canAccessSection(profile, hub.id, isAdminFlag)) return false;
       if (!activeDivision && hub.id !== 'settings') return false;
       if (!isHubEnabled(hub.id)) return false;
       return true;
     });
-  }, [profile, isPlatformAdmin, activeDivision, isHubEnabled]);
+  }, [profile, isAdminFlag, activeDivision, isHubEnabled]);
 
   // Build sections
   const sections = useMemo(() => {

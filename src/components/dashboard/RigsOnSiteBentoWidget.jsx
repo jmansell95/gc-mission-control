@@ -13,6 +13,7 @@ import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
 import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
+import { useDivision } from '@/contexts/DivisionContext';
 import { computeRigEarnings } from '@/utils/rigEarnings';
 
 const fmtGBP = (v) => {
@@ -45,6 +46,7 @@ const METHOD_LABEL = { cp: 'CP', rotary: 'Rotary', window_sampling: 'Window', mi
  */
 export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   const navigate = useNavigate();
+  const { activeDivisionId } = useDivision();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const [showAllRigs, setShowAllRigs] = useState(false);
 
@@ -70,15 +72,16 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
     queryKey: ['rig-bento-jaa'],
     queryFn: () => base44.entities.JobAssetAssignment.list('-created_date', 500),
   });
-  const { data: jobs = [] } = useQuery({ queryKey: ['rig-bento-jobs'], queryFn: () => base44.entities.Job.list() });
+  const { data: jobs = [] } = useQuery({ queryKey: ['rig-bento-jobs', activeDivisionId], queryFn: () => activeDivisionId ? base44.entities.Job.filter({ division_id: activeDivisionId }) : base44.entities.Job.list() });
   const { data: allStaff = [] } = useQuery({ queryKey: ['rig-bento-staff'], queryFn: () => base44.entities.Staff.list() });
 
   // LIVE today's drilling logs — server-side date filter so we always get today's records
   const { data: todayLogs = [] } = useQuery({
-    queryKey: ['rig-bento-today-logs', todayStr],
+    queryKey: ['rig-bento-today-logs', todayStr, activeDivisionId],
     queryFn: () => base44.entities.InvestigationLog.filter({
       date: todayStr,
       source: { $in: ['ags_import', 'keylogbook_remarks'] },
+      ...(activeDivisionId ? { division_id: activeDivisionId } : {}),
     }, '-created_date', 500),
     staleTime: 60000,
   });

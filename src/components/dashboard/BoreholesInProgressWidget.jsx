@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useDivision } from '@/contexts/DivisionContext';
 import { Mountain, CheckCircle2, CircleDashed, ChevronRight, Ruler, Percent } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { setInvestigationHubDeepLink } from '@/utils/investigationDeepLink';
@@ -17,11 +18,13 @@ import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
  * Quick-action opens the Investigation Hub showing all boreholes.
  */
 export default function BoreholesInProgressWidget({ onNavigate }) {
+  const { activeDivisionId } = useDivision();
   const { data: logs = [], isLoading } = useQuery({
-    queryKey: ['boreholes-in-progress-widget'],
+    queryKey: ['boreholes-in-progress-widget', activeDivisionId],
     queryFn: () => base44.entities.InvestigationLog.filter({
       log_type: 'borehole_progress',
       source: 'ags_import',
+      ...(activeDivisionId ? { division_id: activeDivisionId } : {}),
     }, '-created_date', 500),
   });
 

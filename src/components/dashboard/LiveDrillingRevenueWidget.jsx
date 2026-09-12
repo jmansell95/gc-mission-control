@@ -12,6 +12,7 @@ import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
 import SparklineMini from '@/components/dashboard/SparklineMini';
 import { useToast } from '@/components/ui/use-toast';
 import { computeRigEarnings } from '@/utils/rigEarnings';
+import { useDivision } from '@/contexts/DivisionContext';
 import { setInvestigationHubDeepLink, navigateToInvestigationHub } from '@/utils/investigationDeepLink';
 
 const fmtGBP = (v) => {
@@ -31,6 +32,7 @@ const fmtGBP = (v) => {
 export default function LiveDrillingRevenueWidget({ onNavigate }) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { activeDivisionId } = useDivision();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const queryClient = useQueryClient();
   const [syncing, setSyncing] = useState(false);
@@ -47,10 +49,11 @@ export default function LiveDrillingRevenueWidget({ onNavigate }) {
   // filtering of the 500 most-recent logs missed today's records when older
   // imports dominated the recent batch.
   const { data: todayLogs = [], isLoading } = useQuery({
-    queryKey: ['rev-bento-logs', 'today', todayStr],
+    queryKey: ['rev-bento-logs', 'today', todayStr, activeDivisionId],
     queryFn: () => base44.entities.InvestigationLog.filter({
       date: todayStr,
       source: { $in: ['ags_import', 'keylogbook_remarks'] },
+      ...(activeDivisionId ? { division_id: activeDivisionId } : {}),
     }, '-created_date', 500),
     staleTime: 60000,
   });
@@ -62,15 +65,16 @@ export default function LiveDrillingRevenueWidget({ onNavigate }) {
   });
 
   const { data: jobs = [] } = useQuery({
-    queryKey: ['rev-bento-jobs'],
-    queryFn: () => base44.entities.Job.list(),
+    queryKey: ['rev-bento-jobs', activeDivisionId],
+    queryFn: () => activeDivisionId ? base44.entities.Job.filter({ division_id: activeDivisionId }) : base44.entities.Job.list(),
   });
 
   // 7-day trend — fetch recent logs and group by date
   const { data: weekLogs = [] } = useQuery({
-    queryKey: ['rev-bento-week'],
+    queryKey: ['rev-bento-week', activeDivisionId],
     queryFn: () => base44.entities.InvestigationLog.filter({
       source: { $in: ['ags_import', 'keylogbook_remarks'] },
+      ...(activeDivisionId ? { division_id: activeDivisionId } : {}),
     }, '-created_date', 500),
     staleTime: 120000,
   });

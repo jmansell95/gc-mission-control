@@ -56,12 +56,16 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
   }, [isOpen]);
 
   const isPlatformAdmin = authUser?.role === 'admin' || authUser?.role === 'director';
+  // Enterprise admins (directors, BS admins with managed_division_ids) get full
+  // hub access — without this, a non-platform-admin enterprise user whose profile
+  // loads with system_role='field' would see all hub links vanish from the drawer.
+  const isAdminFlag = isPlatformAdmin || isEnterpriseAdmin;
 
   // Filter hubs by access, lockdown, division, and search query
   const accessibleHubs = useMemo(() => {
     const q = query.toLowerCase().trim();
     return ALL_HUBS.filter((hub) => {
-      if (!canAccessSection(profile, hub.id, isPlatformAdmin)) return false;
+      if (!canAccessSection(profile, hub.id, isAdminFlag)) return false;
       if (isLocked(hub.id)) return false;
       if (!activeDivision && hub.id !== 'settings') return false;
       if (!isHubEnabled(hub.id)) return false;
@@ -71,7 +75,7 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
       ...hub,
       comingSoon: isComingSoon(hub.id),
     }));
-  }, [profile, isPlatformAdmin, isLocked, activeDivision, isHubEnabled, isComingSoon, query]);
+  }, [profile, isAdminFlag, isLocked, activeDivision, isHubEnabled, isComingSoon, query]);
 
   const tabPaths = new Set(tabs.filter((t) => t.path).map((t) => t.path));
 

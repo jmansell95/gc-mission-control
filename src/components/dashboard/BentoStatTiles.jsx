@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
+import { useDivision } from '@/contexts/DivisionContext';
 import {
   Briefcase, Percent, ClipboardCheck, PoundSterling, ShieldAlert,
   AlertTriangle, ShieldCheck, Gauge,
@@ -20,16 +21,18 @@ const gbp = (n) => (n != null && !isNaN(n)) ? '£' + Number(n).toLocaleString(un
  */
 export default function BentoStatTiles({ onNavigate }) {
   const navigate = useNavigate();
+  const { activeDivisionId } = useDivision();
   const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const divFilter = activeDivisionId ? { division_id: activeDivisionId } : {};
 
-  const { data: jobs = [] } = useQuery({ queryKey: ['bento-tile-jobs'], queryFn: () => base44.entities.Job.list() });
-  const { data: rotas = [] } = useQuery({ queryKey: ['bento-tile-rotas', todayStr], queryFn: () => base44.entities.RotaAssignment.filter({ assigned_date: todayStr }) });
-  const { data: staff = [] } = useQuery({ queryKey: ['bento-tile-staff'], queryFn: () => base44.entities.Staff.list() });
+  const { data: jobs = [] } = useQuery({ queryKey: ['bento-tile-jobs', activeDivisionId], queryFn: () => activeDivisionId ? base44.entities.Job.filter({ division_id: activeDivisionId }) : base44.entities.Job.list() });
+  const { data: rotas = [] } = useQuery({ queryKey: ['bento-tile-rotas', todayStr, activeDivisionId], queryFn: () => base44.entities.RotaAssignment.filter({ assigned_date: todayStr, ...divFilter }) });
+  const { data: staff = [] } = useQuery({ queryKey: ['bento-tile-staff', activeDivisionId], queryFn: () => activeDivisionId ? base44.entities.Staff.filter({ division_id: activeDivisionId }) : base44.entities.Staff.list() });
   const { data: timesheets = [] } = useQuery({ queryKey: ['bento-tile-timesheets'], queryFn: () => base44.entities.Timesheet.list('-created_date', 100) });
-  const { data: invoices = [] } = useQuery({ queryKey: ['bento-tile-invoices'], queryFn: () => base44.entities.Invoice.list('-issue_date', 200) });
+  const { data: invoices = [] } = useQuery({ queryKey: ['bento-tile-invoices', activeDivisionId], queryFn: () => activeDivisionId ? base44.entities.Invoice.filter({ division_id: activeDivisionId }, '-issue_date', 200) : base44.entities.Invoice.list('-issue_date', 200) });
   const { data: complianceItems = [] } = useQuery({ queryKey: ['bento-tile-compliance'], queryFn: () => base44.entities.ComplianceItem.list('-created_date', 300) });
-  const { data: safetyReports = [] } = useQuery({ queryKey: ['bento-tile-safety'], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open' }, '-created_date', 50) });
-  const { data: siteAssets = [] } = useQuery({ queryKey: ['bento-tile-assets'], queryFn: () => base44.entities.SiteAsset.list('-created_date', 500) });
+  const { data: safetyReports = [] } = useQuery({ queryKey: ['bento-tile-safety', activeDivisionId], queryFn: () => base44.entities.SafetyReport.filter({ status: 'open', ...divFilter }, '-created_date', 50) });
+  const { data: siteAssets = [] } = useQuery({ queryKey: ['bento-tile-assets', activeDivisionId], queryFn: () => activeDivisionId ? base44.entities.SiteAsset.filter({ division_id: activeDivisionId }, '-created_date', 500) : base44.entities.SiteAsset.list('-created_date', 500) });
   const { isConnected: scConnected } = useMittiStatus();
 
   const tiles = useMemo(() => {

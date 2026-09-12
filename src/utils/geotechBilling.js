@@ -46,8 +46,8 @@ export function parseDepthBand(description) {
   // "between existing ground level / ground level and N m"
   m = d.match(/between\s+(?:existing ground level|ground level|0)\s+and\s+(\d+(?:\.\d+)?)\s*m/);
   if (m) return { from: 0, to: parseFloat(m[1]) };
-  // "between N and M m"
-  m = d.match(/between\s+(\d+(?:\.\d+)?)\s+(?:and|to|-)\s+(\d+(?:\.\d+)?)\s*m/);
+  // "between N and M m" — handles "10m", "10 m", "10m and 20m", "10 m - 20 m"
+  m = d.match(/between\s+(\d+(?:\.\d+)?)\s*m?\s*(?:and|to|-)\s*(\d+(?:\.\d+)?)\s*m/);
   if (m) return { from: parseFloat(m[1]), to: parseFloat(m[2]) };
   return null;
 }
