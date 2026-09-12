@@ -1,0 +1,147 @@
+{
+  "name": "EnterpriseSetting",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Singleton key \u2014 always 'global'. Used to fetch the single enterprise settings record."
+    },
+    "enterprise_name": {
+      "type": "string",
+      "default": "Ground Control",
+      "description": "The legal/trading name of the enterprise. Shown on the enterprise dashboard, login screen, and reports."
+    },
+    "enterprise_logo_url": {
+      "type": "string",
+      "description": "URL of the enterprise-wide logo. Shown on the unified login page above the BU/stream picker and on the enterprise dashboard."
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#2E5A1A",
+      "description": "Enterprise-wide primary brand colour (hex). Used as the default --primary CSS variable for all streams that don't override it."
+    },
+    "secondary_color": {
+      "type": "string",
+      "default": "#1c4a12",
+      "description": "Enterprise-wide secondary brand colour (hex). Used as the default gradient end colour."
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#8DC63F",
+      "description": "Enterprise-wide accent colour (hex). Used as the default --accent CSS variable."
+    },
+    "default_vat_rate": {
+      "type": "number",
+      "default": 20,
+      "description": "Default VAT rate (%) applied to all streams' invoices. UK standard is 20. Streams can override this in their settings_overrides."
+    },
+    "default_markup_percentage": {
+      "type": "number",
+      "default": 0,
+      "description": "Default markup % applied to all streams' jobs when assigned. Streams can override this."
+    },
+    "require_briefing_signature": {
+      "type": "boolean",
+      "default": true,
+      "description": "Default \u2014 whether staff must sign the job briefing before starting work. Streams can override this."
+    },
+    "allow_timesheet_edit": {
+      "type": "boolean",
+      "default": true,
+      "description": "Default \u2014 whether field staff can edit their own timesheets. Streams can override this."
+    },
+    "weather_temp_min": {
+      "type": "number",
+      "description": "Default minimum safe working temperature (\u00b0C). Below this, the weather card flags 'do not work'. Streams can override per-project."
+    },
+    "weather_temp_max": {
+      "type": "number",
+      "description": "Default maximum safe working temperature (\u00b0C). Above this, the weather card flags 'do not work'."
+    },
+    "weather_wind_max_mph": {
+      "type": "number",
+      "description": "Default maximum safe wind gust speed (mph). Above this, the weather card flags 'do not work'."
+    },
+    "weather_rain_max_mm": {
+      "type": "number",
+      "description": "Default maximum safe rainfall (mm). Above this, the weather card flags 'do not work'."
+    },
+    "weather_lightning_block": {
+      "type": "boolean",
+      "default": true,
+      "description": "Default \u2014 whether thunderstorms block work due to lightning risk."
+    },
+    "geofence_default_radius_m": {
+      "type": "number",
+      "default": 250,
+      "description": "Default geofence radius in metres for site arrival/departure detection. Streams and individual jobs can override this."
+    },
+    "default_login_animation_type": {
+      "type": "string",
+      "enum": [
+        "themed_scene",
+        "particle_field",
+        "flowing_lines",
+        "gradient_mesh",
+        "none"
+      ],
+      "default": "themed_scene",
+      "description": "Default login animation style for streams that don't configure their own."
+    },
+    "default_login_welcome_text": {
+      "type": "string",
+      "default": "Welcome back",
+      "description": "Default welcome text shown on the login page when no stream is selected."
+    },
+    "default_login_tagline": {
+      "type": "string",
+      "description": "Default tagline shown below the welcome text on the login page."
+    },
+    "default_post_login_duration_ms": {
+      "type": "number",
+      "default": 2500,
+      "description": "Default duration of the post-login loading animation (milliseconds)."
+    },
+    "email_domain_auto_detect": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, the login page auto-selects a stream based on the user's email domain (matched against each Division's email_domains array)."
+    },
+    "enable_global_search": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the enterprise-wide global search is available in the sidebar. Respects the user's scope (enterprise admin = all, BU admin = their BU, stream = their stream)."
+    },
+    "enable_org_tree_navigator": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the org-tree navigator is shown to admins in the sidebar for quick navigation between BUs and streams."
+    },
+    "audit_log_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether every settings change (enterprise or stream override) is recorded in the SystemAuditLog."
+    }
+  },
+  "required": [
+    "key"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

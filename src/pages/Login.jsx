@@ -1,124 +1,245 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ShieldCheck, ChevronDown, Check } from 'lucide-react';
+import { ShieldCheck, ChevronDown, Check, Building2, Layers, Globe } from 'lucide-react';
 import MicrosoftIcon from '@/components/MicrosoftIcon';
 import { safeReturnTo } from '@/lib/authReturnTo';
 import { EMBLEM_URL } from '@/components/Logo';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import DivisionLoginAnimation from '@/components/login/DivisionLoginAnimation';
-import { useDivisionLoginConfig } from '@/hooks/useDivisionLoginConfig';
 
 /**
- * Microsoft SSO-only login with division-based animated background.
+ * Enterprise Unified Login — single login page for the entire enterprise.
  *
- * The login page shows an animated background based on the selected
- * division (defaults to the first active division). A division picker
- * in the corner lets users preview different divisions' animations.
- * After Microsoft SSO, the post-login loading animation plays in the
- * app entry point (Home.jsx) based on the user's actual division.
+ * Shows a Business Unit → Business Stream picker that dynamically swaps
+ * the animated background and branding based on the selected stream.
+ * Email-domain auto-detect runs on blur (matched against each Division's
+ * email_domains array). After Microsoft SSO, the post-login animation
+ * plays the selected stream's theme.
  */
 export default function Login() {
-  const [selectedDivisionId, setSelectedDivisionId] = useState(null);
+  const [selectedBuId, setSelectedBuId] = useState(null);
+  const [selectedStreamId, setSelectedStreamId] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
 
-  // Load all divisions for the picker
+  // Load all divisions
   const { data: divisions = [] } = useQuery({
     queryKey: ['divisions-for-login-picker'],
     queryFn: () => base44.entities.Division.list('-sort_order', 500),
     staleTime: 5 * 60 * 1000,
   });
 
-  // Find the selected division (or default to first active)
-  const selectedDivision = useMemo(() => {
-    if (selectedDivisionId) return divisions.find(d => d.id === selectedDivisionId);
-    return divisions.find(d => d.is_active !== false && d.status === 'active') || divisions[0] || null;
-  }, [divisions, selectedDivisionId]);
+  // Group divisions into BU → Streams
+  const buGroups = useMemo(() => {
+    const bus = divisions.filter(d => !d.parent_division_id && d.is_active !== false);
+    const streams = divisions.filter(d => d.parent_division_id && d.is_active !== false);
+    return bus.map(bu => ({
+      bu,
+      streams: streams.filter(s => s.parent_division_id === bu.id).sort((a, b) =>
+        (a.sort_order || 0) - (b.sort_order || 0)
+      ),
+    })).filter(g => g.streams.length > 0 || g.bu.status === 'active');
+  }, [divisions]);
 
-  // Build the config for the animation
+  // Standalone divisions (no parent, no children — backward compat)
+  const standaloneStreams = useMemo(() => {
+    const childIds = new Set(divisions.filter(d => d.parent_division_id).map(d => d.id));
+    return divisions.filter(d => !d.parent_division_id && !childIds.has(d.id) && d.is_active !== false && d.status === 'active');
+  }, [divisions]);
+
+  // The selected stream (for animation config)
+  const selectedStream = useMemo(() => {
+    if (selectedStreamId) return divisions.find(d => d.id === selectedStreamId);
+    // Default to first stream of first BU, or first standalone
+    if (buGroups.length > 0 && buGroups[0].streams.length > 0) return buGroups[0].streams[0];
+    if (standaloneStreams.length > 0) return standaloneStreams[0];
+    return divisions.find(d => d.is_active !== false && d.status === 'active') || null;
+  }, [divisions, selectedStreamId, buGroups, standaloneStreams]);
+
+  const selectedBu = useMemo(() => {
+    if (!selectedStream) return null;
+    return divisions.find(d => d.id === selectedStream.parent_division_id) || null;
+  }, [divisions, selectedStream]);
+
+  // Build animation config from the selected stream
   const config = useMemo(() => {
-    if (!selectedDivision) return null;
-    const cfg = selectedDivision.login_animation_config || {};
+    if (!selectedStream) return null;
+    const cfg = selectedStream.login_animation_config || {};
     return {
-      division: selectedDivision,
+      division: selectedStream,
       animationType: cfg.animation_type || 'themed_scene',
-      primaryColor: cfg.primary_color || selectedDivision.color || '#2E5A1A',
+      primaryColor: cfg.primary_color || selectedStream.color || '#2E5A1A',
       secondaryColor: cfg.secondary_color || '#1c4a12',
       accentColor: cfg.accent_color || '#8DC63F',
-      logoUrl: cfg.logo_url || selectedDivision.logo_url || null,
-      welcomeText: cfg.welcome_text || `Welcome to ${selectedDivision.name}`,
-      tagline: cfg.tagline || selectedDivision.tagline || '',
+      logoUrl: cfg.logo_url || selectedStream.logo_url || null,
+      welcomeText: cfg.welcome_text || `Welcome to ${selectedStream.name}`,
+      tagline: cfg.tagline || selectedStream.tagline || (selectedBu ? selectedBu.name : ''),
       durationMs: cfg.duration_ms || 2500,
       transitionStyle: cfg.transition_style || 'fade',
       showProgressBar: cfg.show_progress_bar !== false,
     };
-  }, [selectedDivision]);
+  }, [selectedStream, selectedBu]);
+
+  // Email-domain auto-detect
+  const autoDetectFromEmail = (email) => {
+    if (!email || !email.includes('@')) return;
+    const domain = email.split('@')[1].toLowerCase();
+    for (const d of divisions) {
+      if (d.email_domains && d.email_domains.some(dom => domain === dom.toLowerCase() || domain.endsWith('.' + dom.toLowerCase()))) {
+        setSelectedStreamId(d.id);
+        if (d.parent_division_id) setSelectedBuId(d.parent_division_id);
+        return;
+      }
+    }
+  };
 
   const handleMicrosoft = () => {
+    // Store the selected stream for the post-login animation
+    if (selectedStream) {
+      try { sessionStorage.setItem('login_selected_division_id', selectedStream.id); } catch {}
+    }
     base44.auth.loginWithProvider('microsoft', safeReturnTo());
   };
+
+  // Auto-select first BU's first stream on mount
+  useEffect(() => {
+    if (!selectedStreamId && buGroups.length > 0 && buGroups[0].streams.length > 0) {
+      setSelectedBuId(buGroups[0].bu.id);
+      setSelectedStreamId(buGroups[0].streams[0].id);
+    }
+  }, [buGroups, selectedStreamId]);
+
+  const availableStreams = selectedBuId
+    ? (buGroups.find(g => g.bu.id === selectedBuId)?.streams || [])
+    : standaloneStreams;
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-8 overflow-hidden">
       {/* Animated background */}
       <DivisionLoginAnimation config={config} />
 
-      {/* Division picker — top right corner */}
-      {divisions.length > 1 && (
-        <div className="absolute top-4 right-4 z-20">
-          <button
-            onClick={() => setPickerOpen(!pickerOpen)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold hover:bg-white/25 transition"
-          >
-            <span className="w-2 h-2 rounded-full" style={{ background: selectedDivision?.color || '#8DC63F' }} />
-            {selectedDivision?.name || 'Select Division'}
-            <ChevronDown className={`w-3.5 h-3.5 transition ${pickerOpen ? 'rotate-180' : ''}`} />
-          </button>
-          <AnimatePresence>
-            {pickerOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.15 }}
-                className="absolute top-full right-0 mt-2 w-56 max-h-64 overflow-y-auto rounded-xl bg-white/95 backdrop-blur-xl border border-white/30 shadow-2xl py-1.5"
-              >
-                {divisions.filter(d => d.is_active !== false).map(d => (
-                  <button
-                    key={d.id}
-                    onClick={() => { setSelectedDivisionId(d.id); setPickerOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-100 transition text-left"
-                  >
-                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.color || '#2E5A1A' }} />
-                    <span className="text-sm font-semibold text-slate-700 flex-1 truncate">{d.name}</span>
-                    {selectedDivision?.id === d.id && <Check className="w-4 h-4 text-primary" />}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
-
       {/* Login card */}
       <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <img src={EMBLEM_URL} alt="Ground Control" className="mx-auto h-16 w-auto mb-4 object-contain drop-shadow-2xl" />
-          <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-lg">
+        {/* Enterprise logo + welcome */}
+        <div className="text-center mb-6">
+          <img src={EMBLEM_URL} alt="Ground Control" className="mx-auto h-14 w-auto mb-3 object-contain drop-shadow-2xl" />
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-lg">
             {config?.welcomeText || 'Welcome back'}
           </h1>
           {config?.tagline && (
-            <p className="text-white/70 mt-2 drop-shadow-sm font-medium">{config.tagline}</p>
+            <p className="text-white/70 mt-1.5 drop-shadow-sm font-medium text-sm">{config.tagline}</p>
           )}
         </div>
 
         {/* Login card */}
-        <div className="rounded-2xl p-8 bg-white/95 backdrop-blur-xl border border-white/40 shadow-2xl">
-          <p className="text-sm text-slate-500 font-medium mb-4 text-center">
-            Sign in with your work Microsoft account
-          </p>
+        <div className="rounded-2xl p-6 sm:p-8 bg-white/95 backdrop-blur-xl border border-white/40 shadow-2xl">
+          {/* BU → Stream picker */}
+          <div className="mb-5">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 block">
+              Select your Business Unit & Stream
+            </label>
 
+            {/* BU selector */}
+            <div className="relative mb-2">
+              <button
+                type="button"
+                onClick={() => setPickerOpen(!pickerOpen)}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 bg-white text-left transition"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center flex-shrink-0">
+                  {selectedBu ? <Building2 className="w-4 h-4 text-white" /> : <Globe className="w-4 h-4 text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Business Unit</p>
+                  <p className="text-sm font-bold text-slate-800 truncate">{selectedBu?.name || 'Select unit'}</p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition ${pickerOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {pickerOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-xl bg-white border-2 border-slate-200 shadow-2xl z-50 py-1"
+                  >
+                    {buGroups.map(g => (
+                      <button
+                        key={g.bu.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedBuId(g.bu.id);
+                          // Auto-select first stream in this BU
+                          if (g.streams.length > 0) setSelectedStreamId(g.streams[0].id);
+                          setPickerOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 transition text-left"
+                      >
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: g.bu.color || '#2E5A1A' }}>
+                          <Building2 className="w-3.5 h-3.5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800 truncate">{g.bu.name}</p>
+                          <p className="text-[10px] text-slate-400">{g.streams.length} stream{g.streams.length !== 1 ? 's' : ''}</p>
+                        </div>
+                        {selectedBuId === g.bu.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Stream selector */}
+            <div className="relative">
+              <select
+                value={selectedStreamId || ''}
+                onChange={e => setSelectedStreamId(e.target.value)}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-2 border-slate-200 hover:border-slate-300 bg-white text-sm font-semibold text-slate-800 cursor-pointer outline-none focus:border-primary transition appearance-none"
+                style={{ backgroundImage: 'none' }}
+              >
+                {availableStreams.length === 0 && <option value="">No streams available</option>}
+                {availableStreams.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+
+            {/* Selected stream badge */}
+            {selectedStream && (
+              <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-100">
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: selectedStream.color || '#2E5A1A' }} />
+                <span className="text-xs font-semibold text-slate-600 truncate">
+                  {selectedBu ? `${selectedBu.name} → ` : ''}{selectedStream.name}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Email field (for auto-detect) */}
+          <div className="mb-4">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">
+              Work email (optional — auto-detects your stream)
+            </label>
+            <input
+              type="email"
+              value={emailInput}
+              onChange={e => setEmailInput(e.target.value)}
+              onBlur={() => { setEmailTouched(true); autoDetectFromEmail(emailInput); }}
+              placeholder="you@ground-control.co.uk"
+              className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none text-sm"
+            />
+            {emailTouched && emailInput && !emailInput.includes('@') && (
+              <p className="text-[10px] text-amber-600 mt-1">Enter a valid email to auto-detect your stream</p>
+            )}
+          </div>
+
+          {/* Microsoft SSO */}
           <button
             type="button"
             onClick={handleMicrosoft}
@@ -129,7 +250,7 @@ export default function Login() {
           </button>
 
           {/* Trust badges */}
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+          <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-400">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
             <span>Secured with enterprise-grade encryption</span>
           </div>

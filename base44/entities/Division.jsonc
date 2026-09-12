@@ -14,6 +14,16 @@
       "type": "string",
       "description": "Links this division to its parent business-unit division. Business units are top-level divisions (parent_division_id is null) that have child divisions pointing to them. Operational divisions have parent_division_id set to their business unit's ID. When null and the division has children, it's a business unit; when null with no children, it's a standalone division (backward compatible)."
     },
+    "hierarchy_level": {
+      "type": "string",
+      "enum": [
+        "enterprise",
+        "business_unit",
+        "stream"
+      ],
+      "default": "stream",
+      "description": "Where this division sits in the enterprise org tree. 'business_unit' = a top-level operating entity (e.g. 'Land & Water Solutions') that contains one or more business streams; 'stream' = a business stream that belongs to a business unit (parent_division_id set); 'enterprise' = the root enterprise level (reserved). When parent_division_id is null and the division has children, it's a business unit; when null with no children, it's a standalone stream (backward compatible, treated as 'stream')."
+    },
     "division_type": {
       "type": "string",
       "enum": [
@@ -307,6 +317,70 @@
           "description": "Whether field staff can edit their own timesheets in this division."
         }
       }
+    },
+    "settings_overrides": {
+      "type": "object",
+      "description": "Per-stream overrides on top of the EnterpriseSetting defaults. Only keys present in this object take precedence \u2014 all other settings are inherited from the enterprise defaults. Managed via the Division Settings UI (override toggle per field). When empty or absent, the stream uses enterprise defaults for everything.",
+      "properties": {
+        "default_vat_rate": {
+          "type": "number",
+          "description": "Override VAT rate (%) for this stream."
+        },
+        "default_markup_percentage": {
+          "type": "number",
+          "description": "Override markup % for this stream."
+        },
+        "require_briefing_signature": {
+          "type": "boolean",
+          "description": "Override briefing signature requirement."
+        },
+        "allow_timesheet_edit": {
+          "type": "boolean",
+          "description": "Override timesheet edit permission."
+        },
+        "weather_temp_min": {
+          "type": "number"
+        },
+        "weather_temp_max": {
+          "type": "number"
+        },
+        "weather_wind_max_mph": {
+          "type": "number"
+        },
+        "weather_rain_max_mm": {
+          "type": "number"
+        },
+        "weather_lightning_block": {
+          "type": "boolean"
+        },
+        "geofence_default_radius_m": {
+          "type": "number"
+        },
+        "primary_color": {
+          "type": "string",
+          "description": "Override --primary CSS variable for this stream."
+        },
+        "secondary_color": {
+          "type": "string"
+        },
+        "accent_color": {
+          "type": "string"
+        },
+        "default_login_welcome_text": {
+          "type": "string"
+        },
+        "default_login_tagline": {
+          "type": "string"
+        },
+        "default_login_animation_type": {
+          "type": "string"
+        },
+        "default_post_login_duration_ms": {
+          "type": "number"
+        }
+      },
+      "default": {},
+      "additionalProperties": true
     },
     "status": {
       "type": "string",

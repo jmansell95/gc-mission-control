@@ -81,7 +81,7 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
           <div className="px-3 py-2 border-b border-slate-100">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Switch Business Stream</p>
           </div>
-          <div className="py-1 max-h-72 overflow-y-auto">
+          <div className="py-1 max-h-80 overflow-y-auto">
             <button
               onClick={() => select(null)}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium hover:bg-slate-50 transition text-left ${!activeDivisionId ? 'bg-emerald-50' : ''}`}>
@@ -91,22 +91,89 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
               <span className="flex-1 text-slate-700">Enterprise Overview</span>
               {!activeDivisionId && <Check className="w-4 h-4 text-emerald-600" />}
             </button>
-            {permittedDivisions.filter(d => d.is_active !== false).map(d => (
-              <button
-                key={d.id}
-                onClick={() => select(d.id)}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium hover:bg-slate-50 transition text-left"
-                style={activeDivisionId === d.id ? { background: `${d.color || '#2E5A1A'}14` } : undefined}>
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: d.color || '#2E5A1A' }}>
-                  <Building2 className="w-3.5 h-3.5 text-white" />
+            {(() => {
+              // Group permitted divisions by Business Unit (parent_division_id)
+              const active = permittedDivisions.filter(d => d.is_active !== false);
+              const bus = active.filter(d => !d.parent_division_id);
+              const streams = active.filter(d => d.parent_division_id);
+
+              // Render each BU with its streams grouped underneath
+              return bus.map(bu => {
+                const childStreams = streams.filter(s => s.parent_division_id === bu.id);
+                // If the BU itself is in the permitted list (user can select it), show it
+                const buSelectable = active.find(d => d.id === bu.id);
+
+                return (
+                  <div key={bu.id}>
+                    {/* BU header */}
+                    <div className="px-3 pt-2 pb-1 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: bu.color || '#2E5A1A' }} />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide truncate">{bu.name}</span>
+                    </div>
+                    {/* BU itself (if selectable) */}
+                    {buSelectable && (
+                      <button
+                        onClick={() => select(bu.id)}
+                        className="w-full flex items-center gap-2.5 pl-5 pr-3 py-2 text-sm font-medium hover:bg-slate-50 transition text-left"
+                        style={activeDivisionId === bu.id ? { background: `${bu.color || '#2E5A1A'}14` } : undefined}>
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: bu.color || '#2E5A1A' }}>
+                          <Building2 className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="flex-1 text-slate-700 truncate text-xs font-semibold">{bu.name} (All)</span>
+                        {activeDivisionId === bu.id && <Check className="w-3.5 h-3.5" style={{ color: bu.color || '#2E5A1A' }} />}
+                      </button>
+                    )}
+                    {/* Streams under this BU */}
+                    {childStreams.map(s => (
+                      <button
+                        key={s.id}
+                        onClick={() => select(s.id)}
+                        className="w-full flex items-center gap-2.5 pl-5 pr-3 py-2 text-sm font-medium hover:bg-slate-50 transition text-left"
+                        style={activeDivisionId === s.id ? { background: `${s.color || '#2E5A1A'}14` } : undefined}>
+                        <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.color || '#2E5A1A' }}>
+                          <Building2 className="w-3 h-3 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-slate-800 truncate text-xs font-semibold">{s.name}</p>
+                          <p className="text-[9px] text-slate-400 uppercase tracking-wide">{s.code || s.division_type}</p>
+                        </div>
+                        {activeDivisionId === s.id && <Check className="w-3.5 h-3.5" style={{ color: s.color || '#2E5A1A' }} />}
+                      </button>
+                    ))}
+                  </div>
+                );
+              });
+            })()}
+            {/* Orphan streams (no parent BU in the permitted list) */}
+            {(() => {
+              const active = permittedDivisions.filter(d => d.is_active !== false);
+              const bus = active.filter(d => !d.parent_division_id);
+              const orphanStreams = active.filter(d => d.parent_division_id && !bus.find(b => b.id === d.parent_division_id));
+              if (orphanStreams.length === 0) return null;
+              return (
+                <div>
+                  <div className="px-3 pt-2 pb-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Other Streams</span>
+                  </div>
+                  {orphanStreams.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => select(s.id)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium hover:bg-slate-50 transition text-left"
+                      style={activeDivisionId === s.id ? { background: `${s.color || '#2E5A1A'}14` } : undefined}>
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: s.color || '#2E5A1A' }}>
+                        <Building2 className="w-3 h-3 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-slate-800 truncate text-xs font-semibold">{s.name}</p>
+                        <p className="text-[9px] text-slate-400 uppercase tracking-wide">{s.code || s.division_type}</p>
+                      </div>
+                      {activeDivisionId === s.id && <Check className="w-3.5 h-3.5" style={{ color: s.color || '#2E5A1A' }} />}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-slate-800 truncate">{d.name}</p>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wide">{d.code || d.division_type}</p>
-                </div>
-                {activeDivisionId === d.id && <Check className="w-4 h-4" style={{ color: d.color || '#2E5A1A' }} />}
-              </button>
-            ))}
+              );
+            })()}
           </div>
           {isSuperAdmin && (
             <div className="border-t border-slate-100 py-1">

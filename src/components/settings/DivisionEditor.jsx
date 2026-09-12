@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import {
   Building2, X, Check, Loader2, Layers, Settings as SettingsIcon, Navigation,
-  Palette, ChevronUp, ChevronDown, GripVertical,
+  Palette, ChevronUp, ChevronDown, GripVertical, ToggleLeft, ToggleRight,
 } from 'lucide-react';
 import { NAV_ITEM_REGISTRY, ALL_NAV_ITEM_IDS, DIVISION_TYPE_NAV_DEFAULTS } from '@/utils/divisionNav';
 import { DIVISION_TYPES, ALL_HUBS, HUB_LABELS } from '@/components/wizard/divisionWizardData';
+import { ENTERPRISE_SETTING_FIELDS, SETTING_CATEGORIES } from '@/lib/enterpriseSettingsConfig';
 
 const LANDING_OPTIONS = [
   { value: '', label: 'Auto (by role)', },
@@ -35,6 +37,8 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
     name: division?.name || '',
     code: division?.code || '',
     division_type: division?.division_type || 'general',
+    hierarchy_level: division?.hierarchy_level || (division?.parent_division_id ? 'stream' : 'business_unit'),
+    parent_division_id: division?.parent_division_id || '',
     description: division?.description || '',
     tagline: division?.tagline || '',
     color: division?.color || '#475569',
@@ -51,8 +55,41 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
       require_briefing_signature: true,
       allow_timesheet_edit: true,
     },
+    settings_overrides: division?.settings_overrides || {},
   }));
   const [saving, setSaving] = useState(false);
+
+  // Load enterprise settings (defaults) and all divisions (for BU selector)
+  const { data: enterpriseSettings } = useQuery({
+    queryKey: ['enterprise-settings-global'],
+    queryFn: async () => {
+      const list = await base44.entities.EnterpriseSetting.filter({ key: 'global' });
+      return list[0] || {};
+    },
+    staleTime: 60000,
+  });
+  const { data: allDivisions = [] } = useQuery({
+    queryKey: ['divisions-for-editor'],
+    queryFn: () => base44.entities.Division.list('-sort_order', 500),
+    staleTime: 60000,
+  });
+  const businessUnits = allDivisions.filter(d => !d.parent_division_id && d.id !== division?.id);
+
+  // Toggle a setting override on/off
+  const toggleOverride = (key, enable) => {
+    setForm(f => {
+      const overrides = { ...(f.settings_overrides || {}) };
+      if (enable) {
+        if (!(key in overrides)) overrides[key] = enterpriseSettings?.[key] ?? null;
+      } else {
+        delete overrides[key];
+      }
+      return { ...f, settings_overrides: overrides };
+    });
+  };
+  const setOverrideValue = (key, value) => {
+    setForm(f => ({ ...f, settings_overrides: { ...(f.settings_overrides || {}), [key]: value } }));
+  };
 
   const setHubsFromType = (type) => {
     const preset = DIVISION_TYPES.find(t => t.value === type);
@@ -108,6 +145,8 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
         name: toProperCase(form.name.trim()),
         code: form.code.toUpperCase().trim(),
         nav_items: form.nav_items.length > 0 ? form.nav_items : [],
+        parent_division_id: form.hierarchy_level === 'business_unit' ? null : (form.parent_division_id || null),
+        settings_overrides: form.settings_overrides || {},
       };
       if (division) {
         await base44.entities.Division.update(division.id, payload);
@@ -170,6 +209,34 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
                   <input value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} placeholder="GEO" maxLength={6}
                     className={inputCls + ' uppercase'} />
                 </div>
+              </div>
+              {/* Hierarchy level + Parent BU */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Hierarchy Level</label>
+                  <select
+                    value={form.hierarchy_level}
+                    onChange={e => setForm({ ...form, hierarchy_level: e.target.value, parent_division_id: e.target.value === 'business_unit' ? '' : form.parent_division_id })}
+                    className={inputCls}
+                  >
+                    <option value="business_unit">Business Unit (top-level)</option>
+                    <option value="stream">Business Stream (child of a BU)</option>
+                  </select>
+                  <p className="text-[10px] text-slate-400 mt-1">{form.hierarchy_level === 'business_unit' ? 'Contains one or more business streams' : 'Belongs to a business unit'}</p>
+                </div>
+                {form.hierarchy_level === 'stream' && (
+                  <div>
+                    <label className={labelCls}>Parent Business Unit</label>
+                    <select
+                      value={form.parent_division_id}
+                      onChange={e => setForm({ ...form, parent_division_id: e.target.value })}
+                      className={inputCls}
+                    >
+                      <option value="">— Select parent BU —</option>
+                      {businessUnits.map(bu => <option key={bu.id} value={bu.id}>{bu.name}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
               <div>
                 <label className={labelCls}>Business Stream Type</label>
@@ -309,54 +376,48 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
             </div>
           )}
 
-          {/* ═══ Settings ═══ */}
+          {/* ═══ Settings — Per-Stream Overrides ═══ */}
           {subTab === 'settings' && (
-            <div className="space-y-4">
-              <label className={labelCls + ' flex items-center gap-1.5'}><SettingsIcon className="w-3.5 h-3.5" /> Business Stream-Specific Settings</label>
-              <p className="text-[11px] text-slate-400 mt-0.5">These override platform defaults for this stream's users only.</p>
+            <div className="space-y-3">
+              <label className={labelCls + ' flex items-center gap-1.5'}><SettingsIcon className="w-3.5 h-3.5" /> Settings — Inherited & Overrides</label>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Every setting is inherited from the enterprise defaults. Toggle <span className="font-semibold text-primary">Override</span> to customise a setting for this stream only.
+              </p>
 
-              {/* Financial */}
-              <div className="hub-glass rounded-xl p-3 space-y-3">
-                <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Financial</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-500">VAT Rate (%)</label>
-                    <input type="number" value={form.settings.vat_rate} onChange={e => updateSetting('vat_rate', Number(e.target.value))}
-                      className={inputCls} />
+              {SETTING_CATEGORIES.map(cat => {
+                const fields = ENTERPRISE_SETTING_FIELDS.filter(f => f.category === cat);
+                if (fields.length === 0) return null;
+                return (
+                  <div key={cat} className="hub-glass rounded-xl p-3 space-y-2">
+                    <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">{cat}</p>
+                    {fields.map(field => {
+                      const isOverridden = field.key in (form.settings_overrides || {});
+                      const inheritedValue = enterpriseSettings?.[field.key];
+                      const currentValue = isOverridden ? form.settings_overrides[field.key] : inheritedValue;
+
+                      return (
+                        <OverrideRow
+                          key={field.key}
+                          field={field}
+                          isOverridden={isOverridden}
+                          inheritedValue={inheritedValue}
+                          currentValue={currentValue}
+                          onToggle={(enable) => toggleOverride(field.key, enable)}
+                          onChange={(v) => setOverrideValue(field.key, v)}
+                          inputCls={inputCls}
+                        />
+                      );
+                    })}
                   </div>
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-500">Default Markup (%)</label>
-                    <input type="number" value={form.settings.default_markup_percentage} onChange={e => updateSetting('default_markup_percentage', Number(e.target.value))}
-                      className={inputCls} />
-                  </div>
-                </div>
-              </div>
+                );
+              })}
 
-              {/* Field Operations */}
-              <div className="hub-glass rounded-xl p-3 space-y-2">
-                <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Field Operations</p>
-                <SettingToggle
-                  label="Require Briefing Signature"
-                  desc="Staff must sign the job briefing before starting work"
-                  value={form.settings.require_briefing_signature}
-                  onChange={v => updateSetting('require_briefing_signature', v)}
-                />
-                <SettingToggle
-                  label="Allow Timesheet Edit"
-                  desc="Field staff can edit their own timesheets"
-                  value={form.settings.allow_timesheet_edit}
-                  onChange={v => updateSetting('allow_timesheet_edit', v)}
-                />
-              </div>
-
-              {/* Integrations are managed centrally from Enterprise Settings → Integrations.
-                  Division-level toggles have been removed to ensure a single source of truth. */}
+              {/* Integrations note */}
               <div className="hub-glass rounded-xl p-3">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Integrations</p>
                 <p className="text-[11px] text-slate-400">
-                  All integrations (Geotab, SafetyCulture, Asset Panda, OpenGround, KeyLogBook, etc.) are now managed
-                  centrally from <span className="font-semibold text-primary">Enterprise Settings → Integrations</span>.
-                  This ensures every division uses the same configuration.
+                  All integrations (Geotab, SafetyCulture, Asset Panda, OpenGround, KeyLogBook, etc.) are managed
+                  centrally from <span className="font-semibold text-primary">Enterprise Settings → Global Settings</span>.
                 </p>
               </div>
             </div>
@@ -391,5 +452,83 @@ function SettingToggle({ label, desc, value, onChange }) {
         <span className={'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition ' + (value ? 'translate-x-5' : '')} />
       </button>
     </label>
+  );
+}
+
+function OverrideRow({ field, isOverridden, inheritedValue, currentValue, onToggle, onChange, inputCls }) {
+  return (
+    <div className={`rounded-lg border p-2.5 transition ${isOverridden ? 'border-primary/30 bg-primary/5' : 'border-slate-100 bg-slate-50/50'}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold text-slate-700">{field.label}</p>
+          <p className="text-[10px] text-slate-400 leading-snug">{field.description}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onToggle(!isOverridden)}
+          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition flex-shrink-0 ${
+            isOverridden ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
+          }`}
+        >
+          {isOverridden ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+          {isOverridden ? 'Overridden' : 'Override'}
+        </button>
+      </div>
+      {/* Value input */}
+      <div className="mt-2">
+        {field.type === 'boolean' ? (
+          <button
+            type="button"
+            onClick={() => isOverridden && onChange(!currentValue)}
+            disabled={!isOverridden}
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition ${
+              isOverridden ? 'border-primary/30 bg-white cursor-pointer' : 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-70'
+            }`}
+          >
+            <span className={`relative w-9 h-4 rounded-full transition ${currentValue ? 'bg-primary' : 'bg-slate-300'}`}>
+              <span className={`absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-white shadow transition ${currentValue ? 'translate-x-5' : ''}`} />
+            </span>
+            <span className="text-slate-700">{currentValue ? 'Enabled' : 'Disabled'}</span>
+          </button>
+        ) : field.type === 'color' ? (
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={currentValue || '#2E5A1A'}
+              onChange={e => onChange(e.target.value)}
+              disabled={!isOverridden}
+              className={`w-9 h-9 rounded-lg border border-slate-200 ${isOverridden ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
+            />
+            <input
+              value={isOverridden ? (currentValue || '') : (inheritedValue || '')}
+              onChange={e => onChange(e.target.value)}
+              disabled={!isOverridden}
+              className={`flex-1 px-2.5 py-1.5 rounded-lg border text-xs font-mono ${isOverridden ? 'border-primary/30 bg-white' : 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-70'}`}
+            />
+          </div>
+        ) : field.type === 'number' ? (
+          <input
+            type="number"
+            value={isOverridden ? (currentValue ?? '') : (inheritedValue ?? '')}
+            onChange={e => onChange(e.target.value === '' ? null : Number(e.target.value))}
+            disabled={!isOverridden}
+            className={`${inputCls} ${isOverridden ? 'border-primary/30 bg-white' : 'bg-slate-50 cursor-not-allowed opacity-70'}`}
+          />
+        ) : (
+          <input
+            value={isOverridden ? (currentValue || '') : (inheritedValue || '')}
+            onChange={e => onChange(e.target.value)}
+            disabled={!isOverridden}
+            className={`${inputCls} ${isOverridden ? 'border-primary/30 bg-white' : 'bg-slate-50 cursor-not-allowed opacity-70'}`}
+          />
+        )}
+        {!isOverridden && (
+          <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+            Inherited from Enterprise {inheritedValue !== undefined && inheritedValue !== null ? `· ${typeof inheritedValue === 'boolean' ? (inheritedValue ? 'Enabled' : 'Disabled') : inheritedValue}` : ''}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }

@@ -18,6 +18,17 @@
       "default": [],
       "description": "Additional business streams this staff member can access as an enterprise admin (e.g. a director who oversees Land & Water AND Surveys). When non-empty, the staff member is treated as an enterprise admin \u2014 they can switch between their home division and every division listed here, and see the enterprise dashboard rollup. Synced to the platform user's managed_division_ids and is_enterprise_admin flags by syncStaffUserRoles. Blank for regular staff (single-division access only)."
     },
+    "enterprise_role": {
+      "type": "string",
+      "enum": [
+        "enterprise_admin",
+        "bu_admin",
+        "stream_manager",
+        "user"
+      ],
+      "default": "user",
+      "description": "Enterprise role in the four-tier hierarchy. 'enterprise_admin' = sees every BU and stream, manages global settings; 'bu_admin' = manages all streams within their parent Business Unit; 'stream_manager' = manages their own stream only; 'user' = scoped to their assigned stream. This controls BU/stream visibility and cross-scope data access (RLS). Permission Groups continue to gate granular per-module access underneath this role. Synced to the platform user by syncStaffUserRoles. When blank, falls back to the legacy managed_division_ids / is_enterprise_admin flags."
+    },
     "email": {
       "type": "string",
       "description": "Staff member email address"

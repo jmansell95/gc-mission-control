@@ -13,8 +13,24 @@ import BusinessUnitManager from '@/components/settings/BusinessUnitManager';
 import BackupRestoreHub from '@/components/settings/BackupRestoreHub';
 import DivisionDashboardSettings from '@/components/settings/DivisionDashboardSettings';
 import LoginBrandingSettings from '@/components/settings/LoginBrandingSettings';
+import AccessRolesTab from '@/components/enterprise/AccessRolesTab';
+import GlobalSettingsTab from '@/components/enterprise/GlobalSettingsTab';
 
 const TABS = [
+  {
+    id: 'global-settings',
+    label: 'Global Settings',
+    icon: Settings,
+    gradient: 'from-slate-700 to-slate-900',
+    description: 'Enterprise-wide defaults for branding, financials, weather, geofence, and system config. Streams inherit these and can override.',
+  },
+  {
+    id: 'access-roles',
+    label: 'Access & Roles',
+    icon: ShieldCheck,
+    gradient: 'from-amber-600 to-orange-700',
+    description: 'Assign enterprise roles (Enterprise Admin, BU Admin, Stream Manager, User) to control BU/stream visibility. Permission Groups handle module access.',
+  },
   {
     id: 'business-units',
     label: 'Business Units',
@@ -84,6 +100,8 @@ export default function EnterpriseSettings() {
 
   const renderTab = () => {
     switch (activeTab) {
+      case 'global-settings': return <GlobalSettingsTab />;
+      case 'access-roles': return <AccessRolesTab />;
       case 'business-units': return <BusinessUnitManager />;
       case 'divisions': return <DivisionManager />;
       case 'division-dashboard': return <DivisionDashboardSettings divisions={allDivisions} canEditAll={true} />;
