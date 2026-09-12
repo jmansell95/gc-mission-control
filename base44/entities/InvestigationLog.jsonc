@@ -144,7 +144,7 @@
     },
     "project_engineer": {
       "type": "string",
-      "description": "Project engineer from the AGS PROJ_ENG field \u2014 the engineer who designed/specified the borehole. Stored separately from staff_name (the driller) so both the engineer and the driller are visible on the borehole card."
+      "description": "Project engineer from the AGS PROJ_ENG field — the engineer who designed/specified the borehole. Stored separately from staff_name (the driller) so both the engineer and the driller are visible on the borehole card."
     },
     "device_name": {
       "type": "string",
@@ -160,7 +160,7 @@
     },
     "shift_id": {
       "type": "string",
-      "description": "KeyLogBook shift ID (SHFT_ID) linking this log to a specific drilling shift. Used to attribute the correct crew to each activity \u2014 activities from different shifts on the same borehole show different drillers."
+      "description": "KeyLogBook shift ID (SHFT_ID) linking this log to a specific drilling shift. Used to attribute the correct crew to each activity — activities from different shifts on the same borehole show different drillers."
     },
     "shift_start_time": {
       "type": "string",
@@ -567,8 +567,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

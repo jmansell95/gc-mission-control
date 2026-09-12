@@ -12,15 +12,15 @@
         "cp",
         "rotary"
       ],
-      "description": "Type of drilling crew (legacy field \u2014 kept for backward compatibility with the original DrillingCrew entity used in team management)."
+      "description": "Type of drilling crew (legacy field — kept for backward compatibility with the original DrillingCrew entity used in team management)."
     },
     "supervisor_id": {
       "type": "string",
-      "description": "Supervisor/team leader staff ID (legacy field \u2014 kept for backward compatibility)."
+      "description": "Supervisor/team leader staff ID (legacy field — kept for backward compatibility)."
     },
     "team_id": {
       "type": "string",
-      "description": "Team this crew belongs to (legacy field \u2014 kept for backward compatibility)."
+      "description": "Team this crew belongs to (legacy field — kept for backward compatibility)."
     },
     "lead_driller_staff_id": {
       "type": "string",
@@ -32,7 +32,7 @@
     },
     "parent_staff_id": {
       "type": "string",
-      "description": "The parent subcontractor Staff record this crew belongs to. Multiple crews can share the same parent_staff_id \u2014 one per 2-man pairing. This is how crews are grouped under a subcontractor in the Contacts tab."
+      "description": "The parent subcontractor Staff record this crew belongs to. Multiple crews can share the same parent_staff_id — one per 2-man pairing. This is how crews are grouped under a subcontractor in the Contacts tab."
     },
     "parent_contractor_id": {
       "type": "string",
@@ -82,8 +82,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

@@ -19,7 +19,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "The division this compliance item belongs to. Set automatically from the active division (or the linked staff/vehicle/job's division) when the item is created. Drives division-scoped filtering \u2014 a division only sees its own compliance items. Blank = unassigned (visible to enterprise admins only)."
+      "description": "The division this compliance item belongs to. Set automatically from the active division (or the linked staff/vehicle/job's division) when the item is created. Drives division-scoped filtering — a division only sees its own compliance items. Blank = unassigned (visible to enterprise admins only)."
     },
     "qualification_type": {
       "type": "string",
@@ -102,7 +102,7 @@
     },
     "submitter_location": {
       "type": "string",
-      "description": "Location the staff member entered when they submitted/uploaded this document \u2014 where they are now (e.g. 'Cambridge North site', 'Home'). Helps the manager context-check the submission."
+      "description": "Location the staff member entered when they submitted/uploaded this document — where they are now (e.g. 'Cambridge North site', 'Home'). Helps the manager context-check the submission."
     },
     "reviewed_by": {
       "type": "string",
@@ -146,8 +146,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

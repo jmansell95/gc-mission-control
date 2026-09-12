@@ -8,7 +8,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "The division this team belongs to. Set automatically from the active division when the team is created. This is the single source of truth for a staff member's division \u2014 staff inherit their division from their team. Drives division-scoped filtering \u2014 a division only sees its own teams. Blank = unassigned (visible to enterprise admins only)."
+      "description": "The division this team belongs to. Set automatically from the active division when the team is created. This is the single source of truth for a staff member's division — staff inherit their division from their team. Drives division-scoped filtering — a division only sees its own teams. Blank = unassigned (visible to enterprise admins only)."
     },
     "description": {
       "type": "string",
@@ -16,7 +16,7 @@
     },
     "parent_team_id": {
       "type": "string",
-      "description": "Parent team ID \u2014 set when this is a sub-team under a team group (e.g. Coring and Trial Pit crews sit under the Groundworks parent)."
+      "description": "Parent team ID — set when this is a sub-team under a team group (e.g. Coring and Trial Pit crews sit under the Groundworks parent)."
     },
     "job_type": {
       "type": "string",
@@ -25,7 +25,7 @@
         "groundworks",
         "depot"
       ],
-      "description": "Discipline this team handles \u2014 staff in this team can only be assigned to matching jobs. 'drilling' covers all drilling crews (CP and Rotary, via the drilling_method sub-choice on the job). 'groundworks' covers all groundworks crews (enabling, coring, trial pit, general). 'depot' for yard-based teams. Blank/absent = flexible (any discipline, e.g. supervisors)."
+      "description": "Discipline this team handles — staff in this team can only be assigned to matching jobs. 'drilling' covers all drilling crews (CP and Rotary, via the drilling_method sub-choice on the job). 'groundworks' covers all groundworks crews (enabling, coring, trial pit, general). 'depot' for yard-based teams. Blank/absent = flexible (any discipline, e.g. supervisors)."
     },
     "category": {
       "type": "string",
@@ -42,7 +42,7 @@
         "/staff-schedule",
         "/admin"
       ],
-      "description": "Deprecated \u2014 landing pages are now set per-staff (Staff.default_landing_page). Kept for backward compatibility; no longer read by buildMyProfile or resolveRoleLandingPage."
+      "description": "Deprecated — landing pages are now set per-staff (Staff.default_landing_page). Kept for backward compatibility; no longer read by buildMyProfile or resolveRoleLandingPage."
     },
     "allowed_tool_access": {
       "type": "array",
@@ -53,7 +53,7 @@
     },
     "permission_group_id": {
       "type": "string",
-      "description": "Deprecated \u2014 permission groups are now assigned per-staff (Staff.permission_group_id), not per-team. Kept for backward compatibility; no longer read by buildMyProfile."
+      "description": "Deprecated — permission groups are now assigned per-staff (Staff.permission_group_id), not per-team. Kept for backward compatibility; no longer read by buildMyProfile."
     },
     "revenue_stream_type": {
       "type": "string",
@@ -67,7 +67,7 @@
         "flat_fee"
       ],
       "default": "none",
-      "description": "How revenue is calculated for jobs handled by this crew. 'drilling_meterage' = \u00a3/metre drilled, 'groundworks_unit' = \u00a3/trial pit or unit, 'coring_unit' = \u00a3/core run or metre cored, 'trial_pit_unit' = \u00a3/trial pit, 'day_rate' = fixed daily crew rate, 'flat_fee' = single project fee, 'none' = revenue tracked per asset/task only."
+      "description": "How revenue is calculated for jobs handled by this crew. 'drilling_meterage' = £/metre drilled, 'groundworks_unit' = £/trial pit or unit, 'coring_unit' = £/core run or metre cored, 'trial_pit_unit' = £/trial pit, 'day_rate' = fixed daily crew rate, 'flat_fee' = single project fee, 'none' = revenue tracked per asset/task only."
     },
     "billing_default_markup": {
       "type": "number",
@@ -140,8 +140,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

@@ -25,11 +25,11 @@
     },
     "rig_asset_id": {
       "type": "string",
-      "description": "Drilling rig (SiteAsset) assigned to this shift. For drilling jobs, the crew is formed dynamically by the rig \u2014 not by a static crew number. The Lead Driller and Second Man assigned to the same rig on the same date form the drilling crew. This links the rota assignment to the specific rig for utilisation and cost tracking."
+      "description": "Drilling rig (SiteAsset) assigned to this shift. For drilling jobs, the crew is formed dynamically by the rig — not by a static crew number. The Lead Driller and Second Man assigned to the same rig on the same date form the drilling crew. This links the rota assignment to the specific rig for utilisation and cost tracking."
     },
     "crew_pairing_id": {
       "type": "string",
-      "description": "Links a 2-man drilling crew (Lead Driller + Second Man) assigned together to the same rig on the same job. Set by the Crew-Rig assignment flow \u2014 both crew members' RotaAssignment entries share the same crew_pairing_id so they move as a unit when the rig is swapped. Blank for non-drilling assignments and legacy single-staff assignments."
+      "description": "Links a 2-man drilling crew (Lead Driller + Second Man) assigned together to the same rig on the same job. Set by the Crew-Rig assignment flow — both crew members' RotaAssignment entries share the same crew_pairing_id so they move as a unit when the rig is swapped. Blank for non-drilling assignments and legacy single-staff assignments."
     },
     "crew_role": {
       "type": "string",
@@ -37,7 +37,7 @@
         "lead_driller",
         "second_man"
       ],
-      "description": "This crew member's role within the crew_pairing. 'lead_driller' = the Lead Driller operating the rig; 'second_man' = the Second Man driller on the same rig. Blank for non-drilling assignments and legacy assignments. Used by the Rig Performance widget to show 'Lead: X \u00b7 Second: Y' per rig."
+      "description": "This crew member's role within the crew_pairing. 'lead_driller' = the Lead Driller operating the rig; 'second_man' = the Second Man driller on the same rig. Blank for non-drilling assignments and legacy assignments. Used by the Rig Performance widget to show 'Lead: X · Second: Y' per rig."
     },
     "week_start": {
       "type": "string",
@@ -54,7 +54,7 @@
         "yard_depot"
       ],
       "default": "job",
-      "description": "Type of day. 'job' = normal job assignment (requires job_id), 'annual_leave' = annual leave/holiday/day off (Off, Golf day, Holiday, AL), 'sick' = sick leave, 'training' = training course day, 'yard_depot' = yard/depot duty (non-billable \u2014 staff are on the bench at the depot/yard, available for reassignment to jobs or delivery legs). Non-job types have no job_id."
+      "description": "Type of day. 'job' = normal job assignment (requires job_id), 'annual_leave' = annual leave/holiday/day off (Off, Golf day, Holiday, AL), 'sick' = sick leave, 'training' = training course day, 'yard_depot' = yard/depot duty (non-billable — staff are on the bench at the depot/yard, available for reassignment to jobs or delivery legs). Non-job types have no job_id."
     },
     "non_job_label": {
       "type": "string",
@@ -63,7 +63,7 @@
     "has_conflict": {
       "type": "boolean",
       "default": false,
-      "description": "True when this assignment conflicts with another assignment on the same date \u2014 the staff member is double-booked (e.g. assigned to a job AND yard/depot on the same day, or two different jobs on the same day). Set by the Global Rota Registry conflict detector during import."
+      "description": "True when this assignment conflicts with another assignment on the same date — the staff member is double-booked (e.g. assigned to a job AND yard/depot on the same day, or two different jobs on the same day). Set by the Global Rota Registry conflict detector during import."
     },
     "conflict_note": {
       "type": "string",
@@ -89,7 +89,7 @@
     },
     "arrived_on_site_at": {
       "type": "string",
-      "description": "Timestamp when staff confirmed arrival on site (travel-to-site logged). The first step of the daily workflow \u2014 set before the briefing/induction can begin."
+      "description": "Timestamp when staff confirmed arrival on site (travel-to-site logged). The first step of the daily workflow — set before the briefing/induction can begin."
     },
     "left_site_at": {
       "type": "string",
@@ -182,12 +182,12 @@
     "start_delayed": {
       "type": "boolean",
       "default": false,
-      "description": "True when the job started later than its planned start date \u2014 captured during assignment so managers can track delays."
+      "description": "True when the job started later than its planned start date — captured during assignment so managers can track delays."
     },
     "actual_start_date": {
       "type": "string",
       "format": "date",
-      "description": "Actual date the job started on site \u2014 recorded when the job was delayed from its planned start date"
+      "description": "Actual date the job started on site — recorded when the job was delayed from its planned start date"
     },
     "meterage": {
       "type": "number",
@@ -195,12 +195,12 @@
     },
     "progress_notes": {
       "type": "string",
-      "description": "End-of-shift progress notes for multi-day jobs \u2014 visible to management and the next shift"
+      "description": "End-of-shift progress notes for multi-day jobs — visible to management and the next shift"
     },
     "daily_checks_completed": {
       "type": "boolean",
       "default": false,
-      "description": "True when the crew member has completed the daily pre-work checklist (vehicle walk-round, plant/power, PPE checks) in the ShiftWizard. Gates the shift \u2014 the Arrive step is blocked until this is true. The checks are completed in Mitti first, then confirmed here."
+      "description": "True when the crew member has completed the daily pre-work checklist (vehicle walk-round, plant/power, PPE checks) in the ShiftWizard. Gates the shift — the Arrive step is blocked until this is true. The checks are completed in Mitti first, then confirmed here."
     },
     "daily_checks_completed_at": {
       "type": "string",
@@ -208,7 +208,7 @@
     },
     "mitti_vehicle_check_at": {
       "type": "string",
-      "description": "ISO timestamp auto-stamped when a Mitti/SafetyCulture vehicle-check audit is received for this staff member on this assignment's date. When set, the ShiftWizard Checks step shows a live green 'verified by Mitti' badge. When Mitti is connected, this gates the Arrive step \u2014 crew cannot proceed until the vehicle check is verified (or they manually confirm if Mitti is not connected)."
+      "description": "ISO timestamp auto-stamped when a Mitti/SafetyCulture vehicle-check audit is received for this staff member on this assignment's date. When set, the ShiftWizard Checks step shows a live green 'verified by Mitti' badge. When Mitti is connected, this gates the Arrive step — crew cannot proceed until the vehicle check is verified (or they manually confirm if Mitti is not connected)."
     },
     "mitti_powra_at": {
       "type": "string",
@@ -229,7 +229,7 @@
     "inter_site_travel_minutes": {
       "type": "number",
       "default": 0,
-      "description": "Total minutes spent travelling between different job sites during this assignment's day (e.g. Site A \u2192 Site B). Auto-calculated by the geofence engine from inter-site transitions. Chargeable to the client."
+      "description": "Total minutes spent travelling between different job sites during this assignment's day (e.g. Site A → Site B). Auto-calculated by the geofence engine from inter-site transitions. Chargeable to the client."
     },
     "end_of_day_signature_data_url": {
       "type": "string",
@@ -237,7 +237,7 @@
     },
     "end_of_day_signed_at": {
       "type": "string",
-      "description": "ISO timestamp of when the crew member signed the end-of-day declaration. Gates timesheet submission \u2014 the shift cannot be submitted without this signature."
+      "description": "ISO timestamp of when the crew member signed the end-of-day declaration. Gates timesheet submission — the shift cannot be submitted without this signature."
     }
   },
   "required": [
@@ -260,8 +260,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

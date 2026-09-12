@@ -8,7 +8,7 @@
     },
     "division_id": {
       "type": "string",
-      "description": "The division this supplier belongs to. Set automatically from the active division when the supplier is created. Drives division-scoped filtering \u2014 a division only sees its own suppliers. Blank = unassigned (visible to enterprise admins only)."
+      "description": "The division this supplier belongs to. Set automatically from the active division when the supplier is created. Drives division-scoped filtering — a division only sees its own suppliers. Blank = unassigned (visible to enterprise admins only)."
     },
     "category": {
       "type": "array",
@@ -61,7 +61,7 @@
         ]
       },
       "default": [],
-      "description": "All contacts for this supplier \u2014 unlimited, no primary designation. Each entry has name, role, phone, email, notes. Used for comms and booking request recipient selection."
+      "description": "All contacts for this supplier — unlimited, no primary designation. Each entry has name, role, phone, email, notes. Used for comms and booking request recipient selection."
     },
     "notes": {
       "type": "string",
@@ -161,7 +161,7 @@
     },
     "lat": {
       "type": "number",
-      "description": "Supplier yard/depot latitude. Set via the geocode button on the supplier form. Used for geofence detection \u2014 when a vehicle enters the radius around this location, an arrival event is triggered."
+      "description": "Supplier yard/depot latitude. Set via the geocode button on the supplier form. Used for geofence detection — when a vehicle enters the radius around this location, an arrival event is triggered."
     },
     "lng": {
       "type": "number",
@@ -190,8 +190,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

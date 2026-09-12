@@ -13,12 +13,12 @@
     "start_date": {
       "type": "string",
       "format": "date",
-      "description": "Block start date \u2014 the first day the tentative job would run."
+      "description": "Block start date — the first day the tentative job would run."
     },
     "end_date": {
       "type": "string",
       "format": "date",
-      "description": "Block end date \u2014 the last day the tentative job would run."
+      "description": "Block end date — the last day the tentative job would run."
     },
     "rig_asset_id": {
       "type": "string",
@@ -49,7 +49,7 @@
     },
     "notes": {
       "type": "string",
-      "description": "Planning notes \u2014 client details, potential scope, pricing thoughts, any context for the reviewing manager."
+      "description": "Planning notes — client details, potential scope, pricing thoughts, any context for the reviewing manager."
     },
     "status": {
       "type": "string",
@@ -94,6 +94,11 @@
         },
         {
           "data.division_id": null
+        },
+        {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
         },
         {
           "user_condition": {

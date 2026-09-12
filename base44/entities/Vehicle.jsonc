@@ -76,7 +76,7 @@
     },
     "height_m": {
       "type": "number",
-      "description": "Vehicle height in metres \u2014 used for low-bridge clearance warnings on load manifests and displayed on vehicle cards. Preferred source is Asset Panda (mapped 'Height' field); falls back to manual entry when no Panda height is available."
+      "description": "Vehicle height in metres — used for low-bridge clearance warnings on load manifests and displayed on vehicle cards. Preferred source is Asset Panda (mapped 'Height' field); falls back to manual entry when no Panda height is available."
     },
     "vin": {
       "type": "string",
@@ -88,7 +88,7 @@
     },
     "model": {
       "type": "string",
-      "description": "Vehicle model (e.g. Transit, Sprinter, Daily). DVLA VES does not return model \u2014 it is pulled from the DVLA MOT History API when available, or from Geotab/manual entry as a fallback."
+      "description": "Vehicle model (e.g. Transit, Sprinter, Daily). DVLA VES does not return model — it is pulled from the DVLA MOT History API when available, or from Geotab/manual entry as a fallback."
     },
     "year": {
       "type": "number",
@@ -162,7 +162,7 @@
     },
     "engine_hours": {
       "type": "number",
-      "description": "Total engine operating hours, pulled from Geotab DeviceStatusInfo during sync. Shows how long the vehicle's engine has been running \u2014 used for utilisation tracking and service scheduling."
+      "description": "Total engine operating hours, pulled from Geotab DeviceStatusInfo during sync. Shows how long the vehicle's engine has been running — used for utilisation tracking and service scheduling."
     },
     "holman_sync_status": {
       "type": "string",
@@ -200,7 +200,7 @@
     },
     "geotab_keeper_name": {
       "type": "string",
-      "description": "Name of the vehicle's assigned keeper/primary driver from Geotab (the Driver entity's defaultDevice link). This is the FIXED assignment \u2014 who the vehicle belongs to. Updated automatically during Geotab sync. Shown as the 'Assigned' badge on vehicle cards."
+      "description": "Name of the vehicle's assigned keeper/primary driver from Geotab (the Driver entity's defaultDevice link). This is the FIXED assignment — who the vehicle belongs to. Updated automatically during Geotab sync. Shown as the 'Assigned' badge on vehicle cards."
     },
     "geotab_keeper_staff_id": {
       "type": "string",
@@ -208,7 +208,7 @@
     },
     "current_operator_id": {
       "type": "string",
-      "description": "Staff ID of the driver currently driving this vehicle (LIVE). Set automatically when a DeliveryLog task moves to 'in_progress' and cleared when the task completes. This is the dynamic 'Driving Now' status \u2014 reflects who is actually behind the wheel right now, driven by delivery/collection/handover activity rather than hardware."
+      "description": "Staff ID of the driver currently driving this vehicle (LIVE). Set automatically when a DeliveryLog task moves to 'in_progress' and cleared when the task completes. This is the dynamic 'Driving Now' status — reflects who is actually behind the wheel right now, driven by delivery/collection/handover activity rather than hardware."
     },
     "current_operator_name": {
       "type": "string",
@@ -287,7 +287,7 @@
         "weekly"
       ],
       "default": "auto",
-      "description": "Vehicle check frequency for the ShiftWizard Daily Checks step. 'auto' = system detects from weekly mileage (300+ mi/week \u2192 daily, otherwise weekly). 'daily' = manager override to force daily checks. 'weekly' = manager override to force weekly checks regardless of mileage."
+      "description": "Vehicle check frequency for the ShiftWizard Daily Checks step. 'auto' = system detects from weekly mileage (300+ mi/week → daily, otherwise weekly). 'daily' = manager override to force daily checks. 'weekly' = manager override to force weekly checks regardless of mileage."
     },
     "check_frequency_override": {
       "type": "boolean",
@@ -296,7 +296,7 @@
     },
     "weekly_mileage_miles": {
       "type": "number",
-      "description": "Calculated weekly mileage in miles (Mon\u2013Sun). Updated by the getMyDuties function on each call. Used to auto-determine if daily checks are needed (300+ mi/week threshold)."
+      "description": "Calculated weekly mileage in miles (Mon–Sun). Updated by the getMyDuties function on each call. Used to auto-determine if daily checks are needed (300+ mi/week threshold)."
     },
     "weekly_mileage_calculated_at": {
       "type": "string",
@@ -322,8 +322,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

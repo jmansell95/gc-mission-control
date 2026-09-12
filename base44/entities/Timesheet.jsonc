@@ -34,11 +34,11 @@
     },
     "start_time": {
       "type": "string",
-      "description": "Start time (HH:MM) \u2014 optional, used by legacy time-based entries"
+      "description": "Start time (HH:MM) — optional, used by legacy time-based entries"
     },
     "end_time": {
       "type": "string",
-      "description": "End time (HH:MM) \u2014 optional, used by legacy time-based entries"
+      "description": "End time (HH:MM) — optional, used by legacy time-based entries"
     },
     "break_minutes": {
       "type": "number",
@@ -94,11 +94,11 @@
     },
     "rota_assignment_id": {
       "type": "string",
-      "description": "ID of the RotaAssignment this auto-generated timesheet is linked to. Set when source is 'geotab_auto' \u2014 the geofence arrival/departure flow creates a draft timesheet linked to the day's assignment so the two stay in sync. Used for idempotency (prevents duplicate auto-creation on repeated arrival events) and to stamp left_site_at / close the timesheet on departure."
+      "description": "ID of the RotaAssignment this auto-generated timesheet is linked to. Set when source is 'geotab_auto' — the geofence arrival/departure flow creates a draft timesheet linked to the day's assignment so the two stay in sync. Used for idempotency (prevents duplicate auto-creation on repeated arrival events) and to stamp left_site_at / close the timesheet on departure."
     },
     "linked_delivery_id": {
       "type": "string",
-      "description": "ID of the DeliveryLog task this entry was auto-created from. Set when a driver completes a delivery/collection \u2014 the system auto-creates a draft Timesheet entry from the delivery's actual start\u2192complete duration. Used for idempotency (prevents duplicate creation on retry) and to render a 'Delivery' badge in the End of Shift wizard. Blank for manually-entered entries."
+      "description": "ID of the DeliveryLog task this entry was auto-created from. Set when a driver completes a delivery/collection — the system auto-creates a draft Timesheet entry from the delivery's actual start→complete duration. Used for idempotency (prevents duplicate creation on retry) and to render a 'Delivery' badge in the End of Shift wizard. Blank for manually-entered entries."
     },
     "is_summary": {
       "type": "boolean",
@@ -127,24 +127,24 @@
     },
     "travel_depart_home": {
       "type": "string",
-      "description": "Time departed home (HH:MM) \u2014 from the travel_to entry"
+      "description": "Time departed home (HH:MM) — from the travel_to entry"
     },
     "travel_arrive_site": {
       "type": "string",
-      "description": "Time arrived on site (HH:MM) \u2014 from the travel_to entry"
+      "description": "Time arrived on site (HH:MM) — from the travel_to entry"
     },
     "travel_depart_site": {
       "type": "string",
-      "description": "Time departed site (HH:MM) \u2014 from the travel_from entry"
+      "description": "Time departed site (HH:MM) — from the travel_from entry"
     },
     "travel_arrive_home": {
       "type": "string",
-      "description": "Time arrived home (HH:MM) \u2014 from the travel_from entry"
+      "description": "Time arrived home (HH:MM) — from the travel_from entry"
     },
     "is_weekly_summary": {
       "type": "boolean",
       "default": false,
-      "description": "True for the single merged weekly record created by mergeWeeklyTimesheet. One per staff per week \u2014 aggregates all approved daily summaries so the week can be downloaded as one payroll document."
+      "description": "True for the single merged weekly record created by mergeWeeklyTimesheet. One per staff per week — aggregates all approved daily summaries so the week can be downloaded as one payroll document."
     },
     "weekly_entry_ids": {
       "type": "string",
@@ -212,7 +212,7 @@
     },
     "billing_rule_id": {
       "type": "string",
-      "description": "BillingRule that matched this task description \u2014 used to calculate the client charge"
+      "description": "BillingRule that matched this task description — used to calculate the client charge"
     },
     "charge_amount": {
       "type": "number",
@@ -224,7 +224,7 @@
     },
     "payroll_export_id": {
       "type": "string",
-      "description": "Payroll batch export ID \u2014 set when this timesheet is exported to the payroll provider. Locks the record from re-export."
+      "description": "Payroll batch export ID — set when this timesheet is exported to the payroll provider. Locks the record from re-export."
     },
     "payroll_exported_at": {
       "type": "string",
@@ -294,8 +294,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]

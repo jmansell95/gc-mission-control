@@ -51,7 +51,7 @@
     },
     "linked_cost_item_ids": {
       "type": "string",
-      "description": "Comma-separated IDs of JobCostItem groups linked to this delivery \u2014 used to auto-populate items and track which material sets are on this load"
+      "description": "Comma-separated IDs of JobCostItem groups linked to this delivery — used to auto-populate items and track which material sets are on this load"
     },
     "linked_rig_ids": {
       "type": "string",
@@ -59,7 +59,7 @@
     },
     "sample_ids": {
       "type": "string",
-      "description": "Comma-separated Sample entity IDs linked to this delivery task. Set when a driver is collecting samples from site or delivering them to a laboratory. Drives the sample checklist shown in the sign-off modal \u2014 the driver must tick 'all samples accounted' before completing."
+      "description": "Comma-separated Sample entity IDs linked to this delivery task. Set when a driver is collecting samples from site or delivering them to a laboratory. Drives the sample checklist shown in the sign-off modal — the driver must tick 'all samples accounted' before completing."
     },
     "samples_accounted": {
       "type": "boolean",
@@ -109,7 +109,7 @@
     },
     "signature_data_url": {
       "type": "string",
-      "description": "Base64 data URL of the signature \u2014 used for offline storage, cleared after sync"
+      "description": "Base64 data URL of the signature — used for offline storage, cleared after sync"
     },
     "signed_by_name": {
       "type": "string",
@@ -121,7 +121,7 @@
     },
     "photo_data_urls": {
       "type": "string",
-      "description": "Comma-separated base64 data URLs of photos \u2014 used for offline storage, cleared after sync"
+      "description": "Comma-separated base64 data URLs of photos — used for offline storage, cleared after sync"
     },
     "gps_coordinates": {
       "type": "string",
@@ -146,11 +146,11 @@
     },
     "weight_kg": {
       "type": "number",
-      "description": "Weight of this delivery's items in kg \u2014 used for vehicle capacity checks. Manager-only field."
+      "description": "Weight of this delivery's items in kg — used for vehicle capacity checks. Manager-only field."
     },
     "volume_m3": {
       "type": "number",
-      "description": "Volume of this delivery's items in cubic metres \u2014 used for vehicle capacity checks. Manager-only field."
+      "description": "Volume of this delivery's items in cubic metres — used for vehicle capacity checks. Manager-only field."
     },
     "total_loaded_weight_kg": {
       "type": "number",
@@ -184,7 +184,7 @@
     },
     "miles": {
       "type": "number",
-      "description": "Round-trip miles driven for this delivery \u2014 used for per-mile charge calculations"
+      "description": "Round-trip miles driven for this delivery — used for per-mile charge calculations"
     },
     "billing_status": {
       "type": "string",
@@ -198,7 +198,7 @@
     },
     "custom_fee": {
       "type": "number",
-      "description": "Manual fee override in GBP \u2014 used when billing_status is 'custom_fee'"
+      "description": "Manual fee override in GBP — used when billing_status is 'custom_fee'"
     },
     "handover_to_staff_id": {
       "type": "string",
@@ -214,7 +214,7 @@
     },
     "parent_delivery_id": {
       "type": "string",
-      "description": "ID of the original delivery this was handed over from. Set on chained (child) deliveries created by the handover flow \u2014 links the chain so the admin hub can show the full movement history of an item."
+      "description": "ID of the original delivery this was handed over from. Set on chained (child) deliveries created by the handover flow — links the chain so the admin hub can show the full movement history of an item."
     },
     "handover_completed_at": {
       "type": "string",
@@ -292,7 +292,7 @@
     "towing_checklist_completed": {
       "type": "boolean",
       "default": false,
-      "description": "True when the driver has completed the pre-departure towing safety checklist (number plate grabbed, lights checked, toolbox talk opened) for a delivery with a trailer assigned. Gates the Start button on the driver hub \u2014 the delivery cannot be started until this is true."
+      "description": "True when the driver has completed the pre-departure towing safety checklist (number plate grabbed, lights checked, toolbox talk opened) for a delivery with a trailer assigned. Gates the Start button on the driver hub — the delivery cannot be started until this is true."
     },
     "towing_checklist_at": {
       "type": "string",
@@ -320,8 +320,18 @@
           "data.division_id": null
         },
         {
+          "data.division_id": {
+            "$in": "{{user.data.managed_division_ids}}"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "is_enterprise_admin": true
           }
         }
       ]
