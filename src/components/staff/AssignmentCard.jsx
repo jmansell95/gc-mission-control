@@ -50,7 +50,7 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
 
   return (
     <motion.div variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } }}
-      className="insight-card rounded-3xl overflow-hidden">
+      className="field-card overflow-hidden">
       <div className={`h-1.5 ${accent}`} />
 
       {job.status === 'on_hold' && (

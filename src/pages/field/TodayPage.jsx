@@ -29,7 +29,6 @@ import ActiveJobCard from '@/components/staff/ActiveJobCard';
 import IncentiveQuickLook from '@/components/staff/IncentiveQuickLook';
 import DrillingWeatherWidget from '@/components/DrillingWeatherWidget';
 import RigSignInScanner from '@/components/staff/RigSignInScanner';
-import OfflineBanner from '@/components/field/OfflineBanner';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import StartMyDayHero from '@/components/staff/StartMyDayHero';
@@ -449,7 +448,6 @@ export default function TodayPage() {
       <RedAlertBanner />
 
       <FieldContainer>
-        <OfflineBanner />
         {inSubmissionWindow && (
           <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
             <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
