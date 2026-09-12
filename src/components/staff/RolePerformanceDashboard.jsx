@@ -65,7 +65,7 @@ export default function RolePerformanceDashboard({ staffId, staffName, jobTitle 
 
   if (setsLoading || ctxLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="h-6 w-40 bg-slate-100 rounded animate-pulse mb-4" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-slate-50 rounded-xl animate-pulse" />)}
@@ -77,7 +77,7 @@ export default function RolePerformanceDashboard({ staffId, staffName, jobTitle 
   // No KPI set assigned — gentle empty state, NOT drilling metrics
   if (!kpiSet || !kpiSet.metrics || kpiSet.metrics.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
           <Gauge className="w-6 h-6 text-slate-400" />
         </div>
@@ -113,7 +113,7 @@ export default function RolePerformanceDashboard({ staffId, staffName, jobTitle 
   return (
     <div className="space-y-4">
       {/* Incentive score hero */}
-      <div className="insight-card rounded-2xl p-5" style={{ borderColor: `${accent}30` }}>
+      <div className="hub-glass rounded-2xl p-5" style={{ borderColor: `${accent}30` }}>
         <div className="flex items-center gap-4">
           {/* Score ring */}
           <div className="relative w-20 h-20 flex-shrink-0">
@@ -154,7 +154,7 @@ export default function RolePerformanceDashboard({ staffId, staffName, jobTitle 
         {computedMetrics.map(m => {
           const MIcon = m.icon;
           return (
-            <div key={m.key} className="insight-card rounded-2xl p-4 relative overflow-hidden">
+            <div key={m.key} className="hub-glass rounded-2xl p-4 relative overflow-hidden">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}12` }}>
                   <MIcon className="w-4 h-4" style={{ color: accent }} />

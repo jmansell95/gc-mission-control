@@ -213,7 +213,7 @@ export default function ReportNativeSection({ hub, filters }) {
       </div>
 
       {/* Breakdown table with subtotals */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-900">{breakdownTable.label}</h3>
           <p className="text-xs text-slate-500">{breakdownTable.rows.length} records · {breakdownGroups.length} groups</p>

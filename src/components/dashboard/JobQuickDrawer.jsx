@@ -197,7 +197,7 @@ export default function JobQuickDrawer({ job, onClose, onOpenFullDetails }) {
 
               {/* Meterage (drilling jobs) */}
               {totalMeters > 0 && (
-                <div className="insight-card rounded-2xl p-4">
+                <div className="hub-glass rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Activity className="w-4 h-4 text-blue-600" />
                     <h3 className="text-sm font-bold text-slate-900">Drilling Progress</h3>

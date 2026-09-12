@@ -36,7 +36,7 @@ function JobCard({ job, onClick }) {
   const statusLabel = statusLabels[job.status] || job.status;
   const statusColor = statusColors[job.status] || 'bg-slate-100 text-slate-600';
   return (
-    <button onClick={onClick} className="text-left insight-card rounded-2xl p-5 hover:shadow-lg transition w-full">
+    <button onClick={onClick} className="text-left hub-glass rounded-2xl p-5 hover:shadow-lg transition w-full">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <h3 className="text-base font-bold text-slate-900 truncate">{job.name}</h3>
@@ -93,23 +93,23 @@ function JobDetailView({ data, onBack }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-5">
         {/* Stats strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="insight-card rounded-xl p-3 text-center">
+          <div className="hub-glass rounded-xl p-3 text-center">
             <Users className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
             <p className="text-lg font-bold text-slate-900">{totals.staff}</p>
             <p className="text-[10px] text-slate-400 uppercase font-semibold">Team</p>
           </div>
-          <div className="insight-card rounded-xl p-3 text-center">
+          <div className="hub-glass rounded-xl p-3 text-center">
             <Clock className="w-5 h-5 text-blue-600 mx-auto mb-1" />
             <p className="text-lg font-bold text-slate-900">{totals.shifts}</p>
             <p className="text-[10px] text-slate-400 uppercase font-semibold">Shifts</p>
           </div>
-          <div className="insight-card rounded-xl p-3 text-center">
+          <div className="hub-glass rounded-xl p-3 text-center">
             <Truck className="w-5 h-5 text-amber-600 mx-auto mb-1" />
             <p className="text-lg font-bold text-slate-900">{totals.hours}h</p>
             <p className="text-[10px] text-slate-400 uppercase font-semibold">Hours</p>
           </div>
           {totals.meterage > 0 && (
-            <div className="insight-card rounded-xl p-3 text-center">
+            <div className="hub-glass rounded-xl p-3 text-center">
               <Mountain className="w-5 h-5 text-violet-600 mx-auto mb-1" />
               <p className="text-lg font-bold text-slate-900">{totals.meterage.toFixed(1)}m</p>
               <p className="text-[10px] text-slate-400 uppercase font-semibold">Drilled</p>
@@ -119,7 +119,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Team */}
         {show('team') && team.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-[#2E5A1A]" /> Team</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {team.map((m, i) => (
@@ -139,7 +139,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Schedule */}
         {show('schedule') && upcomingDates.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-[#2E5A1A]" /> Upcoming Schedule</h3>
             <div className="space-y-2">
               {upcomingDates.map(d => (
@@ -161,7 +161,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Milestones */}
         {show('milestones') && milestones.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Target className="w-4 h-4 text-[#2E5A1A]" /> Milestones</h3>
             <div className="space-y-2">
               {milestones.map((m, i) => (
@@ -179,7 +179,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Photos */}
         {show('photos') && photos.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Camera className="w-4 h-4 text-[#2E5A1A]" /> Site Photos ({photos.length})</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {photos.slice(0, 9).map((p, i) => (
@@ -193,7 +193,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Documents */}
         {show('documents') && documents.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-[#2E5A1A]" /> Documents ({documents.length})</h3>
             <div className="space-y-2">
               {documents.map((d, i) => (
@@ -212,7 +212,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Comments */}
         {show('comments') && comments.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#2E5A1A]" /> Comments ({comments.length})</h3>
             <div className="space-y-2">
               {comments.slice(0, 10).map((c, i) => (
@@ -231,7 +231,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Billing */}
         {show('client_charge') && billing && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><PoundSterling className="w-4 h-4 text-[#2E5A1A]" /> {billing.quote_label}</h3>
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between text-slate-600"><span>Subtotal</span><span className="font-semibold tabular-nums">£{Number(billing.subtotal || 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}</span></div>
@@ -243,7 +243,7 @@ function JobDetailView({ data, onBack }) {
 
         {/* Notes */}
         {show('notes') && job.notes && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <h3 className="text-sm font-bold text-slate-900 mb-2">Notes</h3>
             <p className="text-sm text-slate-600 whitespace-pre-wrap">{job.notes}</p>
           </div>

@@ -117,7 +117,7 @@ export default function StaffReviewManager() {
       />
 
       {showForm && (
-        <div className="insight-card rounded-2xl p-5 mb-5 space-y-4">
+        <div className="hub-glass rounded-2xl p-5 mb-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-slate-800">{editing ? 'Edit Review' : 'New Performance Review'}</h3>
             <button onClick={resetForm}><X className="w-5 h-5 text-slate-400" /></button>
@@ -256,7 +256,7 @@ export default function StaffReviewManager() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {reviews.map(r => (
-            <div key={r.id} className="insight-card rounded-xl p-4">
+            <div key={r.id} className="hub-glass rounded-xl p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <p className="font-semibold text-slate-800 text-sm">{r.staff_name || 'Unknown'}</p>

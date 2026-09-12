@@ -344,7 +344,7 @@ export default function PowerAppsBuildHub() {
 
         {/* === Step 1: Generate === */}
         {genState === 'idle' && (
-          <div className="insight-card rounded-2xl p-6 md:p-8 text-center">
+          <div className="hub-glass rounded-2xl p-6 md:p-8 text-center">
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
               <FileDown className="w-8 h-8 md:w-10 md:h-10 text-white" />
             </div>
@@ -385,7 +385,7 @@ export default function PowerAppsBuildHub() {
 
         {/* === Step 2: Generating progress === */}
         {genState === 'generating' && (
-          <div className="insight-card rounded-2xl p-6 md:p-8">
+          <div className="hub-glass rounded-2xl p-6 md:p-8">
             <div className="flex items-center gap-3 mb-5">
               <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
               <div>
@@ -438,7 +438,7 @@ export default function PowerAppsBuildHub() {
         {genState === 'done' && (
           <div className="space-y-4">
             {/* Success header */}
-            <div className="insight-card rounded-2xl p-5 md:p-6">
+            <div className="hub-glass rounded-2xl p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                   <CheckCircle2 className="w-6 h-6 text-emerald-600" />
@@ -465,7 +465,7 @@ export default function PowerAppsBuildHub() {
               {generatedFiles.map((file, i) => {
                 const Icon = file.icon;
                 return (
-                  <div key={file.id} className="insight-card rounded-2xl p-4 md:p-5">
+                  <div key={file.id} className="hub-glass rounded-2xl p-4 md:p-5">
                     <div className="flex items-center gap-3 md:gap-4">
                       <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-br ${colorClasses[file.color]} flex items-center justify-center flex-shrink-0 shadow-md`}>
                         <Icon className="w-6 h-6 text-white" />
@@ -500,7 +500,7 @@ export default function PowerAppsBuildHub() {
 
         {/* === Error state === */}
         {genState === 'error' && (
-          <div className="insight-card rounded-2xl p-6 md:p-8 text-center">
+          <div className="hub-glass rounded-2xl p-6 md:p-8 text-center">
             <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-7 h-7 text-red-500" />
             </div>
@@ -532,7 +532,7 @@ export default function PowerAppsBuildHub() {
         {/* === Link to Migration Roadmap === */}
         <Link
           to="/powerapps-migration-roadmap"
-          className="insight-card rounded-2xl p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition group"
+          className="hub-glass rounded-2xl p-4 md:p-5 flex items-center gap-3 hover:shadow-lg transition group"
         >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center flex-shrink-0">
             <FileText className="w-5 h-5 text-white" />

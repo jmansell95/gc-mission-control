@@ -77,7 +77,7 @@ export default function JobPacksTab() {
 
   if (!geoDivision) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <Package className="w-8 h-8 text-amber-500 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-700">No Geotechnical division found</p>
       </div>
@@ -99,7 +99,7 @@ export default function JobPacksTab() {
             Auditor Pack · {selectedJob.name}
           </div>
         </div>
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <JobPackView
             job={selectedJob}
             clientName={clientMap[selectedJob.client_id]}
@@ -175,7 +175,7 @@ export default function JobPacksTab() {
           <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
         </div>
       ) : filteredJobs.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-600">No projects found</p>
           <p className="text-xs text-slate-400 mt-1">

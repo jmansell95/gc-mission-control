@@ -26,7 +26,7 @@ export default function PermissionGroupManager({ profile }) {
   return (
     <div className="space-y-4">
       {/* Super Admin Only banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
           <Crown className="w-5 h-5 text-white" />
         </div>
@@ -182,7 +182,7 @@ function GroupsTab() {
   return (
     <div className="space-y-5">
       {/* Business Stream isolation banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-start gap-3 bg-emerald-50/50 border-emerald-200">
+      <div className="hub-glass rounded-2xl p-4 flex items-start gap-3 bg-emerald-50/50 border-emerald-200">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center flex-shrink-0 shadow-md">
           <Shield className="w-5 h-5 text-white" />
         </div>
@@ -259,7 +259,7 @@ function GroupsTab() {
       )}
 
       {!isLoading && customGroups.length === 0 && systemGroups.length > 0 && (
-        <div className="insight-card rounded-2xl p-6 text-center">
+        <div className="hub-glass rounded-2xl p-6 text-center">
           <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-700">No custom groups yet</p>
           <p className="text-xs text-slate-400 mt-1">Click "New Group" to create your own access level — e.g. "Office Staff", "Junior Manager", "Read-Only Accounts".</p>

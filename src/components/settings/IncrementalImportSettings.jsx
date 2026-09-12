@@ -59,7 +59,7 @@ export default function IncrementalImportSettings() {
       />
 
       {/* How it works */}
-      <div className="insight-card rounded-2xl p-5 mb-4">
+      <div className="hub-glass rounded-2xl p-5 mb-4">
         <h3 className="text-sm font-bold text-slate-800 mb-3">How Incremental Import Works</h3>
         <div className="space-y-3">
           <div className="flex items-start gap-3">
@@ -88,7 +88,7 @@ export default function IncrementalImportSettings() {
 
       {/* Dry run result */}
       {dryRunResult && (
-        <div className="insight-card rounded-2xl p-5 mb-4">
+        <div className="hub-glass rounded-2xl p-5 mb-4">
           <div className="flex items-center gap-2 mb-3">
             <Check className="w-5 h-5 text-emerald-600" />
             <h3 className="text-sm font-bold text-slate-800">Dry Run Preview</h3>
@@ -111,7 +111,7 @@ export default function IncrementalImportSettings() {
       )}
 
       {/* Preserved fields reference */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <h3 className="text-sm font-bold text-slate-800 mb-3">Fields Preserved During Incremental Import</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {['arrived_on_site_at', 'left_site_at', 'briefing_signed', 'briefing_signed_at', 'briefing_start_at', 'started_at', 'completed_at', 'meterage', 'progress_notes', 'notes', 'early_leave_reason', 'early_leave_note', 'status', 'shift_status', 'is_overtime', 'rate_multiplier'].map(f => (

@@ -342,7 +342,7 @@ function CrewShiftCard({ assignment, enabledCategories, expanded, onToggle }) {
 
   return (
     <div
-      className={`insight-card rounded-2xl border transition cursor-pointer ${
+      className={`hub-glass rounded-2xl border transition cursor-pointer ${
         allDone
           ? 'border-emerald-200 hover:border-emerald-300'
           : noneDone

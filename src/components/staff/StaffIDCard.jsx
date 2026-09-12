@@ -136,7 +136,7 @@ export default function StaffIDCard() {
       )}
 
       {!selected && (
-        <div className="flex flex-col items-center justify-center py-10 text-center insight-card rounded-xl">
+        <div className="flex flex-col items-center justify-center py-10 text-center hub-glass rounded-xl">
           <IdCard className="w-12 h-12 text-slate-300 mb-2" />
           <p className="text-sm text-slate-500">Select a staff member to generate their digital ID card.</p>
         </div>

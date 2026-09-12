@@ -78,7 +78,7 @@ export default function EnterpriseResourcePoolPage() {
       accent="#6366f1"
     >
       {/* Sticky controls */}
-      <div className="insight-card rounded-2xl p-3 sm:p-4 sticky top-2 z-20">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4 sticky top-2 z-20">
         {/* Tab pills */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
           {tabs.map(t => {
@@ -129,7 +129,7 @@ export default function EnterpriseResourcePoolPage() {
           <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-400">No idle {currentTab.label.toLowerCase()} match your filters.</p>
         </div>
       ) : (
@@ -174,7 +174,7 @@ function ResourceCard({ item, divMap, type, onLoan }) {
   ].filter(Boolean).join(' · ');
 
   return (
-    <div className="insight-card rounded-2xl p-3 sm:p-4 flex items-center gap-3">
+    <div className="hub-glass rounded-2xl p-3 sm:p-4 flex items-center gap-3">
       <span className="w-2.5 h-14 rounded-full flex-shrink-0" style={{ background: divColor }} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-slate-900 truncate">{name}</p>

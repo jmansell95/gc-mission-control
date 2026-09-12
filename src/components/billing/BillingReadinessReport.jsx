@@ -89,7 +89,7 @@ export default function BillingReadinessReport({ onSelectJob }) {
   if (isLoading) return <Skeleton className="h-64 rounded-2xl" />;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">

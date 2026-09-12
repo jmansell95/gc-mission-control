@@ -96,7 +96,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [],
   return (
     <div className="space-y-4">
       {/* Compact stat row — single source of truth for site-wide borehole stats */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5">
           <CompactStat icon={Mountain} value={boreholes.length} label="Boreholes" color="text-emerald-700" />
           <CompactStat icon={ArrowDownToLine} value={`${totals.totalMeters}m`} label="Total Depth" color="text-blue-700" />
@@ -127,7 +127,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [],
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Strata distribution donut */}
         {hasStrata && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
                 <Mountain className="w-4 h-4 text-amber-700" />
@@ -155,7 +155,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [],
 
         {/* Depth per borehole bar chart — OR rig comparison when no strata */}
         {hasDepthChart && hasStrata && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                 <ArrowDownToLine className="w-4 h-4 text-blue-700" />
@@ -176,7 +176,7 @@ export default function BoreholeSummaryPanel({ boreholes, totals, sorItems = [],
 
         {/* Rig comparison bar chart — shown when no strata (rotary jobs) */}
         {!hasStrata && rigEarningsData.length > 0 && (
-          <div className="insight-card rounded-2xl p-5">
+          <div className="hub-glass rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <Cog className="w-4 h-4 text-emerald-700" />

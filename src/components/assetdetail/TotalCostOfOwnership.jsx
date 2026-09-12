@@ -87,7 +87,7 @@ export default function TotalCostOfOwnership({ asset }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-4 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-4 flex items-center justify-center">
         <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
       </div>
     );
@@ -96,7 +96,7 @@ export default function TotalCostOfOwnership({ asset }) {
   const hasData = tco.total > 0 || tco.chartData.length > 0;
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <Activity className="w-4 h-4 text-[#2E5A1A]" />
         <h3 className="text-sm font-extrabold text-slate-900">Total Cost of Ownership</h3>

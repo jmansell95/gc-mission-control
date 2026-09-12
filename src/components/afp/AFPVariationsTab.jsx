@@ -119,7 +119,7 @@ export default function AFPVariationsTab({ job }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin mx-auto" />
       </div>
     );
@@ -128,7 +128,7 @@ export default function AFPVariationsTab({ job }) {
   return (
     <div className="space-y-3">
       {/* Header with summary + actions */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center">
@@ -220,7 +220,7 @@ export default function AFPVariationsTab({ job }) {
 
       {/* Empty state */}
       {variationLines.length === 0 && (
-        <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+        <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-3">
             <GitBranch className="w-7 h-7 text-violet-400" />
           </div>
@@ -247,7 +247,7 @@ function VariationCard({ variation, original, reason, onReasonChange, onApprove,
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 
   return (
-    <div className={`insight-card rounded-2xl overflow-hidden ${pending ? 'border-amber-200' : 'border-emerald-200'}`}>
+    <div className={`hub-glass rounded-2xl overflow-hidden ${pending ? 'border-amber-200' : 'border-emerald-200'}`}>
       <div className={`px-3 py-2 flex items-center gap-2 ${pending ? 'bg-amber-50/60' : 'bg-emerald-50/60'}`}>
         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${pending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
           {pending ? 'PENDING' : 'APPROVED'}

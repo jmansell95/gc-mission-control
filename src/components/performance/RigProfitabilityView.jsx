@@ -49,7 +49,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -57,7 +57,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
 
   if (!data?.rigs || data.rigs.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+      <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
           <TrendingUp className="w-7 h-7 text-slate-300" />
         </div>
@@ -83,7 +83,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
 
       {/* Missing-cost warning */}
       {rigsMissingCost.length > 0 && (
-        <div className="insight-card rounded-2xl p-3 flex items-start gap-2.5 bg-amber-50 border-amber-200">
+        <div className="hub-glass rounded-2xl p-3 flex items-start gap-2.5 bg-amber-50 border-amber-200">
           <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
           <div className="min-w-0">
             <p className="text-xs font-bold text-amber-800">{rigsMissingCost.length} rig{rigsMissingCost.length !== 1 ? 's' : ''} showing £0 cost</p>
@@ -111,7 +111,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
           const isOpen = expanded.has(rig.rig_id);
           const hasJobs = rig.job_breakdown && rig.job_breakdown.length > 0;
           return (
-            <div key={rig.rig_id} className="insight-card rounded-2xl overflow-hidden relative">
+            <div key={rig.rig_id} className="hub-glass rounded-2xl overflow-hidden relative">
               {i === 0 && rig.earned > 0 && (
                 <div className="absolute top-0 right-0 px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-bold rounded-bl-lg flex items-center gap-1 z-10">
                   <Trophy className="w-2.5 h-2.5" /> TOP
@@ -182,7 +182,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
       </div>
 
       {/* Desktop table */}
-      <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+      <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-slate-50/80">
@@ -294,7 +294,7 @@ export default function RigProfitabilityView({ dateRange, onSelectJob }) {
 
 function KPICard({ icon: Icon, label, value, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className={`relative w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
         <Icon className="w-4 h-4 text-white" />

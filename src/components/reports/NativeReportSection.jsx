@@ -105,7 +105,7 @@ function tally(rows, field) {
 
 function ReportCard({ title, icon: Icon, data, type, rows }) {
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center flex-shrink-0">

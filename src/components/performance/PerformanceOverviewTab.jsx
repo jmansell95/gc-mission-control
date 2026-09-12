@@ -55,7 +55,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -81,7 +81,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
           {maintenanceAlerts.length > 0 && (
             <button
               onClick={() => onGoToTab?.('rig-profitability')}
-              className="insight-card rounded-2xl p-3 flex items-center gap-3 bg-amber-50 border-amber-200 hover:bg-amber-100/60 transition text-left"
+              className="hub-glass rounded-2xl p-3 flex items-center gap-3 bg-amber-50 border-amber-200 hover:bg-amber-100/60 transition text-left"
             >
               <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
                 <AlertCircle className="w-5 h-5 text-white" />
@@ -96,7 +96,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
             </button>
           )}
           {pendingCount > 0 && (
-            <div className="insight-card rounded-2xl p-3 flex items-center gap-3 bg-amber-50 border-amber-200">
+            <div className="hub-glass rounded-2xl p-3 flex items-center gap-3 bg-amber-50 border-amber-200">
               <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
                 <AlertCircle className="w-5 h-5 text-white" />
               </div>
@@ -112,7 +112,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
       {/* Top rigs + Top crews side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {/* Top Rigs */}
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <div className="px-4 py-3 bg-gradient-to-r from-[#2E5A1A]/5 to-[#8DC63F]/5 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
@@ -157,7 +157,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
         </div>
 
         {/* Top Crews */}
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
@@ -200,7 +200,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
       </div>
 
       {/* Quick links to other hubs */}
-      <div className="insight-card rounded-2xl p-3.5">
+      <div className="hub-glass rounded-2xl p-3.5">
         <p className="text-[10px] text-slate-400 uppercase font-semibold mb-2">Quick Links</p>
         <div className="flex items-center gap-2 flex-wrap">
           <a
@@ -235,7 +235,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
 
 function KPICard({ icon: Icon, label, value, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className={`relative w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
         <Icon className="w-4 h-4 text-white" />

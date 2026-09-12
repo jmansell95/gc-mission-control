@@ -171,28 +171,28 @@ export default function FieldExpenseManagement() {
 
       {/* Portfolio summary tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Total This Week</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900 tabular-nums">{fmtMoney(portfolio.total)}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-amber-500" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Pending Approval</p>
           </div>
           <p className="text-2xl font-extrabold text-amber-600 tabular-nums">{portfolio.pending}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Approved</p>
           </div>
           <p className="text-2xl font-extrabold text-emerald-600 tabular-nums">{portfolio.approved}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <Users className="w-4 h-4 text-blue-500" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Staff with Receipts</p>
@@ -203,7 +203,7 @@ export default function FieldExpenseManagement() {
 
       {/* Category breakdown */}
       {Object.keys(portfolio.byCategory).length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
             <TrendingUp className="w-4 h-4 text-[#2E5A1A]" /> By Category
           </h3>
@@ -224,7 +224,7 @@ export default function FieldExpenseManagement() {
       )}
 
       {/* Staff breakdown table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-800">Staff Breakdown</h3>
         </div>

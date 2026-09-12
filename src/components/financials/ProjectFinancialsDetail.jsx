@@ -178,28 +178,28 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
 
       {/* Project-level headline figures */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg stat-gradient-brand flex items-center justify-center"><TrendingUp className="w-4 h-4 text-white" /></div>
             <p className="text-[10px] text-slate-400 uppercase font-medium">Revenue (net)</p>
           </div>
           <p className="text-xl font-bold text-slate-900 tabular-nums">{fmt(totals.revenue)}</p>
         </div>
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg stat-gradient-amber flex items-center justify-center"><Calculator className="w-4 h-4 text-white" /></div>
             <p className="text-[10px] text-slate-400 uppercase font-medium">Cost (net)</p>
           </div>
           <p className="text-xl font-bold text-slate-900 tabular-nums">{fmt(totals.cost)}</p>
         </div>
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg stat-gradient-emerald flex items-center justify-center"><PoundSterling className="w-4 h-4 text-white" /></div>
             <p className="text-[10px] text-slate-400 uppercase font-medium">Profit</p>
           </div>
           <p className="text-xl font-bold tabular-nums" style={{ color: totals.profit >= 0 ? '#059669' : '#dc2626' }}>{fmt(totals.profit)}</p>
         </div>
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg stat-gradient-violet flex items-center justify-center"><Percent className="w-4 h-4 text-white" /></div>
             <p className="text-[10px] text-slate-400 uppercase font-medium">Margin</p>

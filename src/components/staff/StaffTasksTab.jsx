@@ -138,7 +138,7 @@ export default function StaffTasksTab() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Staff list */}
           <div className="lg:col-span-1">
-            <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="hub-glass rounded-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -190,12 +190,12 @@ export default function StaffTasksTab() {
           {/* Task list for selected staff */}
           <div className="lg:col-span-2">
             {!selectedStaffId ? (
-              <div className="insight-card rounded-2xl p-12 flex flex-col items-center justify-center text-center">
+              <div className="hub-glass rounded-2xl p-12 flex flex-col items-center justify-center text-center">
                 <ClipboardList className="w-12 h-12 text-slate-300 mb-3" />
                 <p className="text-sm font-semibold text-slate-500">Select a staff member to view their tasks</p>
               </div>
             ) : (
-              <div className="insight-card rounded-2xl overflow-hidden">
+              <div className="hub-glass rounded-2xl overflow-hidden">
                 {/* Staff header */}
                 <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -338,7 +338,7 @@ function RecurringDutyTemplateManager({ templates, allStaff, onClose }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-800">Recurring Duty Templates</h3>

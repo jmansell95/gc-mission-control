@@ -136,7 +136,7 @@ export default function PermissionGroupsPopup({ open, onClose, scopedDivisionId 
                     <Users className="w-3 h-3 text-slate-400" /> Custom Groups
                   </p>
                   {customGroups.length === 0 ? (
-                    <div className="insight-card rounded-2xl p-6 text-center">
+                    <div className="hub-glass rounded-2xl p-6 text-center">
                       <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                       <p className="text-xs font-semibold text-slate-500">No custom groups yet</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">Tap "New Permission Group" to create one.</p>
@@ -173,7 +173,7 @@ function GroupCard({ group, staffCount, onEdit, onDelete }) {
   const total = Object.keys(p).length || 1;
 
   return (
-    <div className="insight-card rounded-2xl p-3.5">
+    <div className="hub-glass rounded-2xl p-3.5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap mb-1">

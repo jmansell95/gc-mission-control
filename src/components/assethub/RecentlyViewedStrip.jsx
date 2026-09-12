@@ -25,7 +25,7 @@ export default function RecentlyViewedStrip({ onOpen, currentAssetId }) {
   if (visible.length === 0) return null;
 
   return (
-    <div className="insight-card rounded-hub px-hub-card-pad-sm py-2.5">
+    <div className="hub-glass rounded-hub px-hub-card-pad-sm py-2.5">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5 flex-shrink-0 pr-2 border-r border-slate-200">
           <Clock className="w-3.5 h-3.5 text-slate-400" />

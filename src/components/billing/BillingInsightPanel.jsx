@@ -92,7 +92,7 @@ export default function BillingInsightPanel({ rows = [], onSelectJob }) {
 
   if (insights.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-4 mb-5">
+      <div className="hub-glass rounded-2xl p-4 mb-5">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -117,7 +117,7 @@ export default function BillingInsightPanel({ rows = [], onSelectJob }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4 mb-5">
+    <div className="hub-glass rounded-2xl p-4 mb-5">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
           <Sparkles className="w-4 h-4 text-white" />

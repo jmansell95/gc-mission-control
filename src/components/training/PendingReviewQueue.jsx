@@ -86,7 +86,7 @@ export default function PendingReviewQueue() {
         <span className="text-xs text-slate-400">· {allItems.length} awaiting</span>
       </div>
       {allItems.map((item) => (
-        <div key={item.id} className="insight-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-start gap-3">
+        <div key={item.id} className="hub-glass rounded-xl p-4 flex flex-col sm:flex-row sm:items-start gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
             <FileText className="w-5 h-5 text-amber-600" />
           </div>

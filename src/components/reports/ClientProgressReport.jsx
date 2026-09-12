@@ -338,7 +338,7 @@ export default function ClientProgressReport() {
         description="Generate a branded, printable progress report for any job — photos, milestones, borehole data, team, deliveries, safety & financial summary."
       />
 
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="mb-4">
           <label className="block text-xs font-medium text-slate-600 mb-1.5">Select Job</label>
           <SearchableSelect

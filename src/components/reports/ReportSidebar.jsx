@@ -32,7 +32,7 @@ export default function ReportSidebar({ category, setCategory, counts = {} }) {
     <>
       {/* Desktop sidebar */}
       <div className="hidden lg:block w-56 flex-shrink-0">
-        <div className="insight-card rounded-2xl p-2 sticky top-4">
+        <div className="hub-glass rounded-2xl p-2 sticky top-4">
           {REPORT_CATEGORIES.map(c => {
             const Icon = c.icon;
             const active = c.id === category;

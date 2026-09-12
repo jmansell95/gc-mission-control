@@ -32,7 +32,7 @@ export default function PowerBIReportSection() {
 
   if (datasets.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-10 text-center">
+      <div className="hub-glass rounded-2xl p-10 text-center">
         <Database className="w-10 h-10 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No Power BI data yet</p>
         <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
@@ -60,7 +60,7 @@ function PowerBICard({ ds }) {
   const chartData = rows.map(r => ({ name: String(r[x] ?? ''), value: Number(r[y]) || 0 }));
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">

@@ -19,7 +19,7 @@ const tooltipStyle = {
   padding: '8px 12px'
 };
 
-const cardCls = "insight-card rounded-2xl p-5";
+const cardCls = "hub-glass rounded-2xl p-5";
 
 export function JobStatusChart({ jobs }) {
   const statuses = ['planning', 'in_progress', 'completed', 'on_hold'];

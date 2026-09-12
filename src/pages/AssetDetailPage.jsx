@@ -269,7 +269,7 @@ export default function AssetDetailPage() {
               <div className="space-y-4">
                 {/* Master compliance rollup (for rigs with linked equipment) */}
                 {rollup && rollup.total > 1 && (
-                  <div className="insight-card rounded-2xl p-4 flex items-center gap-3">
+                  <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
                     <ShieldCheck className="w-6 h-6 text-[#2E5A1A]" />
                     <div>
                       <p className="text-sm font-bold text-slate-900">System Compliance: {rollup.master}</p>
@@ -310,7 +310,7 @@ export default function AssetDetailPage() {
             )}
 
             {activeTab === 'activity' && (
-              <div className="insight-card rounded-2xl p-4">
+              <div className="hub-glass rounded-2xl p-4">
                 <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#2E5A1A]" /> Movement & Activity Timeline
                 </h3>

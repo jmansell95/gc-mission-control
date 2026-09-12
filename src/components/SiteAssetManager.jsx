@@ -94,7 +94,7 @@ export default function SiteAssetManager() {
       />
 
       {/* Master-system info banner */}
-      <div className="insight-card rounded-xl p-3.5 mb-4 flex items-start gap-2.5">
+      <div className="hub-glass rounded-xl p-3.5 mb-4 flex items-start gap-2.5">
         <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
           <Info className="w-4 h-4 text-emerald-600" />
         </div>

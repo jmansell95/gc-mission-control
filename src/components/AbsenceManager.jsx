@@ -170,7 +170,7 @@ export default function AbsenceManager() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-amber opacity-10" />
           <div className="relative">
             <div className="w-9 h-9 rounded-xl stat-gradient-amber flex items-center justify-center mb-2.5">
@@ -180,7 +180,7 @@ export default function AbsenceManager() {
             <p className="text-xs font-semibold text-slate-500 mt-1">Pending Requests</p>
           </div>
         </div>
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-blue opacity-10" />
           <div className="relative">
             <div className="w-9 h-9 rounded-xl stat-gradient-blue flex items-center justify-center mb-2.5">
@@ -190,7 +190,7 @@ export default function AbsenceManager() {
             <p className="text-xs font-semibold text-slate-500 mt-1">On Leave Today</p>
           </div>
         </div>
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-violet opacity-10" />
           <div className="relative">
             <div className="w-9 h-9 rounded-xl stat-gradient-violet flex items-center justify-center mb-2.5">
@@ -200,7 +200,7 @@ export default function AbsenceManager() {
             <p className="text-xs font-semibold text-slate-500 mt-1">Recurring Days Off</p>
           </div>
         </div>
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full stat-gradient-brand opacity-10" />
           <div className="relative">
             <div className="w-9 h-9 rounded-xl stat-gradient-brand flex items-center justify-center mb-2.5">
@@ -288,7 +288,7 @@ export default function AbsenceManager() {
           </Dialog>
 
           {requestsByStaff.length === 0 ? (
-            <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">
+            <div className="hub-glass rounded-2xl p-10 text-center text-slate-400 text-sm">
               No absence requests{statusFilter !== 'all' ? ` with status "${statusFilter}"` : ''}.
             </div>
           ) : (
@@ -300,7 +300,7 @@ export default function AbsenceManager() {
                   .filter(a => a.status === 'pending' || (a.status === 'approved' && a.end_date >= today))
                   .sort((a, b) => a.start_date.localeCompare(b.start_date))[0];
                 return (
-                  <div key={s.id} className="insight-card rounded-2xl overflow-hidden">
+                  <div key={s.id} className="hub-glass rounded-2xl overflow-hidden">
                     <button onClick={() => toggleStaffExpand(s.id)}
                       className="w-full px-5 py-3.5 flex items-center gap-3 hover:bg-slate-50 transition text-left">
                       <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
@@ -424,13 +424,13 @@ export default function AbsenceManager() {
           </Dialog>
 
           {recurringByStaff.length === 0 ? (
-            <div className="insight-card rounded-2xl p-10 text-center text-slate-400 text-sm">
+            <div className="hub-glass rounded-2xl p-10 text-center text-slate-400 text-sm">
               No recurring days off set up yet. Use “Add Weekends for All Staff” to set everyone up in one click, or add a custom pattern per staff member.
             </div>
           ) : (
             <div className="space-y-3">
               {recurringByStaff.map(({ staff: s, items }) => (
-                <div key={s.id} className="insight-card rounded-2xl overflow-hidden">
+                <div key={s.id} className="hub-glass rounded-2xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                       <span className="text-emerald-700 font-bold text-xs">{s.name.charAt(0)}</span>

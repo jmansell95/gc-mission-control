@@ -263,7 +263,7 @@ export default function PeopleDirectory() {
 
       {/* Unlinked users banner */}
       {unlinkedCount > 0 && (
-        <div className="insight-card rounded-2xl p-4 border-l-4 border-amber-400 bg-amber-50/40">
+        <div className="hub-glass rounded-2xl p-4 border-l-4 border-amber-400 bg-amber-50/40">
           <div className="flex items-start gap-3 mb-3">
             <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -326,7 +326,7 @@ export default function PeopleDirectory() {
           ))}
         </div>
       ) : filteredTeams.length === 0 ? (
-        <div className="insight-card rounded-2xl p-10 text-center">
+        <div className="hub-glass rounded-2xl p-10 text-center">
           <Users className="w-10 h-10 mx-auto mb-3 text-slate-300" />
           <p className="text-sm font-semibold text-slate-500">No crew types found</p>
           <p className="text-xs text-slate-400 mt-1">Create crew types in Settings to get started.</p>
@@ -342,7 +342,7 @@ export default function PeopleDirectory() {
             const memberCount = members.length;
 
             return (
-              <div key={team.id} className="insight-card rounded-2xl overflow-hidden">
+              <div key={team.id} className="hub-glass rounded-2xl overflow-hidden">
                 {/* Crew Type header — Level 1 */}
                 <button
                   onClick={() => setExpandedType(isExpanded ? null : team.id)}
@@ -427,7 +427,7 @@ export default function PeopleDirectory() {
 
       {/* Unassigned people */}
       {!q && (staffByTeam['__unassigned'] || []).length > 0 && (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <button
             onClick={() => setExpandedType(expandedType === '__unassigned' ? null : '__unassigned')}
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-slate-50/60 transition"

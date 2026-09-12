@@ -97,7 +97,7 @@ export default function SiteLogMonthGroup({ byDate, sortedDates, job, groupBy, s
         const weeks = monthWeeks[monthKey] || [];
 
         return (
-          <div key={monthKey} className="insight-card rounded-2xl overflow-hidden">
+          <div key={monthKey} className="hub-glass rounded-2xl overflow-hidden">
             {/* Month header */}
             <button
               onClick={() => toggleMonth(monthKey)}

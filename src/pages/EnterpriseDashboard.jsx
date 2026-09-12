@@ -224,7 +224,7 @@ export default function EnterpriseDashboard() {
       <div className="px-4 lg:px-6 pb-8 lg:pb-6 space-y-4 max-w-7xl mx-auto">
 
         {/* Quick Access */}
-        <div className="insight-card rounded-2xl p-4 sm:p-5 mt-5 sm:mt-8 relative z-10">
+        <div className="hub-glass rounded-2xl p-4 sm:p-5 mt-5 sm:mt-8 relative z-10">
           <div className={'grid gap-2 sm:gap-3 ' + (quickActions.length === 2 ? 'grid-cols-2' : quickActions.length === 3 ? 'grid-cols-3' : 'grid-cols-4')}>
             {quickActions.map(a => {
               const Icon = a.icon;
@@ -282,7 +282,7 @@ export default function EnterpriseDashboard() {
 
         {/* Fleet & Assets */}
         {widgets.fleetAssets && (
-          <section className="insight-card rounded-2xl p-4 sm:p-5">
+          <section className="hub-glass rounded-2xl p-4 sm:p-5">
             <SectionTitle icon={Truck} title="Fleet & Assets" subtitle="Vehicles and equipment across all divisions" gradient="from-cyan-500 to-blue-600" />
             <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
               <div className="stat-gradient-teal rounded-xl sm:rounded-2xl p-3 sm:p-4 text-white relative overflow-hidden">
@@ -318,7 +318,7 @@ export default function EnterpriseDashboard() {
 
         {/* Workforce Overview — aggregated per BU */}
         {widgets.workforceOverview && (
-          <section className="insight-card rounded-2xl p-4 sm:p-5">
+          <section className="hub-glass rounded-2xl p-4 sm:p-5">
             <SectionTitle icon={Users} title="Workforce by Business Unit" subtitle="Crew aggregated per business unit" gradient="from-violet-500 to-purple-600" />
             <div className="grid grid-cols-2 gap-2 sm:gap-2.5 mb-3">
               <div className="stat-gradient-violet rounded-xl sm:rounded-2xl p-3 sm:p-4 text-white relative overflow-hidden">
@@ -367,7 +367,7 @@ export default function EnterpriseDashboard() {
 
         {/* Enterprise Hub Widgets — Operations, Financial, Compliance */}
         {widgets.operationsHub && (
-          <section className="insight-card rounded-2xl p-4 sm:p-5">
+          <section className="hub-glass rounded-2xl p-4 sm:p-5">
             <SectionTitle icon={Activity} title="Operations & Logistics" subtitle="Active jobs, deliveries, rigs and fleet utilisation" gradient="from-cyan-500 to-blue-600" />
             <div className={'grid gap-2 sm:gap-2.5 mb-3 ' + (permittedDivisions.some(d => d.division_type === 'geotechnical') ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3')}>
               <HubStatTile value={globalStats.activeJobs} label="Active Jobs" icon={Activity} gradient="stat-gradient-amber" />
@@ -384,7 +384,7 @@ export default function EnterpriseDashboard() {
         )}
 
         {widgets.financialHub && (
-          <section className="insight-card rounded-2xl p-4 sm:p-5">
+          <section className="hub-glass rounded-2xl p-4 sm:p-5">
             <SectionTitle icon={PoundSterling} title="Financial Performance" subtitle="Revenue, outstanding, cash flow and profitability" gradient="from-emerald-500 to-teal-600" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
               <HubStatTile value={gbp(globalStats.totalRevenue)} label="Revenue" icon={TrendingUp} gradient="stat-gradient-emerald" />
@@ -399,7 +399,7 @@ export default function EnterpriseDashboard() {
         )}
 
         {widgets.complianceHub && (
-          <section className="insight-card rounded-2xl p-4 sm:p-5">
+          <section className="hub-glass rounded-2xl p-4 sm:p-5">
             <SectionTitle icon={ShieldCheck} title="Compliance & Safety" subtitle="Compliance status, expiring certs and open incidents" gradient="from-violet-500 to-purple-600" />
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mb-3">
               <HubStatTile value={`${globalStats.compliancePassRate || 100}%`} label="Pass Rate" icon={ShieldCheck} gradient="stat-gradient-emerald" />

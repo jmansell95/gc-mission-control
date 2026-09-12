@@ -22,7 +22,7 @@ function HubCard({ item, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen);
   const Icon = ICONS[item.icon] || FileText;
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left hover:bg-slate-50/50 transition"
@@ -87,7 +87,7 @@ export default function PresentationPack() {
 
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Hero */}
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <div className="hero-gradient px-5 sm:px-7 py-6 text-white">
             <img src={EMBLEM_URL} alt="Ground Control" className="h-10 mb-3 object-contain brightness-0 invert" />
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1.5">Team Briefing Pack</h2>
@@ -107,11 +107,11 @@ export default function PresentationPack() {
             <h2 className="text-lg font-bold text-slate-900">Part 1 — Why We Built This</h2>
           </div>
 
-          <div className="insight-card rounded-2xl p-5 sm:p-6">
+          <div className="hub-glass rounded-2xl p-5 sm:p-6">
             <p className="text-sm text-slate-700 leading-relaxed">{whyBuilt.intro}</p>
           </div>
 
-          <div className="insight-card rounded-2xl p-5 sm:p-6">
+          <div className="hub-glass rounded-2xl p-5 sm:p-6">
             <h3 className="text-sm font-bold text-slate-900 mb-3">What was going wrong</h3>
             <ul className="space-y-2">
               {whyBuilt.problems.map((p, i) => (
@@ -123,7 +123,7 @@ export default function PresentationPack() {
             </ul>
           </div>
 
-          <div className="insight-card rounded-2xl p-5 sm:p-6 bg-emerald-50/40 border-emerald-200/60">
+          <div className="hub-glass rounded-2xl p-5 sm:p-6 bg-emerald-50/40 border-emerald-200/60">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-5 rounded-full bg-[#2E5A1A]" />
               <h3 className="text-sm font-bold text-[#2E5A1A]">The solution</h3>
@@ -133,7 +133,7 @@ export default function PresentationPack() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {whyBuilt.outcomes.map((o, i) => (
-              <div key={i} className="insight-card rounded-2xl p-4">
+              <div key={i} className="hub-glass rounded-2xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
                     <span className="text-white text-xs font-bold">{i + 1}</span>
@@ -193,7 +193,7 @@ export default function PresentationPack() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {closingPoints.roles.map((roleBlock, i) => (
-              <div key={i} className="insight-card rounded-2xl p-4 sm:p-5">
+              <div key={i} className="hub-glass rounded-2xl p-4 sm:p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-1 h-5 rounded-full bg-[#8DC63F]" />
                   <h3 className="text-sm font-bold text-slate-900">{roleBlock.role}</h3>
@@ -212,7 +212,7 @@ export default function PresentationPack() {
         </div>
 
         {/* Download CTA */}
-        <div className="insight-card rounded-2xl p-5 sm:p-6 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white">
+        <div className="hub-glass rounded-2xl p-5 sm:p-6 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] text-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-base font-bold mb-1">Download the full briefing pack</h3>

@@ -89,7 +89,7 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-5 flex items-center justify-center">
         <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
       </div>
     );
@@ -97,7 +97,7 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
 
   if (sortedEvents.length === 0 && breadcrumbPath.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-5 text-center">
+      <div className="hub-glass rounded-2xl p-5 text-center">
         <Route className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No movement data yet</p>
         <p className="text-xs text-slate-400 mt-1">GPS tracking events will appear here once {staffName || 'this staff member'} starts their shift.</p>

@@ -316,7 +316,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
               <p className="text-[11px] text-slate-400 mt-0.5">These override platform defaults for this stream's users only.</p>
 
               {/* Financial */}
-              <div className="insight-card rounded-xl p-3 space-y-3">
+              <div className="hub-glass rounded-xl p-3 space-y-3">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Financial</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -333,7 +333,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
               </div>
 
               {/* Field Operations */}
-              <div className="insight-card rounded-xl p-3 space-y-2">
+              <div className="hub-glass rounded-xl p-3 space-y-2">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Field Operations</p>
                 <SettingToggle
                   label="Require Briefing Signature"
@@ -351,7 +351,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
 
               {/* Integrations are managed centrally from Enterprise Settings → Integrations.
                   Division-level toggles have been removed to ensure a single source of truth. */}
-              <div className="insight-card rounded-xl p-3">
+              <div className="hub-glass rounded-xl p-3">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Integrations</p>
                 <p className="text-[11px] text-slate-400">
                   All integrations (Geotab, SafetyCulture, Asset Panda, OpenGround, KeyLogBook, etc.) are now managed

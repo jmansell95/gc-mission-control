@@ -11,7 +11,7 @@ export default function RawPandaDataPanel({ rawFields }) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-2 text-left"

@@ -166,7 +166,7 @@ export default function PeopleInsights() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <div key={kpi.label} className="insight-card rounded-2xl p-4 relative overflow-hidden">
+            <div key={kpi.label} className="hub-glass rounded-2xl p-4 relative overflow-hidden">
               <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full ${colorMap[kpi.color]} opacity-10`} />
               <div className="relative">
                 <div className={`w-9 h-9 rounded-xl ${colorMap[kpi.color]} flex items-center justify-center mb-2.5`}>
@@ -183,7 +183,7 @@ export default function PeopleInsights() {
 
       {/* Hours trend + Job throughput */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="insight-card rounded-2xl p-4 lg:col-span-2">
+        <div className="hub-glass rounded-2xl p-4 lg:col-span-2">
           <div className="flex items-center gap-2 mb-3">
             <Clock className="w-4 h-4 text-emerald-600" />
             <h3 className="text-sm font-bold text-slate-900">Hours Worked Trend</h3>
@@ -212,7 +212,7 @@ export default function PeopleInsights() {
           )}
         </div>
 
-        <div className="insight-card rounded-2xl p-4 flex flex-col">
+        <div className="hub-glass rounded-2xl p-4 flex flex-col">
           <div className="flex items-center gap-2 mb-3">
             <Briefcase className="w-4 h-4 text-indigo-600" />
             <h3 className="text-sm font-bold text-slate-900">Job Throughput</h3>
@@ -228,7 +228,7 @@ export default function PeopleInsights() {
       </div>
 
       {/* Crew vs Crew benchmark */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Users className="w-4 h-4 text-violet-600" />
           <h3 className="text-sm font-bold text-slate-900">Crew Benchmark — Hours by Crew Type</h3>

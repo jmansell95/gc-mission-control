@@ -108,7 +108,7 @@ function CrewCompositionBar({ assignedStaff, rotas, contractors, onAddStaff }) {
   ].filter(s => s.count > 0);
 
   return (
-    <div className="insight-card rounded-2xl p-4 md:p-5">
+    <div className="hub-glass rounded-2xl p-4 md:p-5">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm icon-tile-glow">
           <UsersRound className="w-5 h-5 text-white" />
@@ -326,7 +326,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
       {assignedStaff.length > 0 ? (
         <CrewCompositionBar assignedStaff={assignedStaff} rotas={rotas} contractors={contractors} onAddStaff={() => setShowAssignStaff(true)} />
       ) : (
-        <div className="insight-card rounded-2xl p-4 md:p-5">
+        <div className="hub-glass rounded-2xl p-4 md:p-5">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm icon-tile-glow">
               <UsersRound className="w-5 h-5 text-white" />

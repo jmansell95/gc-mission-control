@@ -14,7 +14,7 @@ export default function DivisionPreviewCard({ form }) {
   const typeLabel = form.division_type ? form.division_type.charAt(0).toUpperCase() + form.division_type.slice(1) : 'General';
 
   return (
-    <div className="insight-card relative rounded-2xl overflow-hidden">
+    <div className="hub-glass relative rounded-2xl overflow-hidden">
       <div className="h-20 px-5 flex items-center justify-between relative overflow-hidden" style={{ background: 'linear-gradient(90deg, ' + color + ', ' + color + '99)' }}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.3) 0%, transparent 60%)' }} />
         <div className="relative flex items-center gap-3 min-w-0">

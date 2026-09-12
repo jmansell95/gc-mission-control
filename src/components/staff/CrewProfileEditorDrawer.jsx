@@ -162,7 +162,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
 
         <div className="space-y-5">
           {/* Avatar */}
-          <div className="insight-card rounded-xl p-4">
+          <div className="hub-glass rounded-xl p-4">
             <div className="flex items-center gap-4">
               <ProfileAvatar name={form.name} avatarUrl={form.avatar_url} size={64} />
               <div className="min-w-0 flex-1">
@@ -185,7 +185,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           </div>
 
           {/* Identity */}
-          <div className="insight-card rounded-xl p-4 space-y-3">
+          <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
               <UserCog className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-sm font-semibold text-slate-700">Identity</p>
@@ -210,7 +210,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           </div>
 
           {/* Assignment */}
-          <div className="insight-card rounded-xl p-4 space-y-3">
+          <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
               <Users className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-sm font-semibold text-slate-700">Assignment</p>
@@ -246,7 +246,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
 
           {/* Financial — admin + management */}
           {canEditFinancials && (
-            <div className="insight-card rounded-xl p-4 space-y-3">
+            <div className="hub-glass rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-2.5 mb-1">
                 <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
                 <p className="text-sm font-semibold text-slate-700">Financial</p>
@@ -268,7 +268,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
 
           {/* Subcontractor / Agency Details — conditional */}
           {(form.worker_type === 'subcontractor' || form.worker_type === 'agency') && (
-            <div className="insight-card rounded-xl p-4 space-y-3">
+            <div className="hub-glass rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-2.5 mb-1">
                 <Building2 className="w-4 h-4 text-[#2E5A1A]" />
                 <p className="text-sm font-semibold text-slate-700">Subcontractor / Agency Details</p>
@@ -296,7 +296,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           )}
 
           {/* Permissions — managed on the dedicated Access Levels page */}
-          <div className="insight-card rounded-xl p-4">
+          <div className="hub-glass rounded-xl p-4">
             <div className="flex items-center gap-2.5 mb-2">
               <Shield className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-sm font-semibold text-slate-700">Permissions</p>
@@ -314,7 +314,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           </div>
 
           {/* Sensitive (admin-only) */}
-          <div className="insight-card rounded-xl p-4 space-y-3">
+          <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
               <Shield className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-sm font-semibold text-slate-700">Compliance (Admin Only)</p>
@@ -377,7 +377,7 @@ function ToggleRow({ icon: Icon, color, title, desc, checked, onChange }) {
     emerald: 'bg-emerald-50 text-emerald-600',
   };
   return (
-    <div className="insight-card rounded-xl p-4 flex items-center justify-between gap-4">
+    <div className="hub-glass rounded-xl p-4 flex items-center justify-between gap-4">
       <div className="flex items-start gap-2.5 min-w-0">
         <div className={`w-8 h-8 rounded-lg ${colorMap[color]} flex items-center justify-center flex-shrink-0`}>
           <Icon className="w-4 h-4" />

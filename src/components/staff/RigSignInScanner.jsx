@@ -152,7 +152,7 @@ export default function RigSignInScanner({ open, onClose, staffId, assignments =
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="insight-card rounded-2xl overflow-hidden"
+              className="hub-glass rounded-2xl overflow-hidden"
             >
               <div className="bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] px-4 py-3 text-white">
                 <div className="flex items-center gap-2.5">

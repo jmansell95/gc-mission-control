@@ -265,7 +265,7 @@ export default function SupplierSpendReport({ filters }) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
               onClick={() => setDrillJob(j)}
-              className="w-full insight-card rounded-2xl p-4 flex items-center gap-4 text-left hover:shadow-md transition group"
+              className="w-full hub-glass rounded-2xl p-4 flex items-center gap-4 text-left hover:shadow-md transition group"
             >
               <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
                 {i + 1}
@@ -294,28 +294,28 @@ export default function SupplierSpendReport({ filters }) {
     <div className="space-y-4">
       {/* Summary tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center"><Truck className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{fmt0(grandTotal)}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><Store className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Suppliers</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{supplierRows.length}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><Briefcase className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Jobs</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{uniqueJobCount}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center"><TrendingUp className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Avg / Supplier</p>
@@ -339,7 +339,7 @@ export default function SupplierSpendReport({ filters }) {
       </div>
 
       {/* Grouping toggle */}
-      <div className="insight-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">
             <Truck className="w-4 h-4 text-white" />
@@ -361,7 +361,7 @@ export default function SupplierSpendReport({ filters }) {
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-900 mb-3">
             {grouping === 'total' ? 'Top 10 Suppliers by Spend' : `Spend Over Time (${grouping})`}
           </h3>
@@ -370,7 +370,7 @@ export default function SupplierSpendReport({ filters }) {
       )}
 
       {/* Per-Supplier Summary table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-900">Per-Supplier Summary</h3>
         </div>

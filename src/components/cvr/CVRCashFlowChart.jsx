@@ -24,7 +24,7 @@ export default function CVRCashFlowChart({ cashFlow }) {
 
   if (chartData.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-500">No cash flow data yet</p>
         <p className="text-xs text-slate-400 mt-1">Cash flow forecast will appear here when the CVR includes a Cash flow sheet</p>
@@ -35,7 +35,7 @@ export default function CVRCashFlowChart({ cashFlow }) {
   const total = chartData.reduce((s, d) => s + d.amount, 0);
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-900">Cash Flow Forecast</h3>

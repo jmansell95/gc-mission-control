@@ -55,7 +55,7 @@ function ChoiceCard({ icon: Icon, title, description, accent, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="insight-card relative rounded-2xl p-5 text-left group overflow-hidden"
+      className="hub-glass relative rounded-2xl p-5 text-left group overflow-hidden"
     >
       <div className="absolute top-0 left-0 right-0 h-1" style={{ background: `linear-gradient(to right, ${accent}, ${accent}66)` }} />
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 shadow-sm" style={{ background: `${accent}15` }}>

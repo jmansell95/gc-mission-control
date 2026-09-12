@@ -61,7 +61,7 @@ export default function ResourceRequestModal({ rig, dateStr, divisionId, divMap,
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ duration: 0.2 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[92vw] max-w-lg insight-card rounded-2xl shadow-2xl overflow-hidden"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[92vw] max-w-lg hub-glass rounded-2xl shadow-2xl overflow-hidden"
       >
         {submitted ? (
           <div className="p-8 text-center">

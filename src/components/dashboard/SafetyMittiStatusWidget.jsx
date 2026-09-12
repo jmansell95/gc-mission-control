@@ -72,7 +72,7 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
 
   if (isLoading || mittiLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5 min-h-[280px] flex flex-col">
+      <div className="hub-glass rounded-2xl p-5 min-h-[280px] flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center shadow-md">
             <ShieldCheck className="w-5 h-5 text-white" />
@@ -90,7 +90,7 @@ export default function SafetyMittiStatusWidget({ onNavigate }) {
   return (
     <>
     <div
-      className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
+      className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
       onClick={handleClick}
     >
       {/* Header */}

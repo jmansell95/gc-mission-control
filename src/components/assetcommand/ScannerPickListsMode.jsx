@@ -140,7 +140,7 @@ export default function ScannerPickListsMode({ onBack }) {
                   const status = pickStatus(d);
                   const itemCount = (d.items || '').split(/\n|,(?=\s)/).filter(x => x.trim()).length || 0;
                   return (
-                    <div key={d.id} className="insight-card rounded-2xl p-4 space-y-3">
+                    <div key={d.id} className="hub-glass rounded-2xl p-4 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">

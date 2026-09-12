@@ -523,7 +523,7 @@ export default function StaffDashboard() {
   if (!staff) {
     return (
       <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
-        <div className="text-center max-w-sm insight-card rounded-3xl p-8">
+        <div className="text-center max-w-sm hub-glass rounded-3xl p-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center mx-auto mb-4">
             <HardHat className="w-8 h-8 text-slate-400" />
           </div>
@@ -769,7 +769,7 @@ export default function StaffDashboard() {
           {assignmentsLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="insight-card rounded-3xl p-5">
+                <div key={i} className="hub-glass rounded-3xl p-5">
                   <Skeleton className="h-1.5 w-full mb-4 rounded-full" />
                   <Skeleton className="h-4 w-1/3 mb-3" />
                   <SkeletonText lines={3} />
@@ -777,18 +777,18 @@ export default function StaffDashboard() {
               ))}
             </div>
           ) : scheduleLocked ? (
-            <div className="insight-card rounded-3xl">
+            <div className="hub-glass rounded-3xl">
               <EmptyState icon={CalendarClock} title="New schedule on the way" message="Your manager is preparing your new rota. You'll get it by email once it's ready." />
             </div>
           ) : visibleAssignments.length === 0 ? (
-            <div className="insight-card rounded-3xl">
+            <div className="hub-glass rounded-3xl">
               <EmptyState icon={CalendarDays} title="No shifts scheduled" message="Check back later — your manager will assign you to upcoming jobs." />
             </div>
           ) : todaysSorted.length === 0 ? (() => {
             // No jobs today — show a countdown to the next upcoming shift
             if (upcomingAssignments.length === 0) {
               return (
-                <div className="insight-card rounded-3xl">
+                <div className="hub-glass rounded-3xl">
                   <EmptyState icon={CalendarDays} title="No jobs today" message="Check back later — your manager will assign you to upcoming jobs." />
                 </div>
               );
@@ -799,7 +799,7 @@ export default function StaffDashboard() {
             const daysUntil = Math.ceil((nextDate - new Date(new Date().toDateString())) / (1000 * 60 * 60 * 24));
             const label = daysUntil === 0 ? 'Later today' : daysUntil === 1 ? 'Tomorrow' : `In ${daysUntil} days`;
             return (
-              <div className="insight-card rounded-3xl p-5 text-center">
+              <div className="hub-glass rounded-3xl p-5 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-3">
                   <CalendarClock className="w-7 h-7 text-[#2E5A1A]" strokeWidth={2.5} />
                 </div>
@@ -902,7 +902,7 @@ export default function StaffDashboard() {
           {assignmentsLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="insight-card rounded-3xl p-5">
+                <div key={i} className="hub-glass rounded-3xl p-5">
                   <Skeleton className="h-1.5 w-full mb-4 rounded-full" />
                   <Skeleton className="h-4 w-1/3 mb-3" />
                   <SkeletonText lines={3} />
@@ -910,7 +910,7 @@ export default function StaffDashboard() {
               ))}
             </div>
           ) : visibleAssignments.length === 0 ? (
-            <div className="insight-card rounded-3xl">
+            <div className="hub-glass rounded-3xl">
               <EmptyState icon={CalendarDays} title="No shifts scheduled" message="Check back later — your manager will assign you to upcoming jobs." />
             </div>
           ) : (
@@ -970,7 +970,7 @@ export default function StaffDashboard() {
             </div>
 
             {/* Self-Service Hub — holiday/expense/payslip requests, shift swap, messages */}
-            <div className="insight-card rounded-2xl p-4">
+            <div className="hub-glass rounded-2xl p-4">
             <h3 className="text-sm font-extrabold text-slate-900 mb-1">Self-Service & Comms</h3>
             <p className="text-xs text-slate-500 mb-3">Request time off, swap shifts, message your crew</p>
             <SelfServiceHub
@@ -987,7 +987,7 @@ export default function StaffDashboard() {
             </div>
 
             {/* Live Crew Map — where everyone is today */}
-            <div className="insight-card rounded-2xl p-4">
+            <div className="hub-glass rounded-2xl p-4">
             <h3 className="text-sm font-extrabold text-slate-900 mb-1">Crew Map — Today</h3>
             <p className="text-xs text-slate-500 mb-3">See where your crew is deployed right now</p>
             <LiveCrewMap

@@ -145,7 +145,7 @@ export default function ReadinessManager() {
       />
 
       {/* ─── Explainer ─── */}
-      <div className="mb-4 insight-card rounded-2xl p-4">
+      <div className="mb-4 hub-glass rounded-2xl p-4">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
             <Info className="w-5 h-5 text-blue-600" />
@@ -189,7 +189,7 @@ export default function ReadinessManager() {
           const hasFeatures = features.length > 0;
 
           return (
-            <div key={hubId} className="insight-card rounded-2xl overflow-hidden">
+            <div key={hubId} className="hub-glass rounded-2xl overflow-hidden">
               {/* Hub header row */}
               <div className="flex items-center gap-3 px-4 py-3">
                 <button
@@ -263,7 +263,7 @@ export default function ReadinessManager() {
       </div>
 
       {/* Legend */}
-      <div className="mt-5 insight-card rounded-2xl p-4">
+      <div className="mt-5 hub-glass rounded-2xl p-4">
         <p className="text-xs font-bold text-slate-600 uppercase tracking-wide mb-3">What each state means & what to do</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
@@ -326,7 +326,7 @@ function NeedsAttentionCard({ states, integrationStatus }) {
   }
 
   return (
-    <div className="mb-4 insight-card rounded-2xl p-4">
+    <div className="mb-4 hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
           <AlertCircle className="w-4 h-4 text-amber-600" />

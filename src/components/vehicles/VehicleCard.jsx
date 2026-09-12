@@ -35,7 +35,7 @@ export default function VehicleCard({ vehicle, staff, team, onClick }) {
   const teamName = team?.find(t => t.id === vehicle.team_id)?.name;
 
   return (
-    <button onClick={() => onClick(vehicle)} className={`insight-card rounded-xl p-4 text-left border-l-4 ${meta.tone} w-full`}>
+    <button onClick={() => onClick(vehicle)} className={`hub-glass rounded-xl p-4 text-left border-l-4 ${meta.tone} w-full`}>
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className={`w-11 h-11 rounded-xl ${meta.grad} flex items-center justify-center flex-shrink-0 shadow-sm`}>

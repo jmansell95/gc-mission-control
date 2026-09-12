@@ -125,7 +125,7 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
       </div>
 
       {/* Progress bar */}
-      <div className="insight-card rounded-2xl p-3.5">
+      <div className="hub-glass rounded-2xl p-3.5">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <ClipboardCheck className="w-4 h-4 text-[#2E5A1A]" />
@@ -152,7 +152,7 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
           return (
             <div
               key={item.id}
-              className={`insight-card rounded-2xl p-3.5 transition ${isChecked ? 'bg-emerald-50/40 border-emerald-200' : ''}`}
+              className={`hub-glass rounded-2xl p-3.5 transition ${isChecked ? 'bg-emerald-50/40 border-emerald-200' : ''}`}
             >
               <div className="flex items-start gap-3">
                 <button

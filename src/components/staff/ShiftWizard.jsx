@@ -502,7 +502,7 @@ export default function ShiftWizard({
                   )}
                   {step === 'briefing' && previewMode && (
                     <div className="px-5 py-8 space-y-4">
-                      <div className="insight-card rounded-2xl p-5 text-center">
+                      <div className="hub-glass rounded-2xl p-5 text-center">
                         <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-3">
                           <ShieldCheck className="w-7 h-7 text-amber-600" />
                         </div>
@@ -515,7 +515,7 @@ export default function ShiftWizard({
                   )}
                   {step === 'end_of_shift' && previewMode && (
                     <div className="px-5 py-8 space-y-4">
-                      <div className="insight-card rounded-2xl p-5 text-center">
+                      <div className="hub-glass rounded-2xl p-5 text-center">
                         <div className="w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-3">
                           <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                         </div>

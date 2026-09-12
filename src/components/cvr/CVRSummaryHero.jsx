@@ -23,7 +23,7 @@ export default function CVRSummaryHero({ cvr }) {
   return (
     <div className="space-y-3">
       {/* P&L Hero Banner */}
-      <div className={`relative rounded-2xl overflow-hidden insight-card ${isProfit ? 'border-emerald-200' : 'border-rose-200'}`}>
+      <div className={`relative rounded-2xl overflow-hidden hub-glass ${isProfit ? 'border-emerald-200' : 'border-rose-200'}`}>
         <div className={`absolute inset-0 ${isProfit ? 'bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50' : 'bg-gradient-to-br from-rose-50 via-white to-rose-50/50'}`} />
         <div className="relative p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -83,7 +83,7 @@ export default function CVRSummaryHero({ cvr }) {
       </div>
 
       {/* Timeline info bar */}
-      <div className="insight-card rounded-2xl p-3 flex items-center gap-4 flex-wrap text-xs">
+      <div className="hub-glass rounded-2xl p-3 flex items-center gap-4 flex-wrap text-xs">
         <div className="flex items-center gap-1.5 text-slate-600">
           <Calendar className="w-3.5 h-3.5 text-slate-400" />
           <span className="font-medium">{cvr.project_start || '—'}</span>
@@ -108,7 +108,7 @@ export default function CVRSummaryHero({ cvr }) {
 
 function StatTile({ icon: Icon, label, value, subValue, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className="flex items-start justify-between mb-1.5">
         <div className={`w-9 h-9 rounded-lg ${gradient} flex items-center justify-center flex-shrink-0`}>
           <Icon className="w-4 h-4 text-white" />

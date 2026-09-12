@@ -521,7 +521,7 @@ export default function AssetScannerPage() {
               </div>
 
               {/* Hero scan card — focal point with integrated direction toggle */}
-              <div className="relative rounded-3xl overflow-hidden insight-card">
+              <div className="relative rounded-3xl overflow-hidden hub-glass">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#2E5A1A] via-[#3a7a22] to-[#1c4a12]" />
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 30% 20%, rgba(141,198,63,0.4) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(16,185,129,0.3) 0%, transparent 50%)' }} />
                 <div className="relative p-6 flex flex-col items-center text-center">

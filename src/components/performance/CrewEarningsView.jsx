@@ -42,7 +42,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -50,7 +50,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
 
   if (!data?.crews || data.crews.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+      <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
           <Users className="w-7 h-7 text-slate-300" />
         </div>
@@ -88,7 +88,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
         {crews.map((crew, i) => {
           const isOpen = expanded.has(crew.team_id);
           return (
-            <div key={crew.team_id} className="insight-card rounded-2xl overflow-hidden">
+            <div key={crew.team_id} className="hub-glass rounded-2xl overflow-hidden">
               <button
                 onClick={() => toggle(crew.team_id)}
                 className="w-full p-3.5 flex items-center justify-between gap-2 text-left"
@@ -136,7 +136,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
       </div>
 
       {/* Desktop table */}
-      <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+      <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-slate-50/80">
@@ -218,7 +218,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
 
 function KPICard({ icon: Icon, label, value, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className={`relative w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
         <Icon className="w-4 h-4 text-white" />

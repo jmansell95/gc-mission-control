@@ -5,7 +5,7 @@ import WidgetEmptyState from './WidgetEmptyState';
 
 /**
  * WidgetShell — modernized wrapper for dashboard widgets.
- * Uses the new insight-card style system with layered shadows and gradient header.
+ * Uses the new hub-glass style system with layered shadows and gradient header.
  *
  * Built-in state handling: pass `isLoading`, `error`, `isEmpty` (with optional
  * `emptyIcon`, `emptyTitle`, `emptyMessage`, `onRetry`, `loadingVariant`,
@@ -34,7 +34,7 @@ export default function WidgetShell({
   loadingRows = 3,
 }) {
   return (
-    <div className="insight-card relative rounded-2xl overflow-hidden h-full flex flex-col min-h-[200px]">
+    <div className="hub-glass relative rounded-2xl overflow-hidden h-full flex flex-col min-h-[200px]">
       <div className="px-4 sm:px-5 py-4 bg-gradient-to-r from-slate-50/90 via-white to-white border-b border-slate-100/80 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           {Icon && (

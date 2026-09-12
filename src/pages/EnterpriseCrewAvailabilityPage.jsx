@@ -67,7 +67,7 @@ function CrewAvailabilityContent() {
   return (
     <div className="space-y-3">
       {/* Sticky controls */}
-      <div className="insight-card rounded-2xl p-3 sm:p-4 sticky top-2 z-20">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4 sticky top-2 z-20">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition">
@@ -114,7 +114,7 @@ function CrewAvailabilityContent() {
           <div className="w-8 h-8 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-400">No crew members match your filters.</p>
         </div>
       ) : (
@@ -125,7 +125,7 @@ function CrewAvailabilityContent() {
         </div>
       )}
 
-      <div className="insight-card rounded-2xl p-3 sm:p-4">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-wrap gap-3">
           {HEATMAP_LEGEND.map(l => (
             <div key={l.label} className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -157,7 +157,7 @@ function CrewCard({ staff, divMap, days, dayStrs, getCellStatus }) {
   const divName = div?.name || 'Unassigned';
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="flex items-center gap-3 p-3 sm:p-4">
         <span className="w-2.5 h-12 rounded-full flex-shrink-0" style={{ background: divColor }} />
         <div className="flex-1 min-w-0">

@@ -65,7 +65,7 @@ export default function WorkloadOwnershipPanel() {
   if (activeJobs.length === 0) return null;
 
   return (
-    <div className="mb-5 insight-card rounded-2xl p-4">
+    <div className="mb-5 hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm">
           <Network className="w-4 h-4 text-white" />

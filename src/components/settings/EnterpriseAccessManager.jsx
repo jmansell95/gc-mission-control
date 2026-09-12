@@ -152,7 +152,7 @@ export default function EnterpriseAccessManager({ profile }) {
   return (
     <div className="space-y-4">
       {/* Intro */}
-      <div className="insight-card rounded-2xl p-4 flex items-start gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
           <Crown className="w-5 h-5 text-white" />
         </div>
@@ -189,7 +189,7 @@ export default function EnterpriseAccessManager({ profile }) {
       {/* Two-pane layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* ─── LEFT: Group Explorer ─── */}
-        <div className="lg:col-span-4 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-14rem)] lg:overflow-y-auto">
+        <div className="lg:col-span-4 hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-14rem)] lg:overflow-y-auto">
           {/* Search + New */}
           <div className="flex items-center gap-2 mb-3">
             <div className="relative flex-1">
@@ -276,7 +276,7 @@ export default function EnterpriseAccessManager({ profile }) {
               onDelete={() => handleDelete(selectedGroup)}
             />
           ) : (
-            <div className="insight-card rounded-2xl p-12 text-center">
+            <div className="hub-glass rounded-2xl p-12 text-center">
               <KeyRound className="w-10 h-10 text-slate-300 mx-auto mb-3" />
               <p className="text-sm font-semibold text-slate-600">Select a group to manage its access</p>
               <p className="text-xs text-slate-400 mt-1">Choose a permission group from the list on the left</p>

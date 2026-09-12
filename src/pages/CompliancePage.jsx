@@ -112,7 +112,7 @@ export default function CompliancePage() {
         {profileLoading ? (
           <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin"></div>
         ) : (
-          <div className="insight-card rounded-3xl p-8 max-w-md text-center">
+          <div className="hub-glass rounded-3xl p-8 max-w-md text-center">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Lock className="w-8 h-8 text-white" />
             </div>

@@ -173,7 +173,7 @@ export default function BusinessUnitPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06, duration: 0.35, ease: 'easeOut' }}
                 onClick={() => enterDivision(d)}
-                className="insight-card relative rounded-2xl overflow-hidden text-left group w-full"
+                className="hub-glass relative rounded-2xl overflow-hidden text-left group w-full"
               >
                 {/* Color accent bar */}
                 <div className="h-1.5" style={{ background: `linear-gradient(to right, ${dColor}, ${dColor}88)` }} />

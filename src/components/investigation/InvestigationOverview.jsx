@@ -9,7 +9,7 @@ import { Briefcase, Layers, Clock, AlertTriangle, CheckCircle2, ChevronRight } f
 export default function InvestigationOverview({ groups, jobMap, onSelectJob }) {
   if (groups.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mx-auto mb-4">
           <Briefcase className="w-8 h-8 text-slate-400" />
         </div>
@@ -25,7 +25,7 @@ export default function InvestigationOverview({ groups, jobMap, onSelectJob }) {
         <button
           key={g.key}
           onClick={() => onSelectJob(g.key)}
-          className="insight-card rounded-2xl p-4 text-left hover:shadow-lg transition group"
+          className="hub-glass rounded-2xl p-4 text-left hover:shadow-lg transition group"
         >
           <div className="flex items-start gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">

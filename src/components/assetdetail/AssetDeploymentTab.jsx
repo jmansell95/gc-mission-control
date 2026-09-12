@@ -40,7 +40,7 @@ export default function AssetDeploymentTab({ asset, assignments = [], jobs = [],
           <MapPin className="w-4 h-4 text-emerald-600" /> Active ({active.length})
         </h3>
         {active.length === 0 ? (
-          <div className="insight-card rounded-2xl">
+          <div className="hub-glass rounded-2xl">
             <EmptyState icon={MapPin} title="Not deployed" message="This asset is in the yard and available for assignment." />
           </div>
         ) : (
@@ -49,7 +49,7 @@ export default function AssetDeploymentTab({ asset, assignments = [], jobs = [],
               const job = jobById[a.job_id] || { name: a.job_name || 'Unknown Job', location: '' };
               const sm = STATUS_META[a.status] || STATUS_META.assigned;
               return (
-                <div key={a.id} className="insight-card rounded-xl p-3 flex items-center gap-3">
+                <div key={a.id} className="hub-glass rounded-xl p-3 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <Briefcase className="w-5 h-5 text-blue-600" />
                   </div>

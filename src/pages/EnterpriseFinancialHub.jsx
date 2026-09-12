@@ -66,7 +66,7 @@ export default function EnterpriseFinancialHub() {
       )}
 
       {/* Cash Flow */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={Wallet} title="Cash Flow Overview" subtitle="Projected cash position and outstanding receivables" gradient="from-emerald-500 to-teal-600" />
         <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
           <div className="bg-emerald-50 rounded-xl sm:rounded-2xl p-3 sm:p-4">
@@ -83,7 +83,7 @@ export default function EnterpriseFinancialHub() {
       </div>
 
       {/* Per-Stream Financials */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={BarChart3} title="Financials by Stream" subtitle="Revenue and outstanding per business stream" gradient="from-violet-500 to-purple-600" />
         {isLoading ? (
           <WidgetLoadingState rows={3} variant="list" />

@@ -85,7 +85,7 @@ export default function DepreciationScheduleTable({ asset }) {
 
   if (!asset.acquisition_cost || !asset.acquisition_date) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <TrendingDown className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm text-slate-400">No depreciation data — set acquisition cost and date to begin.</p>
         <button onClick={() => setEditing(true)} className="mt-3 inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold">
@@ -98,7 +98,7 @@ export default function DepreciationScheduleTable({ asset }) {
   const meta = METHOD_META[preview.method];
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">

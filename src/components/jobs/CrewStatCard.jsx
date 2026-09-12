@@ -38,7 +38,7 @@ export default function CrewStatCard({ member, rotas, rigs, allStaff, primaryTyp
       variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}
       onClick={onClick}
       type="button"
-      className="insight-card rounded-2xl p-4 text-left w-full hover:shadow-lg active:scale-[0.98] transition group"
+      className="hub-glass rounded-2xl p-4 text-left w-full hover:shadow-lg active:scale-[0.98] transition group"
     >
       {/* Header — avatar, name, role, worker-type badge */}
       <div className="flex items-start gap-3 mb-3">

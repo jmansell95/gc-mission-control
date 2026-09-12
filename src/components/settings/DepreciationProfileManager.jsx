@@ -133,7 +133,7 @@ export default function DepreciationProfileManager() {
           {ASSET_TYPES.map(at => {
             const typeProfiles = byType(at.id);
             return (
-              <div key={at.id} className="insight-card rounded-2xl p-4">
+              <div key={at.id} className="hub-glass rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-bold text-slate-800">{at.label}</h4>
                   <span className="text-[10px] text-slate-400">{typeProfiles.length} profile{typeProfiles.length !== 1 ? 's' : ''}</span>

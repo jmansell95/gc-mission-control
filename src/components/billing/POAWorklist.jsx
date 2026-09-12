@@ -145,35 +145,35 @@ export default function POAWorklist() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <FileQuestion className="w-3.5 h-3.5 text-amber-500" />
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Total POA</p>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-slate-900 tabular-nums">{stats.total}</p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <Lock className="w-3.5 h-3.5 text-emerald-500" />
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Locked</p>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-emerald-700 tabular-nums">{stats.locked}</p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <AlertCircle className="w-3.5 h-3.5 text-red-500" />
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Outstanding</p>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-red-600 tabular-nums">{stats.unlocked}</p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <PoundSterling className="w-3.5 h-3.5 text-blue-500" />
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Value Stamped</p>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-blue-700 tabular-nums">{fmt(stats.lockedValue)}</p>
         </div>
-        <div className={`insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4 ${(stats.expired > 0 || stats.expiringSoon > 0) ? 'ring-2 ring-amber-200' : ''}`}>
+        <div className={`hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4 ${(stats.expired > 0 || stats.expiringSoon > 0) ? 'ring-2 ring-amber-200' : ''}`}>
           <div className="flex items-center gap-1.5 mb-1">
             <AlertTriangle className={`w-3.5 h-3.5 ${stats.expired > 0 ? 'text-red-500' : 'text-amber-500'}`} />
             <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Expiring ≤30d / Expired</p>
@@ -187,7 +187,7 @@ export default function POAWorklist() {
       </div>
 
       {/* Filters */}
-      <div className="insight-card rounded-2xl p-3 sm:p-4 space-y-2.5 sm:space-y-3">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4 space-y-2.5 sm:space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -230,7 +230,7 @@ export default function POAWorklist() {
       </div>
 
       {/* POA Items List */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-slate-300" />

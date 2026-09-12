@@ -9,7 +9,7 @@ import { Lock, ArrowLeft } from 'lucide-react';
 export default function ComingSoonLock({ label, onBack }) {
   return (
     <div className="max-w-lg mx-auto px-4 py-10">
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
           <Lock className="w-8 h-8 text-slate-400" />
         </div>

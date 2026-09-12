@@ -116,7 +116,7 @@ export default function HireManagementTab() {
 
       {/* Cards */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Package className="w-12 h-12 text-slate-200 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No active hires</p>
           <p className="text-xs text-slate-400 mt-1">Hired equipment will appear here once added to jobs.</p>
@@ -124,7 +124,7 @@ export default function HireManagementTab() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {filtered.map(item => (
-            <div key={item.id} className="insight-card rounded-2xl p-4 relative overflow-hidden">
+            <div key={item.id} className="hub-glass rounded-2xl p-4 relative overflow-hidden">
               {/* Status stripe */}
               <div className={`absolute top-0 left-0 right-0 h-1 ${item.is_overdue ? 'bg-rose-500' : item.days_remaining !== null && item.days_remaining <= 3 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
 
@@ -188,7 +188,7 @@ export default function HireManagementTab() {
 
 function KPICard({ icon: Icon, label, value, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className={`relative w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
         <Icon className="w-4 h-4 text-white" />

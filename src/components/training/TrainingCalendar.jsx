@@ -77,7 +77,7 @@ export default function TrainingCalendar({ courses, bookings, staff, teams }) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Calendar grid */}
-        <div className="lg:col-span-2 insight-card rounded-2xl p-3">
+        <div className="lg:col-span-2 hub-glass rounded-2xl p-3">
           {/* Weekday headers */}
           <div className="grid grid-cols-7 gap-1 mb-1">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
@@ -123,7 +123,7 @@ export default function TrainingCalendar({ courses, bookings, staff, teams }) {
         </div>
 
         {/* Selected day details */}
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-4 h-4 text-[#2E5A1A]" />
             <h4 className="text-sm font-bold text-slate-900">

@@ -106,7 +106,7 @@ export default function PulseRibbon({ onNavigate }) {
       </div>
 
       {items.length === 0 ? (
-        <motion.div variants={itemAnim} className="insight-card rounded-2xl p-5 flex items-center gap-3.5">
+        <motion.div variants={itemAnim} className="hub-glass rounded-2xl p-5 flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-md icon-tile-glow">
             <CheckCircle2 className="w-6 h-6 text-white" />
           </div>
@@ -123,7 +123,7 @@ export default function PulseRibbon({ onNavigate }) {
             return (
               <motion.button key={it.key} variants={itemAnim}
                 onClick={() => onNavigate(it.nav)}
-                className="insight-card rounded-2xl p-4 flex items-center gap-3.5 text-left min-w-[80%] sm:min-w-0 snap-start flex-shrink-0 sm:flex-shrink group">
+                className="hub-glass rounded-2xl p-4 flex items-center gap-3.5 text-left min-w-[80%] sm:min-w-0 snap-start flex-shrink-0 sm:flex-shrink group">
                 <div className={`relative w-11 h-11 rounded-xl bg-gradient-to-br ${t.gradient} flex items-center justify-center flex-shrink-0 shadow-md icon-tile-glow`}>
                   <Icon className="w-5 h-5 text-white" />
                   {it.urgent && (

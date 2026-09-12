@@ -212,7 +212,7 @@ export default function BackupRestoreHub() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-start gap-3">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 flex items-center justify-center shadow-md flex-shrink-0">
             <Database className="w-6 h-6 text-white" />
@@ -232,7 +232,7 @@ export default function BackupRestoreHub() {
 
       {/* Stats strip */}
       <div className="grid grid-cols-3 gap-2.5">
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
             <History className="w-4 h-4 text-blue-600" />
           </div>
@@ -241,7 +241,7 @@ export default function BackupRestoreHub() {
             <p className="text-[10px] text-slate-400 font-bold uppercase">Snapshots</p>
           </div>
         </div>
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
             <FileJson className="w-4 h-4 text-emerald-600" />
           </div>
@@ -250,7 +250,7 @@ export default function BackupRestoreHub() {
             <p className="text-[10px] text-slate-400 font-bold uppercase">Records</p>
           </div>
         </div>
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-2.5">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
             <Database className="w-4 h-4 text-indigo-600" />
           </div>
@@ -262,7 +262,7 @@ export default function BackupRestoreHub() {
       </div>
 
       {/* Quick backup buttons per division */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2.5">Quick Backup</p>
         <div className="flex flex-wrap gap-2">
           {divisions.map(d => (
@@ -281,7 +281,7 @@ export default function BackupRestoreHub() {
       </div>
 
       {/* Scheduled Backups */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
@@ -515,7 +515,7 @@ export default function BackupRestoreHub() {
       {isLoading ? (
         <div className="h-40 animate-pulse bg-slate-100 rounded-2xl" />
       ) : filteredSnapshots.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Database className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-600">No snapshots yet</p>
           <p className="text-xs text-slate-400 mt-1">Create a backup using the Quick Backup buttons above.</p>
@@ -531,7 +531,7 @@ export default function BackupRestoreHub() {
             const isRestoring = restoring === s.id;
 
             return (
-              <div key={s.id} className="insight-card rounded-2xl p-4">
+              <div key={s.id} className="hub-glass rounded-2xl p-4">
                 <div className="flex items-start gap-3">
                   {/* Division color dot */}
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm" style={{ background: `linear-gradient(135deg, ${div?.color || '#2E5A1A'}, ${div?.color || '#2E5A1A'}cc)` }}>

@@ -296,7 +296,7 @@ export default function LiveCrewTab() {
       </div>
 
       {/* ── Controls bar ── */}
-      <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-3">
+      <div className="hub-glass rounded-2xl p-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
           <div className="w-10 h-10 rounded-xl stat-gradient-brand flex items-center justify-center icon-tile-glow">
             <Users className="w-5 h-5 text-white" />
@@ -350,7 +350,7 @@ export default function LiveCrewTab() {
       {/* ── Split-pane: map + sidebar ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* Map */}
-        <div className="lg:col-span-2 insight-card rounded-2xl overflow-hidden">
+        <div className="lg:col-span-2 hub-glass rounded-2xl overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center" style={{ height: 600 }}>
               <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
@@ -414,7 +414,7 @@ export default function LiveCrewTab() {
 
         {/* Sidebar — crew list */}
         <div className="lg:col-span-1 space-y-3">
-          <div className="insight-card rounded-2xl overflow-hidden">
+          <div className="hub-glass rounded-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Users className="w-4 h-4 text-[#2E5A1A]" /> Crew ({filteredCrew.length})</p>
               <span className="text-[10px] text-slate-400 flex items-center gap-1"><Filter className="w-3 h-3" /> {filterStatus !== 'all' ? filterStatus : 'all'}</span>

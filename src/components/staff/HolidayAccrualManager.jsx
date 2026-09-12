@@ -115,7 +115,7 @@ export default function HolidayAccrualManager() {
 
       {/* Summary dashboard band */}
       {!isLoading && rows.length > 0 && (
-        <div className="insight-card rounded-2xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="hub-glass rounded-2xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-center gap-2 sm:pr-4 sm:border-r sm:border-slate-100">
             <div className="w-10 h-10 rounded-xl stat-gradient-brand flex items-center justify-center">
               <Users className="w-5 h-5 text-white" />
@@ -148,7 +148,7 @@ export default function HolidayAccrualManager() {
           <p className="text-xs text-slate-400 mt-1">Click "Recalculate All" to generate accrual records for direct employees.</p>
         </div>
       ) : (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           {/* Sortable header row */}
           <div className="hidden md:grid grid-cols-12 gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
             <div className="md:col-span-4">

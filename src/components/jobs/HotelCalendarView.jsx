@@ -34,7 +34,7 @@ export default function HotelCalendarView({ bookings }) {
   if (bookings.length === 0) return null;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
         <Hotel className="w-4 h-4 text-[#2E5A1A]" />
         <h3 className="text-sm font-semibold text-slate-900">Booking Calendar</h3>

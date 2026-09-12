@@ -188,7 +188,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
 
   if (permittedDivisions.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-3" />
         <p className="text-sm font-semibold text-slate-700">No divisions available</p>
         <p className="text-xs text-slate-400 mt-1">Create a business stream first in the Business Streams tab to configure lockdown rules.</p>
@@ -201,7 +201,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
     return (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Matrix Editor */}
-        <div className="lg:col-span-7 insight-card rounded-2xl p-4">
+        <div className="lg:col-span-7 hub-glass rounded-2xl p-4">
           {selectedGroup && selectedDivision ? (
             <>
               {/* Division context */}
@@ -344,7 +344,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
         </div>
 
         {/* Live Preview */}
-        <div className="lg:col-span-5 insight-card rounded-2xl p-4">
+        <div className="lg:col-span-5 hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <Eye className="w-4 h-4 text-blue-500" />
             <h3 className="text-sm font-bold text-slate-900">Live Preview</h3>
@@ -416,7 +416,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
         {/* PANE 1: Hierarchy Selector */}
-        <div className={'insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto ' + (fixedGroup ? 'lg:col-span-4' : 'lg:col-span-3')}>
+        <div className={'hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto ' + (fixedGroup ? 'lg:col-span-4' : 'lg:col-span-3')}>
           <div className="flex items-center gap-2 mb-3">
             <Layers className="w-4 h-4 text-[#2E5A1A]" />
             <h3 className="text-sm font-bold text-slate-900">{fixedGroup ? 'Business Streams' : 'Hierarchy'}</h3>
@@ -494,7 +494,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
         </div>
 
         {/* PANE 2: Matrix Editor */}
-        <div className={'insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto ' + (fixedGroup ? 'lg:col-span-5' : 'lg:col-span-6')}>
+        <div className={'hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto ' + (fixedGroup ? 'lg:col-span-5' : 'lg:col-span-6')}>
           {selectedGroup && selectedDivision ? (
             <>
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
@@ -624,7 +624,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
         </div>
 
         {/* PANE 3: Live Preview */}
-        <div className="lg:col-span-3 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto">
+        <div className="lg:col-span-3 hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto">
           <div className="flex items-center gap-2 mb-3">
             <Eye className="w-4 h-4 text-blue-500" />
             <h3 className="text-sm font-bold text-slate-900">Live Preview</h3>

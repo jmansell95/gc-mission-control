@@ -92,7 +92,7 @@ export default function ManagerTeamDashboard() {
     return (
       <div className="max-w-4xl mx-auto px-5 py-12">
         <PageHeader icon={Users} title="My Team" subtitle="Your direct reports at a glance" />
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <p className="text-sm font-semibold text-slate-600">No direct reports</p>
           <p className="text-xs text-slate-400 mt-1">Staff assigned to you as their manager will appear here with their live status.</p>
@@ -118,7 +118,7 @@ export default function ManagerTeamDashboard() {
       {/* Staff cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {staffCards.map(s => (
-          <div key={s.id} className="insight-card rounded-2xl p-4 hover:shadow-lg transition cursor-pointer" onClick={() => setSelectedStaffId(selectedStaffId === s.id ? null : s.id)}>
+          <div key={s.id} className="hub-glass rounded-2xl p-4 hover:shadow-lg transition cursor-pointer" onClick={() => setSelectedStaffId(selectedStaffId === s.id ? null : s.id)}>
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-sm font-bold text-slate-600">

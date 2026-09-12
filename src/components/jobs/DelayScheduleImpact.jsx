@@ -13,7 +13,7 @@ export default function DelayScheduleImpact({ job, totalApprovedDays }) {
   const extendedEnd = addDays(originalEnd, totalApprovedDays);
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
           <CalendarClock className="w-4 h-4 text-amber-600" />

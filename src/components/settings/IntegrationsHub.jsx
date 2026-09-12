@@ -168,19 +168,19 @@ export default function IntegrationsHub({ onNavigate }) {
 
       {/* Summary tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
+        <div className="hub-glass rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div>
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{configuredCount}</p><p className="text-[10px] text-slate-500 font-semibold">Configured</p></div>
         </div>
-        <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
+        <div className="hub-glass rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Link2Off className="w-5 h-5 text-slate-500" /></div>
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{notConfiguredCount}</p><p className="text-[10px] text-slate-500 font-semibold">Not configured</p></div>
         </div>
-        <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
+        <div className="hub-glass rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center"><EyeOff className="w-5 h-5 text-amber-600" /></div>
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{hiddenIds.size}</p><p className="text-[10px] text-slate-500 font-semibold">Hidden</p></div>
         </div>
-        <div className="insight-card rounded-xl p-3 flex items-center gap-2.5">
+        <div className="hub-glass rounded-xl p-3 flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><Webhook className="w-5 h-5 text-blue-600" /></div>
           <div><p className="text-lg font-extrabold text-slate-900 tabular-nums leading-none">{INTEGRATIONS.length}</p><p className="text-[10px] text-slate-500 font-semibold">Total</p></div>
         </div>

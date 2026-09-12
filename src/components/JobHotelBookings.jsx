@@ -145,7 +145,7 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
       )}
 
       {/* Person-centric list (bottom of hybrid layout) — multi-booking rows */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
             <Users className="w-4 h-4 text-[#2E5A1A]" />

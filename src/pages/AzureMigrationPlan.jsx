@@ -62,7 +62,7 @@ function PhaseSection({ index, title, content, isDone, onToggle, defaultOpen }) 
   const Icon = PHASE_ICONS[index] || FileText;
 
   return (
-    <div className={`insight-card rounded-2xl overflow-hidden transition-all ${isDone ? 'opacity-90' : ''}`}>
+    <div className={`hub-glass rounded-2xl overflow-hidden transition-all ${isDone ? 'opacity-90' : ''}`}>
       <button
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left hover:bg-slate-50/50 transition"
@@ -254,7 +254,7 @@ export default function AzureMigrationPlan() {
             <>
             {/* Intro */}
             {intro && (
-              <div className="insight-card rounded-2xl p-5 sm:p-7">
+              <div className="hub-glass rounded-2xl p-5 sm:p-7">
                 <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-2xl prose-h1:text-slate-900 prose-h2:text-lg prose-h2:text-[#2E5A1A] prose-p:text-[15px] prose-p:leading-relaxed prose-strong:text-slate-900 prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-emerald-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-th:border prose-th:border-slate-200 prose-td:border prose-td:border-slate-200">
                   <ReactMarkdown
                     components={{
@@ -282,7 +282,7 @@ export default function AzureMigrationPlan() {
             ))}
 
             {/* Footer note */}
-            <div className="insight-card rounded-2xl p-5 flex items-start gap-3 bg-emerald-50/40 border-emerald-200/60">
+            <div className="hub-glass rounded-2xl p-5 flex items-start gap-3 bg-emerald-50/40 border-emerald-200/60">
               <ListChecks className="w-5 h-5 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
               <p className="text-sm text-slate-600 leading-relaxed">
                 Your progress is saved on this device. Tick each phase as you complete it —

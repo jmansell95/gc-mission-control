@@ -137,7 +137,7 @@ function SectionTab({ active, onClick, icon: Icon, label, count }) {
 function CertsSection({ details }) {
   if (!details.length) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <IdCard className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No certificates or cards on file</p>
         <p className="text-xs text-slate-400 mt-1">Add compliance items from the People Hub.</p>
@@ -162,7 +162,7 @@ function CertsSection({ details }) {
         const Icon = st.icon;
         const days = complianceDaysUntil(ci.expiry_date);
         return (
-          <div key={ci.id} className="insight-card rounded-2xl p-3.5 flex items-start gap-3">
+          <div key={ci.id} className="hub-glass rounded-2xl p-3.5 flex items-start gap-3">
             <div className={`w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 ${st.color}`}>
               <Icon className="w-4 h-4" />
             </div>
@@ -211,7 +211,7 @@ function TrainingSection({ details, bookings, staffId }) {
 
   if (!details.length && !allBookings.length) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <GraduationCap className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No training categories assigned</p>
         <p className="text-xs text-slate-400 mt-1">Assign training categories from the People Hub.</p>
@@ -227,7 +227,7 @@ function TrainingSection({ details, bookings, staffId }) {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">Required Categories</p>
           <div className="space-y-2">
             {details.map(tc => (
-              <div key={tc.id} className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+              <div key={tc.id} className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   tc.status === 'met' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
                 }`}>
@@ -257,7 +257,7 @@ function TrainingSection({ details, bookings, staffId }) {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">Training History</p>
           <div className="space-y-2">
             {allBookings.map(tb => (
-              <div key={tb.id} className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+              <div key={tb.id} className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   tb.status === 'passed' ? 'bg-emerald-100 text-emerald-600' :
                   tb.status === 'failed' ? 'bg-rose-100 text-rose-600' :
@@ -298,7 +298,7 @@ function TrainingSection({ details, bookings, staffId }) {
 function MittiSection({ details }) {
   if (!details.length) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <ClipboardCheck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No Mitti safety checks recorded</p>
         <p className="text-xs text-slate-400 mt-1">Audits from Mitti/SafetyCulture will appear here once synced.</p>
@@ -326,7 +326,7 @@ function MittiSection({ details }) {
         const Icon = st.icon;
         const CatIcon = categoryIcons[a.audit_category] || ClipboardCheck;
         return (
-          <div key={a.id} className="insight-card rounded-2xl p-3.5 flex items-start gap-3">
+          <div key={a.id} className="hub-glass rounded-2xl p-3.5 flex items-start gap-3">
             <div className={`w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 ${st.color}`}>
               <CatIcon className="w-4 h-4" />
             </div>

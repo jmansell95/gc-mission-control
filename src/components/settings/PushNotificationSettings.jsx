@@ -90,7 +90,7 @@ export default function PushNotificationSettings() {
       />
 
       {/* Permission status */}
-      <div className="insight-card rounded-2xl p-5 mb-4">
+      <div className="hub-glass rounded-2xl p-5 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${permission === 'granted' ? 'stat-gradient-emerald' : 'bg-slate-100'}`}>
@@ -123,7 +123,7 @@ export default function PushNotificationSettings() {
 
       {/* Notification preferences */}
       {permission === 'granted' && (
-        <div className="insight-card rounded-2xl p-5">
+        <div className="hub-glass rounded-2xl p-5">
           <h3 className="text-sm font-bold text-slate-800 mb-3">Notification Preferences</h3>
           <div className="space-y-2">
             {NOTIFICATION_TYPES.map(type => (
@@ -146,7 +146,7 @@ export default function PushNotificationSettings() {
       )}
 
       {/* Info */}
-      <div className="insight-card rounded-2xl p-4 mt-4 bg-slate-50/50">
+      <div className="hub-glass rounded-2xl p-4 mt-4 bg-slate-50/50">
         <p className="text-xs text-slate-500 leading-relaxed">
           <strong>How it works:</strong> Push notifications use your browser's built-in Notification API.
           When enabled, the app can send you real-time alerts even when the tab is in the background.

@@ -154,7 +154,7 @@ export default function DelayLogManager({ job }) {
         {stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="insight-card rounded-2xl p-3 flex items-center gap-2.5">
+            <div key={i} className="hub-glass rounded-2xl p-3 flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0">
                 <Icon className={`w-4 h-4 ${s.iconColor}`} />
               </div>
@@ -169,7 +169,7 @@ export default function DelayLogManager({ job }) {
 
       {/* Cause chart + schedule impact toggle */}
       {logs.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="w-4 h-4 text-slate-400" />
             <h3 className="text-sm font-semibold text-slate-900">Delay Causes</h3>

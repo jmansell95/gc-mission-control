@@ -104,21 +104,21 @@ export default function AgedDebtorsDashboard() {
     <div className="space-y-3 sm:space-y-4">
       {/* Summary tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <PoundSterling className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Total Outstanding</span>
           </div>
           <p className="text-lg sm:text-xl font-bold text-slate-900 tabular-nums">{gbp(totalOutstanding)}</p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
             <span className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Overdue</span>
           </div>
           <p className="text-lg sm:text-xl font-bold text-rose-600 tabular-nums">{overdueCount}</p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <Clock className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">Avg Days</span>
@@ -129,7 +129,7 @@ export default function AgedDebtorsDashboard() {
               : 0}d
           </p>
         </div>
-        <div className="insight-card rounded-xl sm:rounded-2xl p-3 sm:p-4">
+        <div className="hub-glass rounded-xl sm:rounded-2xl p-3 sm:p-4">
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
             <span className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">90+ Days</span>
@@ -139,7 +139,7 @@ export default function AgedDebtorsDashboard() {
       </div>
 
       {/* Aging waterfall chart */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <h3 className="text-sm font-bold text-slate-900 mb-1">Aging Waterfall</h3>
         <p className="text-[11px] sm:text-xs text-slate-500 mb-3 sm:mb-4">Outstanding debt by age bucket</p>
         <ResponsiveContainer width="100%" height={180}>
@@ -173,7 +173,7 @@ export default function AgedDebtorsDashboard() {
       </div>
 
       {/* Clients with outstanding debt — expandable */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 sm:px-5 py-3.5 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-900">Clients by Outstanding — {byClient.length} clients</h3>
         </div>

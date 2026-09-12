@@ -166,7 +166,7 @@ export default function RewardsManager() {
               const Icon = ICON_MAP[r.icon] || Gift;
               const outOfStock = r.stock_count != null && r.stock_count <= 0;
               return (
-                <div key={r.id} className="insight-card rounded-2xl p-4 flex flex-col">
+                <div key={r.id} className="hub-glass rounded-2xl p-4 flex flex-col">
                   <div className="flex items-start gap-3">
                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <Icon className="w-5 h-5 text-white" />
@@ -198,7 +198,7 @@ export default function RewardsManager() {
           </div>
         )
       ) : (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           {redLoading ? (
             <div className="p-4 space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
           ) : redemptions.length === 0 ? (

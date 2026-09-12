@@ -72,7 +72,7 @@ export default function ClientPortalMultiJobView({ clientId, client }) {
   return (
     <div className="space-y-4">
       {/* Project header */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] flex items-center justify-center">
             <Briefcase className="w-6 h-6 text-white" />
@@ -105,7 +105,7 @@ export default function ClientPortalMultiJobView({ clientId, client }) {
       </div>
 
       {/* Job list */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <h3 className="font-bold text-slate-900 text-sm mb-3">Jobs in this project</h3>
         <div className="space-y-2">
           {jobs.map(job => {
@@ -139,7 +139,7 @@ export default function ClientPortalMultiJobView({ clientId, client }) {
 
       {/* Shared milestones */}
       {milestones.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="font-bold text-slate-900 text-sm mb-3">Shared Milestones</h3>
           <div className="space-y-1.5">
             {milestones.slice(0, 10).map(m => {
@@ -158,7 +158,7 @@ export default function ClientPortalMultiJobView({ clientId, client }) {
 
       {/* Photo timeline */}
       {photos.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="font-bold text-slate-900 text-sm mb-3 flex items-center gap-1.5">
             <FileText className="w-4 h-4 text-slate-400" /> Project Photo Timeline
           </h3>

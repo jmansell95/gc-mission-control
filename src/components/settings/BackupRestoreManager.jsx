@@ -105,7 +105,7 @@ export default function BackupRestoreManager() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Backup */}
-        <div className="insight-card rounded-2xl p-5">
+        <div className="hub-glass rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg stat-gradient-blue flex items-center justify-center">
               <Download className="w-5 h-5 text-white" />
@@ -125,7 +125,7 @@ export default function BackupRestoreManager() {
         </div>
 
         {/* Restore */}
-        <div className="insight-card rounded-2xl p-5">
+        <div className="hub-glass rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg stat-gradient-emerald flex items-center justify-center">
               <Upload className="w-5 h-5 text-white" />
@@ -147,7 +147,7 @@ export default function BackupRestoreManager() {
         </div>
 
         {/* Reset */}
-        <div className="insight-card rounded-2xl p-5 border-rose-200">
+        <div className="hub-glass rounded-2xl p-5 border-rose-200">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg stat-gradient-rose flex items-center justify-center">
               <ShieldAlert className="w-5 h-5 text-white" />

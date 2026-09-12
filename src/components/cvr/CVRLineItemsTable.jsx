@@ -29,7 +29,7 @@ export default function CVRLineItemsTable({ cvr, lineItems }) {
 
   if (!lineItems || lineItems.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-500">No CVR line items yet</p>
         <p className="text-xs text-slate-400 mt-1">Upload a CVR spreadsheet to populate this table</p>
@@ -38,7 +38,7 @@ export default function CVRLineItemsTable({ cvr, lineItems }) {
   }
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-slate-900">CVR Line Items</h3>

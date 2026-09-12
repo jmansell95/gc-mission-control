@@ -122,13 +122,13 @@ export default function ZapierWebhookSettings() {
 
       <div className="space-y-4">
         {webhooks.length === 0 ? (
-          <div className="insight-card rounded-2xl p-8 text-center">
+          <div className="hub-glass rounded-2xl p-8 text-center">
             <Zap className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-slate-600">No webhooks registered</p>
             <p className="text-xs text-slate-400 mt-1">Add a webhook URL from Zapier, Make, or n8n to start receiving events.</p>
           </div>
         ) : webhooks.map((w, idx) => (
-          <div key={idx} className="insight-card rounded-2xl p-5">
+          <div key={idx} className="hub-glass rounded-2xl p-5">
             <div className="flex items-start gap-3 mb-3">
               <div className="w-10 h-10 rounded-lg stat-gradient-violet flex items-center justify-center flex-shrink-0">
                 <Webhook className="w-5 h-5 text-white" />
@@ -174,7 +174,7 @@ export default function ZapierWebhookSettings() {
         ))}
       </div>
 
-      <div className="insight-card rounded-2xl p-4 mt-4 bg-slate-50/50">
+      <div className="hub-glass rounded-2xl p-4 mt-4 bg-slate-50/50">
         <p className="text-xs text-slate-500 leading-relaxed">
           <strong>How it works:</strong> When a system event fires (e.g. a job is created, a timesheet is submitted),
           the backend calls the <code className="text-xs bg-slate-100 px-1 py-0.5 rounded">zapierWebhook</code> function

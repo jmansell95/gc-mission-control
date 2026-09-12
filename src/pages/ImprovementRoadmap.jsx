@@ -505,7 +505,7 @@ export default function ImprovementRoadmap() {
 
       {/* What's Left Summary */}
       <div className="max-w-6xl mx-auto px-5 pt-4">
-        <div className="insight-card rounded-2xl p-4 sm:p-5">
+        <div className="hub-glass rounded-2xl p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <h3 className="font-bold text-slate-900 text-sm">Master Roadmap Status</h3>
@@ -582,7 +582,7 @@ export default function ImprovementRoadmap() {
             <motion.div key={cat.id}
               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04, duration: 0.3 }}
-              className="insight-card rounded-2xl overflow-hidden">
+              className="hub-glass rounded-2xl overflow-hidden">
               <button onClick={() => setExpanded(isExpanded ? null : cat.id)}
                 className="w-full px-5 py-4 flex items-center gap-4 text-left hover:bg-slate-50/50 transition">
                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center flex-shrink-0 shadow-md icon-tile-glow`}>

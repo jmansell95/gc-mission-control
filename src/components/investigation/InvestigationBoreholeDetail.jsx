@@ -52,7 +52,7 @@ export default function InvestigationBoreholeDetail({
   return (
     <div className="space-y-3">
       {/* Summary header */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
             <Mountain className="w-6 h-6" />
@@ -137,7 +137,7 @@ function SummaryStat({ icon: Icon, label, value }) {
 function SectionCard({ icon: Icon, title, count, color, defaultOpen = true, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <button onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-3 p-3 sm:p-4 text-left hover:bg-slate-50/60 transition">
         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${color}`}>
           <Icon className="w-4 h-4" />

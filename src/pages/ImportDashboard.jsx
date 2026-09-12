@@ -154,7 +154,7 @@ export default function ImportDashboard() {
     <div className="page-bg-vibrant min-h-screen p-4 md:p-6 space-y-6">
       {/* Prehistoric import link */}
       <Link to="/prehistoric-import" className="block">
-        <div className="insight-card rounded-2xl p-4 flex items-center gap-3 hover:shadow-lg transition group">
+        <div className="hub-glass rounded-2xl p-4 flex items-center gap-3 hover:shadow-lg transition group">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center flex-shrink-0">
             <History className="w-5 h-5 text-white" />
           </div>
@@ -170,7 +170,7 @@ export default function ImportDashboard() {
       <PurgeCompletedJobsPanel />
 
       {/* Upload Card */}
-      <div className="insight-card rounded-2xl p-6">
+      <div className="hub-glass rounded-2xl p-6">
         <h2 className="text-lg font-semibold text-slate-800 mb-1">Upload Spreadsheet</h2>
         <p className="text-sm text-slate-500 mb-4">
            Select your <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">.xlsx</code> planner file. Only two tabs are processed: <strong>"Team Planner 2026_GW+Depot"</strong> (groundworks &amp; depot staff) and <strong>"Drillers"</strong> (drilling crews &amp; rig assignments). All other tabs are ignored. Every import <strong>rebuilds jobs, rotas, and cost items</strong> from the spreadsheet — <strong>staff, teams, and crew member types are never touched</strong>; the import matches names only.
@@ -254,7 +254,7 @@ export default function ImportDashboard() {
             </div>
             <div className="overflow-y-auto flex-1 p-6 space-y-4">
           {/* Active-only status filter info */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <Filter className="w-4 h-4 text-[#2E5A1A]" />
               <h3 className="text-sm font-bold text-slate-800">Status Filter</h3>
@@ -291,7 +291,7 @@ export default function ImportDashboard() {
           </div>
 
           {/* Summary tiles */}
-          <div className="insight-card rounded-2xl p-6">
+          <div className="hub-glass rounded-2xl p-6">
 
             {/* Full wipe summary */}
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
@@ -543,7 +543,7 @@ export default function ImportDashboard() {
 
           {/* Leavers */}
           {preview.leavers?.length > 0 && (
-            <div className="insight-card rounded-2xl p-6">
+            <div className="hub-glass rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
                   <UserX className="w-4 h-4 text-rose-600" />
@@ -764,7 +764,7 @@ export default function ImportDashboard() {
 
           {/* Rig & Equipment matching summary */}
           {preview.summary.rig_assignments && (
-            <div className="insight-card rounded-2xl p-6">
+            <div className="hub-glass rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
                   <Layers className="w-4 h-4 text-amber-600" />
@@ -866,7 +866,7 @@ export default function ImportDashboard() {
 
           {/* Rota Conflicts — Global Rota Registry */}
           {preview.conflicts?.length > 0 && (
-            <div className="insight-card rounded-2xl p-6">
+            <div className="hub-glass rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
                   <AlertCircle className="w-4 h-4 text-rose-600" />
@@ -901,7 +901,7 @@ export default function ImportDashboard() {
           )}
 
           {/* Confirm bar */}
-          <div className="insight-card rounded-2xl p-6">
+          <div className="hub-glass rounded-2xl p-6">
             <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800 flex items-start gap-2 mb-4">
               <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>
@@ -932,7 +932,7 @@ export default function ImportDashboard() {
 
       {/* How it works */}
       {!preview && !analysing && (
-        <div className="insight-card rounded-2xl p-6">
+        <div className="hub-glass rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-slate-800 mb-3">How it works</h2>
           <ol className="space-y-3 text-sm text-slate-600">
             <Step n={1} title="Upload your planner file">The Excel file is uploaded and parsed directly — no third-party AI involved.</Step>
@@ -996,7 +996,7 @@ function StatusBadge({ status }) {
 function CollapsibleSection({ title, icon: Icon, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="insight-card rounded-2xl p-6">
+    <div className="hub-glass rounded-2xl p-6">
       <button onClick={() => setOpen(!open)} className="flex items-center gap-2 w-full text-left">
         {open ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
         {Icon && <Icon className="w-4 h-4 text-slate-500" />}

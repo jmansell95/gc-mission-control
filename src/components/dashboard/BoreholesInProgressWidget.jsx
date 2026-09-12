@@ -68,7 +68,7 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col">
         <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
@@ -89,7 +89,7 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
 
   if (counts.total === 0) {
     return (
-      <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col">
         <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center ring-1 ring-white/20">
@@ -111,7 +111,7 @@ export default function BoreholesInProgressWidget({ onNavigate }) {
   return (
     <div
       onClick={handleClick}
-      className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
+      className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
     >
       {/* Header */}
       <div className="bg-gradient-to-br from-amber-500 to-orange-600 px-4 py-3.5 text-white flex-shrink-0">

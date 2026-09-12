@@ -116,7 +116,7 @@ export default function DivisionCheckConfigManager() {
   return (
     <div className="space-y-4">
       {/* Division selector */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="w-5 h-5 text-[#2E5A1A]" />
           <h2 className="text-sm font-bold text-slate-900">Division Check Configuration</h2>
@@ -151,7 +151,7 @@ export default function DivisionCheckConfigManager() {
             const assignedTemplates = (cfg.template_ids || []).map(tid => templates.find(t => t.template_id === tid)).filter(Boolean);
 
             return (
-              <div key={cat.key} className="insight-card rounded-2xl overflow-hidden">
+              <div key={cat.key} className="hub-glass rounded-2xl overflow-hidden">
                 {/* Header row with toggle */}
                 <div className="px-4 py-3.5 flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${

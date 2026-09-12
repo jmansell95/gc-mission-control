@@ -10,7 +10,7 @@ const fmtMoney = (n) => '£' + Math.round(Number(n) || 0).toLocaleString('en-GB'
 export default function PortfolioMonthlyChart({ portfolioMonthly }) {
   if (!portfolioMonthly || portfolioMonthly.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <CalendarClock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-500">No remaining months to project</p>
         <p className="text-xs text-slate-400 mt-1">All filtered jobs have ended or have no end date set.</p>
@@ -22,7 +22,7 @@ export default function PortfolioMonthlyChart({ portfolioMonthly }) {
   const hasGapMonths = portfolioMonthly.some(m => m.crew_count === 0);
 
   return (
-    <div className="insight-card rounded-2xl p-4 space-y-4">
+    <div className="hub-glass rounded-2xl p-4 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 text-[#2E5A1A] flex items-center justify-center">

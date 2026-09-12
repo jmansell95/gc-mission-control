@@ -32,7 +32,7 @@ export default function FleetHealthRibbon({ assets = [] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
       {/* Fleet health score — spans 1, larger on desktop */}
-      <div className="insight-card rounded-xl p-3.5 flex items-center gap-3 col-span-2 md:col-span-1 lg:col-span-1">
+      <div className="hub-glass rounded-xl p-3.5 flex items-center gap-3 col-span-2 md:col-span-1 lg:col-span-1">
         <div className="w-10 h-10 rounded-xl stat-gradient-brand flex items-center justify-center shadow-md icon-tile-glow flex-shrink-0">
           <Activity className="w-5 h-5 text-white" />
         </div>
@@ -44,7 +44,7 @@ export default function FleetHealthRibbon({ assets = [] }) {
       {tiles.map(t => {
         const SIcon = t.Icon;
         return (
-          <div key={t.label} className="insight-card rounded-xl p-3.5 flex items-center gap-3">
+          <div key={t.label} className="hub-glass rounded-xl p-3.5 flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl ${t.grad} flex items-center justify-center shadow-md icon-tile-glow flex-shrink-0`}>
               <SIcon className="w-5 h-5 text-white" />
             </div>

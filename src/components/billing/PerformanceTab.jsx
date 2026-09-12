@@ -43,7 +43,7 @@ export default function PerformanceTab() {
   return (
     <div className="space-y-3">
       {/* Date range picker */}
-      <div className="insight-card rounded-2xl p-3 flex items-center gap-3 flex-wrap">
+      <div className="hub-glass rounded-2xl p-3 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
           <Calendar className="w-4 h-4" /> Period:
         </div>

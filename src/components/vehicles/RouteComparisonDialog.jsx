@@ -177,24 +177,24 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
 
             {/* Summary tiles */}
             <div className="grid grid-cols-3 gap-2.5">
-              <div className="insight-card rounded-xl p-3">
+              <div className="hub-glass rounded-xl p-3">
                 <div className="flex items-center gap-1.5 mb-1"><Route className="w-3.5 h-3.5 text-[#2E5A1A]" /><p className="text-[10px] uppercase font-semibold text-slate-400">Actual</p></div>
                 <p className="text-lg font-bold text-[#2E5A1A] tabular-nums">{actualKm}<span className="text-xs font-normal"> km</span></p>
                 <p className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {comparison?.actual_duration_min || 0} min</p>
               </div>
-              <div className="insight-card rounded-xl p-3">
+              <div className="hub-glass rounded-xl p-3">
                 <div className="flex items-center gap-1.5 mb-1"><Navigation className="w-3.5 h-3.5 text-cyan-600" /><p className="text-[10px] uppercase font-semibold text-slate-400">Google Optimal</p></div>
                 <p className="text-lg font-bold text-cyan-700 tabular-nums">{googleKm}<span className="text-xs font-normal"> km</span></p>
                 <p className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {googleMin} min</p>
               </div>
               {stops.length > 0 ? (
-                <div className="insight-card rounded-xl p-3">
+                <div className="hub-glass rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1"><MapPin className="w-3.5 h-3.5 text-amber-600" /><p className="text-[10px] uppercase font-semibold text-slate-400">Optimized Stops</p></div>
                   <p className="text-lg font-bold text-amber-700 tabular-nums">{stopKm}<span className="text-xs font-normal"> km</span></p>
                   <p className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {stopMin} min · {stops.length} stops</p>
                 </div>
               ) : (
-                <div className="insight-card rounded-xl p-3">
+                <div className="hub-glass rounded-xl p-3">
                   <div className="flex items-center gap-1.5 mb-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /><p className="text-[10px] uppercase font-semibold text-slate-400">Stops</p></div>
                   <p className="text-sm text-slate-400 italic mt-1">No delivery stops for this driver/date</p>
                 </div>
@@ -202,7 +202,7 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
             </div>
 
             {/* Delta analysis */}
-            <div className="insight-card rounded-xl p-3">
+            <div className="hub-glass rounded-xl p-3">
               <p className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Gauge className="w-3.5 h-3.5 text-[#2E5A1A]" /> Deviation Analysis</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2">

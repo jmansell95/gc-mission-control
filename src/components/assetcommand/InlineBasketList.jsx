@@ -13,7 +13,7 @@ const TYPE_ICON = { rig: '🛠️', machinery: '🔧', trailer: '📦', vehicle:
 export default function InlineBasketList({ items, onRemove }) {
   if (!items || items.length === 0) return null;
   return (
-    <div className="insight-card rounded-2xl p-3 sm:p-4">
+    <div className="hub-glass rounded-2xl p-3 sm:p-4">
       <div className="flex items-center gap-2 mb-2.5">
         <Package className="w-4 h-4 text-[#2E5A1A]" />
         <h3 className="text-sm font-bold text-slate-800">Basket ({items.length})</h3>

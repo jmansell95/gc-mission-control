@@ -67,7 +67,7 @@ export default function InvestigationBulkReview({ logs = [], jobs = [], onDone }
   };
 
   return (
-    <div className="insight-card rounded-2xl p-3 mb-4">
+    <div className="hub-glass rounded-2xl p-3 mb-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">

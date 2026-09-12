@@ -88,7 +88,7 @@ export default function UniversalReportFilters({ filters, setFilters, onExportCs
   const selectCls = 'rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[110px] sm:min-w-[130px] bg-white flex-1 sm:flex-none';
 
   return (
-    <div className="insight-card rounded-2xl p-4 space-y-3">
+    <div className="hub-glass rounded-2xl p-4 space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-shrink-0">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">

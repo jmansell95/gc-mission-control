@@ -85,7 +85,7 @@ export default function PerformanceKpiManager() {
       {isLoading ? (
         <div className="h-40 animate-pulse bg-slate-100 rounded-2xl" />
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <TrendingUp className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-ui-body font-semibold text-slate-600">No KPI sets yet</p>
           <p className="text-ui-caption text-slate-400 mt-1">Create a KPI set for each role — drillers, depot staff, managers — to show role-specific performance on their profile.</p>
@@ -98,7 +98,7 @@ export default function PerformanceKpiManager() {
             const totalBonus = metrics.reduce((sum, m) => sum + (Number(m.bonus_amount) || 0), 0);
             const assignedCount = (s.assigned_staff_ids || []).length;
             return (
-              <div key={s.id} className={`insight-card rounded-2xl p-4 ${!s.is_active ? 'opacity-60' : ''}`}>
+              <div key={s.id} className={`hub-glass rounded-2xl p-4 ${!s.is_active ? 'opacity-60' : ''}`}>
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${dept.color}15` }}>
                     <dept.icon className="w-5 h-5" style={{ color: dept.color }} />

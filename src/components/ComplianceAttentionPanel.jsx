@@ -46,7 +46,7 @@ export default function ComplianceAttentionPanel({ assets }) {
     'bg-slate-100 text-slate-600';
 
   return (
-    <div className="insight-card rounded-2xl p-4 md:p-5 mb-4 overflow-hidden">
+    <div className="hub-glass rounded-2xl p-4 md:p-5 mb-4 overflow-hidden">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-rose-700 flex items-center justify-center shadow-md icon-tile-glow flex-shrink-0">

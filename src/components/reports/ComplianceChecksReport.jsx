@@ -138,7 +138,7 @@ function CompletionRateReport({ filters, toast }) {
 
   if (isLoading || configsLoading) {
     return (
-      <div className="insight-card rounded-2xl p-6">
+      <div className="hub-glass rounded-2xl p-6">
         <Skeleton className="h-6 w-48 mb-4" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -150,7 +150,7 @@ function CompletionRateReport({ filters, toast }) {
   }
 
   return (
-    <div className="insight-card rounded-2xl p-5">
+    <div className="hub-glass rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-bold text-slate-900">Daily Check Completion Rate</h3>
@@ -273,13 +273,13 @@ function OutstandingByPersonReport({ filters, toast }) {
   };
 
   if (isLoading) {
-    return <div className="insight-card rounded-2xl p-6"><Skeleton className="h-64 w-full" /></div>;
+    return <div className="hub-glass rounded-2xl p-6"><Skeleton className="h-64 w-full" /></div>;
   }
 
   if (enabledCategories.length === 0) return <NoConfigState />;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
         <div>
           <h3 className="text-sm font-bold text-slate-900">Outstanding Checks by Person</h3>
@@ -397,11 +397,11 @@ function DivisionComparisonReport({ filters, toast }) {
   };
 
   if (isLoading) {
-    return <div className="insight-card rounded-2xl p-6"><Skeleton className="h-64 w-full" /></div>;
+    return <div className="hub-glass rounded-2xl p-6"><Skeleton className="h-64 w-full" /></div>;
   }
 
   return (
-    <div className="insight-card rounded-2xl p-5">
+    <div className="hub-glass rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-bold text-slate-900">Division Comparison</h3>
@@ -457,7 +457,7 @@ function DivisionComparisonReport({ filters, toast }) {
 // ── No config state ──
 function NoConfigState() {
   return (
-    <div className="insight-card rounded-2xl p-8">
+    <div className="hub-glass rounded-2xl p-8">
       <div className="flex flex-col items-center text-center max-w-md mx-auto">
         <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
           <ShieldCheck className="w-6 h-6 text-amber-500" />

@@ -267,7 +267,7 @@ export default function CustomReportBuilder() {
         {/* Left: Report config */}
         <div className="lg:col-span-1 space-y-4">
           {/* Report name */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Report Name</label>
             <input
               value={reportName}
@@ -278,7 +278,7 @@ export default function CustomReportBuilder() {
           </div>
 
           {/* Data source */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5 block">Data Source</label>
             <SearchableSelect
               value={sourceId}
@@ -291,7 +291,7 @@ export default function CustomReportBuilder() {
           </div>
 
           {/* Filters */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Filters</label>
             <div>
               <p className="text-xs text-slate-500 mb-1">Date range (created)</p>
@@ -312,7 +312,7 @@ export default function CustomReportBuilder() {
           </div>
 
           {/* Group by + aggregation */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Group & Aggregate</label>
             <div>
               <p className="text-xs text-slate-500 mb-1">Group by (optional)</p>
@@ -336,7 +336,7 @@ export default function CustomReportBuilder() {
           </div>
 
           {/* Column selection */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Columns (click to toggle)</p>
             <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
               {COMMON_FIELDS.map(f => (
@@ -353,7 +353,7 @@ export default function CustomReportBuilder() {
         <div className="lg:col-span-2 space-y-4">
           {/* Chart panel */}
           {groupBy && chartData.length > 0 && (
-            <div className="insight-card rounded-2xl p-4">
+            <div className="hub-glass rounded-2xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-slate-900">Chart Visualisation</h3>
                 <div className="flex bg-slate-100 rounded-lg p-0.5">
@@ -374,7 +374,7 @@ export default function CustomReportBuilder() {
           )}
 
           {/* Preview table */}
-          <div className="insight-card rounded-2xl overflow-hidden">
+          <div className="hub-glass rounded-2xl overflow-hidden">
             <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-800">Preview</h3>

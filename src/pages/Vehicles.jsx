@@ -178,7 +178,7 @@ export default function Vehicles({ focusVehicleId }) {
       />
 
       {/* Search & filters */}
-      <div className="insight-card rounded-2xl p-3 space-y-2">
+      <div className="hub-glass rounded-2xl p-3 space-y-2">
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -237,7 +237,7 @@ export default function Vehicles({ focusVehicleId }) {
           {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-56 w-full rounded-xl" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-10 text-center">
+        <div className="hub-glass rounded-2xl p-10 text-center">
           <Truck className="w-10 h-10 text-slate-200 mx-auto mb-2" />
           <p className="text-sm text-slate-400">{vehicles.length === 0 ? 'No vehicles yet. Add them via Settings → Vehicles.' : 'No vehicles match your filters.'}</p>
         </div>

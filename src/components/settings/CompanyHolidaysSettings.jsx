@@ -102,13 +102,13 @@ export default function CompanyHolidaysSettings() {
         )}
 
         {upcomingHolidays.length === 0 ? (
-          <div className="insight-card rounded-xl p-5 text-center text-sm text-slate-400">
+          <div className="hub-glass rounded-xl p-5 text-center text-sm text-slate-400">
             No upcoming bank holidays. Click "Sync from gov.uk" to load them.
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {upcomingHolidays.map(bh => (
-              <div key={bh.id} className="insight-card rounded-xl px-3.5 py-2.5 flex items-center gap-3">
+              <div key={bh.id} className="hub-glass rounded-xl px-3.5 py-2.5 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                   <CalendarDays className="w-4 h-4 text-blue-600" />
                 </div>
@@ -141,13 +141,13 @@ export default function CompanyHolidaysSettings() {
         </div>
 
         {shutdowns.length === 0 ? (
-          <div className="insight-card rounded-xl p-5 text-center text-sm text-slate-400">
+          <div className="hub-glass rounded-xl p-5 text-center text-sm text-slate-400">
             No shutdown periods configured. Add a Christmas shutdown or annual break to show it on everyone's rota automatically.
           </div>
         ) : (
           <div className="space-y-2">
             {shutdowns.map(s => (
-              <div key={s.id} className="insight-card rounded-xl px-4 py-3 flex items-center gap-3">
+              <div key={s.id} className="hub-glass rounded-xl px-4 py-3 flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${s.is_active !== false ? 'bg-purple-100' : 'bg-slate-100'}`}>
                   <PartyPopper className={`w-4 h-4 ${s.is_active !== false ? 'text-purple-600' : 'text-slate-400'}`} />
                 </div>

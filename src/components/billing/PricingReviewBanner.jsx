@@ -164,7 +164,7 @@ export default function PricingReviewBanner({ jobId }) {
       {/* Banner */}
       <button
         onClick={() => setOpen(true)}
-        className="w-full insight-card rounded-2xl p-3 flex items-center justify-between gap-3 bg-amber-50 border-amber-200 hover:bg-amber-100/80 transition active:scale-[0.99] mb-3"
+        className="w-full hub-glass rounded-2xl p-3 flex items-center justify-between gap-3 bg-amber-50 border-amber-200 hover:bg-amber-100/80 transition active:scale-[0.99] mb-3"
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
@@ -262,7 +262,7 @@ export default function PricingReviewBanner({ jobId }) {
                     ((Number(log.depth_to) || 0) - (Number(log.depth_from) || 0)) || 1;
                   const isAuto = view === 'auto_matched';
                   return (
-                    <div key={log.id} className="insight-card rounded-xl p-3 space-y-2">
+                    <div key={log.id} className="hub-glass rounded-xl p-3 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">

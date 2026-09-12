@@ -19,7 +19,7 @@ export default function DivisionCard({ ds, onEnter }) {
   return (
     <button
       onClick={() => onEnter(d)}
-      className="insight-card relative rounded-2xl overflow-hidden text-left group w-full"
+      className="hub-glass relative rounded-2xl overflow-hidden text-left group w-full"
     >
       {/* Compact gradient header — lighter than BU card */}
       <div className="h-14 sm:h-16 px-4 flex items-center justify-between relative overflow-hidden" style={{ background: headerGradient }}>

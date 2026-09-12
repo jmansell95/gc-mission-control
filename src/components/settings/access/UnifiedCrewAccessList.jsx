@@ -135,7 +135,7 @@ export default function UnifiedCrewAccessList({ scopedDivisionId, onEditGroup, o
           <div className="w-6 h-6 border-2 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin" />
         </div>
       ) : filteredTeams.length === 0 ? (
-        <div className="insight-card rounded-2xl p-12 text-center">
+        <div className="hub-glass rounded-2xl p-12 text-center">
           <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
           <p className="text-sm font-semibold text-slate-600">No crews in this business stream</p>
           <p className="text-xs text-slate-400 mt-1">Create teams in the People Hub to manage crew access here</p>
@@ -168,7 +168,7 @@ function CrewRow({ team, groups, members, groupStaffCount, expanded, onToggleExp
   const categoryLabel = CATEGORY_LABELS[team.category] || team.category || 'General';
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Row */}
       <div className="flex items-center gap-3 px-4 py-3">
         <button

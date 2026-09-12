@@ -8,7 +8,7 @@ import React from 'react';
  */
 export default function SettingsSectionHeader({ icon: Icon, title, description, actions }) {
   return (
-    <div className="insight-card relative rounded-2xl p-4 md:p-5 mb-5 overflow-hidden">
+    <div className="hub-glass relative rounded-2xl p-4 md:p-5 mb-5 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 relative z-10">
         <div className="flex items-center gap-3.5 min-w-0">
           {Icon && (

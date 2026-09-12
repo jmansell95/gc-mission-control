@@ -202,7 +202,7 @@ export default function RemainingWorkReport({ filters }) {
           ignoreDateRange={ignoreDateRange} setIgnoreDateRange={setIgnoreDateRange}
           onExportCsv={handleCsv} onExportPdf={handlePdf} exporting={exporting}
         />
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Briefcase className="w-10 h-10 text-slate-300 mx-auto mb-3" />
           <p className="text-sm font-semibold text-slate-500">No jobs match the selected filters</p>
           <p className="text-xs text-slate-400 mt-1">Try adjusting the status filters or date range.</p>
@@ -235,7 +235,7 @@ export default function RemainingWorkReport({ filters }) {
       {data.portfolio_monthly && <PortfolioMonthlyChart portfolioMonthly={data.portfolio_monthly} />}
 
       {/* Job table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900">Remaining Work by Job</h3>
           <span className="text-xs text-slate-400">{jobs.length} jobs · as of {fmtDate(asOfDate)}</span>
@@ -326,7 +326,7 @@ export default function RemainingWorkReport({ filters }) {
 // ── Filter bar sub-component ──
 function RemainingWorkFilterBar({ statusFilter, toggleStatus, asOfDate, setAsOfDate, ignoreDateRange, setIgnoreDateRange, onExportCsv, onExportPdf, exporting }) {
   return (
-    <div className="insight-card rounded-2xl p-4 space-y-3">
+    <div className="hub-glass rounded-2xl p-4 space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         {/* Status pills */}
         <div className="flex items-center gap-1.5 flex-wrap">

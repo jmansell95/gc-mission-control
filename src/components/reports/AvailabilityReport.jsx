@@ -175,7 +175,7 @@ export default function AvailabilityReport({ filters }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-12 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-12 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
         <span className="ml-3 text-sm text-slate-500">Loading availability data…</span>
       </div>
@@ -206,7 +206,7 @@ export default function AvailabilityReport({ filters }) {
       </div>
 
       {/* Preview table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>

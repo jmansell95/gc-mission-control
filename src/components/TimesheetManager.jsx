@@ -20,7 +20,7 @@ const meterageOf = (t) => Number(t?.meterage) || 0;
 
 function StatBox({ icon: Icon, label, value, gradient = 'stat-gradient-slate', sub }) {
   return (
-    <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
       <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full ${gradient} opacity-10`} />
       <div className="relative">
         <div className={`w-9 h-9 rounded-xl ${gradient} flex items-center justify-center mb-2.5`}>
@@ -404,11 +404,11 @@ export default function TimesheetManager() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <TableSkeleton rows={4} cols={6} />
         </div>
       ) : isError ? (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <ErrorState message="Couldn't load timesheets" onRetry={refetch} />
         </div>
       ) : rangeMode === 'week' ? (
@@ -463,7 +463,7 @@ export default function TimesheetManager() {
 
           {/* 3. Per-staff Weekly Cards */}
           {weeklyGroups.length === 0 ? (
-            <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="hub-glass rounded-2xl overflow-hidden">
               <EmptyState icon={Users} title="No timesheets this week" message="No submitted or approved timesheets for the selected week and filters. Use the arrows to check other weeks." />
             </div>
           ) : (
@@ -487,7 +487,7 @@ export default function TimesheetManager() {
         </div>
       ) : (
         byDateGroups.length === 0 ? (
-          <div className="insight-card rounded-2xl overflow-hidden">
+          <div className="hub-glass rounded-2xl overflow-hidden">
             <EmptyState icon={Users} title="No timesheets in this range" message="No timesheets found for the selected date range and filters. Try a different range or clear your filters." />
           </div>
         ) : (

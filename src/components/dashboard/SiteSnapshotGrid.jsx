@@ -340,7 +340,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
     return (
       <div className="mb-6">
         <SectionHeader />
-        <div className="insight-card rounded-2xl">
+        <div className="hub-glass rounded-2xl">
           <WidgetEmptyState icon={Radio} title="No active sites right now" message="Sites will appear here when jobs move to In Progress" />
         </div>
       </div>
@@ -428,7 +428,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
               tabIndex={0}
               onClick={() => onSelectJob(job)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectJob(job); } }}
-              className={`insight-card relative rounded-2xl p-5 text-left group overflow-hidden cursor-pointer ${hasCritical ? 'ring-2 ring-rose-300' : ''}`}
+              className={`hub-glass relative rounded-2xl p-5 text-left group overflow-hidden cursor-pointer ${hasCritical ? 'ring-2 ring-rose-300' : ''}`}
             >
               {/* Status accent bar */}
               <div className={`absolute left-0 top-0 bottom-0 w-1 ${job.status === 'in_progress' ? 'bg-emerald-500' : 'bg-orange-500'}`} />

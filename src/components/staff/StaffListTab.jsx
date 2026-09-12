@@ -135,7 +135,7 @@ export default function StaffListTab() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-10 text-center">
+        <div className="hub-glass rounded-2xl p-10 text-center">
           <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No staff found</p>
           <p className="text-xs text-slate-400 mt-1">Try a different search or add a new staff member.</p>

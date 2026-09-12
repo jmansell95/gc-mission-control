@@ -68,7 +68,7 @@ export default function EnterpriseOperationsHub() {
       )}
 
       {/* Delivery Status */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={Package} title="Delivery Status" subtitle="Live delivery pipeline across all streams" gradient="from-blue-500 to-cyan-600" />
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
           <StatusTile label="Active" value={g.activeDeliveries || 0} icon={Clock} color="blue" />
@@ -78,7 +78,7 @@ export default function EnterpriseOperationsHub() {
       </div>
 
       {/* Per-Stream Operations */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={MapPin} title="Operations by Stream" subtitle="Active jobs, deliveries and rigs per business stream" gradient="from-amber-500 to-orange-600" />
         {isLoading ? (
           <WidgetLoadingState rows={3} variant="list" />

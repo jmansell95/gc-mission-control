@@ -85,7 +85,7 @@ export default function AssetFinancialLifecycle({ assetId }) {
   return (
     <div className="space-y-4">
       {/* ROI Hero Card */}
-      <div className={`insight-card rounded-2xl p-4 ${isProfitable ? 'border-emerald-200' : 'border-rose-200'}`}>
+      <div className={`hub-glass rounded-2xl p-4 ${isProfitable ? 'border-emerald-200' : 'border-rose-200'}`}>
         <div className="flex items-center gap-3 mb-3">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isProfitable ? 'bg-gradient-to-br from-emerald-500 to-green-600' : 'bg-gradient-to-br from-rose-500 to-pink-600'}`}>
             {isProfitable ? <TrendingUp className="w-6 h-6 text-white" /> : <TrendingDown className="w-6 h-6 text-white" />}
@@ -114,7 +114,7 @@ export default function AssetFinancialLifecycle({ assetId }) {
       </div>
 
       {/* Cost Breakdown */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
           <Wrench className="w-4 h-4 text-slate-500" /> Cost Breakdown
         </h4>
@@ -139,7 +139,7 @@ export default function AssetFinancialLifecycle({ assetId }) {
       </div>
 
       {/* Utilization indicator */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <h4 className="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
           <Activity className="w-4 h-4 text-slate-500" /> Asset Utilisation
         </h4>

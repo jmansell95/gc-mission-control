@@ -109,7 +109,7 @@ export default function ReportsHubWidget({ onNavigate }) {
                 key={report.id}
                 onClick={() => exportCSV(report)}
                 disabled={isGenerating}
-                className="insight-card rounded-xl p-3 text-left hover:border-[#2E5A1A]/40 transition group disabled:opacity-60"
+                className="hub-glass rounded-xl p-3 text-left hover:border-[#2E5A1A]/40 transition group disabled:opacity-60"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center group-hover:from-[#2E5A1A] group-hover:to-[#5A8C1E] transition">

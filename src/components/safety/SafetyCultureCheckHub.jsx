@@ -103,7 +103,7 @@ export default function MittiCheckHub({ onNavigate }) {
   // No data synced — show info message instead of zero-value stats
   if (!isLoading && reports.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
           <ShieldAlert className="w-7 h-7 text-amber-600" />
         </div>
@@ -150,7 +150,7 @@ export default function MittiCheckHub({ onNavigate }) {
 
       {/* Overdue action items */}
       {overdueActions.length > 0 && (
-        <div className="insight-card rounded-2xl p-5 mb-5 border-l-4 border-rose-400">
+        <div className="hub-glass rounded-2xl p-5 mb-5 border-l-4 border-rose-400">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-rose-600" />
             <h3 className="font-bold text-slate-900">Overdue Safety Actions</h3>
@@ -189,7 +189,7 @@ export default function MittiCheckHub({ onNavigate }) {
       )}
 
       {/* Who completed what */}
-      <div className="insight-card rounded-2xl p-5 mb-5">
+      <div className="hub-glass rounded-2xl p-5 mb-5">
         <div className="flex items-center gap-2 mb-4">
           <Users className="w-5 h-5 text-[#2E5A1A]" />
           <h3 className="font-bold text-slate-900">Who Completed What</h3>
@@ -239,7 +239,7 @@ export default function MittiCheckHub({ onNavigate }) {
       </div>
 
       {/* Recent audits table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-5 py-3.5 border-b border-slate-100 flex items-center gap-2 flex-wrap">
           <FileText className="w-4 h-4 text-slate-500" />
           <h3 className="font-bold text-slate-900">Recent Audits</h3>
@@ -315,7 +315,7 @@ export default function MittiCheckHub({ onNavigate }) {
         )}
       </div>
 
-      <div className="mt-4 insight-card rounded-2xl p-4 flex items-center gap-3">
+      <div className="mt-4 hub-glass rounded-2xl p-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center flex-shrink-0 shadow-md">
           <ShieldAlert className="w-5 h-5 text-white" />
         </div>

@@ -106,7 +106,7 @@ export default function CrewProfilesTab() {
     <div className="space-y-5">
       {/* Unlinked users banner */}
       {unlinkedCount > 0 && (
-        <div className="insight-card rounded-2xl p-4 md:p-5 border-l-4 border-amber-400 bg-amber-50/40">
+        <div className="hub-glass rounded-2xl p-4 md:p-5 border-l-4 border-amber-400 bg-amber-50/40">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
               <AlertTriangle className="w-5 h-5 text-amber-600" />
@@ -136,7 +136,7 @@ export default function CrewProfilesTab() {
             {unlinked.map((u) => {
               const candidate = linkCandidate(u);
               return (
-                <div key={u.id} className="insight-card rounded-xl p-3.5 flex items-center gap-3">
+                <div key={u.id} className="hub-glass rounded-xl p-3.5 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
                     <UserCircle className="w-5 h-5 text-amber-600" />
                   </div>
@@ -217,7 +217,7 @@ export default function CrewProfilesTab() {
                 <button
                   key={s.id}
                   onClick={() => setEditing(s)}
-                  className="w-full text-left insight-card rounded-xl p-3.5 flex items-center gap-3 hover:border-[#2E5A1A]/40 transition group"
+                  className="w-full text-left hub-glass rounded-xl p-3.5 flex items-center gap-3 hover:border-[#2E5A1A]/40 transition group"
                 >
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-xs shadow-sm overflow-hidden">
                     {s.avatar_url ? <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" /> : initials}

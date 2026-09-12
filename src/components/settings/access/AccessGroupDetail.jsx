@@ -36,7 +36,7 @@ export default function AccessGroupDetail({ group, groups, staffCount, divisions
   return (
     <div className="space-y-4">
       {/* ─── Group Header ─── */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1">

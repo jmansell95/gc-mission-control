@@ -17,7 +17,7 @@ export default function AutoApprovedStrip({ entries, staffMap, onUndo }) {
   if (undoable.length === 0) return null;
 
   return (
-    <div className="insight-card rounded-2xl p-3 sm:p-4">
+    <div className="hub-glass rounded-2xl p-3 sm:p-4">
       <div className="flex items-center gap-2 mb-2.5">
         <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />

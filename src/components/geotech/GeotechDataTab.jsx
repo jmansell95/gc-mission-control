@@ -139,8 +139,8 @@ export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
         </div>
       </div>
 
-      {/* Sample management — insight-card matching the Borehole Data Explorer */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      {/* Sample management — hub-glass matching the Borehole Data Explorer */}
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
           <Mountain className="w-5 h-5 text-emerald-700" />
           <h3 className="font-semibold text-slate-900 text-sm">Sample Management</h3>
@@ -177,7 +177,7 @@ export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
         </div>
       </div>
 
-      {/* Monitoring wells + Equipment calibration (light insight-cards) */}
+      {/* Monitoring wells + Equipment calibration (light hub-glasss) */}
       <MonitoringWellManager job={job} allStaff={allStaff} />
       <EquipmentCalibrationManager job={job} assets={assets} />
 

@@ -116,15 +116,15 @@ export default function TimesheetDelegationManager() {
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <p className="text-2xl font-bold text-emerald-700">{activeCount}</p>
           <p className="text-xs text-slate-500 mt-0.5">Active Now</p>
         </div>
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <p className="text-2xl font-bold text-slate-700">{delegations.filter(d => d.is_active && d.start_date > today).length}</p>
           <p className="text-xs text-slate-500 mt-0.5">Upcoming</p>
         </div>
-        <div className="insight-card rounded-xl p-4">
+        <div className="hub-glass rounded-xl p-4">
           <p className="text-2xl font-bold text-slate-400">{delegations.filter(d => !d.is_active).length}</p>
           <p className="text-xs text-slate-500 mt-0.5">Revoked / Expired</p>
         </div>
@@ -132,7 +132,7 @@ export default function TimesheetDelegationManager() {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="insight-card rounded-2xl p-5 mb-5 space-y-4 animate-slide-up">
+        <form onSubmit={handleSubmit} className="hub-glass rounded-2xl p-5 mb-5 space-y-4 animate-slide-up">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1.5">Delegating Manager</label>
@@ -186,7 +186,7 @@ export default function TimesheetDelegationManager() {
         {isLoading ? (
           <div className="text-center py-8 text-slate-400 text-sm">Loading…</div>
         ) : delegations.length === 0 ? (
-          <div className="insight-card rounded-2xl p-8 text-center">
+          <div className="hub-glass rounded-2xl p-8 text-center">
             <ShieldCheck className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <p className="text-sm font-semibold text-slate-600">No delegations yet</p>
             <p className="text-xs text-slate-400 mt-1">Create a delegation to let someone else approve timesheets during a manager's absence.</p>
@@ -196,7 +196,7 @@ export default function TimesheetDelegationManager() {
             const active = isCurrentlyActive(d);
             const expired = d.end_date && d.end_date < today;
             return (
-              <div key={d.id} className={`insight-card rounded-xl p-4 flex items-center gap-3 ${!d.is_active ? 'opacity-60' : ''}`}>
+              <div key={d.id} className={`hub-glass rounded-xl p-4 flex items-center gap-3 ${!d.is_active ? 'opacity-60' : ''}`}>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   active ? 'bg-emerald-100 text-emerald-700' : expired ? 'bg-slate-100 text-slate-400' : 'bg-amber-100 text-amber-600'
                 }`}>

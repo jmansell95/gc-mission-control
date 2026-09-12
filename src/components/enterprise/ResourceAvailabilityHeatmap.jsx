@@ -78,7 +78,7 @@ export default function ResourceAvailabilityHeatmap({ divisionId = '', onFindGap
   return (
     <div className="space-y-3">
       {/* ── Controls Bar ── */}
-      <div className="insight-card rounded-2xl p-3 sm:p-4">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-col lg:flex-row lg:items-center gap-2.5">
           {/* View toggle */}
           <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 flex-shrink-0">
@@ -138,18 +138,18 @@ export default function ResourceAvailabilityHeatmap({ divisionId = '', onFindGap
 
       {/* ── Heatmap Grid ── */}
       {isLoading ? (
-        <div className="insight-card rounded-2xl p-12 flex items-center justify-center">
+        <div className="hub-glass rounded-2xl p-12 flex items-center justify-center">
           <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin" />
           <span className="ml-3 text-sm text-slate-500">Loading rig availability…</span>
         </div>
       ) : filteredRigs.length === 0 ? (
-        <div className="insight-card rounded-2xl p-12 text-center">
+        <div className="hub-glass rounded-2xl p-12 text-center">
           <Cog className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No rigs found</p>
           <p className="text-xs text-slate-400 mt-1">Try a different search or division filter.</p>
         </div>
       ) : (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           {/* Day headers */}
           <div className="flex bg-slate-50 border-b border-slate-200">
             <div className="flex-shrink-0 sticky left-0 bg-slate-50 border-r border-slate-200 z-10 px-3 py-2 min-w-[180px] sm:min-w-[220px]">
@@ -229,7 +229,7 @@ export default function ResourceAvailabilityHeatmap({ divisionId = '', onFindGap
       )}
 
       {/* ── Legend ── */}
-      <div className="insight-card rounded-2xl p-3 sm:p-4">
+      <div className="hub-glass rounded-2xl p-3 sm:p-4">
         <div className="flex flex-wrap items-center gap-3">
           {Object.entries(STATUS_COLORS).map(([key, cfg]) => (
             <div key={key} className="flex items-center gap-1.5">
@@ -293,7 +293,7 @@ function CellPopover({ cell, divMap, onClose, onResource }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -10 }}
         transition={{ duration: 0.15 }}
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md insight-card rounded-2xl shadow-2xl overflow-hidden"
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-md hub-glass rounded-2xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
         <div className={`relative ${cfg.bg} px-4 py-3`}>

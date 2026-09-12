@@ -20,7 +20,7 @@ export default function PendingAccess() {
         <div className="flex flex-col items-center mb-8">
           <Logo height={48} />
         </div>
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-7 h-7 text-amber-600" />
           </div>

@@ -18,7 +18,7 @@ export default function IntegrationHealthWidget({ integrations = [], onNavigate 
   const allOk = connected === total;
 
   return (
-    <div className="insight-card rounded-2xl p-4 sm:p-5">
+    <div className="hub-glass rounded-2xl p-4 sm:p-5">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
           <Link2 className="w-4 h-4 text-white" />

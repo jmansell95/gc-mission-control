@@ -47,7 +47,7 @@ export default function AssetDetailHero({ asset, onBack, onEdit, onRecert, onQR,
   const dashOffset = circumference - (ring.pct / 100) * circumference;
 
   return (
-    <div className="insight-card rounded-3xl overflow-hidden">
+    <div className="hub-glass rounded-3xl overflow-hidden">
       {/* Top accent bar — type-coloured gradient strip */}
       <div className={`h-1.5 bg-gradient-to-r ${grad}`} />
 

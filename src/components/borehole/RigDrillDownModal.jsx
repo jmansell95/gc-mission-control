@@ -115,7 +115,7 @@ export default function RigDrillDownModal({ rigName, isDrillerFallback, logs = [
             <div className="space-y-2">
               {boreholes.length === 0 && <Empty msg="No borehole records for this rig." />}
               {boreholes.map((b) => (
-                <div key={b.ref} className="insight-card rounded-xl p-3 flex items-center gap-3">
+                <div key={b.ref} className="hub-glass rounded-xl p-3 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
                     <Mountain className="w-4 h-4 text-emerald-700" />
                   </div>
@@ -208,7 +208,7 @@ export default function RigDrillDownModal({ rigName, isDrillerFallback, logs = [
               {loggerNames.map((name) => {
                 const staff = resolveLoggerStaff(name, staffList);
                 return (
-                  <div key={name} className="insight-card rounded-xl p-3 flex items-center gap-3">
+                  <div key={name} className="hub-glass rounded-xl p-3 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                       <User className="w-5 h-5 text-emerald-700" />
                     </div>

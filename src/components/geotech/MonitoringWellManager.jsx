@@ -71,7 +71,7 @@ export default function MonitoringWellManager({ job, allStaff }) {
   const overdueWells = wells.filter(w => w.status === 'active' && w.next_reading_due && w.next_reading_due < today);
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">

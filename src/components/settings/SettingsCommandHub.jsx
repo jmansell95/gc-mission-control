@@ -189,7 +189,7 @@ export default function SettingsCommandHub({ onNavigate, items }) {
       return (
         <div
           key={item.id}
-          className={`insight-card rounded-xl p-3.5 flex items-center gap-3 transition ${
+          className={`hub-glass rounded-xl p-3.5 flex items-center gap-3 transition ${
             isHidden ? 'bg-amber-50/60 border-amber-200' : ''
           }`}
         >
@@ -241,7 +241,7 @@ export default function SettingsCommandHub({ onNavigate, items }) {
       <button
         key={item.id}
         onClick={handleClick}
-        className={`insight-card rounded-xl p-3.5 flex items-center gap-3 text-left transition hover:shadow-md hover:-translate-y-0.5 ${
+        className={`hub-glass rounded-xl p-3.5 flex items-center gap-3 text-left transition hover:shadow-md hover:-translate-y-0.5 ${
           isHidden ? 'opacity-50' : ''
         }`}
       >
@@ -357,7 +357,7 @@ export default function SettingsCommandHub({ onNavigate, items }) {
       </div>
 
       {query.trim() && totalVisible === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-500">No settings found for "{query}"</p>
         </div>
       ) : (

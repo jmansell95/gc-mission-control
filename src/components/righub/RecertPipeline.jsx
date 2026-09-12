@@ -76,7 +76,7 @@ export default function RecertPipeline({ assets = [], onRecert, onOpenAsset }) {
           const active = group === s.key;
           return (
             <button key={s.key} onClick={() => setGroup(active ? 'all' : s.key)}
-              className={`insight-card rounded-xl p-3.5 text-left transition ${active ? 'ring-2 ring-emerald-500' : ''}`}>
+              className={`hub-glass rounded-xl p-3.5 text-left transition ${active ? 'ring-2 ring-emerald-500' : ''}`}>
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl ${s.grad} flex items-center justify-center shadow-md`}>
                   <SIcon className="w-5 h-5 text-white" />

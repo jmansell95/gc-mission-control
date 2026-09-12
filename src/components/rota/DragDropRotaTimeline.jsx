@@ -111,7 +111,7 @@ export default function DragDropRotaTimeline({ weekStart: propWeekStart }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4 overflow-hidden">
+    <div className="hub-glass rounded-2xl p-4 overflow-hidden">
       {/* Week navigation */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

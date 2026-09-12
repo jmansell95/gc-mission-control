@@ -387,7 +387,7 @@ export default function AssetInventoryGrid({
               const border = rollup.master === 'expired' ? 'border-l-4 border-l-red-500 ring-1 ring-red-100' : rollup.master === 'expiring' ? 'border-l-4 border-l-amber-500 ring-1 ring-amber-100' : rollup.master === 'unknown' ? 'border-l-4 border-l-slate-400 ring-1 ring-slate-100' : 'border-l-4 border-l-emerald-500 ring-1 ring-emerald-100';
               const depotTagged = isInDepot(rig);
               return (
-                <button key={rig.id} onClick={() => onOpenRig(rig)} className={`insight-card rounded-xl text-left ${border} relative overflow-hidden`}>
+                <button key={rig.id} onClick={() => onOpenRig(rig)} className={`hub-glass rounded-xl text-left ${border} relative overflow-hidden`}>
                   <AssetCardBanner asset={rig} heightClass="h-32" />
                   {depotTagged && (
                     <span className="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-0.5 z-10">
@@ -570,7 +570,7 @@ export default function AssetInventoryGrid({
                 } else { onOpenEquip(equip); }
               };
               return (
-                <div key={equip.id} onClick={handleCardClick} className={`insight-card rounded-xl text-left relative ${statusAccent} ${selectionMode ? 'cursor-pointer' : 'cursor-pointer hover:shadow-lg'} ${isSel ? 'ring-2 ring-emerald-500' : ''} ${depotTagged ? 'ring-1 ring-emerald-200' : ''} overflow-hidden`}>
+                <div key={equip.id} onClick={handleCardClick} className={`hub-glass rounded-xl text-left relative ${statusAccent} ${selectionMode ? 'cursor-pointer' : 'cursor-pointer hover:shadow-lg'} ${isSel ? 'ring-2 ring-emerald-500' : ''} ${depotTagged ? 'ring-1 ring-emerald-200' : ''} overflow-hidden`}>
                   {selectionMode && <div className={`absolute top-2.5 right-2.5 w-6 h-6 rounded-md flex items-center justify-center border-2 transition z-20 ${isSel ? 'bg-emerald-500 border-emerald-500' : 'bg-white/80 border-slate-300'}`}>{isSel && <Check className="w-4 h-4 text-white" />}</div>}
                   <AssetCardBanner asset={equip} heightClass={compact ? 'h-16' : 'h-28'} />
                   {depotTagged && !selectionMode && (

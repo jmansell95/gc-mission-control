@@ -122,7 +122,7 @@ export default function StaffComplianceDirectory() {
 
   if (!geoDivision) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-700">No Geotechnical division found</p>
         <p className="text-xs text-slate-500 mt-1">Create a division with 'Geotechnical' in the name in Settings → Divisions to use this view.</p>
@@ -169,7 +169,7 @@ export default function StaffComplianceDirectory() {
           <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-600">No staff found</p>
           <p className="text-xs text-slate-400 mt-1">

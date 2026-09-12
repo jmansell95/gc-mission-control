@@ -133,7 +133,7 @@ export default function ParityMatrix() {
   return (
     <div className="space-y-4">
       {/* Header + progress */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <CheckCircle2 className="w-5 h-5 text-[#2E5A1A]" />
           <h2 className="text-lg font-bold text-slate-900">1:1 Parity Matrix</h2>
@@ -205,7 +205,7 @@ export default function ParityMatrix() {
 
       {/* Items */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <p className="text-sm text-slate-500">No items match "{query}"</p>
         </div>
       ) : grouped ? (
@@ -214,7 +214,7 @@ export default function ParityMatrix() {
             const isCollapsed = collapsedCats[cat];
             const catDone = items.filter(i => done[i.id]).length;
             return (
-              <div key={cat} className="insight-card rounded-2xl overflow-hidden">
+              <div key={cat} className="hub-glass rounded-2xl overflow-hidden">
                 <button
                   onClick={() => toggleCat(cat)}
                   className="w-full flex items-center gap-2 px-4 py-3 hover:bg-slate-50/50 transition"
@@ -248,7 +248,7 @@ export default function ParityMatrix() {
       ) : (
         <div className="space-y-2">
           {filtered.map(item => (
-            <div key={item.id} className="insight-card rounded-xl">
+            <div key={item.id} className="hub-glass rounded-xl">
               <Row
                 item={item}
                 isDone={!!done[item.id]}

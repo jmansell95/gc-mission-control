@@ -67,7 +67,7 @@ export default function PurgeCompletedJobsPanel() {
   return (
     <div className="space-y-4">
       {/* Header card */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-start gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
             <Trash2 className="w-5 h-5 text-rose-600" />
@@ -96,7 +96,7 @@ export default function PurgeCompletedJobsPanel() {
 
       {/* Preview */}
       {preview && (
-        <div className="insight-card rounded-2xl p-5 space-y-4">
+        <div className="hub-glass rounded-2xl p-5 space-y-4">
           <div className="flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-rose-600" />
             <h3 className="text-base font-bold text-slate-800">Purge Preview</h3>
@@ -195,7 +195,7 @@ export default function PurgeCompletedJobsPanel() {
 
       {/* Result */}
       {result && (
-        <div className="insight-card rounded-2xl p-5 space-y-3">
+        <div className="hub-glass rounded-2xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <h3 className="text-base font-bold text-slate-800">Purge Complete</h3>

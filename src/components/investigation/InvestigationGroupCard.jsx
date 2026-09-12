@@ -107,7 +107,7 @@ export default function InvestigationGroupCard({
   };
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Group header */}
       <button
         onClick={() => setOpen(o => !o)}

@@ -81,7 +81,7 @@ export default function FleetCommandHeader({ vehicles, liveByVehicle }) {
         const Icon = tile.icon;
         if (tile.light) {
           return (
-            <div key={i} className={`insight-card rounded-xl p-3.5 border ${lightColorMap[tile.color]}`}>
+            <div key={i} className={`hub-glass rounded-xl p-3.5 border ${lightColorMap[tile.color]}`}>
               <div className="flex items-center gap-2 mb-1.5">
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 <p className="text-ui-micro font-bold uppercase tracking-wide opacity-70">{tile.label}</p>

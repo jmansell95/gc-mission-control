@@ -64,7 +64,7 @@ export default function EnterpriseComplianceHub() {
       )}
 
       {/* Safety Summary */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={HeartPulse} title="Safety Summary" subtitle="Open incidents and critical alerts across all streams" gradient="from-rose-500 to-red-600" />
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
           {/* Compliance pass rate ring */}
@@ -100,7 +100,7 @@ export default function EnterpriseComplianceHub() {
       </div>
 
       {/* Per-Stream Compliance */}
-      <div className="insight-card rounded-2xl p-4 sm:p-5">
+      <div className="hub-glass rounded-2xl p-4 sm:p-5">
         <SectionTitle icon={ShieldCheck} title="Compliance by Stream" subtitle="Expired certs, expiring items and open incidents per stream" gradient="from-violet-500 to-purple-600" />
         {isLoading ? (
           <WidgetLoadingState rows={3} variant="list" />

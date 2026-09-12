@@ -91,7 +91,7 @@ export default function MasterCertificateVault({ assets = [], onOpenAsset }) {
         ].map(s => {
           const SIcon = s.Icon;
           return (
-            <div key={s.label} className="insight-card rounded-xl p-3.5 flex items-center gap-3">
+            <div key={s.label} className="hub-glass rounded-xl p-3.5 flex items-center gap-3">
               <div className={`w-10 h-10 rounded-xl ${s.grad} flex items-center justify-center shadow-md`}>
                 <SIcon className="w-5 h-5 text-white" />
               </div>

@@ -157,7 +157,7 @@ export function StepIntegrations({ form, setForm }) {
     <div className="space-y-3">
       <BlankSlateBanner stepLabel="Connect" />
       <label className={labelCls + ' flex items-center gap-1.5'}><Plug className="w-3.5 h-3.5" /> Integrations</label>
-      <div className="insight-card rounded-2xl p-5 text-center space-y-3">
+      <div className="hub-glass rounded-2xl p-5 text-center space-y-3">
         <div className="w-14 h-14 rounded-2xl command-gradient flex items-center justify-center shadow-md mx-auto">
           <Plug className="w-7 h-7 text-white" />
         </div>
@@ -186,7 +186,7 @@ export function StepReview({ form }) {
       <BlankSlateBanner stepLabel="Launch" />
       <label className={labelCls + ' flex items-center gap-1.5'}><Sparkles className="w-3.5 h-3.5" /> Ready to Launch</label>
       <p className="text-[11px] text-slate-400">Review your workspace configuration below.</p>
-      <div className="insight-card rounded-2xl p-4 space-y-3">
+      <div className="hub-glass rounded-2xl p-4 space-y-3">
         <ReviewRow icon={Building2} label="Name" value={form.name || '—'} />
         <ReviewRow label="Type" value={typeLabel} />
         <ReviewRow label="Code" value={form.code || '—'} />

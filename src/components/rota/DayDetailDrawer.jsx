@@ -19,7 +19,7 @@ export default function DayDetailDrawer({ resource, dateStr, status, onClose, on
       />
 
       {/* Drawer panel */}
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-96 max-w-[90vw] insight-card rounded-l-2xl rounded-r-none border-l border-slate-200 shadow-2xl animate-drawer-slide-in flex flex-col">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-96 max-w-[90vw] hub-glass rounded-l-2xl rounded-r-none border-l border-slate-200 shadow-2xl animate-drawer-slide-in flex flex-col">
         {/* Header bar */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 flex-shrink-0">
           <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Day Details</h3>

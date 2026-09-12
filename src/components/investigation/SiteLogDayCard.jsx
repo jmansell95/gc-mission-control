@@ -259,7 +259,7 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
   };
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Day header */}
       <button onClick={() => onToggle(date)}
         className="w-full px-4 py-4 flex items-center gap-3 text-left hover:bg-slate-50/50 transition border-b border-slate-100/80">

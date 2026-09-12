@@ -105,7 +105,7 @@ export default function LiveJobProgressFeed({ limit = 25, title = 'Live Activity
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4 sm:p-5">
+    <div className="hub-glass rounded-2xl p-4 sm:p-5">
       <div className="flex items-center gap-2.5 mb-3">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-md flex-shrink-0">
           <Activity className="w-4 h-4 text-white" />

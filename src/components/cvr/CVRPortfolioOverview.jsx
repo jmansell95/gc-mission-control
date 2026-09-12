@@ -70,7 +70,7 @@ export default function CVRPortfolioOverview({ onSelectJob }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -124,7 +124,7 @@ export default function CVRPortfolioOverview({ onSelectJob }) {
 
       {/* Portfolio table */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <FileBarChart className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">
             {cvrs.length === 0 ? 'No CVRs uploaded yet' : 'No jobs match your search'}
@@ -134,7 +134,7 @@ export default function CVRPortfolioOverview({ onSelectJob }) {
           </p>
         </div>
       ) : (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50/80 sticky top-0">
@@ -221,7 +221,7 @@ export default function CVRPortfolioOverview({ onSelectJob }) {
 
 function KPICard({ icon: Icon, label, value, subValue, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2`}>
         <Icon className="w-4 h-4 text-white" />
       </div>

@@ -88,7 +88,7 @@ export default function WidgetRenderer({ widgetId, onNavigate, onSelectJob, onOp
 
       default:
         return (
-          <div className="insight-card rounded-2xl p-6 text-center">
+          <div className="hub-glass rounded-2xl p-6 text-center">
             <p className="text-sm text-slate-400">Unknown widget: {widgetId}</p>
           </div>
         );

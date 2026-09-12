@@ -141,7 +141,7 @@ export default function EnterpriseStaffHub() {
 
       <div className="space-y-4">
         {/* Search + Division filters */}
-        <div className="insight-card rounded-2xl p-4 space-y-3">
+        <div className="hub-glass rounded-2xl p-4 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -195,7 +195,7 @@ export default function EnterpriseStaffHub() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="insight-card rounded-2xl p-10 text-center">
+          <div className="hub-glass rounded-2xl p-10 text-center">
             <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <p className="text-sm text-slate-400">No staff match your filters.</p>
           </div>

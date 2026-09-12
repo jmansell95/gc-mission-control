@@ -148,7 +148,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
       }
     >
       {/* Info panel — explains where the data goes */}
-      <div className="insight-card rounded-2xl p-4 mb-4 bg-blue-50/60 border-blue-100">
+      <div className="hub-glass rounded-2xl p-4 mb-4 bg-blue-50/60 border-blue-100">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0">
             <Database className="w-5 h-5 text-white" />
@@ -168,7 +168,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
       {/* Live totals preview */}
       {filledCount > 0 && (
         <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="insight-card rounded-2xl p-3.5">
+          <div className="hub-glass rounded-2xl p-3.5">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-wide">Total Day Rate</p>
@@ -177,7 +177,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
               £{totalRatePreview.toLocaleString('en-GB', { maximumFractionDigits: 0 })}
             </p>
           </div>
-          <div className="insight-card rounded-2xl p-3.5">
+          <div className="hub-glass rounded-2xl p-3.5">
             <div className="flex items-center gap-2 mb-1">
               <PoundSterling className="w-4 h-4 text-blue-600" />
               <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-wide">Total Cost Price (70%)</p>
@@ -198,7 +198,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
           const initials = (s.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
           return (
-            <div key={s.id} className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+            <div key={s.id} className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
               {/* Avatar */}
               <div className="flex-shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-sm shadow-sm overflow-hidden">
                 {s.avatar_url ? (

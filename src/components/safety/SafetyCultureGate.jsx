@@ -52,7 +52,7 @@ export default function MittiGate({ children, onConfigure, message }) {
     return (
       <div className="space-y-4">
         {/* Amber not-connected banner */}
-        <div className="insight-card rounded-2xl p-4 flex items-start gap-3 bg-amber-50/60 border-amber-200">
+        <div className="hub-glass rounded-2xl p-4 flex items-start gap-3 bg-amber-50/60 border-amber-200">
           <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
             <ShieldAlert className="w-5 h-5 text-amber-600" />
           </div>
@@ -74,7 +74,7 @@ export default function MittiGate({ children, onConfigure, message }) {
         </div>
 
         {/* No data info card */}
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="w-7 h-7 text-slate-400" />
           </div>
@@ -90,7 +90,7 @@ export default function MittiGate({ children, onConfigure, message }) {
   // Connected — green banner + normal content
   return (
     <div className="space-y-4">
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-3 bg-emerald-50/60 border-emerald-200">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-3 bg-emerald-50/60 border-emerald-200">
         <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
           <CheckCircle2 className="w-5 h-5 text-emerald-600" />
         </div>

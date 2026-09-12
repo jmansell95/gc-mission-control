@@ -45,7 +45,7 @@ export default function TrainingGapSchedulerWidget() {
 
   if (complianceItems.length === 0 && suggestedBookings.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-600" />
           <h3 className="font-bold text-slate-900 text-sm">Training Compliance</h3>
@@ -60,7 +60,7 @@ export default function TrainingGapSchedulerWidget() {
   }
 
   return (
-    <div className="insight-card rounded-2xl p-5">
+    <div className="hub-glass rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-600" />

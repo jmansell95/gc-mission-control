@@ -84,7 +84,7 @@ export default function KeywordMappingManager() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="insight-card rounded-2xl p-3.5 flex items-center justify-between gap-3 flex-wrap">
+      <div className="hub-glass rounded-2xl p-3.5 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
             <Zap className="w-5 h-5 text-white" />
@@ -104,7 +104,7 @@ export default function KeywordMappingManager() {
 
       {/* Add/Edit form */}
       {showAdd && (
-        <div className="insight-card rounded-2xl p-3.5 space-y-2">
+        <div className="hub-glass rounded-2xl p-3.5 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-slate-700">{editing ? 'Edit Keyword' : 'New Keyword Mapping'}</p>
             <button onClick={() => { setShowAdd(false); setEditing(null); }} className="text-slate-400 hover:text-slate-600">
@@ -163,11 +163,11 @@ export default function KeywordMappingManager() {
 
       {/* Mappings list */}
       {isLoading ? (
-        <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+        <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
           <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-6 text-center">
+        <div className="hub-glass rounded-2xl p-6 text-center">
           <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-2">
             <Tag className="w-6 h-6 text-slate-300" />
           </div>
@@ -181,7 +181,7 @@ export default function KeywordMappingManager() {
             {filtered.map(m => {
               const rci = rciMap[m.rate_card_item_id];
               return (
-                <div key={m.id} className="insight-card rounded-2xl p-3">
+                <div key={m.id} className="hub-glass rounded-2xl p-3">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-slate-800 text-sm">{m.keyword}</p>
@@ -207,7 +207,7 @@ export default function KeywordMappingManager() {
           </div>
 
           {/* Desktop table */}
-          <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+          <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-slate-50/80">

@@ -285,7 +285,7 @@ export default function InvestigationHub({ onNavigate }) {
 
       {/* Empty state */}
       {hasNoLogs && (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mx-auto mb-4">
             <FlaskConical className="w-8 h-8 text-slate-400" />
           </div>

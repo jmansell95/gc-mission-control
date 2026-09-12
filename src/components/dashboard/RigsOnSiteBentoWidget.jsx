@@ -216,7 +216,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
 
   if (isLoading || rigsLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5 min-h-[280px] flex flex-col">
+      <div className="hub-glass rounded-2xl p-5 min-h-[280px] flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">
             <Drill className="w-5 h-5 text-white" />
@@ -233,7 +233,7 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
   return (
     <>
     <div
-      className="insight-card rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
+      className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col cursor-pointer hover:shadow-lg transition group"
       onClick={handleClick}
     >
       {/* Header */}

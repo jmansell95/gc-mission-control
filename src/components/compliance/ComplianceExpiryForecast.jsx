@@ -57,7 +57,7 @@ export default function ComplianceExpiryForecast({ items }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
           <CalendarClock className="w-4 h-4 text-amber-600" />

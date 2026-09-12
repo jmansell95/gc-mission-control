@@ -119,7 +119,7 @@ export default function JobScheduleOverview({ job, primaryType, assignedStaff, r
       <SubcontractorCrewSection jobId={job?.id || ''} />
 
       {/* Daily Schedule — collapsible, grouped by week */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2 flex-wrap">
           <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><Calendar className="w-4 h-4 text-blue-700" /></div>
           <h3 className="font-bold text-slate-900 text-sm">Daily Schedule</h3>

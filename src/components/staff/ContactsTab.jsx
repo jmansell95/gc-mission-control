@@ -404,7 +404,7 @@ export default function ContactsTab({ activeSub }) {
   return (
     <div className="space-y-4">
       {/* Search + Add */}
-      <div className="insight-card rounded-2xl p-4 space-y-3">
+      <div className="hub-glass rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
@@ -484,7 +484,7 @@ export default function ContactsTab({ activeSub }) {
           ))}
         </div>
       ) : records.length === 0 ? (
-        <div className="insight-card rounded-2xl p-10 text-center">
+        <div className="hub-glass rounded-2xl p-10 text-center">
           <Icon className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm text-slate-400">No {meta.label.toLowerCase()} yet. Click "Add {meta.singular}" to create one.</p>
         </div>

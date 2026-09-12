@@ -78,7 +78,7 @@ export default function DirectorAssignment() {
   return (
     <div className="space-y-4">
       {/* Info banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-start gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex items-start gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
           <Crown className="w-5 h-5 text-white" />
         </div>
@@ -165,7 +165,7 @@ function DirectorCard({ director, divisions, updating, onToggleDivision, onDemot
   const managedIds = director.managed_division_ids || [];
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">

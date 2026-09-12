@@ -176,7 +176,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
   const totalActiveJobs = jobs.length;
 
   return (
-    <div className={embedded ? "" : "insight-card rounded-2xl overflow-hidden"}>
+    <div className={embedded ? "" : "hub-glass rounded-2xl overflow-hidden"}>
       {/* Header — collapsible (hidden when embedded in a modal) */}
       {!embedded && (
         <button

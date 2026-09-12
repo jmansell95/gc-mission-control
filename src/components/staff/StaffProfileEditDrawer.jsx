@@ -96,7 +96,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
 
         <div className="space-y-6">
           {/* Profile Photo */}
-          <div className="insight-card rounded-xl p-4">
+          <div className="hub-glass rounded-xl p-4">
             <div className="flex items-center gap-4">
               <ProfileAvatar name={staff?.name} avatarUrl={form.avatar_url} size={64} />
               <div className="min-w-0 flex-1">
@@ -121,7 +121,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
           </div>
 
           {/* Read-only identity fields */}
-          <div className="insight-card rounded-xl p-4 space-y-3">
+          <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
               <ShieldCheck className="w-4 h-4 text-[#2E5A1A]" />
               <p className="text-sm font-semibold text-slate-700">Identity</p>
@@ -152,7 +152,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
               />
             </div>
 
-            <div className="insight-card rounded-xl p-4 flex items-center justify-between gap-4">
+            <div className="hub-glass rounded-xl p-4 flex items-center justify-between gap-4">
               <div className="flex items-start gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
                   <Bell className="w-4 h-4 text-amber-600" />
@@ -168,7 +168,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
               />
             </div>
 
-            <div className="insight-card rounded-xl p-4 flex items-center justify-between gap-4">
+            <div className="hub-glass rounded-xl p-4 flex items-center justify-between gap-4">
               <div className="flex items-start gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
                   <Truck className="w-4 h-4 text-blue-600" />
@@ -184,7 +184,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
               />
             </div>
 
-            <div className="insight-card rounded-xl p-4 flex items-center justify-between gap-4">
+            <div className="hub-glass rounded-xl p-4 flex items-center justify-between gap-4">
               <div className="flex items-start gap-2.5 min-w-0">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-4 h-4 text-emerald-600" />

@@ -107,7 +107,7 @@ export default function PrehistoricImportPage() {
   return (
     <div className="page-bg-vibrant min-h-screen p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="insight-card rounded-2xl p-6">
+      <div className="hub-glass rounded-2xl p-6">
         <div className="flex items-start gap-3 mb-3">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center flex-shrink-0">
             <History className="w-6 h-6 text-white" />
@@ -181,7 +181,7 @@ export default function PrehistoricImportPage() {
 
       {/* How it works */}
       {!preview && !loading && (
-        <div className="insight-card rounded-2xl p-6">
+        <div className="hub-glass rounded-2xl p-6">
           <h3 className="text-base font-semibold text-slate-800 mb-3">How it works</h3>
           <ol className="space-y-2.5 text-sm text-slate-600">
             <li className="flex gap-3"><span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 text-amber-700 text-xs font-bold flex items-center justify-center">1</span><div><strong>Upload your legacy archive</strong> — Excel or CSV with any number of sheets/tabs.</div></li>
@@ -194,7 +194,7 @@ export default function PrehistoricImportPage() {
 
       {/* Result */}
       {result && (
-        <div className="insight-card rounded-2xl p-6 space-y-3">
+        <div className="hub-glass rounded-2xl p-6 space-y-3">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <h3 className="text-base font-bold text-slate-800">Import Complete</h3>

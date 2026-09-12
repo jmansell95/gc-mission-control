@@ -61,7 +61,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
 
       {/* Linked to Rig — prominent card for equipment, shows the parent rig immediately */}
       {asset.asset_type !== 'rig' && parentRig && (
-        <div className="insight-card rounded-2xl p-4 border-l-4 border-l-emerald-500">
+        <div className="hub-glass rounded-2xl p-4 border-l-4 border-l-emerald-500">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <Link2 className="w-4 h-4 text-emerald-600" /> Linked to Rig
           </h3>
@@ -90,7 +90,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {/* Identity + Compliance ring side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Identity card */}
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <Cog className="w-4 h-4 text-[#2E5A1A]" /> Identity
           </h3>
@@ -116,7 +116,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
         </div>
 
         {/* Compliance + Maintenance */}
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <Activity className="w-4 h-4 text-[#2E5A1A]" /> Health
           </h3>
@@ -146,7 +146,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
 
       {/* Specifications — make, model, length, fuel type, condition, hours */}
       {(asset.make || asset.model || asset.length != null || asset.fuel_type || asset.condition || asset.hours_used != null) && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <Wrench className="w-4 h-4 text-[#2E5A1A]" /> Specifications
           </h3>
@@ -162,7 +162,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       )}
 
       {/* Current deployment */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
           <MapPin className="w-4 h-4 text-[#2E5A1A]" /> Current Deployment
         </h3>
@@ -194,7 +194,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
 
       {/* Linked equipment (rigs only) */}
       {asset.asset_type === 'rig' && linkedItems.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <Link2 className="w-4 h-4 text-[#2E5A1A]" /> Linked Equipment ({linkedItems.length})
           </h3>
@@ -239,7 +239,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
 
       {/* Tooling notes */}
       {asset.tooling_notes && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-2 flex items-center gap-2">
             <Wrench className="w-4 h-4 text-[#2E5A1A]" /> Tooling Notes
           </h3>
@@ -249,7 +249,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
 
       {/* General notes */}
       {asset.notes && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-2 flex items-center gap-2">
             <Database className="w-4 h-4 text-[#2E5A1A]" /> Notes
           </h3>

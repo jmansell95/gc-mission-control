@@ -45,7 +45,7 @@ export default function ResourceGapFinder({ divisionId = '', divMap = {}, onClos
   const handleSearch = () => setSearched(true);
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden animate-pop-in">
+    <div className="hub-glass rounded-2xl overflow-hidden animate-pop-in">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-[#2E5A1A] to-[#5A8C1E]">
         <div className="flex items-center gap-2">

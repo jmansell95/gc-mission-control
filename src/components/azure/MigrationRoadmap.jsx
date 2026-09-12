@@ -62,7 +62,7 @@ export default function MigrationRoadmap() {
   return (
     <div className="space-y-5">
       {/* Executive summary hero */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="hero-gradient px-5 sm:px-7 py-6 text-white">
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-5 h-5" />
@@ -88,7 +88,7 @@ export default function MigrationRoadmap() {
       </div>
 
       {/* Why migrate / benefits */}
-      <div className="insight-card rounded-2xl p-5 sm:p-7">
+      <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-[#2E5A1A]" />
           Why migrate to Azure
@@ -109,7 +109,7 @@ export default function MigrationRoadmap() {
       </div>
 
       {/* Roadmap timeline */}
-      <div className="insight-card rounded-2xl p-5 sm:p-7">
+      <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-[#2E5A1A]" />
           Migration Roadmap — 13 Weeks
@@ -166,7 +166,7 @@ export default function MigrationRoadmap() {
       {/* Costs + Risks */}
       <div className="grid md:grid-cols-2 gap-5">
         {/* Costs */}
-        <div className="insight-card rounded-2xl p-5 sm:p-6">
+        <div className="hub-glass rounded-2xl p-5 sm:p-6">
           <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
             <PoundSterling className="w-5 h-5 text-[#2E5A1A]" />
             Indicative Monthly Cost
@@ -187,7 +187,7 @@ export default function MigrationRoadmap() {
         </div>
 
         {/* Risks */}
-        <div className="insight-card rounded-2xl p-5 sm:p-6">
+        <div className="hub-glass rounded-2xl p-5 sm:p-6">
           <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             Risk & Mitigation
@@ -209,7 +209,7 @@ export default function MigrationRoadmap() {
       </div>
 
       {/* Architecture table */}
-      <div className="insight-card rounded-2xl p-5 sm:p-7">
+      <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
           <Server className="w-5 h-5 text-[#2E5A1A]" />
           Target Architecture

@@ -87,7 +87,7 @@ export default function RigEarningsStrip({ boreholes = [], sorItems = [], job = 
             <button
               key={rig.key}
               onClick={() => setSelectedRig(rig)}
-              className={`insight-card rounded-xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg ${c.tile} group`}
+              className={`hub-glass rounded-xl p-4 text-left transition hover:-translate-y-0.5 hover:shadow-lg ${c.tile} group`}
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.icon}`}>

@@ -62,7 +62,7 @@ export default function InsightCard({
 
   const card = (
     <div
-      className={`relative rounded-2xl overflow-hidden ${interactive ? 'insight-card cursor-pointer' : 'insight-card'} ${accent ? 'insight-card-accent' : ''}`}
+      className={`relative rounded-2xl overflow-hidden ${interactive ? 'hub-glass cursor-pointer' : 'hub-glass'} ${accent ? 'hub-glass-accent' : ''}`}
       style={accentColor ? { '--accent-color': accentColor } : undefined}
     >
       {/* Header */}

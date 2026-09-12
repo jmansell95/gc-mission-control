@@ -97,7 +97,7 @@ export default function AccessGroupStaffManager({ group, groups }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4">
+    <div className="hub-glass rounded-2xl p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

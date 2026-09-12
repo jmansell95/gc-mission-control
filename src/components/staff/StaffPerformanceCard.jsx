@@ -63,7 +63,7 @@ export default function StaffPerformanceCard({ staffId }) {
   ];
 
   return (
-    <div className="insight-card rounded-2xl p-4 md:p-5">
+    <div className="hub-glass rounded-2xl p-4 md:p-5">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
           <HardHat className="w-4 h-4 text-emerald-600" />

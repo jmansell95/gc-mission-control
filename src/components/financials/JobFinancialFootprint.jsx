@@ -128,7 +128,7 @@ export default function JobFinancialFootprint({ job }) {
 
   if (anyLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -146,7 +146,7 @@ export default function JobFinancialFootprint({ job }) {
 
       {/* Monthly chart */}
       {monthlyData.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
             <PoundSterling className="w-4 h-4 text-[#2E5A1A]" /> Cost vs Revenue Timeline
           </h3>
@@ -166,7 +166,7 @@ export default function JobFinancialFootprint({ job }) {
 
       {/* Invoice snapshot */}
       {invoices.length > 0 && (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-[#2E5A1A]" /> Invoices ({invoices.length})
           </h3>
@@ -192,7 +192,7 @@ export default function JobFinancialFootprint({ job }) {
       )}
 
       {/* Unified ledger */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
           <Scale className="w-4 h-4 text-[#2E5A1A]" /> Project Ledger
           <span className="text-xs text-slate-400 font-normal ml-1">{ledger.length} entries</span>
@@ -258,7 +258,7 @@ function SummaryTile({ icon: Icon, label, value, sub, tone }) {
     blue: 'text-blue-600 bg-blue-50',
   };
   return (
-    <div className="insight-card rounded-xl p-3.5">
+    <div className="hub-glass rounded-xl p-3.5">
       <div className="flex items-center gap-2 mb-1.5">
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${tones[tone] || tones.blue}`}>
           <Icon className="w-3.5 h-3.5" />

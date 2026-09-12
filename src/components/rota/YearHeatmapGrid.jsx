@@ -119,7 +119,7 @@ export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus,
   );
 
   return (
-    <div className="relative insight-card rounded-2xl overflow-hidden">
+    <div className="relative hub-glass rounded-2xl overflow-hidden">
       <div ref={scrollRef} onScroll={handleScroll} className="heatmap-grid-scroll overflow-x-auto overflow-y-auto" style={{ maxHeight: '70vh' }}>
         <div style={{ width: `${NAME_WIDTH + totalWidth}px`, position: 'relative' }}>
           {/* Month header */}

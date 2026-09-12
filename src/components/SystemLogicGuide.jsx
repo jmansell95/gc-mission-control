@@ -461,7 +461,7 @@ export default function SystemLogicGuide() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="hero-gradient px-6 py-5 text-white flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center backdrop-blur-sm">
@@ -485,7 +485,7 @@ export default function SystemLogicGuide() {
       {SECTIONS.map(section => {
         const Icon = section.icon;
         return (
-          <div key={section.id} className="insight-card rounded-2xl p-5">
+          <div key={section.id} className="hub-glass rounded-2xl p-5">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm">
                 <Icon className="w-4 h-4 text-white" />

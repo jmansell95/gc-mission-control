@@ -64,7 +64,7 @@ export default function DivisionManager() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md flex-shrink-0">
             <Building2 className="w-6 h-6 text-white" />
@@ -86,7 +86,7 @@ export default function DivisionManager() {
         {isLoading ? (
           <div className="h-40 animate-pulse bg-slate-100 rounded-2xl" />
         ) : divisions.length === 0 ? (
-          <div className="insight-card rounded-2xl p-8 text-center">
+          <div className="hub-glass rounded-2xl p-8 text-center">
             <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <p className="text-sm font-semibold text-slate-600">No business streams yet</p>
             <p className="text-xs text-slate-400 mt-1">Create your first business stream, or run the migration to auto-create the Geotechnical stream.</p>
@@ -100,7 +100,7 @@ export default function DivisionManager() {
               const navCount = resolveNavItems(d).length;
               const typeLabel = (DIVISION_TYPES.find(t => t.value === d.division_type) || {}).label || d.division_type;
               return (
-                <div key={d.id} className="insight-card relative rounded-2xl overflow-hidden">
+                <div key={d.id} className="hub-glass relative rounded-2xl overflow-hidden">
                   <div className="h-1.5" style={{ background: `linear-gradient(90deg, ${d.color || '#2E5A1A'}, ${d.color || '#2E5A1A'}99)` }} />
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-2 mb-3">

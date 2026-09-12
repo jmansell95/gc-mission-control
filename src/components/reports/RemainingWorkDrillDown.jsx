@@ -101,7 +101,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
           </div>
 
           {/* Monthly projection chart */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-bold text-slate-900">Monthly Projected Earnings</h4>
               {job.using_fallback && (
@@ -227,7 +227,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
           {/* Resources */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Crew */}
-            <div className="insight-card rounded-2xl p-4">
+            <div className="hub-glass rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
                   <Users className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
             </div>
 
             {/* Rigs */}
-            <div className="insight-card rounded-2xl p-4">
+            <div className="hub-glass rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center">
                   <Drill className="w-4 h-4" />
@@ -297,7 +297,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
           </div>
 
           {/* Run-rate analysis */}
-          <div className="insight-card rounded-2xl p-4">
+          <div className="hub-glass rounded-2xl p-4">
             <h4 className="text-sm font-bold text-slate-900 mb-3">Run-Rate Analysis</h4>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>

@@ -98,7 +98,7 @@ export default function BentoStatTiles({ onNavigate }) {
           <button
             key={i}
             onClick={() => handleNav(tile.nav)}
-            className="insight-card rounded-xl p-3 text-left hover:shadow-md transition group cursor-pointer"
+            className="hub-glass rounded-xl p-3 text-left hover:shadow-md transition group cursor-pointer"
           >
             <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition`}>
               <Icon className={`w-4 h-4 ${c.iconColor}`} />

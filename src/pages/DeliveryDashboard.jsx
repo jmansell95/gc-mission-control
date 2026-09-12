@@ -335,7 +335,7 @@ export default function DeliveryDashboard() {
   if (!staff) {
     return (
       <div className="flex items-center justify-center min-h-screen page-bg-vibrant px-6">
-        <div className="text-center max-w-sm insight-card rounded-3xl p-8">
+        <div className="text-center max-w-sm hub-glass rounded-3xl p-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center mx-auto mb-4">
             <Truck className="w-8 h-8 text-slate-400" />
           </div>
@@ -428,7 +428,7 @@ export default function DeliveryDashboard() {
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="insight-card rounded-2xl p-5">
+              <div key={i} className="hub-glass rounded-2xl p-5">
                 <Skeleton className="h-1.5 w-full mb-4 rounded-full" />
                 <Skeleton className="h-4 w-1/3 mb-3" />
                 <SkeletonText lines={3} />
@@ -436,7 +436,7 @@ export default function DeliveryDashboard() {
             ))}
           </div>
         ) : todaysSorted.length === 0 ? (
-          <div className="insight-card rounded-2xl">
+          <div className="hub-glass rounded-2xl">
             <EmptyState icon={Clock} title="No deliveries scheduled yet" message="Check back later — your supervisor will assign delivery tasks to you." />
           </div>
         ) : (

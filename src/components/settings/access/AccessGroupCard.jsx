@@ -31,7 +31,7 @@ export default function AccessGroupCard({ group, staffCount, teamCount, division
   const readPct = (readCount / total) * 100;
 
   return (
-    <div className="insight-card rounded-2xl p-4 flex flex-col group">
+    <div className="hub-glass rounded-2xl p-4 flex flex-col group">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="min-w-0 flex-1">

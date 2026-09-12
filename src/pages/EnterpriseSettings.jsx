@@ -129,7 +129,7 @@ export default function EnterpriseSettings() {
             ].map((s, i) => {
               const SIcon = s.icon;
               return (
-                <div key={i} className="insight-card rounded-xl p-3 flex items-center gap-2.5">
+                <div key={i} className="hub-glass rounded-xl p-3 flex items-center gap-2.5">
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${s.tint}`}>
                     <SIcon className="w-5 h-5" />
                   </div>

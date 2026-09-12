@@ -183,7 +183,7 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
                 const hasDefaults = jt.default_revenue_method || jt.default_budget_amount || jt.default_duration_days || (jt.default_team_ids && jt.default_team_ids.length > 0) || jt.default_notes;
                 const divisionName = jt.division_id ? (divisions.find(d => d.id === jt.division_id)?.name || 'Unknown stream') : 'All streams';
                 return (
-                  <div key={jt.id} className="insight-card rounded-xl p-3 flex items-center gap-3">
+                  <div key={jt.id} className="hub-glass rounded-xl p-3 flex items-center gap-3">
                     <div className="flex flex-col gap-0.5">
                       <button type="button" onClick={() => handleReorder(jt.id, -1)} disabled={i === 0} className="p-0.5 text-slate-400 hover:text-[#2E5A1A] disabled:opacity-30 transition">
                         <ChevronUp className="w-3.5 h-3.5" />

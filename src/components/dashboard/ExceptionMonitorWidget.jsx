@@ -213,7 +213,7 @@ export default function ExceptionMonitorWidget({ onNavigate }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+    <div className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-br from-rose-500 to-rose-700 px-4 py-3.5 text-white flex-shrink-0">
         <div className="flex items-center justify-between">

@@ -149,7 +149,7 @@ export default function CVRExportTab() {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -158,7 +158,7 @@ export default function CVRExportTab() {
   return (
     <div className="space-y-3">
       {/* Export bar */}
-      <div className="insight-card rounded-2xl p-3.5 flex items-center justify-between gap-3 flex-wrap">
+      <div className="hub-glass rounded-2xl p-3.5 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center">
             <FileSpreadsheet className="w-5 h-5 text-white" />
@@ -180,7 +180,7 @@ export default function CVRExportTab() {
 
       {/* Export result */}
       {exportResult && !exportResult.error && (
-        <div className="insight-card rounded-2xl p-3.5 bg-emerald-50 border-emerald-200">
+        <div className="hub-glass rounded-2xl p-3.5 bg-emerald-50 border-emerald-200">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
             <p className="text-sm font-bold text-emerald-800">CVR Pack Generated</p>
@@ -200,7 +200,7 @@ export default function CVRExportTab() {
         </div>
       )}
       {exportResult?.error && (
-        <div className="insight-card rounded-2xl p-3.5 bg-rose-50 border-rose-200">
+        <div className="hub-glass rounded-2xl p-3.5 bg-rose-50 border-rose-200">
           <p className="text-sm font-bold text-rose-800">Export Failed</p>
           <p className="text-xs text-rose-600 mt-1">{exportResult.error}</p>
         </div>
@@ -228,7 +228,7 @@ export default function CVRExportTab() {
 
       {/* CVR list — Mobile cards */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+        <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <FileBarChart className="w-7 h-7 text-slate-300" />
           </div>
@@ -245,7 +245,7 @@ export default function CVRExportTab() {
                 <div
                   key={cvr.id}
                   onClick={() => toggleSelect(cvr.id)}
-                  className={`insight-card rounded-2xl p-3.5 cursor-pointer transition active:scale-[0.98] ${
+                  className={`hub-glass rounded-2xl p-3.5 cursor-pointer transition active:scale-[0.98] ${
                     isSelected ? 'ring-2 ring-[#2E5A1A] bg-emerald-50/30' : ''
                   }`}
                 >
@@ -275,7 +275,7 @@ export default function CVRExportTab() {
           </div>
 
           {/* Desktop table */}
-          <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+          <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-slate-50/80">

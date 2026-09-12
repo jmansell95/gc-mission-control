@@ -108,7 +108,7 @@ export default function CrewAccessManager({ scopedDivisionId = null }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
       {/* ─── LEFT: Crew Explorer ─── */}
-      <div className="lg:col-span-4 insight-card rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
+      <div className="lg:col-span-4 hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
         <div className="flex items-center gap-2 mb-3">
           <Layers className="w-4 h-4 text-[#2E5A1A]" />
           <h3 className="text-sm font-bold text-slate-900">Crews & Teams</h3>
@@ -186,7 +186,7 @@ export default function CrewAccessManager({ scopedDivisionId = null }) {
             saving={assignMutation.isPending}
           />
         ) : (
-          <div className="insight-card rounded-2xl p-12 text-center">
+          <div className="hub-glass rounded-2xl p-12 text-center">
             <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-slate-600">Select a crew to manage its access</p>
             <p className="text-xs text-slate-400 mt-1">Choose a team from the list on the left</p>
@@ -203,7 +203,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
   return (
     <div className="space-y-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
       {/* ─── Crew Header ─── */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md flex-shrink-0">
@@ -255,7 +255,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
       </div>
 
       {/* ─── Permission Group Selector ─── */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="w-4 h-4 text-[#2E5A1A]" />
           <h3 className="text-sm font-bold text-slate-900">Crew Access Level</h3>
@@ -305,7 +305,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
       </div>
 
       {/* ─── Crew Members ─── */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Users className="w-4 h-4 text-[#2E5A1A]" />
           <h3 className="text-sm font-bold text-slate-900">Crew Members</h3>

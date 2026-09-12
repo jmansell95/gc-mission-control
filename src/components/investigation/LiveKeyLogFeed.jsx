@@ -86,7 +86,7 @@ export default function LiveKeyLogFeed({ jobs = [] }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-4 mb-4">
+      <div className="hub-glass rounded-2xl p-4 mb-4">
         <Skeleton className="h-10 w-full rounded-lg" />
       </div>
     );
@@ -108,7 +108,7 @@ export default function LiveKeyLogFeed({ jobs = [] }) {
   };
 
   return (
-    <div className="insight-card rounded-2xl mb-4 overflow-hidden">
+    <div className="hub-glass rounded-2xl mb-4 overflow-hidden">
       {/* Header — pulsing live indicator */}
       <button
         onClick={() => setCollapsed(c => !c)}

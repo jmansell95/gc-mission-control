@@ -105,7 +105,7 @@ export default function JobRateCardSubTab({ job }) {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2.5 mb-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center">
             <Receipt className="w-5 h-5 text-white" />
@@ -171,7 +171,7 @@ export default function JobRateCardSubTab({ job }) {
 
       {/* Add new rate form */}
       {showAdd && (
-        <div className="insight-card rounded-2xl p-3 space-y-2">
+        <div className="hub-glass rounded-2xl p-3 space-y-2">
           <div className="grid grid-cols-12 gap-2">
             <input
               type="text"
@@ -211,15 +211,15 @@ export default function JobRateCardSubTab({ job }) {
 
       {/* Rate items table */}
       {isLoading ? (
-        <div className="insight-card rounded-2xl p-8 flex items-center justify-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin" /></div>
+        <div className="hub-glass rounded-2xl p-8 flex items-center justify-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin" /></div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Receipt className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No {CATEGORY_META[activeCategory].label} rates for this job</p>
           <p className="text-xs text-slate-400 mt-1">Add rates manually or upload a rate card file</p>
         </div>
       ) : (
-        <div className="insight-card rounded-2xl overflow-hidden">
+        <div className="hub-glass rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50/80">

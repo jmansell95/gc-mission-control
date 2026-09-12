@@ -38,7 +38,7 @@ export default function LiveFleetPanel() {
     <div className="space-y-4">
       {/* Live KPI strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center"><Navigation className="w-3.5 h-3.5 text-blue-600" /></div>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Driving Now</p>
@@ -46,7 +46,7 @@ export default function LiveFleetPanel() {
           <p className="text-lg sm:text-xl font-bold tabular-nums text-slate-900">{driving.length}</p>
           <p className="text-[10px] text-slate-400">live vehicles moving</p>
         </div>
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center"><Car className="w-3.5 h-3.5 text-slate-500" /></div>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Parked</p>
@@ -54,7 +54,7 @@ export default function LiveFleetPanel() {
           <p className="text-lg sm:text-xl font-bold tabular-nums text-slate-900">{parked}</p>
           <p className="text-[10px] text-slate-400">stopped / engine off</p>
         </div>
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-[#2E5A1A]" /></div>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Tracked</p>
@@ -62,7 +62,7 @@ export default function LiveFleetPanel() {
           <p className="text-lg sm:text-xl font-bold tabular-nums text-slate-900">{vehicles.length}</p>
           <p className="text-[10px] text-slate-400">Geotab devices</p>
         </div>
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center"><Gauge className="w-3.5 h-3.5 text-emerald-600" /></div>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Refresh</p>
@@ -73,7 +73,7 @@ export default function LiveFleetPanel() {
       </div>
 
       {/* Driving-now driver list */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <Navigation className="w-4 h-4 text-blue-600" />
           <h3 className="text-sm font-bold text-slate-900">Driving Now</h3>

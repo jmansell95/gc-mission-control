@@ -163,7 +163,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
           const value = list.reduce((s, c) => s + (c.total_contract_value_net || 0), 0);
           const Icon = meta.icon;
           return (
-            <div key={key} className={`insight-card relative rounded-2xl p-4 overflow-hidden ring-1 ${meta.ring}`}>
+            <div key={key} className={`hub-glass relative rounded-2xl p-4 overflow-hidden ring-1 ${meta.ring}`}>
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${meta.soft}`}>
                   <Icon className={`w-4 h-4 ${meta.text}`} />
@@ -186,7 +186,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
       </div>
 
       {/* Renewal Radar */}
-      <section className="insight-card rounded-2xl p-4">
+      <section className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
             <CalendarClock className="w-4 h-4 text-amber-600" />
@@ -229,7 +229,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
       {/* Two-column: Reconciliation + Retention */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Reconciliation Status */}
-        <section className="insight-card rounded-2xl p-4">
+        <section className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
               <Scale className="w-4 h-4 text-blue-600" />
@@ -267,7 +267,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
         </section>
 
         {/* Retention Watch */}
-        <section className="insight-card rounded-2xl p-4">
+        <section className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
               <Lock className="w-4 h-4 text-amber-600" />
@@ -310,7 +310,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
 
       {/* Revenue Method Mix + Invoice Snapshot */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <section className="insight-card rounded-2xl p-4">
+        <section className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[#2E5A1A]" /> Active Contract Billing Methods
           </h3>
@@ -335,7 +335,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
           )}
         </section>
 
-        <section className="insight-card rounded-2xl p-4">
+        <section className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-[#2E5A1A]" /> Invoice Status Snapshot
           </h3>

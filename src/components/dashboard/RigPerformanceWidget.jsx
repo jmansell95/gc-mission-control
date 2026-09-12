@@ -397,7 +397,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
 
   if (isLoading || rigsLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5 min-h-[280px]">
+      <div className="hub-glass rounded-2xl p-5 min-h-[280px]">
         <WidgetLoadingState rows={4} />
       </div>
     );
@@ -405,7 +405,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
 
   if (activeRigCount === 0) {
     return (
-      <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col">
         <div className="bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] px-4 py-3 text-white">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
@@ -431,7 +431,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
   const top6 = rigStats.slice(0, 6);
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden h-full flex flex-col">
+    <div className="hub-glass rounded-2xl overflow-hidden h-full flex flex-col">
       {/* Header */}
       <div className="bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] px-4 py-3 text-white flex-shrink-0">
         <div className="flex items-center justify-between">

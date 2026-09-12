@@ -41,7 +41,7 @@ export default function RigCertificateHero({ asset, onOpenCert }) {
   const dashOffset = circumference - (ring.pct / 100) * circumference;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Status-coloured top strip */}
       <div className="h-1.5" style={{ background: ring.color }} />
 

@@ -80,7 +80,7 @@ export default function PermissionGroupsTab() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-10 text-center">
+        <div className="hub-glass rounded-2xl p-10 text-center">
           <KeyRound className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No permission groups found</p>
           <p className="text-xs text-slate-400 mt-1">Create one to control what your team can access.</p>

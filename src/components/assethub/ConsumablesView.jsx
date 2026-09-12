@@ -61,19 +61,19 @@ export default function ConsumablesView() {
     <div className="space-y-4">
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center"><Package className="w-4 h-4 text-blue-700" /></div>
           <div><p className="text-lg font-bold text-slate-900 tabular-nums">{stats.total}</p><p className="text-[10px] text-slate-400 uppercase font-semibold">Total Items</p></div>
         </div>
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center"><AlertTriangle className="w-4 h-4 text-amber-700" /></div>
           <div><p className="text-lg font-bold text-slate-900 tabular-nums">{stats.low}</p><p className="text-[10px] text-slate-400 uppercase font-semibold">Low Stock</p></div>
         </div>
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center"><AlertTriangle className="w-4 h-4 text-rose-700" /></div>
           <div><p className="text-lg font-bold text-slate-900 tabular-nums">{stats.out}</p><p className="text-[10px] text-slate-400 uppercase font-semibold">Out of Stock</p></div>
         </div>
-        <div className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+        <div className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center"><PoundSterling className="w-4 h-4 text-emerald-700" /></div>
           <div><p className="text-lg font-bold text-slate-900 tabular-nums">£{stats.totalValue.toLocaleString('en-GB', { maximumFractionDigits: 0 })}</p><p className="text-[10px] text-slate-400 uppercase font-semibold">Stock Value</p></div>
         </div>
@@ -101,7 +101,7 @@ export default function ConsumablesView() {
 
       {/* Consumable cards */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Package className="w-12 h-12 text-slate-200 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No consumables found</p>
           <p className="text-xs text-slate-400 mt-1">Add consumable items from Settings → Consumable Stock.</p>
@@ -114,7 +114,7 @@ export default function ConsumablesView() {
             const min = Number(item.minimum_stock) || 0;
             const unitCost = Number(item.unit_cost) || 0;
             return (
-              <div key={item.id} className="insight-card rounded-2xl p-4 relative overflow-hidden">
+              <div key={item.id} className="hub-glass rounded-2xl p-4 relative overflow-hidden">
                 <div className={`absolute top-0 left-0 right-0 h-1 ${badge.dot}`} />
                 <div className="flex items-start justify-between gap-2 mb-2 mt-1">
                   <div className="min-w-0">

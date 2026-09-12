@@ -28,7 +28,7 @@ export default function BookingSummaryCard({ booking, onEdit, onDelete }) {
   const perPerson = perPersonTotal(booking);
 
   return (
-    <div className={`insight-card rounded-2xl p-4 relative overflow-hidden ${isAirbnb ? 'border-amber-200/60' : 'border-blue-200/60'}`}>
+    <div className={`hub-glass rounded-2xl p-4 relative overflow-hidden ${isAirbnb ? 'border-amber-200/60' : 'border-blue-200/60'}`}>
       <div className={`absolute top-0 left-0 right-0 h-1 ${isAirbnb ? 'bg-amber-400' : 'bg-blue-400'}`} />
       <div className="flex items-start gap-3">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isAirbnb ? 'bg-amber-100' : 'bg-blue-100'}`}>

@@ -42,7 +42,7 @@ export default function TripPlaybackScrubber({ breadcrumbs, currentIndex, onInde
 
   if (!hasData) {
     return (
-      <div className="insight-card rounded-xl p-3 text-center">
+      <div className="hub-glass rounded-xl p-3 text-center">
         <Clock className="w-5 h-5 text-slate-300 mx-auto mb-1" />
         <p className="text-xs text-slate-400">No breadcrumb data for playback</p>
       </div>
@@ -58,7 +58,7 @@ export default function TripPlaybackScrubber({ breadcrumbs, currentIndex, onInde
   const fmtTime = (ts) => ts ? new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
 
   return (
-    <div className="insight-card rounded-xl p-3 space-y-2.5">
+    <div className="hub-glass rounded-xl p-3 space-y-2.5">
       <div className="flex items-center gap-2">
         <Gauge className="w-3.5 h-3.5 text-[#2E5A1A]" />
         <h4 className="text-xs font-bold text-slate-800">Trip Playback</h4>

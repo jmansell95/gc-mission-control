@@ -75,7 +75,7 @@ export default function ScheduleSplash({ assignments, jobs, vehicles, clients, t
             <p className="text-sm text-slate-400">Loading your schedule…</p>
           </div>
         ) : dates.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center insight-card rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-16 text-center hub-glass rounded-2xl">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
               <Calendar className="w-8 h-8 text-slate-300" />
             </div>

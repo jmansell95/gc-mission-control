@@ -67,7 +67,7 @@ export default function EfficiencySnapshotWidget({ onSelectJob }) {
         </div>
       ) : (
         <motion.div initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.06 } } }} className="grid grid-cols-3 gap-3">
-          <motion.div variants={tileAnim} className="insight-card rounded-xl p-3.5">
+          <motion.div variants={tileAnim} className="hub-glass rounded-xl p-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <div className="w-7 h-7 rounded-lg stat-gradient-brand flex items-center justify-center"><PoundSterling className="w-3.5 h-3.5 text-white" /></div>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Booked</span>
@@ -76,7 +76,7 @@ export default function EfficiencySnapshotWidget({ onSelectJob }) {
             <p className="text-[10px] text-slate-400">{activeJobs.length} active {activeJobs.length === 1 ? 'job' : 'jobs'}</p>
           </motion.div>
 
-          <motion.div variants={tileAnim} className="insight-card rounded-xl p-3.5">
+          <motion.div variants={tileAnim} className="hub-glass rounded-xl p-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <div className="w-7 h-7 rounded-lg stat-gradient-blue flex items-center justify-center"><CalendarDays className="w-3.5 h-3.5 text-white" /></div>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Crew-Days</span>
@@ -85,7 +85,7 @@ export default function EfficiencySnapshotWidget({ onSelectJob }) {
             <p className="text-[10px] text-slate-400">on the clock this week</p>
           </motion.div>
 
-          <motion.div variants={tileAnim} className="insight-card rounded-xl p-3.5">
+          <motion.div variants={tileAnim} className="hub-glass rounded-xl p-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <div className="w-7 h-7 rounded-lg stat-gradient-emerald flex items-center justify-center"><Users className="w-3.5 h-3.5 text-white" /></div>
               <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">£ / Day</span>
@@ -98,7 +98,7 @@ export default function EfficiencySnapshotWidget({ onSelectJob }) {
 
       {/* Top earners — compact list */}
       {topJobs.length > 0 && (
-        <div className="insight-card rounded-xl divide-y divide-slate-100">
+        <div className="hub-glass rounded-xl divide-y divide-slate-100">
           {topJobs.map(({ job, rev }) => (
             <button key={job.id} type="button" onClick={() => onSelectJob?.(job)}
               className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-slate-50/60 transition first:rounded-t-xl last:rounded-b-xl">

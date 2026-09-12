@@ -89,7 +89,7 @@ export default function CrewPerformanceReport({ filters }) {
 
   if (!report || report.crewData.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <HardHat className="w-10 h-10 text-slate-300 mx-auto mb-3" />
         <p className="text-sm font-semibold text-slate-500">No crew timesheets in the selected range</p>
         <p className="text-xs text-slate-400 mt-1">Try widening the date range or clearing filters.</p>
@@ -103,28 +103,28 @@ export default function CrewPerformanceReport({ filters }) {
     <div className="space-y-4">
       {/* Summary tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center"><Users className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Crew Members</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{crewData.length}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><Clock className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Total Hours</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{totals.totalHours.toFixed(1)}h</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><Clock className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Overtime Hours</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{totals.overtimeHours.toFixed(1)}h</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center"><TrendingUp className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Revenue Earned</p>
@@ -146,7 +146,7 @@ export default function CrewPerformanceReport({ filters }) {
       </div>
 
       {/* Preview table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-slate-100">
           <h3 className="text-sm font-bold text-slate-900">Per-Staff Breakdown</h3>
         </div>

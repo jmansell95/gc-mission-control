@@ -84,26 +84,26 @@ export default function AssetLifecycleManager() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <p className="text-[10px] text-slate-500 uppercase font-medium">Total Assets</p>
           <p className="text-2xl font-bold text-slate-800 mt-1">{stats.count}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <p className="text-[10px] text-slate-500 uppercase font-medium">Acquisition Value</p>
           <p className="text-2xl font-bold text-slate-800 mt-1">£{stats.totalValue.toLocaleString()}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <p className="text-[10px] text-slate-500 uppercase font-medium">Current Book Value</p>
           <p className="text-2xl font-bold text-emerald-700 mt-1">£{stats.totalBookValue.toLocaleString()}</p>
         </div>
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <p className="text-[10px] text-slate-500 uppercase font-medium">Due for Replacement</p>
           <p className="text-2xl font-bold text-rose-600 mt-1">{stats.dueForReplacement}</p>
         </div>
       </div>
 
       {/* Asset list */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />

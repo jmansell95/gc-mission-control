@@ -660,7 +660,7 @@ export default function Microsoft365SetupGuide() {
       />
 
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-8">
-        <div className="insight-card rounded-2xl p-6 md:p-8 space-y-4">
+        <div className="hub-glass rounded-2xl p-6 md:p-8 space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#8DC63F] flex items-center justify-center flex-shrink-0 shadow-md">
               <Cloud className="w-6 h-6 text-white" />

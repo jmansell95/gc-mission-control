@@ -36,7 +36,7 @@ export default function InvestigationHeader({
   const hasActiveFilters = typeFilter !== 'all' || boreholeStatusFilter !== 'all' || drillerFilter !== 'all' || dateFrom || dateTo;
 
   return (
-    <div className="insight-card rounded-2xl mb-4 sticky top-0 z-30 shadow-md overflow-hidden">
+    <div className="hub-glass rounded-2xl mb-4 sticky top-0 z-30 shadow-md overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-[#2E5A1A] via-[#5A8C1E] to-[#8DC63F]" />
       <div className="p-3 sm:p-4">
         {/* Primary row: search + review pills + filters toggle */}

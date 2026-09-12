@@ -69,7 +69,7 @@ export default function MissionControlWidget({ onNavigate }) {
         {/* Key Gauges Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {/* Burn Rate */}
-          <div className="insight-card rounded-xl p-3 relative overflow-hidden">
+          <div className="hub-glass rounded-xl p-3 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
                 <Gauge className="w-4 h-4 text-white" />
@@ -84,7 +84,7 @@ export default function MissionControlWidget({ onNavigate }) {
           </div>
 
           {/* Active Jobs */}
-          <div className="insight-card rounded-xl p-3">
+          <div className="hub-glass rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                 <Activity className="w-4 h-4 text-white" />
@@ -96,7 +96,7 @@ export default function MissionControlWidget({ onNavigate }) {
           </div>
 
           {/* Outstanding Revenue */}
-          <div className="insight-card rounded-xl p-3">
+          <div className="hub-glass rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                 <PoundSterling className="w-4 h-4 text-white" />
@@ -108,7 +108,7 @@ export default function MissionControlWidget({ onNavigate }) {
           </div>
 
           {/* Safety Status */}
-          <div className="insight-card rounded-xl p-3">
+          <div className="hub-glass rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
                 <AlertTriangle className="w-4 h-4 text-white" />

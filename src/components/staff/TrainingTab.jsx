@@ -138,7 +138,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
   return (
     <div className="space-y-5">
       {/* Qualification Matrix — compact, no scroll */}
-      <div className="insight-card rounded-2xl p-4 md:p-5">
+      <div className="hub-glass rounded-2xl p-4 md:p-5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 mb-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center flex-shrink-0">
@@ -210,7 +210,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
               if (!c) return null;
               const attendeeCount = allBookings.filter(ab => ab.course_id === c.id && ab.staff_id).length;
               return (
-                <div key={b.id} className="insight-card rounded-2xl p-3.5 flex items-start gap-3">
+                <div key={b.id} className="hub-glass rounded-2xl p-3.5 flex items-start gap-3">
                   <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-sm">
                     <GraduationCap className="w-5 h-5 text-white" />
                   </div>
@@ -246,7 +246,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
           </div>
           <div className="space-y-2">
             {teamUpcoming.map(({ course: c, attendees }) => (
-              <div key={c.id} className="insight-card rounded-2xl p-3.5">
+              <div key={c.id} className="hub-glass rounded-2xl p-3.5">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-sm">
                     <BookOpen className="w-5 h-5 text-white" />

@@ -28,7 +28,7 @@ export default function CVRVariationsTab({ cvr, variations }) {
 
   if (!variations || variations.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-500">No variation orders yet</p>
         <p className="text-xs text-slate-400 mt-1">Variations will appear here when the CVR includes a VO Account sheet</p>
@@ -41,7 +41,7 @@ export default function CVRVariationsTab({ cvr, variations }) {
   const totalMargin = totalAgreed - totalCost;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-200">
         <h3 className="text-sm font-bold text-slate-900">Variation Orders</h3>
         <p className="text-[11px] text-slate-400">{variations.length} VOs · {fmt(totalAgreed)} agreed · {fmt(totalMargin)} margin</p>

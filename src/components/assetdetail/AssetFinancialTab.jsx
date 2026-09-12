@@ -82,7 +82,7 @@ export default function AssetFinancialTab({ asset }) {
 
       {/* Depreciation chart */}
       {depreciationData.length > 0 ? (
-        <div className="insight-card rounded-2xl p-4">
+        <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
             <TrendingDown className="w-4 h-4 text-[#2E5A1A]" /> Depreciation Schedule
           </h3>
@@ -106,7 +106,7 @@ export default function AssetFinancialTab({ asset }) {
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="insight-card rounded-2xl p-4 text-center">
+        <div className="hub-glass rounded-2xl p-4 text-center">
           <TrendingDown className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-sm text-slate-400">No depreciation data — set acquisition cost and useful life to see the schedule.</p>
         </div>

@@ -69,7 +69,7 @@ export default function UsageHoursWidget() {
   return (
     <div className="space-y-3">
       {/* Header + recalculate button */}
-      <div className="insight-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="hub-glass rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
             <Gauge className="w-5 h-5 text-white" />

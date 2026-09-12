@@ -25,7 +25,7 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
   return (
     <button
       onClick={() => onEnter(d)}
-      className="insight-card relative rounded-3xl overflow-hidden text-left group w-full"
+      className="hub-glass relative rounded-3xl overflow-hidden text-left group w-full"
     >
       {/* Gradient header — large, with BU label and stream count */}
       <div className="h-20 sm:h-24 px-5 sm:px-6 flex items-center justify-between relative overflow-hidden" style={{ background: headerGradient }}>

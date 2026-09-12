@@ -150,7 +150,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
               const canAfford = balance >= (r.points_cost || 0);
               const accent = r.accent_color || '#2E5A1A';
               return (
-                <div key={r.id} className="insight-card rounded-2xl overflow-hidden flex flex-col">
+                <div key={r.id} className="hub-glass rounded-2xl overflow-hidden flex flex-col">
                   {/* Tile header */}
                   <div className={`${tc.grad} relative h-20 flex items-center justify-center`}>
                     {r.image_url ? (
@@ -216,7 +216,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
               const st = STATUS_CFG[r.status] || STATUS_CFG.pending;
               const SIcon = st.icon;
               return (
-                <div key={r.id} className="insight-card rounded-2xl p-3.5 flex items-center gap-3">
+                <div key={r.id} className="hub-glass rounded-2xl p-3.5 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-sm">
                     <Gift className="w-5 h-5 text-white" />
                   </div>

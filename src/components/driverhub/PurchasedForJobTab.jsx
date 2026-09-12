@@ -106,7 +106,7 @@ export default function PurchasedForJobTab() {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-8 text-center">
+        <div className="hub-glass rounded-2xl p-8 text-center">
           <Package className="w-12 h-12 text-slate-200 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No purchased items</p>
           <p className="text-xs text-slate-400 mt-1">Items purchased for jobs will appear here once added.</p>
@@ -114,7 +114,7 @@ export default function PurchasedForJobTab() {
       ) : (
         <>
           {/* Desktop table */}
-          <div className="insight-card rounded-2xl overflow-hidden hidden md:block">
+          <div className="hub-glass rounded-2xl overflow-hidden hidden md:block">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-slate-50/80">
@@ -163,7 +163,7 @@ export default function PurchasedForJobTab() {
             {filtered.map(item => {
               const loc = LOCATION_LABELS[item.current_location] || LOCATION_LABELS.yard;
               return (
-                <div key={item.id} className="insight-card rounded-2xl p-3.5">
+                <div key={item.id} className="hub-glass rounded-2xl p-3.5">
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0">
                       <p className="font-bold text-slate-800 text-sm truncate">{item.description}</p>
@@ -194,7 +194,7 @@ export default function PurchasedForJobTab() {
 
 function KPICard({ icon: Icon, label, value, gradient }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className={`relative w-9 h-9 rounded-lg ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
         <Icon className="w-4 h-4 text-white" />

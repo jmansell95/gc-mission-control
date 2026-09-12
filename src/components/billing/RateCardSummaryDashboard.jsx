@@ -87,7 +87,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
     <div className="space-y-3">
       {/* KPI tiles */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
-        <div className="insight-card rounded-xl p-3 relative overflow-hidden">
+        <div className="hub-glass rounded-xl p-3 relative overflow-hidden">
           <div className="flex items-center gap-1.5 mb-1">
             <Receipt className="w-3.5 h-3.5 text-slate-500" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Total Rates</p>
@@ -100,7 +100,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
           </div>
         </div>
 
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Avg Margin</p>
@@ -111,7 +111,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
           <p className="text-[10px] text-slate-400 mt-1">{stats.withMargin} items</p>
         </div>
 
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <FileQuestion className="w-3.5 h-3.5 text-amber-500" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">POA Items</p>
@@ -120,7 +120,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
           <p className="text-[10px] text-slate-400 mt-1">{stats.poa === 0 ? 'All priced' : 'Need pricing'}</p>
         </div>
 
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Missing Cost</p>
@@ -129,7 +129,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
           <p className="text-[10px] text-slate-400 mt-1">No margin data</p>
         </div>
 
-        <div className="insight-card rounded-xl p-3">
+        <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-1.5 mb-1">
             <PoundSterling className="w-3.5 h-3.5 text-blue-500" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Card Value</p>
@@ -138,7 +138,7 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
           <p className="text-[10px] text-slate-400 mt-1">Cost: {fmt(stats.totalCostValue)}</p>
         </div>
 
-        <div className="insight-card rounded-xl p-3 flex flex-col">
+        <div className="hub-glass rounded-xl p-3 flex flex-col">
           <div className="flex items-center gap-1.5 mb-1">
             <Download className="w-3.5 h-3.5 text-[#2E5A1A]" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Export</p>

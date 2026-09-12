@@ -220,7 +220,7 @@ export default function AssetHub() {
       ) : (
         <>
           {/* Fleet health strip — refined brand card with sync + health visuals */}
-          <div className="insight-card rounded-hub px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="hub-glass rounded-hub px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex w-9 h-9 rounded-xl stat-gradient-brand items-center justify-center flex-shrink-0">
                 <ShieldCheck className="w-4 h-4 text-white" />

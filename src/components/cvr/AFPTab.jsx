@@ -22,12 +22,12 @@ export default function AFPTab({ job }) {
   });
 
   if (isLoading) {
-    return <div className="insight-card rounded-2xl p-8 text-center"><p className="text-sm text-slate-400">Loading AFPs…</p></div>;
+    return <div className="hub-glass rounded-2xl p-8 text-center"><p className="text-sm text-slate-400">Loading AFPs…</p></div>;
   }
 
   if (afps.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <AlertCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-500">No AFPs yet</p>
         <p className="text-xs text-slate-400 mt-1">Upload an Application for Payment spreadsheet to see it here</p>
@@ -46,7 +46,7 @@ export default function AFPTab({ job }) {
         return (
           <div key={afp.id} className="space-y-3">
             {/* Contract Details */}
-            <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="hub-glass rounded-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -72,7 +72,7 @@ export default function AFPTab({ job }) {
 
             {/* Drilling Breakdown */}
             {drillingItems.length > 0 && (
-              <div className="insight-card rounded-2xl overflow-hidden">
+              <div className="hub-glass rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
                   <Drill className="w-4 h-4 text-[#2E5A1A]" />
                   <h3 className="text-sm font-bold text-slate-900">Drilling Breakdown</h3>
@@ -115,7 +115,7 @@ export default function AFPTab({ job }) {
 
             {/* Plant Hire */}
             {plantHireItems.length > 0 && (
-              <div className="insight-card rounded-2xl overflow-hidden">
+              <div className="hub-glass rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
                   <Truck className="w-4 h-4 text-amber-600" />
                   <h3 className="text-sm font-bold text-slate-900">Plant Hire</h3>
@@ -156,7 +156,7 @@ export default function AFPTab({ job }) {
 
             {/* Rates Reference */}
             {rateItems.length > 0 && (
-              <div className="insight-card rounded-2xl overflow-hidden">
+              <div className="hub-glass rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-violet-600" />
                   <h3 className="text-sm font-bold text-slate-900">Schedule of Rates</h3>

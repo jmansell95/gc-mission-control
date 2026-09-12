@@ -181,7 +181,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
       {/* Secondary metrics row — VAT, Retention, Revenue Trend */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
         {/* VAT Liability */}
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center">
               <Percent className="w-4 h-4 text-violet-600" />
@@ -197,7 +197,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
         </div>
 
         {/* Retention Held */}
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4 text-amber-600" />
@@ -213,7 +213,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
         </div>
 
         {/* Revenue Trend (6-month sparkline) */}
-        <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-4 relative overflow-hidden">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
@@ -239,7 +239,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
       </div>
 
       {/* AfP vs Invoice explainer banner */}
-      <div className="insight-card rounded-2xl p-4 border-l-4 border-l-[#2E5A1A]">
+      <div className="hub-glass rounded-2xl p-4 border-l-4 border-l-[#2E5A1A]">
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
             <Wallet className="w-5 h-5 text-[#2E5A1A]" />

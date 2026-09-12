@@ -54,7 +54,7 @@ export default function AfPPipelineWidget({ onSelectJob }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <Loader2 className="w-4 h-4 animate-spin text-slate-400" />
           <p className="text-sm font-semibold text-slate-500">Loading AfP pipeline…</p>
@@ -64,7 +64,7 @@ export default function AfPPipelineWidget({ onSelectJob }) {
   }
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-4 sm:px-5 py-3.5 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
         <div className="flex items-center justify-between gap-3 flex-wrap">

@@ -115,7 +115,7 @@ export default function Onboarding() {
           </p>
         </div>
 
-        <div className="insight-card rounded-2xl p-6 space-y-6">
+        <div className="hub-glass rounded-2xl p-6 space-y-6">
           {/* Profile photo */}
           <div className="flex flex-col items-center text-center">
             <ProfileAvatar name={profile?.name} avatarUrl={avatarUrl} size={96} />

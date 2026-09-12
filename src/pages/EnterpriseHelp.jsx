@@ -196,7 +196,7 @@ export default function EnterpriseHelp() {
             <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="insight-card rounded-2xl p-8 text-center">
+          <div className="hub-glass rounded-2xl p-8 text-center">
             <HelpCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <p className="text-sm font-semibold text-slate-600">No guides found</p>
             <p className="text-xs text-slate-400 mt-1">Try a different search or category.</p>
@@ -214,7 +214,7 @@ export default function EnterpriseHelp() {
                       key={topic.id}
                       onClick={() => setSelectedTopic(topic)}
                       type="button"
-                      className="insight-card rounded-2xl p-4 text-left group"
+                      className="hub-glass rounded-2xl p-4 text-left group"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0 shadow-sm">

@@ -65,7 +65,7 @@ export default function DrillingTimeline({ boreholes = [] }) {
 
   if (!hasData) {
     return (
-      <div className="insight-card rounded-2xl p-5">
+      <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
             <CalendarDays className="w-4 h-4 text-blue-700" />
@@ -82,7 +82,7 @@ export default function DrillingTimeline({ boreholes = [] }) {
   }
 
   return (
-    <div className="insight-card rounded-2xl p-5">
+    <div className="hub-glass rounded-2xl p-5">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
           <CalendarDays className="w-4 h-4 text-blue-700" />

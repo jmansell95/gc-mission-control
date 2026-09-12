@@ -81,7 +81,7 @@ export default function IncentiveDashboard({ staffId, staffName, teamId }) {
 
   return (
     <>
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         {/* Header */}
         <div className="hero-gradient relative overflow-hidden px-4 md:px-6 py-4">
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-yellow-300/10 blur-2xl pointer-events-none" />

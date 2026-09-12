@@ -57,7 +57,7 @@ export default function ReadinessGate({
   // === COMING SOON state ===
   if (compact) {
     return (
-      <div className="insight-card rounded-xl p-4 flex items-center gap-3 bg-amber-50/60 border-amber-200">
+      <div className="hub-glass rounded-xl p-4 flex items-center gap-3 bg-amber-50/60 border-amber-200">
         <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
           <Clock className="w-4 h-4 text-amber-600" />
         </div>
@@ -79,7 +79,7 @@ export default function ReadinessGate({
   return (
     <div className="space-y-4">
       {/* Amber coming-soon banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-start gap-3 bg-amber-50/60 border-amber-200">
+      <div className="hub-glass rounded-2xl p-4 flex items-start gap-3 bg-amber-50/60 border-amber-200">
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
           <Clock className="w-5 h-5 text-amber-600" />
         </div>
@@ -100,7 +100,7 @@ export default function ReadinessGate({
       </div>
 
       {/* No data placeholder */}
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
           <Clock className="w-7 h-7 text-slate-400" />
         </div>

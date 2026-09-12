@@ -51,7 +51,7 @@ export default function ReportTemplateLibrary({ onRun, onSchedule, onBuildCustom
 
   if (templates.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-10 text-center">
+      <div className="hub-glass rounded-2xl p-10 text-center">
         <Bookmark className="w-10 h-10 text-slate-300 mx-auto mb-2" />
         <p className="text-sm font-semibold text-slate-600">No saved reports yet</p>
         <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto mb-4">
@@ -69,7 +69,7 @@ export default function ReportTemplateLibrary({ onRun, onSchedule, onBuildCustom
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {templates.map(tpl => (
-        <div key={tpl.id} className="insight-card rounded-2xl p-4 flex flex-col">
+        <div key={tpl.id} className="hub-glass rounded-2xl p-4 flex flex-col">
           <div className="flex items-start justify-between mb-2">
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-slate-900 truncate">{tpl.name}</h3>

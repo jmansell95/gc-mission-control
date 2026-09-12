@@ -230,7 +230,7 @@ export default function AvailabilityHeatmap() {
   return (
     <div className="space-y-3">
       {/* Controls bar */}
-      <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-2">
+      <div className="hub-glass rounded-2xl p-3 flex flex-wrap items-center gap-2">
         {/* View mode toggle */}
         <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
           {[
@@ -313,7 +313,7 @@ export default function AvailabilityHeatmap() {
 
       {/* Filter panel */}
       {showFilters && (
-        <div className="insight-card rounded-2xl p-4 space-y-3 animate-slide-up">
+        <div className="hub-glass rounded-2xl p-4 space-y-3 animate-slide-up">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
               <SlidersHorizontal className="w-4 h-4 text-[#2E5A1A]" /> Filters
@@ -418,7 +418,7 @@ export default function AvailabilityHeatmap() {
 
       {/* Analytics strip */}
       {!isLoading && (filteredStaff.length > 0 || filteredRigs.length > 0) && (
-        <div className="insight-card rounded-2xl p-3 flex flex-wrap items-center gap-3">
+        <div className="hub-glass rounded-2xl p-3 flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2.5">
             <div className="relative w-12 h-12">
               <svg width="48" height="48" viewBox="0 0 48 48">
@@ -465,7 +465,7 @@ export default function AvailabilityHeatmap() {
 
       {/* Gap finder panel */}
       {showGapFinder && (
-        <div className="insight-card rounded-2xl p-4 space-y-3 border-violet-200">
+        <div className="hub-glass rounded-2xl p-4 space-y-3 border-violet-200">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-violet-600" />
             <h3 className="text-sm font-bold text-slate-900">Who's Free When?</h3>
@@ -529,12 +529,12 @@ export default function AvailabilityHeatmap() {
 
       {/* Grid */}
       {isLoading ? (
-        <div className="insight-card rounded-2xl p-12 flex items-center justify-center">
+        <div className="hub-glass rounded-2xl p-12 flex items-center justify-center">
           <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
           <span className="ml-3 text-sm text-slate-500">Loading availability matrix…</span>
         </div>
       ) : (filteredStaff.length === 0 && filteredRigs.length === 0) ? (
-        <div className="insight-card rounded-2xl p-12 text-center">
+        <div className="hub-glass rounded-2xl p-12 text-center">
           <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
           <p className="text-sm font-semibold text-slate-500">No resources found</p>
           <p className="text-xs text-slate-400 mt-1">Try a different search, year, or adjust your filters.</p>

@@ -53,7 +53,7 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
   };
 
   return (
-    <div className="insight-card rounded-2xl p-4 space-y-3">
+    <div className="hub-glass rounded-2xl p-4 space-y-3">
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-shrink-0">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-md">

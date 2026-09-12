@@ -207,7 +207,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
       <div className="flex-1 overflow-y-auto bg-slate-50">
         <div className="max-w-2xl mx-auto w-full p-4 space-y-4">
           {/* Job & route details */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <FileText className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Job Details</h4>
@@ -224,7 +224,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           </div>
 
           {/* Vehicle */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <Truck className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Vehicle & Loading</h4>
@@ -241,7 +241,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           </div>
 
           {/* Items to pick — scan to check off */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <Package className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Items to Pick ({items.length})</h4>
@@ -295,7 +295,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           )}
 
           {/* Digital sign-off with per-stage drawn signatures */}
-          <div className="insight-card rounded-2xl p-4 space-y-3">
+          <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <PenLine className="w-4 h-4 text-[#2E5A1A]" />
               <h4 className="text-sm font-bold text-slate-900">Digital Sign-Off</h4>

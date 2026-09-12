@@ -36,7 +36,7 @@ export default function MonthlyBookingsAccordion({ bookings, onEdit, onDelete })
         const [y, m] = key.split('-');
         const monthLabel = format(new Date(parseInt(y), parseInt(m) - 1, 1), 'MMMM yyyy');
         return (
-          <div key={key} className="insight-card rounded-2xl overflow-hidden">
+          <div key={key} className="hub-glass rounded-2xl overflow-hidden">
             <button onClick={() => toggle(key)}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition">
               <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">

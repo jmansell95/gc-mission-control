@@ -115,7 +115,7 @@ export default function AssetPandaImageGallery({ asset }) {
 
   return (
     <>
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
             <Camera className="w-4 h-4 text-[#2E5A1A]" /> Asset Panda Photos

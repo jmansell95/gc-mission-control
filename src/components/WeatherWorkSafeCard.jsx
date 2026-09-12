@@ -48,7 +48,7 @@ export default function WeatherWorkSafeCard({ job }) {
 
   if (job.site_lat == null || job.site_lng == null) {
     return (
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-2.5">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-2.5">
         <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
         <p className="text-xs text-slate-500">Set the job location to see the work-safe weather check.</p>
       </div>
@@ -57,7 +57,7 @@ export default function WeatherWorkSafeCard({ job }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-2.5">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-2.5">
         <Loader2 className="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" />
         <p className="text-xs text-slate-500">Checking live weather conditions…</p>
       </div>
@@ -66,7 +66,7 @@ export default function WeatherWorkSafeCard({ job }) {
 
   if (error || !data?.ok) {
     return (
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-2.5">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-2.5">
         <Cloud className="w-4 h-4 text-slate-400 flex-shrink-0" />
         <p className="text-xs text-slate-500 flex-1">Weather check unavailable right now.</p>
         <button onClick={() => refetch()} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] transition"><RefreshCw className="w-3.5 h-3.5" /></button>
@@ -84,7 +84,7 @@ export default function WeatherWorkSafeCard({ job }) {
   const isOverridden = (field) => job[`weather_${field}`] != null;
 
   return (
-    <div className={`insight-card rounded-2xl overflow-hidden border-2 ${lvl.border}`}>
+    <div className={`hub-glass rounded-2xl overflow-hidden border-2 ${lvl.border}`}>
       <div className={`bg-gradient-to-br ${lvl.grad} px-4 py-3.5`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">

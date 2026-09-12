@@ -134,7 +134,7 @@ export default function SettingsLockdownManager({ profile }) {
               return (
                 <motion.div key={item.id}
                   initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                  className={`insight-card relative rounded-xl p-4 overflow-hidden ${isLocked ? 'ring-2 ring-amber-300' : ''}`}>
+                  className={`hub-glass relative rounded-xl p-4 overflow-hidden ${isLocked ? 'ring-2 ring-amber-300' : ''}`}>
                   {isLocked && <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-500" />}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2.5 min-w-0 flex-1">

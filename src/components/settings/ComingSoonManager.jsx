@@ -162,7 +162,7 @@ export default function ComingSoonManager() {
       />
 
       {/* Info banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-start gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex items-start gap-3">
         <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
           <Info className="w-4 h-4 text-blue-600" />
         </div>
@@ -176,17 +176,17 @@ export default function ComingSoonManager() {
 
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="insight-card rounded-xl p-3 text-center">
+        <div className="hub-glass rounded-xl p-3 text-center">
           <CheckCircle2 className="w-5 h-5 text-emerald-500 mx-auto mb-1" />
           <p className="text-xl font-extrabold text-slate-900 tabular-nums">{configuredCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Configured</p>
         </div>
-        <div className="insight-card rounded-xl p-3 text-center">
+        <div className="hub-glass rounded-xl p-3 text-center">
           <EyeOff className="w-5 h-5 text-amber-500 mx-auto mb-1" />
           <p className="text-xl font-extrabold text-slate-900 tabular-nums">{hiddenCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Hidden</p>
         </div>
-        <div className="insight-card rounded-xl p-3 text-center">
+        <div className="hub-glass rounded-xl p-3 text-center">
           <Sparkles className="w-5 h-5 text-slate-400 mx-auto mb-1" />
           <p className="text-xl font-extrabold text-slate-900 tabular-nums">{availableCount}</p>
           <p className="text-[11px] text-slate-500 font-semibold">Visible</p>
