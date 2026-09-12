@@ -49,7 +49,7 @@ export default function FieldSheetBOQVsActual({ afp, lineItems }) {
 
   if (mwItems.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <Layers className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm text-slate-400">No Measured Works lines to compare</p>
       </div>
@@ -94,7 +94,7 @@ export default function FieldSheetBOQVsActual({ afp, lineItems }) {
       </div>
 
       {/* Desktop table */}
-      <div className="insight-card rounded-2xl overflow-hidden hidden lg:block">
+      <div className="hub-glass rounded-2xl overflow-hidden hidden lg:block">
         <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
           <FileText className="w-4 h-4 text-[#2E5A1A]" />
           <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">BOQ vs Actual</h3>
@@ -172,7 +172,7 @@ export default function FieldSheetBOQVsActual({ afp, lineItems }) {
           const meta = statusMeta[status];
           const Icon = meta.icon;
           return (
-            <div key={li.id} className="insight-card rounded-2xl p-3 space-y-2">
+            <div key={li.id} className="hub-glass rounded-2xl p-3 space-y-2">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   {li.item_ref && <span className="text-[10px] font-mono text-slate-400">{li.item_ref}</span>}

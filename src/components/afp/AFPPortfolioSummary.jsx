@@ -76,7 +76,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-6">
+      <div className="hub-glass rounded-2xl p-6">
         <div className="w-6 h-6 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin mx-auto" />
       </div>
     );
@@ -89,7 +89,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
   return (
     <div className="space-y-3">
       {/* ── Portfolio Hero ── */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         {/* Gradient strip */}
         <div className="relative h-2 bg-gradient-to-r from-[#2E5A1A] via-[#5A8C1E] to-[#8DC63F]" />
 
@@ -197,7 +197,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: i * 0.04, ease: 'easeOut' }}
               onClick={() => onSelectAfp?.(afp.id)}
-              className="insight-card rounded-2xl p-3.5 text-left hover:shadow-lg transition-all active:scale-[0.98] group cursor-pointer"
+              className="hub-glass rounded-2xl p-3.5 text-left hover:shadow-lg transition-all active:scale-[0.98] group cursor-pointer"
             >
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 min-w-0">

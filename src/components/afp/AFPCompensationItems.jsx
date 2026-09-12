@@ -31,7 +31,7 @@ export default function AFPCompensationItems({ lineItems }) {
   if (ciItems.length === 0) return null;
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Package className="w-4 h-4 text-[#2E5A1A]" />

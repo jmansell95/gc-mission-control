@@ -47,7 +47,7 @@ export default function AFPSummaryHeader({ afp, job, totals, lineItems, category
     .slice(0, 6);
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Gradient hero strip */}
       <div className="relative h-1.5 bg-gradient-to-r from-[#2E5A1A] via-[#5A8C1E] to-[#8DC63F]" />
 

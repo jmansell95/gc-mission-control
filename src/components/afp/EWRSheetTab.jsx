@@ -30,7 +30,7 @@ export default function EWRSheetTab({ sheetName, lineItems, afp, canEdit, canDis
 
   if (items.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <Icon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm text-slate-400">No {meta.label} items in this AFP</p>
       </div>
@@ -38,7 +38,7 @@ export default function EWRSheetTab({ sheetName, lineItems, afp, canEdit, canDis
   }
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
         <Icon className={`w-4 h-4 ${meta.color}`} />
         <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">{meta.label}</h3>

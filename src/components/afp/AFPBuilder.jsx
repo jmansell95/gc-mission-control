@@ -570,7 +570,7 @@ export default function AFPBuilder({ job }) {
   if (!afpsLoading && afps.length === 0) {
     return (
       <>
-        <div className="insight-card rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden">
+        <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2E5A1A] to-[#8DC63F]" />
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-[#2E5A1A]" />
@@ -617,7 +617,7 @@ export default function AFPBuilder({ job }) {
   }
 
   if (afpsLoading || itemsLoading) {
-    return <div className="insight-card rounded-2xl p-8 text-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin mx-auto" /></div>;
+    return <div className="hub-glass rounded-2xl p-8 text-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin mx-auto" /></div>;
   }
 
   const statusMeta = selectedAfp ? STATUS_META[selectedAfp.status] : STATUS_META.draft;
@@ -626,7 +626,7 @@ export default function AFPBuilder({ job }) {
   return (
     <div className="space-y-3">
       {/* ── AFP Chain Selector ── */}
-      <div className="insight-card rounded-2xl p-3">
+      <div className="hub-glass rounded-2xl p-3">
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {afps.map(afp => {
             const meta = STATUS_META[afp.status];
@@ -688,7 +688,7 @@ export default function AFPBuilder({ job }) {
         <AFPSummaryHeader afp={selectedAfp} job={job} totals={totals} lineItems={lineItems} categoryCounts={categoryCounts} freshness={freshness} />
 
         {/* Action bar with buttons + auto-save */}
-        <div className="insight-card rounded-2xl p-3">
+        <div className="hub-glass rounded-2xl p-3">
           <div className="flex items-center gap-2 flex-wrap">
             {selectedAfp.status === 'draft' && (
               <button onClick={handlePopulate} disabled={populating}
@@ -759,7 +759,7 @@ export default function AFPBuilder({ job }) {
       )}
 
       {/* ── AFP Tab Navigation ── */}
-      <div className="insight-card rounded-2xl p-2">
+      <div className="hub-glass rounded-2xl p-2">
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
           {(ewr ? [
             ...EWR_SHEETS.map(s => ({ id: s.id, label: s.label, icon: { Drill, Clock, HardHat, Hotel, Package, Truck, MapPin }[s.icon] || Package, count: lineItems.filter(li => li.sheet_name === s.id).length })),
@@ -853,7 +853,7 @@ export default function AFPBuilder({ job }) {
 
       {/* ── Bulk Action Toolbar ── */}
       {selectedItems.size > 0 && (
-        <div className="insight-card rounded-2xl p-3 bg-[#2E5A1A]/5 border-[#2E5A1A]/20 flex items-center justify-between gap-2 flex-wrap animate-slide-up">
+        <div className="hub-glass rounded-2xl p-3 bg-[#2E5A1A]/5 border-[#2E5A1A]/20 flex items-center justify-between gap-2 flex-wrap animate-slide-up">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2E5A1A] text-white text-xs font-bold">
               {selectedItems.size} selected
@@ -903,7 +903,7 @@ export default function AFPBuilder({ job }) {
 
       {/* ── Add Manual Line ── */}
       {showAddManual && (
-        <div className="insight-card rounded-2xl p-3 sm:p-4 space-y-3">
+        <div className="hub-glass rounded-2xl p-3 sm:p-4 space-y-3">
           {/* Mobile: stacked layout */}
           <div className="sm:hidden space-y-2">
             <input
@@ -1099,7 +1099,7 @@ export default function AFPBuilder({ job }) {
           {(selectedAfp?.status === 'draft' || selectedAfp?.status === 'pending_review') && (
             <button
               onClick={() => setShowAddVariation(true)}
-              className="w-full insight-card rounded-2xl p-3 flex items-center justify-center gap-2 bg-violet-50 border-violet-200 hover:bg-violet-100/80 transition active:scale-[0.99]"
+              className="w-full hub-glass rounded-2xl p-3 flex items-center justify-center gap-2 bg-violet-50 border-violet-200 hover:bg-violet-100/80 transition active:scale-[0.99]"
             >
               <Plus className="w-4 h-4 text-violet-600" />
               <span className="text-sm font-bold text-violet-700">Add Variation</span>
@@ -1108,13 +1108,13 @@ export default function AFPBuilder({ job }) {
           )}
 
           {variationSummaryItems.length === 0 ? (
-            <div className="insight-card rounded-2xl p-6 text-center">
+            <div className="hub-glass rounded-2xl p-6 text-center">
               <GitBranch className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-400">No variations in this AFP</p>
               <p className="text-[11px] text-slate-400 mt-1">Click "Add Variation" above when the client instructs extra work.</p>
             </div>
           ) : (
-            <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="hub-glass rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
                 <GitBranch className="w-4 h-4 text-violet-600" />
                 <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Variation Summary</h3>
@@ -1164,12 +1164,12 @@ export default function AFPBuilder({ job }) {
       {activeTab === 'materials' && (
         <div className="space-y-3">
           {lineItems.filter(li => li.sheet_name === 'materials').length === 0 ? (
-            <div className="insight-card rounded-2xl p-6 text-center">
+            <div className="hub-glass rounded-2xl p-6 text-center">
               <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-sm text-slate-400">No materials in this AFP</p>
             </div>
           ) : (
-            <div className="insight-card rounded-2xl overflow-hidden">
+            <div className="hub-glass rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
                 <Package className="w-4 h-4 text-amber-600" />
                 <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Materials On Site</h3>
@@ -1211,7 +1211,7 @@ export default function AFPBuilder({ job }) {
       {activeTab === 'all-lines' && groupBy === 'category' && (
         <div className="space-y-2.5">
           {categoryGroupedItems.length === 0 ? (
-            <div className="insight-card rounded-2xl p-6 text-center">
+            <div className="hub-glass rounded-2xl p-6 text-center">
               <p className="text-sm text-slate-400">{search ? 'No items match your search' : 'No items in this category'}</p>
             </div>
           ) : (
@@ -1220,7 +1220,7 @@ export default function AFPBuilder({ job }) {
               const isCollapsed = collapsedCats.has(cat.id);
               const allCatSelected = cat.items.every(li => selectedItems.has(li.id));
               return (
-                <div key={cat.id} className="insight-card rounded-2xl overflow-hidden">
+                <div key={cat.id} className="hub-glass rounded-2xl overflow-hidden">
                   <div className="px-3 py-2.5 bg-slate-100/80 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {canSelect && (
@@ -1268,7 +1268,7 @@ export default function AFPBuilder({ job }) {
       {activeTab === 'all-lines' && groupBy === 'time' && (
       <div className="sm:hidden space-y-3">
         {groupedItems.length === 0 ? (
-          <div className="insight-card rounded-2xl p-6 text-center">
+          <div className="hub-glass rounded-2xl p-6 text-center">
             <p className="text-sm text-slate-400">No items in this category</p>
           </div>
         ) : (
@@ -1280,7 +1280,7 @@ export default function AFPBuilder({ job }) {
               new Date(bucket + '-01').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
             const allBucketSelected = items.every(li => selectedItems.has(li.id));
             return (
-              <div key={bucket} className="insight-card rounded-2xl overflow-hidden">
+              <div key={bucket} className="hub-glass rounded-2xl overflow-hidden">
                 <div className="px-3 py-2 bg-slate-100/80 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {canSelect && (
@@ -1321,7 +1321,7 @@ export default function AFPBuilder({ job }) {
 
       {/* ── Line Items Table (grouped by time bucket) — Desktop only ── */}
       {activeTab === 'all-lines' && groupBy === 'time' && (
-      <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+      <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="bg-slate-50/80 sticky top-0">

@@ -112,7 +112,7 @@ export default function VariationBreakdownTab({ afp, job, voRef, lineItems, canE
       </div>
 
       {/* Breakdown table */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-4 py-2.5 bg-violet-50/60 border-b border-violet-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <GitBranch className="w-4 h-4 text-violet-600" />

@@ -62,7 +62,7 @@ export default function AFPDualSideTable({ afp, lineItems, canEdit, onAutoSave }
 
   if (mwItems.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 text-center">
+      <div className="hub-glass rounded-2xl p-6 text-center">
         <Layers className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm text-slate-400">No Measured Works lines in this AFP</p>
       </div>
@@ -70,7 +70,7 @@ export default function AFPDualSideTable({ afp, lineItems, canEdit, onAutoSave }
   }
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">

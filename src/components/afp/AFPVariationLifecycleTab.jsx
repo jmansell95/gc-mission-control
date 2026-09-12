@@ -69,12 +69,12 @@ export default function AFPVariationLifecycleTab({ job }) {
   }, [variations]);
 
   if (isLoading) {
-    return <div className="insight-card rounded-2xl p-8 flex items-center justify-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin" /></div>;
+    return <div className="hub-glass rounded-2xl p-8 flex items-center justify-center"><Loader2 className="w-6 h-6 text-slate-400 animate-spin" /></div>;
   }
 
   if (variations.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+      <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
         <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
           <GitBranch className="w-8 h-8 text-slate-300" />
         </div>
@@ -91,7 +91,7 @@ export default function AFPVariationLifecycleTab({ job }) {
   return (
     <div className="space-y-3">
       {/* Summary header */}
-      <div className="insight-card rounded-2xl p-4">
+      <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-9 h-9 rounded-lg stat-gradient-violet flex items-center justify-center">
             <GitBranch className="w-4 h-4 text-white" />
@@ -132,7 +132,7 @@ export default function AFPVariationLifecycleTab({ job }) {
           const canEdit = afpStatus === 'draft' || afpStatus === 'pending_review' || afpStatus === 'submitted';
           const afpNum = afps.find(a => a.id === v.afp_id)?.afp_number;
           return (
-            <div key={v.id} className="insight-card rounded-2xl overflow-hidden">
+            <div key={v.id} className="hub-glass rounded-2xl overflow-hidden">
               {/* Header row */}
               <div className="px-4 py-2.5 flex items-center justify-between gap-2 border-b border-slate-100">
                 <div className="flex items-center gap-2 min-w-0">

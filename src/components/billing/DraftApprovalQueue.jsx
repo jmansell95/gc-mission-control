@@ -176,7 +176,7 @@ export default function DraftApprovalQueue() {
 
   if (invoices.length === 0) {
     return (
-      <div className="insight-card rounded-2xl p-8 text-center">
+      <div className="hub-glass rounded-2xl p-8 text-center">
         <CheckCircle2 className="w-12 h-12 text-emerald-300 mx-auto mb-3" />
         <p className="text-sm font-semibold text-slate-700">No draft invoices waiting</p>
         <p className="text-xs text-slate-400 mt-1">All auto-generated drafts have been reviewed. New drafts appear here when the Auto-Invoice Engine runs.</p>
@@ -187,7 +187,7 @@ export default function DraftApprovalQueue() {
   return (
     <div className="space-y-3 pb-20">
       {/* Summary banner */}
-      <div className="insight-card rounded-2xl p-4 flex items-center gap-3">
+      <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
           <AlertCircle className="w-5 h-5 text-amber-600" />
         </div>
@@ -204,7 +204,7 @@ export default function DraftApprovalQueue() {
       </div>
 
       {/* Draft list */}
-      <div className="insight-card rounded-2xl overflow-hidden">
+      <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="divide-y divide-slate-100">
           {invoices.map((inv) => {
             const isExpanded = expandedId === inv.id;
@@ -426,7 +426,7 @@ export default function DraftApprovalQueue() {
       {selectedIds.length > 0 && !showBulkConfirm && (
         <div className="fixed bottom-0 left-0 right-0 z-40 animate-slide-up">
           <div className="mx-auto max-w-3xl m-4">
-            <div className="insight-card rounded-2xl shadow-2xl border-[#2E5A1A]/20 px-5 py-3.5 flex items-center gap-4">
+            <div className="hub-glass rounded-2xl shadow-2xl border-[#2E5A1A]/20 px-5 py-3.5 flex items-center gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center">
                   <span className="text-sm font-extrabold text-[#2E5A1A]">{selectedIds.length}</span>

@@ -112,7 +112,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-8 flex items-center justify-center">
+      <div className="hub-glass rounded-2xl p-8 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
       </div>
     );
@@ -179,7 +179,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
 
       {/* Portfolio — Mobile card view */}
       {filtered.length === 0 ? (
-        <div className="insight-card rounded-2xl p-6 sm:p-8 text-center">
+        <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <FileBarChart className="w-7 h-7 text-slate-300" />
           </div>
@@ -201,7 +201,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
                 <div
                   key={afp.id}
                   onClick={() => onSelectJob?.(afp.job_id)}
-                  className="insight-card rounded-2xl p-3.5 cursor-pointer active:scale-[0.98] transition"
+                  className="hub-glass rounded-2xl p-3.5 cursor-pointer active:scale-[0.98] transition"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="min-w-0 flex-1">
@@ -233,7 +233,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
               );
             })}
             {/* Mobile total */}
-            <div className="insight-card rounded-2xl p-3.5 bg-slate-50/80 flex items-center justify-between text-sm font-bold">
+            <div className="hub-glass rounded-2xl p-3.5 bg-slate-50/80 flex items-center justify-between text-sm font-bold">
               <span className="text-slate-700">Total ({filtered.length})</span>
               <div className="flex items-center gap-3">
                 {totals.disputed > 0 && <span className="text-amber-600 tabular-nums text-xs">{fmt(totals.disputed)}</span>}
@@ -243,7 +243,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
           </div>
 
           {/* Desktop table */}
-          <div className="insight-card rounded-2xl overflow-hidden hidden sm:block">
+          <div className="hub-glass rounded-2xl overflow-hidden hidden sm:block">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead className="bg-slate-50/80 sticky top-0">
@@ -344,7 +344,7 @@ export default function AFPPortfolioOverview({ onSelectJob, onUploadTemplate }) 
 
 function KPICard({ icon: Icon, label, value, gradient, count }) {
   return (
-    <div className="insight-card rounded-2xl p-3.5 relative overflow-hidden">
+    <div className="hub-glass rounded-2xl p-3.5 relative overflow-hidden">
       <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${gradient} opacity-[0.08]`} />
       <div className="flex items-center justify-between relative">
         <div className={`w-9 h-9 rounded-lg ${gradient} flex items-center justify-center shadow-sm`}>
