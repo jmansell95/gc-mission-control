@@ -21,8 +21,6 @@ export default function Login() {
   const [selectedBuId, setSelectedBuId] = useState(null);
   const [selectedStreamId, setSelectedStreamId] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [emailInput, setEmailInput] = useState('');
-  const [emailTouched, setEmailTouched] = useState(false);
 
   // Load all divisions
   const { data: divisions = [] } = useQuery({
@@ -81,19 +79,6 @@ export default function Login() {
       showProgressBar: cfg.show_progress_bar !== false,
     };
   }, [selectedStream, selectedBu]);
-
-  // Email-domain auto-detect
-  const autoDetectFromEmail = (email) => {
-    if (!email || !email.includes('@')) return;
-    const domain = email.split('@')[1].toLowerCase();
-    for (const d of divisions) {
-      if (d.email_domains && d.email_domains.some(dom => domain === dom.toLowerCase() || domain.endsWith('.' + dom.toLowerCase()))) {
-        setSelectedStreamId(d.id);
-        if (d.parent_division_id) setSelectedBuId(d.parent_division_id);
-        return;
-      }
-    }
-  };
 
   const handleMicrosoft = () => {
     // Store the selected stream for the post-login animation
@@ -218,24 +203,6 @@ export default function Login() {
                   {selectedBu ? `${selectedBu.name} → ` : ''}{selectedStream.name}
                 </span>
               </div>
-            )}
-          </div>
-
-          {/* Email field (for auto-detect) */}
-          <div className="mb-4">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">
-              Work email (optional — auto-detects your stream)
-            </label>
-            <input
-              type="email"
-              value={emailInput}
-              onChange={e => setEmailInput(e.target.value)}
-              onBlur={() => { setEmailTouched(true); autoDetectFromEmail(emailInput); }}
-              placeholder="you@ground-control.co.uk"
-              className="w-full px-3 py-2.5 rounded-xl border-2 border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none text-sm"
-            />
-            {emailTouched && emailInput && !emailInput.includes('@') && (
-              <p className="text-[10px] text-amber-600 mt-1">Enter a valid email to auto-detect your stream</p>
             )}
           </div>
 
