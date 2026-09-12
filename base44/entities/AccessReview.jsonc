@@ -1,0 +1,93 @@
+{
+  "name": "AccessReview",
+  "type": "object",
+  "properties": {
+    "reviewed_user_id": {
+      "type": "string",
+      "description": "The platform user ID of the person whose access was reviewed."
+    },
+    "reviewed_staff_id": {
+      "type": "string",
+      "description": "The Staff record ID of the reviewed person (if they have a Staff record)."
+    },
+    "reviewed_user_name": {
+      "type": "string",
+      "description": "Name of the reviewed user (denormalised for display)."
+    },
+    "reviewed_user_email": {
+      "type": "string",
+      "description": "Email of the reviewed user (denormalised for display)."
+    },
+    "reviewer_id": {
+      "type": "string",
+      "description": "The admin who performed the review."
+    },
+    "reviewer_name": {
+      "type": "string",
+      "description": "Name of the reviewer (denormalised)."
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "ISO timestamp of the review."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "confirmed",
+        "reduced",
+        "revoked",
+        "escalated"
+      ],
+      "default": "confirmed",
+      "description": "Review outcome. 'confirmed' = access level appropriate; 'reduced' = access level lowered; 'revoked' = access removed (leaver); 'escalated' = flagged for further investigation."
+    },
+    "role_at_review": {
+      "type": "string",
+      "description": "The user's platform role at the time of review (admin/user)."
+    },
+    "enterprise_role_at_review": {
+      "type": "string",
+      "description": "The user's enterprise role at the time of review (enterprise_admin/bu_admin/stream_manager/user)."
+    },
+    "last_activity_at": {
+      "type": "string",
+      "description": "Last known activity timestamp for the user at the time of review."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Reviewer notes \u2014 rationale for the decision, any concerns, follow-up actions."
+    },
+    "review_period": {
+      "type": "string",
+      "description": "The review period this review belongs to (e.g. '2026-Q3'). Used to group reviews by quarter."
+    }
+  },
+  "required": [
+    "reviewed_user_id",
+    "reviewer_id",
+    "reviewed_at",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

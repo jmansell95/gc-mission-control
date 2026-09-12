@@ -22,6 +22,7 @@ import EnterpriseDashboard from './pages/EnterpriseDashboard';
 import BusinessUnitPage from './pages/BusinessUnitPage';
 import EnterpriseSettings from './pages/EnterpriseSettings';
 import EnterpriseHelp from './pages/EnterpriseHelp';
+import SecurityGovernanceHub from './pages/SecurityGovernanceHub';
 import EnterpriseStaffHub from './pages/EnterpriseStaffHub';
 import EnterpriseFleetHub from './pages/EnterpriseFleetHub';
 import EnterpriseOperationsHub from './pages/EnterpriseOperationsHub';
@@ -213,6 +214,7 @@ const AuthenticatedApp = () => {
 
             <Route path="/pat-testing" element={<RouteGuard><PATTestingConsole /></RouteGuard>} />
             <Route path="/compliance" element={<RouteGuard><HubReadinessGate featureId="compliance"><CompliancePage /></HubReadinessGate></RouteGuard>} />
+            <Route path="/security" element={<RouteGuard><SecurityGovernanceHub /></RouteGuard>} />
             <Route path="/billing" element={<RouteGuard><HubReadinessGate featureId="billing"><BillingPage /></HubReadinessGate></RouteGuard>} />
 
             <Route path="/reports" element={<RouteGuard><HubReadinessGate featureId="reports"><ReportingHub /></HubReadinessGate></RouteGuard>} />
