@@ -408,7 +408,7 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
   // Delete existing auto-populated items (keep manual + uploaded variation breakdowns)
   const existing = await base44.entities.AFPLineItem.filter({ afp_id: afpId }, 'sort_order', 500);
   const autoIds = existing.filter((li: any) =>
-    li.source !== 'manual' && !li.is_manual &&
+    li.source !== 'manual' && !li.is_manual && li.source !== 'afp_upload_bespoke' &&
     !(li.is_variation_breakdown && li.source === 'afp_upload')
   ).map((li: any) => li.id);
   for (const id of autoIds) {
