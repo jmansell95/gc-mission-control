@@ -97,6 +97,18 @@ export default function EnterpriseDashboard() {
     return map;
   }, [hierarchy.businessUnits, divisionStats]);
 
+  // Server-side BU rollup stats (revenue, compliance, incidents) merged with
+  // client-side child stats for the richest possible BU card data.
+  const buRollupStats = useMemo(() => {
+    const serverBuStats = statsData?.buStats || [];
+    const map = {};
+    for (const bu of hierarchy.businessUnits) {
+      const serverStat = serverBuStats.find(s => s.businessUnit.id === bu.id);
+      map[bu.id] = serverStat || null;
+    }
+    return map;
+  }, [hierarchy.businessUnits, statsData]);
+
   const globalStats = useMemo(() => {
     const base = statsData?.globalStats || { divisions: 0, activeDivisions: 0, staff: 0, activeJobs: 0, vehicles: 0, pendingTs: 0, openCompliance: 0, totalOutstanding: 0 };
     return {
@@ -245,7 +257,7 @@ export default function EnterpriseDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {hierarchy.businessUnits.map((bu, i) => (
                 <motion.div key={bu.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.35, ease: 'easeOut' }}>
-                  <BusinessUnitCard unit={bu} childStats={buChildStats[bu.id] || []} onEnter={goToBU} />
+                  <BusinessUnitCard unit={bu} childStats={buChildStats[bu.id] || []} rollupStats={buRollupStats[bu.id]} onEnter={goToBU} />
                 </motion.div>
               ))}
             </div>

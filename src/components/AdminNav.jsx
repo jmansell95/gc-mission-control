@@ -16,6 +16,7 @@ import Logo from '@/components/Logo';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 import { useReadiness } from '@/hooks/useReadiness';
 import DivisionSwitcher from '@/components/DivisionSwitcher';
+import OrgTreeNavigator from '@/components/enterprise/OrgTreeNavigator';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useGlobalScanner } from '@/contexts/GlobalScannerContext';
 import { useMobileApp } from '@/contexts/MobileAppContext';
@@ -151,6 +152,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
         </div>
       </div>
       {!effectiveCollapsed && <DivisionSwitcher variant="sidebar" />}
+      {!effectiveCollapsed && <OrgTreeNavigator />}
       {/* Enterprise Command Centre link — prominent at top of nav (super admins + directors only) */}
       {(isSuperAdmin || permittedDivisions.length > 1) && (
         <div className="px-2 pb-1.5">

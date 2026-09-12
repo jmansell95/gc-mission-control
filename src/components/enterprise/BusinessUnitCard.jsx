@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Layers, Users, Briefcase, PoundSterling, ChevronRight } from 'lucide-react';
+import { ArrowRight, Layers, Users, Briefcase, PoundSterling, ChevronRight, TrendingUp, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { STATUS_STYLES } from './enterpriseConstants';
 
 /**
@@ -9,17 +9,20 @@ import { STATUS_STYLES } from './enterpriseConstants';
  * aggregate counters (streams, staff, active jobs, outstanding £) that are
  * distinct from the per-stream operating counters on DivisionCard.
  */
-export default function BusinessUnitCard({ unit, childStats, onEnter }) {
+export default function BusinessUnitCard({ unit, childStats, rollupStats, onEnter }) {
   const d = unit;
   const st = STATUS_STYLES[d.status || 'setup'] || STATUS_STYLES.setup;
   const divColor = d.color || '#2E5A1A';
   const headerGradient = `linear-gradient(135deg, ${divColor}, ${divColor}dd)`;
   const gbp = (n) => n ? '\u00A3' + Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '\u00A30';
 
-  const totalStaff = childStats.reduce((s, c) => s + (c.staffCount || 0), 0);
-  const totalActive = childStats.reduce((s, c) => s + (c.activeStaff || 0), 0);
-  const totalActiveJobs = childStats.reduce((s, c) => s + (c.activeJobs || 0), 0);
-  const totalOutstanding = childStats.reduce((s, c) => s + (c.outstanding || 0), 0);
+  const totalStaff = rollupStats?.totalStaff ?? childStats.reduce((s, c) => s + (c.staffCount || 0), 0);
+  const totalActive = rollupStats?.totalActiveStaff ?? childStats.reduce((s, c) => s + (c.activeStaff || 0), 0);
+  const totalActiveJobs = rollupStats?.totalActiveJobs ?? childStats.reduce((s, c) => s + (c.activeJobs || 0), 0);
+  const totalOutstanding = rollupStats?.totalOutstanding ?? childStats.reduce((s, c) => s + (c.outstanding || 0), 0);
+  const totalRevenue = rollupStats?.totalRevenue ?? 0;
+  const totalOpenIncidents = rollupStats?.totalOpenIncidents ?? 0;
+  const totalExpiredCompliance = rollupStats?.totalExpiredCompliance ?? 0;
   const childCount = childStats.length;
 
   return (
@@ -66,6 +69,30 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
           <span className="text-sm font-extrabold text-emerald-600 tabular-nums">{totalActive}</span>
           <span className="text-[11px] text-slate-400">of {totalStaff}</span>
         </div>
+
+        {/* Server-side rollup stats — revenue, compliance, incidents */}
+        {(totalRevenue > 0 || totalOpenIncidents > 0 || totalExpiredCompliance > 0) && (
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            {totalRevenue > 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50">
+                <TrendingUp className="w-3 h-3 text-emerald-600" />
+                <span className="text-[10px] font-bold text-emerald-700">{gbp(totalRevenue)} revenue</span>
+              </div>
+            )}
+            {totalExpiredCompliance > 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-50">
+                <ShieldAlert className="w-3 h-3 text-rose-600" />
+                <span className="text-[10px] font-bold text-rose-700">{totalExpiredCompliance} expired</span>
+              </div>
+            )}
+            {totalOpenIncidents > 0 && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50">
+                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                <span className="text-[10px] font-bold text-amber-700">{totalOpenIncidents} incidents</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Division preview strip */}
         <div className="space-y-1.5 mb-4">
