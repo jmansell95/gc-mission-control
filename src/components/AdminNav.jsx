@@ -41,7 +41,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
   const { counts: inboxCounts } = useInbox();
   const { openHub } = useAIHub();
   const { isComingSoon, isLocked } = useReadiness();
-  const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
+  const { isHubEnabled, activeDivision, isSuperAdmin, isEnterpriseAdmin, permittedDivisions } = useDivision();
   const { openScanner } = useGlobalScanner();
   const { isMobileApp } = useMobileApp();
 
@@ -154,7 +154,7 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
       {!effectiveCollapsed && <DivisionSwitcher variant="sidebar" />}
       {!effectiveCollapsed && <OrgTreeNavigator />}
       {/* Enterprise Command Centre link — prominent at top of nav (super admins + directors only) */}
-      {(isSuperAdmin || permittedDivisions.length > 1) && (
+      {(isEnterpriseAdmin || permittedDivisions.length > 1) && (
         <div className="px-2 pb-1.5">
           <button type="button" onClick={() => navigate('/enterprise')}
             className={`w-full flex items-center ${effectiveCollapsed ? 'justify-center' : 'gap-3'} ${effectiveCollapsed ? 'px-0 py-2.5' : 'px-3 h-9'} rounded-xl text-ui-body font-bold transition cursor-pointer touch-manipulation select-none bg-gradient-to-r from-amber-500/20 to-amber-600/10 text-amber-200 hover:from-amber-500/30 hover:to-amber-600/20 ring-1 ring-amber-400/30`}>

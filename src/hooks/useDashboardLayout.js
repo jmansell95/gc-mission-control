@@ -43,7 +43,11 @@ export function useDashboardLayout({ staffId, divisionId, roleDefault }) {
     staleTime: 60 * 1000,
   });
 
-  // Apply the saved layout or the role default on first load
+  // Apply the saved layout or the role default on first load.
+  // savedLayout is undefined while the query is loading, null when the query
+  // resolved but found no saved layout, or the layout object when found.
+  // We must set defaults in BOTH the "no staffId" and "query resolved null"
+  // cases — otherwise widgets stays null and the dashboard renders blank.
   useEffect(() => {
     if (hasAppliedServer.current) return;
     if (savedLayout) {
@@ -51,7 +55,6 @@ export function useDashboardLayout({ staffId, divisionId, roleDefault }) {
       if (savedLayout.widgets && savedLayout.widgets.length > 0) {
         setWidgets(savedLayout.widgets);
       } else {
-        // Fall back to role default or system default
         const defaults = roleDefault || DEFAULT_WIDGETS;
         setWidgets(defaults.map((id, i) => ({
           id, visible: true, order: i,
@@ -60,8 +63,10 @@ export function useDashboardLayout({ staffId, divisionId, roleDefault }) {
       }
       if (savedLayout.edit_mode) setEditMode(savedLayout.edit_mode);
       if (savedLayout.id) setLayoutId(savedLayout.id);
-    } else if (!staffId) {
-      // No staff ID yet — use defaults
+    } else if (savedLayout === null || !staffId) {
+      // Query resolved with no saved layout, or no staffId — use defaults.
+      // savedLayout === null means the query finished (not still loading).
+      hasAppliedServer.current = true;
       const defaults = roleDefault || DEFAULT_WIDGETS;
       setWidgets(defaults.map((id, i) => ({
         id, visible: true, order: i,

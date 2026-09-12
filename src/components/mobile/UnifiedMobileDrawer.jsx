@@ -48,7 +48,7 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user: authUser } = useAuth();
-  const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
+  const { isHubEnabled, activeDivision, isSuperAdmin, isEnterpriseAdmin, permittedDivisions } = useDivision();
   const { counts: inboxCounts } = useInbox();
   const { openHub } = useAIHub();
   const [profile, setProfile] = useState(null);
@@ -194,7 +194,7 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
             </div>
 
             {/* Enterprise switch */}
-            {(isSuperAdmin || permittedDivisions.length > 1) && (
+            {(isEnterpriseAdmin || permittedDivisions.length > 1) && (
               <div className="px-3 pt-3">
                 <button
                   onClick={() => { onClose(); navigate('/enterprise'); }}

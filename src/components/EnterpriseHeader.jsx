@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, HelpCircle } from 'lucide-react';
+import { LogOut, HelpCircle, ArrowLeft } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import Logo, { LandWaterLogo } from '@/components/Logo';
@@ -51,8 +51,15 @@ export default function EnterpriseHeader() {
       <div className="absolute inset-0 sidebar-modern" />
       <div className="relative z-10 h-14 flex items-center justify-between px-4">
         <div className="flex items-center gap-2.5 flex-shrink-0">
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            type="button"
+            className="h-9 w-9 flex items-center justify-center text-white/80 hover:bg-white/15 hover:text-white rounded-lg transition flex-shrink-0 touch-manipulation"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           <Logo height={26} />
-
         </div>
         <div className="relative">
           <button

@@ -40,7 +40,7 @@ const HUB_GROUPS = [
 export default function MoreSheet({ isOpen, onClose, tabs }) {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
-  const { isHubEnabled, activeDivision, isSuperAdmin, permittedDivisions } = useDivision();
+  const { isHubEnabled, activeDivision, isSuperAdmin, isEnterpriseAdmin, permittedDivisions } = useDivision();
   const { isComingSoon, isLocked } = useReadiness();
   const [profile, setProfile] = useState(null);
   const [query, setQuery] = useState('');
@@ -144,7 +144,7 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {/* Enterprise switch */}
-          {(isSuperAdmin || permittedDivisions.length > 1) && (
+          {(isEnterpriseAdmin || permittedDivisions.length > 1) && (
             <button
               onClick={() => { onClose(); navigate('/enterprise'); }}
               className="w-full flex items-center gap-3 px-3 py-3 mb-3 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/50 ring-1 ring-amber-200 text-amber-800 active:scale-[0.98] transition"
