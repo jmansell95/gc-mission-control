@@ -37,7 +37,6 @@ const INTEGRATIONS = [
   { id: 'accounting-sync', name: 'Xero / Sage', category: 'Finance', icon: FileSpreadsheet, color: 'bg-purple-100 text-purple-600', desc: 'Push invoices & purchase costs to Xero or Sage accounting' },
   { id: 'payment-gateway', name: 'Stripe Payments', category: 'Finance', icon: CreditCard, color: 'bg-indigo-100 text-indigo-600', desc: 'Accept client invoice payments via Stripe in the client portal' },
   { id: 'microsoft-365', name: 'Microsoft 365', category: 'Communication', icon: Calendar, color: 'bg-blue-100 text-blue-600', desc: 'Unified SSO for Outlook, SharePoint, Teams & OneDrive' },
-  { id: 'sharepoint-sync', name: 'SharePoint Sync', category: 'Ground Investigation', icon: Cloud, color: 'bg-blue-100 text-blue-600', desc: 'Two-way document sync — each job gets its own SharePoint folder under Drilling Team' },
   { id: 'zapier-webhooks', name: 'Zapier / Make', category: 'Automation', icon: Webhook, color: 'bg-orange-100 text-orange-600', desc: 'Outbound webhooks for no-code automation' },
 ];
 

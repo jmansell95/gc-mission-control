@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDivisionLoginConfig } from '@/hooks/useDivisionLoginConfig';
 import DivisionLoginAnimation from './DivisionLoginAnimation';
@@ -21,6 +21,8 @@ import { EMBLEM_URL } from '@/components/Logo';
 export default function LoginAnimationOverlay({ email, onDone, forceShow = false }) {
   const config = useDivisionLoginConfig(email);
   const [visible, setVisible] = useState(true);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   const duration = config?.durationMs || 2500;
   const transitionStyle = config?.transitionStyle || 'fade';
@@ -29,10 +31,10 @@ export default function LoginAnimationOverlay({ email, onDone, forceShow = false
     if (!config && !forceShow) return;
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(() => onDone?.(), 400); // wait for exit animation
+      setTimeout(() => onDoneRef.current?.(), 400); // wait for exit animation
     }, duration);
     return () => clearTimeout(timer);
-  }, [config, duration, forceShow, onDone]);
+  }, [config, duration, forceShow]);
 
   if (!config && !forceShow) return null;
 

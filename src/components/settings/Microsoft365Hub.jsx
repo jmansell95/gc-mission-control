@@ -23,15 +23,6 @@ const SERVICES = [
     connectorName: 'Microsoft 365 — Outlook',
   },
   {
-    id: 'share_point',
-    name: 'SharePoint Documents',
-    icon: Files,
-    color: 'bg-emerald-100 text-emerald-600',
-    desc: 'Mirror job documents to SharePoint folders for corporate records',
-    scopes: 'Files.ReadWrite.All, Sites.ReadWrite.All, User.Read, offline_access',
-    connectorName: 'Microsoft 365 — SharePoint',
-  },
-  {
     id: 'microsoft_teams',
     name: 'Teams Notifications',
     icon: MessageSquare,

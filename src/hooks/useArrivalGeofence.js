@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
 function haversineMetres(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -52,6 +53,7 @@ export function useArrivalGeofence({
   trackingEnabled = true,
 }) {
   const queryClient = useQueryClient();
+  const { get: getEffectiveSetting } = useEffectiveSettings();
   const [distance, setDistance] = useState(null);
   const [homeDistance, setHomeDistance] = useState(null);
   const [arrived, setArrived] = useState(!!assignment?.arrived_on_site_at);
@@ -73,7 +75,8 @@ export function useArrivalGeofence({
 
   const siteLat = job?.site_lat || job?.lat;
   const siteLng = job?.site_lng || job?.lng;
-  const radius = job?.geofence_radius_override || 200;
+  const defaultRadius = getEffectiveSetting('geofence_default_radius_m') ?? 250;
+  const radius = job?.geofence_radius_override || defaultRadius;
   const assignmentId = assignment?.id;
   const vehicleId = assignment?.vehicle_id;
 

@@ -40,7 +40,7 @@ export const LEVEL_STYLES = {
   stop: { border: 'border-rose-200', bg: 'bg-rose-50', dot: 'bg-rose-500', text: 'text-rose-600', icon: ShieldX, label: 'Stop' },
 };
 
-export function assessConditions(current, today) {
+export function assessConditions(current, today, thresholds = {}) {
   const windMs = current?.wind_speed_10m || 0;
   const windMph = Math.round(windMs * 2.23694);
   const gustMs = current?.wind_gusts_10m || windMs;
@@ -49,21 +49,62 @@ export function assessConditions(current, today) {
   const rainProb = today?.precipitation_probability_max || 0;
   const precip = today?.precipitation_sum || 0;
   const tempMin = today?.temperature_2m_min || 0;
+  const temp = current?.temperature_2m || today?.temperature_2m_max || 0;
+
+  // Effective thresholds from enterprise settings (weather_wind_max_mph, weather_rain_max_mm,
+  // weather_temp_min, weather_temp_max, weather_lightning_block). Fall back to hardcoded
+  // defaults when not provided so existing callers without thresholds still work.
+  const maxWind = thresholds.weather_wind_max_mph;
+  const maxRain = thresholds.weather_rain_max_mm != null ? thresholds.weather_rain_max_mm : 10;
+  const minTemp = thresholds.weather_temp_min;
+  const maxTemp = thresholds.weather_temp_max;
+  const lightningBlock = thresholds.weather_lightning_block !== false;
 
   let level = 'good';
   const reasons = [];
 
-  if (gustMph >= 45 || windMph >= 38) {
-    level = 'stop';
-    reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
-  } else if (gustMph >= 35 || windMph >= 25) {
-    if (level !== 'stop') level = 'caution';
-    reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
+  // Wind — use effective max if set, otherwise hardcoded defaults
+  if (maxWind != null) {
+    if (gustMph > maxWind) {
+      level = 'stop';
+      reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
+    } else if (gustMph >= maxWind * 0.85) {
+      if (level !== 'stop') level = 'caution';
+      reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
+    }
+  } else {
+    if (gustMph >= 45 || windMph >= 38) {
+      level = 'stop';
+      reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
+    } else if (gustMph >= 35 || windMph >= 25) {
+      if (level !== 'stop') level = 'caution';
+      reasons.push(`Wind ${windMph} mph (gusts ${gustMph})`);
+    }
   }
-  if (code >= 95) { level = 'stop'; reasons.push('Thunderstorm'); }
-  if (precip >= 10 || rainProb >= 85) {
+
+  // Temperature thresholds (from effective settings)
+  if (maxTemp != null && temp > maxTemp) {
+    level = 'stop';
+    reasons.push(`Temperature ${Math.round(temp)}°C above max ${maxTemp}°C`);
+  } else if (maxTemp != null && temp >= maxTemp - 2) {
     if (level !== 'stop') level = 'caution';
-    reasons.push(precip >= 10 ? `Heavy rain ${precip.toFixed(0)}mm` : `Rain risk ${rainProb}%`);
+    reasons.push(`Temperature near max ${maxTemp}°C`);
+  }
+  if (minTemp != null && temp < minTemp) {
+    level = 'stop';
+    reasons.push(`Temperature ${Math.round(temp)}°C below min ${minTemp}°C`);
+  } else if (minTemp != null && temp <= minTemp + 2) {
+    if (level !== 'stop') level = 'caution';
+    reasons.push(`Temperature near min ${minTemp}°C`);
+  }
+
+  // Lightning
+  if (lightningBlock && code >= 95) { level = 'stop'; reasons.push('Thunderstorm'); }
+
+  // Rain
+  if (precip >= maxRain || rainProb >= 85) {
+    if (level !== 'stop') level = 'caution';
+    reasons.push(precip >= maxRain ? `Heavy rain ${precip.toFixed(0)}mm` : `Rain risk ${rainProb}%`);
   }
   if (code >= 71 && code <= 77) {
     if (level !== 'stop') level = 'caution';

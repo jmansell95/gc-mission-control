@@ -54,7 +54,7 @@ import AssetHub from './pages/AssetHub';
 import AssetDetailPage from './pages/AssetDetailPage';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import FleetHub from './pages/FleetHub';
-import KeyLogBookDocs from './pages/KeyLogBookDocs';
+
 import ImprovementRoadmap from './pages/ImprovementRoadmap';
 import Microsoft365SetupGuide from './pages/Microsoft365SetupGuide';
 import PATTestingConsole from './pages/PATTestingConsole';
@@ -230,7 +230,7 @@ const AuthenticatedApp = () => {
             <Route path="/vehicles" element={<Navigate to="/fleet" replace />} />
             <Route path="/import" element={<Navigate to="/admin" replace />} />
             <Route path="/automations" element={<Navigate to="/admin" replace />} />
-            <Route path="/keylogbook-docs" element={<RouteGuard><KeyLogBookDocs /></RouteGuard>} />
+
             <Route path="/roadmap" element={<RouteGuard><ImprovementRoadmap /></RouteGuard>} />
             <Route path="/azure-migration-plan" element={<RouteGuard><AzureMigrationPlan /></RouteGuard>} />
             <Route path="/m365-setup-guide" element={<RouteGuard><Microsoft365SetupGuide /></RouteGuard>} />

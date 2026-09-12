@@ -1,6 +1,7 @@
 import React from 'react';
 import { useJobWeather } from '@/hooks/useJobWeather';
 import { WEATHER_CODE_MAP, LEVEL_STYLES, assessConditions } from '@/utils/siteWeather';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 import {
   Wind, Droplets, Thermometer, MapPin, Cloud, AlertTriangle,
   ShieldCheck, ShieldAlert, ShieldX, Loader2,
@@ -16,6 +17,7 @@ import {
  */
 export default function StaffWeatherCard({ lat, lng, locationName, isDrillingJob }) {
   const { data: w, isLoading, error } = useJobWeather(lat, lng);
+  const { settings: effectiveSettings } = useEffectiveSettings();
 
   // No coordinates
   if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) {
@@ -57,9 +59,9 @@ export default function StaffWeatherCard({ lat, lng, locationName, isDrillingJob
   const Icon = wInfo.icon;
   const temp = Math.round(w.current.temperature_2m);
   const feelsLike = Math.round(w.current.apparent_temperature);
-  const windMph = assessConditions(w.current, w.daily?.[0]).windMph;
-  const gustMph = assessConditions(w.current, w.daily?.[0]).gustMph;
-  const assessment = assessConditions(w.current, w.daily?.[0]);
+  const assessment = assessConditions(w.current, w.daily?.[0], effectiveSettings);
+  const windMph = assessment.windMph;
+  const gustMph = assessment.gustMph;
   const lvl = LEVEL_STYLES[assessment.level];
   const daily = w.daily?.[0];
   const maxTemp = daily ? Math.round(daily.temperature_2m_max) : null;

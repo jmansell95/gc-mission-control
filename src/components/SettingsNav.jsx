@@ -77,7 +77,6 @@ export const settingsGroups = [
       { id: 'azure-migration', label: 'Azure Migration Plan', icon: Cloud, desc: '13-week 1:1 migration roadmap to Azure-native architecture with A3 wall chart and parity matrix', roles: ['admin'] },
       { id: 'm365-setup-guide', label: 'M365 Setup Guide', icon: CalendarDays, desc: 'Microsoft 365 & Entra ID setup guide — SSO, SharePoint, Teams & OneDrive configuration for the migration', roles: ['admin'] },
       { id: 'improvement-roadmap', label: 'Improvement Roadmap', icon: Rocket, desc: 'Known issues, next priority actions and the long-term improvement roadmap', roles: ['admin'] },
-      { id: 'keylogbook-docs', label: 'KeyLogBook Docs', icon: FileUp, desc: 'KeyLogBook AGS webhook integration documentation — endpoints, auth, payload format & troubleshooting', roles: ['admin'] },
     ],
   },
   {

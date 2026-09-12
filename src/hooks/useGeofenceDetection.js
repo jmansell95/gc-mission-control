@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
 /**
  * useGeofenceDetection — real-time geofence detection for a job site.
@@ -45,10 +46,12 @@ export function useGeofenceDetection({ job, vehicleId, staffId, enabled = true }
   const [source, setSource] = useState(null);
   const [wasOnSite, setWasOnSite] = useState(false);
   const arrivalRef = useRef(null);
+  const { get: getEffectiveSetting } = useEffectiveSettings();
 
   const siteLat = job?.site_lat;
   const siteLng = job?.site_lng;
-  const radius = job?.geofence_radius_override || 200;
+  const defaultRadius = getEffectiveSetting('geofence_default_radius_m') ?? 250;
+  const radius = job?.geofence_radius_override || defaultRadius;
 
   // Phone GPS — watch position
   const { position: phonePos } = useGeolocation({

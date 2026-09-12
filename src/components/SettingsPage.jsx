@@ -85,7 +85,6 @@ import PowerAppsBuildHub from '@/pages/PowerAppsBuildHub';
 import AzureMigrationPlan from '@/pages/AzureMigrationPlan';
 import Microsoft365SetupGuide from '@/pages/Microsoft365SetupGuide';
 import ImprovementRoadmap from '@/pages/ImprovementRoadmap';
-import KeyLogBookDocs from '@/pages/KeyLogBookDocs';
 import ApprovalRoutingSettings from '@/components/settings/ApprovalRoutingSettings';
 
 import ReadinessManager from '@/components/settings/ReadinessManager';
@@ -247,7 +246,6 @@ export default function SettingsPage({ initialTab, onSelectJob, standalone }) {
       case 'azure-migration': return <AzureMigrationPlan />;
       case 'm365-setup-guide': return <Microsoft365SetupGuide />;
       case 'improvement-roadmap': return <ImprovementRoadmap />;
-      case 'keylogbook-docs': return <KeyLogBookDocs />;
       default: return null;
     }
   };

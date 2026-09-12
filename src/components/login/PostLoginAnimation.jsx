@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useDivisionLoginConfig } from '@/hooks/useDivisionLoginConfig';
 import LoginAnimationOverlay from '@/components/login/LoginAnimationOverlay';
@@ -30,12 +30,17 @@ export default function PostLoginAnimation() {
     try { sessionStorage.setItem(SESSION_KEY, '1'); } catch {}
   }, [isAuthenticated, user?.email, done]);
 
+  const handleDone = useCallback(() => {
+    setDone(true);
+    setShouldShow(false);
+  }, []);
+
   if (!shouldShow || done) return null;
 
   return (
     <LoginAnimationOverlay
       email={user?.email}
-      onDone={() => { setDone(true); setShouldShow(false); }}
+      onDone={handleDone}
     />
   );
 }
