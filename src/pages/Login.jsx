@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ShieldCheck, ChevronDown, Check, Building2, Layers, Globe } from 'lucide-react';
+import { ShieldCheck, ChevronDown, Check, Building2, Globe } from 'lucide-react';
 import MicrosoftIcon from '@/components/MicrosoftIcon';
 import { safeReturnTo } from '@/lib/authReturnTo';
 import { EMBLEM_URL } from '@/components/Logo';

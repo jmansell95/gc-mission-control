@@ -41,3 +41,27 @@ export const ENTERPRISE_SETTING_FIELDS = [
 ];
 
 export const SETTING_CATEGORIES = ['Branding', 'Financial', 'Field Operations', 'Weather', 'Geofence', 'Login', 'System'];
+
+/**
+ * Resolve the effective settings for a stream by merging enterprise defaults
+ * with the stream's overrides. Override keys take precedence.
+ * Frontend mirror of base44/shared/enterpriseSettings.ts → resolveSettings.
+ */
+export function resolveSettings(enterpriseSettings, streamOverrides) {
+  return {
+    ...(enterpriseSettings || {}),
+    ...(streamOverrides || {}),
+  };
+}
+
+/**
+ * Get a single effective setting value for a stream.
+ * Returns the override if present, otherwise the enterprise default.
+ * Frontend mirror of base44/shared/enterpriseSettings.ts → getEffectiveSetting.
+ */
+export function getEffectiveSetting(enterpriseSettings, streamOverrides, key) {
+  if (streamOverrides && key in streamOverrides) {
+    return streamOverrides[key];
+  }
+  return enterpriseSettings?.[key];
+}
