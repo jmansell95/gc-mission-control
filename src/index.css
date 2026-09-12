@@ -70,6 +70,14 @@
     --btn-radius: 0.875rem;
     --btn-icon-size: 2.25rem;
 
+    /* === Button Height Normalization ===
+       Ensures every <button> using bg-primary (the brand green) has the
+       same min-height as the shared Button component (h-9 = 36px) even
+       when the page uses a raw <button> instead of <Button>. This catches
+       the hundreds of legacy buttons that were normalized to bg-primary
+       via the token sweep but haven't been converted to <Button> yet. */
+    --btn-min-h: 2.25rem;
+
     /* === Unified Text Type Scale ===
        Single source of truth for all UI text across the site.
        Every heading, card title, KPI number, label, caption, and body
@@ -465,6 +473,19 @@
   .bg-planning {
     background: #fef3c7;
     background-image: repeating-linear-gradient(45deg, transparent 0, transparent 2px, #fbbf24 2px, #fbbf24 3px);
+  }
+
+  /* === Button Height Normalization ===
+     Applies the shared Button height to every <button> using bg-primary
+     so legacy buttons match the shared Button component's h-9 standard.
+     Skips buttons that already declare their own height (h-8, h-10, etc.)
+     or are icon-only / pill-shaped (rounded-full). */
+  button[class*="bg-primary"]:not([class*="h-8"]):not([class*="h-10"]):not([class*="h-11"]):not([class*="h-12"]):not([class*="h-full"]):not([class*="h-auto"]):not([class*="min-h-"]):not([class*="rounded-full"]):not([class*="rounded-3xl"]):not([class*="rounded-2xl"]) {
+    min-height: var(--btn-min-h);
+  }
+  /* Ensure consistent radius on brand buttons that don't already specify one */
+  button[class*="bg-primary"]:not([class*="rounded"]):not([class*="rounded-full"]):not([class*="rounded-lg"]):not([class*="rounded-xl"]):not([class*="rounded-2xl"]):not([class*="rounded-3xl"]) {
+    border-radius: var(--btn-radius);
   }
 
   /* === Shimmer Loading === */

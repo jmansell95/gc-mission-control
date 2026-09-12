@@ -29,6 +29,24 @@ export default function MittiSyncStatusCard() {
   const templates = config?.synced_templates || [];
   const lastSync = config?.last_pull_sync_at || config?.last_webhook_at;
 
+  // Pending audits check — lightweight query with 5-min staleTime so we
+  // don't hit the Mitti API on every mount. Shows an amber badge when
+  // there are audits waiting to be synced.
+  const { data: pendingData } = useQuery({
+    queryKey: ['mitti-pending'],
+    queryFn: async () => {
+      try {
+        const res = await base44.functions.invoke('searchMittiAudits', {});
+        const d = res.data || res;
+        return d?.pending_count || 0;
+      } catch { return 0; }
+    },
+    enabled: isConnected && !syncing,
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  });
+  const pendingCount = pendingData || 0;
+
   const addLog = useCallback((msg, type = 'info') => {
     setSyncLog(prev => [...prev.slice(-80), { time: new Date().toLocaleTimeString('en-GB'), msg, type }]);
   }, []);
@@ -168,6 +186,15 @@ export default function MittiSyncStatusCard() {
           <div className="text-center"><div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600" /></div><p className="text-sm font-bold text-slate-700">{isConnected ? 'Connected' : 'Off'}</p><p className="text-[10px] text-slate-500 font-semibold uppercase">Status</p></div>
           <div className="text-center"><div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-1.5"><Clock className="w-4 h-4 text-amber-600" /></div><p className="text-xs font-bold text-slate-700">{lastSync ? new Date(lastSync).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : 'Never'}</p><p className="text-[10px] text-slate-500 font-semibold uppercase">Last Sync</p></div>
         </div>
+        {pendingCount > 0 && !syncing && (
+          <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <p className="text-xs font-semibold text-amber-700">{pendingCount} audit{pendingCount !== 1 ? 's' : ''} pending sync</p>
+            <Button variant="ghost" size="sm" onClick={runSync} className="ml-auto text-amber-700 hover:bg-amber-100">
+              Sync now
+            </Button>
+          </div>
+        )}
         {templates.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {templates.slice(0, 8).map(t => <span key={t.template_id} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 truncate max-w-[140px]">{t.name || t.template_id}</span>)}
