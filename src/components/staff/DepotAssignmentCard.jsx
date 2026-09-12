@@ -24,7 +24,7 @@ export default function DepotAssignmentCard({ assignment, staff, onOpenShiftWiza
 
   return (
     <motion.div variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } }}
-      className="insight-card rounded-3xl overflow-hidden">
+      className="field-card overflow-hidden">
       <div className="h-1.5 bg-amber-400" />
 
       {/* Compact header — always visible */}

@@ -25,7 +25,7 @@ export default function IncentiveQuickLook({ staffId, teamId }) {
 
   if (isLoading) {
     return (
-      <div className="insight-card rounded-2xl p-4 animate-pulse">
+      <div className="field-card p-4 animate-pulse">
         <div className="h-16 bg-slate-100 rounded-xl" />
       </div>
     );
@@ -43,7 +43,7 @@ export default function IncentiveQuickLook({ staffId, teamId }) {
   return (
     <button
       onClick={() => navigate('/staff-profile')}
-      className="insight-card w-full rounded-2xl p-4 text-left group transition hover:shadow-lg"
+      className="field-card w-full p-4 text-left group transition hover:shadow-lg"
     >
       <div className="flex items-center gap-3">
         {/* Trophy icon tile */}

@@ -26,7 +26,7 @@ export default function DutiesSummaryCard({ staffId, enabled = true }) {
 
   if (isLoading) {
     return (
-      <div className="hub-glass rounded-2xl p-4 animate-pulse">
+      <div className="field-card p-4 animate-pulse">
         <div className="h-4 w-32 bg-slate-200/60 rounded mb-3" />
         <div className="h-3 w-full bg-slate-200/40 rounded mb-2" />
         <div className="h-3 w-2/3 bg-slate-200/40 rounded" />
@@ -46,7 +46,7 @@ export default function DutiesSummaryCard({ staffId, enabled = true }) {
         type="button"
         className="w-full text-left active:scale-[0.98] transition touch-manipulation"
       >
-        <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
+        <div className="field-card p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
             <CheckCircle2 className="w-5 h-5 text-emerald-600" />
           </div>
@@ -114,7 +114,7 @@ export default function DutiesSummaryCard({ staffId, enabled = true }) {
       type="button"
       className="w-full text-left active:scale-[0.98] transition touch-manipulation"
     >
-      <div className="hub-glass rounded-2xl overflow-hidden">
+      <div className="field-card overflow-hidden">
         {/* Header */}
         <div className="px-4 py-3 flex items-center gap-2.5 border-b border-slate-100/80">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">

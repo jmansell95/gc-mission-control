@@ -28,7 +28,7 @@ export default function StartMyDayHero({ isDriller = false, onStart }) {
       type="button"
       className="w-full text-left active:scale-[0.98] transition touch-manipulation"
     >
-      <div className="hub-glass rounded-2xl overflow-hidden">
+      <div className="field-card overflow-hidden">
         {/* Header bar */}
         <div className="bg-gradient-to-r from-[#2E5A1A] to-[#1c4a12] px-4 py-3.5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">

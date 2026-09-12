@@ -107,7 +107,7 @@ export default function ActiveJobCard({
   return (
     <motion.div
       variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } } }}
-      className="insight-card rounded-3xl overflow-hidden"
+      className="field-card overflow-hidden"
     >
       {/* Status strip — gradient with subtle depth */}
       <div className={`px-4 py-3 flex items-center justify-between ${status.bg} border-b border-slate-100/50`}>

@@ -33,7 +33,7 @@ export default function DeliveryHeroToday({ deliveries = [], jobs = [] }) {
       ? 'Collect from'
       : 'Deliver to';
   return (
-    <div className="insight-card rounded-3xl overflow-hidden">
+    <div className="field-card overflow-hidden">
       <div className={`h-1.5 ${cfg.accent}`} />
       <div className="p-4 md:p-5">
         <div className="flex items-center gap-2 mb-2">

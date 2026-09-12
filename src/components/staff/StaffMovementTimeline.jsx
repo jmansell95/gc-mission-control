@@ -106,7 +106,7 @@ export default function StaffMovementTimeline({ staffId, staffName }) {
   }
 
   return (
-    <div className="insight-card rounded-2xl overflow-hidden">
+    <div className="field-card overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
         <Route className="w-4 h-4 text-[#2E5A1A]" />
         <h3 className="text-sm font-bold text-slate-900">Today's Movements</h3>
