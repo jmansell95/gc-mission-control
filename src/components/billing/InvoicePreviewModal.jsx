@@ -35,9 +35,9 @@ export default function InvoicePreviewModal({ invoice, onClose }) {
         {/* Invoice document */}
         <div className="p-8 print:p-0">
           {/* Company header */}
-          <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-[#2E5A1A]">
+          <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-primary">
             <div>
-              <h1 className="text-2xl font-extrabold text-[#2E5A1A] tracking-tight">Ground Control</h1>
+              <h1 className="text-2xl font-extrabold text-primary tracking-tight">Ground Control</h1>
               <p className="text-xs text-slate-500 mt-1">Geotechnical & Environmental Specialists</p>
               <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">
                 Unit 1, Industrial Estate<br />
@@ -121,9 +121,9 @@ export default function InvoicePreviewModal({ invoice, onClose }) {
                 <span className="text-slate-500">VAT ({invoice.vat_rate || 20}%)</span>
                 <span className="font-semibold text-slate-800 tabular-nums">{gbp(invoice.vat_total)}</span>
               </div>
-              <div className="flex justify-between text-base pt-2 border-t-2 border-[#2E5A1A]">
+              <div className="flex justify-between text-base pt-2 border-t-2 border-primary">
                 <span className="font-bold text-slate-900">Gross Total</span>
-                <span className="font-extrabold text-[#2E5A1A] tabular-nums">{gbp(invoice.gross_total)}</span>
+                <span className="font-extrabold text-primary tabular-nums">{gbp(invoice.gross_total)}</span>
               </div>
             </div>
           </div>

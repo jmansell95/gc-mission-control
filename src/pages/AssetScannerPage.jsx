@@ -529,7 +529,7 @@ export default function AssetScannerPage() {
                   <div className="flex gap-1 p-1 bg-white/15 backdrop-blur-md rounded-xl mb-5 w-full max-w-xs">
                     <button
                       onClick={() => { setDirection('signout'); setSelectedJobId(''); }}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${isSignOut ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-white/80'}`}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${isSignOut ? 'bg-white text-primary shadow-sm' : 'text-white/80'}`}
                     >
                       <ShieldCheck className="w-3.5 h-3.5" /> Sign Out
                     </button>
@@ -568,8 +568,8 @@ export default function AssetScannerPage() {
                   {/* Resolving overlay (when full-screen scanner is closed) */}
                   {resolving && !showFullScreen && (
                     <div className="hub-glass rounded-2xl p-6 flex items-center justify-center gap-2.5">
-                      <div className="w-5 h-5 border-2 border-[#2E5A1A] border-t-transparent rounded-full animate-spin" />
-                      <p className="text-sm font-medium text-[#2E5A1A]">Checking Asset Panda…</p>
+                      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      <p className="text-sm font-medium text-primary">Checking Asset Panda…</p>
                     </div>
                   )}
 

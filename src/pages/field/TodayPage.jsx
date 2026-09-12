@@ -557,9 +557,9 @@ export default function TodayPage() {
               </div>
             </button>
             <button onClick={() => navigate('/scanner')} type="button"
-              className="flex items-center gap-3 bg-white border border-slate-200/80 rounded-2xl px-4 py-4 active:scale-95 transition touch-manipulation hover:border-[#2E5A1A]/30 shadow-sm shadow-slate-900/[0.04]">
+              className="flex items-center gap-3 bg-white border border-slate-200/80 rounded-2xl px-4 py-4 active:scale-95 transition touch-manipulation hover:border-primary/30 shadow-sm shadow-slate-900/[0.04]">
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-[#2E5A1A]" strokeWidth={2.5} />
+                <Package className="w-5 h-5 text-primary" strokeWidth={2.5} />
               </div>
               <div className="text-left min-w-0">
                 <p className="text-sm font-bold leading-tight text-slate-900">Sign Out Gear</p>
@@ -603,19 +603,19 @@ export default function TodayPage() {
           return (
             <div className="field-card p-5 text-center">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-3">
-                <CalendarClock className="w-7 h-7 text-[#2E5A1A]" strokeWidth={2.5} />
+                <CalendarClock className="w-7 h-7 text-primary" strokeWidth={2.5} />
               </div>
               <p className="text-sm font-bold text-slate-900 mb-1">No jobs today</p>
-              <p className="text-xs text-slate-500 mb-3">Your next shift is <span className="font-semibold text-[#2E5A1A]">{label}</span></p>
+              <p className="text-xs text-slate-500 mb-3">Your next shift is <span className="font-semibold text-primary">{label}</span></p>
               <div className="bg-slate-50/80 rounded-xl border border-slate-200/70 px-4 py-3 text-left">
                 <p className="text-sm font-bold text-slate-900 truncate">{nextJob?.name || 'Shift'}</p>
                 <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                  <Calendar className="w-3.5 h-3.5 text-[#2E5A1A]/60" /> {format(nextDate, 'EEEE dd MMM')}
-                  {next.start_time && <><span>·</span><Clock className="w-3.5 h-3.5 text-[#2E5A1A]/60" /> {next.start_time}</>}
+                  <Calendar className="w-3.5 h-3.5 text-primary/60" /> {format(nextDate, 'EEEE dd MMM')}
+                  {next.start_time && <><span>·</span><Clock className="w-3.5 h-3.5 text-primary/60" /> {next.start_time}</>}
                 </div>
               </div>
               <button onClick={() => navigate('/upcoming')} type="button"
-                className="mt-3 text-xs font-semibold text-[#2E5A1A] hover:underline">View all upcoming →</button>
+                className="mt-3 text-xs font-semibold text-primary hover:underline">View all upcoming →</button>
             </div>
           );
         })() : todaysAllDone ? (

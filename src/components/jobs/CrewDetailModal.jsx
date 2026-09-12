@@ -27,7 +27,7 @@ const roleLabels = {
 const statusMeta = {
   assigned: { label: 'Assigned', icon: Clock, cls: 'text-slate-600 bg-slate-100' },
   started: { label: 'On Shift', icon: PlayCircle, cls: 'text-blue-700 bg-blue-100' },
-  completed: { label: 'Completed', icon: CheckCircle2, cls: 'text-[#2E5A1A] bg-emerald-100' },
+  completed: { label: 'Completed', icon: CheckCircle2, cls: 'text-primary bg-emerald-100' },
 };
 
 // Full crew profile modal — opens when a manager clicks a crew member card.
@@ -114,7 +114,7 @@ export default function CrewDetailModal({ open, member, rotas, rigs, allStaff, j
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400 mb-1.5">Assigned Rig</p>
                     {stats.rig ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
                           <Cog className="w-4 h-4 text-white" />
                         </div>
                         <div>
@@ -251,8 +251,8 @@ function Section({ icon: Icon, title, children }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2.5">
-        <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5 text-[#2E5A1A]" />
+        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="w-3.5 h-3.5 text-primary" />
         </div>
         <h3 className="text-sm font-bold text-slate-900">{title}</h3>
       </div>

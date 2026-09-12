@@ -89,7 +89,7 @@ export default function RigCertificateHero({ asset, onOpenCert }) {
         <div className="flex items-center gap-2">
           {onOpenCert && (
             <button onClick={onOpenCert}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition shadow-sm">
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition shadow-sm">
               <FileText className="w-3.5 h-3.5" /> View Certificate
             </button>
           )}

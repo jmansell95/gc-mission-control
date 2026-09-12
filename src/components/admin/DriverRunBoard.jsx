@@ -60,7 +60,7 @@ export default function DriverRunBoard({ deliveries, jobs, drivers, onSelectDeli
         return (
           <div key={run.driverId} className="hub-glass rounded-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-200/60 flex items-center gap-2.5 bg-slate-50/50">
-              <div className="w-9 h-9 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                 {(run.driverName || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

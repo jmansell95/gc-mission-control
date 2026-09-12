@@ -257,7 +257,7 @@ export default function SkillsMatrix() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search staff or job title..."
-            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
@@ -271,8 +271,8 @@ export default function SkillsMatrix() {
                 onClick={() => setStatusFilter(opt.key)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap flex-shrink-0 ${
                   active
-                    ? 'bg-[#2E5A1A] text-white shadow-sm'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2E5A1A]/30'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-primary/30'
                 }`}
               >
                 {opt.label}

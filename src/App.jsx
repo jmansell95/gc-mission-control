@@ -32,7 +32,7 @@ import EnterpriseResourcePoolPage from './pages/EnterpriseResourcePoolPage';
 import AdminDashboard from './pages/AdminDashboard';
 import ManagerTeamDashboard from '@/components/dashboard/ManagerTeamDashboard';
 import PrehistoricImportPage from './components/import/PrehistoricImportPage';
-import StaffDashboard from './pages/StaffDashboard';
+
 import ProfileRouter from '@/components/staff/ProfileRouter';
 import DesktopProfile from '@/components/staff/DesktopProfile';
 import FieldShell from '@/components/field/FieldShell';

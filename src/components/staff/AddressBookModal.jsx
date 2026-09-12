@@ -84,7 +84,7 @@ export default function AddressBookModal({ open, onClose, entityType, recordId, 
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 sticky top-0 bg-white rounded-t-xl z-10">
           <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-            <BookUser className="w-4 h-4 text-[#2E5A1A]" /> Address Book
+            <BookUser className="w-4 h-4 text-primary" /> Address Book
             <span className="text-xs font-normal text-slate-400 truncate">· {recordName || ''}</span>
           </h3>
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
@@ -104,14 +104,14 @@ export default function AddressBookModal({ open, onClose, entityType, recordId, 
               {editingIdx === idx ? (
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="text" placeholder="Name *" value={editDraft.name} onChange={e => setEditDraft({ ...editDraft, name: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                    <input type="text" placeholder="Job Title" value={editDraft.role} onChange={e => setEditDraft({ ...editDraft, role: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                    <input type="text" placeholder="Phone" value={editDraft.phone} onChange={e => setEditDraft({ ...editDraft, phone: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                    <input type="email" placeholder="Email" value={editDraft.email} onChange={e => setEditDraft({ ...editDraft, email: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                    <input type="text" placeholder="Name *" value={editDraft.name} onChange={e => setEditDraft({ ...editDraft, name: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                    <input type="text" placeholder="Job Title" value={editDraft.role} onChange={e => setEditDraft({ ...editDraft, role: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                    <input type="text" placeholder="Phone" value={editDraft.phone} onChange={e => setEditDraft({ ...editDraft, phone: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                    <input type="email" placeholder="Email" value={editDraft.email} onChange={e => setEditDraft({ ...editDraft, email: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                   </div>
-                  <textarea placeholder="Notes" value={editDraft.notes} onChange={e => setEditDraft({ ...editDraft, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  <textarea placeholder="Notes" value={editDraft.notes} onChange={e => setEditDraft({ ...editDraft, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                   <div className="flex gap-2">
-                    <button onClick={handleSaveEdit} disabled={saving} className="flex-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-1">
+                    <button onClick={handleSaveEdit} disabled={saving} className="flex-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-1">
                       {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Save
                     </button>
                     <button onClick={() => setEditingIdx(null)} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-200 transition">Cancel</button>
@@ -125,7 +125,7 @@ export default function AddressBookModal({ open, onClose, entityType, recordId, 
                       {c.role && <p className="text-xs text-slate-500 truncate">{c.role}</p>}
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => { setEditingIdx(idx); setEditDraft({ ...emptyContact, ...c }); }} className="p-1 text-slate-400 hover:text-[#2E5A1A] hover:bg-slate-100 rounded transition">
+                      <button onClick={() => { setEditingIdx(idx); setEditDraft({ ...emptyContact, ...c }); }} className="p-1 text-slate-400 hover:text-primary hover:bg-slate-100 rounded transition">
                         <Edit2 className="w-3 h-3" />
                       </button>
                       <button onClick={() => handleDelete(idx)} disabled={saving} className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition disabled:opacity-50">
@@ -144,23 +144,23 @@ export default function AddressBookModal({ open, onClose, entityType, recordId, 
           ))}
 
           {showAdd ? (
-            <div className="rounded-lg border-2 border-dashed border-[#2E5A1A]/30 p-3 space-y-2">
+            <div className="rounded-lg border-2 border-dashed border-primary/30 p-3 space-y-2">
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Name *" value={addDraft.name} onChange={e => setAddDraft({ ...addDraft, name: e.target.value })} autoFocus className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                <input type="text" placeholder="Job Title" value={addDraft.role} onChange={e => setAddDraft({ ...addDraft, role: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                <input type="text" placeholder="Phone" value={addDraft.phone} onChange={e => setAddDraft({ ...addDraft, phone: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
-                <input type="email" placeholder="Email" value={addDraft.email} onChange={e => setAddDraft({ ...addDraft, email: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                <input type="text" placeholder="Name *" value={addDraft.name} onChange={e => setAddDraft({ ...addDraft, name: e.target.value })} autoFocus className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                <input type="text" placeholder="Job Title" value={addDraft.role} onChange={e => setAddDraft({ ...addDraft, role: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                <input type="text" placeholder="Phone" value={addDraft.phone} onChange={e => setAddDraft({ ...addDraft, phone: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
+                <input type="email" placeholder="Email" value={addDraft.email} onChange={e => setAddDraft({ ...addDraft, email: e.target.value })} className="px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
               </div>
-              <textarea placeholder="Notes" value={addDraft.notes} onChange={e => setAddDraft({ ...addDraft, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              <textarea placeholder="Notes" value={addDraft.notes} onChange={e => setAddDraft({ ...addDraft, notes: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
               <div className="flex gap-2">
-                <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-1">
+                <button onClick={handleAdd} disabled={saving} className="flex-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-1">
                   {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />} Add Contact
                 </button>
                 <button onClick={() => { setShowAdd(false); setAddDraft(emptyContact); }} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium hover:bg-slate-200 transition">Cancel</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowAdd(true)} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:border-[#2E5A1A]/30 hover:text-[#2E5A1A] transition flex items-center justify-center gap-1.5">
+            <button onClick={() => setShowAdd(true)} className="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-sm font-medium text-slate-500 hover:border-primary/30 hover:text-primary transition flex items-center justify-center gap-1.5">
               <Plus className="w-4 h-4" /> Add Contact
             </button>
           )}

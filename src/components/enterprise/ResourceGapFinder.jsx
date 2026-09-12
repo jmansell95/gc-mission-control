@@ -70,14 +70,14 @@ export default function ResourceGapFinder({ divisionId = '', divMap = {}, onClos
               type="date"
               value={fromDate}
               onChange={e => { setFromDate(e.target.value); setSearched(false); }}
-              className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#2E5A1A] transition"
+              className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-primary transition"
             />
             <span className="text-slate-400 text-xs">→</span>
             <input
               type="date"
               value={toDate}
               onChange={e => { setToDate(e.target.value); setSearched(false); }}
-              className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-[#2E5A1A] transition"
+              className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white focus:outline-none focus:border-primary transition"
             />
           </div>
 
@@ -85,7 +85,7 @@ export default function ResourceGapFinder({ divisionId = '', divMap = {}, onClos
           <select
             value={rigType}
             onChange={e => { setRigType(e.target.value); setSearched(false); }}
-            className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A] transition"
+            className="h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-primary transition"
           >
             {RIG_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
@@ -186,7 +186,7 @@ function RigResultCard({ rig, divMap, freeDays, conflicts, fromDate, toDate, onR
   const totalDays = Math.round((parseISO(toDate) - parseISO(fromDate)) / 86400000) + 1;
 
   return (
-    <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A]/30 hover:shadow-sm transition group">
+    <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary/30 hover:shadow-sm transition group">
       <span className="w-1 h-10 rounded-full flex-shrink-0" style={{ background: divColor }} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">

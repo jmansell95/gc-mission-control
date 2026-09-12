@@ -9,7 +9,7 @@ const FIELD_OPTIONS = [
   { value: 'line_total', label: 'Line Total' },
 ];
 
-const inputCls = 'w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#2E5A1A] text-sm';
+const inputCls = 'w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-primary text-sm';
 
 /**
  * SmartUploadReview — the review/mapping step shown after a quote is uploaded.
@@ -120,7 +120,7 @@ export default function SmartUploadReview({
         {/* Left: visual preview */}
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wide">
-            {isImage ? <ImageIcon className="w-3.5 h-3.5 text-[#2E5A1A]" /> : <FileText className="w-3.5 h-3.5 text-[#2E5A1A]" />}
+            {isImage ? <ImageIcon className="w-3.5 h-3.5 text-primary" /> : <FileText className="w-3.5 h-3.5 text-primary" />}
             Document Preview
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden" style={{ height: '420px' }}>
@@ -142,7 +142,7 @@ export default function SmartUploadReview({
         {/* Right: raw extracted rows */}
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wide">
-            <FileText className="w-3.5 h-3.5 text-[#2E5A1A]" />
+            <FileText className="w-3.5 h-3.5 text-primary" />
             Extracted Rows ({editableRows.length})
           </div>
           <div className="rounded-xl border border-slate-200 overflow-auto" style={{ maxHeight: '420px' }}>
@@ -171,7 +171,7 @@ export default function SmartUploadReview({
                             type="text"
                             value={row[col] || ''}
                             onChange={(e) => handleCellEdit(rowIdx, col, e.target.value)}
-                            className="w-full px-1.5 py-1 border border-transparent rounded text-xs hover:border-slate-200 focus:border-[#2E5A1A] focus:outline-none"
+                            className="w-full px-1.5 py-1 border border-transparent rounded text-xs hover:border-slate-200 focus:border-primary focus:outline-none"
                           />
                         </td>
                       ))}
@@ -195,7 +195,7 @@ export default function SmartUploadReview({
       {/* Column mapping builder */}
       <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wide">
-          <ArrowRight className="w-3.5 h-3.5 text-[#2E5A1A]" />
+          <ArrowRight className="w-3.5 h-3.5 text-primary" />
           Column Mapping
           <span className="text-slate-400 font-normal normal-case tracking-normal">— assign each column to a billable field</span>
         </div>
@@ -207,7 +207,7 @@ export default function SmartUploadReview({
               <select
                 value={columnMapping[col] || 'ignore'}
                 onChange={(e) => handleMappingChange(col, e.target.value)}
-                className="text-xs px-2 py-1 border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] font-medium flex-shrink-0"
+                className="text-xs px-2 py-1 border border-slate-200 rounded-lg focus:outline-none focus:border-primary font-medium flex-shrink-0"
               >
                 {FIELD_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -227,7 +227,7 @@ export default function SmartUploadReview({
           type="button"
           onClick={handleApply}
           disabled={!hasDescriptionMapped || applying || editableRows.length === 0}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50"
         >
           {applying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           {applying ? 'Matching…' : 'Map & Extract'}

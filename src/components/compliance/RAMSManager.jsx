@@ -109,7 +109,7 @@ export default function RAMSManager({ onSelectJob }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by document name or job..."
-            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+            className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
         </div>
         <div className="flex gap-1.5">
@@ -163,7 +163,7 @@ export default function RAMSManager({ onSelectJob }) {
                 {d.isSigned ? (
                   <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Signed</span>
                 ) : d.isCurrent ? (
-                  <button onClick={() => handleSignOff(d)} className="text-[10px] font-bold bg-[#2E5A1A] text-white px-2.5 py-1 rounded-full hover:bg-[#1c4a12] transition">
+                  <button onClick={() => handleSignOff(d)} className="text-[10px] font-bold bg-primary text-white px-2.5 py-1 rounded-full hover:bg-primary/90 transition">
                     Sign Off
                   </button>
                 ) : null}

@@ -168,7 +168,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-slate-800">Profile Photo</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
                     <Camera className="w-3.5 h-3.5" />
                     {form.avatar_url ? 'Change' : 'Upload'}
                     <input type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
@@ -187,7 +187,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {/* Identity */}
           <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
-              <UserCog className="w-4 h-4 text-[#2E5A1A]" />
+              <UserCog className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Identity</p>
             </div>
             <Field icon={UserCog} label="Full Name">
@@ -212,7 +212,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {/* Assignment */}
           <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
-              <Users className="w-4 h-4 text-[#2E5A1A]" />
+              <Users className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Assignment</p>
             </div>
             <Field label="Worker Type">
@@ -248,7 +248,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {canEditFinancials && (
             <div className="hub-glass rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-2.5 mb-1">
-                <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
+                <PoundSterling className="w-4 h-4 text-primary" />
                 <p className="text-sm font-semibold text-slate-700">Financial</p>
               </div>
               <Field icon={PoundSterling} label="Day Rate (£)">
@@ -270,7 +270,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {(form.worker_type === 'subcontractor' || form.worker_type === 'agency') && (
             <div className="hub-glass rounded-xl p-4 space-y-3">
               <div className="flex items-center gap-2.5 mb-1">
-                <Building2 className="w-4 h-4 text-[#2E5A1A]" />
+                <Building2 className="w-4 h-4 text-primary" />
                 <p className="text-sm font-semibold text-slate-700">Subcontractor / Agency Details</p>
               </div>
               <Field icon={Building2} label="Company">
@@ -289,7 +289,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
                 <input type="tel" value={form.second_man_phone} onChange={(e) => set('second_man_phone', e.target.value)} className={inputCls} />
               </Field>
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={(e) => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={(e) => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Onboarded in Market Dojo</span>
               </label>
             </div>
@@ -298,7 +298,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {/* Permissions — managed on the dedicated Access Levels page */}
           <div className="hub-glass rounded-xl p-4">
             <div className="flex items-center gap-2.5 mb-2">
-              <Shield className="w-4 h-4 text-[#2E5A1A]" />
+              <Shield className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Permissions</p>
             </div>
             <p className="text-xs text-slate-500 mb-3">
@@ -307,7 +307,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
             <button
               type="button"
               onClick={() => setShowPermissionPopup(true)}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition"
             >
               <KeyRound className="w-3.5 h-3.5" /> Manage Permissions
             </button>
@@ -316,7 +316,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
           {/* Sensitive (admin-only) */}
           <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
-              <Shield className="w-4 h-4 text-[#2E5A1A]" />
+              <Shield className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Compliance (Admin Only)</p>
             </div>
             <Field icon={Calendar} label="Date of Birth">
@@ -356,7 +356,7 @@ export default function CrewProfileEditorDrawer({ open, onOpenChange, staff, tea
   );
 }
 
-const inputCls = "w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition";
+const inputCls = "w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition";
 
 function Field({ icon: Icon, label, children }) {
   return (

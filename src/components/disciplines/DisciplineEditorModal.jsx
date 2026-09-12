@@ -62,7 +62,7 @@ export default function DisciplineEditorModal({ open, onClose, job }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-[#2E5A1A]/5 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Layers className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function DisciplineEditorModal({ open, onClose, job }) {
           <button type="button" onClick={onClose} className="px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition">
             Cancel
           </button>
-          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+          <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <><Save className="w-4 h-4" /> Save Disciplines</>}
           </button>
         </div>

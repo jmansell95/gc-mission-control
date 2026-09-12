@@ -10,7 +10,7 @@ import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 import { useDivisionAppSetting } from '@/hooks/useDivisionAppSetting';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   api_url: 'https://api.holman.com',
@@ -173,7 +173,7 @@ export default function HolmanSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">API Credentials</h3>
         </div>
 
@@ -245,17 +245,17 @@ export default function HolmanSettings() {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
 
       {/* Webhook receiver */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Webhook className="w-4 h-4 text-[#2E5A1A]" />
+          <Webhook className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Webhook Receiver</h3>
         </div>
         <p className="text-xs text-slate-500">Add this URL to your Holman portal's webhook configuration to receive real-time fleet events (MOT expiry, service due, odometer updates). Holman will push updates here automatically.</p>
@@ -291,13 +291,13 @@ export default function HolmanSettings() {
       {/* Manual sync */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <RefreshCw className="w-4 h-4 text-[#2E5A1A]" />
+          <RefreshCw className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Manual Fleet Sync</h3>
           <span className="ml-auto text-xs text-slate-400">Pull all vehicles from Holman now</span>
         </div>
         <p className="text-xs text-slate-500 mb-3">Fetches the full fleet vehicle list from Holman and updates MOT expiry, service due dates, last service dates, breakdown status, windscreen repair logs, and fuel card alerts on matching local Vehicle records. Vehicles are matched by registration number, Holman fleet ID, or VIN.</p>
         <button onClick={handleSync} disabled={!connected || syncing}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
           {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Sync Fleet Now
         </button>
         {!connected && <p className="text-[11px] text-amber-600 mt-2 text-center">Save your API credentials first to enable fleet sync.</p>}
@@ -325,13 +325,13 @@ export default function HolmanSettings() {
       {/* Fuel card sync */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Fuel className="w-4 h-4 text-[#2E5A1A]" />
+          <Fuel className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Fuel Card Transactions</h3>
           <span className="ml-auto text-xs text-slate-400">Pull fuel card spend from Holman</span>
         </div>
         <p className="text-xs text-slate-500 mb-3">Fetches fuel card transactions from Holman and creates fuel card booking records for each transaction, matched to vehicles by registration or VIN. Each transaction is also matched to the job the vehicle was assigned to on that date (via the rota) and recorded as a fuel cost against that job for profitability tracking. Transactions are deduplicated by reference number, and vehicle mileage is updated from odometer readings on the fuel receipt.</p>
         <button onClick={handleSyncFuel} disabled={!connected || fuelSyncing}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
           {fuelSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Fuel className="w-4 h-4" />} Sync Fuel Cards
         </button>
         {fuelSyncResult && (

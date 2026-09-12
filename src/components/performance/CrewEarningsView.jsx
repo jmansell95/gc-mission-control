@@ -79,7 +79,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search crews…"
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A]"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary"
         />
       </div>
 
@@ -124,7 +124,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <span className="font-semibold text-slate-700 tabular-nums">{fmt(jb.earned)}</span>
-                        <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-[#2E5A1A] transition" />
+                        <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-primary transition" />
                       </div>
                     </button>
                   ))}
@@ -191,7 +191,7 @@ export default function CrewEarningsView({ dateRange, onSelectJob }) {
                               </div>
                               <div className="flex items-center gap-1">
                                 <span className="font-semibold text-slate-700 tabular-nums">{fmt(jb.earned)}</span>
-                                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-[#2E5A1A] transition" />
+                                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-primary transition" />
                               </div>
                             </button>
                           ))}

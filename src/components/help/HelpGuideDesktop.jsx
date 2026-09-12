@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Skeleton, EmptyState } from '@/components/StateViews';
 
 const categoryConfig = {
-  delivery: { label: 'Deliveries', icon: '🚚', color: 'text-[#2E5A1A]', bg: 'bg-[#2E5A1A]/10', dot: 'bg-[#2E5A1A]' },
+  delivery: { label: 'Deliveries', icon: '🚚', color: 'text-primary', bg: 'bg-primary/10', dot: 'bg-primary' },
   logistics: { label: 'Logistics & Equipment', icon: '📦', color: 'text-teal-600', bg: 'bg-teal-50', dot: 'bg-teal-500' },
   compliance: { label: 'Compliance', icon: '🛡️', color: 'text-blue-600', bg: 'bg-blue-50', dot: 'bg-blue-500' },
   safety: { label: 'Safety', icon: '⚠️', color: 'text-amber-600', bg: 'bg-amber-50', dot: 'bg-amber-500' },
@@ -47,7 +47,7 @@ export default function HelpGuideDesktop({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search articles…"
-              className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 focus:border-[#2E5A1A]/30"
+              className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
             />
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function HelpGuideDesktop({
         <div className="px-3 pb-3 flex-1 overflow-y-auto">
           <button
             onClick={() => { setActiveCategory('all'); setSelectedTopic(null); }}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition mb-1 ${activeCategory === 'all' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition mb-1 ${activeCategory === 'all' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
           >
             <span className="flex items-center gap-2.5">
               <span className="text-base">📚</span> All Articles
@@ -70,7 +70,7 @@ export default function HelpGuideDesktop({
               <button
                 key={key}
                 onClick={() => { setActiveCategory(key); setSelectedTopic(null); }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition mb-1 ${active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition mb-1 ${active ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
               >
                 <span className="flex items-center gap-2.5">
                   <span className="text-base">{cfg.icon}</span> {cfg.label}
@@ -83,7 +83,7 @@ export default function HelpGuideDesktop({
 
         <div className="px-5 py-4 border-t border-slate-200">
           <button onClick={handleExportPDF} type="button"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white text-[#2E5A1A] ring-1 ring-slate-200 text-sm font-semibold hover:bg-slate-50 transition">
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white text-primary ring-1 ring-slate-200 text-sm font-semibold hover:bg-slate-50 transition">
             <Download className="w-4 h-4" /> Print All Guides
           </button>
         </div>
@@ -95,7 +95,7 @@ export default function HelpGuideDesktop({
           <div className="max-w-3xl mx-auto px-8 py-6">
             <button
               onClick={() => setSelectedTopic(null)}
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-[#2E5A1A] transition mb-4"
+              className="flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-primary transition mb-4"
             >
               <ChevronRight className="w-4 h-4 rotate-180" /> Back to articles
             </button>
@@ -103,7 +103,7 @@ export default function HelpGuideDesktop({
               <div className="px-7 pt-6 pb-4 border-b border-slate-100">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="text-[11px] font-semibold text-[#2E5A1A] uppercase tracking-wide">
+                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wide">
                       {categoryConfig[selectedTopic.category]?.label || selectedTopic.category}
                     </span>
                     <h1 className="text-2xl font-bold text-slate-900 mt-1 leading-tight">{selectedTopic.title}</h1>
@@ -123,11 +123,11 @@ export default function HelpGuideDesktop({
                     p: ({ children }) => <p className="text-sm text-slate-600 leading-relaxed mb-3.5">{children}</p>,
                     li: ({ children }) => <li className="text-sm text-slate-600 leading-relaxed mb-1.5 ml-1">{children}</li>,
                     ul: ({ children }) => <ul className="list-disc list-outside space-y-1 mb-4 ml-4 text-slate-600 marker:text-[#8DC63F] marker:text-xs">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal list-outside space-y-1 mb-4 ml-4 text-slate-600 marker:text-[#2E5A1A] marker:font-semibold">{children}</ol>,
-                    strong: ({ children }) => <strong className="font-semibold text-slate-800 bg-[#2E5A1A]/10 px-1 rounded">{children}</strong>,
-                    a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-[#2E5A1A] font-medium underline decoration-[#2E5A1A]/40 underline-offset-2 hover:text-[#2E5A1A]">{children}</a>,
+                    ol: ({ children }) => <ol className="list-decimal list-outside space-y-1 mb-4 ml-4 text-slate-600 marker:text-primary marker:font-semibold">{children}</ol>,
+                    strong: ({ children }) => <strong className="font-semibold text-slate-800 bg-primary/10 px-1 rounded">{children}</strong>,
+                    a: ({ children, href }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium underline decoration-[#2E5A1A]/40 underline-offset-2 hover:text-primary">{children}</a>,
                     code: ({ children }) => <code className="text-xs font-mono bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md border border-slate-200">{children}</code>,
-                    blockquote: ({ children }) => <blockquote className="border-l-3 border-[#2E5A1A]/30 pl-4 my-4 text-sm text-slate-500 italic bg-[#2E5A1A]/10 py-2.5 pr-3 rounded-r-lg">{children}</blockquote>,
+                    blockquote: ({ children }) => <blockquote className="border-l-3 border-primary/30 pl-4 my-4 text-sm text-slate-500 italic bg-primary/10 py-2.5 pr-3 rounded-r-lg">{children}</blockquote>,
                   }}
                 >
                   {selectedTopic.content || ''}
@@ -169,14 +169,14 @@ export default function HelpGuideDesktop({
                           <button
                             key={topic.id}
                             onClick={() => setSelectedTopic(topic)}
-                            className="w-full text-left bg-white rounded-xl border border-slate-200 p-3.5 hover:border-[#2E5A1A]/30 hover:shadow-md hover:bg-[#2E5A1A]/5 transition group flex items-center gap-3"
+                            className="w-full text-left bg-white rounded-xl border border-slate-200 p-3.5 hover:border-primary/30 hover:shadow-md hover:bg-primary/5 transition group flex items-center gap-3"
                           >
                             <div className="min-w-0 flex-1">
-                              <h4 className="font-semibold text-slate-900 text-sm group-hover:text-[#2E5A1A] transition">{topic.title}</h4>
+                              <h4 className="font-semibold text-slate-900 text-sm group-hover:text-primary transition">{topic.title}</h4>
                               {topic.summary && <p className="text-xs text-slate-500 mt-1 line-clamp-1 leading-relaxed">{topic.summary}</p>}
                             </div>
-                            <div className="w-7 h-7 rounded-lg bg-slate-50 group-hover:bg-[#2E5A1A]/15 flex items-center justify-center flex-shrink-0 transition">
-                              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] transition" />
+                            <div className="w-7 h-7 rounded-lg bg-slate-50 group-hover:bg-primary/15 flex items-center justify-center flex-shrink-0 transition">
+                              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition" />
                             </div>
                           </button>
                         ))}

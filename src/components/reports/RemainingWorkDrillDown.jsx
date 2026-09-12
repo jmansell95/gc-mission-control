@@ -164,7 +164,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
                             {hasGap && (
                               <span className="text-[9px] text-amber-600 font-bold flex-shrink-0">⚠ NO CREW</span>
                             )}
-                            <span className="ml-auto text-xs font-bold text-[#2E5A1A] tabular-nums flex-shrink-0">{fmtMoney(m.projected)}</span>
+                            <span className="ml-auto text-xs font-bold text-primary tabular-nums flex-shrink-0">{fmtMoney(m.projected)}</span>
                           </button>
                           {isExpanded && (
                             <div className="px-3 pb-3 pt-1 border-t border-slate-100 space-y-2">
@@ -211,7 +211,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
                               <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                                 <span>Daily rate: <span className="font-bold text-slate-700">{fmtMoney(m.daily_rate_total)}</span></span>
                                 <span>× {m.working_days} days</span>
-                                <span className="font-bold text-[#2E5A1A]">= {fmtMoney(m.projected)}</span>
+                                <span className="font-bold text-primary">= {fmtMoney(m.projected)}</span>
                               </div>
                             </div>
                           )}
@@ -314,7 +314,7 @@ export default function RemainingWorkDrillDown({ job, asOfDate, onClose }) {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase">Daily Run-Rate</p>
-                <p className="text-lg font-extrabold text-[#2E5A1A] mt-0.5">{fmtMoney(job.daily_run_rate)}</p>
+                <p className="text-lg font-extrabold text-primary mt-0.5">{fmtMoney(job.daily_run_rate)}</p>
               </div>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500">

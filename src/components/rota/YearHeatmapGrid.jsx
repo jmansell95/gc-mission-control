@@ -95,7 +95,7 @@ export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus,
             const dimmed = (statusFilter?.size > 0 && s?.type && !statusFilter.has(s.type)) || (d.isWeekend && !showWeekends);
             return (
               <div key={d.dateStr} onClick={() => handleCellClick(resource, d.dateStr, s, isRig)}
-                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-50' : 'opacity-10') : ''} ${d.isToday ? 'ring-1 ring-[#2E5A1A] ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-125 hover:scale-y-110 transition-all rounded-sm`}
+                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-50' : 'opacity-10') : ''} ${d.isToday ? 'ring-1 ring-primary ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-125 hover:scale-y-110 transition-all rounded-sm`}
                 style={{ width: `${CELL_WIDTH}px`, height: '100%', flexShrink: 0 }}
                 title={`${resource.name} · ${d.dateStr} · ${cfg.label}${s?.job_name ? ` · ${s.job_name}` : ''}`} />
             );
@@ -143,7 +143,7 @@ export default function YearHeatmapGrid({ days, staffRows, rigRows, staffStatus,
           {(() => {
             const grouped = groupStaffByWorkerType(staffRows);
             const groups = [
-              { key: 'direct_employee', label: 'Direct Employees', Icon: HardHat, color: 'text-[#2E5A1A]', collapsed: collapsedDirect, setCollapsed: setCollapsedDirect },
+              { key: 'direct_employee', label: 'Direct Employees', Icon: HardHat, color: 'text-primary', collapsed: collapsedDirect, setCollapsed: setCollapsedDirect },
               { key: 'subcontractor', label: 'Subcontractors', Icon: Building2, color: 'text-amber-600', collapsed: collapsedSub, setCollapsed: setCollapsedSub },
               { key: 'agency', label: 'Agency Workers', Icon: Briefcase, color: 'text-violet-600', collapsed: collapsedAgency, setCollapsed: setCollapsedAgency },
             ];

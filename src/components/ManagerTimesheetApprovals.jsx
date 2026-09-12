@@ -60,13 +60,13 @@ export default function ManagerTimesheetApprovals({ staffId }) {
       <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
         <button
           onClick={() => setView('auto')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${view === 'auto' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${view === 'auto' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
         >
           <Bot className="w-3.5 h-3.5" /> Auto-Built Queue
         </button>
         <button
           onClick={() => setView('manual')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${view === 'manual' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition ${view === 'manual' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
         >
           <ClipboardCheck className="w-3.5 h-3.5" /> Manual Review
         </button>

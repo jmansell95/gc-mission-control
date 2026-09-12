@@ -11,7 +11,7 @@ export default function HubBreadcrumb({ items = [] }) {
   if (!items.length) return null;
   return (
     <nav aria-label="Hub breadcrumb" className="flex items-center gap-1 text-ui-caption font-medium text-slate-400 min-w-0 overflow-hidden">
-      <Link to="/admin" className="inline-flex items-center gap-1 hover:text-[#2E5A1A] transition flex-shrink-0">
+      <Link to="/admin" className="inline-flex items-center gap-1 hover:text-primary transition flex-shrink-0">
         <LayoutDashboard className="w-3.5 h-3.5" />
         <span className="hidden sm:inline">Dashboard</span>
       </Link>
@@ -21,7 +21,7 @@ export default function HubBreadcrumb({ items = [] }) {
           <React.Fragment key={i}>
             <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0" />
             {item.to && !last ? (
-              <Link to={item.to} className="hover:text-[#2E5A1A] transition truncate">{item.label}</Link>
+              <Link to={item.to} className="hover:text-primary transition truncate">{item.label}</Link>
             ) : (
               <span className={`truncate ${last ? 'text-slate-700 font-semibold' : ''}`}>{item.label}</span>
             )}

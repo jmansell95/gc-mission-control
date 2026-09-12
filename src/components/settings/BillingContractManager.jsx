@@ -9,7 +9,7 @@ import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const STATUS_BADGE = {
   draft: 'bg-slate-100 text-slate-600',
@@ -96,7 +96,7 @@ export default function BillingContractManager() {
         icon={ScrollText}
         title="Billing Contracts"
         description="Locked per-job billing terms with version control. Each contract freezes the rate snapshot, VAT, markup and POA items at activation — future rate card changes don't affect active contracts."
-        actions={<button onClick={() => setShowNew(true)} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition"><Plus className="w-4 h-4" /> New Contract</button>}
+        actions={<button onClick={() => setShowNew(true)} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition"><Plus className="w-4 h-4" /> New Contract</button>}
       />
 
       {isLoading ? (
@@ -117,8 +117,8 @@ export default function BillingContractManager() {
               <div key={row.jobId} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <button onClick={() => setExpandedJob(expanded ? null : row.jobId)} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50/50 transition text-left">
                   {expanded ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
-                  <div className="w-9 h-9 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-[#2E5A1A]" />
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-slate-800 truncate">{row.job?.name || 'Unknown job'}</p>
@@ -367,7 +367,7 @@ function NewContractModal({ onClose, jobs }) {
         </div>
         <div className="flex items-center gap-2 px-5 py-4 border-t border-slate-100 sticky bottom-0 bg-white">
           <button onClick={onClose} className="px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium">Cancel</button>
-          <button onClick={handleSave} disabled={!form.job_id || saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={!form.job_id || saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Create Contract (Draft)
           </button>
         </div>

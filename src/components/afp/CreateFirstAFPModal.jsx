@@ -188,7 +188,7 @@ function DateField({ icon: Icon, label, hint, value, onChange, required, accent,
         type="date"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 ${accent ? 'border-[#2E5A1A]/30 bg-[#2E5A1A]/5' : 'border-slate-200'} ${auto ? 'bg-blue-50/40' : ''}`}
+        className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 ${accent ? 'border-primary/30 bg-primary/5' : 'border-slate-200'} ${auto ? 'bg-blue-50/40' : ''}`}
       />
       <p className="text-[10px] text-slate-400 mt-1">{hint}</p>
     </div>

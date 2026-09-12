@@ -19,7 +19,7 @@ const WEATHER_CODE_MAP = {
 };
 
 const LEVEL_CONFIG = {
-  okay: { label: 'Okay to Work', icon: ShieldCheck, color: 'text-[#2E5A1A]', bg: 'bg-emerald-50', border: 'border-emerald-300', dot: 'bg-emerald-500', grad: 'from-emerald-50 to-white' },
+  okay: { label: 'Okay to Work', icon: ShieldCheck, color: 'text-primary', bg: 'bg-emerald-50', border: 'border-emerald-300', dot: 'bg-emerald-500', grad: 'from-emerald-50 to-white' },
   caution: { label: 'Caution', icon: ShieldAlert, color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300', dot: 'bg-amber-500', grad: 'from-amber-50 to-white' },
   stop: { label: 'Do Not Work', icon: ShieldX, color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-300', dot: 'bg-rose-500', grad: 'from-rose-50 to-white' },
 };
@@ -69,7 +69,7 @@ export default function WeatherWorkSafeCard({ job }) {
       <div className="hub-glass rounded-2xl p-4 flex items-center gap-2.5">
         <Cloud className="w-4 h-4 text-slate-400 flex-shrink-0" />
         <p className="text-xs text-slate-500 flex-1">Weather check unavailable right now.</p>
-        <button onClick={() => refetch()} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] transition"><RefreshCw className="w-3.5 h-3.5" /></button>
+        <button onClick={() => refetch()} className="p-1.5 text-slate-400 hover:text-primary transition"><RefreshCw className="w-3.5 h-3.5" /></button>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function WeatherWorkSafeCard({ job }) {
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <button onClick={() => refetch()} disabled={isFetching} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] transition rounded-lg hover:bg-white/60">
+            <button onClick={() => refetch()} disabled={isFetching} className="p-1.5 text-slate-400 hover:text-primary transition rounded-lg hover:bg-white/60">
               <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />
             </button>
             <button onClick={() => setShowEdit(true)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white/70 hover:bg-white border border-slate-200 text-slate-600 rounded-lg text-[11px] font-bold transition active:scale-95">
@@ -154,7 +154,7 @@ function ConditionStat({ icon: Icon, value, label, sub, overridden }) {
       <p className="text-[9px] text-slate-400 uppercase font-semibold">{label}</p>
       <p className="text-[9px] text-slate-400 mt-0.5 flex items-center justify-center gap-0.5">
         {sub}
-        {overridden && <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A1A]" title="Overridden for this job" />}
+        {overridden && <span className="w-1.5 h-1.5 rounded-full bg-primary" title="Overridden for this job" />}
       </p>
     </div>
   );
@@ -209,7 +209,7 @@ function WeatherOverrideModal({ job, defaults, onClose, onSaved }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-[#2E5A1A]" />
+            <Thermometer className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Weather Thresholds — {job.name}</h3>
           </div>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"><X className="w-4 h-4" /></button>
@@ -231,7 +231,7 @@ function WeatherOverrideModal({ job, defaults, onClose, onSaved }) {
             </div>
             <div className="flex items-center gap-1.5">
               <button onClick={() => setForm(p => ({ ...p, lightning_block: '' }))} className={`px-2 py-1 rounded-lg text-[10px] font-bold ${form.lightning_block === '' ? 'bg-slate-200 text-slate-700' : 'bg-white text-slate-400 border border-slate-200'}`}>Default</button>
-              <button onClick={() => setForm(p => ({ ...p, lightning_block: true }))} className={`px-2 py-1 rounded-lg text-[10px] font-bold ${form.lightning_block === true ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-400 border border-slate-200'}`}>Yes</button>
+              <button onClick={() => setForm(p => ({ ...p, lightning_block: true }))} className={`px-2 py-1 rounded-lg text-[10px] font-bold ${form.lightning_block === true ? 'bg-primary text-white' : 'bg-white text-slate-400 border border-slate-200'}`}>Yes</button>
               <button onClick={() => setForm(p => ({ ...p, lightning_block: false }))} className={`px-2 py-1 rounded-lg text-[10px] font-bold ${form.lightning_block === false ? 'bg-rose-100 text-rose-700' : 'bg-white text-slate-400 border border-slate-200'}`}>No</button>
             </div>
           </div>
@@ -240,7 +240,7 @@ function WeatherOverrideModal({ job, defaults, onClose, onSaved }) {
           <button onClick={handleClear} disabled={saving} className="text-xs font-semibold text-slate-500 hover:text-rose-600 transition">Reset to defaults</button>
           <div className="flex items-center gap-2">
             <button onClick={onClose} className="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700">Cancel</button>
-            <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-xl text-xs font-bold disabled:opacity-50 active:scale-95 transition">
+            <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold disabled:opacity-50 active:scale-95 transition">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save Override
             </button>
           </div>
@@ -254,7 +254,7 @@ function OverrideField({ icon: Icon, label, value, onChange, placeholder }) {
   return (
     <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
       <div className="flex items-center gap-1.5 mb-1.5">
-        <Icon className="w-3.5 h-3.5 text-[#2E5A1A]" />
+        <Icon className="w-3.5 h-3.5 text-primary" />
         <p className="text-[11px] font-bold text-slate-700">{label}</p>
       </div>
       <input
@@ -262,7 +262,7 @@ function OverrideField({ icon: Icon, label, value, onChange, placeholder }) {
         value={value === '' ? '' : value}
         onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))}
         placeholder={placeholder != null ? `Default: ${placeholder}` : '—'}
-        className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-[#2E5A1A]"
+        className="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-primary"
       />
     </div>
   );

@@ -187,7 +187,7 @@ export default function AssetCommandDrawer({ asset, allAssets = [], staffProfile
             const TabIcon = t.Icon;
             return (
               <button key={t.key} onClick={() => setTab(t.key)} type="button"
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap ${tab === t.key ? 'border-[#2E5A1A] text-[#2E5A1A]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap ${tab === t.key ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
                 <TabIcon className="w-3.5 h-3.5" /> {t.label}
               </button>
             );

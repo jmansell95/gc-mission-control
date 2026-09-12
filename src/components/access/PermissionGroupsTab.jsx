@@ -60,12 +60,12 @@ export default function PermissionGroupsTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search permission groups…"
-            className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 shadow-sm transition"
+            className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm transition"
           />
         </div>
         <button
           onClick={() => setEditing('__new')}
-          className="inline-flex items-center gap-1.5 h-11 px-4 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] transition shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 h-11 px-4 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition shadow-sm flex-shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">New Group</span>
@@ -97,15 +97,15 @@ export default function PermissionGroupsTab() {
               <button
                 key={g.id}
                 onClick={() => setEditing(g)}
-                className="text-left bg-white rounded-2xl border border-slate-200 p-4 hover:shadow-md hover:border-[#2E5A1A]/30 transition group"
+                className="text-left bg-white rounded-2xl border border-slate-200 p-4 hover:shadow-md hover:border-primary/30 transition group"
               >
                 <div className="flex items-start gap-2.5">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${g.is_read_only ? 'bg-amber-100 text-amber-600' : 'bg-[#2E5A1A]/10 text-[#2E5A1A]'}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${g.is_read_only ? 'bg-amber-100 text-amber-600' : 'bg-primary/10 text-primary'}`}>
                     {g.is_read_only ? <Lock className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-slate-900 truncate group-hover:text-[#2E5A1A] transition">{g.name}</p>
+                      <p className="text-sm font-bold text-slate-900 truncate group-hover:text-primary transition">{g.name}</p>
                       {g.is_system && <Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
                     </div>
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">
@@ -254,7 +254,7 @@ function GroupEditorPopup({ group, onClose, onSaved }) {
                 onChange={(e) => setName(e.target.value)}
                 disabled={isSystem}
                 placeholder="e.g. Senior Drillers"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
             <div>
@@ -264,7 +264,7 @@ function GroupEditorPopup({ group, onClose, onSaved }) {
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isSystem}
                 placeholder="What can this group do?"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-slate-50 disabled:text-slate-400"
               />
             </div>
           </div>
@@ -358,7 +358,7 @@ function GroupEditorPopup({ group, onClose, onSaved }) {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || isSystem || (isNew && !name.trim())}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
           >
             {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saveMutation.isPending ? 'Saving…' : isNew ? 'Create Group' : 'Save Changes'}

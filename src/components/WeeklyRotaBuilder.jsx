@@ -633,7 +633,7 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
           <div className="flex items-center gap-1 flex-shrink-0">
             {job && <RotaWeatherBadge job={job} />}
             {isMulti && (
-              <span className="text-[8px] px-1 py-0.5 rounded-full bg-[#2E5A1A] text-white font-bold whitespace-nowrap">
+              <span className="text-[8px] px-1 py-0.5 rounded-full bg-primary text-white font-bold whitespace-nowrap">
                 #{jobIndex}
               </span>
             )}
@@ -747,7 +747,7 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
                 <Copy className="w-4 h-4" /> <span className="hidden sm:inline">{smartFillLoading ? '...' : 'Copy Last Week'}</span>
               </button>
               <button onClick={() => setModal({ isOpen: true, assignment: null, defaultStaffId: '', defaultDate: '' })}
-                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition text-ui-caption font-semibold shadow-sm">
+                className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-primary text-white hover:bg-primary/90 transition text-ui-caption font-semibold shadow-sm">
                 <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Shift</span>
               </button>
               <TodayCrewPopup
@@ -1098,7 +1098,7 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
                               )}
                               {/* Multi-job count badge — shows when 2+ jobs are assigned */}
                               {isMulti && !ls && (
-                                <div className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-[#2E5A1A] text-white text-[9px] font-bold">
+                                <div className="flex items-center justify-center gap-1 px-2 py-0.5 rounded-full bg-primary text-white text-[9px] font-bold">
                                   <Layers className="w-2.5 h-2.5" /> {sortedAssignments.length} JOBS
                                 </div>
                               )}

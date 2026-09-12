@@ -11,7 +11,7 @@ import { useConfigLists } from '@/hooks/useConfigLists';
 import { formatWorkerType } from '@/utils/format';
 import { TEAM_CATEGORIES, LANDING_PAGES, CAPABILITY_KEYS, DEFAULT_CAPABILITIES, DEFAULT_LANDING_PAGE } from '@/utils/teamAccess';
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 const TABS = [
   { id: 'details', label: 'Details', icon: Briefcase },
@@ -104,7 +104,7 @@ export default function CrewTypeCommand() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
             <Users className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -112,7 +112,7 @@ export default function CrewTypeCommand() {
             <p className="text-sm text-slate-400">{teams.length} crews · {staff.length - unassigned.length} assigned · {unassigned.length} unassigned</p>
           </div>
         </div>
-        <button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm">
+        <button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold shadow-sm">
           <Plus className="w-4 h-4" /> Add Crew Type
         </button>
       </div>
@@ -133,7 +133,7 @@ export default function CrewTypeCommand() {
               const isSel = t.id === selectedId;
               const count = membersOf(t.id).length;
               return (
-                <button key={t.id} onClick={() => setSelectedId(t.id)} style={{ paddingLeft: 12 + t._depth * 16 }} className={`w-full text-left flex items-center gap-2 px-3 py-2.5 border-b border-slate-50 transition ${isSel ? 'bg-[#2E5A1A]/5 border-l-[3px] border-l-[#2E5A1A]' : 'hover:bg-slate-50'}`}>
+                <button key={t.id} onClick={() => setSelectedId(t.id)} style={{ paddingLeft: 12 + t._depth * 16 }} className={`w-full text-left flex items-center gap-2 px-3 py-2.5 border-b border-slate-50 transition ${isSel ? 'bg-primary/5 border-l-[3px] border-l-[#2E5A1A]' : 'hover:bg-slate-50'}`}>
                   {t._depth > 0 && <GitBranch className="w-3 h-3 text-slate-300 flex-shrink-0" />}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-slate-900 truncate">{t.name}</p>
@@ -173,7 +173,7 @@ export default function CrewTypeCommand() {
                 const Icon = t.icon;
                 const active = tab === t.id;
                 return (
-                  <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${active ? 'border-[#2E5A1A] text-[#2E5A1A]' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                  <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
                     <Icon className="w-4 h-4" /> {t.label}
                     {t.id === 'roster' && selectedMembers.length > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded-full">{selectedMembers.length}</span>}
                   </button>
@@ -204,7 +204,7 @@ export default function CrewTypeCommand() {
             </div>
             <form onSubmit={handleAdd} className="space-y-3">
               <input required autoFocus type="text" placeholder="Crew name *" value={addName} onChange={e => setAddName(e.target.value)} className={inputCls} />
-              <button type="submit" disabled={adding} className="w-full px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+              <button type="submit" disabled={adding} className="w-full px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
                 {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} Add Crew
               </button>
             </form>
@@ -284,7 +284,7 @@ function DetailsTab({ team, teams, JOB_TYPE_OPTIONS }) {
           {TEAM_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
         </select>
       </Field>
-      <button type="submit" disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+      <button type="submit" disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
       </button>
     </form>
@@ -316,7 +316,7 @@ function RevenueTab({ team, REVENUE_STREAMS, ASSET_TYPE_OPTIONS }) {
         <label className="block text-xs font-medium text-slate-600 mb-2">Compatible Asset Types</label>
         <ChipMultiSelect options={ASSET_TYPE_OPTIONS} value={assets} onChange={setAssets} columns={2} hint="Only compatible assets are offered when assigning equipment to this crew." />
       </div>
-      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
         <Save className="w-4 h-4" /> Save
       </button>
     </form>
@@ -334,7 +334,7 @@ function QualificationsTab({ team, QUALIFICATION_OPTIONS }) {
         <label className="block text-xs font-medium text-slate-600 mb-2 flex items-center gap-1.5"><GraduationCap className="w-3.5 h-3.5" /> Required Qualifications & Training</label>
         <ChipMultiSelect options={QUALIFICATION_OPTIONS} value={quals} onChange={setQuals} columns={2} color="violet" hint="Staff missing these are flagged in the Training Gaps dashboard. Red dot = critical (e.g. CSCS card)." />
       </div>
-      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
         <Save className="w-4 h-4" /> Save
       </button>
     </form>
@@ -368,7 +368,7 @@ function AccessTab({ team }) {
         <label className="block text-xs font-medium text-slate-600 mb-2">Default Landing Page (first page after login)</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {LANDING_PAGES.map(p => (
-            <button type="button" key={p.value} onClick={() => setLanding(p.value)} className={`px-3 py-2.5 rounded-lg text-sm font-medium border transition text-left ${landing === p.value ? 'border-[#2E5A1A] bg-[#2E5A1A]/5 text-[#2E5A1A]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+            <button type="button" key={p.value} onClick={() => setLanding(p.value)} className={`px-3 py-2.5 rounded-lg text-sm font-medium border transition text-left ${landing === p.value ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
               {p.label}
             </button>
           ))}
@@ -378,7 +378,7 @@ function AccessTab({ team }) {
         <label className="block text-xs font-medium text-slate-600 mb-2">Admin Tool Access (legacy)</label>
         <ChipMultiSelect options={CAPABILITY_KEYS.map(c => ({ value: c.key, label: c.label }))} value={access} onChange={setAccess} columns={2} hint={groupId ? "Overridden by the permission group above — kept for reference." : "Pick which admin sections this crew can access. Field crews typically only need Schedule View."} />
       </div>
-      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
         <Save className="w-4 h-4" /> Save
       </button>
     </form>
@@ -394,8 +394,8 @@ function SupervisorTab({ team, teams, staff }) {
   const save = async (e) => { e.preventDefault(); await update(team.id, { is_supervisor_team: isSupervisor, supervisor_staff_id: supervisorId || '', managed_team_ids: managed }); };
   return (
     <form onSubmit={save} className="space-y-4">
-      <button type="button" onClick={() => setIsSupervisor(!isSupervisor)} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition text-left w-full ${isSupervisor ? 'border-[#2E5A1A] bg-[#2E5A1A]/5 text-[#2E5A1A]' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
-        <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${isSupervisor ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300'}`}>{isSupervisor && <span className="w-2 h-2 bg-white rounded-full" />}</span>
+      <button type="button" onClick={() => setIsSupervisor(!isSupervisor)} className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium border transition text-left w-full ${isSupervisor ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+        <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0 ${isSupervisor ? 'bg-primary border-primary' : 'border-slate-300'}`}>{isSupervisor && <span className="w-2 h-2 bg-white rounded-full" />}</span>
         This is a supervisor team (oversees other crews)
       </button>
       {isSupervisor && (
@@ -412,7 +412,7 @@ function SupervisorTab({ team, teams, staff }) {
           </div>
         </>
       )}
-      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+      <button type="submit" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
         <Save className="w-4 h-4" /> Save
       </button>
     </form>

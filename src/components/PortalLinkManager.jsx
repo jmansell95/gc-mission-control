@@ -92,7 +92,7 @@ function RecipientCard({ label, icon: Icon, iconColor, record, recipientType, jo
           <div className="flex gap-2 flex-wrap">
             {!record.portal_user_id && (
               <button onClick={handleInvite} disabled={inviting}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 disabled:opacity-50 transition">
                 {inviting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : record.portal_invited_at ? <RotateCw className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
                 {record.portal_invited_at ? 'Resend Invite' : 'Invite with Login'}
               </button>
@@ -227,10 +227,10 @@ export default function PortalLinkManager({ job }) {
         <h3 className="font-semibold text-slate-900 text-sm">Portal Access</h3>
         {/* Mode toggle */}
         <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg ml-auto">
-          <button onClick={() => setMode('quick')} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold transition ${mode === 'quick' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+          <button onClick={() => setMode('quick')} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold transition ${mode === 'quick' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
             <Zap className="w-3 h-3" /> Quick Share
           </button>
-          <button onClick={() => setMode('secure')} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold transition ${mode === 'secure' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+          <button onClick={() => setMode('secure')} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold transition ${mode === 'secure' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
             <Lock className="w-3 h-3" /> Secure Login
           </button>
         </div>
@@ -326,7 +326,7 @@ export default function PortalLinkManager({ job }) {
 
       <Dialog open={showSections} onOpenChange={setShowSections}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Settings className="w-5 h-5 text-[#2E5A1A]" /> Portal Section Visibility</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Settings className="w-5 h-5 text-primary" /> Portal Section Visibility</DialogTitle></DialogHeader>
           <PortalSectionManager job={job} embedded />
         </DialogContent>
       </Dialog>

@@ -149,14 +149,14 @@ export default function EnterpriseStaffHub() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name, role, email or team..."
-              className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
           {/* Division filter pills */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <button
               onClick={() => setDivisionFilter('all')}
-              className={`px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${divisionFilter === 'all' ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${divisionFilter === 'all' ? 'bg-primary text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
             >
               All Business Streams ({totalStaff})
             </button>
@@ -240,7 +240,7 @@ export default function EnterpriseStaffHub() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-[#2E5A1A] transition">{s.name}</p>
+                                <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary transition">{s.name}</p>
                                 {s.is_active === false && (
                                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-500">INACTIVE</span>
                                 )}

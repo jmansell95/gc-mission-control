@@ -246,7 +246,7 @@ export function findAvailableResources(staffRows, rigRows, staffStatus, rigStatu
 // Staff rows are grouped into three collapsible sections: Direct Employees,
 // Subcontractors, Agency Workers — each with a count badge.
 export const WORKER_TYPE_GROUPS = [
-  { key: 'direct_employee', label: 'Direct Employees', shortLabel: 'Direct', color: 'text-[#2E5A1A]' },
+  { key: 'direct_employee', label: 'Direct Employees', shortLabel: 'Direct', color: 'text-primary' },
   { key: 'subcontractor', label: 'Subcontractors', shortLabel: 'Subbies', color: 'text-amber-600' },
   { key: 'agency', label: 'Agency Workers', shortLabel: 'Agency', color: 'text-violet-600' },
 ];

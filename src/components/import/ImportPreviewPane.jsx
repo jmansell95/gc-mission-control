@@ -236,7 +236,7 @@ export default function ImportPreviewPane({
                   key={s.sheet_name}
                   onClick={() => setActiveSheetIdx(i)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left transition flex-shrink-0 lg:flex-shrink ${
-                    isActive ? 'bg-[#2E5A1A] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    isActive ? 'bg-primary text-white' : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   <Table className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-white/80' : 'text-slate-400'}`} />
@@ -263,7 +263,7 @@ export default function ImportPreviewPane({
                   <select
                     value={activeMapping.entity}
                     onChange={(e) => updateEntity(e.target.value)}
-                    className="text-sm font-bold text-slate-800 bg-slate-100 rounded-lg px-3 py-1.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]"
+                    className="text-sm font-bold text-slate-800 bg-slate-100 rounded-lg px-3 py-1.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">— Not mapped —</option>
                     {supportedEntities.map((e) => (
@@ -301,7 +301,7 @@ export default function ImportPreviewPane({
                         <select
                           value={mappedField}
                           onChange={(e) => updateFieldMap(header, e.target.value)}
-                          className={`text-sm rounded-lg px-2.5 py-1.5 border focus:outline-none focus:ring-2 focus:ring-[#2E5A1A] min-w-[160px] ${
+                          className={`text-sm rounded-lg px-2.5 py-1.5 border focus:outline-none focus:ring-2 focus:ring-primary min-w-[160px] ${
                             mappedField ? 'bg-white text-slate-700 border-slate-200' : 'bg-rose-50 text-rose-500 border-rose-200'
                           }`}
                         >

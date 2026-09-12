@@ -474,7 +474,7 @@ export default function SystemLogicGuide() {
             </div>
           </div>
           <button onClick={buildPDF} disabled={generating}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-[#2E5A1A] rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition disabled:opacity-60">
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-primary rounded-xl font-semibold text-sm shadow-lg hover:shadow-xl transition disabled:opacity-60">
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             {generating ? 'Building…' : 'Download PDF Guide'}
           </button>
@@ -497,9 +497,9 @@ export default function SystemLogicGuide() {
             </div>
             <div className="space-y-3">
               {section.items.map((item, i) => (
-                <div key={i} className="border border-slate-100 rounded-xl p-3.5 hover:border-[#2E5A1A]/20 transition">
+                <div key={i} className="border border-slate-100 rounded-xl p-3.5 hover:border-primary/20 transition">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-[#2E5A1A]/10 text-[#2E5A1A] text-xs font-bold uppercase tracking-wide">{item.stat}</span>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide">{item.stat}</span>
                   </div>
                   <p className="text-sm text-slate-600 leading-relaxed">{item.meaning}</p>
                 </div>

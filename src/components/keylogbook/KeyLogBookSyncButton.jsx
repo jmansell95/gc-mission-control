@@ -123,7 +123,7 @@ export default function KeyLogBookSyncButton({ config }) {
       <button
         onClick={runTestSync}
         disabled={syncing}
-        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-[#2E5A1A] text-[#2E5A1A] rounded-lg text-sm font-semibold hover:bg-[#2E5A1A]/5 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-white border-2 border-primary text-primary rounded-lg text-sm font-semibold hover:bg-primary/5 disabled:opacity-50 disabled:cursor-not-allowed transition"
       >
         {syncing ? (
           <>

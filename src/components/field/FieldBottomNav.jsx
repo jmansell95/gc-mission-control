@@ -75,18 +75,18 @@ export default function FieldBottomNav({ onMoreClick }) {
               >
                 <div className="relative">
                   <Icon
-                    className={`w-6 h-6 transition-colors ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`}
+                    className={`w-6 h-6 transition-colors ${active ? 'text-primary' : 'text-slate-400'}`}
                     strokeWidth={2.5}
                   />
                   {active && (
                     <motion.div
                       layoutId="fieldNavActive"
-                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#2E5A1A]"
+                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
                     />
                   )}
                 </div>
                 <span
-                  className={`text-[10px] font-bold transition-colors ${active ? 'text-[#2E5A1A]' : 'text-slate-500'}`}
+                  className={`text-[10px] font-bold transition-colors ${active ? 'text-primary' : 'text-slate-500'}`}
                 >
                   {tab.label}
                 </span>

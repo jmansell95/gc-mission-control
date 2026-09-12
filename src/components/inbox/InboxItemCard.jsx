@@ -148,7 +148,7 @@ export default function InboxItemCard({ item, onActioned }) {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={isApproval ? 'Add a note (optional)…' : 'Reason (optional)…'}
                 rows={2}
-                className="w-full text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                className="w-full text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <div className="flex items-center gap-2 flex-wrap">
                 {isApproval ? (

@@ -83,7 +83,7 @@ export default function BulkActionsBar({ selectedAssets, totalAvailable, onSelec
 
   return (
     <>
-      <div className="sticky bottom-4 z-30 bg-[#2E5A1A] text-white rounded-xl shadow-2xl px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+      <div className="sticky bottom-4 z-30 bg-primary text-white rounded-xl shadow-2xl px-4 py-3 flex items-center justify-between flex-wrap gap-2">
         <span className="text-sm font-semibold">{selectedCount} of {totalAvailable} selected</span>
         <div className="flex items-center gap-2 flex-wrap">
           <button onClick={onViewCerts} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-xs font-bold transition">
@@ -120,11 +120,11 @@ export default function BulkActionsBar({ selectedAssets, totalAvailable, onSelec
               <p className="text-sm text-slate-500 text-center py-6">No active jobs found. Create or activate a job first.</p>
             ) : (
               <>
-                <select value={selectedJobId} onChange={e => setSelectedJobId(e.target.value)} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white mb-4">
+                <select value={selectedJobId} onChange={e => setSelectedJobId(e.target.value)} className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white mb-4">
                   <option value="">Select a job...</option>
                   {jobs.map(j => <option key={j.id} value={j.id}>{j.name} {j.job_reference ? `· ${j.job_reference}` : ''}</option>)}
                 </select>
-                <button onClick={handleAssignToJob} disabled={busy || !selectedJobId} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#244715] disabled:opacity-50 transition">
+                <button onClick={handleAssignToJob} disabled={busy || !selectedJobId} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[#244715] disabled:opacity-50 transition">
                   {busy ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Check className="w-4 h-4" />}
                   {busy ? 'Assigning...' : 'Assign Assets'}
                 </button>

@@ -108,7 +108,7 @@ export default function DrillingEfficiencyPanel({ assets }) {
 
       {isLoading ? (
         <div className="bg-white rounded-xl border border-slate-200 p-10 flex flex-col items-center">
-          <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
           <p className="text-sm text-slate-500">Calculating drilling efficiency across all active jobs...</p>
         </div>
       ) : rigAggregation.length === 0 ? (
@@ -120,7 +120,7 @@ export default function DrillingEfficiencyPanel({ assets }) {
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><TrendingUp className="w-4 h-4 text-[#2E5A1A]" /> Rig Efficiency Comparison</h3>
+            <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><TrendingUp className="w-4 h-4 text-primary" /> Rig Efficiency Comparison</h3>
             <p className="text-[11px] text-slate-400 mt-0.5">Aggregated across all active jobs — click a rig for per-job breakdown</p>
           </div>
           <div className="overflow-x-auto">

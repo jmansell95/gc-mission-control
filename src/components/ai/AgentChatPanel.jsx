@@ -22,7 +22,7 @@ import ReactMarkdown from 'react-markdown';
 export default function AgentChatPanel({
   open, onClose, messages, input, setInput, onSend, loading, sending, scrollRef,
   icon: Icon, title, subtitle, placeholder, suggestions = [],
-  brandClass = 'bg-[#2E5A1A]', brandRing = 'focus:ring-[#2E5A1A]/40',
+  brandClass = 'bg-primary', brandRing = 'focus:ring-primary/40',
   headerGradient = 'hero-vibrant',
 }) {
   // Detect viewport for animation direction
@@ -78,10 +78,10 @@ export default function AgentChatPanel({
               {loading && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-[#2E5A1A]/10 flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-[#2E5A1A]/60" />
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-primary/60" />
                     </div>
-                    <div className="absolute inset-0 rounded-full border-2 border-[#2E5A1A]/20 border-t-[#2E5A1A] animate-spin" />
+                    <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-[#2E5A1A] animate-spin" />
                   </div>
                   <p className="text-sm text-slate-400 font-medium">Connecting…</p>
                 </div>
@@ -126,7 +126,7 @@ function EmptyState({ Icon, suggestions, onSuggestion }) {
   return (
     <div className="flex flex-col items-center text-center py-8 px-2">
       <div className="relative mb-4">
-        <div className="absolute inset-0 rounded-2xl bg-[#2E5A1A]/10 blur-xl" />
+        <div className="absolute inset-0 rounded-2xl bg-primary/10 blur-xl" />
         <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-lg">
           <Icon className="w-8 h-8 text-white" />
         </div>
@@ -144,9 +144,9 @@ function EmptyState({ Icon, suggestions, onSuggestion }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 * i }}
               onClick={() => onSuggestion(s)}
-              className="w-full flex items-center gap-2.5 text-left text-xs text-slate-600 bg-white border border-slate-200 rounded-xl px-3.5 py-3 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 hover:shadow-sm transition group"
+              className="w-full flex items-center gap-2.5 text-left text-xs text-slate-600 bg-white border border-slate-200 rounded-xl px-3.5 py-3 hover:border-primary/30 hover:bg-primary/5 hover:shadow-sm transition group"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#2E5A1A]/40 group-hover:text-[#2E5A1A] transition flex-shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-primary/40 group-hover:text-primary transition flex-shrink-0" />
               <span className="leading-snug">{s}</span>
             </motion.button>
           ))}
@@ -193,13 +193,13 @@ function MessageBubble({ message, Icon, isLast }) {
             <div className="prose prose-sm max-w-none
               prose-headings:text-slate-900 prose-headings:font-bold prose-headings:tracking-tight
               prose-h1:text-base prose-h2:text-sm prose-h3:text-sm
-              prose-strong:text-slate-800 prose-strong:bg-[#2E5A1A]/8 prose-strong:px-1 prose-strong:py-0.5 prose-strong:rounded
+              prose-strong:text-slate-800 prose-strong:bg-primary/8 prose-strong:px-1 prose-strong:py-0.5 prose-strong:rounded
               prose-table:text-xs prose-table:border-collapse prose-table:w-full
               prose-th:border prose-th:border-slate-200 prose-th:bg-slate-50 prose-th:px-2.5 prose-th:py-1.5 prose-th:font-semibold prose-th:text-slate-600
               prose-td:border prose-td:border-slate-200 prose-td:px-2.5 prose-td:py-1.5
               prose-li:text-slate-600 prose-li:my-0.5
-              prose-a:text-[#2E5A1A] prose-a:font-medium
-              prose-code:text-[#2E5A1A] prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none
+              prose-a:text-primary prose-a:font-medium
+              prose-code:text-primary prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-code:before:content-none prose-code:after:content-none
               prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-slate-50 prose-blockquote:py-1 prose-blockquote:px-3 prose-blockquote:rounded-r-lg
               prose-p:my-1.5 prose-p:leading-relaxed
             ">
@@ -208,9 +208,9 @@ function MessageBubble({ message, Icon, isLast }) {
           ) : isPending ? (
             <div className="flex items-center gap-2 text-slate-400 py-1">
               <div className="flex gap-1">
-                <span className="w-2 h-2 bg-[#2E5A1A]/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-[#2E5A1A]/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-[#2E5A1A]/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
               <span className="text-xs font-medium">Thinking…</span>
             </div>
@@ -236,9 +236,9 @@ function TypingBubble({ Icon }) {
       </div>
       <div className="px-4 py-3 bg-white border border-slate-200/80 rounded-2xl rounded-tl-md shadow-sm">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 bg-[#2E5A1A]/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 bg-[#2E5A1A]/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 bg-[#2E5A1A]/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     </motion.div>
@@ -277,7 +277,7 @@ function ToolCallDisplay({ toolCall }) {
         className="flex items-center gap-1.5 text-slate-500 hover:text-slate-700 transition"
       >
         {isActive ? (
-          <Loader2 className="w-3 h-3 animate-spin text-[#2E5A1A]" />
+          <Loader2 className="w-3 h-3 animate-spin text-primary" />
         ) : isFailed ? (
           <AlertCircle className="w-3 h-3 text-red-500" />
         ) : (

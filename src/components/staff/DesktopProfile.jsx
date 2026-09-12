@@ -110,7 +110,7 @@ export default function DesktopProfile() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -154,7 +154,7 @@ export default function DesktopProfile() {
           </div>
           {!viewingOther && (
             <button onClick={() => setShowEditDrawer(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95 shadow-sm">
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition active:scale-95 shadow-sm">
               <Pencil className="w-4 h-4" /> Edit Profile
             </button>
           )}
@@ -173,7 +173,7 @@ export default function DesktopProfile() {
             </a>
           )}
           {staff.job_title && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2E5A1A]/5 border border-[#2E5A1A]/15 text-xs font-medium text-[#2E5A1A]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/15 text-xs font-medium text-primary">
               <Briefcase className="w-3.5 h-3.5" /> {staff.job_title}
             </span>
           )}
@@ -202,7 +202,7 @@ export default function DesktopProfile() {
                     onClick={() => setActiveSection(section.key)}
                     className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#2E5A1A] text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-sm'
                         : 'text-slate-600 hover:bg-slate-100'
                     }`}
                   >
@@ -339,7 +339,7 @@ export default function DesktopProfile() {
                 <p className="text-xs text-slate-400 mt-1 mb-4">Create your crew profile to submit and manage requests.</p>
                 {isPlatformAdmin && (
                   <button onClick={handleCreateCrewProfile} disabled={creatingProfile}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50">
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition active:scale-95 disabled:opacity-50">
                     {creatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                     Create Crew Profile
                   </button>

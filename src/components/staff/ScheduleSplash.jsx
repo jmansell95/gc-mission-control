@@ -90,9 +90,9 @@ export default function ScheduleSplash({ assignments, jobs, vehicles, clients, t
               const dayAssignments = byDate[dateStr];
 
               return (
-                <div key={dateStr} className={`rounded-2xl border overflow-hidden ${isToday ? 'border-[#2E5A1A] shadow-md shadow-[#2E5A1A]/10' : 'border-slate-200 shadow-sm'}`}>
+                <div key={dateStr} className={`rounded-2xl border overflow-hidden ${isToday ? 'border-primary shadow-md shadow-[#2E5A1A]/10' : 'border-slate-200 shadow-sm'}`}>
                   {/* Day header */}
-                  <div className={`flex items-center justify-between px-4 py-3 ${isToday ? 'bg-[#2E5A1A] text-white' : isFuture ? 'bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-500'}`}>
+                  <div className={`flex items-center justify-between px-4 py-3 ${isToday ? 'bg-primary text-white' : isFuture ? 'bg-slate-50 text-slate-700' : 'bg-slate-100 text-slate-500'}`}>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm">{format(new Date(dateStr + 'T00:00:00'), 'EEEE')}</span>
                       <span className="text-xs opacity-80">{format(new Date(dateStr + 'T00:00:00'), 'dd MMM')}</span>

@@ -93,7 +93,7 @@ export default function JobDetailHero({
       {/* Metric strip — modern glass cards */}
       <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-white border-t border-slate-100">
         <div className="flex items-center gap-3 md:gap-5 flex-wrap">
-          <MetricChip icon={Users} value={assignedStaff.length} label={assignedStaff.length === 1 ? 'crew' : 'crew'} color="text-[#2E5A1A]" bg="bg-[#2E5A1A]/8" />
+          <MetricChip icon={Users} value={assignedStaff.length} label={assignedStaff.length === 1 ? 'crew' : 'crew'} color="text-primary" bg="bg-primary/8" />
           <Divider />
           <MetricChip icon={Clock} value={rotas.length} label={rotas.length === 1 ? 'shift' : 'shifts'} color="text-blue-600" bg="bg-blue-50" />
           {isDrillingJob && totalMeterage > 0 && (

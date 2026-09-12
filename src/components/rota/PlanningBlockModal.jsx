@@ -293,7 +293,7 @@ export default function PlanningBlockModal({ open, onClose, block, rigs, staff, 
               </button>
               <div className="flex-1" />
               <button onClick={handleSave} disabled={saving}
-                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-[#2E5A1A] text-white text-xs font-bold hover:bg-[#1c4a12] transition disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition disabled:opacity-50">
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save Changes
               </button>
             </>

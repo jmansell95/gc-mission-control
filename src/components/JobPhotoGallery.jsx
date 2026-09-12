@@ -145,13 +145,13 @@ export default function JobPhotoGallery({ job, canUpload }) {
         <span className="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{photos.length}</span>
         {photos.length > 1 && (
           <button onClick={() => setShowTimeLapse(s => !s)}
-            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition ${showTimeLapse ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg transition ${showTimeLapse ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
             <Film className="w-3.5 h-3.5" /> Time-Lapse
           </button>
         )}
         {canUpload && !showUpload && (
           <button onClick={() => setShowUpload(true)}
-            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-[#2E5A1A] text-white hover:bg-[#244715] transition">
+            className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-[#244715] transition">
             <Upload className="w-3.5 h-3.5" /> Add Photos
           </button>
         )}
@@ -180,7 +180,7 @@ export default function JobPhotoGallery({ job, canUpload }) {
           </label>
           <input type="text" value={caption} onChange={e => setCaption(e.target.value)}
             placeholder="Caption (optional, applied to all photos)"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
           <input ref={fileInputRef} type="file" accept="image/*" multiple
             onChange={handleUpload} className="hidden" />
           {taggingStatus && (
@@ -191,7 +191,7 @@ export default function JobPhotoGallery({ job, canUpload }) {
           )}
           <div className="flex gap-2">
             <button onClick={() => fileInputRef.current.click()} disabled={uploading}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#244715] transition text-sm font-medium disabled:opacity-50">
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg hover:bg-[#244715] transition text-sm font-medium disabled:opacity-50">
               <Upload className="w-4 h-4" /> {uploading ? `Processing ${progress.done}/${progress.total}…` : 'Choose Photos'}
             </button>
             <button onClick={() => setShowUpload(false)} disabled={uploading}

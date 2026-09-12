@@ -90,7 +90,7 @@ export default function VehicleManager() {
         description="Track vehicles, MOTs and service dates"
         actions={
           <button onClick={() => { setShowForm(!showForm); setEditingId(null); setFormData(emptyForm); }}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium">
             <Plus className="w-4 h-4" /> Add Vehicle
           </button>
         }
@@ -163,7 +163,7 @@ export default function VehicleManager() {
             </div>
           </div>
           <div className="flex gap-2 mt-5">
-            <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">
+            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium text-sm">
             {editingId ? 'Update' : 'Add'} Vehicle
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">
@@ -201,7 +201,7 @@ export default function VehicleManager() {
           <div className="hidden lg:block rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-[#2E5A1A] text-white">
+                <tr className="bg-primary text-white">
                   <th className="px-4 py-3 text-left font-semibold">Registration</th>
                   <th className="px-4 py-3 text-left font-semibold">Description</th>
                   <th className="px-4 py-3 text-left font-semibold">Team</th>
@@ -217,7 +217,7 @@ export default function VehicleManager() {
                   const team = teams.find(t => t.id === v.team_id);
                   const issues = getMaintenanceStatus(v);
                   return (
-                    <tr key={v.id} className={`border-b border-slate-100 hover:bg-[#2E5A1A]/5 transition ${idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white'}`}>
+                    <tr key={v.id} className={`border-b border-slate-100 hover:bg-primary/5 transition ${idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white'}`}>
                       <td className="px-4 py-3 font-mono font-bold text-slate-900">{v.registration_number}</td>
                       <td className="px-4 py-3 text-slate-700">{v.name}</td>
                       <td className="px-4 py-3 text-slate-600">{team?.name || '—'}</td>
@@ -245,7 +245,7 @@ export default function VehicleManager() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">
-                          <button onClick={() => handleEdit(v)} className="p-1.5 text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
+                          <button onClick={() => handleEdit(v)} className="p-1.5 text-primary hover:bg-primary/10 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
                           <button onClick={() => handleDelete(v.id)} className="p-1.5 text-red-500 hover:bg-red-100 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>

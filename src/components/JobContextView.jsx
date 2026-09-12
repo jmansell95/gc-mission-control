@@ -118,7 +118,7 @@ function CrewCompositionBar({ assignedStaff, rotas, contractors, onAddStaff }) {
           <p className="text-xs text-slate-500">{total} {total === 1 ? 'person' : 'people'} on this job</p>
         </div>
         {onAddStaff && (
-          <button onClick={onAddStaff} className="flex items-center gap-1 text-[11px] font-bold text-[#2E5A1A] hover:bg-[#2E5A1A]/10 px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
+          <button onClick={onAddStaff} className="flex items-center gap-1 text-[11px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
             <UserPlus className="w-3.5 h-3.5" /> Add Staff
           </button>
         )}
@@ -189,34 +189,34 @@ function SetupChecklist({ job, rotas, hotelBookings }) {
   return (
     <div className="rounded-xl p-4 bg-gradient-to-br from-slate-50 to-[#2E5A1A]/5 border border-emerald-200">
       <div className="flex items-center gap-2 mb-3">
-        <CalendarClock className="w-4 h-4 text-[#2E5A1A]" />
+        <CalendarClock className="w-4 h-4 text-primary" />
         <h3 className="font-semibold text-slate-900 text-sm">Setup Checklist</h3>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-        <div className={`rounded-lg p-2.5 border ${job.required_team_ids?.length > 0 ? 'border-[#2E5A1A]/20 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white'}`}>
+        <div className={`rounded-lg p-2.5 border ${job.required_team_ids?.length > 0 ? 'border-primary/20 bg-primary/5' : 'border-slate-200 bg-white'}`}>
           <div className="flex items-center gap-1.5 mb-0.5">
-            {job.required_team_ids?.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2E5A1A]" /> : <UsersRound className="w-3.5 h-3.5 text-slate-400" />}
+            {job.required_team_ids?.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> : <UsersRound className="w-3.5 h-3.5 text-slate-400" />}
             <p className="text-xs font-bold text-slate-800">1. Teams</p>
           </div>
           <p className="text-[11px] text-slate-500">{job.required_team_ids?.length > 0 ? `${job.required_team_ids.length} assigned` : 'Pick required teams'}</p>
         </div>
-        <div className={`rounded-lg p-2.5 border ${hotelBookings?.length > 0 ? 'border-[#2E5A1A]/20 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white'}`}>
+        <div className={`rounded-lg p-2.5 border ${hotelBookings?.length > 0 ? 'border-primary/20 bg-primary/5' : 'border-slate-200 bg-white'}`}>
           <div className="flex items-center gap-1.5 mb-0.5">
-            {hotelBookings?.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2E5A1A]" /> : <CalendarClock className="w-3.5 h-3.5 text-slate-400" />}
+            {hotelBookings?.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> : <CalendarClock className="w-3.5 h-3.5 text-slate-400" />}
             <p className="text-xs font-bold text-slate-800">2. Hotels <span className="font-normal text-slate-400">(opt)</span></p>
           </div>
           <p className="text-[11px] text-slate-500">{hotelBookings?.length > 0 ? `${hotelBookings.length} booking(s)` : 'Add if needed'}</p>
         </div>
-        <div className={`rounded-lg p-2.5 border ${rotas.length > 0 ? 'border-[#2E5A1A]/20 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white'}`}>
+        <div className={`rounded-lg p-2.5 border ${rotas.length > 0 ? 'border-primary/20 bg-primary/5' : 'border-slate-200 bg-white'}`}>
           <div className="flex items-center gap-1.5 mb-0.5">
-            {rotas.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2E5A1A]" /> : <CalendarClock className="w-3.5 h-3.5 text-slate-400" />}
+            {rotas.length > 0 ? <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> : <CalendarClock className="w-3.5 h-3.5 text-slate-400" />}
             <p className="text-xs font-bold text-slate-800">3. Rota</p>
           </div>
           <p className="text-[11px] text-slate-500">{rotas.length > 0 ? `${rotas.length} shifts` : 'Build the rota'}</p>
         </div>
-        <div className={`rounded-lg p-2.5 border ${job.status === 'in_progress' || job.status === 'completed' ? 'border-[#2E5A1A]/20 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white'}`}>
+        <div className={`rounded-lg p-2.5 border ${job.status === 'in_progress' || job.status === 'completed' ? 'border-primary/20 bg-primary/5' : 'border-slate-200 bg-white'}`}>
           <div className="flex items-center gap-1.5 mb-0.5">
-            {job.status === 'in_progress' || job.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2E5A1A]" /> : <Send className="w-3.5 h-3.5 text-slate-400" />}
+            {job.status === 'in_progress' || job.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> : <Send className="w-3.5 h-3.5 text-slate-400" />}
             <p className="text-xs font-bold text-slate-800">4. Publish</p>
           </div>
           <p className="text-[11px] text-slate-500">{job.status === 'in_progress' || job.status === 'completed' ? 'Activated' : 'Submit to email staff'}</p>
@@ -316,7 +316,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
         <DisciplinePills job={job} size="md" showStatus />
         <button
           onClick={() => setShowDisciplineEditor(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 px-3 py-1.5 rounded-lg transition flex-shrink-0"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition flex-shrink-0"
         >
           <Pencil className="w-3.5 h-3.5" /> Edit Disciplines
         </button>
@@ -335,7 +335,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
               <h3 className="text-sm font-semibold text-slate-900">Crew Composition</h3>
               <p className="text-xs text-slate-500">No crew assigned yet</p>
             </div>
-            <button onClick={() => setShowAssignStaff(true)} className="flex items-center gap-1 text-[11px] font-bold text-[#2E5A1A] hover:bg-[#2E5A1A]/10 px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
+            <button onClick={() => setShowAssignStaff(true)} className="flex items-center gap-1 text-[11px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1.5 rounded-lg transition flex-shrink-0">
               <UserPlus className="w-3.5 h-3.5" /> Add Staff
             </button>
           </div>
@@ -382,17 +382,17 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
                   return (
                   <button key={v.id} type="button" onClick={() => navigate(`/fleet?vehicle=${v.id}`)}
                     className="w-full flex items-center gap-2 p-1.5 -mx-1.5 rounded-lg hover:bg-slate-50 border border-transparent hover:border-slate-200 transition group text-left">
-                    <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center flex-shrink-0"><Truck className="w-3 h-3 text-slate-500 group-hover:text-[#2E5A1A] transition" /></div>
+                    <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center flex-shrink-0"><Truck className="w-3 h-3 text-slate-500 group-hover:text-primary transition" /></div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-mono font-bold text-slate-900">{v.registration_number}</p>
                       <p className="text-[11px] text-slate-500 truncate">{v.name}</p>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#2E5A1A] flex-shrink-0 transition" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover:text-primary flex-shrink-0 transition" />
                   </button>
                   );
                 })}
                 {job.requisition_list_url && (
-                  <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 mt-1.5 px-2.5 py-1.5 bg-[#2E5A1A]/10 text-[#2E5A1A] hover:bg-[#2E5A1A]/20 rounded-lg text-xs font-medium transition">
+                  <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 mt-1.5 px-2.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-medium transition">
                     <FileText className="w-3 h-3" /> Requisition List
                   </a>
                 )}
@@ -413,7 +413,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
                 </div>
                 <h3 className="text-sm font-semibold text-slate-900">Live Financials</h3>
                 <span className="ml-auto text-[10px] text-slate-400">{s.revenue_method_label || s.revenue_method || '—'}</span>
-                <button onClick={() => refetch()} disabled={isFetching} className="p-1 text-slate-400 hover:text-[#2E5A1A] transition">
+                <button onClick={() => refetch()} disabled={isFetching} className="p-1 text-slate-400 hover:text-primary transition">
                   <RefreshCw className={'w-3.5 h-3.5 ' + (isFetching ? 'animate-spin' : '')} />
                 </button>
               </div>
@@ -560,7 +560,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden sticky top-16">
             <div className="px-4 py-3 border-b border-slate-100">
               <div className="flex items-center gap-2 mb-2">
-                <Activity className="w-4 h-4 text-[#2E5A1A]" />
+                <Activity className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-semibold text-slate-900">Activity Feed</h3>
                 <span className="ml-auto text-xs text-slate-400">{activityFeed.length} recent</span>
               </div>
@@ -574,7 +574,7 @@ export default function JobContextView({ job, primaryType, assignedStaff, rotas,
                   { key: 'milestone', label: 'Milestones' },
                 ].map(f => (
                   <button key={f.key} onClick={() => setActiveActivity(f.key)}
-                    className={'px-2 py-0.5 rounded-full text-[10px] font-bold transition ' + (activeActivity === f.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}>
+                    className={'px-2 py-0.5 rounded-full text-[10px] font-bold transition ' + (activeActivity === f.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}>
                     {f.label}
                   </button>
                 ))}

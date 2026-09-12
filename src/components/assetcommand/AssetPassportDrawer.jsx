@@ -118,7 +118,7 @@ export default function AssetPassportDrawer({ asset, allAssets = [], onClose, on
         <div className="flex border-b border-slate-200 px-3 flex-shrink-0 overflow-x-auto no-scrollbar">
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} type="button"
-              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap ${tab === t.key ? 'border-[#2E5A1A] text-[#2E5A1A]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+              className={`px-3.5 py-2.5 text-xs font-semibold border-b-2 transition whitespace-nowrap ${tab === t.key ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
               {t.label}
             </button>
           ))}

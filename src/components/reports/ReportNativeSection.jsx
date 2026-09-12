@@ -271,7 +271,7 @@ export default function ReportNativeSection({ hub, filters }) {
                           ))}
                           <button
                             onClick={(e) => { e.stopPropagation(); setDrill({ title: `${breakdownTable.label} → ${g.name}`, records: g.rows, cols: breakdownTable.cols, breadcrumb: [hub, breakdownTable.label, g.name] }); }}
-                            className="ml-auto text-[10px] font-bold text-[#2E5A1A] hover:underline"
+                            className="ml-auto text-[10px] font-bold text-primary hover:underline"
                           >
                             View all {g.rows.length} →
                           </button>

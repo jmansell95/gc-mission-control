@@ -8,7 +8,7 @@ export default function RoadmapTimeline() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <Map className="w-5 h-5 text-[#2E5A1A]" />
+        <Map className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-900 text-sm">Migration Roadmap — {total} weeks critical path</h3>
       </div>
 
@@ -19,7 +19,7 @@ export default function RoadmapTimeline() {
             <div key={phase.n} className="flex gap-3">
               {/* Timeline rail */}
               <div className="flex flex-col items-center flex-shrink-0">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${i === 0 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
                   {phase.n}
                 </div>
                 {!isLast && <div className="w-0.5 flex-1 bg-slate-200 my-0.5" style={{ minHeight: '1.5rem' }} />}
@@ -29,7 +29,7 @@ export default function RoadmapTimeline() {
               <div className="flex-1 pb-4">
                 <div className="flex items-start gap-2 flex-wrap">
                   <p className="text-sm font-bold text-slate-900">{phase.name}</p>
-                  <span className="text-xs font-semibold text-[#2E5A1A] bg-emerald-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+                  <span className="text-xs font-semibold text-primary bg-emerald-50 px-2 py-0.5 rounded-full whitespace-nowrap">
                     {phase.weeks} weeks
                   </span>
                 </div>

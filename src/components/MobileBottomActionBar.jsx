@@ -31,7 +31,7 @@ export default function MobileBottomActionBar({ selectedCount, actions = [], onC
             <div className="flex items-center gap-2">
               {/* Selection count */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#2E5A1A] text-white text-xs font-bold tabular-nums">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-xs font-bold tabular-nums">
                   {selectedCount}
                 </span>
                 <span className="text-xs font-semibold text-slate-600">selected</span>
@@ -50,7 +50,7 @@ export default function MobileBottomActionBar({ selectedCount, actions = [], onC
                         a.variant === 'danger'
                           ? 'bg-rose-50 text-rose-600 active:bg-rose-100'
                           : a.variant === 'primary'
-                          ? 'bg-[#2E5A1A] text-white active:bg-[#1c4a12]'
+                          ? 'bg-primary text-white active:bg-[#1c4a12]'
                           : 'bg-slate-100 text-slate-700 active:bg-slate-200'
                       }`}
                     >

@@ -80,7 +80,7 @@ export default function DriverDayPlan({ deliveries, jobs, drivers, onSelectDeliv
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setSelectedDriver('all')}
-          className={`px-3 py-1.5 rounded-lg text-ui-caption font-semibold transition ${selectedDriver === 'all' ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+          className={`px-3 py-1.5 rounded-lg text-ui-caption font-semibold transition ${selectedDriver === 'all' ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
         >
           All drivers ({todayDeliveries.length})
         </button>
@@ -91,7 +91,7 @@ export default function DriverDayPlan({ deliveries, jobs, drivers, onSelectDeliv
             <button
               key={d.id}
               onClick={() => setSelectedDriver(d.id)}
-              className={`px-3 py-1.5 rounded-lg text-ui-caption font-semibold transition ${active ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 rounded-lg text-ui-caption font-semibold transition ${active ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             >
               {d.name} ({count})
             </button>
@@ -111,7 +111,7 @@ export default function DriverDayPlan({ deliveries, jobs, drivers, onSelectDeliv
         return (
           <div key={run.driverId} className="hub-glass rounded-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-200/60 flex items-center gap-2.5 bg-slate-50/50">
-              <div className="w-9 h-9 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center text-ui-caption font-bold flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-ui-caption font-bold flex-shrink-0">
                 {(run.driverName || '?').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">

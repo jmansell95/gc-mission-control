@@ -8,7 +8,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   api_key: '',
@@ -107,7 +107,7 @@ export default function GoogleMapsSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">API Credentials</h3>
         </div>
         <p className="text-xs text-slate-500">Create a project in the <code className="bg-slate-100 px-1 rounded">Google Cloud Console</code>, enable the Geocoding API and (optionally) the Routes API, then create an API key. Restrict the key to your domain for security.</p>
@@ -133,10 +133,10 @@ export default function GoogleMapsSettings() {
           </label>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
     </div>

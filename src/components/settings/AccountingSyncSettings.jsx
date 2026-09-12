@@ -9,7 +9,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   provider: '', // 'xero' | 'sage' | ''
@@ -113,12 +113,12 @@ export default function AccountingSyncSettings() {
       {/* Provider selection */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Select Accounting Provider</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button onClick={() => setConfig({ ...config, provider: 'xero' })}
-            className={`p-4 rounded-xl border-2 text-left transition ${config.provider === 'xero' ? 'border-[#2E5A1A] bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
+            className={`p-4 rounded-xl border-2 text-left transition ${config.provider === 'xero' ? 'border-primary bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
                 <FileSpreadsheet className="w-4 h-4 text-blue-600" />
@@ -128,7 +128,7 @@ export default function AccountingSyncSettings() {
             <p className="text-[11px] text-slate-400">Cloud accounting — OAuth 2.0 integration with automatic invoice pushing</p>
           </button>
           <button onClick={() => setConfig({ ...config, provider: 'sage' })}
-            className={`p-4 rounded-xl border-2 text-left transition ${config.provider === 'sage' ? 'border-[#2E5A1A] bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
+            className={`p-4 rounded-xl border-2 text-left transition ${config.provider === 'sage' ? 'border-primary bg-emerald-50' : 'border-slate-200 hover:border-slate-300'}`}>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
@@ -157,7 +157,7 @@ export default function AccountingSyncSettings() {
       {config.provider === 'xero' && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-2">
-            <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+            <Settings2 className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Xero OAuth Credentials</h3>
           </div>
           <p className="text-xs text-slate-500">Create a custom app in the <code className="bg-slate-100 px-1 rounded">Xero Developer Portal</code> with the "accounting.transactions" and "accounting.contacts" scopes. Add the client ID and secret, then connect your tenant.</p>
@@ -185,7 +185,7 @@ export default function AccountingSyncSettings() {
       {config.provider === 'sage' && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-2">
-            <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+            <Settings2 className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Sage OAuth Credentials</h3>
           </div>
           <p className="text-xs text-slate-500">Create an app in the <code className="bg-slate-100 px-1 rounded">Sage Developer Portal</code> with the "full_access" scope. Use the client ID and secret to authenticate, then connect your business.</p>
@@ -213,7 +213,7 @@ export default function AccountingSyncSettings() {
       {config.provider && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
           <div className="flex items-center gap-2">
-            <ArrowDownToLine className="w-4 h-4 text-[#2E5A1A]" />
+            <ArrowDownToLine className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Sync Direction</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -257,10 +257,10 @@ export default function AccountingSyncSettings() {
             </div>
           )}
           <div className="flex items-center gap-2">
-            <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+            <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
             </button>
-            {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+            {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
           </div>
         </div>
       )}
@@ -269,7 +269,7 @@ export default function AccountingSyncSettings() {
       {config.provider && (
         <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <Webhook className="w-4 h-4 text-[#2E5A1A]" />
+            <Webhook className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Webhook Receiver</h3>
           </div>
           <p className="text-xs text-slate-500">{config.provider === 'xero' ? 'Xero' : 'Sage'} can push real-time invoice status updates to this endpoint. Configure the webhook in your {config.provider === 'xero' ? 'Xero' : 'Sage'} developer portal.</p>
@@ -297,11 +297,11 @@ export default function AccountingSyncSettings() {
       {config.provider && (
         <div className="bg-white border border-slate-200 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <RefreshCw className="w-4 h-4 text-[#2E5A1A]" />
+            <RefreshCw className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-800">Sync Now</h3>
           </div>
           <button onClick={handleSync} disabled={!connected || syncing}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
             {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Sync to {config.provider === 'xero' ? 'Xero' : 'Sage'} Now
           </button>
           {!connected && <p className="text-[11px] text-amber-600 mt-2 text-center">Save your credentials first to enable sync.</p>}

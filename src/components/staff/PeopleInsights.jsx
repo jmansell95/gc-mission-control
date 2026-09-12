@@ -152,7 +152,7 @@ export default function PeopleInsights() {
               key={p.id}
               onClick={() => setPeriod(p.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                period === p.id ? 'bg-[#2E5A1A] text-white' : 'text-slate-500 hover:bg-slate-100'
+                period === p.id ? 'bg-primary text-white' : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
               {p.label}

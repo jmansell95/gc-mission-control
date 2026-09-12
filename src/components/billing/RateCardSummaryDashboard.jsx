@@ -140,11 +140,11 @@ export default function RateCardSummaryDashboard({ items, cardLabel, isOurCard, 
 
         <div className="hub-glass rounded-xl p-3 flex flex-col">
           <div className="flex items-center gap-1.5 mb-1">
-            <Download className="w-3.5 h-3.5 text-[#2E5A1A]" />
+            <Download className="w-3.5 h-3.5 text-primary" />
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide truncate">Export</p>
           </div>
           <button onClick={exportCSV} disabled={items.length === 0}
-            className="mt-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+            className="mt-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
         </div>

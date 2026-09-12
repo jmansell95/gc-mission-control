@@ -105,14 +105,14 @@ export default function StaffListTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, role, email or team…"
-            className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 shadow-sm transition"
+            className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm transition"
           />
         </div>
         <button
           onClick={handleDeduplicate}
           disabled={deduping}
           title="Merge duplicate staff records (same name + user account)"
-          className="inline-flex items-center gap-1.5 h-11 px-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition disabled:opacity-50 shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 h-11 px-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:border-primary hover:text-primary transition disabled:opacity-50 shadow-sm flex-shrink-0"
         >
           {deduping ? <Loader2 className="w-4 h-4 animate-spin" /> : <CopyX className="w-4 h-4" />}
           <span className="hidden sm:inline">Dedup</span>
@@ -120,7 +120,7 @@ export default function StaffListTab() {
         <button
           onClick={handleAdd}
           disabled={creating}
-          className="inline-flex items-center gap-1.5 h-11 px-4 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] transition disabled:opacity-50 shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 h-11 px-4 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 transition disabled:opacity-50 shadow-sm flex-shrink-0"
         >
           {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
           <span className="hidden sm:inline">Add Staff</span>
@@ -203,7 +203,7 @@ function StaffCard({ staff, team, onOpen, onPermissions, onDelete }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-[#2E5A1A] transition">{staff.name}</p>
+            <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary transition">{staff.name}</p>
             {staff.is_active === false && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-500">INACTIVE</span>
             )}
@@ -253,14 +253,14 @@ function StaffCard({ staff, team, onOpen, onPermissions, onDelete }) {
         <div className="flex-1" />
         <button
           onClick={onPermissions}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-[#2E5A1A] hover:text-white text-slate-600 text-[11px] font-semibold transition"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 text-[11px] font-semibold transition"
           title="Manage permissions"
         >
           <KeyRound className="w-3.5 h-3.5" /> Access
         </button>
         <button
           onClick={onOpen}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-[11px] font-semibold hover:bg-[#1c4a12] transition"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary text-white text-[11px] font-semibold hover:bg-primary/90 transition"
         >
           Edit <ChevronRight className="w-3.5 h-3.5" />
         </button>

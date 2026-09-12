@@ -12,7 +12,7 @@ export default function PillTabs({ tabs, activeId, onChange, className = '', con
     <div className={`mb-1 ${className}`}>
       {contextLabel && (
         <div className="flex items-center gap-1.5 mb-1.5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2E5A1A]/8 text-[#2E5A1A] text-ui-caption font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/8 text-primary text-ui-caption font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-[#8DC63F]" />
             {contextLabel}
           </span>

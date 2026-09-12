@@ -136,7 +136,7 @@ export default function BoreholeRevenueTable({ boreholeRevenue = [], drillingRat
             className="w-full px-4 py-3 border-b border-slate-100 flex items-center gap-2 text-left hover:bg-slate-50/50 transition"
           >
             {showRateCard ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-            <Layers className="w-4 h-4 text-[#2E5A1A]" />
+            <Layers className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-slate-800">Drilling Rate Card Reference</h3>
             <span className="ml-auto text-xs text-slate-400">{allRates.length} depth-banded rates (CP + Rotary)</span>
           </button>

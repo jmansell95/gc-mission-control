@@ -10,7 +10,7 @@ import {
   nightsBetween, bookingType, perPersonTotal, perPersonDayRate, fmtGBP,
 } from '@/components/jobs/hotelCost';
 
-const inputCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm';
+const inputCls = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm';
 
 function TypeToggle({ value, onChange }) {
   const opts = [
@@ -254,8 +254,8 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
                   const onJob = assignedStaff.some(s => s.id === member.id);
                   return (
                     <button key={member.id} type="button" onClick={() => toggleStaff(member.id)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition text-left ${selected ? 'bg-[#2E5A1A]/5 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
-                      <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#2E5A1A]' : 'bg-white border border-slate-300'}`}>
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition text-left ${selected ? 'bg-primary/5 text-primary ring-1 ring-primary/20' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'}`}>
+                      <div className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 ${selected ? 'bg-primary' : 'bg-white border border-slate-300'}`}>
                         {selected && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <span className="flex-1">{member.name}</span>
@@ -271,7 +271,7 @@ export default function HotelEditor({ open, onClose, booking, job, assignedStaff
 
           <div className="flex gap-2 pt-2">
             <button type="submit" disabled={saving}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] disabled:opacity-50 transition text-sm font-semibold">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition text-sm font-semibold">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               {booking?.id ? 'Update' : 'Create'}
             </button>

@@ -48,7 +48,7 @@ export default function PhotoGalleryLightbox({ photos = [], label = 'Photos' }) 
             <img
               src={url}
               alt={`Photo ${i + 1}`}
-              className="w-14 h-14 rounded-lg object-cover border border-slate-200 group-hover:opacity-80 group-hover:border-[#2E5A1A]/40 transition"
+              className="w-14 h-14 rounded-lg object-cover border border-slate-200 group-hover:opacity-80 group-hover:border-primary/40 transition"
               loading="lazy"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />

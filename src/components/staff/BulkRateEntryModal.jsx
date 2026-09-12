@@ -170,7 +170,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="hub-glass rounded-2xl p-3.5">
             <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
+              <TrendingUp className="w-4 h-4 text-primary" />
               <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-wide">Total Day Rate</p>
             </div>
             <p className="text-xl font-extrabold text-slate-900 tabular-nums">
@@ -236,7 +236,7 @@ export default function BulkRateEntryModal({ staff, onClose }) {
                     placeholder="0.00"
                     value={rates[s.id] || ''}
                     onChange={e => setRates(prev => ({ ...prev, [s.id]: e.target.value }))}
-                    className="w-28 pl-7 pr-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 bg-white"
+                    className="w-28 pl-7 pr-3 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white"
                   />
                 </div>
                 <span className="text-xs text-slate-400 font-medium w-8">/day</span>

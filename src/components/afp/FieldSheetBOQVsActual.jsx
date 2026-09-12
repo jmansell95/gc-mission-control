@@ -96,7 +96,7 @@ export default function FieldSheetBOQVsActual({ afp, lineItems }) {
       {/* Desktop table */}
       <div className="hub-glass rounded-2xl overflow-hidden hidden lg:block">
         <div className="px-4 py-2.5 bg-slate-50/80 border-b border-slate-200 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#2E5A1A]" />
+          <FileText className="w-4 h-4 text-primary" />
           <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wide">BOQ vs Actual</h3>
           <span className="text-[10px] text-slate-400">({mwItems.length} lines)</span>
         </div>

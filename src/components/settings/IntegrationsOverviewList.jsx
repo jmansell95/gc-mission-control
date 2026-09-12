@@ -59,7 +59,7 @@ export default function IntegrationsOverviewList({ items, statusMap, onNavigate 
                 </span>
               )}
 
-              <Icon className={'w-5 h-5 flex-shrink-0 ' + (connected ? 'text-emerald-500' : greyed ? 'text-slate-300' : 'text-slate-400 group-hover:text-[#2E5A1A] transition')} />
+              <Icon className={'w-5 h-5 flex-shrink-0 ' + (connected ? 'text-emerald-500' : greyed ? 'text-slate-300' : 'text-slate-400 group-hover:text-primary transition')} />
               <div className="min-w-0 flex-1">
                 <p className={'text-sm font-semibold truncate ' + (greyed ? 'text-slate-400' : 'text-slate-800')}>{item.label}</p>
                 <p className="text-xs text-slate-400 truncate">{item.sub}</p>
@@ -78,14 +78,14 @@ export default function IntegrationsOverviewList({ items, statusMap, onNavigate 
                     Coming Soon
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] text-[10px] font-bold">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
                     <Sparkles className="w-3 h-3" />
                     Active
                   </span>
                 )}
               </div>
 
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] group-hover:translate-x-0.5 transition flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition flex-shrink-0" />
             </button>
           );
         })}

@@ -122,7 +122,7 @@ export default function TrackingPresenceStrip({ divisionId }) {
   return (
     <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Users className="w-4 h-4 text-[#2E5A1A]" />
+        <Users className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-slate-800">Crew Tracking Presence</h3>
         <span className="ml-auto text-[11px] text-slate-400">{roster.length} tracked today</span>
       </div>

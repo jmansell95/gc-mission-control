@@ -171,7 +171,7 @@ export default function RIDDORStatsPanel() {
         <HubCard icon={TrendingDown} title="SafetyCulture Audits" subtitle={`${audits.length} total · ${stats.failedAudits} failed`} tone="slate">
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-600">Audit performance in this period</p>
-            <a href="https://app.safetyculture.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-[#2E5A1A] hover:underline">
+            <a href="https://app.safetyculture.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
               Open <ExternalLink className="w-3 h-3" />
             </a>
           </div>

@@ -135,7 +135,7 @@ function AgentCard({ agent, onToggle, onConfig }) {
           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition active:scale-95 ${
             isActive
               ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              : 'bg-[#2E5A1A] text-white hover:bg-[#1c4a12]'
+              : 'bg-primary text-white hover:bg-primary/90'
           }`}
         >
           {isActive ? <><Pause className="w-3.5 h-3.5" /> Pause</> : <><Play className="w-3.5 h-3.5" /> Activate</>}
@@ -326,7 +326,7 @@ function AgentConfigDrawer({ agent, onClose, onSaved }) {
               onClick={() => setAggressiveness(l.id)}
               className={`w-full text-left p-3.5 rounded-xl border-2 transition active:scale-[0.98] ${
                 aggressiveness === l.id
-                  ? 'border-[#2E5A1A] bg-[#2E5A1A]/5'
+                  ? 'border-primary bg-primary/5'
                   : 'border-slate-200 hover:border-slate-300'
               }`}
             >
@@ -339,7 +339,7 @@ function AgentConfigDrawer({ agent, onClose, onSaved }) {
           <button onClick={onClose} className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-600 font-semibold text-sm hover:bg-slate-200 transition">
             Cancel
           </button>
-          <button onClick={save} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-[#2E5A1A] text-white font-semibold text-sm hover:bg-[#1c4a12] transition disabled:opacity-50">
+          <button onClick={save} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-50">
             {saving ? 'Saving…' : 'Save'}
           </button>
         </div>

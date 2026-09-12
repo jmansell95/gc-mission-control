@@ -120,7 +120,7 @@ export default function Onboarding() {
           <div className="flex flex-col items-center text-center">
             <ProfileAvatar name={profile?.name} avatarUrl={avatarUrl} size={96} />
             <div className="flex items-center gap-2 mt-3">
-              <label className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
+              <label className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
                 <Camera className="w-3.5 h-3.5" />
                 {avatarUrl ? 'Change Photo' : 'Upload Photo'}
                 <input type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
@@ -149,7 +149,7 @@ export default function Onboarding() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="07XXX XXX XXX"
-              className="w-full px-3.5 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+              className="w-full px-3.5 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
             />
             <p className="text-[11px] text-slate-400 mt-1">Used for schedule reminders and assignment alerts.</p>
           </div>

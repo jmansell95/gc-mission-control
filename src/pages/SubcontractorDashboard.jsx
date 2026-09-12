@@ -47,7 +47,7 @@ export default function SubcontractorDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
-        <div className="w-10 h-10 border-4 border-[#2E5A1A]/20 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-primary/20 border-t-[#2E5A1A] rounded-full animate-spin"></div>
       </div>
     );
   }

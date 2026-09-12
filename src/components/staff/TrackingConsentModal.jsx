@@ -174,7 +174,7 @@ export default function TrackingConsentModal({ open, onClose, onDecline, staff }
                 Not now
               </button>
               <button onClick={handleAccept} disabled={!signature || saving || declining}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 {saving ? 'Saving…' : 'I Consent & Sign'}
               </button>

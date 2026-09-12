@@ -99,7 +99,7 @@ export default function JobKanbanBoard({ onSelectJob }) {
       {COLUMNS.map(col => (
         <div
           key={col.id}
-          className={`rounded-xl border ${dragOver === col.id ? 'border-[#2E5A1A] border-2' : 'border-slate-200'} ${col.color} flex flex-col min-h-64 transition`}
+          className={`rounded-xl border ${dragOver === col.id ? 'border-primary border-2' : 'border-slate-200'} ${col.color} flex flex-col min-h-64 transition`}
           onDragOver={(e) => { e.preventDefault(); setDragOver(col.id); }}
           onDragLeave={() => setDragOver(null)}
           onDrop={() => handleDrop(col.id)}
@@ -169,7 +169,7 @@ export default function JobKanbanBoard({ onSelectJob }) {
                     </span>
                   )}
                   {crewTodayByJob[job.id] > 0 && (
-                    <span className="flex items-center gap-0.5 text-[#2E5A1A] font-medium">
+                    <span className="flex items-center gap-0.5 text-primary font-medium">
                       <Users className="w-2.5 h-2.5" />
                       {crewTodayByJob[job.id]}
                     </span>

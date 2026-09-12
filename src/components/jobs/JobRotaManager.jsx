@@ -131,7 +131,7 @@ export default function JobRotaManager({ job, allStaff, vehicles, rotas }) {
                   </div>
                   <button
                     onClick={() => { setAddDate(date); setShowAddModal(true); }}
-                    className="p-1 rounded-md hover:bg-[#2E5A1A]/10 text-slate-400 hover:text-[#2E5A1A] transition"
+                    className="p-1 rounded-md hover:bg-primary/10 text-slate-400 hover:text-primary transition"
                     title="Add staff"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ export default function JobRotaManager({ job, allStaff, vehicles, rotas }) {
                 <select
                   value={selectedStaffId}
                   onChange={e => setSelectedStaffId(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary bg-white"
                 >
                   <option value="">Select staff…</option>
                   {availableStaff.map(s => (
@@ -211,7 +211,7 @@ export default function JobRotaManager({ job, allStaff, vehicles, rotas }) {
                 <select
                   value={selectedVehicleId}
                   onChange={e => setSelectedVehicleId(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary bg-white"
                 >
                   <option value="">No vehicle</option>
                   {vehicles.map(v => (
@@ -227,7 +227,7 @@ export default function JobRotaManager({ job, allStaff, vehicles, rotas }) {
               <button
                 onClick={handleAdd}
                 disabled={!selectedStaffId || saving}
-                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] disabled:opacity-50 transition"
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-[#244715] disabled:opacity-50 transition"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                 {saving ? 'Assigning…' : 'Assign to Job'}

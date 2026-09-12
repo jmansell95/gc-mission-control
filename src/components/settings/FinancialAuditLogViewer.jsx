@@ -96,11 +96,11 @@ export default function FinancialAuditLogViewer() {
       {/* Filters */}
       <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-wrap items-center gap-2">
         <Filter className="w-4 h-4 text-slate-400" />
-        <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)} className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#2E5A1A]">
+        <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)} className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-primary">
           <option value="">All Entities</option>
           {ENTITY_OPTIONS.map(e => <option key={e} value={e}>{e}</option>)}
         </select>
-        <select value={actionFilter} onChange={e => setActionFilter(e.target.value)} className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-[#2E5A1A]">
+        <select value={actionFilter} onChange={e => setActionFilter(e.target.value)} className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:border-primary">
           <option value="">All Actions</option>
           <option value="create">Created</option>
           <option value="update">Updated</option>

@@ -35,7 +35,7 @@ const DRILLING_METHODS = [
 
 const slugify = (s) => (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'template';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 /**
  * JobTypeManager — inline panel opened from the job wizard.
@@ -130,7 +130,7 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-[#2E5A1A]/5 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <LayoutTemplate className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -165,7 +165,7 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
           />
         ) : (
           <div className="flex-1 overflow-y-auto p-5 space-y-3">
-            <button type="button" onClick={handleNew} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+            <button type="button" onClick={handleNew} className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
               <Plus className="w-4 h-4" /> New Template
             </button>
 
@@ -185,10 +185,10 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
                 return (
                   <div key={jt.id} className="hub-glass rounded-xl p-3 flex items-center gap-3">
                     <div className="flex flex-col gap-0.5">
-                      <button type="button" onClick={() => handleReorder(jt.id, -1)} disabled={i === 0} className="p-0.5 text-slate-400 hover:text-[#2E5A1A] disabled:opacity-30 transition">
+                      <button type="button" onClick={() => handleReorder(jt.id, -1)} disabled={i === 0} className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30 transition">
                         <ChevronUp className="w-3.5 h-3.5" />
                       </button>
-                      <button type="button" onClick={() => handleReorder(jt.id, 1)} disabled={i === sorted.length - 1} className="p-0.5 text-slate-400 hover:text-[#2E5A1A] disabled:opacity-30 transition">
+                      <button type="button" onClick={() => handleReorder(jt.id, 1)} disabled={i === sorted.length - 1} className="p-0.5 text-slate-400 hover:text-primary disabled:opacity-30 transition">
                         <ChevronDown className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -202,7 +202,7 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
                           </span>
                         )}
                         {hasDefaults && (
-                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase bg-[#2E5A1A]/10 text-[#2E5A1A] px-1.5 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
                             <Check className="w-2.5 h-2.5" /> Defaults
                           </span>
                         )}
@@ -215,7 +215,7 @@ export default function JobTypeManager({ open, onClose, activeDivisionId }) {
                     <button type="button" onClick={() => handleToggleActive(jt)} title={jt.is_active === false ? 'Show in wizard' : 'Hide from wizard'} className="p-2 text-slate-400 hover:text-amber-600 transition flex-shrink-0">
                       {jt.is_active === false ? <Plus className="w-4 h-4" /> : <X className="w-4 h-4" />}
                     </button>
-                    <button type="button" onClick={() => setEditing({ ...jt, _isNew: false })} className="p-2 text-slate-400 hover:text-[#2E5A1A] transition flex-shrink-0">
+                    <button type="button" onClick={() => setEditing({ ...jt, _isNew: false })} className="p-2 text-slate-400 hover:text-primary transition flex-shrink-0">
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button type="button" onClick={() => handleDelete(jt)} className="p-2 text-slate-400 hover:text-red-600 transition flex-shrink-0">
@@ -381,7 +381,7 @@ function JobTypeEditor({ template, teams, divisions, isSuperAdmin, onCancel, onS
                   const selected = (form.default_team_ids || []).includes(t.id);
                   return (
                     <button type="button" key={t.id} onClick={() => toggleTeam(t.id)}
-                      className={`text-xs px-2.5 py-1.5 rounded-lg border transition font-medium ${selected ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'}`}>
+                      className={`text-xs px-2.5 py-1.5 rounded-lg border transition font-medium ${selected ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'}`}>
                       {t.name}
                     </button>
                   );
@@ -408,7 +408,7 @@ function JobTypeEditor({ template, teams, divisions, isSuperAdmin, onCancel, onS
       {/* Footer */}
       <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-100 bg-white">
         <button type="button" onClick={onCancel} className="px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition">Cancel</button>
-        <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+        <button type="button" onClick={handleSave} disabled={saving} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
           {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <><Save className="w-4 h-4" /> Save Template</>}
         </button>
       </div>

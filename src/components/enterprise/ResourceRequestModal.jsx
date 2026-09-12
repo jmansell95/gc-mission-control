@@ -116,7 +116,7 @@ export default function ResourceRequestModal({ rig, dateStr, divisionId, divMap,
                     type="number"
                     value={durationDays}
                     onChange={e => setDurationDays(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A] transition"
+                    className="w-16 h-9 px-2 text-xs font-medium border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:border-primary transition"
                   />
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default function ResourceRequestModal({ rig, dateStr, divisionId, divMap,
                   value={opportunityName}
                   onChange={e => setOpportunityName(e.target.value)}
                   placeholder="e.g. Cambridge North Borehole Investigation"
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
 
@@ -140,7 +140,7 @@ export default function ResourceRequestModal({ rig, dateStr, divisionId, divMap,
                   onChange={e => setNotes(e.target.value)}
                   placeholder="Any details about the opportunity — site location, client, rig type needed, etc."
                   rows={3}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 resize-none"
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
                 />
               </div>
             </div>

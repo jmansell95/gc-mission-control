@@ -363,7 +363,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
               <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider mr-0.5 hidden sm:inline">Filter</span>
               <button
                 onClick={() => setDisciplineFilter('all')}
-                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${disciplineFilter === 'all' ? 'bg-white text-[#2E5A1A]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${disciplineFilter === 'all' ? 'bg-white text-primary' : 'bg-white/10 text-white hover:bg-white/20'}`}
               >
                 All
               </button>
@@ -457,7 +457,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
                     })()}
                     {job.job_reference && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-slate-500 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg border border-slate-200 shadow-sm">
-                        <Hash className="w-2.5 h-2.5 text-[#2E5A1A]" />{job.job_reference}
+                        <Hash className="w-2.5 h-2.5 text-primary" />{job.job_reference}
                       </span>
                     )}
                   </div>
@@ -466,7 +466,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
                     <MapPin className="w-3.5 h-3.5 flex-shrink-0" /> {job.location || 'No location'}
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#2E5A1A] group-hover:translate-x-0.5 transition flex-shrink-0 mt-1" />
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition flex-shrink-0 mt-1" />
               </div>
 
               {/* Mini site map — integrated from the former Live Site Map widget */}
@@ -544,7 +544,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); onSelectJob(job); }}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/8 hover:bg-[#2E5A1A]/15 rounded-lg transition"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-primary bg-primary/8 hover:bg-primary/15 rounded-lg transition"
                     >
                       <Cog className="w-3.5 h-3.5" />
                       View all {jobRigs.length} rigs on this job
@@ -627,7 +627,7 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
               {onNavigate && (
                 <div className="mt-3 pl-2 flex gap-2" onClick={(e) => e.stopPropagation()}>
                   <button type="button" onClick={() => onNavigate('scheduling')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/8 hover:bg-[#2E5A1A]/15 transition">
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary/8 hover:bg-primary/15 transition">
                     <CalendarClock className="w-3.5 h-3.5" /> Rota
                   </button>
                   <button type="button" onClick={() => onNavigate('compliance')}
@@ -645,11 +645,11 @@ export default function SiteSnapshotGrid({ onSelectJob, onNavigate }) {
       {onNavigate && scopedJobs.length > 0 && (
         <button
           onClick={() => onNavigate('jobs')}
-          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-[#2E5A1A]/30 transition shadow-sm group"
+          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:border-primary/30 transition shadow-sm group"
         >
-          <Briefcase className="w-4 h-4 text-[#2E5A1A] group-hover:scale-110 transition" />
+          <Briefcase className="w-4 h-4 text-primary group-hover:scale-110 transition" />
           View All Jobs
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#2E5A1A] group-hover:translate-x-0.5 transition" />
+          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-primary group-hover:translate-x-0.5 transition" />
         </button>
       )}
     </motion.div>

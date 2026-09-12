@@ -60,7 +60,7 @@ export default function TripPlaybackScrubber({ breadcrumbs, currentIndex, onInde
   return (
     <div className="hub-glass rounded-xl p-3 space-y-2.5">
       <div className="flex items-center gap-2">
-        <Gauge className="w-3.5 h-3.5 text-[#2E5A1A]" />
+        <Gauge className="w-3.5 h-3.5 text-primary" />
         <h4 className="text-xs font-bold text-slate-800">Trip Playback</h4>
         <span className="ml-auto text-[10px] text-slate-400 tabular-nums">
           {currentIndex + 1} / {total}
@@ -70,7 +70,7 @@ export default function TripPlaybackScrubber({ breadcrumbs, currentIndex, onInde
       {/* Time display */}
       <div className="flex items-center justify-between text-[11px] text-slate-500 tabular-nums">
         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {fmtTime(startTime)}</span>
-        <span className="font-bold text-[#2E5A1A]">{fmtTime(currentTime)}</span>
+        <span className="font-bold text-primary">{fmtTime(currentTime)}</span>
         <span className="flex items-center gap-1">{fmtTime(endTime)} <Clock className="w-3 h-3" /></span>
       </div>
 
@@ -121,7 +121,7 @@ export default function TripPlaybackScrubber({ breadcrumbs, currentIndex, onInde
               key={s}
               onClick={() => setSpeed(s)}
               className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${
-                speed === s ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'
+                speed === s ? 'bg-white text-primary shadow-sm' : 'text-slate-500'
               }`}
             >
               {s}x

@@ -114,8 +114,8 @@ export default function ExpenseDefaultsManager() {
           return (
             <div key={cat.key} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                  <Icon className="w-5 h-5 text-[#2E5A1A]" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-slate-900">{cat.label}</p>
@@ -138,7 +138,7 @@ export default function ExpenseDefaultsManager() {
                       value={f.default_amount}
                       onChange={e => updateField(cat.key, 'default_amount', e.target.value)}
                       placeholder="0.00"
-                      className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                      className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function ExpenseDefaultsManager() {
                     step="0.1"
                     value={f.vat_rate}
                     onChange={e => updateField(cat.key, 'vat_rate', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function ExpenseDefaultsManager() {
                 value={f.description}
                 onChange={e => updateField(cat.key, 'description', e.target.value)}
                 placeholder="Optional description (shown to staff)"
-                className="w-full mt-2.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-[#2E5A1A]/40"
+                className="w-full mt-2.5 px-3 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-primary/40"
               />
             </div>
           );
@@ -172,7 +172,7 @@ export default function ExpenseDefaultsManager() {
       <div className="sticky bottom-4 flex items-center gap-3 bg-white rounded-xl border border-slate-200 shadow-lg px-4 py-3">
         <div className="flex-1 min-w-0">
           {saved ? (
-            <p className="text-sm font-semibold text-[#2E5A1A] flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-primary flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4" /> Defaults saved — new expense entries will use these values.
             </p>
           ) : dirty ? (
@@ -186,7 +186,7 @@ export default function ExpenseDefaultsManager() {
         <button
           onClick={handleSave}
           disabled={saving || !dirty}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] active:scale-95 transition disabled:opacity-50 touch-manipulation"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 active:scale-95 transition disabled:opacity-50 touch-manipulation"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? 'Saving…' : 'Save Defaults'}

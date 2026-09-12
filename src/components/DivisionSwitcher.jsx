@@ -112,7 +112,7 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
             <div className="border-t border-slate-100 py-1">
               <button
                 onClick={() => { setOpen(false); navigate('/enterprise'); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-[#2E5A1A] hover:bg-slate-50 transition text-left">
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm font-semibold text-primary hover:bg-slate-50 transition text-left">
                 <Plus className="w-4 h-4" />
                 Manage Business Streams
               </button>

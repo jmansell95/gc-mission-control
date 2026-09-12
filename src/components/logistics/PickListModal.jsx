@@ -209,7 +209,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           {/* Job & route details */}
           <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <FileText className="w-4 h-4 text-[#2E5A1A]" />
+              <FileText className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-slate-900">Job Details</h4>
             </div>
             <DetailRow icon={FileText} label="Job" value={delivery.job_name || resolvedJob?.name} />
@@ -226,7 +226,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           {/* Vehicle */}
           <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <Truck className="w-4 h-4 text-[#2E5A1A]" />
+              <Truck className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-slate-900">Vehicle & Loading</h4>
             </div>
             <DetailRow icon={Truck} label="Vehicle" value={resolvedVehicle?.name ? `${resolvedVehicle.name}${resolvedVehicle.registration_number ? ` (${resolvedVehicle.registration_number})` : ''}` : '—'} />
@@ -243,7 +243,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           {/* Items to pick — scan to check off */}
           <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <Package className="w-4 h-4 text-[#2E5A1A]" />
+              <Package className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-slate-900">Items to Pick ({items.length})</h4>
               {hasRealItems && (
                 <span className={`ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${allScanned ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
@@ -257,7 +257,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
               <button
                 onClick={() => setShowScanner(true)}
                 disabled={allScanned}
-                className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition touch-manipulation min-h-[48px] ${allScanned ? 'bg-emerald-100 text-emerald-700 cursor-default' : 'bg-[#2E5A1A] text-white hover:bg-[#244715] active:scale-95'}`}
+                className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition touch-manipulation min-h-[48px] ${allScanned ? 'bg-emerald-100 text-emerald-700 cursor-default' : 'bg-primary text-white hover:bg-[#244715] active:scale-95'}`}
               >
                 <Barcode className="w-4 h-4" /> {allScanned ? 'All Items Scanned' : 'Scan to Check Off'}
               </button>
@@ -268,7 +268,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                 const scanned = scannedIndices.has(i);
                 return (
                   <div key={i} className={`flex items-center gap-3 py-2 px-2 rounded-lg transition ${scanned ? 'bg-emerald-50' : 'hover:bg-slate-50'}`}>
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${scanned ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-[#2E5A1A]'}`}>{i + 1}</span>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${scanned ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-primary'}`}>{i + 1}</span>
                     <span className={`text-sm flex-1 ${scanned ? 'text-emerald-800 font-medium' : 'text-slate-700'}`}>{line}</span>
                     {scanned ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
@@ -297,7 +297,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           {/* Digital sign-off with per-stage drawn signatures */}
           <div className="hub-glass rounded-2xl p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-              <PenLine className="w-4 h-4 text-[#2E5A1A]" />
+              <PenLine className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-slate-900">Digital Sign-Off</h4>
               {allDone && (
                 <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">
@@ -317,7 +317,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                     <button
                       onClick={() => !stage.done && !busy && allScanned && setActiveStage(isActive ? null : stage.key)}
                       disabled={stage.done || busy || (!allScanned && hasRealItems)}
-                      className={`w-full flex items-center gap-3 p-3 text-left touch-manipulation min-h-[56px] ${stage.done ? 'cursor-default' : allScanned ? 'cursor-pointer hover:border-[#2E5A1A] active:scale-[0.99]' : 'cursor-not-allowed opacity-60'} ${isActive ? 'border-b-0' : ''}`}
+                      className={`w-full flex items-center gap-3 p-3 text-left touch-manipulation min-h-[56px] ${stage.done ? 'cursor-default' : allScanned ? 'cursor-pointer hover:border-primary active:scale-[0.99]' : 'cursor-not-allowed opacity-60'} ${isActive ? 'border-b-0' : ''}`}
                     >
                       <span className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${stage.done ? 'bg-emerald-600' : 'bg-slate-100'}`}>
                         {stage.done ? <CheckCircle2 className="w-5 h-5 text-white" /> : <Icon className="w-5 h-5 text-slate-500" />}
@@ -333,7 +333,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                         )}
                       </div>
                       {!stage.done && (isBusy ? (
-                        <div className="w-5 h-5 border-2 border-[#2E5A1A] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin flex-shrink-0" />
                       ) : (
                         <Circle className="w-5 h-5 text-slate-300 flex-shrink-0" />
                       ))}
@@ -362,7 +362,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
                           <button
                             onClick={() => confirmStage(stage)}
                             disabled={!currentSig || busy}
-                            className="flex-[2] inline-flex items-center justify-center gap-2 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition touch-manipulation min-h-[44px] disabled:opacity-50"
+                            className="flex-[2] inline-flex items-center justify-center gap-2 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition touch-manipulation min-h-[44px] disabled:opacity-50"
                           >
                             {isBusy ? (
                               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Confirming…</>
@@ -389,7 +389,7 @@ export default function PickListModal({ delivery, job, vehicle, driverName, open
           </button>
           <button
             onClick={() => downloadPickListPDF({ delivery, job: resolvedJob, vehicle: resolvedVehicle, driverName })}
-            className="flex-[2] inline-flex items-center justify-center gap-2 py-3 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition shadow-sm touch-manipulation min-h-[48px]"
+            className="flex-[2] inline-flex items-center justify-center gap-2 py-3 bg-primary text-white rounded-xl text-sm font-bold hover:bg-[#244715] transition shadow-sm touch-manipulation min-h-[48px]"
           >
             <Printer className="w-4 h-4" /> Download PDF
           </button>

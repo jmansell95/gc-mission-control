@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import BoreholeRevenueTable from '@/components/financials/BoreholeRevenueTable';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm";
 
 // Map billing-setup warning text to a deep-link route so the user can jump
 // straight to the settings area that fixes the warning.
@@ -129,7 +129,7 @@ export default function AutoFinancialsBreakdown({ job }) {
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex items-center justify-center">
-        <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-5 h-5 text-primary animate-spin" />
         <span className="ml-2 text-sm text-slate-500">Calculating financials from logged activities…</span>
       </div>
     );
@@ -336,7 +336,7 @@ export default function AutoFinancialsBreakdown({ job }) {
                 <span className="text-slate-600 font-semibold">{dp.target_pct}% · {(dp.total_metres || 0).toFixed(1)}m / {dp.target_metres}m</span>
               </div>
               <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-[#2E5A1A] rounded-full transition-all" style={{ width: `${dp.target_pct}%` }} />
+                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${dp.target_pct}%` }} />
               </div>
             </div>
           )}
@@ -346,7 +346,7 @@ export default function AutoFinancialsBreakdown({ job }) {
             <div className="space-y-2">
               <button onClick={() => setShowRigs(!showRigs)} className="w-full flex items-center gap-2 text-left">
                 {showRigs ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                <Truck className="w-4 h-4 text-[#2E5A1A]" />
+                <Truck className="w-4 h-4 text-primary" />
                 <p className="text-xs font-semibold text-slate-700">Rig & Crew Profitability</p>
                 <span className="ml-auto text-xs text-slate-400">{data.rig_profitability.length} rig(s)</span>
               </button>
@@ -410,7 +410,7 @@ export default function AutoFinancialsBreakdown({ job }) {
       {/* === BILLING SETUP (inline editor) === */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Ruler className="w-4 h-4 text-[#2E5A1A]" />
+          <Ruler className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-slate-800">Billing Setup</h3>
           <span className="ml-auto text-xs text-slate-400">Drilling method · per-metre rate · target · budget</span>
         </div>
@@ -425,7 +425,7 @@ export default function AutoFinancialsBreakdown({ job }) {
               { val: 'not_applicable', label: 'N/A', desc: 'Non-drilling' },
             ].map(m => (
               <button key={m.val} onClick={() => setBilling({ ...billing, drilling_method: m.val })}
-                className={`px-2 py-2 rounded-lg border text-center transition ${billing.drilling_method === m.val ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'}`}>
+                className={`px-2 py-2 rounded-lg border text-center transition ${billing.drilling_method === m.val ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'}`}>
                 <span className="block text-xs font-bold">{m.label}</span>
                 <span className="block text-[9px] opacity-70">{m.desc}</span>
               </button>
@@ -453,10 +453,10 @@ export default function AutoFinancialsBreakdown({ job }) {
           </div>
         </div>
         <div className="flex items-center gap-2 mt-3">
-          <button onClick={saveBilling} disabled={savingBilling || !billingDirty} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition disabled:opacity-50">
+          <button onClick={saveBilling} disabled={savingBilling || !billingDirty} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition disabled:opacity-50">
             {savingBilling ? <span>Saving…</span> : <><Save className="w-3.5 h-3.5" /> Save</>}
           </button>
-          {billingSaved && <span className="text-xs text-[#2E5A1A] font-medium inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Saved</span>}
+          {billingSaved && <span className="text-xs text-primary font-medium inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Saved</span>}
           {!billingDirty && !billingSaved && <span className="text-xs text-slate-400">Leave metre rate blank to auto-price from rate cards</span>}
         </div>
       </div>
@@ -482,7 +482,7 @@ export default function AutoFinancialsBreakdown({ job }) {
             </span>
           </div>
           <div className="h-2.5 bg-slate-200 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all ${overBudget ? 'bg-red-500' : 'bg-[#2E5A1A]'}`} style={{ width: `${budget > 0 ? Math.min((s.total_cost_net / budget) * 100, 100) : 0}%` }} />
+            <div className={`h-full rounded-full transition-all ${overBudget ? 'bg-red-500' : 'bg-primary'}`} style={{ width: `${budget > 0 ? Math.min((s.total_cost_net / budget) * 100, 100) : 0}%` }} />
           </div>
         </div>
       )}
@@ -490,7 +490,7 @@ export default function AutoFinancialsBreakdown({ job }) {
       {/* === Cost Breakdown === */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Calculator className="w-4 h-4 text-[#2E5A1A]" />
+          <Calculator className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-slate-800">Cost Breakdown</h3>
           <span className="ml-auto text-xs text-slate-400">Net</span>
         </div>
@@ -533,9 +533,9 @@ export default function AutoFinancialsBreakdown({ job }) {
               <p className="text-[10px] text-emerald-600 uppercase font-medium">Sell (Revenue)</p>
               <p className="text-base font-bold text-emerald-700 tabular-nums">{fmt(cb.subcon_client_charge_net)}</p>
             </div>
-            <div className="bg-[#2E5A1A]/5 rounded-lg border border-[#2E5A1A]/15 p-3 text-center">
-              <p className="text-[10px] text-[#2E5A1A] uppercase font-medium">Margin</p>
-              <p className="text-base font-bold text-[#2E5A1A] tabular-nums">{fmt(cb.subcon_margin_net)}</p>
+            <div className="bg-primary/5 rounded-lg border border-primary/15 p-3 text-center">
+              <p className="text-[10px] text-primary uppercase font-medium">Margin</p>
+              <p className="text-base font-bold text-primary tabular-nums">{fmt(cb.subcon_margin_net)}</p>
               <p className="text-[10px] text-slate-400">{cb.subcon_client_charge_net > 0 ? `${((cb.subcon_margin_net / cb.subcon_client_charge_net) * 100).toFixed(1)}%` : '—'}</p>
             </div>
           </div>
@@ -547,7 +547,7 @@ export default function AutoFinancialsBreakdown({ job }) {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <button onClick={() => setShowCrew(!showCrew)} className="w-full px-4 py-3 border-b border-slate-100 flex items-center gap-2 text-left hover:bg-slate-50/50 transition">
             {showCrew ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-            <Users className="w-4 h-4 text-[#2E5A1A]" />
+            <Users className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-slate-800">Crew Labour ({cb.crew_rows.length})</h3>
             <span className="ml-auto text-xs text-slate-400">{fmt(cb.crew_cost)}</span>
           </button>
@@ -624,7 +624,7 @@ export default function AutoFinancialsBreakdown({ job }) {
                       {m.staff_name && <span className="text-[10px] text-slate-500">{m.staff_name}</span>}
                     </div>
                     <p className="text-xs text-slate-700 truncate">{m.description}</p>
-                    <p className="text-[10px] text-[#2E5A1A] font-medium mt-0.5">
+                    <p className="text-[10px] text-primary font-medium mt-0.5">
                       → {m.rate_card_description} ({m.rate_source} rate)
                     </p>
                   </div>

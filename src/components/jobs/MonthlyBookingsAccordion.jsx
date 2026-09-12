@@ -39,8 +39,8 @@ export default function MonthlyBookingsAccordion({ bookings, onEdit, onDelete })
           <div key={key} className="hub-glass rounded-2xl overflow-hidden">
             <button onClick={() => toggle(key)}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition">
-              <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-4 h-4 text-[#2E5A1A]" />
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Calendar className="w-4 h-4 text-primary" />
               </div>
               <div className="min-w-0 flex-1 text-left">
                 <p className="text-sm font-bold text-slate-900">{monthLabel}</p>

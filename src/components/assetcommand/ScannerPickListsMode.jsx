@@ -126,7 +126,7 @@ export default function ScannerPickListsMode({ onBack }) {
             <div key={group.vehicleId} className="space-y-2">
               {/* Vehicle group header */}
               <div className="flex items-center gap-2 px-1 pt-1">
-                <Truck className="w-4 h-4 text-[#2E5A1A]" />
+                <Truck className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-bold text-slate-800">
                   {group.vehicle ? `${group.vehicle.name}${group.vehicle.registration_number ? ` · ${group.vehicle.registration_number}` : ''}` : 'Unassigned Vehicle'}
                 </h3>
@@ -145,7 +145,7 @@ export default function ScannerPickListsMode({ onBack }) {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             {d.optimized_sequence_index && (
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#2E5A1A] text-white text-xs font-bold flex-shrink-0">
+                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex-shrink-0">
                                 {d.optimized_sequence_index}
                               </span>
                             )}
@@ -191,7 +191,7 @@ export default function ScannerPickListsMode({ onBack }) {
                       <div className="flex gap-2 pt-1">
                         <button
                           onClick={() => setOpenDelivery(d)}
-                          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-xs font-bold hover:bg-[#244715] transition touch-manipulation min-h-[44px]"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold hover:bg-[#244715] transition touch-manipulation min-h-[44px]"
                         >
                           <ClipboardList className="w-3.5 h-3.5" /> Open & Sign Off
                         </button>

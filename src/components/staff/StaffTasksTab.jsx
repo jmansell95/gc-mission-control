@@ -125,7 +125,7 @@ export default function StaffTasksTab() {
           </button>
           <button
             onClick={() => selectedStaffId ? setShowAssignModal(true) : toast({ title: 'Select a staff member first' })}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition active:scale-95 shadow-sm"
           >
             <Plus className="w-4 h-4" /> Assign Task
           </button>
@@ -147,7 +147,7 @@ export default function StaffTasksTab() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search staff…"
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function StaffTasksTab() {
                       key={staff.id}
                       onClick={() => setSelectedStaffId(staff.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 text-left transition border-b border-slate-50 ${
-                        isSelected ? 'bg-[#2E5A1A]/8' : 'hover:bg-slate-50'
+                        isSelected ? 'bg-primary/8' : 'hover:bg-slate-50'
                       }`}
                     >
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm flex-shrink-0">
@@ -213,7 +213,7 @@ export default function StaffTasksTab() {
                         key={f}
                         onClick={() => setStatusFilter(f)}
                         className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                          statusFilter === f ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          statusFilter === f ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                       >
                         {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -347,7 +347,7 @@ function RecurringDutyTemplateManager({ templates, allStaff, onClose }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setEditingTemplate(null); setShowForm(true); }}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition active:scale-95"
           >
             <Plus className="w-4 h-4" /> New Template
           </button>
@@ -476,7 +476,7 @@ function TemplateForm({ template, allStaff, onClose, onSaved }) {
               value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               placeholder="e.g. Daily Vehicle Check"
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div>
@@ -484,7 +484,7 @@ function TemplateForm({ template, allStaff, onClose, onSaved }) {
             <select
               value={form.frequency}
               onChange={e => setForm(f => ({ ...f, frequency: e.target.value }))}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
@@ -501,7 +501,7 @@ function TemplateForm({ template, allStaff, onClose, onSaved }) {
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             placeholder="What does this duty involve?"
             rows={2}
-            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+            className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
@@ -591,7 +591,7 @@ function TemplateForm({ template, allStaff, onClose, onSaved }) {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition active:scale-95 disabled:opacity-50"
           >
             {saving ? 'Saving…' : (template?.id ? 'Update Template' : 'Create Template')}
           </button>

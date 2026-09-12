@@ -98,8 +98,8 @@ export default function CommandCentreSection({ monitors, onNavigate }) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <Radar className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />
-              <p className="text-xs font-bold text-[#2E5A1A] uppercase tracking-wide">Mission Control</p>
+              <Radar className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <p className="text-xs font-bold text-primary uppercase tracking-wide">Mission Control</p>
             </div>
             <p className="text-sm font-bold text-slate-800 truncate">{healthLabel}</p>
             {m.issues.length > 0 && (

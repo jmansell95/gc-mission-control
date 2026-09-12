@@ -84,7 +84,7 @@ export default function CostPerHourProfitability({ asset }) {
   return (
     <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
+        <TrendingUp className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-extrabold text-slate-900">Cost-per-Hour Profitability</h3>
       </div>
 

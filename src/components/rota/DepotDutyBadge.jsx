@@ -4,7 +4,7 @@ import { Warehouse, ChevronDown, Clock, StickyNote } from 'lucide-react';
 const statusConfig = {
   assigned: { label: 'Assigned', cls: 'bg-slate-100 text-slate-600' },
   started: { label: 'In Progress', cls: 'bg-blue-50 text-blue-700' },
-  completed: { label: 'Completed', cls: 'bg-[#2E5A1A]/10 text-[#2E5A1A]' },
+  completed: { label: 'Completed', cls: 'bg-primary/10 text-primary' },
 };
 
 /**

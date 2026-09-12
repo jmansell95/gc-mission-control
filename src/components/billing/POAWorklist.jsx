@@ -194,14 +194,14 @@ export default function POAWorklist() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search POA items..."
-            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
           />
         </div>
         <div className="grid grid-cols-3 gap-2">
           <select
             value={filterSource}
             onChange={(e) => setFilterSource(e.target.value)}
-            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2E5A1A] truncate"
+            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-primary truncate"
           >
             <option value="all">All Sources</option>
             <option value="our_company">Our Rate Card</option>
@@ -210,7 +210,7 @@ export default function POAWorklist() {
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2E5A1A] truncate"
+            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-primary truncate"
           >
             <option value="all">All Categories</option>
             <option value="labour">Labour</option>
@@ -220,7 +220,7 @@ export default function POAWorklist() {
           <select
             value={filterLock}
             onChange={(e) => setFilterLock(e.target.value)}
-            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-[#2E5A1A] truncate"
+            className="px-2.5 py-2 border border-slate-200 rounded-lg text-xs sm:text-sm bg-white focus:outline-none focus:border-primary truncate"
           >
             <option value="all">All Status</option>
             <option value="unlocked">Outstanding</option>
@@ -333,7 +333,7 @@ export default function POAWorklist() {
                     <div className="flex-shrink-0">
                       <button
                         onClick={() => setLockModalItem(item)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-[#2E5A1A] text-white hover:bg-[#1c4a12]"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-primary text-white hover:bg-primary/90"
                       >
                         <Lock className="w-3.5 h-3.5" />
                         {isLocked ? 'Add Lock' : 'Lock Price'}

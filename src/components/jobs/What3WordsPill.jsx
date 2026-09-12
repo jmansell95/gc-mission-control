@@ -25,7 +25,7 @@ export default function What3WordsPill({ value, size = 'sm', showLabel = false }
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
       title={`what3words: ${w3w} — click to open map`}
-      className={`inline-flex items-center rounded-full font-mono font-semibold bg-[#2E5A1A]/8 text-[#2E5A1A] hover:bg-[#2E5A1A]/15 transition border border-[#2E5A1A]/15 ${sizeCls}`}
+      className={`inline-flex items-center rounded-full font-mono font-semibold bg-primary/8 text-primary hover:bg-primary/15 transition border border-primary/15 ${sizeCls}`}
     >
       <MapPin className="w-3 h-3 flex-shrink-0" />
       {showLabel && <span className="opacity-60 uppercase text-[9px] font-bold tracking-wide">w3w</span>}

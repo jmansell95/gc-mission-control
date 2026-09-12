@@ -120,7 +120,7 @@ export default function PATTestingPanel() {
           <button onClick={() => setImportOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:border-amber-400 hover:text-amber-600 transition shadow-sm">
             <Upload className="w-3.5 h-3.5" /> Import KEWPAT
           </button>
-          <button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm disabled:opacity-60">
+          <button onClick={handleSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold hover:border-primary hover:text-primary transition shadow-sm disabled:opacity-60">
             <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Syncing…' : 'Sync Panda'}
           </button>
         </div>

@@ -81,7 +81,7 @@ export default function KeyLogActivityCard({
       <div
         onClick={() => onSelect?.(log.id)}
         className={`group flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition cursor-pointer animate-slide-up ${
-          selected ? 'border-[#2E5A1A]/40 bg-[#2E5A1A]/5' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50/60'
+          selected ? 'border-primary/40 bg-primary/5' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50/60'
         }`}
       >
         <span className={`w-1 h-9 rounded-full flex-shrink-0 ${isPending ? 'bg-amber-400' : 'bg-emerald-500'}`} />
@@ -121,7 +121,7 @@ export default function KeyLogActivityCard({
           <button
             onClick={handleDeepLink}
             title={linkDirection === 'to_hub' ? 'View in Investigation Hub' : 'Open on Job Site Activity'}
-            className="p-1 text-slate-300 hover:text-[#2E5A1A] rounded-md hover:bg-[#2E5A1A]/5 transition opacity-0 group-hover:opacity-100"
+            className="p-1 text-slate-300 hover:text-primary rounded-md hover:bg-primary/5 transition opacity-0 group-hover:opacity-100"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
@@ -135,7 +135,7 @@ export default function KeyLogActivityCard({
     <div
       onClick={() => onSelect?.(log.id)}
       className={`group relative flex gap-3 p-3.5 rounded-xl border transition cursor-pointer animate-slide-up ${
-        selected ? 'border-[#2E5A1A]/40 bg-[#2E5A1A]/5 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+        selected ? 'border-primary/40 bg-primary/5 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
       }`}
     >
       <span className={`w-1.5 rounded-full flex-shrink-0 ${isPending ? 'bg-amber-400' : 'bg-emerald-500'}`} />
@@ -198,7 +198,7 @@ export default function KeyLogActivityCard({
           )}
           <button
             onClick={handleDeepLink}
-            className="ml-auto text-[11px] font-medium text-[#2E5A1A] hover:text-[#1c4a12] inline-flex items-center gap-1 transition"
+            className="ml-auto text-[11px] font-medium text-primary hover:text-primary/90 inline-flex items-center gap-1 transition"
           >
             <ExternalLink className="w-3 h-3" />
             {linkDirection === 'to_hub' ? 'View in Investigation Hub' : 'Open on Job Site Activity'}

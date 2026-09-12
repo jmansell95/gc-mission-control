@@ -98,7 +98,7 @@ export default function ESignatureModal({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSignature className="w-5 h-5 text-[#2E5A1A]" />
+            <FileSignature className="w-5 h-5 text-primary" />
             E-Signature: {documentTitle}
           </DialogTitle>
         </DialogHeader>
@@ -146,7 +146,7 @@ export default function ESignatureModal({
 
             <DialogFooter>
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              <Button onClick={handleSign} disabled={!signatureData || saving} className="bg-[#2E5A1A] hover:bg-[#1c4a12]">
+              <Button onClick={handleSign} disabled={!signatureData || saving} className="bg-primary hover:bg-primary/90">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <FileSignature className="w-4 h-4 mr-1.5" />}
                 {saving ? 'Saving…' : 'Sign Document'}
               </Button>

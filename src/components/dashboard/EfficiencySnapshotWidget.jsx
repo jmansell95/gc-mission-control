@@ -102,14 +102,14 @@ export default function EfficiencySnapshotWidget({ onSelectJob }) {
           {topJobs.map(({ job, rev }) => (
             <button key={job.id} type="button" onClick={() => onSelectJob?.(job)}
               className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-slate-50/60 transition first:rounded-t-xl last:rounded-b-xl">
-              <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                <HardHat className="w-3.5 h-3.5 text-[#2E5A1A]" />
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <HardHat className="w-3.5 h-3.5 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold text-slate-800 truncate">{job.name}</p>
                 <p className="text-[10px] text-slate-400 truncate">{job.location || 'No location'}</p>
               </div>
-              <span className="text-sm font-bold text-[#2E5A1A] tabular-nums flex-shrink-0">{gbp(rev)}</span>
+              <span className="text-sm font-bold text-primary tabular-nums flex-shrink-0">{gbp(rev)}</span>
               <ArrowUpRight className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
             </button>
           ))}

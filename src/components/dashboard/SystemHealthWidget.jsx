@@ -81,7 +81,7 @@ export default function SystemHealthWidget({ onNavigate }) {
       action={
         <button
           onClick={() => onNavigate?.('compliance')}
-          className="text-xs font-semibold text-[#2E5A1A] hover:text-[#1c4a12] px-3 py-1.5 rounded-lg hover:bg-[#2E5A1A]/5 transition"
+          className="text-xs font-semibold text-primary hover:text-primary/90 px-3 py-1.5 rounded-lg hover:bg-primary/5 transition"
         >
           View Audit Trail →
         </button>

@@ -101,7 +101,7 @@ export default function PresentationPack() {
         {/* Part 1: Why We Built This */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Target className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-lg font-bold text-slate-900">Part 1 — Why We Built This</h2>
@@ -125,8 +125,8 @@ export default function PresentationPack() {
 
           <div className="hub-glass rounded-2xl p-5 sm:p-6 bg-emerald-50/40 border-emerald-200/60">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-1 h-5 rounded-full bg-[#2E5A1A]" />
-              <h3 className="text-sm font-bold text-[#2E5A1A]">The solution</h3>
+              <div className="w-1 h-5 rounded-full bg-primary" />
+              <h3 className="text-sm font-bold text-primary">The solution</h3>
             </div>
             <p className="text-sm text-slate-700 leading-relaxed">{whyBuilt.solution}</p>
           </div>
@@ -149,7 +149,7 @@ export default function PresentationPack() {
         {/* Part 2: Platform Tour */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1 pt-2">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Building2 className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-lg font-bold text-slate-900">Part 2 — Platform Tour</h2>
@@ -168,7 +168,7 @@ export default function PresentationPack() {
         {/* Part 3: Deep-Dive */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1 pt-2">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Cloud className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-lg font-bold text-slate-900">Part 3 — Deep-Dive: Recent Major Work</h2>
@@ -186,7 +186,7 @@ export default function PresentationPack() {
         {/* Part 4: What This Means For You */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 px-1 pt-2">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Users className="w-4 h-4 text-white" />
             </div>
             <h2 className="text-lg font-bold text-slate-900">Part 4 — What This Means For You</h2>
@@ -223,7 +223,7 @@ export default function PresentationPack() {
             <button
               onClick={handleDownload}
               disabled={generating}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-[#2E5A1A] rounded-xl font-semibold text-sm hover:bg-white/90 transition shadow-lg disabled:opacity-60 whitespace-nowrap flex-shrink-0"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-primary rounded-xl font-semibold text-sm hover:bg-white/90 transition shadow-lg disabled:opacity-60 whitespace-nowrap flex-shrink-0"
             >
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               {generating ? 'Building PDF…' : 'Download PDF'}

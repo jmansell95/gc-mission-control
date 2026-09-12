@@ -118,7 +118,7 @@ export default function InvoiceHistoryPanel({ companyName }) {
         </div>
         <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 shadow-sm col-span-2 sm:col-span-1">
           <p className="text-[10px] uppercase tracking-wide text-slate-400">Total (excl. void)</p>
-          <p className="text-lg font-bold text-[#2E5A1A]">{gbp(totalGross)}</p>
+          <p className="text-lg font-bold text-primary">{gbp(totalGross)}</p>
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default function InvoiceHistoryPanel({ companyName }) {
                   <td className="px-4 py-3">
                     <span className={statusBadgeClass(inv.status)}>{inv.status}</span>
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-[#2E5A1A] tabular-nums">{gbp(inv.gross_total)}</td>
+                  <td className="px-4 py-3 text-right font-bold text-primary tabular-nums">{gbp(inv.gross_total)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
                       <button title="Reprint" onClick={() => reprint(inv)} className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition">

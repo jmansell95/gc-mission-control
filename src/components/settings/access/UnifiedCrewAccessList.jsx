@@ -126,7 +126,7 @@ export default function UnifiedCrewAccessList({ scopedDivisionId, onEditGroup, o
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search crews..."
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 focus:border-[#2E5A1A] bg-white"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
         />
       </div>
 

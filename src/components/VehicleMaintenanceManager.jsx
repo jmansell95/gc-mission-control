@@ -379,7 +379,7 @@ export default function VehicleMaintenanceManager() {
             <Sparkles className="w-4 h-4" /> {autoRunning ? 'Scanning…' : 'Auto-Book'}
           </button>
           <button onClick={() => setShowNumbers(true)}
-            className="flex items-center gap-2 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-xl hover:brightness-110 transition text-sm font-bold shadow-sm">
+            className="flex items-center gap-2 px-3 py-2.5 bg-primary text-white rounded-xl hover:brightness-110 transition text-sm font-bold shadow-sm">
             <PhoneCall className="w-4 h-4" /> Provider Directory
           </button>
           <button onClick={() => { setEditingBooking(null); setShowModal(true); }}

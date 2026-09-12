@@ -104,7 +104,7 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
     <div className="space-y-4 px-5 py-2">
       {jobLocation && (
         <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3">
-          <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+          <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
           <p className="text-xs text-slate-700 break-words">{jobLocation}</p>
         </div>
       )}
@@ -122,16 +122,16 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
       {/* On-site auto-detection — phone GPS or vehicle Geotab confirms the crew is at the job */}
       {onSiteDetected && (
         <div className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-3">
-          <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#2E5A1A] font-semibold">
+            <p className="text-xs text-primary font-semibold">
               You're on site — arrival time auto-filled.
             </p>
-            <p className="text-[10px] text-[#2E5A1A]/70 mt-0.5">
+            <p className="text-[10px] text-primary/70 mt-0.5">
               Detected via {phoneOnSite && vehicleOnSite ? 'phone GPS + vehicle GPS' : phoneOnSite ? 'phone GPS' : 'vehicle GPS (Geotab)'}
             </p>
           </div>
-          <button type="button" onClick={useMyLocation} className="text-[11px] font-bold text-[#2E5A1A] underline flex-shrink-0">
+          <button type="button" onClick={useMyLocation} className="text-[11px] font-bold text-primary underline flex-shrink-0">
             Re-sync now
           </button>
         </div>
@@ -185,9 +185,9 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
       )}
       {travelMins > 0 && (
         <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3.5 py-2.5">
-          <Car className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
-          <p className="text-xs text-[#2E5A1A] font-medium">Travel time: {fmtDur(travelMins)}</p>
-          <span className="text-[10px] text-[#2E5A1A] ml-auto">First 1.5h unpaid</span>
+          <Car className="w-4 h-4 text-primary flex-shrink-0" />
+          <p className="text-xs text-primary font-medium">Travel time: {fmtDur(travelMins)}</p>
+          <span className="text-[10px] text-primary ml-auto">First 1.5h unpaid</span>
         </div>
       )}
       {inductionRequired ? (
@@ -199,8 +199,8 @@ function ArriveStep({ job, jobLocation, inductionRequired, saving, staffId, vehi
         </div>
       ) : (
         <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-100 rounded-xl px-3.5 py-3">
-          <ShieldCheck className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-[#2E5A1A] leading-relaxed">
+          <ShieldCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-primary leading-relaxed">
             You've already done the site induction — you'll just do a quick daily briefing, then you're ready to work.
           </p>
         </div>
@@ -449,7 +449,7 @@ export default function ShiftWizard({
               {steps.map((s, i) => (
                 <React.Fragment key={s}>
                   <div className={`flex items-center gap-1.5 ${i <= currentStepIndex ? 'text-white' : 'text-white/40'}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i < currentStepIndex ? 'bg-white text-[#2E5A1A]' : i === currentStepIndex ? 'bg-white/25 ring-1 ring-white/40' : 'bg-white/10'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i < currentStepIndex ? 'bg-white text-primary' : i === currentStepIndex ? 'bg-white/25 ring-1 ring-white/40' : 'bg-white/10'}`}>
                       {i < currentStepIndex ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
                     </div>
                     <span className="text-[11px] font-medium">{stepLabels[s]}</span>
@@ -573,7 +573,7 @@ export default function ShiftWizard({
                     }
                   }}
                   disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
                 >
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                   {saving ? 'Saving…' : 'Confirm Checks Complete'}
@@ -588,26 +588,26 @@ export default function ShiftWizard({
                   Cancel
                 </button>
                 <button onClick={advanceFromArrive} disabled={saving}
-                  className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
                   {saving ? 'Saving…' : 'Confirm Arrival'} <ChevronRight className="w-5 h-5" />
                 </button>
               </>
             )}
             {step === 'briefing' && previewMode && (
               <button onClick={() => setStep('working')}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold touch-manipulation">
                 Continue to Tasks <ChevronRight className="w-5 h-5" />
               </button>
             )}
             {step === 'end_of_shift' && previewMode && (
               <button onClick={() => setStep(null)}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold touch-manipulation">
                 Finish Preview <ChevronRight className="w-5 h-5" />
               </button>
             )}
             {step === 'working' && (
               <button onClick={() => setStep('end_of_shift')}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold touch-manipulation">
                 Finish My Day <ChevronRight className="w-5 h-5" />
               </button>
             )}

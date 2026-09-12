@@ -64,7 +64,7 @@ export default function PerformanceKpiManager() {
         action={
           <button
             onClick={() => setEditing('new')}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#1c4a12] transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-ui-caption font-semibold hover:bg-primary/90 transition active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" /> New KPI Set
           </button>
@@ -78,7 +78,7 @@ export default function PerformanceKpiManager() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search KPI sets by name, role or department..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 text-ui-body text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 text-ui-body text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
         />
       </div>
 
@@ -266,12 +266,12 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
             <div>
               <label className="text-ui-micro font-bold text-slate-500 uppercase block mb-1">Set Name</label>
               <input value={form.name} onChange={e => update({ name: e.target.value })} placeholder="e.g. Cable Percussion Driller"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="text-ui-micro font-bold text-slate-500 uppercase block mb-1">Role Key</label>
               <input value={form.role_key} onChange={e => update({ role_key: e.target.value })} placeholder="e.g. cp_driller"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-primary" />
             </div>
           </div>
 
@@ -279,7 +279,7 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
             <div>
               <label className="text-ui-micro font-bold text-slate-500 uppercase block mb-1">Department</label>
               <select value={form.department} onChange={e => update({ department: e.target.value })}
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-[#2E5A1A]">
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-primary">
                 {Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
@@ -287,7 +287,7 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
               <label className="text-ui-micro font-bold text-slate-500 uppercase block mb-1">Accent Colour</label>
               <div className="flex items-center gap-2">
                 <input type="color" value={form.accent_color} onChange={e => update({ accent_color: e.target.value })} className="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer" />
-                <input value={form.accent_color} onChange={e => update({ accent_color: e.target.value })} className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                <input value={form.accent_color} onChange={e => update({ accent_color: e.target.value })} className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-primary" />
               </div>
             </div>
           </div>
@@ -295,7 +295,7 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
           <div>
             <label className="text-ui-micro font-bold text-slate-500 uppercase block mb-1">Description</label>
             <textarea value={form.description} onChange={e => update({ description: e.target.value })} rows={2} placeholder="What this role does and how performance is measured"
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-ui-body text-slate-800 focus:outline-none focus:border-primary" />
           </div>
 
           {/* Metrics */}
@@ -324,22 +324,22 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
                         <div>
                           <label className="text-ui-micro text-slate-400 block mb-0.5">Weight</label>
                           <input type="number" min="1" max="10" value={m.weight} onChange={e => updateMetric(idx, { weight: Number(e.target.value) })}
-                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-primary" />
                         </div>
                         <div>
                           <label className="text-ui-micro text-slate-400 block mb-0.5">Target</label>
                           <input type="number" value={m.target} onChange={e => updateMetric(idx, { target: Number(e.target.value) })}
-                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-primary" />
                         </div>
                         <div>
                           <label className="text-ui-micro text-slate-400 block mb-0.5">Threshold %</label>
                           <input type="number" value={m.incentive_threshold} onChange={e => updateMetric(idx, { incentive_threshold: Number(e.target.value) })}
-                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-primary" />
                         </div>
                         <div>
                           <label className="text-ui-micro text-slate-400 block mb-0.5">Bonus £</label>
                           <input type="number" value={m.bonus_amount} onChange={e => updateMetric(idx, { bonus_amount: Number(e.target.value) })}
-                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-[#2E5A1A]" />
+                            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-ui-caption text-slate-800 focus:outline-none focus:border-primary" />
                         </div>
                       </div>
                     </div>
@@ -357,7 +357,7 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
                     const MIcon = m.icon;
                     return (
                       <button key={m.key} onClick={() => addMetric(m.key)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-ui-caption font-semibold text-slate-600 hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition">
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-ui-caption font-semibold text-slate-600 hover:border-primary hover:text-primary transition">
                         <MIcon className="w-3 h-3" /> {m.label} <Plus className="w-3 h-3" />
                       </button>
                     );
@@ -394,7 +394,7 @@ function KpiSetEditor({ set, staff, onClose, onSaved }) {
         <div className="sticky bottom-0 bg-white px-5 py-3 border-t border-slate-100 flex justify-end gap-2">
           <button onClick={onClose} disabled={saving} className="px-4 py-2 rounded-xl text-ui-caption font-semibold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
           <button onClick={handleSave} disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-bold shadow-md hover:bg-[#1c4a12] disabled:opacity-60 transition">
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-ui-caption font-bold shadow-md hover:bg-primary/90 disabled:opacity-60 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             {isExisting ? 'Save Changes' : 'Create KPI Set'}
           </button>

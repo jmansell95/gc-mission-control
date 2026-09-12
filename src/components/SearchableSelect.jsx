@@ -104,7 +104,7 @@ export default function SearchableSelect({
         onClick={() => setOpen(o => !o)}
         className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white text-left transition ${
           disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-slate-400 cursor-pointer'
-        } ${open ? 'border-[#2E5A1A] ring-2 ring-[#2E5A1A]/10' : ''}`}
+        } ${open ? 'border-primary ring-2 ring-primary/10' : ''}`}
       >
         <span className={`truncate ${selected ? 'text-slate-800' : 'text-slate-400'}`}>
           {selected ? selected.label : placeholder}
@@ -150,11 +150,11 @@ export default function SearchableSelect({
                   onClick={() => handleSelect(opt.value)}
                   onMouseEnter={() => setHighlightIdx(i)}
                   className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 text-sm text-left transition ${
-                    i === highlightIdx ? 'bg-[#2E5A1A]/5' : 'hover:bg-slate-50'
-                  } ${opt.value === value ? 'font-semibold text-[#2E5A1A]' : 'text-slate-700'}`}
+                    i === highlightIdx ? 'bg-primary/5' : 'hover:bg-slate-50'
+                  } ${opt.value === value ? 'font-semibold text-primary' : 'text-slate-700'}`}
                 >
                   <span className="truncate">{opt.label}</span>
-                  {opt.value === value && <Check className="w-4 h-4 flex-shrink-0 text-[#2E5A1A]" />}
+                  {opt.value === value && <Check className="w-4 h-4 flex-shrink-0 text-primary" />}
                 </button>
               ))
             )}

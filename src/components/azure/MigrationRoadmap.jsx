@@ -90,7 +90,7 @@ export default function MigrationRoadmap() {
       {/* Why migrate / benefits */}
       <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-[#2E5A1A]" />
+          <TrendingUp className="w-5 h-5 text-primary" />
           Why migrate to Azure
         </h3>
         <div className="grid sm:grid-cols-2 gap-3">
@@ -111,7 +111,7 @@ export default function MigrationRoadmap() {
       {/* Roadmap timeline */}
       <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#2E5A1A]" />
+          <Calendar className="w-5 h-5 text-primary" />
           Migration Roadmap — 13 Weeks
         </h3>
         <p className="text-xs text-slate-500 mb-5">3-month continuous-phase timeline with a 1-week stabilization buffer before Base44 decommission.</p>
@@ -152,7 +152,7 @@ export default function MigrationRoadmap() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {MILESTONES.map(m => (
               <div key={m.week} className="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                <m.icon className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+                <m.icon className="w-4 h-4 text-primary flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold text-slate-400">Week {Math.ceil(m.week)}</p>
                   <p className="text-[11px] font-semibold text-slate-700 truncate">{m.label}</p>
@@ -168,13 +168,13 @@ export default function MigrationRoadmap() {
         {/* Costs */}
         <div className="hub-glass rounded-2xl p-5 sm:p-6">
           <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <PoundSterling className="w-5 h-5 text-[#2E5A1A]" />
+            <PoundSterling className="w-5 h-5 text-primary" />
             Indicative Monthly Cost
           </h3>
           <div className="space-y-1.5">
             {COSTS.map(c => (
               <div key={c.item} className={`flex items-center justify-between px-3 py-2 rounded-lg ${
-                c.highlight ? 'bg-[#2E5A1A] text-white font-bold' : 'bg-slate-50 text-slate-700'
+                c.highlight ? 'bg-primary text-white font-bold' : 'bg-slate-50 text-slate-700'
               }`}>
                 <span className="text-sm">{c.item}</span>
                 <span className="text-sm font-semibold tabular-nums">{c.cost}</span>
@@ -211,7 +211,7 @@ export default function MigrationRoadmap() {
       {/* Architecture table */}
       <div className="hub-glass rounded-2xl p-5 sm:p-7">
         <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Server className="w-5 h-5 text-[#2E5A1A]" />
+          <Server className="w-5 h-5 text-primary" />
           Target Architecture
         </h3>
         <div className="overflow-x-auto no-scrollbar">
@@ -237,7 +237,7 @@ export default function MigrationRoadmap() {
                 <tr key={row[0]}>
                   <td className="py-2 px-3 font-semibold text-slate-700">{row[0]}</td>
                   <td className="py-2 px-3 text-slate-500">{row[1]}</td>
-                  <td className="py-2 px-3 font-semibold text-[#2E5A1A]">{row[2]}</td>
+                  <td className="py-2 px-3 font-semibold text-primary">{row[2]}</td>
                 </tr>
               ))}
             </tbody>

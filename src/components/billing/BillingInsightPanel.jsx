@@ -149,7 +149,7 @@ export default function BillingInsightPanel({ rows = [], onSelectJob }) {
               {onSelectJob && (
                 <button
                   onClick={() => onSelectJob({ id: ins.jobId, name: ins.title.split(':')[0] })}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white text-slate-600 hover:text-[#2E5A1A] rounded-md text-[11px] font-semibold border border-slate-200 hover:border-[#2E5A1A]/30 transition flex-shrink-0"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-white text-slate-600 hover:text-primary rounded-md text-[11px] font-semibold border border-slate-200 hover:border-primary/30 transition flex-shrink-0"
                 >
                   {ins.action} <ArrowRight className="w-3 h-3" />
                 </button>

@@ -480,7 +480,7 @@ export default function TravelReconciliationReport({ vehicle }) {
               className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-cyan-400" />
           </div>
           <button onClick={handleDownloadPDF} disabled={isLoading || trips.length === 0}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             <FileDown className="w-3.5 h-3.5" /> PDF
           </button>
           <button onClick={() => refetch()} disabled={isFetching}

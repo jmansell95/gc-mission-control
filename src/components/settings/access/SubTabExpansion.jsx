@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Lock, Eye, ShieldCheck } from 'lucide-react'
 import { SUB_TAB_REGISTRY, getHubTabs, getTabSubTabs } from '@/utils/subTabRegistry';
 
 const LEVEL_STYLES = {
-  write: { active: 'bg-[#2E5A1A] text-white border-[#2E5A1A]', icon: ShieldCheck },
+  write: { active: 'bg-primary text-white border-primary', icon: ShieldCheck },
   read: { active: 'bg-amber-500 text-white border-amber-500', icon: Eye },
   none: { active: 'bg-slate-200 text-slate-500 border-slate-300', icon: Lock },
 };

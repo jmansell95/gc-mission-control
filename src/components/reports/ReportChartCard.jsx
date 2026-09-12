@@ -41,19 +41,19 @@ export default function ReportChartCard({ title, icon: Icon, data, type = 'bar',
     <div className="hub-glass rounded-2xl p-4 group">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-primary flex items-center justify-center flex-shrink-0">
             <Icon className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-bold text-slate-900 truncate">{title}</h3>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <button onClick={() => downloadCsv(title + '.csv', rows)} title="Export CSV"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[#2E5A1A] hover:bg-emerald-50 transition">
+            className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-emerald-50 transition">
             <Download className="w-3.5 h-3.5" />
           </button>
           {canDrill && (
             <button onClick={handleDrillDown} title="View records"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-[#2E5A1A] hover:bg-emerald-50 transition">
+              className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-emerald-50 transition">
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           )}
@@ -63,7 +63,7 @@ export default function ReportChartCard({ title, icon: Icon, data, type = 'bar',
       <div className="h-64">
         {type === 'stat' ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-4xl font-extrabold text-[#2E5A1A] tabular-nums">
+            <p className="text-4xl font-extrabold text-primary tabular-nums">
               {valuePrefix}{Math.round(data[0]?.value || 0).toLocaleString()}
             </p>
           </div>
@@ -79,7 +79,7 @@ export default function ReportChartCard({ title, icon: Icon, data, type = 'bar',
 
       {canDrill && !onSegmentClick && (
         <button onClick={handleDrillDown}
-          className="mt-2 w-full flex items-center justify-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-[#2E5A1A] transition opacity-0 group-hover:opacity-100">
+          className="mt-2 w-full flex items-center justify-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-primary transition opacity-0 group-hover:opacity-100">
           View records <ChevronRight className="w-3 h-3" />
         </button>
       )}

@@ -124,7 +124,7 @@ export default function WeatherThresholdsSettings() {
           <button
             type="button"
             onClick={() => setForm(p => ({ ...p, lightning_block: !p.lightning_block }))}
-            className={`relative w-12 h-6 rounded-full transition flex-shrink-0 ${form.lightning_block ? 'bg-[#2E5A1A]' : 'bg-slate-300'}`}
+            className={`relative w-12 h-6 rounded-full transition flex-shrink-0 ${form.lightning_block ? 'bg-primary' : 'bg-slate-300'}`}
           >
             <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${form.lightning_block ? 'left-6' : 'left-0.5'}`} />
           </button>
@@ -135,7 +135,7 @@ export default function WeatherThresholdsSettings() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition active:scale-95"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save Defaults
@@ -150,7 +150,7 @@ function ThresholdInput({ icon: Icon, label, description, value, onChange, suffi
   return (
     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
       <div className="flex items-center gap-2 mb-1.5">
-        <Icon className="w-4 h-4 text-[#2E5A1A]" />
+        <Icon className="w-4 h-4 text-primary" />
         <p className="text-sm font-bold text-slate-800">{label}</p>
       </div>
       <p className="text-[11px] text-slate-500 mb-2">{description}</p>
@@ -160,7 +160,7 @@ function ThresholdInput({ icon: Icon, label, description, value, onChange, suffi
           value={value}
           onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
           placeholder="—"
-          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-[#2E5A1A]"
+          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold tabular-nums focus:outline-none focus:border-primary"
         />
         {suffix && <span className="text-xs font-semibold text-slate-400 flex-shrink-0">{suffix}</span>}
       </div>

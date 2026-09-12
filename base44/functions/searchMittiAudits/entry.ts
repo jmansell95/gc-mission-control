@@ -82,15 +82,32 @@ export default async function(req: Request): Promise<Response> {
       return true;
     });
 
-    // Advance cursor +1ms to break the inclusive modified_after pin
+    // ── Pre-fetch dedup: check which audit_ids already exist as SafetyReports ──
+    // This lets the UI show a true "pending" count (audits not yet stored).
+    const allAuditIds = auditEntries.map((e: any) => String(e.audit_id || '')).filter(Boolean);
+    const existingIds = new Set<string>();
+    if (allAuditIds.length > 0) {
+      try {
+        const existing = await base44.asServiceRole.entities.SafetyReport.filter({
+          safetyculture_audit_id: { $in: allAuditIds },
+        });
+        for (const r of existing) {
+          if (r.safetyculture_audit_id) existingIds.add(r.safetyculture_audit_id);
+        }
+      } catch (e) { /* non-fatal */ }
+    }
+    const pendingCount = auditEntries.filter(
+      (e: any) => !existingIds.has(String(e.audit_id || '')),
+    ).length;
+
+    // ── Safe cursor: store the exact max modified_at string (not +1ms) ──
+    // The pre-fetch dedup in syncMitti/syncMittiAuditBatch filters out
+    // already-stored IDs, so we don't need the +1ms hack to avoid reprocessing.
     let latestModified = new Date().toISOString();
     if (auditEntries.length > 0) {
       const lastMod = auditEntries[auditEntries.length - 1].modified_at;
       if (lastMod) {
-        const d = new Date(lastMod);
-        if (!isNaN(d.getTime())) {
-          latestModified = new Date(d.getTime() + 1).toISOString();
-        }
+        latestModified = lastMod;
       }
     }
 
@@ -102,6 +119,7 @@ export default async function(req: Request): Promise<Response> {
         modified_at: String(e.modified_at || ''),
       })),
       total_found: auditEntries.length,
+      pending_count: pendingCount,
       modified_after: modifiedAfter,
       latest_modified: latestModified,
     });

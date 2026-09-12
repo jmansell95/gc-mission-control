@@ -42,7 +42,7 @@ export default function HubHelpSheet({ open, onOpenChange, hubKey, title, topics
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-[#2E5A1A]" /> {title || 'How this hub works'}</SheetTitle>
+          <SheetTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-primary" /> {title || 'How this hub works'}</SheetTitle>
           <SheetDescription>Quick guidance for this hub. Search or browse the topics below.</SheetDescription>
         </SheetHeader>
 
@@ -55,7 +55,7 @@ export default function HubHelpSheet({ open, onOpenChange, hubKey, title, topics
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search help topics…"
-              className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
+              className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
             />
             {search && (
               <button
@@ -82,7 +82,7 @@ export default function HubHelpSheet({ open, onOpenChange, hubKey, title, topics
               <div className="prose prose-sm prose-slate max-w-none text-[14px] leading-relaxed"><ReactMarkdown>{t.body || ''}</ReactMarkdown></div>
             </article>
           ))}
-          <Link to="/help" className="inline-flex items-center gap-1.5 text-ui-body font-semibold text-[#2E5A1A] hover:underline">
+          <Link to="/help" className="inline-flex items-center gap-1.5 text-ui-body font-semibold text-primary hover:underline">
             Open the full Help Guide <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

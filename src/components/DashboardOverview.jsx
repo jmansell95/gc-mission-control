@@ -63,7 +63,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
         help={{ hubKey: 'dashboard', title: 'Command Centre — how it works', topics: DASHBOARD_HELP_TOPICS }}
         actions={isAllJobs ? (
           <>
-            <button onClick={() => onNavigate?.('jobs')} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
+            <button onClick={() => onNavigate?.('jobs')} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-primary text-white text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm">
               <Briefcase className="w-4 h-4" /> Projects
             </button>
             <button onClick={() => onNavigate?.('rota')} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-ui-caption font-semibold hover:bg-slate-50 active:scale-[0.97] transition">
@@ -73,7 +73,7 @@ export default function DashboardOverview({ onNavigate, onSelectJob }) {
         ) : (selectedJob ? (
           <>
             {selectedJob?.status && (
-              <span className="text-ui-micro px-2.5 py-1 rounded-full font-semibold bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20">
+              <span className="text-ui-micro px-2.5 py-1 rounded-full font-semibold bg-primary/10 text-primary ring-1 ring-primary/20">
                 {titleCase(selectedJob.status.replace(/_/g, ' '))}
               </span>
             )}

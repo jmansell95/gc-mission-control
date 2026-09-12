@@ -210,9 +210,9 @@ export default function AddBillableItemsWizard({
             <div className="px-5 pt-4 flex-shrink-0">
               <label className="block">
                 <input type="file" accept=".pdf,image/*" className="hidden" onChange={handleFileSelect} disabled={uploading} />
-                <div className={`w-full rounded-2xl border-2 border-dashed p-4 text-center transition cursor-pointer ${uploading ? 'border-[#2E5A1A]/40 bg-[#2E5A1A]/5' : 'border-slate-300 bg-slate-50/50 hover:border-[#2E5A1A]/40 hover:bg-[#2E5A1A]/[0.03]'}`}>
+                <div className={`w-full rounded-2xl border-2 border-dashed p-4 text-center transition cursor-pointer ${uploading ? 'border-primary/40 bg-primary/5' : 'border-slate-300 bg-slate-50/50 hover:border-primary/40 hover:bg-primary/[0.03]'}`}>
                   {uploading ? (
-                    <div className="flex items-center justify-center gap-2 text-[#2E5A1A]">
+                    <div className="flex items-center justify-center gap-2 text-primary">
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span className="text-sm font-bold">Extracting document…</span>
                     </div>

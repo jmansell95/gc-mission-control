@@ -14,7 +14,7 @@ export default function HubHelpButton({ hubKey, title, topics }) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Help for this hub"
-        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white/80 text-slate-500 hover:text-[#2E5A1A] hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 text-ui-caption font-semibold transition active:scale-[0.97]"
+        className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-slate-200 bg-white/80 text-slate-500 hover:text-primary hover:border-primary/30 hover:bg-primary/5 text-ui-caption font-semibold transition active:scale-[0.97]"
       >
         <HelpCircle className="w-4 h-4" />
         <span className="hidden sm:inline">Help</span>

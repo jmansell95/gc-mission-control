@@ -44,28 +44,28 @@ export default function CrewSuggesterAI({ job, assignedDate, allStaff, onApply }
   };
 
   return (
-    <div className="rounded-xl border border-[#2E5A1A]/20 bg-gradient-to-br from-[#2E5A1A]/5 to-emerald-50/30 p-3 mb-3">
+    <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-[#2E5A1A]/5 to-emerald-50/30 p-3 mb-3">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#2E5A1A]" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <span className="text-sm font-semibold text-slate-800">AI Crew Suggester</span>
         </div>
         {suggestions && suggestions.length > 0 && (
-          <button onClick={applyAll} className="text-xs font-medium text-[#2E5A1A] hover:underline flex items-center gap-1">
+          <button onClick={applyAll} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
             <CheckCircle2 className="w-3.5 h-3.5" /> Apply all
           </button>
         )}
       </div>
 
       {!suggestions && !loading && !error && (
-        <button onClick={fetchSuggestions} className="w-full text-sm text-slate-600 hover:text-[#2E5A1A] py-2 transition">
+        <button onClick={fetchSuggestions} className="w-full text-sm text-slate-600 hover:text-primary py-2 transition">
           Get AI recommendations for this job →
         </button>
       )}
 
       {loading && (
         <div className="flex items-center justify-center gap-2 py-4">
-          <Loader2 className="w-4 h-4 animate-spin text-[#2E5A1A]" />
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
           <span className="text-sm text-slate-500">Analysing crew & job requirements…</span>
         </div>
       )}
@@ -73,7 +73,7 @@ export default function CrewSuggesterAI({ job, assignedDate, allStaff, onApply }
       {error && (
         <div className="text-sm text-red-600 py-2 flex items-center gap-2">
           <X className="w-4 h-4" /> {error}
-          <button onClick={fetchSuggestions} className="ml-auto text-xs text-[#2E5A1A] hover:underline">Retry</button>
+          <button onClick={fetchSuggestions} className="ml-auto text-xs text-primary hover:underline">Retry</button>
         </div>
       )}
 
@@ -103,7 +103,7 @@ export default function CrewSuggesterAI({ job, assignedDate, allStaff, onApply }
                   className={`flex-shrink-0 text-xs px-2.5 py-1.5 rounded-lg font-medium transition flex items-center gap-1 ${
                     isApplied
                       ? 'bg-emerald-100 text-emerald-600 cursor-default'
-                      : 'bg-[#2E5A1A] text-white hover:bg-[#1c4a12]'
+                      : 'bg-primary text-white hover:bg-primary/90'
                   }`}
                 >
                   {isApplied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}

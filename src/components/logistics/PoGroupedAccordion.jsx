@@ -66,8 +66,8 @@ export default function PoGroupedAccordion({
               onClick={() => togglePo(group.po)}
               className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50/50 transition"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-4 h-4 text-[#2E5A1A]" />
+              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <FileText className="w-4 h-4 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -95,7 +95,7 @@ export default function PoGroupedAccordion({
               </div>
               {canSeeCosts && (
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold text-[#2E5A1A]">{fmt(group.total)}</p>
+                  <p className="text-sm font-bold text-primary">{fmt(group.total)}</p>
                   <p className="text-[10px] text-slate-400">net</p>
                 </div>
               )}
@@ -105,7 +105,7 @@ export default function PoGroupedAccordion({
             {/* Accordion body — item rows */}
             {isOpen && (
               <div className="border-t border-slate-200/70 px-3 py-3 space-y-2 bg-slate-50/40">
-                <div className="border-l-2 border-[#2E5A1A]/30 pl-3 space-y-2">
+                <div className="border-l-2 border-primary/30 pl-3 space-y-2">
                   {group.items.map(c => (
                     <LogisticsItemRow
                       key={c.id}

@@ -15,8 +15,8 @@ import WidgetEmptyState from './WidgetEmptyState';
  */
 export default function WidgetShell({
   icon: Icon,
-  iconBg = 'bg-[#2E5A1A]/10',
-  iconColor = 'text-[#2E5A1A]',
+  iconBg = 'bg-primary/10',
+  iconColor = 'text-primary',
   title,
   subtitle,
   action,

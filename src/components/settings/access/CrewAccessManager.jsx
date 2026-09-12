@@ -110,7 +110,7 @@ export default function CrewAccessManager({ scopedDivisionId = null }) {
       {/* ─── LEFT: Crew Explorer ─── */}
       <div className="lg:col-span-4 hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-16rem)] lg:overflow-y-auto">
         <div className="flex items-center gap-2 mb-3">
-          <Layers className="w-4 h-4 text-[#2E5A1A]" />
+          <Layers className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-900">Crews & Teams</h3>
           <span className="text-xs font-bold text-slate-400 ml-auto">{teams.length} total</span>
         </div>
@@ -140,11 +140,11 @@ export default function CrewAccessManager({ scopedDivisionId = null }) {
                   key={t.id}
                   onClick={() => setSelectedTeamId(t.id)}
                   className={'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition ' +
-                    (active ? 'bg-[#2E5A1A]/10 ring-1 ring-[#2E5A1A]/30' : 'hover:bg-slate-50')}
+                    (active ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-slate-50')}
                 >
-                  <Users className={'w-3.5 h-3.5 flex-shrink-0 ' + (active ? 'text-[#2E5A1A]' : 'text-slate-400')} />
+                  <Users className={'w-3.5 h-3.5 flex-shrink-0 ' + (active ? 'text-primary' : 'text-slate-400')} />
                   <div className="min-w-0 flex-1">
-                    <p className={'text-xs font-semibold truncate ' + (active ? 'text-[#2E5A1A]' : 'text-slate-700')}>{t.name}</p>
+                    <p className={'text-xs font-semibold truncate ' + (active ? 'text-primary' : 'text-slate-700')}>{t.name}</p>
                     <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
                       {members.length > 0 && <span>{members.length} staff</span>}
                       {teamDivs.map(d => (
@@ -257,7 +257,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
       {/* ─── Permission Group Selector ─── */}
       <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ShieldCheck className="w-4 h-4 text-[#2E5A1A]" />
+          <ShieldCheck className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-900">Crew Access Level</h3>
         </div>
 
@@ -307,7 +307,7 @@ function CrewDetail({ team, groups, staff, divisions, allDivisions, currentGroup
       {/* ─── Crew Members ─── */}
       <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Users className="w-4 h-4 text-[#2E5A1A]" />
+          <Users className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-900">Crew Members</h3>
           <span className="text-xs font-bold text-slate-400">({staff.length})</span>
         </div>

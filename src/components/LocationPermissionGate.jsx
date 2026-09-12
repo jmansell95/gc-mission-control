@@ -77,8 +77,8 @@ export default function LocationPermissionGate() {
           <div className={`w-10 h-1.5 rounded-full ${isDenied ? 'bg-amber-200' : 'bg-slate-200'}`} />
         </div>
         <div className="px-4 pb-4 pt-1 flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDenied ? 'bg-amber-100' : 'bg-[#2E5A1A]/10'}`}>
-            {isDenied ? <Settings className="w-5 h-5 text-amber-600" /> : <MapPin className="w-5 h-5 text-[#2E5A1A]" />}
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isDenied ? 'bg-amber-100' : 'bg-primary/10'}`}>
+            {isDenied ? <Settings className="w-5 h-5 text-amber-600" /> : <MapPin className="w-5 h-5 text-primary" />}
           </div>
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-bold leading-tight ${isDenied ? 'text-amber-900' : 'text-slate-900'}`}>
@@ -92,7 +92,7 @@ export default function LocationPermissionGate() {
                 onClick={handleAction}
                 disabled={busy}
                 className={`flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition touch-manipulation disabled:opacity-60 ${
-                  isDenied ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-[#2E5A1A] text-white hover:bg-[#1c4a12]'
+                  isDenied ? 'bg-amber-600 text-white hover:bg-amber-700' : 'bg-primary text-white hover:bg-primary/90'
                 }`}
               >
                 <ActionIcon className={`w-4 h-4 ${busy ? 'animate-spin' : ''}`} />

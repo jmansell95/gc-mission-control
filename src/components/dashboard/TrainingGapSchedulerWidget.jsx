@@ -66,7 +66,7 @@ export default function TrainingGapSchedulerWidget() {
           <AlertTriangle className="w-5 h-5 text-amber-600" />
           <h3 className="font-bold text-slate-900 text-sm">Training Gap Scheduler</h3>
         </div>
-        <a href="/staff?tab=training" className="text-xs font-semibold text-[#2E5A1A] hover:underline flex items-center gap-1">
+        <a href="/staff?tab=training" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
           Review <ChevronRight className="w-3.5 h-3.5" />
         </a>
       </div>

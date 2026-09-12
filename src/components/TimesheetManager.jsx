@@ -310,7 +310,7 @@ export default function TimesheetManager() {
           const Icon = m.icon;
           return (
             <button key={m.key} onClick={() => setRangeMode(m.key)}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${rangeMode === m.key ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${rangeMode === m.key ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
               <Icon className="w-4 h-4" /> {m.label}
             </button>
           );
@@ -395,7 +395,7 @@ export default function TimesheetManager() {
       {/* Bulk approve (non-week modes) */}
       {rangeMode !== 'week' && pendingCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <button onClick={handleBulkApprove} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition">
+          <button onClick={handleBulkApprove} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition">
             <CheckCircle2 className="w-3.5 h-3.5" /> Approve all submitted ({pendingCount})
           </button>
           <span className="text-[11px] text-slate-400">Approves every submitted day across all crew for the selected range.</span>
@@ -431,7 +431,7 @@ export default function TimesheetManager() {
               <button
                 key={f.key}
                 onClick={() => setConfidenceFilter(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${confidenceFilter === f.key ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${confidenceFilter === f.key ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
               >
                 {f.label}
               </button>

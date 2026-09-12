@@ -87,7 +87,7 @@ export default function BusinessUnitCard({ unit, childStats, onEnter }) {
         {/* CTA */}
         <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
           <span className="text-xs text-slate-400 font-medium">View all business streams</span>
-          <span className="inline-flex items-center gap-1 text-sm font-bold text-[#2E5A1A] group-hover:gap-2 transition-all">
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-primary group-hover:gap-2 transition-all">
             Drill Down <ArrowRight className="w-4 h-4" />
           </span>
         </div>

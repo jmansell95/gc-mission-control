@@ -62,7 +62,7 @@ export default function GeotabReportModal({ onClose }) {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handleExport} disabled={filtered.length === 0}
-              className="flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 disabled:opacity-50 transition">
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
             <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
@@ -76,18 +76,18 @@ export default function GeotabReportModal({ onClose }) {
           <div className="flex flex-wrap gap-3 items-end">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">From</label>
-              <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">To</label>
-              <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
             <p className="text-xs text-slate-400">{filtered.length} vehicles</p>
           </div>
 
           {isLoading ? (
             <div className="flex flex-col items-center py-10">
-              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
               <p className="text-sm text-slate-500">Generating report...</p>
             </div>
           ) : filtered.length === 0 ? (

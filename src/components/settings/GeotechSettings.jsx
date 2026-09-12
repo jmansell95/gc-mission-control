@@ -11,7 +11,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import AGSAutoSyncSection from '@/components/keylogbook/AGSAutoSyncSection';
 import MigrationHubTab from '@/components/settings/MigrationHubTab';
 
-const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 
 const DEFAULT_OG_CONFIG = {
   token_url: 'https://ims.bentley.com/connect/token',
@@ -211,10 +211,10 @@ export default function GeotechSettings() {
 
             {/* Save + last sync */}
             <div className="flex items-center gap-2">
-              <button onClick={handleOgSave} disabled={ogSaving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              <button onClick={handleOgSave} disabled={ogSaving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
                 {ogSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
               </button>
-              {ogSaved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+              {ogSaved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
               {ogConfig.last_sync_at && (
                 <span className="text-[11px] text-slate-400 ml-auto">
                   Last sync: {new Date(ogConfig.last_sync_at).toLocaleString('en-GB')}
@@ -228,7 +228,7 @@ export default function GeotechSettings() {
       {/* ── Manual AGS upload ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <UploadCloud className="w-4 h-4 text-[#2E5A1A]" />
+          <UploadCloud className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Manual AGS Upload</h3>
           <span className="text-xs text-slate-400">— re-import a file or upload if auto-sync isn't set up</span>
         </div>

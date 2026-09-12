@@ -26,7 +26,7 @@ export default function DomainAccessError({ email, onBackToLogin }) {
           </div>
           <button
             onClick={() => { if (onBackToLogin) { onBackToLogin(); return; } window.location.href = '/login'; }}
-            className="mt-6 w-full h-11 text-sm font-semibold bg-[#2E5A1A] text-white rounded-xl hover:bg-[#1c4a12] transition"
+            className="mt-6 w-full h-11 text-sm font-semibold bg-primary text-white rounded-xl hover:bg-primary/90 transition"
           >
             Back to Login
           </button>

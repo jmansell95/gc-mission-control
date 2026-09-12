@@ -78,7 +78,7 @@ export default function FleetSyncPanel() {
         </div>
       </div>
       <button onClick={handleSync} disabled={syncing || !ready}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] hover:bg-[#244715] text-white rounded-lg text-xs font-semibold transition disabled:opacity-50 flex-shrink-0">
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-[#244715] text-white rounded-lg text-xs font-semibold transition disabled:opacity-50 flex-shrink-0">
         <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
         {syncing ? 'Syncing…' : 'Sync Now'}
       </button>

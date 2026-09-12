@@ -156,8 +156,8 @@ export default function IntegrationsHub({ onNavigate }) {
             onClick={() => { setManageMode(m => !m); setSelected(new Set()); }}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm ${
               manageMode
-                ? 'bg-[#2E5A1A] text-white hover:bg-[#244715]'
-                : 'bg-white border border-slate-200 text-slate-700 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
+                ? 'bg-primary text-white hover:bg-[#244715]'
+                : 'bg-white border border-slate-200 text-slate-700 hover:border-primary hover:text-primary'
             }`}
           >
             <Sparkles className="w-4 h-4" />
@@ -190,7 +190,7 @@ export default function IntegrationsHub({ onNavigate }) {
       {manageMode && (
         <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2E5A1A]" />
+            <Sparkles className="w-4 h-4 text-primary" />
             <p className="text-sm font-semibold text-slate-800">
               Select integrations to <span className="text-amber-600">Hide</span> — they'll be greyed out and unopenable.
             </p>
@@ -217,7 +217,7 @@ export default function IntegrationsHub({ onNavigate }) {
             </button>
             <button onClick={handleApply}
               disabled={saving || selected.size === 0}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-[#2E5A1A] hover:bg-[#244715] rounded-lg transition disabled:opacity-50">
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold text-white bg-primary hover:bg-[#244715] rounded-lg transition disabled:opacity-50">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckSquare className="w-3.5 h-3.5" />}
               Apply ({selected.size})
             </button>
@@ -242,11 +242,11 @@ export default function IntegrationsHub({ onNavigate }) {
                   className={`relative bg-white border rounded-xl p-4 text-left transition group overflow-hidden ${
                     manageMode
                       ? isSelected
-                        ? 'border-[#2E5A1A] ring-2 ring-[#2E5A1A]/20 hover:shadow-md'
-                        : 'border-slate-200 hover:border-[#2E5A1A]/50 hover:shadow-md'
+                        ? 'border-primary ring-2 ring-primary/20 hover:shadow-md'
+                        : 'border-slate-200 hover:border-primary/50 hover:shadow-md'
                       : blocked
                         ? 'border-slate-200 cursor-not-allowed'
-                        : 'border-slate-200 hover:border-[#2E5A1A] hover:shadow-md'
+                        : 'border-slate-200 hover:border-primary hover:shadow-md'
                   }`}
                 >
                   {hidden && !manageMode && (
@@ -257,7 +257,7 @@ export default function IntegrationsHub({ onNavigate }) {
                   {manageMode && (
                     <span className="absolute top-2 right-2 z-10">
                       {isSelected
-                        ? <CheckSquare className="w-5 h-5 text-[#2E5A1A]" />
+                        ? <CheckSquare className="w-5 h-5 text-primary" />
                         : <Square className="w-5 h-5 text-slate-300" />}
                     </span>
                   )}
@@ -271,7 +271,7 @@ export default function IntegrationsHub({ onNavigate }) {
                       <div className="flex items-center gap-1.5 mt-2">
                         {statusBadge(integ)}
                         {!manageMode && !blocked && (
-                          <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-[#2E5A1A] ml-auto transition" />
+                          <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-primary ml-auto transition" />
                         )}
                       </div>
                     </div>

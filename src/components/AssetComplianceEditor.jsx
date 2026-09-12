@@ -543,7 +543,7 @@ export default function AssetComplianceEditor({ asset, onClose }) {
                   <Link2 className="w-3.5 h-3.5" /> Linked Toolkit & Equipment
                 </p>
                 <button type="button" onClick={() => setShowLinker(s => !s)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-xs font-semibold transition">
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-semibold transition">
                   <Plus className="w-3.5 h-3.5" /> Link Equipment
                 </button>
               </div>

@@ -597,7 +597,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
           {canSeeCosts && !effectiveLocked && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:flex-wrap">
               <button onClick={() => setShowQuickAdd(true)}
-                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-[#2E5A1A] hover:bg-[#1c4a12] active:scale-[0.98] transition shadow-md w-full sm:w-auto">
+                className="inline-flex items-center justify-center gap-2 text-sm text-white font-semibold px-4 py-3.5 sm:px-4 sm:py-2.5 rounded-xl bg-primary hover:bg-primary/90 active:scale-[0.98] transition shadow-md w-full sm:w-auto">
                 <Zap className="w-4 h-4" /> Quick Add Items
               </button>
               <button onClick={() => setShowBasket(true)}
@@ -711,7 +711,7 @@ export default function JobLogisticsHub({ jobId, job, suppliers: externalSupplie
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">{person}</p>
                     <span className="text-xs text-slate-400">({personItems.length})</span>
                     <CategoryBadges items={personItems} />
-                    {canSeeCosts && <span className="ml-auto text-xs font-bold text-[#2E5A1A]">{fmt(personItems.reduce((s, c) => s + billingTotal(c), 0))}</span>}
+                    {canSeeCosts && <span className="ml-auto text-xs font-bold text-primary">{fmt(personItems.reduce((s, c) => s + billingTotal(c), 0))}</span>}
                   </div>
                   <div className="space-y-2">
                     {personItems.map(c => (

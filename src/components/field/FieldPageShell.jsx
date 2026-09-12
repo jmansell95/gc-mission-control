@@ -50,7 +50,7 @@ export default function FieldPageShell({
                 key={f.key}
                 onClick={() => onFilterChange(f.key)}
                 className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-hub-body font-semibold transition active:scale-95 ${
-                  active ? 'bg-white text-[#2E5A1A] shadow-sm' : 'bg-white/10 text-white/80 border border-white/20'
+                  active ? 'bg-white text-primary shadow-sm' : 'bg-white/10 text-white/80 border border-white/20'
                 }`}
               >
                 {f.label}

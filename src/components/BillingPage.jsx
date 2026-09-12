@@ -30,7 +30,7 @@ const STATUS_STYLES = {
   planning: 'bg-slate-100 text-slate-600',
   in_progress: 'bg-blue-100 text-blue-700',
   decommissioning: 'bg-amber-100 text-amber-700',
-  completed: 'bg-[#2E5A1A]/15 text-[#2E5A1A]',
+  completed: 'bg-primary/15 text-primary',
   on_hold: 'bg-rose-100 text-rose-700',
   cancelled: 'bg-slate-200 text-slate-500 line-through',
 };
@@ -262,7 +262,7 @@ export default function BillingPage({ onSelectJob }) {
           <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
           <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><PoundSterling className="w-4 h-4" /> Invoices</button>
           <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
-          <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
+          <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
         </div>
         <SettingsSectionHeader icon={ArrowRightLeft} title="Vendor Invoice Reconciliation" description="Match supplier invoices against logged subcontractor costs — flag mismatches before payment." />
         <VendorInvoiceReconciliation />
@@ -274,8 +274,8 @@ export default function BillingPage({ onSelectJob }) {
     return (
       <div>
         <div className="flex gap-1.5 mb-5 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm w-fit flex-wrap">
-          <button onClick={() => setView('summary')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'summary' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}><Receipt className="w-4 h-4" /> Invoice Summary</button>
-          <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
+          <button onClick={() => setView('summary')} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'summary' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}><Receipt className="w-4 h-4" /> Invoice Summary</button>
+          <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
           <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><PoundSterling className="w-4 h-4" /> Invoices</button>
           <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
           <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
@@ -292,7 +292,7 @@ export default function BillingPage({ onSelectJob }) {
           <button onClick={() => setView('summary')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Receipt className="w-4 h-4" /> Invoice Summary</button>
           <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
           <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><PoundSterling className="w-4 h-4" /> Invoices</button>
-          <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
+          <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
           <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
         </div>
         <SettingsSectionHeader icon={FileSpreadsheet} title="Monthly Client Statements" description="Generate and email a statement per client summarising their invoices for the month." />
@@ -307,7 +307,7 @@ export default function BillingPage({ onSelectJob }) {
         <div className="flex gap-1.5 mb-5 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm w-fit flex-wrap">
           <button onClick={() => setView('summary')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Receipt className="w-4 h-4" /> Invoice Summary</button>
           <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
-          <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><PoundSterling className="w-4 h-4" /> Invoices</button>
+          <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><PoundSterling className="w-4 h-4" /> Invoices</button>
           <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
           <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
         </div>
@@ -324,7 +324,7 @@ export default function BillingPage({ onSelectJob }) {
     return (
       <div>
         <div className="flex gap-1.5 mb-5 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm w-fit flex-wrap">
-          <button onClick={() => setView('lifecycle')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><Sparkles className="w-4 h-4" /> Lifecycle</button>
+          <button onClick={() => setView('lifecycle')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><Sparkles className="w-4 h-4" /> Lifecycle</button>
           <button onClick={() => setView('summary')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Receipt className="w-4 h-4" /> Invoice Summary</button>
           <button onClick={() => setView('geotech')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><Mountain className="w-4 h-4" /> Geotechnical Report</button>
           <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><PoundSterling className="w-4 h-4" /> Invoices</button>
@@ -347,7 +347,7 @@ export default function BillingPage({ onSelectJob }) {
           <button onClick={() => setView('invoices')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><PoundSterling className="w-4 h-4" /> Invoices</button>
           <button onClick={() => setView('statements')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><FileSpreadsheet className="w-4 h-4" /> Statements</button>
           <button onClick={() => setView('reconciliation')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition text-slate-600 hover:bg-slate-100"><ArrowRightLeft className="w-4 h-4" /> Reconciliation</button>
-          <button onClick={() => setView('projects')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white shadow-sm"><FolderKanban className="w-4 h-4" /> Projects</button>
+          <button onClick={() => setView('projects')} className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition bg-primary text-white shadow-sm"><FolderKanban className="w-4 h-4" /> Projects</button>
         </div>
         <ProjectFinancialsDetail onSelectJob={onSelectJob} />
       </div>
@@ -367,7 +367,7 @@ export default function BillingPage({ onSelectJob }) {
               {autoRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} Run Auto-Invoice
             </button>
             <button onClick={exportCsv} disabled={filtered.length === 0}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 rounded-lg text-sm font-semibold hover:bg-[#2E5A1A]/5 transition disabled:opacity-50 shadow-sm">
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-primary border border-primary/20 rounded-lg text-sm font-semibold hover:bg-primary/5 transition disabled:opacity-50 shadow-sm">
               <Download className="w-4 h-4" /> Export CSV
             </button>
           </div>
@@ -377,31 +377,31 @@ export default function BillingPage({ onSelectJob }) {
       {/* View toggle */}
       <div className="flex gap-1.5 mb-5 bg-white rounded-xl border border-slate-200 p-1.5 shadow-sm w-fit flex-wrap">
         <button onClick={() => setView('lifecycle')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'lifecycle' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'lifecycle' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Sparkles className="w-4 h-4" /> Lifecycle
         </button>
         <button onClick={() => setView('summary')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'summary' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'summary' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Receipt className="w-4 h-4" /> Invoice Summary
         </button>
         <button onClick={() => setView('geotech')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'geotech' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'geotech' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <Mountain className="w-4 h-4" /> Geotechnical Report
         </button>
         <button onClick={() => setView('invoices')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'invoices' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'invoices' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <PoundSterling className="w-4 h-4" /> Invoices
         </button>
         <button onClick={() => setView('statements')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'statements' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'statements' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <FileSpreadsheet className="w-4 h-4" /> Statements
         </button>
         <button onClick={() => setView('reconciliation')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'reconciliation' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'reconciliation' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <ArrowRightLeft className="w-4 h-4" /> Reconciliation
         </button>
         <button onClick={() => setView('projects')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'projects' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${view === 'projects' ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}>
           <FolderKanban className="w-4 h-4" /> Projects
         </button>
       </div>
@@ -439,13 +439,13 @@ export default function BillingPage({ onSelectJob }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search job, reference or client…"
-              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
             {STATUS_FILTERS.map((f) => (
               <button key={f.id} onClick={() => setStatusFilter(f.id)}
-                className={`px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition ${statusFilter === f.id ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                className={`px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition ${statusFilter === f.id ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                 {f.label}
               </button>
             ))}
@@ -484,14 +484,14 @@ export default function BillingPage({ onSelectJob }) {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filtered.map((r) => (
-                    <tr key={r.job.id} className="hover:bg-[#2E5A1A]/5 transition">
+                    <tr key={r.job.id} className="hover:bg-primary/5 transition">
                       <td className="px-4 py-3 max-w-[220px]">
-                        <button onClick={() => onSelectJob?.(r.job)} className="text-left font-medium text-slate-800 truncate hover:text-[#2E5A1A] block">
+                        <button onClick={() => onSelectJob?.(r.job)} className="text-left font-medium text-slate-800 truncate hover:text-primary block">
                           {r.job.name}
                         </button>
                         {r.job.job_reference && <p className="text-[10px] text-slate-400">{r.job.job_reference}</p>}
                         {metresByJob[r.job.id] > 0 && (
-                          <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-md bg-[#2E5A1A]/10 text-[#2E5A1A] text-[10px] font-semibold">
+                          <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold">
                             <Mountain className="w-2.5 h-2.5" /> {metresByJob[r.job.id].toFixed(1)}m drilled
                           </span>
                         )}
@@ -511,10 +511,10 @@ export default function BillingPage({ onSelectJob }) {
                       <td className="px-4 py-3 text-right text-slate-500">{fmt(r.crewCost)}</td>
                       <td className="px-4 py-3 text-right text-slate-600 font-medium">{fmt(r.totalCostNet)}</td>
                       <td className="px-4 py-3 text-right text-slate-500">{fmt(r.revenueVat)}</td>
-                      <td className="px-4 py-3 text-right font-bold text-[#2E5A1A]">{fmt(r.revenueGross)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-primary">{fmt(r.revenueGross)}</td>
                       <td className="px-4 py-3 text-right">
                         <button onClick={() => openInvoice(r.job)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-[11px] font-medium hover:bg-[#1c4a12] transition">
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-lg text-[11px] font-medium hover:bg-primary/90 transition">
                           <PoundSterling className="w-3 h-3" /> Raise
                         </button>
                       </td>
@@ -540,7 +540,7 @@ export default function BillingPage({ onSelectJob }) {
                       <p className="font-medium text-slate-800 text-sm truncate">{r.job.name}</p>
                       {r.job.job_reference && <p className="text-[10px] text-slate-400">{r.job.job_reference}</p>}
                       {metresByJob[r.job.id] > 0 && (
-                        <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-md bg-[#2E5A1A]/10 text-[#2E5A1A] text-[10px] font-semibold">
+                        <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold">
                           <Mountain className="w-2.5 h-2.5" /> {metresByJob[r.job.id].toFixed(1)}m drilled
                         </span>
                       )}
@@ -560,12 +560,12 @@ export default function BillingPage({ onSelectJob }) {
                     <ArrowRight className="w-4 h-4 text-slate-300" />
                     <div className="text-right">
                       <p className="text-[10px] text-slate-400 uppercase tracking-wide">Invoice Total</p>
-                      <p className="text-sm font-bold text-[#2E5A1A]">{fmt(r.revenueGross)}</p>
+                      <p className="text-sm font-bold text-primary">{fmt(r.revenueGross)}</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => openInvoice(r.job)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition">
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition">
                       <PoundSterling className="w-3.5 h-3.5" /> Raise Invoice
                     </button>
                     <button onClick={() => downloadReport(r.job)} disabled={reportingJobId === r.job.id}

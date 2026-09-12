@@ -142,7 +142,7 @@ export default function StaffHotelRow({ staff, bookings, colorIdx, onEdit, onUna
               <p className="text-xs text-slate-400 mb-2">No accommodation assigned to this crew member.</p>
             </div>
           )}
-          <button onClick={() => onAssign(staff)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-[#2E5A1A] hover:bg-[#2E5A1A]/5 rounded-lg text-xs font-semibold transition border border-[#2E5A1A]/20">
+          <button onClick={() => onAssign(staff)} className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-white text-primary hover:bg-primary/5 rounded-lg text-xs font-semibold transition border border-primary/20">
             <Plus className="w-3.5 h-3.5" /> Add booking for {staff.name.split(' ')[0]}
           </button>
         </div>

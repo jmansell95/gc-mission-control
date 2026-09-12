@@ -19,7 +19,7 @@ export default function RateCardViewToggle({
       {/* Top-level pill toggle */}
       <div className="flex gap-1.5 p-2.5 border-b border-slate-100">
         <button onClick={() => setActiveView('chargeable')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition flex-1 sm:flex-none justify-center ${activeView === 'chargeable' ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition flex-1 sm:flex-none justify-center ${activeView === 'chargeable' ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
           <Receipt className="w-4 h-4" /> Chargeable Rates
         </button>
         <button onClick={() => setActiveView('internal')}
@@ -38,7 +38,7 @@ export default function RateCardViewToggle({
               <div className="flex gap-1">
                 {availableYears.map(yr => (
                   <button key={yr} onClick={() => setActiveYear(yr)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition ${activeYear === yr ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition ${activeYear === yr ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
                     {yr}
                   </button>
                 ))}
@@ -47,7 +47,7 @@ export default function RateCardViewToggle({
           )}
           <div className="flex gap-1.5 px-3 py-2 overflow-x-auto no-scrollbar">
             <button onClick={() => setActiveSource('standard')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeSource === 'standard' ? 'bg-[#2E5A1A]/10 text-[#2E5A1A] border border-[#2E5A1A]/20' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeSource === 'standard' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}>
               <Receipt className="w-3.5 h-3.5" /> Standard Rates
             </button>
             <button onClick={() => setActiveSource('drilling')}
@@ -56,7 +56,7 @@ export default function RateCardViewToggle({
             </button>
             {draftSuppliersForYear.map(s => (
               <button key={s.id} onClick={() => setActiveSource(s.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeSource === s.id ? 'bg-[#2E5A1A]/10 text-[#2E5A1A] border border-[#2E5A1A]/20' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition whitespace-nowrap ${activeSource === s.id ? 'bg-primary/10 text-primary border border-primary/20' : 'text-slate-500 hover:bg-slate-100 border border-transparent'}`}>
                 <Building2 className="w-3.5 h-3.5" /> {s.name}
                 <span className="text-xs text-slate-400">({items.filter(i => i.supplier_id === s.id).length})</span>
               </button>

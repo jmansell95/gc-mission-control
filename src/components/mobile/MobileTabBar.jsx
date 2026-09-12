@@ -40,19 +40,19 @@ export default function MobileTabBar({ tabs, onMore }) {
             >
               <Icon
                 className={`w-[22px] h-[22px] transition-colors ${
-                  active ? 'text-[#2E5A1A]' : 'text-slate-400'
+                  active ? 'text-primary' : 'text-slate-400'
                 }`}
                 strokeWidth={active ? 2.4 : 2}
               />
               <span
                 className={`text-[10px] font-semibold leading-none transition-colors ${
-                  active ? 'text-[#2E5A1A]' : 'text-slate-400'
+                  active ? 'text-primary' : 'text-slate-400'
                 }`}
               >
                 {tab.label}
               </span>
               {active && (
-                <span className="w-1 h-1 rounded-full bg-[#2E5A1A] -mt-0.5" />
+                <span className="w-1 h-1 rounded-full bg-primary -mt-0.5" />
               )}
             </button>
           );

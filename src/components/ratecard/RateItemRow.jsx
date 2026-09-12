@@ -12,7 +12,7 @@ export const fmt = (n) => {
   return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] transition";
+const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary transition";
 
 /**
  * RateItemRow — a single rate card line item.
@@ -162,7 +162,7 @@ export default function RateItemRow({ item, onUpdate, viewMode = 'chargeable' })
             Active (available for new jobs)
           </label>
           <div className="flex gap-2 pt-1">
-            <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+            <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
             </button>
             <button onClick={duplicate} className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-200 transition">
@@ -199,7 +199,7 @@ export default function RateItemRow({ item, onUpdate, viewMode = 'chargeable' })
               <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-bold border border-amber-300">POA</span>
             )}
             {item.men != null && item.men > 0 && (
-              <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] border border-[#2E5A1A]/20">
+              <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                 <Users className="w-2.5 h-2.5" /> {item.men}m
               </span>
             )}
@@ -212,7 +212,7 @@ export default function RateItemRow({ item, onUpdate, viewMode = 'chargeable' })
           </div>
           {item.notes && <p className="text-xs text-slate-400 mt-0.5 truncate">{item.notes}</p>}
           {dailyCharge != null && (
-            <p className="text-[11px] text-[#2E5A1A] font-semibold mt-0.5 inline-flex items-center gap-1">
+            <p className="text-[11px] text-primary font-semibold mt-0.5 inline-flex items-center gap-1">
               <PoundSterling className="w-3 h-3" /> {fmt(dailyCharge)}/day
               <span className="text-slate-400 font-normal">({fmt(item.price)} × {item.men})</span>
             </p>
@@ -245,7 +245,7 @@ export default function RateItemRow({ item, onUpdate, viewMode = 'chargeable' })
           </div>
         )}
         {/* Edit button */}
-        <button onClick={() => { resetForm(); setEditing(true); }} className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-[#2E5A1A] transition flex-shrink-0">
+        <button onClick={() => { resetForm(); setEditing(true); }} className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-primary transition flex-shrink-0">
           <Pencil className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -258,14 +258,14 @@ export default function RateItemRow({ item, onUpdate, viewMode = 'chargeable' })
             <div className="flex items-center gap-1.5 flex-wrap mt-1">
               {item.is_active === false && <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-bold">INACTIVE</span>}
               {isPOA && <span className="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-bold">POA</span>}
-              {item.men != null && item.men > 0 && <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A]">{item.men} men</span>}
+              {item.men != null && item.men > 0 && <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{item.men} men</span>}
               {item.unit && <span className="text-[10px] text-slate-400">/{item.unit}</span>}
             </div>
             {dailyCharge != null && (
-              <p className="text-[11px] text-[#2E5A1A] font-semibold mt-1">{fmt(dailyCharge)}/day ({fmt(item.price)} × {item.men})</p>
+              <p className="text-[11px] text-primary font-semibold mt-1">{fmt(dailyCharge)}/day ({fmt(item.price)} × {item.men})</p>
             )}
           </div>
-          <button onClick={() => { resetForm(); setEditing(true); }} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] transition flex-shrink-0">
+          <button onClick={() => { resetForm(); setEditing(true); }} className="p-1.5 text-slate-400 hover:text-primary transition flex-shrink-0">
             <Pencil className="w-4 h-4" />
           </button>
         </div>

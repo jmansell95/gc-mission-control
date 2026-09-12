@@ -9,7 +9,7 @@ export default function ParityMatrixSummary() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <Layers className="w-5 h-5 text-[#2E5A1A]" />
+        <Layers className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-900 text-sm">Parity Matrix — What Maps Where</h3>
         <button onClick={() => setExpanded(!expanded)}
           className="ml-auto inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 font-medium px-2 py-1 rounded-lg hover:bg-slate-100 transition">

@@ -78,7 +78,7 @@ export default function TrainingManager({ onBulkImport, onManage }) {
         <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 min-w-0 flex-1">
-              <div className="w-12 h-12 rounded-xl bg-[#2E5A1A] flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
                 <GraduationCap className="w-6 h-6 text-white" />
               </div>
               <div className="min-w-0">
@@ -87,7 +87,7 @@ export default function TrainingManager({ onBulkImport, onManage }) {
               </div>
             </div>
             <div className="flex gap-1 flex-shrink-0">
-              <button onClick={() => handleEdit(selectedCourse)} className="p-2 text-[#2E5A1A] hover:bg-[#2E5A1A]/5 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
+              <button onClick={() => handleEdit(selectedCourse)} className="p-2 text-primary hover:bg-primary/5 rounded-lg transition"><Edit2 className="w-4 h-4" /></button>
               <button onClick={() => handleDeleteCourse(selectedCourse.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"><Trash2 className="w-4 h-4" /></button>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function TrainingManager({ onBulkImport, onManage }) {
                         <button onClick={() => handleMarkAttended(b.id)} className="text-xs px-2.5 py-1.5 bg-violet-100 text-violet-700 rounded-lg font-medium hover:bg-violet-200 transition">Mark Attended</button>
                       )}
                       {b.status === 'attended' && (
-                        <button onClick={() => setOutcomeBooking(b)} className="text-xs px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg font-medium hover:bg-[#1c4a12] transition">Record Outcome</button>
+                        <button onClick={() => setOutcomeBooking(b)} className="text-xs px-2.5 py-1.5 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition">Record Outcome</button>
                       )}
                       {(b.status === 'booked' || b.status === 'attended') && (
                         <button onClick={() => setOutcomeBooking(b)} className="text-xs px-2.5 py-1.5 bg-slate-100 text-slate-600 rounded-lg font-medium hover:bg-slate-200 transition">Outcome</button>
@@ -231,9 +231,9 @@ export default function TrainingManager({ onBulkImport, onManage }) {
                   const courseBookings = bookings.filter(b => b.course_id === c.id);
                   const passedCount = courseBookings.filter(b => b.status === 'passed').length;
                   return (
-                    <button key={c.id} onClick={() => setSelectedCourse(c)} className="text-left bg-white border border-slate-200/70 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-[#2E5A1A]/30 transition active:scale-[0.99]">
+                    <button key={c.id} onClick={() => setSelectedCourse(c)} className="text-left bg-white border border-slate-200/70 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/30 transition active:scale-[0.99]">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#2E5A1A] flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
                           <GraduationCap className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">

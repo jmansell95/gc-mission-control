@@ -77,7 +77,7 @@ export default function CourseFormModal({ editing, onClose, onSaved }) {
     setSaving(false);
   };
 
-  const inputCls = 'w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 bg-white';
+  const inputCls = 'w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white';
   const labelCls = 'block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5';
 
   return (
@@ -176,7 +176,7 @@ export default function CourseFormModal({ editing, onClose, onSaved }) {
           <div className="flex gap-2 pt-2 border-t border-slate-100">
             <button onClick={onClose} className="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
             <button onClick={handleSave} disabled={saving}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <GraduationCap className="w-4 h-4" />}
               {saving ? 'Saving…' : editing ? 'Update Course' : 'Create Course'}
             </button>

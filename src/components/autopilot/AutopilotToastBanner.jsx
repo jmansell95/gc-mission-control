@@ -29,7 +29,7 @@ export default function AutopilotToastBanner({ toasts, onDismiss }) {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[#2E5A1A] bg-[#2E5A1A]/10 px-1.5 py-0.5 rounded">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                   <Bot className="w-2.5 h-2.5" /> Autopilot
                 </span>
                 <span className="text-xs text-slate-400 truncate">{t.actor}</span>
@@ -37,7 +37,7 @@ export default function AutopilotToastBanner({ toasts, onDismiss }) {
               <p className="text-sm text-slate-700 font-medium mt-1 leading-snug">{t.summary}</p>
               <button
                 onClick={() => { onDismiss(t.id); navigate('/admin?tab=autopilot'); }}
-                className="mt-1.5 inline-flex items-center gap-0.5 text-xs font-bold text-[#2E5A1A] hover:underline"
+                className="mt-1.5 inline-flex items-center gap-0.5 text-xs font-bold text-primary hover:underline"
               >
                 Review <ChevronRight className="w-3 h-3" />
               </button>

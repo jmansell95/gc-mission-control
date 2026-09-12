@@ -524,7 +524,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
             <div className="sm:col-span-2">
               <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
                 <button type="button" onClick={() => { setShiftMode('job'); setFormData(prev => ({ ...prev, job_id: '' })); setAssignmentMode('today'); }}
-                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${!isDepotMode ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition ${!isDepotMode ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
                   <Briefcase className="w-4 h-4" /> Job shift
                 </button>
                 <button type="button" onClick={() => { setShiftMode('depot'); setFormData(prev => ({ ...prev, job_id: '' })); setAssignmentMode('today'); }}
@@ -842,7 +842,7 @@ export default function AssignmentModal({ isOpen, onClose, assignment, defaultSt
                     const exJob = jobs.find(j => j.id === a.job_id);
                     return (
                       <div key={a.id || i} className="flex items-center gap-2 text-[11px] bg-white border border-slate-200 rounded-md px-2 py-1.5">
-                        <span className="w-4 h-4 rounded-full bg-[#2E5A1A] text-white text-[8px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                        <span className="w-4 h-4 rounded-full bg-primary text-white text-[8px] font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
                         <span className="font-medium text-slate-700 truncate flex-1">{exJob?.name || 'Job'}</span>
                         {a.start_time && <span className="text-slate-400 font-mono flex-shrink-0">{a.start_time}{a.end_time ? `–${a.end_time}` : ''}</span>}
                       </div>

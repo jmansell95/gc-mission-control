@@ -155,7 +155,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
 
   if (!open) return null;
 
-  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm';
+  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm';
   const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5';
   const StepIcon = STEPS[step].icon;
 
@@ -191,7 +191,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
               return (
                 <React.Fragment key={s.id}>
                   <div className={'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition ' +
-                    (current ? 'bg-[#2E5A1A] text-white shadow-sm' : done ? 'bg-emerald-100 text-emerald-700' : 'text-slate-400')}>
+                    (current ? 'bg-primary text-white shadow-sm' : done ? 'bg-emerald-100 text-emerald-700' : 'text-slate-400')}>
                     {done ? <Check className="w-3.5 h-3.5" /> : <SIcon className="w-3.5 h-3.5" />}
                     <span className="hidden sm:inline">{s.label}</span>
                   </div>
@@ -271,7 +271,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
                 </div>
               </div>
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                <input type="checkbox" checked={form.phone_gps_consent === true} onChange={e => set('phone_gps_consent', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.phone_gps_consent === true} onChange={e => set('phone_gps_consent', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Phone GPS consent — auto-detect site arrival/departure</span>
               </label>
             </div>
@@ -298,7 +298,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
               {/* Live landing-page preview */}
               <div className="rounded-2xl border border-slate-200 overflow-hidden">
                 <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-[#2E5A1A]" />
+                  <Compass className="w-4 h-4 text-primary" />
                   <p className="text-xs font-bold text-slate-700">Where they'll land after setup</p>
                   {selectedGroup && groupTypeBadge(selectedGroup) && (
                     <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${groupTypeBadge(selectedGroup).cls}`}>
@@ -328,7 +328,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
               </div>
 
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-blue-50/60 border border-blue-100">
-                <input type="checkbox" checked={form.delivery_dashboard_enabled === true} onChange={e => set('delivery_dashboard_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.delivery_dashboard_enabled === true} onChange={e => set('delivery_dashboard_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-blue-600" /> Driver — delivery dashboard access</span>
               </label>
             </div>
@@ -368,7 +368,7 @@ export default function StaffOnboardingWizard({ open, onClose, teams, vehicles, 
             <button
               onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))}
               disabled={!canProceed()}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm"
             >
               Next <ChevronRight className="w-4 h-4" />
             </button>
@@ -393,7 +393,7 @@ function ReviewRow({ icon: Icon, label, value, highlight }) {
     <div className="flex items-center gap-3 px-4 py-3">
       <Icon className="w-4 h-4 text-slate-400 flex-shrink-0" />
       <span className="text-xs font-bold text-slate-400 uppercase tracking-wide w-28 flex-shrink-0">{label}</span>
-      <span className={'text-sm font-semibold truncate ' + (highlight ? 'text-[#2E5A1A]' : 'text-slate-700')}>{value || '—'}</span>
+      <span className={'text-sm font-semibold truncate ' + (highlight ? 'text-primary' : 'text-slate-700')}>{value || '—'}</span>
     </div>
   );
 }

@@ -133,7 +133,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
       {/* Rewards grid */}
       <div>
         <div className="flex items-center gap-2 mb-3 px-1">
-          <Gift className="w-4 h-4 text-[#2E5A1A]" />
+          <Gift className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-extrabold text-slate-900">Rewards Catalogue</h3>
           <span className="text-xs text-slate-400">· {rewards.length} available</span>
         </div>
@@ -173,7 +173,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
                     {r.brand && <p className="text-[10px] font-semibold mt-0.5" style={{ color: accent }}>{r.brand}</p>}
                     {r.description && <p className="text-[11px] text-slate-500 mt-1.5 line-clamp-2 leading-snug">{r.description}</p>}
                     <div className="mt-auto pt-3 flex items-center justify-between gap-2">
-                      <span className="inline-flex items-center gap-1 text-sm font-extrabold text-[#2E5A1A] tabular-nums">
+                      <span className="inline-flex items-center gap-1 text-sm font-extrabold text-primary tabular-nums">
                         <Star className="w-3.5 h-3.5 text-amber-500" /> {r.points_cost.toLocaleString()}
                       </span>
                       {r.stock_count != null && (
@@ -223,7 +223,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-slate-900 truncate">{r.reward_name}</p>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      {r.requested_at ? format(new Date(r.requested_at), 'dd MMM yyyy') : ''} · <span className="font-semibold text-[#2E5A1A]">{r.points_spent} pts</span>
+                      {r.requested_at ? format(new Date(r.requested_at), 'dd MMM yyyy') : ''} · <span className="font-semibold text-primary">{r.points_spent} pts</span>
                       {r.gift_card_value_gbp ? ` · £${r.gift_card_value_gbp}` : ''}
                     </p>
                   </div>
@@ -247,7 +247,7 @@ export default function RewardsCatalogue({ staffId, staffName }) {
               </div>
               <h3 className="text-lg font-extrabold text-slate-900">Redeem {confirmReward.name}?</h3>
               <p className="text-sm text-slate-500 mt-1">
-                This will spend <span className="font-bold text-[#2E5A1A]">{confirmReward.points_cost.toLocaleString()} points</span> from your balance.
+                This will spend <span className="font-bold text-primary">{confirmReward.points_cost.toLocaleString()} points</span> from your balance.
               </p>
               <div className="w-full mt-4 grid grid-cols-2 gap-2 text-center">
                 <div className="rounded-xl bg-slate-50 p-2.5">

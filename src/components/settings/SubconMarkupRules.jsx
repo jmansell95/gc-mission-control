@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const WORK_TYPES = [
   { key: 'drilling', label: 'Drilling', icon: Wrench, desc: 'CP / rotary drilling subcontractors' },
@@ -91,7 +91,7 @@ export default function SubconMarkupRules() {
       {/* Global defaults */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Percent className="w-4 h-4 text-[#2E5A1A]" />
+          <Percent className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Global Defaults</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -120,7 +120,7 @@ export default function SubconMarkupRules() {
       {/* Per work-type overrides */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <HardHat className="w-4 h-4 text-[#2E5A1A]" />
+          <HardHat className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Per Work-Type Overrides</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -138,7 +138,7 @@ export default function SubconMarkupRules() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <input type="number" min="0" step="0.5" value={rules.per_work_type[w.key] ?? rules.global_default_markup}
                     onChange={e => setRules({ ...rules, per_work_type: { ...rules.per_work_type, [w.key]: parseFloat(e.target.value) || 0 } })}
-                    className="w-16 px-2 py-1.5 border border-slate-300 rounded-lg text-sm font-semibold text-center focus:outline-none focus:border-[#2E5A1A]" />
+                    className="w-16 px-2 py-1.5 border border-slate-300 rounded-lg text-sm font-semibold text-center focus:outline-none focus:border-primary" />
                   <span className="text-sm text-slate-400 font-medium">%</span>
                 </div>
               </div>
@@ -150,10 +150,10 @@ export default function SubconMarkupRules() {
           <p className="text-[11px] text-blue-700">Priority: Per-job contract → Per-contractor override → Per-work-type (here) → Global default. The first match wins.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Rules
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
     </div>

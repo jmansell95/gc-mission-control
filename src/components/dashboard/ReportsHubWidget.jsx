@@ -88,12 +88,12 @@ export default function ReportsHubWidget({ onNavigate }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search reports..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+              className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
             />
           </div>
           <button
             onClick={() => onNavigate?.('settings')}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#244715] transition flex-shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-[#244715] transition flex-shrink-0"
           >
             <Settings2 className="w-3.5 h-3.5" /> Full Report Builder
           </button>
@@ -109,16 +109,16 @@ export default function ReportsHubWidget({ onNavigate }) {
                 key={report.id}
                 onClick={() => exportCSV(report)}
                 disabled={isGenerating}
-                className="hub-glass rounded-xl p-3 text-left hover:border-[#2E5A1A]/40 transition group disabled:opacity-60"
+                className="hub-glass rounded-xl p-3 text-left hover:border-primary/40 transition group disabled:opacity-60"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center group-hover:from-[#2E5A1A] group-hover:to-[#5A8C1E] transition">
                     {isGenerating
-                      ? <Loader2 className="w-4 h-4 text-[#2E5A1A] animate-spin" />
-                      : <Icon className="w-4 h-4 text-[#2E5A1A] group-hover:text-white transition" />
+                      ? <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                      : <Icon className="w-4 h-4 text-primary group-hover:text-white transition" />
                     }
                   </div>
-                  <Download className="w-3.5 h-3.5 text-slate-300 group-hover:text-[#2E5A1A] transition" />
+                  <Download className="w-3.5 h-3.5 text-slate-300 group-hover:text-primary transition" />
                 </div>
                 <p className="text-xs font-bold text-slate-800 leading-tight">{report.label}</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">CSV export</p>

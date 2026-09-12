@@ -14,7 +14,7 @@ const ICON_MAP = {
 };
 
 const LEVEL_STYLES = {
-  write: { active: 'bg-[#2E5A1A] text-white border-[#2E5A1A]', icon: ShieldCheck, dot: 'bg-[#2E5A1A]' },
+  write: { active: 'bg-primary text-white border-primary', icon: ShieldCheck, dot: 'bg-primary' },
   read: { active: 'bg-amber-500 text-white border-amber-500', icon: Eye, dot: 'bg-amber-500' },
   none: { active: 'bg-slate-200 text-slate-500 border-slate-300', icon: Lock, dot: 'bg-slate-300' },
 };
@@ -44,7 +44,7 @@ export default function AccessModuleGrid({
           <Lock className="w-3 h-3" /> Lock All
         </button>
         <div className="ml-auto flex items-center gap-2 text-[10px] font-bold">
-          <span className="flex items-center gap-1 text-emerald-600"><span className="w-2 h-2 rounded-full bg-[#2E5A1A]" />{writeCount}</span>
+          <span className="flex items-center gap-1 text-emerald-600"><span className="w-2 h-2 rounded-full bg-primary" />{writeCount}</span>
           <span className="flex items-center gap-1 text-amber-600"><span className="w-2 h-2 rounded-full bg-amber-500" />{readCount}</span>
           <span className="flex items-center gap-1 text-slate-400"><span className="w-2 h-2 rounded-full bg-slate-300" />{noneCount}</span>
           <span className="text-slate-300">/ {total}</span>
@@ -64,7 +64,7 @@ export default function AccessModuleGrid({
             <div
               key={m.key}
               className={`rounded-xl border transition overflow-hidden ${
-                current === 'write' ? 'border-[#2E5A1A]/20 bg-[#2E5A1A]/[0.03]' :
+                current === 'write' ? 'border-primary/20 bg-primary/[0.03]' :
                 current === 'read' ? 'border-amber-200/60 bg-amber-50/30' :
                 'border-slate-200 bg-white'
               }`}
@@ -72,7 +72,7 @@ export default function AccessModuleGrid({
               {/* Hub header */}
               <div className="flex items-center gap-2 px-3 pt-2.5 pb-2">
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  current === 'write' ? 'bg-[#2E5A1A] text-white' :
+                  current === 'write' ? 'bg-primary text-white' :
                   current === 'read' ? 'bg-amber-100 text-amber-600' :
                   'bg-slate-100 text-slate-400'
                 }`}>

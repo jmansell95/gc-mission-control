@@ -177,7 +177,7 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
         <div className="w-8 h-8 border-4 border-slate-200 border-t-[#2E5A1A] rounded-full animate-spin mb-4"></div>
         <p className="text-sm text-slate-500">Loading project details…</p>
         {onBack && (
-          <button onClick={onBack} className="mt-4 text-sm text-[#2E5A1A] font-semibold hover:underline">
+          <button onClick={onBack} className="mt-4 text-sm text-primary font-semibold hover:underline">
             Go back
           </button>
         )}
@@ -200,8 +200,8 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
     <div>
       {/* Top bar — compact floating action bar */}
       <div className="mb-3 sm:mb-4 flex items-center justify-between gap-2">
-        <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-600 hover:text-[#2E5A1A] font-medium transition group flex-shrink-0">
-          <span className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-[#2E5A1A]/30 group-hover:bg-[#2E5A1A]/5 transition">
+        <button onClick={onBack} className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary font-medium transition group flex-shrink-0">
+          <span className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition">
             <ArrowLeft className="w-4 h-4" />
           </span>
           <span className="hidden sm:inline">Back to Projects</span>
@@ -219,7 +219,7 @@ export default function JobDetail({ job: initialJob, onBack, initialTab }) {
             </span>
           )}
           <button onClick={handleEdit}
-            className="flex items-center gap-2 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium shadow-sm hover:shadow-md">
+            className="flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium shadow-sm hover:shadow-md">
             <Edit2 className="w-4 h-4" /> <span className="hidden sm:inline">Edit</span>
           </button>
           {/* Desktop: inline secondary actions */}

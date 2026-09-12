@@ -9,7 +9,7 @@ export default function BuildEffortTable() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <Hammer className="w-5 h-5 text-[#2E5A1A]" />
+        <Hammer className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-900 text-sm">Build-Effort Estimate</h3>
       </div>
 
@@ -58,7 +58,7 @@ export default function BuildEffortTable() {
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-[#2E5A1A] text-white font-bold">
+            <tr className="bg-primary text-white font-bold">
               <td className="px-4 py-3" colSpan={4}>Total</td>
               <td className="px-3 py-3 text-right tabular-nums">{TOTAL_BUILD_HOURS.toLocaleString()}h</td>
               <td className="px-4 py-3 text-right tabular-nums">{fmtGBP(TOTAL_BUILD_COST)}</td>

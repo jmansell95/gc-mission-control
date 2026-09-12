@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 const statusConfig = {
   assigned: { label: 'Assigned', badge: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' },
   started: { label: 'In Progress', badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' },
-  completed: { label: 'Completed', badge: 'bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' },
+  completed: { label: 'Completed', badge: 'bg-primary/10 text-primary ring-1 ring-primary/20' },
 };
 
 /**
@@ -29,7 +29,7 @@ export default function DepotAssignmentCard({ assignment, staff, onOpenShiftWiza
 
       {/* Compact header — always visible */}
       <button onClick={() => setExpanded(e => !e)} className="w-full text-left p-4 md:p-5 flex items-start gap-3 hover:bg-slate-50/40 transition">
-        <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ring-2 ring-offset-2 ring-offset-white ${assignment.status === 'completed' ? 'bg-[#2E5A1A] ring-[#2E5A1A]/20' : assignment.status === 'started' ? 'bg-blue-500 ring-blue-500/20' : 'bg-amber-400 ring-amber-200'}`} />
+        <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ring-2 ring-offset-2 ring-offset-white ${assignment.status === 'completed' ? 'bg-primary ring-primary/20' : assignment.status === 'started' ? 'bg-blue-500 ring-blue-500/20' : 'bg-amber-400 ring-amber-200'}`} />
         <div className="min-w-0 flex-1">
           <h3 className="text-lg font-bold text-slate-900 leading-tight truncate tracking-tight flex items-center gap-2">
             <Warehouse className="w-5 h-5 text-amber-500 flex-shrink-0" /> Yard / Depot Duty
@@ -98,7 +98,7 @@ export default function DepotAssignmentCard({ assignment, staff, onOpenShiftWiza
               </button>
             )}
             {assignment.status === 'completed' && (
-              <div className="flex items-center gap-2 px-4 py-3 bg-[#2E5A1A]/5 text-[#2E5A1A] rounded-2xl text-sm font-semibold">
+              <div className="flex items-center gap-2 px-4 py-3 bg-primary/5 text-primary rounded-2xl text-sm font-semibold">
                 <CheckCircle2 className="w-5 h-5" /> Shift submitted for approval
               </div>
             )}

@@ -14,7 +14,7 @@ import LiveMarginBadge from '@/components/dashboard/LiveMarginBadge';
 
 const STATUS_META = {
   planning: { label: 'Planning', icon: CircleDashed, grad: 'from-slate-500 to-slate-600', chip: 'bg-slate-100 text-slate-700 ring-1 ring-slate-200', text: 'text-slate-700' },
-  in_progress: { label: 'In Progress', icon: TrendingUp, grad: 'from-[#2E5A1A] to-[#4d7c2a]', chip: 'bg-[#2E5A1A]/15 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20', text: 'text-[#2E5A1A]' },
+  in_progress: { label: 'In Progress', icon: TrendingUp, grad: 'from-[#2E5A1A] to-[#4d7c2a]', chip: 'bg-primary/15 text-primary ring-1 ring-primary/20', text: 'text-primary' },
   decommissioning: { label: 'Decommissioning', icon: AlertTriangle, grad: 'from-orange-500 to-amber-600', chip: 'bg-orange-100 text-orange-700 ring-1 ring-orange-200', text: 'text-orange-700' },
   completed: { label: 'Completed', icon: CheckCircle2, grad: 'from-teal-500 to-cyan-600', chip: 'bg-teal-100 text-teal-700 ring-1 ring-teal-200', text: 'text-teal-700' },
   on_hold: { label: 'On Hold', icon: Clock, grad: 'from-amber-500 to-yellow-600', chip: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200', text: 'text-amber-700' },
@@ -40,7 +40,7 @@ const STAT_TONES = {
   violet: 'bg-violet-100 text-violet-600',
   cyan: 'bg-cyan-100 text-cyan-600',
   orange: 'bg-orange-100 text-orange-600',
-  brand: 'bg-[#2E5A1A]/10 text-[#2E5A1A]',
+  brand: 'bg-primary/10 text-primary',
   fuchsia: 'bg-fuchsia-100 text-fuchsia-600',
 };
 
@@ -166,7 +166,7 @@ export default function JobSummaryCard({
             <div className="w-14 rounded-lg overflow-hidden shadow-sm border border-slate-200 bg-white">
               <div className={`h-1.5 bg-gradient-to-r ${status.grad}`} />
               <div className="px-1.5 pt-1 pb-1.5 text-center">
-                <div className="text-[8px] font-bold uppercase tracking-wider text-[#2E5A1A] leading-none">
+                <div className="text-[8px] font-bold uppercase tracking-wider text-primary leading-none">
                   {job.start_date ? format(parseISO(job.start_date), 'MMM') : 'TBC'}
                 </div>
                 <div className="text-base font-bold text-slate-800 leading-none mt-0.5 tabular-nums">
@@ -178,7 +178,7 @@ export default function JobSummaryCard({
                 </div>
               </div>
             </div>
-            {job.requisition_list_url && <FileText className="w-3 h-3 text-[#2E5A1A] absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-slate-100" title="Has requisition list" />}
+            {job.requisition_list_url && <FileText className="w-3 h-3 text-primary absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-slate-100" title="Has requisition list" />}
           </div>
         </div>
 
@@ -252,11 +252,11 @@ export default function JobSummaryCard({
 
       {/* Footer */}
       <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
-        <button onClick={() => onView(job)} className="flex items-center gap-1.5 text-sm font-medium text-[#2E5A1A] hover:text-[#1c4a12] transition">
+        <button onClick={() => onView(job)} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/90 transition">
           <Eye className="w-4 h-4" /> View Details
         </button>
         <div className="flex gap-1">
-          <button onClick={() => setShowQuickEdit(true)} className="inline-flex items-center gap-1 px-2 py-1.5 text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition text-xs font-semibold" title="Quick edit location, dates, status & notes">
+          <button onClick={() => setShowQuickEdit(true)} className="inline-flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-lg transition text-xs font-semibold" title="Quick edit location, dates, status & notes">
             <Zap className="w-3.5 h-3.5" /> Quick Edit
           </button>
           <button onClick={() => onEdit(job)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Full edit"><Edit2 className="w-4 h-4" /></button>

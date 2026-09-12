@@ -100,7 +100,7 @@ export default function BulkCategoryModal({ preselectedStaffIds, staff, categori
       <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-5 max-h-[calc(100dvh-2rem)] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Tag className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -128,7 +128,7 @@ export default function BulkCategoryModal({ preselectedStaffIds, staff, categori
                   value={staffSearch}
                   onChange={e => setStaffSearch(e.target.value)}
                   placeholder="Search staff…"
-                  className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                  className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               </div>
               <div className="border border-slate-200 rounded-xl max-h-64 overflow-y-auto">
@@ -140,11 +140,11 @@ export default function BulkCategoryModal({ preselectedStaffIds, staff, categori
                       key={s.id}
                       onClick={() => toggleStaff(s.id)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 text-left border-b border-slate-50 transition last:border-b-0 ${
-                        selected ? 'bg-[#2E5A1A]/5' : 'hover:bg-slate-50'
+                        selected ? 'bg-primary/5' : 'hover:bg-slate-50'
                       }`}
                     >
                       <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
-                        selected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300'
+                        selected ? 'bg-primary border-primary' : 'border-slate-300'
                       }`}>
                         {selected && <Check className="w-3 h-3 text-white" />}
                       </div>
@@ -174,7 +174,7 @@ export default function BulkCategoryModal({ preselectedStaffIds, staff, categori
                     onClick={() => toggleCat(cat.id)}
                     className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
                       active
-                        ? 'bg-[#2E5A1A] text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-sm'
                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}
                   >
@@ -196,7 +196,7 @@ export default function BulkCategoryModal({ preselectedStaffIds, staff, categori
           <button
             onClick={() => apply('assign')}
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             Assign to {targetIds.length || 'Selected'}

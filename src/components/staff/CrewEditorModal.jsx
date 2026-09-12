@@ -228,7 +228,7 @@ export default function CrewEditorModal({ open, onClose, parentStaff, parentDivi
               <p className="text-sm text-slate-400 mb-4">No crews yet. Add a 2-man crew to get started.</p>
               <button
                 onClick={() => { setEditingCrew(null); setForm({ lead_name: '', lead_phone: '', second_name: '', second_phone: '' }); setShowAdd(true); }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold"
               >
                 <Plus className="w-4 h-4" /> Add First Crew
               </button>
@@ -285,23 +285,23 @@ export default function CrewEditorModal({ open, onClose, parentStaff, parentDivi
                   <div className="grid grid-cols-2 gap-2.5">
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Name *</label>
-                      <input type="text" value={form.lead_name} onChange={e => setForm({ ...form, lead_name: e.target.value })} autoFocus className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.lead_name} onChange={e => setForm({ ...form, lead_name: e.target.value })} autoFocus className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Lead Driller Phone</label>
-                      <input type="text" value={form.lead_phone} onChange={e => setForm({ ...form, lead_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.lead_phone} onChange={e => setForm({ ...form, lead_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Name</label>
-                      <input type="text" value={form.second_name} onChange={e => setForm({ ...form, second_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.second_name} onChange={e => setForm({ ...form, second_name: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Second Man Phone</label>
-                      <input type="text" value={form.second_phone} onChange={e => setForm({ ...form, second_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.second_phone} onChange={e => setForm({ ...form, second_phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
+                    <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} {editingCrew ? 'Update Crew' : 'Add Crew'}
                     </button>
                     <button type="button" onClick={resetForm} className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium">Cancel</button>
@@ -310,7 +310,7 @@ export default function CrewEditorModal({ open, onClose, parentStaff, parentDivi
               ) : (
                 <button
                   onClick={() => { setEditingCrew(null); setForm({ lead_name: '', lead_phone: '', second_name: '', second_phone: '' }); setShowAdd(true); }}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-slate-300 text-slate-500 rounded-lg hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition text-sm font-medium"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-slate-300 text-slate-500 rounded-lg hover:border-primary hover:text-primary transition text-sm font-medium"
                 >
                   <Plus className="w-4 h-4" /> Add Another Crew
                 </button>

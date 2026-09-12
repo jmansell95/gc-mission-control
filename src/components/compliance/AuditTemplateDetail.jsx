@@ -21,7 +21,7 @@ function StatTile({ icon: Icon, label, value, tone = 'slate' }) {
     emerald: 'from-emerald-50 to-emerald-100 text-emerald-700',
     rose: 'from-rose-50 to-rose-100 text-rose-700',
     amber: 'from-amber-50 to-amber-100 text-amber-700',
-    brand: 'from-[#2E5A1A]/8 to-[#8DC63F]/12 text-[#2E5A1A]',
+    brand: 'from-[#2E5A1A]/8 to-[#8DC63F]/12 text-primary',
   };
   return (
     <div className={`rounded-2xl bg-gradient-to-br ${tones[tone]} p-3 flex items-center gap-2.5`}>
@@ -200,7 +200,7 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
             <AuditExportBar audits={filtered} fileName={`audits-${template.name?.replace(/\s+/g, '-').toLowerCase() || 'template'}`} />
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] w-40 sm:w-52" />
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-primary w-40 sm:w-52" />
             </div>
           </div>
         }>
@@ -209,16 +209,16 @@ export default function AuditTemplateDetail({ template, onBack, onSelectAudit })
         <div className="flex flex-wrap gap-2 mb-3">
           <div className="flex gap-1.5">
             {PASS_FAIL_CHIPS.map(c => (
-              <button key={c.key} onClick={() => setPassFailFilter(c.key)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${passFailFilter === c.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{c.label}</button>
+              <button key={c.key} onClick={() => setPassFailFilter(c.key)} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${passFailFilter === c.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{c.label}</button>
             ))}
           </div>
-          <select value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+          <select value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary">
             <option value="all">All dates</option>
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
           </select>
-          <select value={auditorFilter} onChange={e => setAuditorFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A] max-w-[180px]">
+          <select value={auditorFilter} onChange={e => setAuditorFilter(e.target.value)} className="px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary max-w-[180px]">
             <option value="all">All auditors</option>
             {auditors.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
           </select>

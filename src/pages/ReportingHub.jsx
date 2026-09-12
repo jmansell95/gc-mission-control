@@ -172,7 +172,7 @@ export default function ReportingHub() {
       actions={
         <button
           onClick={() => setShowCustom(true)}
-          className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm"
+          className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl text-xs font-semibold hover:bg-[#244715] active:scale-[0.97] transition shadow-sm"
         >
           <Sparkles className="w-3.5 h-3.5" /> Build Custom Report
         </button>
@@ -204,7 +204,7 @@ export default function ReportingHub() {
           {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:text-[#2E5A1A] text-slate-600 text-xs font-semibold transition">
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-primary hover:text-primary text-slate-600 text-xs font-semibold transition">
                 <Bookmark className="w-3.5 h-3.5" /> Save as Template
               </button>
             </div>

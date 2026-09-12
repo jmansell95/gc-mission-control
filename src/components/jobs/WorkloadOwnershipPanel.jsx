@@ -96,9 +96,9 @@ export default function WorkloadOwnershipPanel() {
 
       {/* Summary + breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-[#2E5A1A]/5">
-          <div className="w-10 h-10 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-            <Briefcase className="w-5 h-5 text-[#2E5A1A]" />
+        <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 bg-primary/5">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Briefcase className="w-5 h-5 text-primary" />
           </div>
           <div>
             <div className="text-2xl font-bold text-slate-900 leading-none tabular-nums">{directJobs.length}</div>

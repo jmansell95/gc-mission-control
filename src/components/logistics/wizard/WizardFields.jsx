@@ -28,7 +28,7 @@ export function SharedFieldsBar({ source, poNumber, setPoNumber, supplierId, set
           value={poNumber}
           onChange={e => setPoNumber(e.target.value)}
           placeholder="e.g. PO-2026-001 (applies to all items)"
-          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 focus:border-[#2E5A1A]"
+          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
       </div>
     );
@@ -40,7 +40,7 @@ export function SharedFieldsBar({ source, poNumber, setPoNumber, supplierId, set
         <select
           value={supplierId}
           onChange={e => setSupplierId(e.target.value)}
-          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
           <option value="">— Select supplier —</option>
           {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -76,7 +76,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
           step="any"
           value={state.qty ?? '1'}
           onChange={e => onChange('qty', e.target.value)}
-          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
       </div>
       {!isClient && (
@@ -89,7 +89,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
             value={state.unit_cost ?? ''}
             onChange={e => onChange('unit_cost', e.target.value)}
             placeholder="0.00"
-            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
         </div>
       )}
@@ -100,7 +100,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
           value={state.unit_label ?? 'each'}
           onChange={e => onChange('unit_label', e.target.value)}
           placeholder="each / day / m"
-          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
         />
       </div>
       {isHired && (
@@ -111,7 +111,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
               type="date"
               value={state.start_date ?? jobStart ?? ''}
               onChange={e => onChange('start_date', e.target.value)}
-              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
             />
           </div>
           <div>
@@ -120,7 +120,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
               type="date"
               value={state.end_date ?? jobEnd ?? ''}
               onChange={e => onChange('end_date', e.target.value)}
-              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+              className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
             />
           </div>
         </>
@@ -133,7 +133,7 @@ export function ItemRowFields({ source, state = {}, onChange, jobStart, jobEnd }
             value={state.supplied_by ?? ''}
             onChange={e => onChange('supplied_by', e.target.value)}
             placeholder="Name of client / company who supplied it"
-            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+            className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
           />
         </div>
       )}

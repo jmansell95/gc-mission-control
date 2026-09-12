@@ -457,7 +457,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
               type="button"
               onClick={() => setShowFullFigures((v) => !v)}
               className={`inline-flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-bold transition ${
-                showFullFigures ? 'bg-white text-[#2E5A1A]' : 'bg-white/15 hover:bg-white/25 text-white ring-1 ring-white/20'
+                showFullFigures ? 'bg-white text-primary' : 'bg-white/15 hover:bg-white/25 text-white ring-1 ring-white/20'
               }`}
               title="Toggle full all-time figures"
             >
@@ -503,7 +503,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
                 className="w-full flex items-center gap-2.5 py-2 px-2 rounded-lg hover:bg-slate-50 transition text-left group disabled:cursor-default disabled:hover:bg-transparent"
               >
                 {/* Rank badge */}
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold ${rank <= 3 ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-bold ${rank <= 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
                   {rank}
                 </div>
 
@@ -545,7 +545,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         <button
           type="button"
           onClick={() => setShowAllRigs(true)}
-          className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A]/8 text-[#2E5A1A] rounded-lg text-xs font-bold hover:bg-[#2E5A1A]/15 transition border border-[#2E5A1A]/20"
+          className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-primary/8 text-primary rounded-lg text-xs font-bold hover:bg-primary/15 transition border border-primary/20"
         >
           <Briefcase className="w-3.5 h-3.5" />
           View All Rigs ({activeRigCount})
@@ -556,7 +556,7 @@ export default function RigPerformanceWidget({ divisionId, onJobBreakdown }) {
         {showFullFigures && (
           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3">
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="w-3.5 h-3.5 text-[#2E5A1A]" />
+              <BarChart3 className="w-3.5 h-3.5 text-primary" />
               <p className="text-xs font-bold text-slate-700">Full Figures — all-time per rig</p>
               <span className="ml-auto text-[10px] text-slate-400">
                 {liveAll.totals.metres.toFixed(1)}m · {fmtGBP(liveAll.totals.earnings)} · {liveAll.totals.rigs} rig{liveAll.totals.rigs !== 1 ? 's' : ''}

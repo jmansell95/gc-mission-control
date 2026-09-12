@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileSpreadsheet, Loader2, Save, Check, Download, Eye, Lock } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   provider: 'csv',
@@ -124,7 +124,7 @@ export default function PayrollExportSettings() {
             <p className="text-[11px] text-slate-500">Prevents the same week being exported twice into payroll</p>
           </div>
         </label>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           {saved && <Check className="w-4 h-4 text-white" />}
         </button>
@@ -132,7 +132,7 @@ export default function PayrollExportSettings() {
 
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Eye className="w-4 h-4 text-[#2E5A1A]" />
+          <Eye className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Export Queue Preview</h3>
         </div>
         <button onClick={handlePreview} disabled={previewing} className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
@@ -175,10 +175,10 @@ export default function PayrollExportSettings() {
 
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Download className="w-4 h-4 text-[#2E5A1A]" />
+          <Download className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Generate Payroll File</h3>
         </div>
-        <button onClick={handleDownload} disabled={downloading} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50">
+        <button onClick={handleDownload} disabled={downloading} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50">
           {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download Payroll CSV
         </button>
         <p className="text-[11px] text-slate-400 mt-2">Downloads a {config.provider === 'xero' ? 'Xero-format' : config.provider === 'sage' ? 'Sage 50-format' : 'generic'} CSV and locks all exported timesheets.</p>

@@ -96,12 +96,12 @@ export default function TrainingCalendar({ courses, bookings, staff, teams }) {
                 <button key={dateStr}
                   onClick={() => setSelectedDate(day)}
                   className={`relative min-h-[64px] p-1.5 rounded-lg border text-left transition ${
-                    isSelected ? 'border-[#2E5A1A] bg-[#2E5A1A]/5 ring-1 ring-[#2E5A1A]/20'
+                    isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                     : isToday ? 'border-[#8DC63F] bg-[#8DC63F]/5'
                     : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
                   } ${!inMonth ? 'opacity-40' : ''}`}
                 >
-                  <span className={`text-[11px] font-bold ${isToday ? 'text-[#2E5A1A]' : 'text-slate-600'}`}>
+                  <span className={`text-[11px] font-bold ${isToday ? 'text-primary' : 'text-slate-600'}`}>
                     {format(day, 'd')}
                   </span>
                   {dayBookings.length > 0 && (
@@ -125,7 +125,7 @@ export default function TrainingCalendar({ courses, bookings, staff, teams }) {
         {/* Selected day details */}
         <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Calendar className="w-4 h-4 text-[#2E5A1A]" />
+            <Calendar className="w-4 h-4 text-primary" />
             <h4 className="text-sm font-bold text-slate-900">
               {selectedDate ? format(selectedDate, 'EEEE, dd MMM') : 'Select a day'}
             </h4>

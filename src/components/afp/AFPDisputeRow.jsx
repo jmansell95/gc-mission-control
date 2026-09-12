@@ -22,7 +22,7 @@ const SOURCE_META = {
   timesheet: { label: 'TS', icon: Clock, color: 'text-emerald-600' },
   cost: { label: 'Cost', icon: Receipt, color: 'text-rose-600' },
   template: { label: 'Tpl', icon: FileText, color: 'text-slate-600' },
-  manual: { label: 'Man', icon: Plus, color: 'text-[#2E5A1A]' },
+  manual: { label: 'Man', icon: Plus, color: 'text-primary' },
 };
 
 /**
@@ -90,12 +90,12 @@ export default function AFPDisputeRow({ item, canEdit, canDispute, canSelect, se
   // ── Mobile card layout ──
   if (mobile) {
     return (
-      <div className={`px-3 py-3 space-y-2 transition ${selected ? 'bg-[#2E5A1A]/5' : ''}`}>
+      <div className={`px-3 py-3 space-y-2 transition ${selected ? 'bg-primary/5' : ''}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {canSelect && (
               <button onClick={onSelect} className="flex-shrink-0 active:scale-95 transition">
-                {selected ? <CheckSquare className="w-4 h-4 text-[#2E5A1A]" /> : <Square className="w-4 h-4 text-slate-300" />}
+                {selected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
               </button>
             )}
             <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${srcMeta.color} bg-slate-100 flex-shrink-0`}>
@@ -128,7 +128,7 @@ export default function AFPDisputeRow({ item, canEdit, canDispute, canSelect, se
                 />
               ) : (
                 <span
-                  className={`tabular-nums font-semibold ${canEdit ? 'cursor-pointer hover:bg-slate-100 rounded px-1' : ''} ${item.is_manual ? 'text-[#2E5A1A]' : 'text-slate-700'}`}
+                  className={`tabular-nums font-semibold ${canEdit ? 'cursor-pointer hover:bg-slate-100 rounded px-1' : ''} ${item.is_manual ? 'text-primary' : 'text-slate-700'}`}
                   onClick={canEdit ? startEdit : undefined}
                 >
                   {item.qty || '—'} {item.unit || ''}
@@ -227,12 +227,12 @@ export default function AFPDisputeRow({ item, canEdit, canDispute, canSelect, se
   // ── Desktop table row layout ──
   return (
     <>
-      <tr className={`hover:bg-slate-50/50 group ${selected ? 'bg-[#2E5A1A]/5' : ''}`}>
+      <tr className={`hover:bg-slate-50/50 group ${selected ? 'bg-primary/5' : ''}`}>
         {/* Selection checkbox */}
         <td className="px-3 py-2">
           {canSelect && (
             <button onClick={onSelect} className="transition active:scale-95">
-              {selected ? <CheckSquare className="w-4 h-4 text-[#2E5A1A]" /> : <Square className="w-4 h-4 text-slate-300" />}
+              {selected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
             </button>
           )}
         </td>
@@ -276,7 +276,7 @@ export default function AFPDisputeRow({ item, canEdit, canDispute, canSelect, se
             />
           ) : (
             <span
-              className={`tabular-nums ${canEdit ? 'cursor-pointer hover:bg-slate-100 rounded px-1' : ''} ${item.is_manual ? 'text-[#2E5A1A] font-semibold' : 'text-slate-600'}`}
+              className={`tabular-nums ${canEdit ? 'cursor-pointer hover:bg-slate-100 rounded px-1' : ''} ${item.is_manual ? 'text-primary font-semibold' : 'text-slate-600'}`}
               onClick={canEdit ? startEdit : undefined}
             >
               {item.qty || '—'}

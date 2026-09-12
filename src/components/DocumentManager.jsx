@@ -182,7 +182,7 @@ export default function DocumentManager({ job }) {
             </a>
           )}
           <button onClick={handleSyncNow} disabled={syncing}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-[#2E5A1A] bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 rounded-lg transition disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg transition disabled:opacity-50"
             title="Two-way sync with SharePoint">
             {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             {syncing ? 'Syncing...' : 'Sync Now'}

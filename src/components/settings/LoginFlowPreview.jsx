@@ -52,7 +52,7 @@ export default function LoginFlowPreview({ contactInstructions = '' }) {
   return (
     <div className="rounded-2xl hub-glass p-5">
       <div className="flex items-center gap-2 mb-1">
-        <Eye className="w-4 h-4 text-[#2E5A1A]" />
+        <Eye className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-slate-900">Login Flow Preview</h3>
       </div>
       <p className="text-xs text-slate-500 mb-4">

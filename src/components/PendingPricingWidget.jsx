@@ -64,7 +64,7 @@ export default function PendingPricingWidget({ jobId }) {
                 </div>
                 <button
                   onClick={() => setConfirmingItem(c)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition flex-shrink-0 whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0 whitespace-nowrap"
                 >
                   <FileCheck className="w-3.5 h-3.5" /> Confirm Price
                 </button>
@@ -76,19 +76,19 @@ export default function PendingPricingWidget({ jobId }) {
 
       {/* Confirmed items — audit trail */}
       {confirmedItems.length > 0 && (
-        <details className="rounded-xl border border-[#2E5A1A]/20 bg-[#2E5A1A]/10 overflow-hidden">
-          <summary className="px-4 py-3 cursor-pointer flex items-center gap-2 hover:bg-[#2E5A1A]/10 transition">
-            <FileCheck className="w-4 h-4 text-[#2E5A1A]" />
-            <span className="text-sm font-semibold text-[#2E5A1A]">
+        <details className="rounded-xl border border-primary/20 bg-primary/10 overflow-hidden">
+          <summary className="px-4 py-3 cursor-pointer flex items-center gap-2 hover:bg-primary/10 transition">
+            <FileCheck className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">
               {confirmedItems.length} confirmed price{confirmedItems.length === 1 ? '' : 's'}
             </span>
-            <ChevronRight className="w-4 h-4 text-[#2E5A1A]/70 ml-auto" />
+            <ChevronRight className="w-4 h-4 text-primary/70 ml-auto" />
           </summary>
-          <div className="divide-y divide-[#2E5A1A]/20 border-t border-[#2E5A1A]/20">
+          <div className="divide-y divide-[#2E5A1A]/20 border-t border-primary/20">
             {confirmedItems.map((c) => (
               <div key={c.id} className="px-4 py-2.5 flex items-center gap-3 bg-white">
-                <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/20 flex items-center justify-center flex-shrink-0">
-                  <FileCheck className="w-4 h-4 text-[#2E5A1A]" />
+                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <FileCheck className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-slate-900 truncate">{c.description}</p>

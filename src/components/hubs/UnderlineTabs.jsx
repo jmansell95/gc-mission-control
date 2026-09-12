@@ -51,17 +51,17 @@ export default function UnderlineTabs({ tabs, activeId, onChange, variant = 'mai
                 type="button"
                 className={`group relative inline-flex items-center gap-1.5 ${padClass} ${textClass} font-semibold whitespace-nowrap flex-shrink-0 transition-colors duration-200 ${
                   active
-                    ? 'text-[#2E5A1A]'
+                    ? 'text-primary'
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                {Icon && <Icon className={`${iconSize} transition-colors ${active ? 'text-[#2E5A1A]' : 'text-slate-400 group-hover:text-slate-600'}`} />}
+                {Icon && <Icon className={`${iconSize} transition-colors ${active ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'}`} />}
                 {t.label}
                 {t.badge != null && t.badge > 0 && (
-                  <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-ui-micro font-bold ${active ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
+                  <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-ui-micro font-bold ${active ? 'bg-primary/10 text-primary' : 'bg-rose-100 text-rose-600'}`}>{t.badge}</span>
                 )}
                 {t.count != null && (
-                  <span className={`ml-0.5 text-ui-caption font-normal ${active ? 'text-[#2E5A1A]/60' : 'text-slate-400'}`}>{t.count}</span>
+                  <span className={`ml-0.5 text-ui-caption font-normal ${active ? 'text-primary/60' : 'text-slate-400'}`}>{t.count}</span>
                 )}
                 {active && (
                   <motion.div

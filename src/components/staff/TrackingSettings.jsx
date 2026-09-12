@@ -57,8 +57,8 @@ export default function TrackingSettings({ staff, onSignConsent }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm p-5 md:p-6">
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-          <MapPin className="w-4 h-4 text-[#2E5A1A]" />
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <MapPin className="w-4 h-4 text-primary" />
         </div>
         <h2 className="text-sm font-bold text-slate-900">Location Tracking</h2>
       </div>
@@ -88,7 +88,7 @@ export default function TrackingSettings({ staff, onSignConsent }) {
           role="switch"
           aria-checked={trackingEnabled}
           className={`relative inline-flex h-7 w-12 items-center rounded-full transition flex-shrink-0 touch-manipulation disabled:opacity-50 ${
-            trackingEnabled ? 'bg-[#2E5A1A]' : 'bg-slate-300'
+            trackingEnabled ? 'bg-primary' : 'bg-slate-300'
           }`}
         >
           {toggling && <Loader2 className="absolute inset-0 m-auto w-4 h-4 animate-spin text-white/80" />}
@@ -112,7 +112,7 @@ export default function TrackingSettings({ staff, onSignConsent }) {
               <span className="font-medium">Consent form not yet signed</span>
             </div>
             <button onClick={onSignConsent}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0">
+              className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0">
               <ShieldCheck className="w-3.5 h-3.5" /> Sign
             </button>
           </div>

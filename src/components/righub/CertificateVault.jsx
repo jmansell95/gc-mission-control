@@ -221,7 +221,7 @@ export default function CertificateVault({ assetIds = [], assetNames = {}, asset
                         <ExternalLink className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => downloadGroup(g.certs)} disabled={downloading} title="Download all in this group"
-                        className="p-1.5 text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition disabled:opacity-50">
+                        className="p-1.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition disabled:opacity-50">
                         <Download className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -262,7 +262,7 @@ export default function CertificateVault({ assetIds = [], assetNames = {}, asset
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </a>
                               <button onClick={() => downloadOne(c.certificate_url, c.certificate_name || `${g.name}-certificate`)} disabled={downloading} title="Download"
-                                className="p-1.5 text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition disabled:opacity-50">
+                                className="p-1.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition disabled:opacity-50">
                                 <Download className="w-3.5 h-3.5" />
                               </button>
                             </div>

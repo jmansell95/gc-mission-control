@@ -59,10 +59,10 @@ export default function AccessGateScreen({ status, email, approvers = [], contac
 
           {/* Approver contact info — pending only */}
           {!isRejected && (approvers.length > 0 || contactInstructions) && (
-            <div className="mb-6 p-4 rounded-xl bg-[#2E5A1A]/5 border border-[#2E5A1A]/15 text-left">
+            <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/15 text-left">
               <div className="flex items-center gap-1.5 mb-2">
-                <UserCog className="w-4 h-4 text-[#2E5A1A]" />
-                <p className="text-xs font-bold text-[#2E5A1A] uppercase tracking-wide">Who to Contact</p>
+                <UserCog className="w-4 h-4 text-primary" />
+                <p className="text-xs font-bold text-primary uppercase tracking-wide">Who to Contact</p>
               </div>
               {contactInstructions && (
                 <p className="text-sm text-slate-600 mb-2">{contactInstructions}</p>
@@ -73,7 +73,7 @@ export default function AccessGateScreen({ status, email, approvers = [], contac
                     <a
                       key={i}
                       href={`mailto:${a.email}`}
-                      className="flex items-center gap-2 text-sm text-slate-700 hover:text-[#2E5A1A] transition"
+                      className="flex items-center gap-2 text-sm text-slate-700 hover:text-primary transition"
                     >
                       <Mail className="w-3.5 h-3.5 text-slate-400" />
                       <span className="font-semibold">{a.name}</span>

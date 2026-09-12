@@ -12,7 +12,7 @@ import SearchableSelect from '@/components/SearchableSelect';
 
 const fmt = (n) => n != null && !isNaN(n) ? '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
 
-const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100';
+const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100';
 
 const SCOPE_OPTIONS = [
   { value: 'job', label: 'Specific Job', icon: Briefcase, desc: 'Lock this price for one job only' },
@@ -101,7 +101,7 @@ export default function POAPriceLockModal({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-[#2E5A1A]" />
+            <Lock className="w-5 h-5 text-primary" />
             Lock POA Price
           </DialogTitle>
         </DialogHeader>
@@ -153,11 +153,11 @@ export default function POAPriceLockModal({
                     onClick={() => setScope(opt.value)}
                     className={`flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-center transition ${
                       active
-                        ? 'border-[#2E5A1A] bg-[#2E5A1A]/5 text-[#2E5A1A]'
+                        ? 'border-primary bg-primary/5 text-primary'
                         : 'border-slate-200 text-slate-500 hover:border-slate-300'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 ${active ? 'text-[#2E5A1A]' : 'text-slate-400'}`} />
+                    <Icon className={`w-5 h-5 ${active ? 'text-primary' : 'text-slate-400'}`} />
                     <span className="text-[11px] font-bold">{opt.label}</span>
                   </button>
                 );
@@ -278,7 +278,7 @@ export default function POAPriceLockModal({
             <button
               onClick={handleSave}
               disabled={!canSave() || saving}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
               {saving ? 'Locking...' : 'Lock Price & Stamp Logs'}

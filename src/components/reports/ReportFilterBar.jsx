@@ -69,7 +69,7 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
         <div className="flex bg-slate-100 rounded-xl p-0.5 flex-wrap">
           {PRESETS.map(p => (
             <button key={p.id} onClick={() => applyPreset(p.id)}
-              className={`h-9 px-3 rounded-lg text-ui-caption font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`h-9 px-3 rounded-lg text-ui-caption font-semibold transition ${filters.datePreset === p.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               {p.label}
             </button>
           ))}
@@ -79,16 +79,16 @@ export default function ReportFilterBar({ filters, setFilters, onExport, exporti
         {filters.datePreset === 'custom' && (
           <div className="flex items-center gap-2">
             <input type="date" value={filters.dateFrom || ''} onChange={e => set('dateFrom', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-primary outline-none" />
             <span className="text-slate-400 text-ui-caption">to</span>
             <input type="date" value={filters.dateTo || ''} onChange={e => set('dateTo', e.target.value)}
-              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+              className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-primary outline-none" />
           </div>
         )}
 
         {/* Division scope */}
         <select value={filters.divisionId || ''} onChange={e => set('divisionId', e.target.value)}
-          className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-[#2E5A1A] outline-none min-w-[160px]">
+          className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-ui-body font-medium text-slate-900 focus:border-primary outline-none min-w-[160px]">
           <option value="">All Business Streams</option>
           {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>

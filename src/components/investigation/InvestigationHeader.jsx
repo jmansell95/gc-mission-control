@@ -47,7 +47,7 @@ export default function InvestigationHeader({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search borehole, sample, staff, description..."
-              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#2E5A1A]/20 focus:border-[#2E5A1A]/30 outline-none transition"
+              className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary/30 outline-none transition"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -56,7 +56,7 @@ export default function InvestigationHeader({
                 key={f.key}
                 onClick={() => setReviewFilter(f.key)}
                 className={`text-xs px-2.5 py-2 rounded-lg font-medium transition ${
-                  reviewFilter === f.key ? 'bg-[#2E5A1A] text-white shadow-sm' : (f.cls || 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                  reviewFilter === f.key ? 'bg-primary text-white shadow-sm' : (f.cls || 'bg-slate-100 text-slate-600 hover:bg-slate-200')
                 }`}
               >
                 {f.label}
@@ -65,10 +65,10 @@ export default function InvestigationHeader({
           </div>
           <button
             onClick={() => setShowFilters(f => !f)}
-            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0 ${showFilters || hasActiveFilters ? 'bg-[#2E5A1A]/10 text-[#2E5A1A] border border-[#2E5A1A]/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-transparent'}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0 ${showFilters || hasActiveFilters ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-transparent'}`}
           >
             <Filter className="w-3.5 h-3.5" /> Filters
-            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-[#2E5A1A]" />}
+            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
           </button>
         </div>
 
@@ -88,7 +88,7 @@ export default function InvestigationHeader({
                     key={f.key}
                     onClick={() => setBoreholeStatusFilter(f.key)}
                     className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition ${
-                      active ? 'bg-[#2E5A1A] text-white shadow-sm' : (f.cls || 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+                      active ? 'bg-primary text-white shadow-sm' : (f.cls || 'bg-slate-100 text-slate-600 hover:bg-slate-200')
                     }`}
                   >
                     <Icon className="w-3 h-3" /> {f.label}
@@ -102,7 +102,7 @@ export default function InvestigationHeader({
               <select
                 value={typeFilter}
                 onChange={e => setTypeFilter(e.target.value)}
-                className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 flex-1 sm:flex-none"
+                className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
               >
                 <option value="all">All Types</option>
                 {Object.entries(logTypes).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
@@ -110,17 +110,17 @@ export default function InvestigationHeader({
               <select
                 value={drillerFilter}
                 onChange={e => setDrillerFilter(e.target.value)}
-                className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 flex-1 sm:flex-none"
+                className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-primary/20 flex-1 sm:flex-none"
               >
                 <option value="all">All Drillers</option>
                 {drillerOptions.map(dr => <option key={dr} value={dr}>{dr}</option>)}
               </select>
               <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
                 <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                  className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 w-full sm:w-auto" />
+                  className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-auto" />
                 <span className="text-slate-300 text-xs">→</span>
                 <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                  className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 w-full sm:w-auto" />
+                  className="text-xs px-2.5 py-2 rounded-lg border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-auto" />
               </div>
               {hasActiveFilters && (
                 <button

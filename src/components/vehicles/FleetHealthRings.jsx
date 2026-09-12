@@ -46,7 +46,7 @@ export default function FleetHealthRings({ stats }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 md:p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Truck className="w-4 h-4 text-[#2E5A1A]" />
+        <Truck className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-slate-800">Fleet Health Overview</h3>
       </div>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">

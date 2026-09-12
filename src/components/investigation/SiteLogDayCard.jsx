@@ -243,7 +243,7 @@ export default function SiteLogDayCard({ date, logs, job, isExpanded, onToggle, 
               <div className="ml-auto flex items-center gap-2">
                 <button onClick={(e) => { e.stopPropagation(); navigateToInvestigationHub(log.job_id, log.id); }}
                   title="View in Investigation Hub"
-                  className="text-[11px] text-slate-400 hover:text-[#2E5A1A] flex items-center gap-1 font-medium transition">
+                  className="text-[11px] text-slate-400 hover:text-primary flex items-center gap-1 font-medium transition">
                   <ExternalLink className="w-3 h-3" /> Hub
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); handleEdit(log); }}

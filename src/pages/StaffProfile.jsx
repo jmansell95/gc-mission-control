@@ -226,7 +226,7 @@ export default function StaffProfile() {
             <div className="flex flex-wrap items-center gap-2 mt-4">
               {canAccessAdmin && (
                 <button onClick={() => navigate('/admin')} type="button"
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-[#1c4a12]">
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-sm font-semibold active:scale-95 transition touch-manipulation whitespace-nowrap flex-shrink-0 hover:bg-primary/90">
                   <LayoutDashboard className="w-4 h-4" /> Admin
                 </button>
               )}
@@ -414,7 +414,7 @@ export default function StaffProfile() {
                   className="w-full px-3 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-emerald-600 resize-none" />
               </div>
               <button onClick={handleSaveAbsence} disabled={savingAbsence || !absenceForm.start_date || !absenceForm.end_date}
-                className="w-full px-4 py-3 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold disabled:opacity-50 touch-manipulation active:scale-95">
+                className="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold disabled:opacity-50 touch-manipulation active:scale-95">
                 {savingAbsence ? 'Submitting…' : 'Submit Request'}
               </button>
             </div>

@@ -109,7 +109,7 @@ export default function AFPDatesEditor({ afp, onSave, onRegenerate, onClose, sav
           <button
             onClick={handleSave}
             disabled={saving || !form.period_start_date || !form.period_end_date}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold transition active:scale-95 hover:border-[#2E5A1A] hover:text-[#2E5A1A] disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold transition active:scale-95 hover:border-primary hover:text-primary disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
             Save Dates
@@ -143,7 +143,7 @@ function DateField({ icon: Icon, label, hint, value, onChange, required, accent,
         type="date"
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 ${accent ? 'border-[#2E5A1A]/30 bg-[#2E5A1A]/5' : 'border-slate-200'} ${auto ? 'bg-blue-50/40' : ''}`}
+        className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 ${accent ? 'border-primary/30 bg-primary/5' : 'border-slate-200'} ${auto ? 'bg-blue-50/40' : ''}`}
       />
       <p className="text-[10px] text-slate-400 mt-1">{hint}</p>
     </div>

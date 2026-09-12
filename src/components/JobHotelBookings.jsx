@@ -132,10 +132,10 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
       {bookings.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2 px-1">
-            <Home className="w-4 h-4 text-[#2E5A1A]" />
+            <Home className="w-4 h-4 text-primary" />
             <h3 className="font-semibold text-slate-900 text-sm">Bookings</h3>
             <span className="text-xs text-slate-400">({bookings.length})</span>
-            <button onClick={handleAdd} className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold">
+            <button onClick={handleAdd} className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Add Booking
             </button>
             <AccommodationPdfExport job={job} bookings={bookings} assignedStaff={assignedStaff} />
@@ -147,13 +147,13 @@ export default function JobHotelBookings({ job, assignedStaff, allStaff }) {
       {/* Person-centric list (bottom of hybrid layout) — multi-booking rows */}
       <div className="hub-glass rounded-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-            <Users className="w-4 h-4 text-[#2E5A1A]" />
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Users className="w-4 h-4 text-primary" />
           </div>
           <h3 className="font-semibold text-slate-900 text-sm">Crew Accommodation</h3>
           <span className="ml-auto text-xs text-slate-400 hidden sm:block">Tap a row to expand</span>
           {bookings.length === 0 && (
-            <button onClick={handleAdd} className="flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold ml-2">
+            <button onClick={handleAdd} className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-xs font-semibold ml-2">
               <Plus className="w-3.5 h-3.5" /> Add Booking
             </button>
           )}

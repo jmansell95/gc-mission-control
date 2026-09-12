@@ -189,7 +189,7 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-[#2E5A1A]" /> Quick Assign Staff
+            <UserPlus className="w-5 h-5 text-primary" /> Quick Assign Staff
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
@@ -229,11 +229,11 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs font-medium text-slate-500">From</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-slate-500">To</label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
@@ -253,7 +253,7 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
                         key={d.val}
                         type="button"
                         onClick={() => toggleDay(d.val)}
-                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${active ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#2E5A1A]/40'}`}
+                        className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${active ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-500 hover:border-primary/40'}`}
                       >
                         {d.label}
                       </button>
@@ -264,11 +264,11 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs font-medium text-slate-500">Starts</label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-slate-500">Until {recurringEnd ? '' : '(job end)'}</label>
-                  <input type="date" value={recurringEnd} onChange={e => setRecurringEnd(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  <input type="date" value={recurringEnd} onChange={e => setRecurringEnd(e.target.value)} className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
                 </div>
               </div>
               <p className="text-[11px] text-slate-400">
@@ -280,7 +280,7 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search staff..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search staff..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
           </div>
 
           {/* Conflict warning */}
@@ -307,8 +307,8 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
               const isAssigned = assignedStaffIds.has(s.id);
               const isSelected = selectedIds.includes(s.id);
               return (
-                <button key={s.id} onClick={() => toggleStaff(s.id)} className={`w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition text-left ${isSelected ? 'bg-[#2E5A1A]/5' : ''}`}>
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300'}`}>
+                <button key={s.id} onClick={() => toggleStaff(s.id)} className={`w-full flex items-center gap-2.5 px-3 py-2 hover:bg-slate-50 transition text-left ${isSelected ? 'bg-primary/5' : ''}`}>
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-primary border-primary' : 'border-slate-300'}`}>
                     {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
                   </div>
                   <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
@@ -331,7 +331,7 @@ export default function QuickAssignStaffModal({ open, onClose, job, allStaff = [
             </span>
             <div className="flex gap-2">
               <button onClick={onClose} className="px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition">Cancel</button>
-              <button onClick={handleAssign} disabled={saving || !canAssign} className="flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-medium hover:bg-[#1c4a12] transition disabled:opacity-50">
+              <button onClick={handleAssign} disabled={saving || !canAssign} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                 {saving ? 'Assigning...' : 'Assign'}
               </button>

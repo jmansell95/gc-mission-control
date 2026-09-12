@@ -17,7 +17,7 @@ const STATUS_STYLES = {
   planning: 'bg-slate-100 text-slate-600',
   in_progress: 'bg-blue-100 text-blue-700',
   decommissioning: 'bg-amber-100 text-amber-700',
-  completed: 'bg-[#2E5A1A]/15 text-[#2E5A1A]',
+  completed: 'bg-primary/15 text-primary',
   on_hold: 'bg-rose-100 text-rose-700',
   cancelled: 'bg-slate-200 text-slate-500 line-through',
 };
@@ -160,11 +160,11 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
       {/* Project selector */}
       <div className="hub-glass rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-3">
-          <Building2 className="w-5 h-5 text-[#2E5A1A] flex-shrink-0" />
+          <Building2 className="w-5 h-5 text-primary flex-shrink-0" />
           <select
             value={effectiveProjectId || ''}
             onChange={(e) => setSelectedProjectId(e.target.value)}
-            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A] bg-white"
+            className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary bg-white"
           >
             {projectOptions.map((p) => (
               <option key={p.id} value={p.id}>{p.name}{p.reference ? ` (${p.reference})` : ''}</option>
@@ -213,7 +213,7 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
         {/* Revenue breakdown */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
+            <TrendingUp className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-semibold text-slate-800">Revenue Breakdown</h3>
           </div>
           <div className="space-y-2">
@@ -225,7 +225,7 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
           </div>
           <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-sm">
             <span className="font-semibold text-slate-600">Total Revenue</span>
-            <span className="font-bold text-[#2E5A1A] tabular-nums">{fmt(totals.revenue)}</span>
+            <span className="font-bold text-primary tabular-nums">{fmt(totals.revenue)}</span>
           </div>
         </div>
 
@@ -305,14 +305,14 @@ export default function ProjectFinancialsDetail({ onSelectJob }) {
                 {jobRows.map((r) => (
                   <React.Fragment key={r.id}>
                     <tr
-                      className="hover:bg-[#2E5A1A]/5 transition cursor-pointer"
+                      className="hover:bg-primary/5 transition cursor-pointer"
                       onClick={() => setExpandedJob(expandedJob === r.id ? null : r.id)}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {expandedJob === r.id ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
                           <div className="min-w-0">
-                            <button onClick={(e) => { e.stopPropagation(); onSelectJob?.({ id: r.id, name: r.name }); }} className="text-left font-medium text-slate-800 hover:text-[#2E5A1A] truncate block">
+                            <button onClick={(e) => { e.stopPropagation(); onSelectJob?.({ id: r.id, name: r.name }); }} className="text-left font-medium text-slate-800 hover:text-primary truncate block">
                               {r.name}
                             </button>
                             <p className="text-[10px] text-slate-400">{r.client} · {r.revenueMethod}</p>

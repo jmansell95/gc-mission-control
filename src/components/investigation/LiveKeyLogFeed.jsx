@@ -145,7 +145,7 @@ export default function LiveKeyLogFeed({ jobs = [] }) {
             <div key={day.date} className="space-y-2">
               {/* Day header — clear date with activity count */}
               <div className="flex items-center gap-2 px-1 pt-1">
-                <Calendar className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />
+                <Calendar className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                 <p className="text-xs font-bold text-slate-700">{dayLabel(day.date)}</p>
                 <span className="text-[10px] text-slate-400">
                   {Object.values(day.jobs).reduce((s, g) => s + g.logs.length, 0)} activities
@@ -159,7 +159,7 @@ export default function LiveKeyLogFeed({ jobs = [] }) {
                 return (
                   <div key={`${day.date}-${group.jobId}`} className="rounded-xl border border-slate-100 overflow-hidden">
                     <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/80 border-b border-slate-100">
-                      <ArrowUpRight className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />
+                      <ArrowUpRight className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                       <p className="text-xs font-bold text-slate-800 truncate flex-1">{group.jobName}</p>
                       <span className="text-[10px] text-slate-400 flex-shrink-0">{group.logs.length} {group.logs.length === 1 ? 'activity' : 'activities'}</span>
                     </div>

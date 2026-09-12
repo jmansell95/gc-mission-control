@@ -14,7 +14,7 @@ export default function PageLoadingOverlay({ isLoading, pageName }) {
         >
           <div className="flex flex-col items-center gap-3">
             <div className="relative">
-              <div className="w-12 h-12 border-4 border-[#2E5A1A]/15 rounded-full" />
+              <div className="w-12 h-12 border-4 border-primary/15 rounded-full" />
               <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-[#2E5A1A] rounded-full animate-spin" />
             </div>
             <p className="text-sm font-semibold text-slate-700 tracking-tight">

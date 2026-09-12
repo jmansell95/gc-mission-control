@@ -107,7 +107,7 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
                     type="button"
                     onClick={() => setForm(f => ({ ...f, staff_type: opt.v }))}
                     className={'flex-1 px-3 py-2 rounded-lg text-xs font-bold border transition ' +
-                      (form.staff_type === opt.v ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
+                      (form.staff_type === opt.v ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')}
                   >
                     {opt.label}
                   </button>
@@ -136,7 +136,7 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
           {/* Module permissions */}
           <div>
             <div className="flex items-center gap-2 mb-2.5">
-              <Shield className="w-4 h-4 text-[#2E5A1A]" />
+              <Shield className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-bold text-slate-900">Module Permissions</h3>
             </div>
             <AccessModuleGrid
@@ -156,7 +156,7 @@ export default function AccessGroupEditor({ group, onCancel, onSave, saving }) {
           <button
             onClick={() => onSave(form)}
             disabled={saving || !form.name.trim()}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm"
           >
             <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save Group'}
           </button>

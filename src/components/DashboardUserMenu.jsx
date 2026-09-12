@@ -39,7 +39,7 @@ export default function DashboardUserMenu() {
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        className="flex items-center gap-2.5 py-1.5 pl-1.5 pr-3 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A]/30 hover:bg-slate-50 transition shadow-sm cursor-pointer touch-manipulation select-none"
+        className="flex items-center gap-2.5 py-1.5 pl-1.5 pr-3 rounded-xl bg-white border border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition shadow-sm cursor-pointer touch-manipulation select-none"
       >
         <ProfileAvatar name={displayName} avatarUrl={displayAvatar} size={34} />
         <div className="text-left hidden sm:block">

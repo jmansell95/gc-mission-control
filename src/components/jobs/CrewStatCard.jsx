@@ -19,7 +19,7 @@ const roleLabels = {
 const statusMeta = {
   assigned: { label: 'Assigned', icon: Clock, cls: 'text-slate-600 bg-slate-100' },
   started: { label: 'On Shift', icon: PlayCircle, cls: 'text-blue-700 bg-blue-100' },
-  completed: { label: 'Done', icon: CheckCircle2, cls: 'text-[#2E5A1A] bg-emerald-100' },
+  completed: { label: 'Done', icon: CheckCircle2, cls: 'text-primary bg-emerald-100' },
 };
 
 // Stat-focused crew card for the redesigned Daily Schedule tab.
@@ -42,11 +42,11 @@ export default function CrewStatCard({ member, rotas, rigs, allStaff, primaryTyp
     >
       {/* Header — avatar, name, role, worker-type badge */}
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0 ring-1 ring-[#2E5A1A]/10">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0 ring-1 ring-primary/10">
           {member.avatar_url ? (
             <img src={member.avatar_url} alt={member.name} className="w-full h-full rounded-xl object-cover" />
           ) : (
-            <span className="text-[#2E5A1A] font-bold text-base">{member.name.charAt(0)}</span>
+            <span className="text-primary font-bold text-base">{member.name.charAt(0)}</span>
           )}
         </div>
         <div className="min-w-0 flex-1">
@@ -61,7 +61,7 @@ export default function CrewStatCard({ member, rotas, rigs, allStaff, primaryTyp
       {/* Stat pill row 1 — Rig + Role + Status */}
       <div className="flex items-center gap-1.5 flex-wrap mb-2.5">
         {stats.rig ? (
-          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg font-semibold bg-[#2E5A1A] text-white shadow-sm">
+          <span className="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg font-semibold bg-primary text-white shadow-sm">
             <Cog className="w-3 h-3" /> {stats.rig.name || 'Rig'}
           </span>
         ) : (
@@ -120,7 +120,7 @@ export default function CrewStatCard({ member, rotas, rigs, allStaff, primaryTyp
       </div>
 
       {/* Click-to-view hint */}
-      <div className="mt-3 flex items-center justify-center gap-1 text-[11px] font-semibold text-[#2E5A1A] group-hover:gap-1.5 transition-all">
+      <div className="mt-3 flex items-center justify-center gap-1 text-[11px] font-semibold text-primary group-hover:gap-1.5 transition-all">
         View crew details <ChevronRight className="w-3.5 h-3.5" />
       </div>
     </motion.button>

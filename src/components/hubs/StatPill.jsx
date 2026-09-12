@@ -9,7 +9,7 @@ import AnimatedNumber from '@/components/hubs/AnimatedNumber';
  * Props: icon, label, value, sublabel, color, onClick, active, delta ({ value, positive })
  */
 const TONES = {
-  brand: 'bg-[#2E5A1A]/10 text-[#2E5A1A]',
+  brand: 'bg-primary/10 text-primary',
   emerald: 'bg-emerald-50 text-emerald-600',
   blue: 'bg-blue-50 text-blue-600',
   amber: 'bg-amber-50 text-amber-600',
@@ -29,7 +29,7 @@ export default function StatPill({ icon: Icon, label, value, sublabel, color = '
       style={{ animationDelay: `${index * 50}ms` }}
       className={`hub-glass rounded-2xl px-3 py-2.5 sm:px-3.5 sm:py-3 text-left animate-slide-up transition-all duration-200 min-w-0 ${
         onClick ? 'hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98] cursor-pointer' : ''
-      } ${active ? 'ring-2 ring-[#2E5A1A]/40' : ''}`}
+      } ${active ? 'ring-2 ring-primary/40' : ''}`}
     >
       <div className="flex items-center gap-2 mb-1 min-w-0">
         {Icon && (

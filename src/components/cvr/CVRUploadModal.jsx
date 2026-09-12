@@ -125,7 +125,7 @@ export default function CVRUploadModal({ job, onClose }) {
           {/* Stage: parsing — spinner */}
           {stage === 'parsing' && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
               <p className="text-sm font-semibold text-slate-700">Parsing CVR spreadsheet…</p>
               <p className="text-xs text-slate-400 mt-1">Extracting financial summary, line items, variations & cash flow</p>
             </div>
@@ -176,7 +176,7 @@ export default function CVRUploadModal({ job, onClose }) {
           {/* Stage: committing */}
           {stage === 'committing' && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
               <p className="text-sm font-semibold text-slate-700">Saving CVR data…</p>
             </div>
           )}
@@ -232,7 +232,7 @@ function PreviewTile({ label, value }) {
 function CountTile({ label, count }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-3 text-center">
-      <p className="text-2xl font-bold text-[#2E5A1A] tabular-nums">{count}</p>
+      <p className="text-2xl font-bold text-primary tabular-nums">{count}</p>
       <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide mt-0.5">{label}</p>
     </div>
   );

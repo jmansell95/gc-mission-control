@@ -12,7 +12,7 @@ export default function IntegrationRiskMap() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <Plug className="w-5 h-5 text-[#2E5A1A]" />
+        <Plug className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-900 text-sm">Integration Mapping & Risk</h3>
         <div className="ml-auto flex items-center gap-2">
           {['High', 'Medium', 'Low'].map(r => {

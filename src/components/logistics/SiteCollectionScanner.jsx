@@ -417,7 +417,7 @@ export default function SiteCollectionScanner({ delivery, onClose }) {
           <div className="max-w-2xl mx-auto">
             <button
               onClick={() => setShowComplete(true)}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A] text-white rounded-xl font-bold text-sm hover:bg-[#1c4a12] transition shadow-sm active:scale-95"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition shadow-sm active:scale-95"
             >
               <Truck className="w-5 h-5" /> Complete Collection ({collectedItems.length} items loaded)
             </button>

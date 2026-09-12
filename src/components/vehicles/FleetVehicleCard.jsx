@@ -271,7 +271,7 @@ export default function FleetVehicleCard({ vehicle, liveLocation, nextBooking, d
 
       <div className="px-4 py-3 flex items-center justify-between gap-2 text-[11px]">
         <div className="flex items-center gap-3">
-          <button onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }} className="flex items-center gap-1 text-[#2E5A1A] font-semibold hover:underline">
+          <button onClick={(e) => { e.stopPropagation(); onBookMaintenance(); }} className="flex items-center gap-1 text-primary font-semibold hover:underline">
             <Wrench className="w-3 h-3" /> Book
           </button>
           <button onClick={handleDownloadReport} disabled={reportLoading} className="flex items-center gap-1 text-blue-600 font-semibold hover:underline disabled:opacity-50">

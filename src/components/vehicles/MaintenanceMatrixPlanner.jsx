@@ -71,7 +71,7 @@ export default function MaintenanceMatrixPlanner({ bookings, vehicles, staff, on
     <div className="hub-glass rounded-2xl overflow-hidden">
       {/* Month navigation */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 bg-slate-50/80">
-        <Calendar className="w-4 h-4 text-[#2E5A1A]" />
+        <Calendar className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-slate-800">Maintenance Planner</h3>
         <span className="text-[11px] text-slate-400">Months × drivers</span>
         <div className="flex items-center gap-1.5 ml-auto">

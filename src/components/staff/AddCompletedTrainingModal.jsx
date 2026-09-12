@@ -151,7 +151,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
     setSaving(false);
   };
 
-  const inputCls = 'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputCls = 'w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
   const labelCls = 'block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5';
 
   return (
@@ -242,9 +242,9 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
           ) : (
             <div>
               <label className={labelCls}>Certificate (optional)</label>
-              <label className="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+              <label className="flex items-center gap-3 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition">
                 <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => handleFile(e.target.files?.[0], 'front')} />
-                {uploadingSide === 'front' ? <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" /> : <Upload className="w-5 h-5 text-slate-400" />}
+                {uploadingSide === 'front' ? <Loader2 className="w-5 h-5 text-primary animate-spin" /> : <Upload className="w-5 h-5 text-slate-400" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-700 truncate">{form.certificate_name || 'Upload certificate / card photo'}</p>
                   <p className="text-[10px] text-slate-400">Image or PDF · auto-creates compliance record</p>
@@ -258,7 +258,7 @@ export default function AddCompletedTrainingModal({ staffId, staffName, onClose 
           <div className="flex gap-2 pt-2 border-t border-slate-100">
             <button onClick={onClose} className="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
             <button onClick={handleSave} disabled={saving || !!uploadingSide}
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               {saving ? 'Saving…' : 'Record Training'}
             </button>
@@ -273,10 +273,10 @@ function CardUploadTile({ label, fileUrl, fileName, uploading, onFile }) {
   return (
     <label className="block">
       <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">{label}</span>
-      <label className="flex flex-col items-center gap-1.5 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition h-full min-h-[120px] justify-center">
+      <label className="flex flex-col items-center gap-1.5 p-3 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition h-full min-h-[120px] justify-center">
         <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => onFile(e.target.files?.[0])} />
         {uploading ? (
-          <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
         ) : fileUrl ? (
           fileUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
             <img src={fileUrl} alt={fileName} className="w-full h-16 object-cover rounded-md" />
@@ -287,7 +287,7 @@ function CardUploadTile({ label, fileUrl, fileName, uploading, onFile }) {
           <Upload className="w-5 h-5 text-slate-300" />
         )}
         <p className="text-[10px] text-slate-500 truncate w-full text-center">{fileName || 'Upload'}</p>
-        {fileUrl && <span className="text-[9px] text-[#2E5A1A] font-semibold">Replace</span>}
+        {fileUrl && <span className="text-[9px] text-primary font-semibold">Replace</span>}
       </label>
     </label>
   );

@@ -150,7 +150,7 @@ export default function GeotechDataTab({ job, allStaff, suppliers, assets }) {
           <div className="ml-auto flex items-center gap-2">
             {stats.needsCollection > 0 && (
               <button onClick={() => handleScheduleRun()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-xs font-semibold">
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-xs font-semibold">
                 <Truck className="w-3.5 h-3.5" /> Schedule Run ({stats.needsCollection})
               </button>
             )}

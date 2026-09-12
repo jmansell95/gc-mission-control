@@ -118,10 +118,10 @@ function DutyCard({ item, mittiUrls, onAction }) {
         <button
           onClick={handleAction}
           type="button"
-          className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-center active:scale-90 transition hover:border-[#2E5A1A]/30"
+          className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-center active:scale-90 transition hover:border-primary/30"
         >
           {item.action_type === 'mitti_form' ? (
-            <ExternalLink className="w-4 h-4 text-[#2E5A1A]" />
+            <ExternalLink className="w-4 h-4 text-primary" />
           ) : (
             <ChevronRight className="w-4 h-4 text-slate-400" />
           )}
@@ -192,7 +192,7 @@ export default function MyDutiesPage() {
 
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         )}
 
@@ -208,7 +208,7 @@ export default function MyDutiesPage() {
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center">
-              <ClipboardCheck className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+              <ClipboardCheck className="w-4 h-4 text-primary" strokeWidth={2.5} />
             </div>
             <div>
               <h2 className="text-sm font-extrabold text-slate-900">Assigned Tasks</h2>
@@ -227,7 +227,7 @@ export default function MyDutiesPage() {
             <div key={cycle.key}>
               <div className="flex items-center gap-2 mb-3 px-1">
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center">
-                  <CycleIcon className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+                  <CycleIcon className="w-4 h-4 text-primary" strokeWidth={2.5} />
                 </div>
                 <div>
                   <h2 className="text-sm font-extrabold text-slate-900">{cycle.label}</h2>

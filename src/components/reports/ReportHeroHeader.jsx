@@ -26,7 +26,7 @@ export default function ReportHeroHeader({ onBuildCustom }) {
         {onBuildCustom && (
           <button
             onClick={onBuildCustom}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#2E5A1A] text-sm font-bold hover:bg-white/90 transition shadow-lg flex-shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-primary text-sm font-bold hover:bg-white/90 transition shadow-lg flex-shrink-0"
           >
             <Sparkles className="w-4 h-4" /> Build Custom Report
           </button>

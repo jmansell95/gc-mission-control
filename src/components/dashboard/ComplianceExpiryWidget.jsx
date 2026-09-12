@@ -164,7 +164,7 @@ export default function ComplianceExpiryWidget({ onNavigate }) {
       {onNavigate && flagged.length > 0 && (
         <button
           onClick={() => onNavigate('compliance')}
-          className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-[#2E5A1A] hover:underline pt-1"
+          className="w-full flex items-center justify-center gap-1 text-xs font-semibold text-primary hover:underline pt-1"
         >
           Open Compliance Manager <ChevronRight className="w-3.5 h-3.5" />
         </button>

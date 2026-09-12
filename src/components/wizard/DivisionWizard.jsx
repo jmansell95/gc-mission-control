@@ -161,12 +161,12 @@ export default function DivisionWizard({ onClose, onCreated }) {
             return (
               <React.Fragment key={s.id}>
                 <div className={'flex items-center gap-1.5 transition ' + (active ? 'scale-110' : '')}>
-                  <div className={'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ' + (done ? 'bg-[#2E5A1A] text-white' : active ? 'command-gradient text-white shadow-md' : 'bg-slate-100 text-slate-400')}>
+                  <div className={'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ' + (done ? 'bg-primary text-white' : active ? 'command-gradient text-white shadow-md' : 'bg-slate-100 text-slate-400')}>
                     {done ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                   </div>
-                  <span className={'text-[11px] font-bold hidden sm:inline ' + (active ? 'text-slate-900' : done ? 'text-[#2E5A1A]' : 'text-slate-400')}>{s.label}</span>
+                  <span className={'text-[11px] font-bold hidden sm:inline ' + (active ? 'text-slate-900' : done ? 'text-primary' : 'text-slate-400')}>{s.label}</span>
                 </div>
-                {i < STEPS.length - 1 && <div className={'flex-1 h-0.5 rounded-full transition ' + (done ? 'bg-[#2E5A1A]' : 'bg-slate-200')} />}
+                {i < STEPS.length - 1 && <div className={'flex-1 h-0.5 rounded-full transition ' + (done ? 'bg-primary' : 'bg-slate-200')} />}
               </React.Fragment>
             );
           })}

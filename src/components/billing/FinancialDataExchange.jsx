@@ -252,9 +252,9 @@ export default function FinancialDataExchange() {
   const Btn = ({ onClick, disabled, busy: btnBusy, icon: Icon, label, variant = 'primary' }) => (
     <button onClick={onClick} disabled={disabled || btnBusy}
       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition disabled:opacity-50 ${
-        variant === 'primary' ? 'bg-[#2E5A1A] text-white hover:bg-[#1c4a12]'
+        variant === 'primary' ? 'bg-primary text-white hover:bg-primary/90'
         : variant === 'secondary' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-        : 'bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5'
+        : 'bg-white text-primary border border-primary/20 hover:bg-primary/5'
       }`}>
       {btnBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icon className="w-3.5 h-3.5" />}
       {label}
@@ -338,8 +338,8 @@ export default function FinancialDataExchange() {
       </div>
 
       {/* Info banner */}
-      <div className="mt-4 bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 rounded-xl border border-[#2E5A1A]/15 p-4 flex items-start gap-3">
-        <CheckCircle2 className="w-5 h-5 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+      <div className="mt-4 bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 rounded-xl border border-primary/15 p-4 flex items-start gap-3">
+        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-slate-800">How the data flows</p>
           <p className="text-xs text-slate-600 mt-1">

@@ -28,9 +28,9 @@ export default function AuditList({ onSelect }) {
   if (reports.length === 0) return <HubEmptyState icon={FileText} title="No audits synced" description="Mitti audits will appear here once the integration is configured and synced." />;
   return (
     <HubCard icon={FileText} title="All Audits" subtitle={`${filtered.length} of ${reports.length} audits`} tone="brand"
-      action={<div className="relative"><Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] w-40 sm:w-52" /></div>}>
+      action={<div className="relative"><Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-primary w-40 sm:w-52" /></div>}>
       <div className="flex gap-1.5 mb-3 overflow-x-auto no-scrollbar">
-        {chips.map(c => <button key={c.key} onClick={() => setFilter(c.key)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${filter === c.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{c.label}</button>)}
+        {chips.map(c => <button key={c.key} onClick={() => setFilter(c.key)} className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${filter === c.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{c.label}</button>)}
       </div>
       <div className="space-y-2">
         {filtered.slice(0, 50).map(r => {

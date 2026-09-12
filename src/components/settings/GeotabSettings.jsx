@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import GeofenceSettings from '@/components/settings/GeofenceSettings';
 import { useDivisionAppSetting } from '@/hooks/useDivisionAppSetting';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   server: 'my.geotab.com',
@@ -144,7 +144,7 @@ export default function GeotabSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Geotab API Credentials</h3>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-slate-600 space-y-1.5">
@@ -204,23 +204,23 @@ export default function GeotabSettings() {
           </div>
         )}
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
 
       {/* Manual sync */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <MapPin className="w-4 h-4 text-[#2E5A1A]" />
+          <MapPin className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Pull Live Locations Now</h3>
           <span className="ml-auto text-xs text-slate-400">Fetch current GPS positions from all vehicles</span>
         </div>
         <p className="text-xs text-slate-500 mb-3">Fetches the current location, speed, ignition status and odometer for every vehicle in your Geotab account and stores them as location logs. Vehicles are matched to your local records by registration number. View the results on the Vehicles page → Live Map.</p>
         <button onClick={handleSync} disabled={!connected || syncing}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
           {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Satellite className="w-4 h-4" />} Sync Locations Now
         </button>
         {!connected && <p className="text-[11px] text-amber-600 mt-2 text-center">Save your Geotab credentials first to enable location sync.</p>}
@@ -248,7 +248,7 @@ export default function GeotabSettings() {
       {/* Timesheet auto-generation from GPS */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Clock className="w-4 h-4 text-[#2E5A1A]" />
+          <Clock className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Auto-Generate Timesheets from GPS</h3>
           <span className="ml-auto text-xs text-slate-400">Geofence-based arrival/departure detection</span>
         </div>
@@ -264,7 +264,7 @@ export default function GeotabSettings() {
             </div>
           </div>
           <button onClick={handleTsSync} disabled={!connected || tsSyncing || !tsDate}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition whitespace-nowrap">
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition whitespace-nowrap">
             {tsSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />} Generate Timesheets
           </button>
         </div>

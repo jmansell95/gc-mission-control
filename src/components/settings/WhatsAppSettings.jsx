@@ -9,7 +9,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   api_url: 'https://graph.facebook.com/v18.0',
@@ -153,7 +153,7 @@ export default function WhatsAppSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Meta Business Suite Credentials</h3>
         </div>
         <p className="text-xs text-slate-500">Set up WhatsApp Business in the <code className="bg-slate-100 px-1 rounded">Meta Business Suite</code>. Go to WhatsApp Manager → API Setup to get your phone number ID and access token. The business account ID is in Meta Business Suite → Business Settings.</p>
@@ -180,17 +180,17 @@ export default function WhatsAppSettings() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
 
       {/* Alert preferences */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Send className="w-4 h-4 text-[#2E5A1A]" />
+          <Send className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Alert Preferences</h3>
         </div>
         <p className="text-xs text-slate-500">Choose which events trigger a WhatsApp message to crew members.</p>
@@ -215,7 +215,7 @@ export default function WhatsAppSettings() {
       {/* Send test message */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Send className="w-4 h-4 text-[#2E5A1A]" />
+          <Send className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Send Test Message</h3>
         </div>
         <p className="text-xs text-slate-500">Verify outbound messaging by sending a test WhatsApp message to a crew member's phone. Use international format (e.g. 447123456789).</p>
@@ -223,7 +223,7 @@ export default function WhatsAppSettings() {
           <input type="tel" value={testPhone} onChange={e => setTestPhone(e.target.value)}
             placeholder="447123456789" className={`${inputCls} font-mono`} />
           <button onClick={handleSendTest} disabled={sendingTest || !connected || !testPhone}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition flex-shrink-0">
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition flex-shrink-0">
             {sendingTest ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Send Test
           </button>
         </div>
@@ -238,7 +238,7 @@ export default function WhatsAppSettings() {
       {/* Webhook receiver */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Webhook className="w-4 h-4 text-[#2E5A1A]" />
+          <Webhook className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Webhook Receiver</h3>
         </div>
         <p className="text-xs text-slate-500">Add this URL to your Meta App's WhatsApp webhook configuration. Subscribe to <code className="bg-slate-100 px-1 rounded">messages</code> and <code className="bg-slate-100 px-1 rounded">message_status</code> events to receive delivery receipts and inbound replies.</p>

@@ -167,7 +167,7 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
           {crew.jobName && (
             <div className="hub-glass rounded-xl p-3">
               <div className="flex items-center gap-2 mb-1">
-                <Briefcase className="w-3.5 h-3.5 text-[#2E5A1A]" />
+                <Briefcase className="w-3.5 h-3.5 text-primary" />
                 <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Active Job</p>
               </div>
               <p className="text-sm font-semibold text-slate-800">{crew.jobName}</p>
@@ -177,7 +177,7 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
           {/* Tracking health */}
           <div className="hub-glass rounded-xl p-3 space-y-2.5">
             <div className="flex items-center gap-2 mb-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#2E5A1A]" />
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Tracking Health</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -242,7 +242,7 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
           {/* Day trail stats */}
           <div className="hub-glass rounded-xl p-3">
             <div className="flex items-center gap-2 mb-2">
-              <Route className="w-3.5 h-3.5 text-[#2E5A1A]" />
+              <Route className="w-3.5 h-3.5 text-primary" />
               <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Today's Trail</p>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -265,8 +265,8 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
           {allPoints.length > 0 && (
             <div className="hub-glass rounded-xl overflow-hidden">
               <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#2E5A1A]" /> Day Trail</p>
-                <button onClick={() => setShowTrail(s => !s)} className="text-[10px] font-semibold text-[#2E5A1A] hover:underline">
+                <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> Day Trail</p>
+                <button onClick={() => setShowTrail(s => !s)} className="text-[10px] font-semibold text-primary hover:underline">
                   {showTrail ? 'Hide' : 'Show'}
                 </button>
               </div>
@@ -274,7 +274,7 @@ export default function CrewDetailDrawer({ crew, open, onClose }) {
                 <div style={{ height: 250 }} className="relative">
                   {isLoading ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
                     </div>
                   ) : (
                     <MapContainer center={allPoints[allPoints.length - 1] || UK_CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom>

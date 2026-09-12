@@ -53,7 +53,7 @@ export default function AssetDetailHero({ asset, onBack, onEdit, onRecert, onQR,
 
       {/* Top row — back + actions */}
       <div className="flex items-center justify-between px-4 pt-3 pb-1">
-        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-slate-500 hover:text-[#2E5A1A] text-xs font-semibold transition">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-slate-500 hover:text-primary text-xs font-semibold transition">
           <ArrowLeft className="w-4 h-4" /> Assets
         </button>
         <div className="flex items-center gap-1.5">
@@ -63,7 +63,7 @@ export default function AssetDetailHero({ asset, onBack, onEdit, onRecert, onQR,
             </button>
           )}
           {onRecert && (
-            <button onClick={onRecert} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A] text-white hover:bg-[#1c4a12] rounded-lg text-xs font-bold transition shadow-sm">
+            <button onClick={onRecert} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-lg text-xs font-bold transition shadow-sm">
               <Upload className="w-3.5 h-3.5" /> Upload Cert
             </button>
           )}

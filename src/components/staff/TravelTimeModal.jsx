@@ -115,7 +115,7 @@ export default function TravelTimeModal({ open, onClose, onConfirm, dayType = 'm
                 Cancel
               </button>
               <button onClick={handleConfirm} disabled={!canConfirm}
-                className="flex items-center justify-center gap-1.5 flex-1 px-4 py-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#244715] active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
+                className="flex items-center justify-center gap-1.5 flex-1 px-4 py-3 bg-primary text-white rounded-xl hover:bg-[#244715] active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Car className="w-4 h-4" />}
                 {saving ? 'Saving…' : 'Log Travel Time'}
               </button>

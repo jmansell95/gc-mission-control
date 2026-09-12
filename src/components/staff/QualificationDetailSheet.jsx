@@ -20,7 +20,7 @@ function statusInfo(item) {
   return { label: 'Valid', Icon: CheckCircle2, cls: 'text-emerald-600 bg-emerald-50' };
 }
 
-const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 
 export default function QualificationDetailSheet({
   open, onOpenChange, staff, category, allCategories = [], complianceItems, bookings, courses, onBookTraining,
@@ -150,7 +150,7 @@ export default function QualificationDetailSheet({
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function QualificationDetailSheet({
               <ScanLine className="w-3.5 h-3.5" /> Scan & Auto-Fill
             </button>
             <button onClick={() => { setShowAdd(true); setShowScan(false); }}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 rounded-lg text-xs font-semibold hover:bg-[#2E5A1A]/5 transition">
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-primary border border-primary/20 rounded-lg text-xs font-semibold hover:bg-primary/5 transition">
               <Plus className="w-3.5 h-3.5" /> Add Manually
             </button>
             <button onClick={handleMarkMissing} disabled={saving}
@@ -205,7 +205,7 @@ export default function QualificationDetailSheet({
                           {item.expiry_date && <span>· exp {formatComplianceDate(item.expiry_date)}</span>}
                           {item.document_url && (
                             <a href={item.document_url} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-0.5 text-[#2E5A1A] hover:underline">
+                              className="inline-flex items-center gap-0.5 text-primary hover:underline">
                               <ExternalLink className="w-2.5 h-2.5" /> doc
                             </a>
                           )}
@@ -299,7 +299,7 @@ export default function QualificationDetailSheet({
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Document / Certificate File</label>
                 <input ref={fileRef} type="file" accept="image/*,.pdf" onChange={handleFileUpload}
-                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#2E5A1A] file:text-white hover:file:bg-[#1c4a12] file:cursor-pointer cursor-pointer" />
+                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-[#1c4a12] file:cursor-pointer cursor-pointer" />
                 {uploading && (
                   <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…
@@ -310,7 +310,7 @@ export default function QualificationDetailSheet({
                     <FileText className="w-3.5 h-3.5 text-emerald-600" />
                     <span className="truncate flex-1">{docName}</span>
                     {docUrl && (
-                      <a href={docUrl} target="_blank" rel="noopener noreferrer" className="text-[#2E5A1A] hover:underline font-medium">View</a>
+                      <a href={docUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">View</a>
                     )}
                     <button type="button" onClick={() => { setDocUrl(null); setDocName(null); }} className="text-slate-400 hover:text-red-500">
                       <X className="w-3.5 h-3.5" />
@@ -320,7 +320,7 @@ export default function QualificationDetailSheet({
               </div>
 
               <button type="submit" disabled={saving || uploading}
-                className="w-full px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+                className="w-full px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                 {saving ? 'Saving…' : 'Save Item'}
               </button>
             </form>

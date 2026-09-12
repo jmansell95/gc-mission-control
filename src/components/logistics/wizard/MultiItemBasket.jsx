@@ -241,7 +241,7 @@ export default function MultiItemBasket({
           <div className="px-5 py-3 border-b border-slate-200/80 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search rate card…" className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" autoFocus />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search rate card…" className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" autoFocus />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-3 min-h-0">
@@ -267,9 +267,9 @@ export default function MultiItemBasket({
                             const isSelected = selectedIds.has(r.id);
                             const st = itemStates[r.id] || {};
                             return (
-                              <div key={r.id} className={`rounded-xl border transition ${isSelected ? 'border-[#2E5A1A]/40 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                              <div key={r.id} className={`rounded-xl border transition ${isSelected ? 'border-primary/40 bg-primary/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
                                 <div className="flex items-start gap-2.5 p-2.5">
-                                  <button type="button" onClick={() => toggleItem(r)} className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${isSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'bg-white border-slate-300 hover:border-slate-400'}`}>
+                                  <button type="button" onClick={() => toggleItem(r)} className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${isSelected ? 'bg-primary border-primary' : 'bg-white border-slate-300 hover:border-slate-400'}`}>
                                     {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
                                   </button>
                                   <div className="min-w-0 flex-1">
@@ -336,7 +336,7 @@ export default function MultiItemBasket({
                   value={row.description}
                   onChange={e => updateManualRow(row.temp_id, 'description', e.target.value)}
                   placeholder="Item description"
-                  className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                  className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                 />
                 {manualRows.length > 1 && (
                   <button onClick={() => removeManualRow(row.temp_id)} className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-500 flex items-center justify-center transition flex-shrink-0">
@@ -370,7 +370,7 @@ export default function MultiItemBasket({
               )}
             </div>
           ))}
-          <button type="button" onClick={addManualRow} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-[#2E5A1A]/40 hover:text-[#2E5A1A] text-sm font-semibold transition flex items-center justify-center gap-1.5">
+          <button type="button" onClick={addManualRow} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-primary/40 hover:text-primary text-sm font-semibold transition flex items-center justify-center gap-1.5">
             <Plus className="w-4 h-4" /> Add another row
           </button>
         </div>
@@ -381,7 +381,7 @@ export default function MultiItemBasket({
         <div className="border-t border-slate-200/80 bg-white px-5 py-3 flex-shrink-0">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center"><ShoppingCart className="w-4 h-4 text-[#2E5A1A]" /></div>
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><ShoppingCart className="w-4 h-4 text-primary" /></div>
               <div>
                 <p className="text-sm font-bold text-slate-900">{itemCount} item{itemCount !== 1 ? 's' : ''}</p>
                 <p className="text-[11px] text-slate-500">
@@ -391,7 +391,7 @@ export default function MultiItemBasket({
                 </p>
               </div>
             </div>
-            <button type="button" onClick={handleCommit} disabled={committing} className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] active:scale-95 transition disabled:opacity-50 flex-shrink-0">
+            <button type="button" onClick={handleCommit} disabled={committing} className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 active:scale-95 transition disabled:opacity-50 flex-shrink-0">
               {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {committing ? 'Adding…' : `Add ${itemCount} Item${itemCount !== 1 ? 's' : ''}`}
             </button>

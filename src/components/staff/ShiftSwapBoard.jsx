@@ -217,7 +217,7 @@ export default function ShiftSwapBoard({ staff, divisionId, myAssignments = [], 
                   {/* Actions */}
                   <div className="flex gap-2 mt-3">
                     {canClaim && (
-                      <button onClick={() => handleClaim(swap)} className="flex-1 py-2 rounded-xl bg-[#2E5A1A] text-white text-xs font-bold active:scale-95 transition">
+                      <button onClick={() => handleClaim(swap)} className="flex-1 py-2 rounded-xl bg-primary text-white text-xs font-bold active:scale-95 transition">
                         Claim Shift
                       </button>
                     )}

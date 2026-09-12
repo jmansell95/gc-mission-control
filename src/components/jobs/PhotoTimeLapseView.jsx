@@ -86,7 +86,7 @@ export default function PhotoTimeLapseView({ jobId }) {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setPlaying(p => !p)}
-          className="w-10 h-10 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center hover:bg-[#1c4a12] transition flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary/90 transition flex-shrink-0"
         >
           {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
         </button>
@@ -110,7 +110,7 @@ export default function PhotoTimeLapseView({ jobId }) {
             <button
               key={p.id}
               onClick={() => { setIndex(i); setPlaying(false); }}
-              className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition ${i === index ? 'border-[#2E5A1A]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition ${i === index ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`}
             >
               <img src={p.photo_url} alt="" className="w-full h-full object-cover" />
             </button>

@@ -36,7 +36,7 @@ export default function NoCrewProfileState({ tab = 'performance', onGoAdmin, onC
           <button
             onClick={onCreateProfile}
             disabled={creating}
-            className="mt-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 inline-flex items-center gap-2"
+            className="mt-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 inline-flex items-center gap-2"
           >
             {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
             {creating ? 'Creating…' : 'Create My Crew Profile'}

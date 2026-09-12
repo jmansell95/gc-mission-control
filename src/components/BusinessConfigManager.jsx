@@ -36,7 +36,7 @@ function RuleCard({ icon: Icon, iconBg, iconColor, title, description, value, on
       <div className="flex items-center gap-3">
         <input type="number" min={0} step={1} value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:border-[#2E5A1A]" />
+          className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:border-primary" />
         <span className="text-sm text-slate-500">{suffix}</span>
         <span className="ml-auto text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-lg">{display}</span>
       </div>
@@ -105,7 +105,7 @@ export default function BusinessConfigManager() {
         description="Core working rules that drive the timesheet, payroll & invoicing engine"
         actions={
           <button onClick={handleSave} disabled={saving || !dirty}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#245215] disabled:opacity-50 transition">
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[#245215] disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save rules
           </button>
         }
@@ -148,9 +148,9 @@ export default function BusinessConfigManager() {
           hint="Default 5 hours. Crew get this long to enter travel-home time & submit their timesheet." />
       </div>
 
-      <div className="mt-4 bg-[#2E5A1A]/5 border border-[#2E5A1A]/15 rounded-xl p-4">
+      <div className="mt-4 bg-primary/5 border border-primary/15 rounded-xl p-4">
         <p className="text-xs text-slate-600 leading-relaxed">
-          <span className="font-semibold text-[#2E5A1A]">How this works:</span> these rules are read live by the timesheet engine every time a crew member submits their daily summary, and by the invoice generator when raising invoices. Change a value here and it applies immediately — no code changes needed. Existing approved/merged timesheets are not recalculated.
+          <span className="font-semibold text-primary">How this works:</span> these rules are read live by the timesheet engine every time a crew member submits their daily summary, and by the invoice generator when raising invoices. Change a value here and it applies immediately — no code changes needed. Existing approved/merged timesheets are not recalculated.
         </p>
       </div>
     </div>

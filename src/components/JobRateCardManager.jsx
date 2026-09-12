@@ -114,7 +114,7 @@ export default function JobRateCardManager() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2 flex-wrap">
-        <Briefcase className="w-5 h-5 text-[#2E5A1A]" />
+        <Briefcase className="w-5 h-5 text-primary" />
         <h2 className="font-semibold text-slate-900">Job Rate Cards</h2>
         <span className="ml-auto text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
           {effectiveJobId ? `${jobItems.length} rates` : 'No job selected'}
@@ -123,7 +123,7 @@ export default function JobRateCardManager() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading || !effectiveJobId}
-          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition bg-[#2E5A1A] text-white hover:bg-[#1c4a12] disabled:opacity-50 flex-shrink-0"
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition bg-primary text-white hover:bg-primary/90 disabled:opacity-50 flex-shrink-0"
         >
           {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
           {uploading ? 'Processing...' : 'Upload Job Rate Card'}
@@ -137,7 +137,7 @@ export default function JobRateCardManager() {
           <select
             value={effectiveJobId || ''}
             onChange={(e) => setSelectedJobId(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary bg-white"
           >
             <option value="">Select a job…</option>
             {jobs.map((j) => (
@@ -173,7 +173,7 @@ export default function JobRateCardManager() {
               const active = activeCategory === key;
               return (
                 <button key={key} onClick={() => setActiveCategory(key)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium transition border-b-2 ${active ? 'border-[#2E5A1A] text-[#2E5A1A] bg-[#2E5A1A]/5' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium transition border-b-2 ${active ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
                   {meta.label}
                   <span className="text-xs text-slate-400">({counts[key]})</span>
                 </button>
@@ -185,7 +185,7 @@ export default function JobRateCardManager() {
           <div className="px-4 py-3 border-b border-slate-100">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${CATEGORY_META[activeCategory].label.toLowerCase()} rates for ${selectedJob?.name || 'this job'}…`} className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Search ${CATEGORY_META[activeCategory].label.toLowerCase()} rates for ${selectedJob?.name || 'this job'}…`} className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
           </div>
 

@@ -50,7 +50,7 @@ function JobCard({ job, onClick }) {
           {job.start_date ? format(parseISO(job.start_date), 'dd MMM yyyy') : '—'} → {job.end_date ? format(parseISO(job.end_date), 'dd MMM yyyy') : '—'}
         </p>
       </div>
-      <div className="flex items-center gap-1 mt-3 text-xs font-bold text-[#2E5A1A]">
+      <div className="flex items-center gap-1 mt-3 text-xs font-bold text-primary">
         View project <ChevronRight className="w-3.5 h-3.5" />
       </div>
     </button>
@@ -120,7 +120,7 @@ function JobDetailView({ data, onBack }) {
         {/* Team */}
         {show('team') && team.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-[#2E5A1A]" /> Team</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-primary" /> Team</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {team.map((m, i) => (
                 <div key={i} className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-50">
@@ -140,7 +140,7 @@ function JobDetailView({ data, onBack }) {
         {/* Schedule */}
         {show('schedule') && upcomingDates.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-[#2E5A1A]" /> Upcoming Schedule</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> Upcoming Schedule</h3>
             <div className="space-y-2">
               {upcomingDates.map(d => (
                 <div key={d} className="flex items-start gap-3 p-2.5 rounded-lg bg-slate-50">
@@ -162,7 +162,7 @@ function JobDetailView({ data, onBack }) {
         {/* Milestones */}
         {show('milestones') && milestones.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Target className="w-4 h-4 text-[#2E5A1A]" /> Milestones</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Target className="w-4 h-4 text-primary" /> Milestones</h3>
             <div className="space-y-2">
               {milestones.map((m, i) => (
                 <div key={i} className="flex items-center gap-2.5">
@@ -180,7 +180,7 @@ function JobDetailView({ data, onBack }) {
         {/* Photos */}
         {show('photos') && photos.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Camera className="w-4 h-4 text-[#2E5A1A]" /> Site Photos ({photos.length})</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><Camera className="w-4 h-4 text-primary" /> Site Photos ({photos.length})</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {photos.slice(0, 9).map((p, i) => (
                 <a key={i} href={p.photo_url} target="_blank" rel="noopener noreferrer" className="aspect-square rounded-lg overflow-hidden bg-slate-100 group">
@@ -194,7 +194,7 @@ function JobDetailView({ data, onBack }) {
         {/* Documents */}
         {show('documents') && documents.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-[#2E5A1A]" /> Documents ({documents.length})</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Documents ({documents.length})</h3>
             <div className="space-y-2">
               {documents.map((d, i) => (
                 <a key={i} href={d.document_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
@@ -213,7 +213,7 @@ function JobDetailView({ data, onBack }) {
         {/* Comments */}
         {show('comments') && comments.length > 0 && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><MessageSquare className="w-4 h-4 text-[#2E5A1A]" /> Comments ({comments.length})</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><MessageSquare className="w-4 h-4 text-primary" /> Comments ({comments.length})</h3>
             <div className="space-y-2">
               {comments.slice(0, 10).map((c, i) => (
                 <div key={i} className="p-2.5 rounded-lg bg-slate-50">
@@ -232,7 +232,7 @@ function JobDetailView({ data, onBack }) {
         {/* Billing */}
         {show('client_charge') && billing && (
           <div className="hub-glass rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><PoundSterling className="w-4 h-4 text-[#2E5A1A]" /> {billing.quote_label}</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2"><PoundSterling className="w-4 h-4 text-primary" /> {billing.quote_label}</h3>
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between text-slate-600"><span>Subtotal</span><span className="font-semibold tabular-nums">£{Number(billing.subtotal || 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}</span></div>
               <div className="flex justify-between text-slate-600"><span>VAT ({billing.vat_rate}%)</span><span className="font-semibold tabular-nums">£{Number(billing.vat_amount || 0).toLocaleString('en-GB', { minimumFractionDigits: 2 })}</span></div>
@@ -294,7 +294,7 @@ export default function PortalDashboard() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-20">

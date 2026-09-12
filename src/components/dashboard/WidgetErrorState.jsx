@@ -20,7 +20,7 @@ export default function WidgetErrorState({ message = "Couldn't load this data", 
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 transition"
+          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
         </button>

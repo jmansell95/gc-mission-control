@@ -47,7 +47,7 @@ export default function TodayCrewPopup({ rotas, staff, jobs, teams, todayStr, on
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] text-white text-ui-caption font-semibold hover:bg-[#1c4a12] transition shadow-sm"
+        className="inline-flex items-center justify-center gap-1.5 h-9 px-3 rounded-xl bg-primary text-white text-ui-caption font-semibold hover:bg-primary/90 transition shadow-sm"
       >
         <Users className="w-4 h-4" />
         <span className="hidden sm:inline">Today's Crew</span>

@@ -76,7 +76,7 @@ export default function DelayReasonModal({ open, log, action, onClose, onConfirm
                   rows={3}
                   autoFocus
                   placeholder={isApprove ? 'e.g. Verified with site agent — ground conditions confirmed, rota shifted accordingly.' : 'e.g. Delay was avoidable — crew did not follow the agreed access route.'}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm resize-none focus:ring-2 focus:ring-[#2E5A1A]/20 focus:border-[#2E5A1A]/40 transition"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition"
                 />
               </div>
             </div>
@@ -95,7 +95,7 @@ export default function DelayReasonModal({ open, log, action, onClose, onConfirm
               </button>
               <button
                 onClick={goToCompliance}
-                className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[#2E5A1A] bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/15 transition"
+                className="w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition"
               >
                 <ShieldCheck className="w-4 h-4" /> Go to Compliance Hub <ArrowUpRight className="w-3.5 h-3.5" />
               </button>

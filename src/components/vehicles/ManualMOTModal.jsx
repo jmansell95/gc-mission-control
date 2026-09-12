@@ -127,7 +127,7 @@ export default function ManualMOTModal({ open, onClose, vehicle }) {
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Test Date</label>
             <input type="date" value={testDate} onChange={e => setTestDate(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
           </div>
 
           {/* Expiry date — only for pass/prs/advisory */}
@@ -135,7 +135,7 @@ export default function ManualMOTModal({ open, onClose, vehicle }) {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">New Expiry Date (if known)</label>
               <input type="date" value={expiryDate} onChange={e => setExpiryDate(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
           )}
 
@@ -143,14 +143,14 @@ export default function ManualMOTModal({ open, onClose, vehicle }) {
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block flex items-center gap-1"><Gauge className="w-3 h-3" /> Odometer (miles)</label>
             <input type="number" value={odometer} onChange={e => setOdometer(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
           </div>
 
           {/* Test number */}
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">MOT Test Number (optional)</label>
             <input type="text" value={testNumber} onChange={e => setTestNumber(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
           </div>
 
           {/* Advisory notes */}
@@ -159,7 +159,7 @@ export default function ManualMOTModal({ open, onClose, vehicle }) {
               <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Advisory Notes / Failure Reasons</label>
               <textarea value={advisoryNotes} onChange={e => setAdvisoryNotes(e.target.value)} rows={3}
                 placeholder={result === 'fail' ? 'e.g. Nearside front brake pad worn below 1.5mm' : 'e.g. Nearside rear tyre wearing thin'}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
           )}
 
@@ -173,7 +173,7 @@ export default function ManualMOTModal({ open, onClose, vehicle }) {
         <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
           <button onClick={handleSubmit} disabled={submitting}
-            className="px-4 py-2 bg-[#2E5A1A] text-white text-sm font-semibold rounded-lg hover:brightness-110 disabled:opacity-50">
+            className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:brightness-110 disabled:opacity-50">
             {submitting ? 'Saving…' : 'Log MOT Result'}
           </button>
         </div>

@@ -67,7 +67,7 @@ export default function TodayPrepStrip({ todaysSorted = [], jobs = [], myComplia
   return (
     <div className="mb-4">
       <div className="flex items-center gap-1.5 mb-2.5">
-        <Sparkles className="w-3.5 h-3.5 text-[#2E5A1A]" strokeWidth={2.5} />
+        <Sparkles className="w-3.5 h-3.5 text-primary" strokeWidth={2.5} />
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Today's Prep</p>
       </div>
       <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1.5">

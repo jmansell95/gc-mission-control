@@ -103,11 +103,11 @@ export default function StaffSwapModal({ assignment, staff, jobs, teams, existin
           {/* Mode toggle */}
           <div className="flex gap-1 p-1 bg-slate-100 rounded-lg mb-4">
             <button onClick={() => { setMode('swap'); setSelectedId(''); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition ${mode === 'swap' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition ${mode === 'swap' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
               <Repeat className="w-4 h-4" /> Swap Staff
             </button>
             <button onClick={() => { setMode('add'); setSelectedId(''); }}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition ${mode === 'add' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold transition ${mode === 'add' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
               <UserPlus className="w-4 h-4" /> Add Crew Member
             </button>
           </div>

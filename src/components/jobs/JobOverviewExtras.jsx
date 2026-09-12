@@ -133,7 +133,7 @@ export default function JobOverviewExtras({ job, client, contractor, invLogs, ca
           <div className="px-4 py-2 divide-y divide-slate-50">
             {job.what3words && (
               <div className="flex items-center gap-2 py-2">
-                <MapPin className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] text-slate-400 uppercase font-semibold">What3Words</p>
                   <p className="text-sm text-slate-800 font-medium font-mono">{job.what3words}</p>
@@ -191,7 +191,7 @@ export default function JobOverviewExtras({ job, client, contractor, invLogs, ca
       {isDrillingJob && (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="w-4 h-4 text-[#2E5A1A]" />
+          <TrendingUp className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-semibold text-slate-900">Progress Snapshot</h3>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

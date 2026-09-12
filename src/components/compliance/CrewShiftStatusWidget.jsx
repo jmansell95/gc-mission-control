@@ -280,7 +280,7 @@ export default function CrewShiftStatusWidget() {
               type="date"
               value={selectedDate}
               onChange={e => setSelectedDate(e.target.value)}
-              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-[#2E5A1A]"
+              className="px-2.5 py-1.5 text-xs bg-white border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-primary"
             />
           </div>
         }
@@ -294,13 +294,13 @@ export default function CrewShiftStatusWidget() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search crew or job…"
-              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-[#2E5A1A] placeholder:text-slate-400"
+              className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-primary placeholder:text-slate-400"
             />
           </div>
           <select
             value={jobFilter}
             onChange={e => setJobFilter(e.target.value)}
-            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-[#2E5A1A] max-w-[160px]"
+            className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 text-slate-700 rounded-lg focus:outline-none focus:border-primary max-w-[160px]"
           >
             <option value="all">All jobs</option>
             {jobOptions.map(([jid, jname]) => (

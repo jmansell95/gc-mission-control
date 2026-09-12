@@ -125,7 +125,7 @@ export default function SingleItemForm({
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search rate card…"
-                className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 autoFocus
               />
             </div>
@@ -136,7 +136,7 @@ export default function SingleItemForm({
                 key={r.id}
                 type="button"
                 onClick={() => pickRate(r)}
-                className="w-full text-left rounded-xl border border-slate-200 bg-white hover:border-[#2E5A1A]/40 hover:bg-[#2E5A1A]/5 p-2.5 transition"
+                className="w-full text-left rounded-xl border border-slate-200 bg-white hover:border-primary/40 hover:bg-primary/5 p-2.5 transition"
               >
                 <p className="text-sm font-semibold text-slate-900">{r.description}</p>
                 <div className="flex items-center gap-2 mt-0.5">
@@ -169,7 +169,7 @@ export default function SingleItemForm({
                 onChange={e => setDesc(e.target.value)}
                 disabled={isRateCard && !!pickedRate}
                 placeholder="Item description"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 disabled:bg-slate-50"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:bg-slate-50"
               />
             </div>
             {source === 'purchased' && (
@@ -180,7 +180,7 @@ export default function SingleItemForm({
                   value={state.po_number}
                   onChange={e => onChange('po_number', e.target.value)}
                   placeholder="PO-2026-001"
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </div>
             )}
@@ -190,7 +190,7 @@ export default function SingleItemForm({
                 <select
                   value={state.supplier_id || ''}
                   onChange={e => onChange('supplier_id', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                   <option value="">— Select supplier —</option>
                   {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -232,7 +232,7 @@ export default function SingleItemForm({
               type="button"
               onClick={handleCommit}
               disabled={committing}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] active:scale-95 transition disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 active:scale-95 transition disabled:opacity-50"
             >
               {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {committing ? 'Adding…' : 'Add Item'}

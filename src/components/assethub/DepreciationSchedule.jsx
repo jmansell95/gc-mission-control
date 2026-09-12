@@ -163,7 +163,7 @@ export default function DepreciationSchedule() {
             { id: 'units_of_production', label: 'Units of Production' },
           ].map(opt => (
             <button key={opt.id} onClick={() => setMethodFilter(opt.id)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${methodFilter === opt.id ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition ${methodFilter === opt.id ? 'bg-primary text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
               {opt.label}
             </button>
           ))}

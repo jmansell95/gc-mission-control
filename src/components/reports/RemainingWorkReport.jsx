@@ -282,7 +282,7 @@ export default function RemainingWorkReport({ filters }) {
                     <td className="px-3 py-2.5 text-right tabular-nums text-slate-600">{fmtMoney(j.earned_to_date)}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums font-bold text-slate-900">{fmtMoney(j.remaining_balance)}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">{fmtMoney(j.daily_run_rate)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums font-bold text-[#2E5A1A]">{fmtMoney(j.projected_earnings)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums font-bold text-primary">{fmtMoney(j.projected_earnings)}</td>
                     <td className={`px-3 py-2.5 text-right tabular-nums font-semibold ${positiveVariance ? 'text-emerald-600' : 'text-rose-600'}`}>
                       {positiveVariance ? '+' : ''}{fmtMoney(j.variance)}
                     </td>
@@ -292,17 +292,17 @@ export default function RemainingWorkReport({ filters }) {
             </tbody>
             <tfoot>
               <tr className="bg-[#8DC63F]/20 border-t-2 border-[#8DC63F]">
-                <td className="px-4 py-2.5 font-bold text-[#2E5A1A]">TOTAL</td>
+                <td className="px-4 py-2.5 font-bold text-primary">TOTAL</td>
                 <td></td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{jobs.reduce((s, j) => s + j.remaining_working_days, 0)}</td>
-                <td className="px-3 py-2.5 text-center font-bold tabular-nums text-[#2E5A1A]">{totals.total_people}</td>
-                <td className="px-3 py-2.5 text-center font-bold tabular-nums text-[#2E5A1A]">{totals.total_rigs}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(totals.total_contracted)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(totals.total_earned)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(totals.total_remaining)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{jobs.reduce((s, j) => s + j.remaining_working_days, 0)}</td>
+                <td className="px-3 py-2.5 text-center font-bold tabular-nums text-primary">{totals.total_people}</td>
+                <td className="px-3 py-2.5 text-center font-bold tabular-nums text-primary">{totals.total_rigs}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{fmtMoney(totals.total_contracted)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{fmtMoney(totals.total_earned)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{fmtMoney(totals.total_remaining)}</td>
                 <td></td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(totals.total_projected)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{fmtMoney(totals.total_projected)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">
                   {totals.total_projected >= totals.total_remaining ? '+' : ''}
                   {fmtMoney(totals.total_projected - totals.total_remaining)}
                 </td>
@@ -350,13 +350,13 @@ function RemainingWorkFilterBar({ statusFilter, toggleStatus, asOfDate, setAsOfD
         <div className="flex items-center gap-2">
           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">As of</label>
           <input type="date" value={asOfDate} onChange={e => setAsOfDate(e.target.value)}
-            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-[#2E5A1A] outline-none" />
+            className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm font-medium text-slate-900 focus:border-primary outline-none" />
         </div>
 
         {/* Ignore date range toggle */}
         <label className="flex items-center gap-1.5 cursor-pointer">
           <input type="checkbox" checked={ignoreDateRange} onChange={e => setIgnoreDateRange(e.target.checked)}
-            className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
           <span className="text-xs font-medium text-slate-600">Ignore date range (show all active jobs)</span>
         </label>
 
@@ -367,7 +367,7 @@ function RemainingWorkFilterBar({ statusFilter, toggleStatus, asOfDate, setAsOfD
             {exporting === 'csv' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} CSV
           </button>
           <button onClick={onExportPdf} disabled={!!exporting}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-xs font-semibold transition disabled:opacity-50 shadow-sm">
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-primary hover:bg-[#244715] text-white text-xs font-semibold transition disabled:opacity-50 shadow-sm">
             {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} PDF
           </button>
         </div>

@@ -46,7 +46,7 @@ export default function ReportTemplateLibrary({ onRun, onSchedule, onBuildCustom
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>;
   }
 
   if (templates.length === 0) {
@@ -58,7 +58,7 @@ export default function ReportTemplateLibrary({ onRun, onSchedule, onBuildCustom
           Configure a report view and click "Save as Template", or build a custom report from scratch.
         </p>
         {onBuildCustom && (
-          <button onClick={onBuildCustom} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition">
+          <button onClick={onBuildCustom} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition">
             Build Custom Report
           </button>
         )}
@@ -88,7 +88,7 @@ export default function ReportTemplateLibrary({ onRun, onSchedule, onBuildCustom
 
           <div className="mt-auto flex items-center gap-2 pt-2">
             <button onClick={() => handleRun(tpl)} disabled={running === tpl.id}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#2E5A1A] text-white text-xs font-bold hover:bg-[#1c4a12] transition disabled:opacity-50">
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary/90 transition disabled:opacity-50">
               {running === tpl.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />} Run
             </button>
             <button onClick={() => onSchedule?.(tpl)} title="Schedule"

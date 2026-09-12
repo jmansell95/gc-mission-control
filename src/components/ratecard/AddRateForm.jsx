@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Plus, Check, X, Loader2 } from 'lucide-react';
 import { useDivision } from '@/contexts/DivisionContext';
 
-const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] transition";
+const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary transition";
 
 /**
  * AddRateForm — inline "Add rate" row at the bottom of each subcategory group.
@@ -40,7 +40,7 @@ export default function AddRateForm({ category, subcategory, source, supplierId,
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 rounded-lg transition border border-dashed border-slate-200 mx-4 my-1" style={{ width: 'calc(100% - 2rem)' }}>
+      <button onClick={() => setOpen(true)} className="w-full flex items-center justify-center gap-1.5 py-2 text-xs text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition border border-dashed border-slate-200 mx-4 my-1" style={{ width: 'calc(100% - 2rem)' }}>
         <Plus className="w-3.5 h-3.5" /> Add rate
       </button>
     );
@@ -60,7 +60,7 @@ export default function AddRateForm({ category, subcategory, source, supplierId,
           <input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Notes" className={inputCls} />
         </div>
         <div className="flex gap-2">
-          <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={save} disabled={saving} className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Save
           </button>
           <button onClick={() => setOpen(false)} className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-300 transition">

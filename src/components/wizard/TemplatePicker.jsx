@@ -15,9 +15,9 @@ export default function TemplatePicker({ divisions, selectedId, onSelect, isLoad
         <button
           type="button"
           onClick={() => onSelect(null)}
-          className={'relative flex flex-col items-start gap-1 p-3 rounded-xl border-2 text-left transition ' + (!selectedId ? 'border-[#2E5A1A] bg-emerald-50 shadow-md' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50')}
+          className={'relative flex flex-col items-start gap-1 p-3 rounded-xl border-2 text-left transition ' + (!selectedId ? 'border-primary bg-emerald-50 shadow-md' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50')}
         >
-          {!selectedId && <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#2E5A1A] flex items-center justify-center"><Check className="w-3 h-3 text-white" /></span>}
+          {!selectedId && <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-white" /></span>}
           <div className="w-8 h-8 rounded-lg bg-slate-200 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-slate-500" />
           </div>
@@ -42,9 +42,9 @@ export default function TemplatePicker({ divisions, selectedId, onSelect, isLoad
                 key={d.id}
                 type="button"
                 onClick={() => onSelect(d)}
-                className={'relative flex flex-col items-start gap-1 p-3 rounded-xl border-2 text-left transition ' + (active ? 'border-[#2E5A1A] bg-emerald-50 shadow-md' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50')}
+                className={'relative flex flex-col items-start gap-1 p-3 rounded-xl border-2 text-left transition ' + (active ? 'border-primary bg-emerald-50 shadow-md' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50')}
               >
-                {active && <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#2E5A1A] flex items-center justify-center"><Check className="w-3 h-3 text-white" /></span>}
+                {active && <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center"><Check className="w-3 h-3 text-white" /></span>}
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, ' + divColor + ', ' + divColor + 'cc)' }}>
                   <Building2 className="w-4 h-4 text-white" />
                 </div>

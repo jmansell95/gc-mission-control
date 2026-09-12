@@ -141,7 +141,7 @@ export default function KeywordMappingManager() {
             <button
               onClick={handleSave}
               disabled={!form.keyword || !form.rate_card_item_id}
-              className="col-span-5 sm:col-span-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold disabled:opacity-50"
+              className="col-span-5 sm:col-span-1 inline-flex items-center justify-center gap-1 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold disabled:opacity-50"
             >
               <Save className="w-3.5 h-3.5" /> {editing ? 'Update' : 'Add'}
             </button>
@@ -157,7 +157,7 @@ export default function KeywordMappingManager() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search keywords…"
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A]"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary"
         />
       </div>
 
@@ -188,7 +188,7 @@ export default function KeywordMappingManager() {
                       <p className="text-[10px] text-slate-400 truncate">{rci?.description || '—'}</p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button onClick={() => handleEdit(m)} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] transition">
+                      <button onClick={() => handleEdit(m)} className="p-1.5 text-slate-400 hover:text-primary transition">
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => handleDelete(m.id)} className="p-1.5 text-slate-400 hover:text-rose-600 transition">
@@ -242,7 +242,7 @@ export default function KeywordMappingManager() {
                         <td className="text-right px-3 py-2.5 text-slate-500 tabular-nums">{m.match_count || 0}</td>
                         <td className="px-3 py-2.5">
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                            <button onClick={() => handleEdit(m)} className="p-1 text-slate-400 hover:text-[#2E5A1A] transition">
+                            <button onClick={() => handleEdit(m)} className="p-1 text-slate-400 hover:text-primary transition">
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
                             <button onClick={() => handleDelete(m.id)} className="p-1 text-slate-400 hover:text-rose-600 transition">

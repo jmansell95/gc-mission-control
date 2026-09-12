@@ -201,12 +201,12 @@ export default function AssetHub() {
         <div className="flex items-center gap-2 flex-wrap">
           <PrintWeightRegister assets={assets} />
           <RunReportButton hub="assets" />
-          <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Scanner</button>
-          <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
-          <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
-          <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
+          <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Scanner</button>
+          <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
+          <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
+          <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
           <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm"><Weight className="w-3.5 h-3.5" /> Bulk Weights</button>
-          <button onClick={openAdd} className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-[#2E5A1A] text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
+          <button onClick={openAdd} className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
         </div>
       }
       tabs={TAB_GROUPS.map(g => ({ id: g.id, label: g.label, icon: g.icon, badge: g.id === 'compliance' ? recertCount : undefined, count: g.id === 'inventory' ? assets.length : undefined }))}
@@ -249,7 +249,7 @@ export default function AssetHub() {
                   const active = category === cat.id;
                   const count = categoryCounts[cat.id] || 0;
                   return (
-                    <button key={cat.id} onClick={() => setCategory(cat.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition ${active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                    <button key={cat.id} onClick={() => setCategory(cat.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition ${active ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       <CIcon className="w-3.5 h-3.5" /> {cat.label}
                       <span className={`text-xs px-1.5 py-0.5 rounded-full ${active ? 'bg-white/20' : 'bg-white text-slate-400'}`}>{count}</span>
                     </button>
@@ -260,10 +260,10 @@ export default function AssetHub() {
               <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
                 <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or serial..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10" />
+                  <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or serial..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <select value={compFilter} onChange={e => setCompFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                  <select value={compFilter} onChange={e => setCompFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                     <option value="all">All Status</option>
                     <option value="compliant">Compliant</option>
                     <option value="expiring">Expiring</option>
@@ -280,43 +280,43 @@ export default function AssetHub() {
                       const active = sourceFilter === opt.val;
                       return (
                         <button key={opt.val} onClick={() => setSourceFilter(opt.val)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${active ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${active ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
                           <OIcon className="w-3 h-3" /> {opt.label}
                         </button>
                       );
                     })}
                   </div>
-                  <button onClick={() => setDepotOnly(d => !d)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${depotOnly ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
+                  <button onClick={() => setDepotOnly(d => !d)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${depotOnly ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
                     <Warehouse className="w-4 h-4" /> {depotOnly ? 'Depot Only' : 'Depot'}
                   </button>
-                  <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                  <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                     <option value="none">No grouping</option>
                     <option value="type">Group by Type</option>
                     <option value="location">Group by Location</option>
                     <option value="status">Group by Status</option>
                     <option value="panda_group">Group by Panda Group</option>
                   </select>
-                  <select value={deployFilter} onChange={(e) => setDeployFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                  <select value={deployFilter} onChange={(e) => setDeployFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                     <option value="all">All Locations</option>
                     <option value="in_depot">In Depot</option>
                     <option value="on_site">On Site / Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
-                  <select value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                  <select value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                     <option value="all">All Lifecycle</option>
                     <option value="active">Active</option>
                     <option value="aging">Aging</option>
                     <option value="due_for_replacement">Due for Replacement</option>
                     <option value="disposed">Disposed</option>
                   </select>
-                  <select value={maintenanceFilter} onChange={(e) => setMaintenanceFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                  <select value={maintenanceFilter} onChange={(e) => setMaintenanceFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                     <option value="all">All Maintenance</option>
                     <option value="on_track">On Track</option>
                     <option value="due_soon">Due Soon</option>
                     <option value="overdue">Overdue</option>
                     <option value="no_interval">No Interval</option>
                   </select>
-                  <button onClick={() => setCompact(c => !c)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${compact ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`} title="Toggle compact card view">
+                  <button onClick={() => setCompact(c => !c)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${compact ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`} title="Toggle compact card view">
                     <LayoutGrid className="w-4 h-4" /> {compact ? 'Compact' : 'Detailed'}
                   </button>
                   {category !== 'rig' && (

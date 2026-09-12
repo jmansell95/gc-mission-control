@@ -159,7 +159,7 @@ export default function DepotShiftWizard({ open, onClose, assignment, staff }) {
               {stepOrder.map((s, i) => (
                 <Fragment key={s}>
                   <div className={`flex items-center gap-1.5 ${i <= currentStepIndex ? 'text-white' : 'text-white/40'}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i < currentStepIndex ? 'bg-white text-[#2E5A1A]' : i === currentStepIndex ? 'bg-white/25 ring-1 ring-white/40' : 'bg-white/10'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i < currentStepIndex ? 'bg-white text-primary' : i === currentStepIndex ? 'bg-white/25 ring-1 ring-white/40' : 'bg-white/10'}`}>
                       {i < currentStepIndex ? <CheckCircle2 className="w-3.5 h-3.5" /> : i + 1}
                     </div>
                     <span className="text-[11px] font-medium">{stepLabels[s]}</span>
@@ -213,8 +213,8 @@ export default function DepotShiftWizard({ open, onClose, assignment, staff }) {
                       if (mins < 0) mins += 24 * 60;
                       return (
                         <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3.5 py-2.5">
-                          <Clock className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
-                          <p className="text-xs text-[#2E5A1A] font-medium">Total: {fmtDur(mins)}</p>
+                          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                          <p className="text-xs text-primary font-medium">Total: {fmtDur(mins)}</p>
                         </div>
                       );
                     })()}
@@ -238,7 +238,7 @@ export default function DepotShiftWizard({ open, onClose, assignment, staff }) {
             </button>
             {step === 'checks' && (
               <button onClick={handleConfirmChecks} disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 {saving ? 'Saving...' : 'Confirm Checks Complete'}
                 <ChevronRight className="w-5 h-5" />
@@ -246,7 +246,7 @@ export default function DepotShiftWizard({ open, onClose, assignment, staff }) {
             )}
             {step === 'timesheet' && (
               <button onClick={handleSubmit} disabled={saving || !validTimes}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
                 {saving ? 'Submitting...' : 'Submit Shift'}
               </button>

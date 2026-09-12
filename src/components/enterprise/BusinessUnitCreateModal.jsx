@@ -75,7 +75,7 @@ export default function BusinessUnitCreateModal({ onClose, onCreated }) {
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-              <Layers className="w-5 h-5 text-[#2E5A1A]" />
+              <Layers className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-slate-900">Create a Business Unit</h3>
@@ -94,7 +94,7 @@ export default function BusinessUnitCreateModal({ onClose, onCreated }) {
               value={form.name}
               onChange={e => set('name', e.target.value)}
               placeholder="e.g. Land & Water Solutions"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100 outline-none transition"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-emerald-100 outline-none transition"
             />
           </Field>
 
@@ -104,7 +104,7 @@ export default function BusinessUnitCreateModal({ onClose, onCreated }) {
               onChange={e => set('code', e.target.value.toUpperCase())}
               placeholder="LWS"
               maxLength={6}
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100 outline-none transition uppercase"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-emerald-100 outline-none transition uppercase"
             />
           </Field>
 
@@ -113,7 +113,7 @@ export default function BusinessUnitCreateModal({ onClose, onCreated }) {
               value={form.tagline}
               onChange={e => set('tagline', e.target.value)}
               placeholder="Ground Investigation Specialists"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100 outline-none transition"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-emerald-100 outline-none transition"
             />
           </Field>
 
@@ -141,7 +141,7 @@ export default function BusinessUnitCreateModal({ onClose, onCreated }) {
               onChange={e => set('description', e.target.value)}
               rows={2}
               placeholder="Marine and waterway engineering services"
-              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100 outline-none transition resize-none"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm font-medium text-slate-900 placeholder:text-slate-300 focus:border-primary focus:ring-2 focus:ring-emerald-100 outline-none transition resize-none"
             />
           </Field>
         </div>

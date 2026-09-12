@@ -56,7 +56,7 @@ export default function LiveFleetPanel() {
         </div>
         <div className="hub-glass rounded-xl p-3">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-[#2E5A1A]" /></div>
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><Users className="w-3.5 h-3.5 text-primary" /></div>
             <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Tracked</p>
           </div>
           <p className="text-lg sm:text-xl font-bold tabular-nums text-slate-900">{vehicles.length}</p>

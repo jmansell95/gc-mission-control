@@ -312,7 +312,7 @@ function ManageCategoriesModal({ onClose }) {
     }
   };
 
-  const inputClass = 'w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputClass = 'w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
   const labelClass = 'block text-xs font-medium text-slate-500 mb-1';
 
   return (
@@ -320,7 +320,7 @@ function ManageCategoriesModal({ onClose }) {
       <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-5 max-h-[calc(100dvh-2rem)] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Settings className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -342,7 +342,7 @@ function ManageCategoriesModal({ onClose }) {
                   <p className="text-sm font-semibold text-slate-900 truncate">{req.label}</p>
                   <p className="text-[10px] text-slate-400">{req.short_code} · {req.qualification_type}{req.is_card ? ' · Card type' : ''}</p>
                 </div>
-                <button onClick={() => handleEdit(req)} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 rounded-lg transition" title="Edit"><Edit2 className="w-4 h-4" /></button>
+                <button onClick={() => handleEdit(req)} className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition" title="Edit"><Edit2 className="w-4 h-4" /></button>
                 <button onClick={() => handleToggle(req)} className={'text-[10px] font-bold px-2 py-1 rounded-lg ' + (req.is_active === false ? 'bg-slate-100 text-slate-500' : 'bg-emerald-100 text-emerald-700')}>
                   {req.is_active === false ? 'Hidden' : 'Active'}
                 </button>
@@ -357,7 +357,7 @@ function ManageCategoriesModal({ onClose }) {
           )}
         </div>
         <button onClick={() => { setEditingId(null); setForm({ label: '', short_code: '', qualification_type: '', requires_front_back: false, is_card: false, icon: 'Award', sort_order: requirements.length, is_active: true }); setShowForm(true); }}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm font-semibold text-slate-500 hover:border-[#2E5A1A] hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm font-semibold text-slate-500 hover:border-primary hover:text-primary hover:bg-primary/5 transition">
           <Plus className="w-4 h-4" /> Add Training Category
         </button>
         {showForm && (
@@ -382,7 +382,7 @@ function ManageCategoriesModal({ onClose }) {
                   <label className="flex items-center gap-2 text-xs font-medium text-slate-600 cursor-pointer"><input type="checkbox" checked={form.requires_front_back} onChange={e => setForm({ ...form, requires_front_back: e.target.checked })} className="w-4 h-4 accent-[#2E5A1A]" />Front/back images</label>
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">{saving ? 'Saving…' : editingId ? 'Update' : 'Add Category'}</button>
+                  <button type="submit" disabled={saving} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">{saving ? 'Saving…' : editingId ? 'Update' : 'Add Category'}</button>
                   <button type="button" onClick={() => { setShowForm(false); setEditingId(null); }} className="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
                 </div>
               </form>

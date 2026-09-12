@@ -148,7 +148,7 @@ export default function JobFinancialFootprint({ job }) {
       {monthlyData.length > 0 && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <PoundSterling className="w-4 h-4 text-[#2E5A1A]" /> Cost vs Revenue Timeline
+            <PoundSterling className="w-4 h-4 text-primary" /> Cost vs Revenue Timeline
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
@@ -168,7 +168,7 @@ export default function JobFinancialFootprint({ job }) {
       {invoices.length > 0 && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#2E5A1A]" /> Invoices ({invoices.length})
+            <FileText className="w-4 h-4 text-primary" /> Invoices ({invoices.length})
           </h3>
           <div className="space-y-2">
             {invoices.map((inv) => (
@@ -194,7 +194,7 @@ export default function JobFinancialFootprint({ job }) {
       {/* Unified ledger */}
       <div className="hub-glass rounded-2xl p-4">
         <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-          <Scale className="w-4 h-4 text-[#2E5A1A]" /> Project Ledger
+          <Scale className="w-4 h-4 text-primary" /> Project Ledger
           <span className="text-xs text-slate-400 font-normal ml-1">{ledger.length} entries</span>
         </h3>
         {ledger.length === 0 ? (

@@ -269,11 +269,11 @@ export default function EnterpriseDashboard() {
             )}
 
             {canManageDivisions && (
-              <button onClick={() => setShowChoice(true)} className="mt-3 w-full rounded-2xl border-2 border-dashed border-slate-300 p-5 text-left hover:border-[#2E5A1A] hover:bg-emerald-50/30 transition group flex flex-col items-center justify-center gap-2 min-h-[120px]">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-[#2E5A1A]/10 flex items-center justify-center transition">
-                  <Sparkles className="w-6 h-6 text-slate-400 group-hover:text-[#2E5A1A] transition" />
+              <button onClick={() => setShowChoice(true)} className="mt-3 w-full rounded-2xl border-2 border-dashed border-slate-300 p-5 text-left hover:border-primary hover:bg-emerald-50/30 transition group flex flex-col items-center justify-center gap-2 min-h-[120px]">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 group-hover:bg-primary/10 flex items-center justify-center transition">
+                  <Sparkles className="w-6 h-6 text-slate-400 group-hover:text-primary transition" />
                 </div>
-                <p className="text-sm font-bold text-slate-500 group-hover:text-[#2E5A1A] transition">Add a Business Unit or Business Stream</p>
+                <p className="text-sm font-bold text-slate-500 group-hover:text-primary transition">Add a Business Unit or Business Stream</p>
                 <p className="text-xs text-slate-400 text-center">Guided setup wizard</p>
               </button>
             )}
@@ -453,7 +453,7 @@ export default function EnterpriseDashboard() {
                     <p className="text-sm font-semibold text-slate-800">{w.label}</p>
                     <p className="text-xs text-slate-400">{w.desc}</p>
                   </div>
-                  <button type="button" onClick={() => toggleWidget(w.key)} className={'relative w-11 h-6 rounded-full transition ' + (widgets[w.key] ? 'bg-[#2E5A1A]' : 'bg-slate-300')}>
+                  <button type="button" onClick={() => toggleWidget(w.key)} className={'relative w-11 h-6 rounded-full transition ' + (widgets[w.key] ? 'bg-primary' : 'bg-slate-300')}>
                     <span className={'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition ' + (widgets[w.key] ? 'translate-x-5' : '')} />
                   </button>
                 </label>

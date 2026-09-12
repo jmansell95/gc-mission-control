@@ -24,7 +24,7 @@ const REVENUE_METHODS = [
   { val: 'flat_fee', label: 'Flat Fee', icon: PoundSterling, desc: 'Fixed fee' },
 ];
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 bg-white";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white";
 
 /**
  * QuickEditJobModal — polished inline editor for the most commonly edited job
@@ -164,8 +164,8 @@ export default function QuickEditJobModal({ open, onClose, job }) {
                       <button key={s.value} type="button" onClick={() => set('status', s.value)}
                         className={`px-2 py-2 rounded-lg border text-xs font-semibold transition ${
                           form.status === s.value
-                            ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
-                            : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'
                         }`}>
                         {s.label}
                       </button>
@@ -185,13 +185,13 @@ export default function QuickEditJobModal({ open, onClose, job }) {
                       return (
                         <button key={m.val} type="button" onClick={() => set('revenue_method', m.val)}
                           className={`flex items-center gap-1.5 px-2.5 py-2 rounded-lg border text-left transition ${
-                            selected ? 'bg-[#2E5A1A]/5 border-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' : 'bg-white border-slate-200 hover:border-[#2E5A1A]/40'
+                            selected ? 'bg-primary/5 border-primary ring-1 ring-primary/20' : 'bg-white border-slate-200 hover:border-primary/40'
                           }`}>
-                          <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 ${selected ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div className="min-w-0">
-                            <p className={`text-xs font-bold leading-tight ${selected ? 'text-[#2E5A1A]' : 'text-slate-700'}`}>{m.label}</p>
+                            <p className={`text-xs font-bold leading-tight ${selected ? 'text-primary' : 'text-slate-700'}`}>{m.label}</p>
                             <p className="text-[9px] text-slate-400 leading-tight">{m.desc}</p>
                           </div>
                         </button>
@@ -215,7 +215,7 @@ export default function QuickEditJobModal({ open, onClose, job }) {
                 Cancel
               </button>
               <button onClick={handleSave} disabled={saving || !dirty}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#1c4a12] active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 active:scale-95 transition text-sm font-bold disabled:opacity-50 touch-manipulation">
                 {saving ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
                 ) : saved ? (
@@ -236,7 +236,7 @@ function Section({ title, icon: Icon, last, children }) {
   return (
     <div className={`px-5 py-4 ${!last ? 'border-b border-slate-100' : ''}`}>
       <div className="flex items-center gap-1.5 mb-3">
-        <Icon className="w-3.5 h-3.5 text-[#2E5A1A]" />
+        <Icon className="w-3.5 h-3.5 text-primary" />
         <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide">{title}</h3>
       </div>
       <div className="space-y-3">{children}</div>

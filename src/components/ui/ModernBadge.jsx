@@ -18,7 +18,7 @@ const VARIANTS = {
   warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
   danger: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', dot: 'bg-rose-500' },
   neutral: { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200', dot: 'bg-slate-400' },
-  brand: { bg: 'bg-[#2E5A1A]/10', text: 'text-[#2E5A1A]', border: 'border-[#2E5A1A]/20', dot: 'bg-[#2E5A1A]' },
+  brand: { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20', dot: 'bg-primary' },
 };
 
 /**

@@ -205,7 +205,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search jobs by name or location..."
-              className="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#2E5A1A] focus:ring-1 focus:ring-[#2E5A1A]/20 transition"
+              className="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
             />
           </div>
 
@@ -273,7 +273,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
                                 }}
                                 className={`w-full text-left p-3 rounded-lg border transition ${
                                   isSelected
-                                    ? 'border-[#2E5A1A] bg-emerald-50 ring-1 ring-[#2E5A1A]/20'
+                                    ? 'border-primary bg-emerald-50 ring-1 ring-primary/20'
                                     : 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40'
                                 }`}
                               >
@@ -316,7 +316,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
                                         value={staffSearch}
                                         onChange={e => setStaffSearch(e.target.value)}
                                         placeholder="Search crew..."
-                                        className="w-full pl-8 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]"
+                                        className="w-full pl-8 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-primary"
                                       />
                                     </div>
                                     <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
@@ -328,7 +328,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
                                             onClick={() => toggleStaff(s.id)}
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition border ${
                                               isOn
-                                                ? 'bg-[#2E5A1A] text-white border-[#2E5A1A] shadow-sm'
+                                                ? 'bg-primary text-white border-primary shadow-sm'
                                                 : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50'
                                             }`}
                                           >
@@ -356,7 +356,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
                                           onClick={() => setSelectedDate(d)}
                                           className={`py-2 text-xs font-semibold rounded-lg transition ${
                                             selectedDate === d
-                                              ? 'bg-[#2E5A1A] text-white shadow-sm'
+                                              ? 'bg-primary text-white shadow-sm'
                                               : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                                           }`}
                                         >
@@ -372,7 +372,7 @@ export default function RotaJobPool({ weekStart, embedded = false }) {
                                     <button
                                       onClick={handleAssign}
                                       disabled={selectedStaff.length === 0 || !selectedDate || saving}
-                                      className="flex-1 py-2.5 text-sm font-semibold bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5"
+                                      className="flex-1 py-2.5 text-sm font-semibold bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5"
                                     >
                                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                                       {rapidMode ? 'Add & Continue' : `Assign ${selectedStaff.length > 0 ? `(${selectedStaff.length})` : ''}`}

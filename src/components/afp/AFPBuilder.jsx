@@ -45,7 +45,7 @@ const SOURCE_META = {
   cost: { label: 'Daily Cost', icon: Receipt, color: 'text-rose-600', bg: 'bg-rose-50' },
   job_cost_item: { label: 'Job Cost Item', icon: FileText, color: 'text-cyan-600', bg: 'bg-cyan-50' },
   template: { label: 'Template', icon: FileBarChart, color: 'text-slate-600', bg: 'bg-slate-50' },
-  manual: { label: 'Manual', icon: Plus, color: 'text-[#2E5A1A]', bg: 'bg-green-50' },
+  manual: { label: 'Manual', icon: Plus, color: 'text-primary', bg: 'bg-green-50' },
 };
 
 const CATEGORIES = [
@@ -573,7 +573,7 @@ export default function AFPBuilder({ job }) {
         <div className="hub-glass rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#2E5A1A] to-[#8DC63F]" />
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-[#2E5A1A]" />
+            <FileText className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-bold text-slate-800 mb-1">No AFPs yet</h3>
           <p className="text-sm text-slate-500 max-w-md mx-auto mb-4">
@@ -646,7 +646,7 @@ export default function AFPBuilder({ job }) {
                     clearSelection();
                   }}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition active:scale-95 ${
-                    isActive ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    isActive ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
                   <span className={`w-2 h-2 rounded-full ${meta.dot}`} />
@@ -783,7 +783,7 @@ export default function AFPBuilder({ job }) {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 ${
                   isActive
-                    ? tab.isRef ? 'bg-violet-600 text-white shadow-sm' : 'bg-[#2E5A1A] text-white shadow-sm'
+                    ? tab.isRef ? 'bg-violet-600 text-white shadow-sm' : 'bg-primary text-white shadow-sm'
                     : tab.isRef ? 'text-violet-600 hover:bg-violet-50' : 'text-slate-500 hover:bg-slate-100'
                 }`}
               >
@@ -810,7 +810,7 @@ export default function AFPBuilder({ job }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search line items…"
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#2E5A1A]"
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-primary"
             />
           </div>
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
@@ -821,7 +821,7 @@ export default function AFPBuilder({ job }) {
                 <button
                   key={cat.id}
                   onClick={() => setCategoryFilter(cat.id)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${categoryFilter === cat.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition ${categoryFilter === cat.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
                 >
                   {cat.label}
                 </button>
@@ -829,13 +829,13 @@ export default function AFPBuilder({ job }) {
             })}
           </div>
           <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
-            <button onClick={() => setGroupBy('category')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'category' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>By Category</button>
-            <button onClick={() => setGroupBy('time')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'time' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>By Time</button>
+            <button onClick={() => setGroupBy('category')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'category' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>By Category</button>
+            <button onClick={() => setGroupBy('time')} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${groupBy === 'time' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>By Time</button>
           </div>
           {groupBy === 'time' && (
             <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
               {['day', 'week', 'month'].map(g => (
-                <button key={g} onClick={() => setGranularity(g)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition capitalize ${granularity === g ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>{g}</button>
+                <button key={g} onClick={() => setGranularity(g)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition capitalize ${granularity === g ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>{g}</button>
               ))}
             </div>
           )}
@@ -853,9 +853,9 @@ export default function AFPBuilder({ job }) {
 
       {/* ── Bulk Action Toolbar ── */}
       {selectedItems.size > 0 && (
-        <div className="hub-glass rounded-2xl p-3 bg-[#2E5A1A]/5 border-[#2E5A1A]/20 flex items-center justify-between gap-2 flex-wrap animate-slide-up">
+        <div className="hub-glass rounded-2xl p-3 bg-primary/5 border-primary/20 flex items-center justify-between gap-2 flex-wrap animate-slide-up">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#2E5A1A] text-white text-xs font-bold">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary text-white text-xs font-bold">
               {selectedItems.size} selected
             </span>
             <button onClick={clearSelection} className="text-xs font-semibold text-slate-500 hover:text-slate-700 transition">
@@ -1038,7 +1038,7 @@ export default function AFPBuilder({ job }) {
           </div>
           <div className="flex justify-end gap-2">
             <button onClick={() => setShowAddManual(false)} className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Cancel</button>
-            <button onClick={handleAddManual} disabled={!manualItem.item} className="px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold disabled:opacity-50">Add</button>
+            <button onClick={handleAddManual} disabled={!manualItem.item} className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-bold disabled:opacity-50">Add</button>
           </div>
         </div>
       )}
@@ -1225,7 +1225,7 @@ export default function AFPBuilder({ job }) {
                     <div className="flex items-center gap-2 min-w-0">
                       {canSelect && (
                         <button onClick={() => toggleBucketSelection(cat.items)} className="flex-shrink-0 active:scale-95 transition">
-                          {allCatSelected ? <CheckSquare className="w-4 h-4 text-[#2E5A1A]" /> : <Square className="w-4 h-4 text-slate-300" />}
+                          {allCatSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
                         </button>
                       )}
                       <button onClick={() => setCollapsedCats(prev => { const n = new Set(prev); n.has(cat.id) ? n.delete(cat.id) : n.add(cat.id); return n; })} className="flex items-center gap-1.5 active:scale-95 transition">
@@ -1285,7 +1285,7 @@ export default function AFPBuilder({ job }) {
                   <div className="flex items-center gap-2">
                     {canSelect && (
                       <button onClick={() => toggleBucketSelection(items)} className="flex-shrink-0 active:scale-95 transition">
-                        {allBucketSelected ? <CheckSquare className="w-4 h-4 text-[#2E5A1A]" /> : <Square className="w-4 h-4 text-slate-300" />}
+                        {allBucketSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
                       </button>
                     )}
                     <span className="font-bold text-slate-700 text-[11px] uppercase tracking-wide">{bucketLabel}</span>
@@ -1356,7 +1356,7 @@ export default function AFPBuilder({ job }) {
                         <td className="px-3 py-1.5">
                           {canSelect && (
                             <button onClick={() => toggleBucketSelection(items)} className="transition active:scale-95">
-                              {allBucketSelected ? <CheckSquare className="w-4 h-4 text-[#2E5A1A]" /> : <Square className="w-4 h-4 text-slate-300" />}
+                              {allBucketSelected ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4 text-slate-300" />}
                             </button>
                           )}
                         </td>

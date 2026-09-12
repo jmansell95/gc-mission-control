@@ -106,7 +106,7 @@ export default function DeliveryRouteMap({ legs = [] }) {
           <span className="text-slate-600">Deliver</span>
         </div>
         <div className="flex items-center gap-1.5 ml-auto">
-          <div className="w-6 h-0.5 bg-[#2E5A1A] border-dashed" />
+          <div className="w-6 h-0.5 bg-primary border-dashed" />
           <span className="text-slate-600">Route path</span>
         </div>
       </div>

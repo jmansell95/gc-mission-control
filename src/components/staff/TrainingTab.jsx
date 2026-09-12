@@ -152,7 +152,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
           <div className="flex items-center gap-1.5 sm:flex-shrink-0">
             {canManageTeam && (
               <button onClick={() => setShowAddCompleted(true)} type="button"
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 transition touch-manipulation shadow-sm">
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 active:scale-95 transition touch-manipulation shadow-sm">
                 <Plus className="w-3.5 h-3.5" /> Add Completed
               </button>
             )}
@@ -240,7 +240,7 @@ export default function TrainingTab({ staffId, staffName, teamId, canManageTeam 
       {canManageTeam && teamUpcoming.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <Users className="w-4 h-4 text-[#2E5A1A]" />
+            <Users className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-extrabold text-slate-900">Team Training</h3>
             <span className="text-xs text-slate-400">· who's booked on what</span>
           </div>

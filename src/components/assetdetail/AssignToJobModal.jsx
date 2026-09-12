@@ -61,7 +61,7 @@ export default function AssignToJobModal({ asset, onClose }) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between z-10">
           <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-[#2E5A1A]" /> Assign to Job
+            <Briefcase className="w-5 h-5 text-primary" /> Assign to Job
           </h3>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
             <X className="w-5 h-5 text-slate-400" />
@@ -81,7 +81,7 @@ export default function AssignToJobModal({ asset, onClose }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search jobs..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
 
@@ -129,7 +129,7 @@ export default function AssignToJobModal({ asset, onClose }) {
           <button
             onClick={handleSubmit}
             disabled={!selectedJob || saving}
-            className="flex-1 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {saving ? 'Assigning...' : 'Assign'}

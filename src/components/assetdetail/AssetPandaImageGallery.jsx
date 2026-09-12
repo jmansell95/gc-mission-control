@@ -118,9 +118,9 @@ export default function AssetPandaImageGallery({ asset }) {
       <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-            <Camera className="w-4 h-4 text-[#2E5A1A]" /> Asset Panda Photos
+            <Camera className="w-4 h-4 text-primary" /> Asset Panda Photos
             {images.length > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#2E5A1A] text-white text-[11px] font-bold">
+              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-white text-[11px] font-bold">
                 {images.length}
               </span>
             )}
@@ -130,7 +130,7 @@ export default function AssetPandaImageGallery({ asset }) {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-[#2E5A1A] hover:bg-[#244715] px-2.5 py-1.5 rounded-lg disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-primary hover:bg-[#244715] px-2.5 py-1.5 rounded-lg disabled:opacity-50 transition"
               title="Upload a new photo to Asset Panda"
             >
               {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Upload
@@ -138,7 +138,7 @@ export default function AssetPandaImageGallery({ asset }) {
             <button
               onClick={() => refetch()}
               disabled={isFetching}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#2E5A1A] disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-primary disabled:opacity-50 transition"
               title="Refresh from Asset Panda"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} /> Refresh
@@ -174,7 +174,7 @@ export default function AssetPandaImageGallery({ asset }) {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#244715] disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-[#244715] disabled:opacity-50 transition"
             >
               {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />} Upload a photo
             </button>
@@ -187,7 +187,7 @@ export default function AssetPandaImageGallery({ asset }) {
             {images.map((img, i) => (
               <div
                 key={img.id || i}
-                className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-slate-200 hover:border-[#2E5A1A] hover:shadow-md transition group relative"
+                className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-slate-200 hover:border-primary hover:shadow-md transition group relative"
               >
                 <button
                   onClick={() => setLightboxIndex(i)}

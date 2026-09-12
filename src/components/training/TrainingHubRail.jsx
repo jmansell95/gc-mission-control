@@ -26,7 +26,7 @@ export function ViewHeader({ icon: Icon, title, subtitle, children }) {
   return (
     <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center flex-shrink-0 shadow-sm">
+        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 shadow-sm">
           <Icon className="w-5 h-5 text-white" />
         </div>
         <div className="min-w-0">
@@ -53,4 +53,4 @@ export function filterProvidersByCategory(providers, category) {
 export const SECONDARY_BTN = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition shadow-sm';
 
 /** Shared button class for primary header actions (Assign Training, New Course). */
-export const PRIMARY_BTN = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm';
+export const PRIMARY_BTN = 'inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition shadow-sm';

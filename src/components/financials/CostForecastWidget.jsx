@@ -74,7 +74,7 @@ export default function CostForecastWidget({ job }) {
             <span className="text-xs font-bold text-slate-700">{progressPct}% · Day {elapsedDays} of {totalDays}</span>
           </div>
           <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#2E5A1A] rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
       )}

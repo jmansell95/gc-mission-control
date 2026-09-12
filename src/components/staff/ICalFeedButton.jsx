@@ -38,7 +38,7 @@ export default function ICalFeedButton({ staffId, staffName, className = '' }) {
     <button
       onClick={handleDownload}
       disabled={loading}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40 hover:text-[#2E5A1A] transition disabled:opacity-50 ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:border-primary/40 hover:text-primary transition disabled:opacity-50 ${className}`}
       title="Download schedule as a calendar file"
     >
       {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Calendar className="w-3.5 h-3.5" />}

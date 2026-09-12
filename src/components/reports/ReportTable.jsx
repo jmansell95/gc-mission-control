@@ -35,7 +35,7 @@ export default function ReportTable({ report, emptyIcon: Icon, filename = 'repor
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{report.rows.length} rows{hasMore ? ` · showing ${visibleRows.length}` : ''}</span>
         <button onClick={handleExportCsv}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-[#2E5A1A]/30 hover:text-[#2E5A1A] transition">
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-primary/30 hover:text-primary transition">
           <Download className="w-3.5 h-3.5" /> Export CSV
         </button>
       </div>
@@ -71,7 +71,7 @@ export default function ReportTable({ report, emptyIcon: Icon, filename = 'repor
       {hasMore && (
         <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 text-center">
           <button onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-[#2E5A1A]/30 hover:text-[#2E5A1A] transition">
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-primary/30 hover:text-primary transition">
             <ChevronDown className="w-4 h-4" /> Load {Math.min(PAGE_SIZE, report.rows.length - visibleCount)} more rows
           </button>
         </div>

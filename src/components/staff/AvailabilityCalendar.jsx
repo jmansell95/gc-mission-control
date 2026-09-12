@@ -66,7 +66,7 @@ export default function AvailabilityCalendar() {
           <button onClick={() => setMonth(addMonths(month, 1))} className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg transition">
             <ChevronRight className="w-5 h-5" />
           </button>
-          <button onClick={() => setMonth(new Date())} className="text-xs font-medium text-[#2E5A1A] hover:underline px-2 py-1">
+          <button onClick={() => setMonth(new Date())} className="text-xs font-medium text-primary hover:underline px-2 py-1">
             Today
           </button>
         </div>
@@ -97,9 +97,9 @@ export default function AvailabilityCalendar() {
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                   const inMonth = d >= monthStart && d <= monthEnd;
                   return (
-                    <th key={d.toISOString()} className={`px-1 py-2 text-center font-medium min-w-[32px] ${isToday ? 'bg-[#2E5A1A]/10' : ''} ${!inMonth ? 'text-slate-300' : isWeekend ? 'text-slate-400' : 'text-slate-600'}`}>
+                    <th key={d.toISOString()} className={`px-1 py-2 text-center font-medium min-w-[32px] ${isToday ? 'bg-primary/10' : ''} ${!inMonth ? 'text-slate-300' : isWeekend ? 'text-slate-400' : 'text-slate-600'}`}>
                       <div className="text-[9px] uppercase">{format(d, 'EEE').slice(0, 1)}</div>
-                      <div className={`text-[11px] font-bold ${isToday ? 'text-[#2E5A1A]' : ''}`}>{format(d, 'd')}</div>
+                      <div className={`text-[11px] font-bold ${isToday ? 'text-primary' : ''}`}>{format(d, 'd')}</div>
                     </th>
                   );
                 })}
@@ -119,7 +119,7 @@ export default function AvailabilityCalendar() {
                     const inMonth = d >= monthStart && d <= monthEnd;
                     if (!inMonth) return <td key={d.toISOString()} className="bg-slate-50/50" />;
                     return (
-                      <td key={d.toISOString()} className={`px-0.5 py-0.5 text-center ${isToday ? 'bg-[#2E5A1A]/5' : ''}`}>
+                      <td key={d.toISOString()} className={`px-0.5 py-0.5 text-center ${isToday ? 'bg-primary/5' : ''}`}>
                         {absence && (() => {
                           const style = REASON_STYLES[absence.reason] || REASON_STYLES.other;
                           return (

@@ -208,7 +208,7 @@ function GroupsTab() {
         </p>
         <button
           onClick={startNew}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition shadow-sm flex-shrink-0"
         >
           <Plus className="w-4 h-4" /> New Group
         </button>
@@ -428,7 +428,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-[#2E5A1A]" />
+          <Shield className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-bold text-slate-900">{group.id ? 'Edit Group' : 'New Permission Group'}</h2>
         </div>
         <button onClick={onCancel} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
@@ -443,7 +443,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
           <input
             value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
-            className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+            className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
             placeholder="e.g. Office Staff, Junior Manager, Read-Only Accounts"
           />
         </div>
@@ -453,7 +453,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
             value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
             rows={2}
-            className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+            className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
             placeholder="What can members of this group do?"
           />
         </div>
@@ -477,7 +477,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
             <select
               value={form.staff_type}
               onChange={e => setForm({ ...form, staff_type: e.target.value })}
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary bg-white"
             >
               <option value="flexible">Flexible (any)</option>
               <option value="office">Office Staff</option>
@@ -490,7 +490,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
             <select
               value={form.landing_page}
               onChange={e => setForm({ ...form, landing_page: e.target.value })}
-              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+              className="w-full mt-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary bg-white"
             >
               <option value="auto">Auto (from staff type)</option>
               <option value="/admin">Admin Dashboard</option>
@@ -524,7 +524,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
       {/* Module Permissions — Visual Matrix Grid */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Shield className="w-4 h-4 text-[#2E5A1A]" />
+          <Shield className="w-4 h-4 text-primary" />
           <h3 className="font-bold text-slate-900 text-sm">Module Permissions</h3>
           <p className="text-xs text-slate-500 ml-1">Click a cell to toggle — red = none, amber = read, green = write</p>
         </div>
@@ -544,7 +544,7 @@ function GroupEditor({ group, onCancel, onSave, saving }) {
         <button
           onClick={() => onSave(form)}
           disabled={saving || !form.name.trim()}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm"
         >
           <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save Group'}
         </button>

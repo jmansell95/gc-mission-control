@@ -118,7 +118,7 @@ export default function ExecutiveSnapshotWidget({ onNavigate }) {
     <WidgetShell icon={Activity} title="Executive Snapshot" subtitle="Fleet compliance, project health & revenue at a glance"
       action={
         <button onClick={handleGenerateReport} disabled={generating} type="button"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-[#2E5A1A] hover:bg-[#1c4a12] rounded-lg transition disabled:opacity-50">
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition disabled:opacity-50">
           {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileDown className="w-3.5 h-3.5" />}
           {generating ? 'Generating…' : 'Executive PDF'}
         </button>

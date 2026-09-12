@@ -101,7 +101,7 @@ export default function HeatmapGrid({ days, staffRows, rigRows, staffStatus, rig
               <div
                 key={d.dateStr}
                 onClick={() => handleCellClick(resource, d.dateStr, s)}
-                className={`${cfg.bg} ${d.isWeekend ? 'opacity-60' : ''} ${d.isToday ? 'ring-1 ring-[#2E5A1A] ring-inset' : ''} cursor-pointer hover:brightness-110 transition`}
+                className={`${cfg.bg} ${d.isWeekend ? 'opacity-60' : ''} ${d.isToday ? 'ring-1 ring-primary ring-inset' : ''} cursor-pointer hover:brightness-110 transition`}
                 style={{ width: `${CELL_WIDTH}px`, height: '100%', flexShrink: 0 }}
                 title={`${resource.name} · ${d.dateStr} · ${cfg.label}${s?.job_name ? ` · ${s.job_name}` : ''}`}
               />
@@ -130,8 +130,8 @@ export default function HeatmapGrid({ days, staffRows, rigRows, staffStatus, rig
       <div ref={scrollRef} onScroll={handleScroll} className="heatmap-grid-scroll overflow-x-auto overflow-y-auto" style={{ maxHeight: '70vh' }}>
         <div style={{ width: `${NAME_WIDTH + totalWidth}px`, position: 'relative' }}>
           {/* Quarter header */}
-          <div className="flex bg-[#2E5A1A] border-b border-[#1c4a12]" style={{ height: '26px' }}>
-            <div className="flex items-center px-2 flex-shrink-0 bg-[#2E5A1A] border-r border-[#1c4a12] z-10 text-white text-[10px] font-bold uppercase tracking-wider" style={{ position: 'sticky', left: 0, width: `${NAME_WIDTH}px` }}>
+          <div className="flex bg-primary border-b border-[#1c4a12]" style={{ height: '26px' }}>
+            <div className="flex items-center px-2 flex-shrink-0 bg-primary border-r border-[#1c4a12] z-10 text-white text-[10px] font-bold uppercase tracking-wider" style={{ position: 'sticky', left: 0, width: `${NAME_WIDTH}px` }}>
               {new Date().getFullYear()} Overview
             </div>
             {quarters.map(q => (
@@ -159,7 +159,7 @@ export default function HeatmapGrid({ days, staffRows, rigRows, staffStatus, rig
           )}
 
           {/* Staff section */}
-          {showStaff && renderSectionHeader('Staff', Users, staffRows.length, 'text-[#2E5A1A]', collapsedStaff, () => setCollapsedStaff(v => !v))}
+          {showStaff && renderSectionHeader('Staff', Users, staffRows.length, 'text-primary', collapsedStaff, () => setCollapsedStaff(v => !v))}
           {showStaff && !collapsedStaff && staffRows.map(s => renderRow(s, staffStatus.get(s.id) || new Map(), false))}
           {showStaff && collapsedStaff && (
             <div className="flex items-center justify-center bg-slate-50 text-[10px] text-slate-400 py-1 border-b border-slate-100" style={{ height: '24px' }}>

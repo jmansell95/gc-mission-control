@@ -29,14 +29,14 @@ export default function WizardBreadcrumb({ steps, current, canGoTo, onJump }) {
               disabled={!reachable}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition whitespace-nowrap ${
                 isCurrent
-                  ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]'
+                  ? 'bg-primary/10 text-primary'
                   : reachable
                     ? 'text-slate-500 hover:bg-white hover:text-slate-700 cursor-pointer'
                     : 'text-slate-300 cursor-default'
               }`}
             >
               <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] ${
-                isCurrent ? 'bg-[#2E5A1A] text-white' : isPast ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
+                isCurrent ? 'bg-primary text-white' : isPast ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'
               }`}>
                 {isPast ? '✓' : i + 1}
               </span>

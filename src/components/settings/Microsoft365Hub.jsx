@@ -118,7 +118,7 @@ function Microsoft365Hub() {
         description="One Azure AD app registration powers Outlook Calendar, SharePoint, Teams, and OneDrive. Staff connect once and get all four services."
         actions={
           <button onClick={() => navigate('/m365-setup-guide')} type="button"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#244715] transition active:scale-95 touch-manipulation shadow-sm">
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-[#244715] transition active:scale-95 touch-manipulation shadow-sm">
             <Download className="w-4 h-4" />
             <span>IT Setup Guide PDF</span>
           </button>
@@ -147,13 +147,13 @@ function Microsoft365Hub() {
       {/* Setup guide */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-[#2E5A1A]" />
+          <Shield className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Azure AD App Registration — Step by Step</h3>
         </div>
         <ol className="space-y-2.5 text-sm text-slate-600">
           <li className="flex gap-2.5">
             <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center">1</span>
-            <span>Go to the <button onClick={() => window.open('https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade', '_blank')} className="text-[#2E5A1A] underline font-medium inline-flex items-center gap-0.5">Azure portal — App registrations <ExternalLink className="w-3 h-3" /></button> and click "New registration".</span>
+            <span>Go to the <button onClick={() => window.open('https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade', '_blank')} className="text-primary underline font-medium inline-flex items-center gap-0.5">Azure portal — App registrations <ExternalLink className="w-3 h-3" /></button> and click "New registration".</span>
           </li>
           <li className="flex gap-2.5">
             <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center">2</span>
@@ -198,7 +198,7 @@ function Microsoft365Hub() {
       {/* Credential form */}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-[#2E5A1A]" />
+          <KeyRound className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Azure AD Credentials (shared across all four services)</h3>
         </div>
 
@@ -211,7 +211,7 @@ function Microsoft365Hub() {
               value={config.tenant_id}
               onChange={e => setConfig(c => ({ ...c, tenant_id: e.target.value }))}
               placeholder="e.g. 8d3c2b1a-..."
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100"
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <div>
@@ -222,7 +222,7 @@ function Microsoft365Hub() {
               value={config.client_id}
               onChange={e => setConfig(c => ({ ...c, client_id: e.target.value }))}
               placeholder="e.g. a1b2c3d4-..."
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100"
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100"
             />
           </div>
         </div>
@@ -236,7 +236,7 @@ function Microsoft365Hub() {
             value={config.client_secret}
             onChange={e => setConfig(c => ({ ...c, client_secret: e.target.value }))}
             placeholder="Paste the client secret value from Azure"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100"
+            className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100"
           />
           <p className="text-xs text-slate-400 mt-1">The secret is stored securely in your app settings and never exposed to the frontend.</p>
         </div>
@@ -245,7 +245,7 @@ function Microsoft365Hub() {
           <button
             onClick={handleSave}
             disabled={saving || (!config.tenant_id && !config.client_id && !config.client_secret)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             Save Credentials

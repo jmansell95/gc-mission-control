@@ -11,7 +11,7 @@ import { useJobFinancials } from '@/hooks/useJobFinancials';
 import StatCard from '@/components/dashboard/StatCard';
 
 const fmt = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm";
 
 function BudgetMarginTracker({ budget, actualNet, clientNet, markup }) {
   const hasBudget = budget > 0;
@@ -26,14 +26,14 @@ function BudgetMarginTracker({ budget, actualNet, clientNet, markup }) {
   return (
     <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/40">
       <div className="flex items-center gap-2 mb-3">
-        <Calculator className="w-4 h-4 text-[#2E5A1A]" />
+        <Calculator className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-semibold text-slate-800">Budget & Margin</h3>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard icon={PoundSterling} value={hasBudget ? fmt(budget) : 'Not set'} label="Budget" gradient="stat-gradient-brand" />
         <StatCard icon={Calculator} value={fmt(actualNet)} label="Actual cost (net)" gradient={overBudget ? 'stat-gradient-rose' : 'stat-gradient-amber'} valueClassName={overBudget ? 'text-rose-600' : ''} />
-        <StatCard icon={TrendingUp} value={hasBudget ? `${variance >= 0 ? '+' : ''}${fmt(variance)}` : fmt(profit)} label={hasBudget ? 'Variance' : 'Profit'} gradient={hasBudget ? (overBudget ? 'stat-gradient-rose' : 'stat-gradient-blue') : 'stat-gradient-brand'} valueClassName={hasBudget ? (overBudget ? 'text-rose-600' : 'text-[#2E5A1A]') : 'text-[#2E5A1A]'} />
-        <StatCard icon={Percent} value={`${marginPct.toFixed(1)}%`} label="Margin" gradient="stat-gradient-violet" valueClassName="text-[#2E5A1A]" />
+        <StatCard icon={TrendingUp} value={hasBudget ? `${variance >= 0 ? '+' : ''}${fmt(variance)}` : fmt(profit)} label={hasBudget ? 'Variance' : 'Profit'} gradient={hasBudget ? (overBudget ? 'stat-gradient-rose' : 'stat-gradient-blue') : 'stat-gradient-brand'} valueClassName={hasBudget ? (overBudget ? 'text-rose-600' : 'text-primary') : 'text-primary'} />
+        <StatCard icon={Percent} value={`${marginPct.toFixed(1)}%`} label="Margin" gradient="stat-gradient-violet" valueClassName="text-primary" />
       </div>
 
       {hasBudget && (
@@ -45,7 +45,7 @@ function BudgetMarginTracker({ budget, actualNet, clientNet, markup }) {
             </span>
           </div>
           <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all ${overBudget ? 'bg-red-500' : 'bg-[#2E5A1A]'}`} style={{ width: `${budgetPct}%` }} />
+            <div className={`h-full rounded-full transition-all ${overBudget ? 'bg-red-500' : 'bg-primary'}`} style={{ width: `${budgetPct}%` }} />
           </div>
           {overBudget && (
             <div className="mt-2 flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5">
@@ -126,9 +126,9 @@ export default function JobCostingManager({ job, staffCosts, totalCost, isDrilli
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <PoundSterling className="w-5 h-5 text-[#2E5A1A]" />
+        <PoundSterling className="w-5 h-5 text-primary" />
         <h2 className="font-semibold text-slate-900">Revenue Breakdown</h2>
-        <span className="ml-auto text-xs bg-[#2E5A1A]/15 text-[#2E5A1A] px-2 py-0.5 rounded-full font-medium">{items.length} billing items</span>
+        <span className="ml-auto text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full font-medium">{items.length} billing items</span>
       </div>
 
       <div className="px-5 py-4 space-y-5">
@@ -187,19 +187,19 @@ export default function JobCostingManager({ job, staffCosts, totalCost, isDrilli
         <div className="border border-slate-200 rounded-lg p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5"><Percent className="w-4 h-4 text-[#2E5A1A]" /> Markup %</label>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5"><Percent className="w-4 h-4 text-primary" /> Markup %</label>
               <input type="number" min="0" step="0.1" value={markup} onChange={(e) => setMarkup(e.target.value)} className={inputCls} />
             </div>
             <div>
-              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5"><PoundSterling className="w-4 h-4 text-[#2E5A1A]" /> VAT rate %</label>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5"><PoundSterling className="w-4 h-4 text-primary" /> VAT rate %</label>
               <input type="number" min="0" step="0.1" value={vatRate} onChange={(e) => setVatRate(e.target.value)} className={inputCls} />
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3">
-            <button onClick={saveConfig} disabled={savingConfig || !configDirty} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition disabled:opacity-50">
+            <button onClick={saveConfig} disabled={savingConfig || !configDirty} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition disabled:opacity-50">
               {savingConfig ? <span>Saving...</span> : <><Save className="w-3.5 h-3.5" /> Save rates</>}
             </button>
-            {configSaved && <span className="text-xs text-[#2E5A1A] font-medium inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Saved</span>}
+            {configSaved && <span className="text-xs text-primary font-medium inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Saved</span>}
             {!configDirty && !configSaved && <span className="text-xs text-slate-400">Rates applied to this job</span>}
           </div>
         </div>

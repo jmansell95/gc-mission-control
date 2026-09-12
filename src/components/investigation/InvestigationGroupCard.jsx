@@ -199,11 +199,11 @@ function LogRow({ log, jobName, staffName, isSelected, onClick, bulkMode, bulkSe
     <button
       onClick={onClick}
       className={`w-full text-left flex items-center gap-2.5 px-3 sm:px-4 py-2.5 transition hover:bg-slate-50 ${
-        bulkSelected ? 'bg-[#2E5A1A]/10' : isSelected ? 'bg-[#2E5A1A]/5' : ''
+        bulkSelected ? 'bg-primary/10' : isSelected ? 'bg-primary/5' : ''
       }`}
     >
       {bulkMode && (
-        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 bg-white'}`}>
+        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected ? 'bg-primary border-primary' : 'border-slate-300 bg-white'}`}>
           {bulkSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
         </span>
       )}

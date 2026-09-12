@@ -106,7 +106,7 @@ export default function PermissionGroupsPopup({ open, onClose, scopedDivisionId 
           <div className="flex-shrink-0 px-5 py-3 border-b border-slate-100 bg-slate-50/50">
             <button
               onClick={() => setEditing({ name: '', description: '', is_read_only: false, staff_type: 'flexible', landing_page: 'auto', permissions: defaultPermissions() })}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm active:scale-[0.98]"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition shadow-sm active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" /> New Permission Group
             </button>
@@ -116,7 +116,7 @@ export default function PermissionGroupsPopup({ open, onClose, scopedDivisionId 
           <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
               </div>
             ) : (
               <>

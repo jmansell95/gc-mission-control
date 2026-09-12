@@ -48,7 +48,7 @@ export default function DivisionCard({ ds, onEnter }) {
         </div>
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
           <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{DIVISION_TYPE_LABELS[d.division_type] || d.division_type} · {d.code}</span>
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#2E5A1A] group-hover:gap-2 transition-all">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-primary group-hover:gap-2 transition-all">
             Enter <ArrowRight className="w-3.5 h-3.5" />
           </span>
         </div>

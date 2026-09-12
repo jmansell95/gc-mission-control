@@ -153,12 +153,12 @@ export default function ComplianceCalendar() {
                 key={dayKey}
                 onClick={() => setSelectedDay(day)}
                 className={`min-h-[64px] p-1.5 rounded-xl border text-left transition ${
-                  isSel ? 'border-[#2E5A1A] border-2 bg-[#2E5A1A]/5' :
-                  today ? 'border-[#2E5A1A] bg-[#2E5A1A]/5' :
+                  isSel ? 'border-primary border-2 bg-primary/5' :
+                  today ? 'border-primary bg-primary/5' :
                   'border-slate-100 hover:border-slate-200 hover:bg-slate-50'
                 } ${!inMonth ? 'opacity-40' : ''}`}
               >
-                <span className={`text-[11px] font-medium ${today ? 'text-[#2E5A1A] font-bold' : 'text-slate-600'}`}>
+                <span className={`text-[11px] font-medium ${today ? 'text-primary font-bold' : 'text-slate-600'}`}>
                   {format(day, 'd')}
                 </span>
                 <div className="space-y-0.5 mt-0.5">

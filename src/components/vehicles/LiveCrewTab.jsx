@@ -308,7 +308,7 @@ export default function LiveCrewTab() {
               <span className={`w-1.5 h-1.5 rounded-full ${isFetching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
               {isFetching ? 'Syncing…' : `Synced ${dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}`}
               <span className="text-slate-300">·</span>
-              <span className="text-[#2E5A1A] font-semibold">Auto 30s</span>
+              <span className="text-primary font-semibold">Auto 30s</span>
             </p>
           </div>
         </div>
@@ -322,7 +322,7 @@ export default function LiveCrewTab() {
             { val: 'dark', label: 'Dark', count: counts.dark },
           ].map(opt => (
             <button key={opt.val} onClick={() => setFilterStatus(opt.val)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterStatus === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterStatus === opt.val ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
               {opt.label}
               <span className={`text-[10px] tabular-nums ${filterStatus === opt.val ? 'text-[#8DC63F]' : 'text-slate-400'}`}>{opt.count}</span>
             </button>
@@ -334,7 +334,7 @@ export default function LiveCrewTab() {
           <select
             value={filterJob}
             onChange={(e) => setFilterJob(e.target.value)}
-            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 bg-white"
+            className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 bg-white"
           >
             <option value="all">All Jobs</option>
             {jobOptions.map(j => <option key={j.id} value={j.id}>{j.name}</option>)}
@@ -353,7 +353,7 @@ export default function LiveCrewTab() {
         <div className="lg:col-span-2 hub-glass rounded-2xl overflow-hidden">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center" style={{ height: 600 }}>
-              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
               <p className="text-sm text-slate-500">Loading crew locations…</p>
             </div>
           ) : mapCrew.length === 0 ? (
@@ -365,7 +365,7 @@ export default function LiveCrewTab() {
           ) : (
             <>
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
-                <Users className="w-4 h-4 text-[#2E5A1A]" />
+                <Users className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-bold text-slate-800">Live Crew Map</h3>
                 <span className="ml-auto text-xs text-slate-400">{mapCrew.length} crew shown</span>
               </div>
@@ -416,7 +416,7 @@ export default function LiveCrewTab() {
         <div className="lg:col-span-1 space-y-3">
           <div className="hub-glass rounded-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-              <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Users className="w-4 h-4 text-[#2E5A1A]" /> Crew ({filteredCrew.length})</p>
+              <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Users className="w-4 h-4 text-primary" /> Crew ({filteredCrew.length})</p>
               <span className="text-[10px] text-slate-400 flex items-center gap-1"><Filter className="w-3 h-3" /> {filterStatus !== 'all' ? filterStatus : 'all'}</span>
             </div>
             <div className="max-h-[540px] overflow-y-auto divide-y divide-slate-50">

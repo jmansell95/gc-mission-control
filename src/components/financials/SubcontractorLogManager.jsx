@@ -21,7 +21,7 @@ const fmtDur = (hours) => {
   if (wholeH) return `${wholeH}h`;
   return `${mins}m`;
 };
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm";
 
 const WORK_TYPES = [
   { val: 'drilling', label: 'Drilling', icon: HardHat, color: 'bg-amber-100 text-amber-700' },
@@ -209,7 +209,7 @@ export default function SubcontractorLogManager({ job }) {
             <h3 className="text-lg font-bold">Subcontractor Activity Logs</h3>
             <p className="text-[11px] text-white/60">Buy-side cost · sell-side margin · verification workflow</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} disabled={effectiveLocked} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 bg-white text-[#2E5A1A] rounded-lg text-xs font-bold hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed">
+          <button onClick={() => setShowForm(!showForm)} disabled={effectiveLocked} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 bg-white text-primary rounded-lg text-xs font-bold hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed">
             {showForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
             {showForm ? 'Cancel' : 'Log Work'}
           </button>
@@ -323,7 +323,7 @@ export default function SubcontractorLogManager({ job }) {
               </div>
               <div>
                 <p className="text-[10px] text-slate-400 uppercase">Margin</p>
-                <p className="text-sm font-bold text-[#2E5A1A] tabular-nums">{fmt(marginNet)} <span className="text-[10px] font-normal">({marginPct.toFixed(1)}%)</span></p>
+                <p className="text-sm font-bold text-primary tabular-nums">{fmt(marginNet)} <span className="text-[10px] font-normal">({marginPct.toFixed(1)}%)</span></p>
               </div>
             </div>
             {markup === 0 && (
@@ -333,7 +333,7 @@ export default function SubcontractorLogManager({ job }) {
               </div>
             )}
           </div>
-          <button onClick={handleSubmit} disabled={saving || !form.subcontractor_id || purchaseCost <= 0} className="w-full px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+          <button onClick={handleSubmit} disabled={saving || !form.subcontractor_id || purchaseCost <= 0} className="w-full px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             {saving ? 'Saving…' : 'Log Subcontractor Work'}
           </button>
@@ -381,7 +381,7 @@ export default function SubcontractorLogManager({ job }) {
                     <div className="ml-auto flex items-center gap-3 text-xs">
                       <span className="text-slate-500">Buy: <strong className="text-slate-700 tabular-nums">{fmt(dayBuy)}</strong></span>
                       <span className="text-slate-500">Sell: <strong className="text-emerald-700 tabular-nums">{fmt(daySell)}</strong></span>
-                      <span className="text-slate-500">Margin: <strong className="text-[#2E5A1A] tabular-nums">{fmt(dayMargin)}</strong></span>
+                      <span className="text-slate-500">Margin: <strong className="text-primary tabular-nums">{fmt(dayMargin)}</strong></span>
                     </div>
                   </div>
 
@@ -422,7 +422,7 @@ export default function SubcontractorLogManager({ job }) {
                                 <div className="flex items-center gap-2 flex-shrink-0">
                                   <div className="text-right">
                                     <p className="text-[9px] text-slate-400 uppercase">Margin</p>
-                                    <p className={`text-xs font-bold tabular-nums ${l.margin_pct >= 0 ? 'text-[#2E5A1A]' : 'text-red-600'}`}>{fmt(l.margin_net)}</p>
+                                    <p className={`text-xs font-bold tabular-nums ${l.margin_pct >= 0 ? 'text-primary' : 'text-red-600'}`}>{fmt(l.margin_net)}</p>
                                   </div>
                                   <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-medium ${st.color}`}>
                                     <StIcon className="w-2.5 h-2.5" />{st.label}

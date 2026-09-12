@@ -86,7 +86,7 @@ export default function MorePage() {
           <div className="field-card p-4">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+                <MapPin className="w-4 h-4 text-primary" strokeWidth={2.5} />
               </div>
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900">Crew Map — Today</h3>

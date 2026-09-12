@@ -39,7 +39,7 @@ export default function StaffCategoryPopup({ staff, categories, onClose }) {
       <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[calc(100dvh-2rem)] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Tag className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -59,7 +59,7 @@ export default function StaffCategoryPopup({ staff, categories, onClose }) {
                 onClick={() => toggle(cat.id)}
                 className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition ${
                   active
-                    ? 'bg-[#2E5A1A] text-white shadow-sm'
+                    ? 'bg-primary text-white shadow-sm'
                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 }`}
               >
@@ -81,7 +81,7 @@ export default function StaffCategoryPopup({ staff, categories, onClose }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
           Save Categories

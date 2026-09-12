@@ -105,7 +105,7 @@ export default function CrewPerformanceReport({ filters }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center"><Users className="w-4 h-4" /></div>
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-primary flex items-center justify-center"><Users className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Crew Members</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{crewData.length}</p>
@@ -140,7 +140,7 @@ export default function CrewPerformanceReport({ filters }) {
           {exporting === 'csv' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Export CSV
         </button>
         <button onClick={handlePdf} disabled={!!exporting}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
           {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} Export PDF
         </button>
       </div>
@@ -175,21 +175,21 @@ export default function CrewPerformanceReport({ filters }) {
                   <td className="px-3 py-2.5 text-right tabular-nums text-amber-600">{r.overtimeHours.toFixed(1)}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{r.jobsWorked}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{r.meterage.toFixed(1)}</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums font-bold text-[#2E5A1A]">£{Math.round(r.revenue).toLocaleString('en-GB')}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums font-bold text-primary">£{Math.round(r.revenue).toLocaleString('en-GB')}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{r.utilizationPct.toFixed(1)}%</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="bg-[#8DC63F]/20 border-t-2 border-[#8DC63F]">
-                <td className="px-4 py-2.5 font-bold text-[#2E5A1A]">TOTAL</td>
+                <td className="px-4 py-2.5 font-bold text-primary">TOTAL</td>
                 <td></td><td></td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{totals.totalHours.toFixed(1)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{totals.overtimeHours.toFixed(1)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{totals.jobsWorked}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{totals.meterage.toFixed(1)}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">£{Math.round(totals.revenue).toLocaleString('en-GB')}</td>
-                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{totals.avgUtilization.toFixed(1)}%</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{totals.totalHours.toFixed(1)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{totals.overtimeHours.toFixed(1)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{totals.jobsWorked}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{totals.meterage.toFixed(1)}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">£{Math.round(totals.revenue).toLocaleString('en-GB')}</td>
+                <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{totals.avgUtilization.toFixed(1)}%</td>
               </tr>
             </tfoot>
           </table>

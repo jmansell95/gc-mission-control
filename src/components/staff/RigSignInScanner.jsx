@@ -131,7 +131,7 @@ export default function RigSignInScanner({ open, onClose, staffId, assignments =
           {/* Searching state */}
           {searching && (
             <div className="flex items-center justify-center gap-2.5 py-8">
-              <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
               <p className="text-sm font-medium text-slate-600">Finding your assignment…</p>
             </div>
           )}
@@ -172,7 +172,7 @@ export default function RigSignInScanner({ open, onClose, staffId, assignments =
                 {scannedAssignment ? (
                   <>
                     <div className="flex items-start gap-2.5">
-                      <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                      <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-900">{scannedJob?.name || 'Job'}</p>
                         <p className="text-xs text-slate-500 break-words">{scannedJob?.location}</p>
@@ -208,8 +208,8 @@ export default function RigSignInScanner({ open, onClose, staffId, assignments =
           {/* Helper text */}
           {!scannedRig && !error && !searching && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-4 ring-4 ring-[#2E5A1A]/5">
-                <ScanLine className="w-10 h-10 text-[#2E5A1A]/40" />
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center mx-auto mb-4 ring-4 ring-primary/5">
+                <ScanLine className="w-10 h-10 text-primary/40" />
               </div>
               <p className="text-slate-700 font-bold">Ready to Scan</p>
               <p className="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Each rig has a QR code sticker. Scan it to instantly sign into your assigned job — no need to search through your schedule.</p>

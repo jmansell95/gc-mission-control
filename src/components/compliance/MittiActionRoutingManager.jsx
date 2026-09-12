@@ -89,7 +89,7 @@ export default function MittiActionRoutingManager() {
   return (
     <HubCard icon={Route} title="Action Item Routing" subtitle="Route audit action items to the right people's inbox" tone="brand"
       action={!editing ? (
-        <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition">
+        <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition">
           <Plus className="w-3.5 h-3.5" /> Add Rule
         </button>
       ) : (
@@ -97,7 +97,7 @@ export default function MittiActionRoutingManager() {
           <button onClick={cancelEdit} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold hover:bg-slate-200 transition">
             <X className="w-3.5 h-3.5" /> Cancel
           </button>
-          <button onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-60">
+          <button onClick={save} disabled={saving} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition disabled:opacity-60">
             <Save className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save'}
           </button>
         </div>

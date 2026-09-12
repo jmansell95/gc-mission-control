@@ -5,7 +5,7 @@ import { MapPin, Plus, Edit2, Trash2, X, Navigation, Calendar } from 'lucide-rea
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 const siteStatusBadge = {
   planning: 'bg-slate-100 text-slate-600',
@@ -73,7 +73,7 @@ export default function JobSiteManager({ job }) {
             {sites.length === 0 ? 'No additional sites — this job uses the primary location' : `${sites.length} ${sites.length === 1 ? 'site' : 'sites'} within this job`}
           </p>
         </div>
-        <button onClick={() => setEditing({})} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm">
+        <button onClick={() => setEditing({})} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition shadow-sm">
           <Plus className="w-4 h-4" /> Add Site
         </button>
       </div>
@@ -81,11 +81,11 @@ export default function JobSiteManager({ job }) {
       {/* Primary site */}
       <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-            <MapPin className="w-3.5 h-3.5 text-[#2E5A1A]" />
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <MapPin className="w-3.5 h-3.5 text-primary" />
           </div>
           <h3 className="font-semibold text-slate-900 text-sm">Primary Site</h3>
-          <span className="text-[10px] bg-[#2E5A1A]/10 text-[#2E5A1A] px-2 py-0.5 rounded-full font-bold uppercase">Default</span>
+          <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold uppercase">Default</span>
         </div>
         <p className="text-sm text-slate-700">{job.location || 'No location set'}</p>
         {job.site_lat != null && job.site_lng != null && (
@@ -126,7 +126,7 @@ function SiteCard({ site, onEdit, onDelete }) {
           </p>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
-          <button onClick={onEdit} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/5 rounded-lg transition">
+          <button onClick={onEdit} className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition">
             <Edit2 className="w-3.5 h-3.5" />
           </button>
           <button onClick={onDelete} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
@@ -146,7 +146,7 @@ function SiteCard({ site, onEdit, onDelete }) {
             <span className="tabular-nums">{Number(site.lat).toFixed(6)}, {Number(site.lng).toFixed(6)}</span>
         )}
         {site.what3words && (
-          <span className="inline-flex items-center gap-1 text-[#2E5A1A] bg-[#2E5A1A]/8 rounded-full px-2 py-0.5 font-mono font-semibold text-[10px]">
+          <span className="inline-flex items-center gap-1 text-primary bg-primary/8 rounded-full px-2 py-0.5 font-mono font-semibold text-[10px]">
             <MapPin className="w-2.5 h-2.5" /> {site.what3words}
           </span>
         )}
@@ -243,7 +243,7 @@ function SiteEditor({ site, saving, onSave, onClose, useMyLocation }) {
         </div>
         <div className="flex items-center gap-3 px-5 py-4 border-t border-slate-100 bg-white">
           <button onClick={onClose} className="px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium transition">Cancel</button>
-          <button onClick={handleSave} disabled={saving || !form.name?.trim()} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+          <button onClick={handleSave} disabled={saving || !form.name?.trim()} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
             {saving ? 'Saving...' : site.index != null ? 'Update Site' : 'Add Site'}
           </button>
         </div>

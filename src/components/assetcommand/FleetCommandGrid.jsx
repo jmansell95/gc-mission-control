@@ -139,7 +139,7 @@ export default function FleetCommandGrid({ assets, isLoading, onOpenPassport, on
             const count = v.key === 'all' ? assets.length : assets.filter(v.predicate).length;
             return (
               <button key={v.key} onClick={() => setView(v.key)} type="button"
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition ${view === v.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition ${view === v.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                 {v.label}
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${view === v.key ? 'bg-white/25' : 'bg-slate-200'}`}>{count}</span>
               </button>
@@ -290,7 +290,7 @@ export default function FleetCommandGrid({ assets, isLoading, onOpenPassport, on
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center justify-end gap-0.5">
-                        <button onClick={() => onOpenPassport(a)} title="Open passport" className="p-1.5 text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition">
+                        <button onClick={() => onOpenPassport(a)} title="Open passport" className="p-1.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition">
                           <ScanLine className="w-4 h-4" />
                         </button>
                         <button onClick={() => onEdit(a)} title="Edit" className="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition">

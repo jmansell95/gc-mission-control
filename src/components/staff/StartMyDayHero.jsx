@@ -48,8 +48,8 @@ export default function StartMyDayHero({ isDriller = false, onStart }) {
           {steps.map((step, i) => (
             <React.Fragment key={i}>
               <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/8 flex items-center justify-center">
-                  <step.icon className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+                <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
+                  <step.icon className="w-4 h-4 text-primary" strokeWidth={2.5} />
                 </div>
                 <p className="text-ui-micro font-bold text-slate-700 text-center leading-tight truncate w-full">{step.label}</p>
                 <p className="text-ui-micro text-slate-400 text-center leading-tight truncate w-full hidden sm:block">{step.sub}</p>

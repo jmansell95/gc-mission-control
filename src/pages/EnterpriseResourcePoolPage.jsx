@@ -186,7 +186,7 @@ function ResourceCard({ item, divMap, type, onLoan }) {
       </div>
       <button
         onClick={onLoan}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-[#2E5A1A] hover:text-white text-slate-700 text-xs font-bold transition flex-shrink-0"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-primary hover:text-white text-slate-700 text-xs font-bold transition flex-shrink-0"
       >
         Loan <ArrowRight className="w-3.5 h-3.5" />
       </button>

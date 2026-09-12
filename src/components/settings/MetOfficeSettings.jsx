@@ -115,7 +115,7 @@ export default function MetOfficeSettings() {
       {/* API Key Configuration */}
       <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Key className="w-4 h-4 text-[#2E5A1A]" />
+          <Key className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">WeatherAPI.com API Key</h3>
           {hasKey && (
             <span className="ml-auto flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
@@ -125,7 +125,7 @@ export default function MetOfficeSettings() {
         </div>
         <p className="text-xs text-slate-500">
           Sign up free at{' '}
-          <a href="https://www.weatherapi.com/signup.aspx" target="_blank" rel="noopener noreferrer" className="text-[#2E5A1A] font-semibold underline inline-flex items-center gap-0.5">
+          <a href="https://www.weatherapi.com/signup.aspx" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline inline-flex items-center gap-0.5">
             weatherapi.com <ExternalLink className="w-3 h-3" />
           </a>
           {' '}— the free tier allows 1 million calls/month. Paste your key below to enable reliable weather syncs.
@@ -137,7 +137,7 @@ export default function MetOfficeSettings() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="Paste your WeatherAPI.com key"
-              className="w-full pr-10 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+              className="w-full pr-10 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
             />
             <button
               type="button"
@@ -150,7 +150,7 @@ export default function MetOfficeSettings() {
           <button
             onClick={handleSaveKey}
             disabled={savingKey || !apiKey.trim()}
-            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition whitespace-nowrap"
+            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition whitespace-nowrap"
           >
             {savingKey ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Key
           </button>
@@ -170,7 +170,7 @@ export default function MetOfficeSettings() {
       {/* Info panel */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Globe className="w-4 h-4 text-[#2E5A1A]" />
+          <Globe className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">About the Weather API</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
@@ -208,12 +208,12 @@ export default function MetOfficeSettings() {
       {/* Manual sync */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Download className="w-4 h-4 text-[#2E5A1A]" />
+          <Download className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Sync Now</h3>
         </div>
         <p className="text-xs text-slate-500 mb-3">Pulls today's weather forecast for all active job sites and stores it as a WeatherLog record. A scheduled automation also runs this daily at 06:00.</p>
         <button onClick={handleSync} disabled={syncing}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
           {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Pull Weather Forecasts Now
         </button>
         {syncResult && (

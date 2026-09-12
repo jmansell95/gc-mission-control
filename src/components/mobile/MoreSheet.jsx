@@ -174,7 +174,7 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
                         className="w-full flex items-center gap-3 px-3 py-3 active:bg-slate-100 transition"
                       >
                         <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <Icon className="w-[18px] h-[18px] text-[#2E5A1A]" />
+                          <Icon className="w-[18px] h-[18px] text-primary" />
                         </div>
                         <span className="text-sm font-medium text-slate-700 flex-1 text-left">
                           {hub.label}

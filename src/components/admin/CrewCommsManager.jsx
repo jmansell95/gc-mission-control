@@ -181,12 +181,12 @@ function MessagesTab({ divisionId }) {
               onChange={e => setReplyDraft(d => ({ ...d, [msg.id]: e.target.value }))}
               placeholder={`Reply to ${msg.sender_name?.split(' ')[0] || 'crew'}...`}
               rows={1}
-              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 resize-none"
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
             />
             <button
               onClick={() => handleReply(msg)}
               disabled={sending === msg.id || !(replyDraft[msg.id] || '').trim()}
-              className="w-10 h-10 rounded-xl bg-[#2E5A1A] text-white flex items-center justify-center transition active:scale-95 disabled:opacity-40 flex-shrink-0"
+              className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center transition active:scale-95 disabled:opacity-40 flex-shrink-0"
             >
               {sending === msg.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </button>
@@ -556,7 +556,7 @@ function RequestCard({ req, onFulfill, onReject, onDelete, processing, responseD
             onChange={e => onDraftChange(e.target.value)}
             placeholder="Response note (optional)..."
             rows={1}
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 resize-none"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
           />
           <div className="flex gap-2">
             <button onClick={onFulfill} disabled={processing} className="flex-1 py-2 rounded-xl bg-emerald-600 text-white text-sm font-bold transition active:scale-95 disabled:opacity-50 inline-flex items-center justify-center gap-1.5">
@@ -576,7 +576,7 @@ function RequestCard({ req, onFulfill, onReject, onDelete, processing, responseD
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-12">
-      <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+      <Loader2 className="w-6 h-6 text-primary animate-spin" />
     </div>
   );
 }

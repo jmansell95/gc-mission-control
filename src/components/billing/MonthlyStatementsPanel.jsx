@@ -87,7 +87,7 @@ export default function MonthlyStatementsPanel({ companyName }) {
               <ChevronLeft className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 min-w-[150px] justify-center">
-              <FileText className="w-4 h-4 text-[#2E5A1A]" />
+              <FileText className="w-4 h-4 text-primary" />
               {monthLabel}
             </div>
             <button onClick={() => shiftMonth(1)} className="p-1 text-slate-400 hover:text-slate-700 rounded transition">
@@ -101,7 +101,7 @@ export default function MonthlyStatementsPanel({ companyName }) {
               Prepare previews
             </button>
             <button onClick={() => handleGenerate(true)} disabled={generating}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Generate &amp; email
             </button>
@@ -134,8 +134,8 @@ export default function MonthlyStatementsPanel({ companyName }) {
                 const client = clients.find((c) => c.id === r.client_id);
                 return (
                   <div key={r.client_id} className="px-4 py-3 flex items-center gap-3 flex-wrap">
-                    <div className="w-9 h-9 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-4 h-4 text-[#2E5A1A]" />
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <FileText className="w-4 h-4 text-primary" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-slate-900 truncate">{r.client_name}</p>

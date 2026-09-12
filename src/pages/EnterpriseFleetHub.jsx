@@ -207,14 +207,14 @@ export default function EnterpriseFleetHub() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by reg, name, make or model..."
-              className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              className="w-full pl-9 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
           {/* Division filter pills */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             <button
               onClick={() => setDivisionFilter('all')}
-              className={`px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${divisionFilter === 'all' ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              className={`px-3.5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition ${divisionFilter === 'all' ? 'bg-primary text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
             >
               All Business Streams ({stats.total})
             </button>
@@ -241,7 +241,7 @@ export default function EnterpriseFleetHub() {
               <button
                 key={opt.val}
                 onClick={() => setStatusFilter(opt.val)}
-                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${statusFilter === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${statusFilter === opt.val ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
               >
                 {opt.label}
               </button>

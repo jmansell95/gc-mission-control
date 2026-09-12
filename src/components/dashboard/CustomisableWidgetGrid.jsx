@@ -170,7 +170,7 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => { setShowPicker(true); setPickerSearch(''); }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-[#2E5A1A] bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 transition"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 transition"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Widget
               </button>
@@ -182,7 +182,7 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
           )}
         </div>
         <button onClick={() => setCustomise(!customise)}
-          className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${customise ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-[#2E5A1A]/30'}`}>
+          className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${customise ? 'bg-primary text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-primary/30'}`}>
           {customise ? <><Check className="w-4 h-4" /> Done Customising</> : <><Settings2 className="w-4 h-4" /> Customise Dashboard</>}
         </button>
       </div>
@@ -196,7 +196,7 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
             const isHidden = hidden.includes(id);
             return (
               <button key={id} onClick={() => toggleHidden(id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isHidden ? 'bg-slate-100 text-slate-400 line-through' : 'bg-[#2E5A1A]/10 text-[#2E5A1A] hover:bg-[#2E5A1A]/20'}`}>
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isHidden ? 'bg-slate-100 text-slate-400 line-through' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>
                 {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 {config.title}
               </button>
@@ -233,7 +233,7 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
                   value={pickerSearch}
                   onChange={e => setPickerSearch(e.target.value)}
                   placeholder="Search widgets…"
-                  className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                  className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
               </div>
             </div>
@@ -267,10 +267,10 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
                             <button
                               key={id}
                               onClick={() => addWidget(id)}
-                              className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 transition text-left group"
+                              className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-primary/30 hover:bg-primary/5 transition text-left group"
                             >
                               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center flex-shrink-0 group-hover:from-[#2E5A1A]/10 group-hover:to-[#8DC63F]/10 transition">
-                                <Icon className="w-4 h-4 text-slate-500 group-hover:text-[#2E5A1A] transition" />
+                                <Icon className="w-4 h-4 text-slate-500 group-hover:text-primary transition" />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1.5">
@@ -279,7 +279,7 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
                                 </div>
                                 <p className="text-xs text-slate-400 mt-0.5 leading-snug">{config.description}</p>
                               </div>
-                              <Plus className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] flex-shrink-0 mt-1 transition" />
+                              <Plus className="w-4 h-4 text-slate-300 group-hover:text-primary flex-shrink-0 mt-1 transition" />
                             </button>
                           );
                         })}
@@ -311,17 +311,17 @@ export default function CustomisableWidgetGrid({ renderWidget, canShowWidget }) 
                       <div
                         ref={prov.innerRef}
                         {...prov.draggableProps}
-                        className={`${colspanClass} relative ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snapshot.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
+                        className={`${colspanClass} relative ${customise ? 'ring-2 ring-primary/30 rounded-2xl pt-8' : ''} ${snapshot.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
                       >
                         {customise && (
                           <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
                             <div {...prov.dragHandleProps}
-                              className="bg-[#2E5A1A] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
+                              className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
                               <GripVertical className="w-3.5 h-3.5" /> Drag
                             </div>
                             <button
                               onClick={(e) => { e.stopPropagation(); cycleSize(widgetId); }}
-                              className="bg-white text-[#2E5A1A] px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5 transition z-30 relative touch-manipulation"
+                              className="bg-white text-primary px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-primary/20 hover:bg-primary/5 transition z-30 relative touch-manipulation"
                               title={`Size: ${SIZE_LABEL[userSize]} (click to change)`}
                             >
                               <SizeIcon className="w-3.5 h-3.5" /> {SIZE_LABEL[userSize]}

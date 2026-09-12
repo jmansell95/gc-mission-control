@@ -79,7 +79,7 @@ export default function StaffAssignmentPanel({ scopedDivisionId, focusStaffId })
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
@@ -104,7 +104,7 @@ export default function StaffAssignmentPanel({ scopedDivisionId, focusStaffId })
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search staff by name or role…"
-          className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-4 focus:ring-[#2E5A1A]/10 bg-white shadow-sm transition"
+          className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 bg-white shadow-sm transition"
         />
       </div>
 
@@ -134,7 +134,7 @@ function StaffAssignRow({ staff, groups, groupMap, saving, focused, rowRef, onCh
   return (
     <div
       ref={rowRef}
-      className={`hub-glass rounded-2xl p-3 sm:p-4 transition ${focused ? 'ring-2 ring-[#2E5A1A]/40 bg-[#2E5A1A]/[0.03]' : ''}`}
+      className={`hub-glass rounded-2xl p-3 sm:p-4 transition ${focused ? 'ring-2 ring-primary/40 bg-primary/[0.03]' : ''}`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         {/* Identity */}
@@ -150,7 +150,7 @@ function StaffAssignRow({ staff, groups, groupMap, saving, focused, rowRef, onCh
             <p className="text-[11px] text-slate-400 truncate">{staff.job_title || 'Crew Member'}</p>
             {currentGroup && (
               <div className="flex items-center gap-1 mt-1">
-                {currentGroup.is_system ? <Crown className="w-3 h-3 text-amber-500" /> : <ShieldCheck className="w-3 h-3 text-[#2E5A1A]" />}
+                {currentGroup.is_system ? <Crown className="w-3 h-3 text-amber-500" /> : <ShieldCheck className="w-3 h-3 text-primary" />}
                 <span className="text-[10px] font-semibold text-slate-500 truncate">{currentGroup.name}</span>
               </div>
             )}
@@ -159,7 +159,7 @@ function StaffAssignRow({ staff, groups, groupMap, saving, focused, rowRef, onCh
 
         {/* Group selector */}
         <div className="flex items-center gap-2 sm:flex-shrink-0">
-          {saving && <Loader2 className="w-4 h-4 text-[#2E5A1A] animate-spin flex-shrink-0" />}
+          {saving && <Loader2 className="w-4 h-4 text-primary animate-spin flex-shrink-0" />}
           <AccessSelect
             value={staff.permission_group_id || ''}
             onChange={onChange}

@@ -16,7 +16,7 @@ const fmtQty = (n) => (Math.round((n || 0) * 10) / 10).toLocaleString('en-GB');
 const STATUS_META = {
   not_started: { label: 'Not Started', icon: Clock, cls: 'bg-slate-100 text-slate-600' },
   in_progress: { label: 'In Progress', icon: TrendingUp, cls: 'bg-blue-100 text-blue-700' },
-  complete: { label: 'Complete', icon: CheckCircle2, cls: 'bg-[#2E5A1A]/15 text-[#2E5A1A]' },
+  complete: { label: 'Complete', icon: CheckCircle2, cls: 'bg-primary/15 text-primary' },
   variation: { label: 'Variation', icon: ArrowRight, cls: 'bg-violet-100 text-violet-700' },
   overrun: { label: 'Overrun', icon: AlertTriangle, cls: 'bg-rose-100 text-rose-700' },
 };
@@ -234,8 +234,8 @@ export default function BOQManager({ job }) {
 
       {/* Header */}
       <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2 flex-wrap">
-        <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-          <ClipboardList className="w-4 h-4 text-[#2E5A1A]" />
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <ClipboardList className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-slate-900 text-sm">Bill of Quantities</h3>
@@ -256,7 +256,7 @@ export default function BOQManager({ job }) {
           {refreshing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Refresh
         </button>
         <button onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white hover:bg-[#1c4a12] rounded-lg text-xs font-medium transition">
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-lg text-xs font-medium transition">
           <Plus className="w-3.5 h-3.5" /> Add Line
         </button>
       </div>
@@ -269,7 +269,7 @@ export default function BOQManager({ job }) {
         </div>
         <div className="bg-white rounded-lg border border-slate-200 p-2.5">
           <p className="text-[10px] text-slate-400 uppercase tracking-wide">Earned (Actual)</p>
-          <p className="text-base font-bold text-[#2E5A1A]">{fmt(totals.actualValue)}</p>
+          <p className="text-base font-bold text-primary">{fmt(totals.actualValue)}</p>
         </div>
         <div className="bg-white rounded-lg border border-slate-200 p-2.5">
           <p className="text-[10px] text-slate-400 uppercase tracking-wide">BOQ Lines</p>
@@ -287,7 +287,7 @@ export default function BOQManager({ job }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search SOR ref, description or section…"
-            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
       </div>
 
@@ -323,11 +323,11 @@ export default function BOQManager({ job }) {
                       {editingId === line.id ? (
                         <div className="flex items-center gap-2 flex-wrap">
                           <input type="number" value={editQty} onChange={(e) => setEditQty(e.target.value)}
-                            placeholder="Qty" className="w-20 px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+                            placeholder="Qty" className="w-20 px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-primary/30" />
                           <span className="text-slate-400">{line.unit || ''}</span>
                           <input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)}
-                            placeholder="Price" className="w-24 px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
-                          <span className="font-semibold text-[#2E5A1A]">{fmt((Number(editQty) || 0) * (Number(editPrice) || 0))}</span>
+                            placeholder="Price" className="w-24 px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                          <span className="font-semibold text-primary">{fmt((Number(editQty) || 0) * (Number(editPrice) || 0))}</span>
                         </div>
                       ) : (
                         <>
@@ -339,14 +339,14 @@ export default function BOQManager({ job }) {
                     </div>
                     {/* Progress bar */}
                     <div className="mt-1.5 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${isOver ? 'bg-rose-500' : pct >= 100 ? 'bg-[#2E5A1A]' : 'bg-blue-500'}`} style={{ width: `${Math.min(100, pct)}%` }} />
+                      <div className={`h-full rounded-full ${isOver ? 'bg-rose-500' : pct >= 100 ? 'bg-primary' : 'bg-blue-500'}`} style={{ width: `${Math.min(100, pct)}%` }} />
                     </div>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     {editingId === line.id ? (
                       <>
                         <button onClick={() => saveEdit(line)} disabled={savingEdit}
-                          className="p-1.5 text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded transition disabled:opacity-50" title="Save">
+                          className="p-1.5 text-primary hover:bg-primary/10 rounded transition disabled:opacity-50" title="Save">
                           {savingEdit ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                         </button>
                         <button onClick={cancelEdit} disabled={savingEdit}
@@ -357,7 +357,7 @@ export default function BOQManager({ job }) {
                     ) : (
                       <>
                         <button onClick={() => startEdit(line)} disabled={line.is_variation}
-                          className="p-1.5 text-slate-300 hover:text-[#2E5A1A] disabled:opacity-30 disabled:cursor-not-allowed transition" title="Edit quantity / price">
+                          className="p-1.5 text-slate-300 hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition" title="Edit quantity / price">
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => deleteLine(line)} disabled={line.is_variation}
@@ -479,12 +479,12 @@ function AddBOQLineForm({ job, rateItems, onAdded }) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input value={search} onChange={(e) => setSearch(e.target.value)} autoFocus
           placeholder="Search rate card items…"
-          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
       </div>
       <div className="border border-slate-200 rounded-lg max-h-[300px] overflow-y-auto divide-y divide-slate-100">
         {filteredRates.map((r) => (
           <button key={r.id} onClick={() => setSelectedRateId(r.id)}
-            className={`w-full text-left p-2.5 hover:bg-[#2E5A1A]/5 transition ${selectedRateId === r.id ? 'bg-[#2E5A1A]/10 border-l-4 border-[#2E5A1A]' : ''}`}>
+            className={`w-full text-left p-2.5 hover:bg-primary/5 transition ${selectedRateId === r.id ? 'bg-primary/10 border-l-4 border-primary' : ''}`}>
             <div className="flex items-center gap-2">
               <span className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-mono font-bold">{r.category?.[0]?.toUpperCase()}</span>
               <p className="text-sm font-medium text-slate-800 flex-1 truncate">{r.description}</p>
@@ -506,17 +506,17 @@ function AddBOQLineForm({ job, rateItems, onAdded }) {
             <div>
               <label className="text-[11px] text-slate-400 uppercase font-medium block mb-1">Quantity</label>
               <input type="number" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="0"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <div>
               <label className="text-[11px] text-slate-400 uppercase font-medium block mb-1">Unit Price (£)</label>
               <input type="number" value={priceOverride} onChange={(e) => setPriceOverride(e.target.value)}
                 placeholder={String(selected.price || '')}
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <div>
               <label className="text-[11px] text-slate-400 uppercase font-medium block mb-1">Line Total</label>
-              <div className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-[#2E5A1A]">
+              <div className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-primary">
                 {fmt(lineTotal)}
               </div>
             </div>
@@ -526,7 +526,7 @@ function AddBOQLineForm({ job, rateItems, onAdded }) {
       )}
       <div className="flex justify-end gap-2 pt-2">
         <button onClick={save} disabled={saving || !selected || !qty}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white hover:bg-[#1c4a12] rounded-lg text-sm font-medium transition disabled:opacity-50">
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white hover:bg-primary/90 rounded-lg text-sm font-medium transition disabled:opacity-50">
           {saving && <Loader2 className="w-4 h-4 animate-spin" />} Add to BOQ
         </button>
       </div>

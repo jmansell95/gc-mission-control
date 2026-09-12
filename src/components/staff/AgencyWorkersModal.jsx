@@ -148,7 +148,7 @@ export default function AgencyWorkersModal({ open, onClose, parentStaff, parentD
               <p className="text-sm text-slate-400 mb-4">No workers yet. Add an individual worker to get started.</p>
               <button
                 onClick={() => { setEditingWorker(null); setForm({ name: '', phone: '', email: '', job_title: '' }); setShowAdd(true); }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold"
               >
                 <Plus className="w-4 h-4" /> Add First Worker
               </button>
@@ -198,23 +198,23 @@ export default function AgencyWorkersModal({ open, onClose, parentStaff, parentD
                   <div className="grid grid-cols-2 gap-2.5">
                     <div className="col-span-2">
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Worker Name *</label>
-                      <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} autoFocus className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} autoFocus className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Job Title</label>
-                      <input type="text" value={form.job_title} onChange={e => setForm({ ...form, job_title: e.target.value })} placeholder="Agency Worker" className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.job_title} onChange={e => setForm({ ...form, job_title: e.target.value })} placeholder="Agency Worker" className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Phone</label>
-                      <input type="text" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="text" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                     <div className="col-span-2">
                       <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Email</label>
-                      <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                      <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
                     </div>
                   </div>
                   <div className="flex gap-2 pt-1">
-                    <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
+                    <button type="submit" disabled={saving} className="flex-1 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-1.5">
                       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} {editingWorker ? 'Update Worker' : 'Add Worker'}
                     </button>
                     <button type="button" onClick={resetForm} className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium">Cancel</button>
@@ -223,7 +223,7 @@ export default function AgencyWorkersModal({ open, onClose, parentStaff, parentD
               ) : (
                 <button
                   onClick={() => { setEditingWorker(null); setForm({ name: '', phone: '', email: '', job_title: '' }); setShowAdd(true); }}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-slate-300 text-slate-500 rounded-lg hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition text-sm font-medium"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-slate-300 text-slate-500 rounded-lg hover:border-primary hover:text-primary transition text-sm font-medium"
                 >
                   <Plus className="w-4 h-4" /> Add Another Worker
                 </button>

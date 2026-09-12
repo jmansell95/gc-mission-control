@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gauge, Loader2, Save, Check, AlertTriangle, Bell, Play } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   enabled: true,
@@ -132,7 +132,7 @@ export default function JobAlertSettings() {
           )}
         </div>
 
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           {saved && <Check className="w-4 h-4 text-white" />}
         </button>
@@ -141,11 +141,11 @@ export default function JobAlertSettings() {
       {/* Run now */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Play className="w-4 h-4 text-[#2E5A1A]" />
+          <Play className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Run Check Now</h3>
         </div>
         <p className="text-xs text-slate-500 mb-3">Manually trigger the budget check across all active jobs. The nightly automation does this automatically.</p>
-        <button onClick={handleRunNow} disabled={running} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50">
+        <button onClick={handleRunNow} disabled={running} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50">
           {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />} Run Budget Check Now
         </button>
         {result && (

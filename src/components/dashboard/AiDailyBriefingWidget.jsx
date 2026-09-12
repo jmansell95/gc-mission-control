@@ -108,7 +108,7 @@ Be realistic and practical. If you don't have specific data, give general operat
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-8">
           <div className="relative">
-            <Bot className="w-10 h-10 text-[#2E5A1A] animate-pulse" />
+            <Bot className="w-10 h-10 text-primary animate-pulse" />
             <Sparkles className="w-4 h-4 text-[#8DC63F] absolute -top-1 -right-1 animate-ping" />
           </div>
           <p className="text-sm text-slate-500 mt-3 font-medium">Generating your briefing…</p>
@@ -116,7 +116,7 @@ Be realistic and practical. If you don't have specific data, give general operat
       ) : briefing ? (
         <div className="space-y-3">
           {/* Headline */}
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 border border-[#2E5A1A]/10">
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-[#2E5A1A]/5 to-[#8DC63F]/5 border border-primary/10">
             <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${PRIORITY_BADGE[briefing.priority] || PRIORITY_BADGE.low}`} />
             <div>
               <p className="text-sm font-bold text-slate-800 leading-snug">{briefing.headline}</p>
@@ -144,7 +144,7 @@ Be realistic and practical. If you don't have specific data, give general operat
                     <p className="text-sm font-bold text-slate-800 leading-tight">{item.title}</p>
                     <p className="text-xs text-slate-500 mt-0.5 leading-snug">{item.detail}</p>
                     {item.action_label && (
-                      <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[#2E5A1A] mt-1 group-hover:gap-1 transition-all">
+                      <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-primary mt-1 group-hover:gap-1 transition-all">
                         {item.action_label} <ChevronRight className="w-3 h-3" />
                       </span>
                     )}
@@ -158,7 +158,7 @@ Be realistic and practical. If you don't have specific data, give general operat
         <div className="flex flex-col items-center justify-center py-8">
           <Bot className="w-10 h-10 text-slate-300" />
           <p className="text-sm text-slate-400 mt-2">Unable to generate briefing</p>
-          <button onClick={() => refetch()} className="text-xs text-[#2E5A1A] font-semibold mt-2 hover:underline">Try again</button>
+          <button onClick={() => refetch()} className="text-xs text-primary font-semibold mt-2 hover:underline">Try again</button>
         </div>
       )}
     </WidgetShell>

@@ -176,7 +176,7 @@ export default function AvailabilityReport({ filters }) {
   if (isLoading) {
     return (
       <div className="hub-glass rounded-2xl p-12 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
         <span className="ml-3 text-sm text-slate-500">Loading availability data…</span>
       </div>
     );
@@ -196,10 +196,10 @@ export default function AvailabilityReport({ filters }) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleCsv} disabled={exporting} className="inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition disabled:opacity-50">
+          <button onClick={handleCsv} disabled={exporting} className="inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition disabled:opacity-50">
             {exporting === 'csv' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />} CSV
           </button>
-          <button onClick={handlePdf} disabled={exporting} className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+          <button onClick={handlePdf} disabled={exporting} className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl text-xs font-semibold hover:bg-primary/90 transition disabled:opacity-50">
             {exporting === 'pdf' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />} PDF
           </button>
         </div>
@@ -224,7 +224,7 @@ export default function AvailabilityReport({ filters }) {
               {resourceSummaries.map((r, i) => (
                 <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                   <td className="px-3 py-2 font-semibold text-slate-800 flex items-center gap-1.5">
-                    {r.type === 'Rig' ? <Cog className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" /> : <Users className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />}
+                    {r.type === 'Rig' ? <Cog className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" /> : <Users className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
                     {r.name}
                   </td>
                   <td className="px-3 py-2 text-slate-500">{r.type}</td>

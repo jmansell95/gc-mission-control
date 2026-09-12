@@ -66,7 +66,7 @@ export default function BulkApproveBar({ selectedIds, onClear, onDone }) {
     <>
       <div className="sticky bottom-0 z-20 bg-white border-t border-slate-200 shadow-lg px-4 py-3 flex items-center justify-between gap-3 safe-area-bottom">
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#2E5A1A] text-white text-xs font-bold">
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary text-white text-xs font-bold">
             {selectedIds.length}
           </span>
           <span className="text-sm font-medium text-slate-700">

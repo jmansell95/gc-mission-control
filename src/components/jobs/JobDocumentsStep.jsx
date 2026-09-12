@@ -103,7 +103,7 @@ export default function JobDocumentsStep({ jobId, stagedFiles = [], onStagedFile
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition"
+          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition"
         >
           {DOC_CATEGORIES.map((c) => (
             <option key={c.value} value={c.value}>
@@ -114,10 +114,10 @@ export default function JobDocumentsStep({ jobId, stagedFiles = [], onStagedFile
       </div>
 
       {/* Upload drop zone */}
-      <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-[#2E5A1A]/40 transition">
+      <label className="flex items-center gap-3 px-4 py-4 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-primary/40 transition">
         {uploading ? (
           <>
-            <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+            <Loader2 className="w-5 h-5 text-primary animate-spin" />
             <span className="text-sm text-slate-500">Uploading…</span>
           </>
         ) : (

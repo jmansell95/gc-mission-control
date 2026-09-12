@@ -41,7 +41,7 @@ const calcDuration = (start, end) => {
 
 const jobTypeBadge = {
   drilling: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-  groundworks: 'bg-[#2E5A1A]/15 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20',
+  groundworks: 'bg-primary/15 text-primary ring-1 ring-primary/20',
   // Legacy types — kept for backward-compatible display of old records
   cp_drilling: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
   rotary_drilling: 'bg-blue-100 text-blue-700 ring-1 ring-blue-200',
@@ -61,7 +61,7 @@ const jobTypeBar = {
 
 const statusBadge = {
   planning: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200',
-  in_progress: 'bg-[#2E5A1A]/15 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20',
+  in_progress: 'bg-primary/15 text-primary ring-1 ring-primary/20',
   decommissioning: 'bg-orange-100 text-orange-700 ring-1 ring-orange-200',
   completed: 'bg-teal-100 text-teal-700 ring-1 ring-teal-200',
   on_hold: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
@@ -237,7 +237,7 @@ export default function JobManager({ onNavigateRota }) {
           <button
             type="button"
             onClick={openWizard}
-            className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#244715] active:scale-[0.97] transition text-ui-caption font-semibold shadow-sm"
+            className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl hover:bg-[#244715] active:scale-[0.97] transition text-ui-caption font-semibold shadow-sm"
           >
             <Plus className="w-4 h-4" /> Add Project
           </button>

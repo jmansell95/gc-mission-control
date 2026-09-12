@@ -125,7 +125,7 @@ export default function PerformanceOverviewTab({ dateRange, onSelectJob, onGoToT
             </div>
             <button
               onClick={() => onGoToTab?.('rig-profitability')}
-              className="text-[11px] font-semibold text-[#2E5A1A] hover:text-[#5A8C1E] transition inline-flex items-center gap-1"
+              className="text-[11px] font-semibold text-primary hover:text-[#5A8C1E] transition inline-flex items-center gap-1"
             >
               View All <ArrowRight className="w-3 h-3" />
             </button>

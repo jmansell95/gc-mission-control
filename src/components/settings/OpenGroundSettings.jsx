@@ -8,7 +8,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   token_url: 'https://ims.bentley.com/connect/token',
@@ -107,7 +107,7 @@ export default function OpenGroundSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">OpenGround API Credentials</h3>
         </div>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-slate-600 space-y-1.5">
@@ -157,34 +157,34 @@ export default function OpenGroundSettings() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
 
       {/* How it works */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <UploadCloud className="w-4 h-4 text-[#2E5A1A]" />
+          <UploadCloud className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">How Push-to-OpenGround Works</h3>
         </div>
         <div className="space-y-2 text-xs text-slate-600">
           <div className="flex items-start gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+            <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
             <p>Field crews log borehole progress, samples, SPTs and installations via the staff app or KeyLogBook.</p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+            <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
             <p>A manager reviews and <span className="font-medium">approves</span> each log in Log QC (Compliance → Log QC tab).</p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+            <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
             <p>In Log QC, select a job and click <span className="font-medium">Push to OpenGround</span> — the system builds a complete AGS v3.1 file and uploads it directly to your OpenGround database via the Bentley API.</p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
+            <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
             <p>The Senior Engineer sees the data in OpenGround immediately — no manual file downloads or browser uploads.</p>
           </div>
         </div>

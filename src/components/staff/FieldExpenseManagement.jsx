@@ -150,7 +150,7 @@ export default function FieldExpenseManagement() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
@@ -163,7 +163,7 @@ export default function FieldExpenseManagement() {
       <div className="flex items-center gap-2 flex-wrap">
         {weekOptions.map(ws => (
           <button key={ws} onClick={() => setWeekStart(ws)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ws === weekStart ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ws === weekStart ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
             {format(new Date(ws + 'T00:00:00'), 'dd MMM')}
           </button>
         ))}
@@ -173,7 +173,7 @@ export default function FieldExpenseManagement() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
-            <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
+            <PoundSterling className="w-4 h-4 text-primary" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Total This Week</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900 tabular-nums">{fmtMoney(portfolio.total)}</p>
@@ -205,7 +205,7 @@ export default function FieldExpenseManagement() {
       {Object.keys(portfolio.byCategory).length > 0 && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5">
-            <TrendingUp className="w-4 h-4 text-[#2E5A1A]" /> By Category
+            <TrendingUp className="w-4 h-4 text-primary" /> By Category
           </h3>
           <div className="flex flex-wrap gap-2">
             {Object.entries(portfolio.byCategory).sort((a, b) => b[1] - a[1]).map(([cat, amt]) => {

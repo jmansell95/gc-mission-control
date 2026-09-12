@@ -77,7 +77,7 @@ export default function ClientFeedbackWidget() {
               <p className="text-xs text-slate-400 mb-4 max-w-[220px]">Feedback is collected via the client portal after job completion. Enable it to start collecting NPS scores and reviews.</p>
               <button
                 onClick={() => navigate('/enterprise/settings')}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-[#2E5A1A] bg-[#2E5A1A]/5 hover:bg-[#2E5A1A]/10 rounded-lg transition border border-[#2E5A1A]/15"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition border border-primary/15"
               >
                 <Settings className="w-3.5 h-3.5" />
                 Enable feedback on portal

@@ -118,7 +118,7 @@ export default function DivisionCheckConfigManager() {
       {/* Division selector */}
       <div className="hub-glass rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ShieldCheck className="w-5 h-5 text-[#2E5A1A]" />
+          <ShieldCheck className="w-5 h-5 text-primary" />
           <h2 className="text-sm font-bold text-slate-900">Division Check Configuration</h2>
         </div>
         <p className="text-xs text-slate-500 mb-3">
@@ -254,7 +254,7 @@ function TemplatePicker({ templates, selectedIds, onToggle, search, onSearch }) 
           onChange={e => { onSearch(e.target.value); setExpanded(true); }}
           onFocus={() => setExpanded(true)}
           placeholder="Search Mitti templates…"
-          className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] placeholder:text-slate-400"
+          className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-primary placeholder:text-slate-400"
         />
       </div>
 

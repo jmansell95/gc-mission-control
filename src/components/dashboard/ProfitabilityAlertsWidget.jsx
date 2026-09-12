@@ -99,7 +99,7 @@ export default function ProfitabilityAlertsWidget({ onSelectJob }) {
                     {onSelectJob && (
                       <button
                         onClick={() => onSelectJob({ id: a.job_id, name: a.job_name })}
-                        className="mt-2 text-xs font-semibold text-[#2E5A1A] hover:underline"
+                        className="mt-2 text-xs font-semibold text-primary hover:underline"
                       >
                         Open job →
                       </button>

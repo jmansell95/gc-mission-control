@@ -21,7 +21,7 @@ export default function WidgetActionFooter({ deepLinkLabel, onDeepLink, quickAct
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onQuickAction?.(); }}
-        className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl text-ui-caption font-bold hover:bg-[#244715] active:scale-[0.98] transition"
+        className="flex-1 flex items-center justify-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl text-ui-caption font-bold hover:bg-[#244715] active:scale-[0.98] transition"
       >
         <Zap className="w-3.5 h-3.5" />
         {quickActionLabel}

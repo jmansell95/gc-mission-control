@@ -150,7 +150,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
         title="Billing Pipeline"
         description="Lifecycle command view of every billing contract — renewals, reconciliation & retention at a glance."
         actions={onNavigate ? (
-          <button onClick={() => onNavigate('billing-contracts')} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+          <button onClick={() => onNavigate('billing-contracts')} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
             <FileText className="w-4 h-4" /> Manage Contracts
           </button>
         ) : null}
@@ -216,7 +216,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
                   {c.total_contract_value_net > 0 && <p className="text-[10px] text-slate-400 tabular-nums">{fmt(c.total_contract_value_net)}</p>}
                 </div>
                 {onSelectJob && (
-                  <button onClick={() => onSelectJob({ id: c.job_id, name: jobName(c.job_id) })} className="text-slate-300 hover:text-[#2E5A1A] flex-shrink-0">
+                  <button onClick={() => onSelectJob({ id: c.job_id, name: jobName(c.job_id) })} className="text-slate-300 hover:text-primary flex-shrink-0">
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 )}
@@ -260,7 +260,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
             </div>
           )}
           {onNavigate && (
-            <button onClick={() => onNavigate('invoicing')} className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-slate-500 hover:text-[#2E5A1A] border border-slate-200 rounded-lg hover:border-[#2E5A1A]/30 transition">
+            <button onClick={() => onNavigate('invoicing')} className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-slate-500 hover:text-primary border border-slate-200 rounded-lg hover:border-primary/30 transition">
               <RefreshCw className="w-3.5 h-3.5" /> Open Reconciliation Centre
             </button>
           )}
@@ -312,7 +312,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <section className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#2E5A1A]" /> Active Contract Billing Methods
+            <TrendingUp className="w-4 h-4 text-primary" /> Active Contract Billing Methods
           </h3>
           {methodMix.length === 0 ? (
             <p className="text-sm text-slate-400 py-3">No active contracts.</p>
@@ -337,7 +337,7 @@ export default function BillingPipelineDashboard({ onNavigate, onSelectJob }) {
 
         <section className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-[#2E5A1A]" /> Invoice Status Snapshot
+            <FileText className="w-4 h-4 text-primary" /> Invoice Status Snapshot
           </h3>
           <div className="grid grid-cols-5 gap-2">
             {[

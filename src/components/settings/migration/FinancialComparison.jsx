@@ -10,7 +10,7 @@ export default function FinancialComparison() {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-[#2E5A1A]" />
+        <TrendingUp className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-900 text-sm">Financial Comparison — {USER_COUNT} Users</h3>
       </div>
 
@@ -67,7 +67,7 @@ export default function FinancialComparison() {
               <td className="px-4 py-3 text-right tabular-nums font-bold text-amber-700">{fmtGBP(TOTAL_BUILD_COST)}</td>
             </tr>
             {/* TCO total */}
-            <tr className="bg-[#2E5A1A] text-white font-bold">
+            <tr className="bg-primary text-white font-bold">
               <td className="px-4 py-3.5" colSpan={2}>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />

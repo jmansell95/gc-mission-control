@@ -35,9 +35,9 @@ export default function EquipmentItemCard({ item: c, linkedItems = [], assetMap 
             <p className="text-sm font-semibold text-slate-900 truncate">{c.description}</p>
             <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-medium">{cfg.label}</span>
             {cb && ComplianceIcon && <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 ${cb.badge}`}><ComplianceIcon className="w-2.5 h-2.5" /> {cb.label}</span>}
-            {c.po_number && <span className="text-[10px] bg-[#2E5A1A]/10 text-[#2E5A1A] px-1.5 py-0.5 rounded-full font-medium font-mono inline-flex items-center gap-1"><Package className="w-2.5 h-2.5" />{c.po_number}</span>}
+            {c.po_number && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium font-mono inline-flex items-center gap-1"><Package className="w-2.5 h-2.5" />{c.po_number}</span>}
             {c.reference_number && <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium font-mono">Ref: {c.reference_number}</span>}
-            {menCount > 0 && <span className="text-[10px] bg-[#2E5A1A]/10 text-[#2E5A1A] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 border border-[#2E5A1A]/20"><Users className="w-2.5 h-2.5" />{menCount} man{menCount > 1 ? 's' : ''}</span>}
+            {menCount > 0 && <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 border border-primary/20"><Users className="w-2.5 h-2.5" />{menCount} man{menCount > 1 ? 's' : ''}</span>}
             {c.rate_card_item_id && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 border border-amber-100"><Receipt className="w-2.5 h-2.5" />Rate card</span>}
             {c.site_asset_id && <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 border border-indigo-100"><Factory className="w-2.5 h-2.5" />Asset Panda</span>}
             {asset && asset.stock_level && asset.stock_level !== 'unknown' && (() => {
@@ -47,7 +47,7 @@ export default function EquipmentItemCard({ item: c, linkedItems = [], assetMap 
               return <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium inline-flex items-center gap-0.5 ${stockCls}`}><StockIcon className="w-2.5 h-2.5" />{stockLabel}</span>;
             })()}
             {isPOA && <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full font-bold inline-flex items-center gap-0.5 border border-amber-300"><AlertCircle className="w-2.5 h-2.5" />POA</span>}
-            {isConfirmed && <span className="text-[10px] bg-[#2E5A1A]/20 text-[#2E5A1A] px-1.5 py-0.5 rounded-full font-bold inline-flex items-center gap-0.5 border border-[#2E5A1A]/30"><FileCheck className="w-2.5 h-2.5" />Confirmed {fmt(Number(c.negotiated_unit_cost))}</span>}
+            {isConfirmed && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-bold inline-flex items-center gap-0.5 border border-primary/30"><FileCheck className="w-2.5 h-2.5" />Confirmed {fmt(Number(c.negotiated_unit_cost))}</span>}
             {c.vat_exempt && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full font-medium">VAT exempt</span>}
             {isJobMode && locBadge && loc !== 'yard' && <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${locBadge.cls}`}>{locBadge.label}</span>}
           </div>
@@ -74,7 +74,7 @@ export default function EquipmentItemCard({ item: c, linkedItems = [], assetMap 
             )}
           </p>
           {dailyCost > 0 && (
-            <p className="text-[10px] text-[#2E5A1A] font-semibold mt-0.5">{fmt(dailyCost)}/day total ({fmt(Number(c.unit_cost) || 0)} × {menCount})</p>
+            <p className="text-[10px] text-primary font-semibold mt-0.5">{fmt(dailyCost)}/day total ({fmt(Number(c.unit_cost) || 0)} × {menCount})</p>
           )}
           {isJobMode && c.category === 'hired_equipment' && (
             <button onClick={() => onOffHire(c)} className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-amber-700 hover:text-amber-900 font-medium bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg transition">
@@ -82,7 +82,7 @@ export default function EquipmentItemCard({ item: c, linkedItems = [], assetMap 
             </button>
           )}
           {isJobMode && isPOA && onConfirmQuote && (
-            <button onClick={() => onConfirmQuote(c)} className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-[#2E5A1A] hover:text-[#1c4a12] font-bold bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 px-2.5 py-1 rounded-lg transition border border-emerald-200">
+            <button onClick={() => onConfirmQuote(c)} className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-primary hover:text-primary/90 font-bold bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg transition border border-emerald-200">
               <FileCheck className="w-3.5 h-3.5" /> Confirm Quote
             </button>
           )}
@@ -102,13 +102,13 @@ export default function EquipmentItemCard({ item: c, linkedItems = [], assetMap 
             <p className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wide">Contractor</p>
           ) : (
             <>
-              <p className="text-sm font-bold text-[#2E5A1A]">{fmt(net)}</p>
+              <p className="text-sm font-bold text-primary">{fmt(net)}</p>
               <p className="text-[10px] text-slate-400">revenue</p>
             </>
           )}
         </div>
         <div className="flex flex-col gap-1 flex-shrink-0">
-          <button onClick={() => onEdit(c)} className="p-1 text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded transition"><Edit2 className="w-3.5 h-3.5" /></button>
+          <button onClick={() => onEdit(c)} className="p-1 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition"><Edit2 className="w-3.5 h-3.5" /></button>
           <button onClick={() => onDelete(c.id)} className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition"><Trash2 className="w-3.5 h-3.5" /></button>
         </div>
       </div>

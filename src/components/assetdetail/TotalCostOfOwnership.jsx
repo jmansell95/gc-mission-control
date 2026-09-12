@@ -98,7 +98,7 @@ export default function TotalCostOfOwnership({ asset }) {
   return (
     <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Activity className="w-4 h-4 text-[#2E5A1A]" />
+        <Activity className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-extrabold text-slate-900">Total Cost of Ownership</h3>
       </div>
 

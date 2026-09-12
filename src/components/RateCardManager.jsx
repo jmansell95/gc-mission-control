@@ -258,7 +258,7 @@ export default function RateCardManager() {
         <SettingsSectionHeader icon={Receipt} title="Rate Card Manager" description="Master Price List (chargeable rates, internal costs, drilling rates) and Job Rate Cards" />
         <div className="flex gap-1.5 bg-slate-100 p-1 rounded-lg w-fit">
           <button onClick={() => setViewMode('master')} className="px-4 py-2 rounded-md text-sm font-semibold transition text-slate-500">Master Price List</button>
-          <button onClick={() => setViewMode('job')} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-[#2E5A1A] shadow-sm">Job Rate Cards</button>
+          <button onClick={() => setViewMode('job')} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-primary shadow-sm">Job Rate Cards</button>
         </div>
         <JobRateCardManager />
       </div>
@@ -271,7 +271,7 @@ export default function RateCardManager() {
       <div className="space-y-4">
         <SettingsSectionHeader icon={Receipt} title="Rate Card Manager" description="Master Price List (chargeable rates, internal costs, drilling rates) and Job Rate Cards" />
         <div className="flex gap-1.5 bg-slate-100 p-1 rounded-lg w-fit">
-          <button onClick={() => { setViewMode('master'); setActiveSource('standard'); }} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-[#2E5A1A] shadow-sm">Master Price List</button>
+          <button onClick={() => { setViewMode('master'); setActiveSource('standard'); }} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-primary shadow-sm">Master Price List</button>
           <button onClick={() => setViewMode('job')} className="px-4 py-2 rounded-md text-sm font-semibold transition text-slate-500">Job Rate Cards</button>
         </div>
         <RateCardViewToggle activeView={activeView} setActiveView={setActiveView} activeSource={activeSource} setActiveSource={setActiveSource}
@@ -288,7 +288,7 @@ export default function RateCardManager() {
     <div className="space-y-4">
       <SettingsSectionHeader icon={Receipt} title="Rate Card Manager" description="Master Price List (chargeable rates, internal costs, drilling rates) and Job Rate Cards" />
       <div className="flex gap-1.5 bg-slate-100 p-1 rounded-lg w-fit">
-        <button onClick={() => setViewMode('master')} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-[#2E5A1A] shadow-sm">Master Price List</button>
+        <button onClick={() => setViewMode('master')} className="px-4 py-2 rounded-md text-sm font-semibold transition bg-white text-primary shadow-sm">Master Price List</button>
         <button onClick={() => setViewMode('job')} className="px-4 py-2 rounded-md text-sm font-semibold transition text-slate-500">Job Rate Cards</button>
       </div>
 
@@ -302,7 +302,7 @@ export default function RateCardManager() {
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Header bar */}
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-100 flex items-center gap-2 flex-wrap">
-          {isOurCard ? <Receipt className="w-5 h-5 text-[#2E5A1A]" /> : isInternalCosts ? <HardHat className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5 text-[#2E5A1A]" />}
+          {isOurCard ? <Receipt className="w-5 h-5 text-primary" /> : isInternalCosts ? <HardHat className="w-5 h-5 text-amber-600" /> : <Building2 className="w-5 h-5 text-primary" />}
           <h2 className="font-semibold text-slate-900 text-sm sm:text-base">
             {isOurCard ? 'Chargeable Rates' : isInternalCosts ? 'Internal Costs' : activeSupplier?.name || 'Supplier'}
           </h2>
@@ -332,7 +332,7 @@ export default function RateCardManager() {
             <>
               <input ref={masterFileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleMasterUpload} className="hidden" />
               <button onClick={() => masterFileInputRef.current?.click()} disabled={uploading}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-[#2E5A1A] text-white hover:bg-[#1c4a12] disabled:opacity-50 flex-shrink-0">
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-primary text-white hover:bg-primary/90 disabled:opacity-50 flex-shrink-0">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 <span className="hidden sm:inline">{uploading ? 'Processing...' : 'Upload MPL'}</span>
                 <span className="sm:hidden">{uploading ? '...' : 'MPL'}</span>
@@ -351,7 +351,7 @@ export default function RateCardManager() {
             </>
           )}
           <button onClick={() => setShowSupplierUpload(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-white text-[#2E5A1A] border border-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5 flex-shrink-0">
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-white text-primary border border-primary/20 hover:bg-primary/5 flex-shrink-0">
             <Building2 className="w-4 h-4" /> <span className="hidden sm:inline">Upload Supplier</span><span className="sm:hidden">Supplier</span>
           </button>
           <button onClick={exportCSV}
@@ -367,7 +367,7 @@ export default function RateCardManager() {
             const active = activeCategory === key;
             return (
               <button key={key} onClick={() => setActiveCategory(key)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium transition border-b-2 ${active ? 'border-[#2E5A1A] text-[#2E5A1A] bg-[#2E5A1A]/5' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium transition border-b-2 ${active ? 'border-primary text-primary bg-primary/5' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
                 <Icon className="w-4 h-4" /> {meta.label}
                 <span className="text-xs text-slate-400">({counts[key]})</span>
               </button>
@@ -380,12 +380,12 @@ export default function RateCardManager() {
           <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Search ${CATEGORY_META[activeCategory].label.toLowerCase()} rates...`} className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={`Search ${CATEGORY_META[activeCategory].label.toLowerCase()} rates...`} className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
-            <button onClick={() => setBulkOpen(!bulkOpen)} className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition w-full sm:w-auto flex-shrink-0 ${bulkOpen ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <button onClick={() => setBulkOpen(!bulkOpen)} className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition w-full sm:w-auto flex-shrink-0 ${bulkOpen ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
               <TrendingUp className="w-4 h-4" /> Bulk Adjust
             </button>
-            <button onClick={() => setCloneOpen(!cloneOpen)} className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition w-full sm:w-auto flex-shrink-0 ${cloneOpen ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            <button onClick={() => setCloneOpen(!cloneOpen)} className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition w-full sm:w-auto flex-shrink-0 ${cloneOpen ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
               <Copy className="w-4 h-4" /> Clone to Draft
             </button>
           </div>
@@ -412,7 +412,7 @@ export default function RateCardManager() {
               <p className="text-xs text-emerald-700">Copies every rate from "Chargeable Rates" into a new draft supplier tab so you can prepare next year's prices without affecting live billing. Optionally apply an uplift %.</p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input type="number" step="0.1" value={clonePct} onChange={e => setClonePct(e.target.value)} placeholder="Uplift % (e.g. 5, or leave blank)" className="flex-1 px-3 py-2 border border-emerald-300 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500" />
-                <button onClick={cloneToDraft} disabled={cloning} className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+                <button onClick={cloneToDraft} disabled={cloning} className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                   {cloning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Clone
                 </button>
                 <button onClick={() => { setCloneOpen(false); setClonePct(''); }} className="px-3 py-2 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-medium transition">Cancel</button>

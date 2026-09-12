@@ -137,7 +137,7 @@ export default function DailyCostViewer({ job }) {
             { val: 'rejected', label: 'Rejected' },
           ].map(f => (
             <button key={f.val} onClick={() => setFilter(f.val)}
-              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition whitespace-nowrap ${filter === f.val ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2E5A1A]/30'}`}>
+              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition whitespace-nowrap ${filter === f.val ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-primary/30'}`}>
               {f.label}
             </button>
           ))}

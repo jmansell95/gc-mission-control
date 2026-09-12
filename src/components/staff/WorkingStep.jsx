@@ -131,7 +131,7 @@ function KeyLogBookReviewPanel({ job, hasAutoTimesheet, onGoToEndOfShift }) {
       {/* CTA to end of shift */}
       <button
         onClick={onGoToEndOfShift}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#1c4a12] active:scale-95 transition text-sm font-bold touch-manipulation shadow-sm"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-primary text-white rounded-xl hover:bg-primary/90 active:scale-95 transition text-sm font-bold touch-manipulation shadow-sm"
       >
         <Clock className="w-4 h-4" />
         Review &amp; Submit My Day

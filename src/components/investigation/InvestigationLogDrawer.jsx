@@ -139,7 +139,7 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               onClick={() => job && navigateToJobSiteActivity(job, log.id)}
               disabled={!job}
               title="Open on Job Site Activity"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-[#2E5A1A] bg-[#2E5A1A]/5 hover:bg-[#2E5A1A]/10 rounded-lg transition disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-primary bg-primary/5 hover:bg-primary/10 rounded-lg transition disabled:opacity-40"
             >
               <ExternalLink className="w-3.5 h-3.5" /> Site Activity
             </button>
@@ -257,7 +257,7 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Evidence Photos ({photos.length})</p>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 {photos.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden border border-slate-200 hover:ring-2 hover:ring-[#2E5A1A]/30 transition">
+                  <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden border border-slate-200 hover:ring-2 hover:ring-primary/30 transition">
                     <img src={url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                   </a>
                 ))}
@@ -300,7 +300,7 @@ export default function InvestigationLogDrawer({ log, jobName, allLogs = [], onC
               onChange={e => setReviewNote(e.target.value)}
               placeholder="Add a review note (optional)..."
               rows={2}
-              className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-[#2E5A1A]/20 focus:border-[#2E5A1A]/30 outline-none transition resize-none"
+              className="w-full text-sm px-3 py-2 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary/30 outline-none transition resize-none"
             />
             <div className="flex gap-2 mt-2">
               <button

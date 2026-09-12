@@ -33,7 +33,7 @@ const jobTypeBadgeColors = {
 const statusConfig = {
   assigned: { label: 'Assigned', icon: Clock, badge: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' },
   started: { label: 'In Progress', icon: PlayCircle, badge: 'bg-blue-50 text-blue-700 ring-1 ring-blue-200' },
-  completed: { label: 'Completed', icon: CheckCircle2, badge: 'bg-[#2E5A1A]/10 text-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' }
+  completed: { label: 'Completed', icon: CheckCircle2, badge: 'bg-primary/10 text-primary ring-1 ring-primary/20' }
 };
 
 export default function AssignmentCard({ assignment, job, vehicle, client, staff, defaultExpanded = false, onOpenShiftWizard, onEarlyLeave, onLeaveSite, tasksSubmitted = false, needsBriefing = false, arrivedOnSite = false, crewSignedCount = 0, crewTotal = 0, allCrewSigned = false, previousProgress = [], onConfirmShift, onDeclineShift, canPerformActions = true, hotelBooking = null, onAdHocVisit, jobAssets = [], assetMap = {}, complianceItems = [] }) {
@@ -65,7 +65,7 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
 
       {/* Compact header — always visible */}
       <button onClick={() => setExpanded(e => !e)} className="w-full text-left p-4 md:p-5 flex items-start gap-3 hover:bg-slate-50/40 transition">
-        <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ring-2 ring-offset-2 ring-offset-white ${assignment.status === 'completed' ? 'bg-[#2E5A1A] ring-[#2E5A1A]/20' : assignment.status === 'started' ? 'bg-blue-500 ring-blue-500/20' : 'bg-slate-300 ring-slate-300/20'}`} />
+        <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ring-2 ring-offset-2 ring-offset-white ${assignment.status === 'completed' ? 'bg-primary ring-primary/20' : assignment.status === 'started' ? 'bg-blue-500 ring-blue-500/20' : 'bg-slate-300 ring-slate-300/20'}`} />
         <div className="min-w-0 flex-1">
           <h3 className="text-ui-heading font-bold text-slate-900 leading-tight truncate tracking-tight">{job.name}</h3>
           <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -155,7 +155,7 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
                         <PlayCircle className="w-6 h-6" strokeWidth={2.5} /> Continue Shift
                       </button>
                       <button onClick={() => onLeaveSite?.(assignment.id)}
-                        className="flex items-center gap-2 px-4 py-4 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-ui-body font-semibold">
+                        className="flex items-center gap-2 px-4 py-4 bg-primary/10 text-primary rounded-2xl hover:bg-primary/15 active:scale-95 transition text-ui-body font-semibold">
                         <DoorOpen className="w-5 h-5" /> Leave Site
                       </button>
                       <button onClick={() => onEarlyLeave(assignment.id)}
@@ -200,23 +200,23 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <div className="space-y-2">
               <div className="flex items-start gap-2 text-sm text-slate-600">
-                <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                 <span className="break-words">{job.location}</span>
               </div>
               {client && (
                 <div className="flex items-start gap-2 text-sm text-slate-600">
-                  <Briefcase className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                  <Briefcase className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <span>Client: <span className="font-medium text-slate-700">{client.name}</span></span>
                 </div>
               )}
               {(job.site_contact_name || job.site_contact_phone) && (
                 <div className="flex items-start gap-2 text-sm text-slate-600">
-                  <Phone className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <span>Site Contact: </span>
                     {job.site_contact_name && <span className="font-medium text-slate-700">{job.site_contact_name}</span>}
                     {job.site_contact_phone && (
-                      <a href={`tel:${job.site_contact_phone}`} className="ml-1.5 inline-flex items-center gap-1 text-[#2E5A1A] font-semibold hover:underline">
+                      <a href={`tel:${job.site_contact_phone}`} className="ml-1.5 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
                         {job.site_contact_phone}
                       </a>
                     )}
@@ -232,12 +232,12 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
             <div className="space-y-2">
               {job.requisition_list_url && (
                 <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-2 p-3 bg-[#2E5A1A]/10 rounded-xl border border-[#2E5A1A]/15 hover:bg-[#2E5A1A]/15 transition group">
+                  className="flex items-center justify-between gap-2 p-3 bg-primary/10 rounded-xl border border-primary/15 hover:bg-primary/15 transition group">
                   <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
-                    <span className="font-semibold text-[#2E5A1A] text-sm truncate">{job.requisition_list_name || 'Requisition List'}</span>
+                    <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="font-semibold text-primary text-sm truncate">{job.requisition_list_name || 'Requisition List'}</span>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 group-hover:translate-x-0.5 transition" />
+                  <ExternalLink className="w-4 h-4 text-primary flex-shrink-0 group-hover:translate-x-0.5 transition" />
                 </a>
               )}
               {job.notes && (
@@ -305,8 +305,8 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
           {/* Briefing status + photos */}
           <div className="pt-3 border-t border-slate-100 space-y-3">
             {assignment.briefing_signed ? (
-              <div className="bg-[#2E5A1A]/5 rounded-lg px-3 py-2.5">
-                <div className="flex items-center gap-2 text-sm text-[#2E5A1A]">
+              <div className="bg-primary/5 rounded-lg px-3 py-2.5">
+                <div className="flex items-center gap-2 text-sm text-primary">
                   <ShieldCheck className="w-4 h-4 flex-shrink-0" />
                   <span className="font-medium">You've signed the briefing</span>
                   {assignment.briefing_signed_at && (
@@ -321,13 +321,13 @@ export default function AssignmentCard({ assignment, job, vehicle, client, staff
                   </div>
                 )}
                 {!allCrewSigned && crewTotal > 1 && (
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#2E5A1A]/15 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-primary/15 text-xs text-slate-500">
                     <Clock className="w-3.5 h-3.5" />
                     <span className="font-medium">{crewSignedCount} of {crewTotal} crew signed off — you can start work; others will join once briefed.</span>
                   </div>
                 )}
                 {allCrewSigned && crewTotal > 1 && (
-                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#2E5A1A]/15 text-xs text-[#2E5A1A]">
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-primary/15 text-xs text-primary">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span className="font-medium">All crew briefed.</span>
                   </div>

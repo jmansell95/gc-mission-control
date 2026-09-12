@@ -215,7 +215,7 @@ export default function CVRExportTab() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search jobs, clients, references…"
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary"
           />
         </div>
         <button
@@ -246,13 +246,13 @@ export default function CVRExportTab() {
                   key={cvr.id}
                   onClick={() => toggleSelect(cvr.id)}
                   className={`hub-glass rounded-2xl p-3.5 cursor-pointer transition active:scale-[0.98] ${
-                    isSelected ? 'ring-2 ring-[#2E5A1A] bg-emerald-50/30' : ''
+                    isSelected ? 'ring-2 ring-primary bg-emerald-50/30' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${
-                        isSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300'
+                        isSelected ? 'bg-primary border-primary' : 'border-slate-300'
                       }`}>
                         {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </div>
@@ -285,7 +285,7 @@ export default function CVRExportTab() {
                         type="checkbox"
                         checked={selected.size === filtered.length && filtered.length > 0}
                         onChange={selectAll}
-                        className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]"
+                        className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                       />
                     </th>
                     <th className="text-left px-3 py-2.5 font-semibold">Job</th>
@@ -310,7 +310,7 @@ export default function CVRExportTab() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelect(cvr.id)}
-                            className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]"
+                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                           />
                         </td>
                         <td className="px-3 py-2.5">

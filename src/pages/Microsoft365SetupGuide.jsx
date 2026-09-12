@@ -651,7 +651,7 @@ export default function Microsoft365SetupGuide() {
               <span className="hidden sm:inline">Back</span>
             </button>
             <button onClick={handleDownloadPDF} disabled={generating} type="button"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-[#2E5A1A] ring-1 ring-white/30 text-sm font-bold active:scale-95 transition touch-manipulation disabled:opacity-60 shadow-sm">
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary ring-1 ring-white/30 text-sm font-bold active:scale-95 transition touch-manipulation disabled:opacity-60 shadow-sm">
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               <span>{generating ? 'Preparing...' : 'Download / Print PDF'}</span>
             </button>
@@ -680,12 +680,12 @@ export default function Microsoft365SetupGuide() {
           <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
             <h3 className="text-sm font-bold text-slate-800 mb-2">What's in the guide:</h3>
             <ul className="text-sm text-slate-600 space-y-1.5">
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">1.</span> Overview &amp; objectives — the four services enabled</li>
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">2.</span> Prerequisites — admin roles &amp; tenant requirements</li>
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">3–6.</span> Azure AD app registration, redirect URIs, API permissions &amp; client secret</li>
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">7–8.</span> Entering credentials in the app &amp; registering connectors</li>
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">9.</span> <strong>Conditional Access &amp; MFA</strong> — enforcing Microsoft Authenticator</li>
-              <li className="flex gap-2"><span className="text-[#2E5A1A] font-bold">10–11.</span> Testing, verification &amp; troubleshooting (with AADSTS error codes)</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">1.</span> Overview &amp; objectives — the four services enabled</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">2.</span> Prerequisites — admin roles &amp; tenant requirements</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">3–6.</span> Azure AD app registration, redirect URIs, API permissions &amp; client secret</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">7–8.</span> Entering credentials in the app &amp; registering connectors</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">9.</span> <strong>Conditional Access &amp; MFA</strong> — enforcing Microsoft Authenticator</li>
+              <li className="flex gap-2"><span className="text-primary font-bold">10–11.</span> Testing, verification &amp; troubleshooting (with AADSTS error codes)</li>
             </ul>
           </div>
 
@@ -697,7 +697,7 @@ export default function Microsoft365SetupGuide() {
 
           <div className="flex justify-center pt-2">
             <button onClick={handleDownloadPDF} disabled={generating} type="button"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold active:scale-95 transition touch-manipulation disabled:opacity-60 shadow-md">
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white text-sm font-bold active:scale-95 transition touch-manipulation disabled:opacity-60 shadow-md">
               {generating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
               <span>{generating ? 'Preparing PDF...' : 'Generate Setup Guide PDF'}</span>
             </button>

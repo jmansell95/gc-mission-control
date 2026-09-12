@@ -210,7 +210,7 @@ export default function StaffMessenger({ staff, divisionStaff = [], divisionId }
             const mine = m.sender_id === staff?.id;
             return (
               <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${mine ? 'bg-[#2E5A1A] text-white rounded-br-md' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'}`}>
+                <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 ${mine ? 'bg-primary text-white rounded-br-md' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'}`}>
                   {!mine && activeChannel.type === 'crew' && (
                     <p className="text-[10px] font-bold text-emerald-700 mb-0.5">{m.sender_name}</p>
                   )}
@@ -233,12 +233,12 @@ export default function StaffMessenger({ staff, divisionStaff = [], divisionId }
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
           placeholder="Type a message…"
           rows={1}
-          className="flex-1 resize-none rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 max-h-24"
+          className="flex-1 resize-none rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 max-h-24"
         />
         <button
           onClick={handleSend}
           disabled={!draft.trim() || sending}
-          className="w-11 h-11 rounded-xl bg-[#2E5A1A] text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition flex-shrink-0"
+          className="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition flex-shrink-0"
         >
           {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </button>

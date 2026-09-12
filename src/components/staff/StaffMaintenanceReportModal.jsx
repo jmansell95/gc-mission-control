@@ -115,7 +115,7 @@ export default function StaffMaintenanceReportModal({ open, onClose, staff }) {
               {myVehicle ? `${myVehicle.registration_number} — ` : ''}The office can see this on the Vehicles page now.
             </p>
             <button onClick={onClose} type="button"
-              className="mt-6 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-lg font-semibold text-sm hover:brightness-110 transition">
+              className="mt-6 px-5 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:brightness-110 transition">
               Done
             </button>
           </div>
@@ -124,7 +124,7 @@ export default function StaffMaintenanceReportModal({ open, onClose, staff }) {
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Vehicle *</label>
               <select value={form.vehicle_id} onChange={e => setForm({ ...form, vehicle_id: e.target.value })} required
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm bg-white">
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm bg-white">
                 <option value="">Select vehicle</option>
                 {vehicles.map(v => <option key={v.id} value={v.id}>{v.name} ({v.registration_number})</option>)}
               </select>
@@ -139,8 +139,8 @@ export default function StaffMaintenanceReportModal({ open, onClose, staff }) {
                   <button key={t.value} type="button" onClick={() => setForm({ ...form, booking_type: t.value })}
                     className={`px-3 py-2.5 rounded-lg text-sm font-medium border transition ${
                       form.booking_type === t.value
-                        ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-[#2E5A1A]/40'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-primary/40'
                     }`}>
                     {t.label}
                   </button>
@@ -151,25 +151,25 @@ export default function StaffMaintenanceReportModal({ open, onClose, staff }) {
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Date *</label>
                 <input type="date" value={form.booking_date} onChange={e => setForm({ ...form, booking_date: e.target.value })} required
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Time</label>
                 <input type="time" value={form.booking_time} onChange={e => setForm({ ...form, booking_time: e.target.value })}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm" />
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">Notes (optional)</label>
               <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} placeholder="e.g. booked in for MOT at Dartford depot"
-                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm resize-none" />
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm resize-none" />
             </div>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[11px] text-amber-700 flex items-start gap-2">
               <Wrench className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
               <span>This will show on the admin Vehicles page under <strong>{myVehicle?.registration_number || 'this reg'}</strong>, marked as reported by you.</span>
             </div>
             <button type="submit" disabled={saving}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2E5A1A] text-white rounded-xl font-semibold text-sm hover:brightness-110 transition disabled:opacity-50 shadow-sm">
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-xl font-semibold text-sm hover:brightness-110 transition disabled:opacity-50 shadow-sm">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               {saving ? 'Saving…' : 'Log Booking'}
             </button>

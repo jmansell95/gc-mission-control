@@ -135,7 +135,7 @@ export default function CompanyHolidaysSettings() {
             </div>
           </div>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium">
             <Plus className="w-4 h-4" /> Add Shutdown
           </button>
         </div>
@@ -224,7 +224,7 @@ export default function CompanyHolidaysSettings() {
               </select>
             </div>
             <div className="flex gap-2 pt-1">
-              <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">Create</button>
+              <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium text-sm">Create</button>
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
             </div>
           </form>

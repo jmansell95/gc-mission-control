@@ -79,13 +79,13 @@ export default function LoanResourceDrawer({ resource, resourceType, divisions, 
                     onClick={() => setTargetId(d.id)}
                     className={`w-full flex items-center gap-2.5 p-3 rounded-xl border transition text-left ${
                       targetId === d.id
-                        ? 'border-[#2E5A1A] bg-emerald-50 ring-1 ring-[#2E5A1A]/30'
+                        ? 'border-primary bg-emerald-50 ring-1 ring-primary/30'
                         : 'border-slate-200 bg-white hover:bg-slate-50'
                     }`}
                   >
                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.color || '#2E5A1A' }} />
                     <span className="text-sm font-semibold text-slate-700 flex-1 min-w-0 truncate">{d.name}</span>
-                    {targetId === d.id && <Check className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />}
+                    {targetId === d.id && <Check className="w-4 h-4 text-primary flex-shrink-0" />}
                   </button>
                 ))
               )}

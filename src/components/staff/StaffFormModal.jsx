@@ -162,7 +162,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
     }
   };
 
-  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm';
+  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm';
   const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5';
   const sectionTitle = 'text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5';
   const gridCls = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
@@ -338,7 +338,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                 <input type="tel" value={form.second_man_phone || ''} onChange={e => set('second_man_phone', e.target.value)} className={inputCls} />
               </div>
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-emerald-50/60 border border-emerald-100 self-end">
-                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={e => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.market_dojo_onboarded === true} onChange={e => set('market_dojo_onboarded', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Onboarded in Market Dojo</span>
               </label>
             </div>
@@ -353,23 +353,23 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
           <div className="space-y-2.5">
             {!editing && (
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-blue-50/60 border border-blue-100">
-                <input type="checkbox" checked={inviteOnCreate} onChange={e => setInviteOnCreate(e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
-                <span className="text-sm text-slate-700 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#2E5A1A]" /> Send app invite so they can log in and see their schedule</span>
+                <input type="checkbox" checked={inviteOnCreate} onChange={e => setInviteOnCreate(e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
+                <span className="text-sm text-slate-700 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-primary" /> Send app invite so they can log in and see their schedule</span>
               </label>
             )}
             {editing && (
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-amber-50/60 border border-amber-100">
-                <input type="checkbox" checked={form.email_notifications_enabled !== false} onChange={e => set('email_notifications_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.email_notifications_enabled !== false} onChange={e => set('email_notifications_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700 flex items-center gap-1.5"><Bell className="w-3.5 h-3.5 text-amber-600" /> Receive schedule and assignment emails</span>
               </label>
             )}
             <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-blue-50/60 border border-blue-100">
-              <input type="checkbox" checked={form.delivery_dashboard_enabled === true} onChange={e => set('delivery_dashboard_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+              <input type="checkbox" checked={form.delivery_dashboard_enabled === true} onChange={e => set('delivery_dashboard_enabled', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
               <span className="text-sm text-slate-700 flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-blue-600" /> Driver — delivery dashboard access</span>
             </label>
             {editing && (
               <label className="flex items-center gap-2.5 cursor-pointer p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <input type="checkbox" checked={form.is_active !== false} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.is_active !== false} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700 flex items-center gap-1.5"><UserCheck className="w-3.5 h-3.5 text-slate-600" /> Active — appears in rota and staff lists</span>
               </label>
             )}
@@ -402,7 +402,7 @@ export default function StaffFormModal({ open, onClose, editing, staff, teams, v
                           onClick={() => toggleManagedDivision(d.id)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                             selected
-                              ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
+                              ? 'bg-primary text-white border-primary'
                               : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400'
                           }`}
                         >

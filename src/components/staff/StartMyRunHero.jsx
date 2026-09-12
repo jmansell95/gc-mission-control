@@ -47,8 +47,8 @@ export default function StartMyRunHero({ onStart, hasStops = true }) {
         {steps.map((step, i) => (
           <React.Fragment key={i}>
             <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/8 flex items-center justify-center">
-                <step.icon className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center">
+                <step.icon className="w-4 h-4 text-primary" strokeWidth={2.5} />
               </div>
               <p className="text-[10px] font-bold text-slate-700 text-center leading-tight truncate w-full">{step.label}</p>
               <p className="text-[9px] text-slate-400 text-center leading-tight truncate w-full hidden sm:block">{step.sub}</p>
@@ -67,7 +67,7 @@ export default function StartMyRunHero({ onStart, hasStops = true }) {
             href={vehicleCheckUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl bg-[#2E5A1A]/8 text-[#2E5A1A] text-sm font-bold active:scale-[0.98] transition touch-manipulation"
+            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-xl bg-primary/8 text-primary text-sm font-bold active:scale-[0.98] transition touch-manipulation"
           >
             <ClipboardCheck className="w-4 h-4" />
             Open Mitti Vehicle Check

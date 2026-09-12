@@ -252,7 +252,7 @@ export default function StaffManager() {
             <button
               onClick={() => setShowAvailability(!showAvailability)}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg transition text-sm font-semibold ${
-                showAvailability ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'
+                showAvailability ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-primary/40'
               }`}
             >
               <Calendar className="w-4 h-4" /> {showAvailability ? 'Back to List' : 'Availability'}
@@ -260,7 +260,7 @@ export default function StaffManager() {
             <button
               onClick={() => setShowIdCards(!showIdCards)}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg transition text-sm font-semibold ${
-                showIdCards ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'
+                showIdCards ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-primary/40'
               }`}
             >
               <IdCard className="w-4 h-4" /> {showIdCards ? 'Back to List' : 'ID Cards'}

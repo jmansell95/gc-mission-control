@@ -114,7 +114,7 @@ export default function RewardsManager() {
 
   const pendingCount = redemptions.filter(r => r.status === 'pending').length;
 
-  const inputCls = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputCls = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
   const labelCls = 'block text-xs font-medium text-slate-500 mb-1';
 
   return (
@@ -132,7 +132,7 @@ export default function RewardsManager() {
               <p className="text-emerald-100 text-sm">Create gift cards & rewards, fulfil staff redemptions</p>
             </div>
           </div>
-          <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-[#2E5A1A] text-sm font-bold shadow-md hover:shadow-lg active:scale-95 transition">
+          <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-primary text-sm font-bold shadow-md hover:shadow-lg active:scale-95 transition">
             <Plus className="w-4 h-4" /> Add Reward
           </button>
         </div>
@@ -141,11 +141,11 @@ export default function RewardsManager() {
       {/* Toggle: Rewards / Redemptions */}
       <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 w-fit">
         <button onClick={() => setView('rewards')}
-          className={'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition ' + (view === 'rewards' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+          className={'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition ' + (view === 'rewards' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
           <Gift className="w-3.5 h-3.5" /> Catalogue ({rewards.length})
         </button>
         <button onClick={() => setView('redemptions')}
-          className={'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition ' + (view === 'redemptions' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+          className={'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition ' + (view === 'redemptions' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
           <Clock className="w-3.5 h-3.5" /> Redemptions
           {pendingCount > 0 && <span className="min-w-[18px] h-4 px-1 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{pendingCount}</span>}
         </button>
@@ -180,7 +180,7 @@ export default function RewardsManager() {
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-3 text-xs">
-                    <span className="inline-flex items-center gap-1 font-bold text-[#2E5A1A]"><Star className="w-3.5 h-3.5 text-amber-500" />{Number(r.points_cost).toLocaleString()} pts</span>
+                    <span className="inline-flex items-center gap-1 font-bold text-primary"><Star className="w-3.5 h-3.5 text-amber-500" />{Number(r.points_cost).toLocaleString()} pts</span>
                     {r.gift_card_value_gbp && <span className="text-slate-500 font-semibold">£{r.gift_card_value_gbp}</span>}
                     {r.stock_count != null && <span className={'font-semibold ' + (outOfStock ? 'text-red-500' : 'text-slate-500')}>{outOfStock ? 'Out of stock' : `${r.stock_count} in stock`}</span>}
                   </div>
@@ -217,7 +217,7 @@ export default function RewardsManager() {
                       <p className="text-sm font-bold text-slate-900 truncate">{r.reward_name}</p>
                       <p className="text-[11px] text-slate-500 mt-0.5">
                         {r.staff_name || 'Staff'} · {r.requested_at ? format(new Date(r.requested_at), 'dd MMM yyyy') : ''}
-                        {' · '}<span className="font-semibold text-[#2E5A1A]">{r.points_spent} pts</span>
+                        {' · '}<span className="font-semibold text-primary">{r.points_spent} pts</span>
                         {r.gift_card_value_gbp ? ` · £${r.gift_card_value_gbp}` : ''}
                       </p>
                     </div>
@@ -308,7 +308,7 @@ export default function RewardsManager() {
                 Active (visible in staff catalogue)
               </label>
               <div className="flex gap-2 pt-1">
-                <button type="submit" disabled={saving} className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+                <button type="submit" disabled={saving} className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                   {saving ? 'Saving…' : editingId ? 'Update Reward' : 'Create Reward'}
                 </button>

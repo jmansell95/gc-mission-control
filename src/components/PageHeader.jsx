@@ -41,7 +41,7 @@ export default function PageHeader({ icon: Icon, title, subtitle, actions, stats
                   key={i}
                   onClick={s.onClick}
                   style={{ animationDelay: `${i * 60}ms` }}
-                  className={`bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-left transition animate-slide-up ${s.onClick ? 'hover:bg-slate-100 hover:border-slate-200 active:scale-[0.98] cursor-pointer' : ''} ${s.active ? 'ring-2 ring-[#2E5A1A]/30 bg-[#2E5A1A]/5' : ''}`}
+                  className={`bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-left transition animate-slide-up ${s.onClick ? 'hover:bg-slate-100 hover:border-slate-200 active:scale-[0.98] cursor-pointer' : ''} ${s.active ? 'ring-2 ring-primary/30 bg-primary/5' : ''}`}
                 >
                   <div className="flex items-center gap-1.5 mb-0.5">
                     {SIcon && <SIcon className="w-3.5 h-3.5 text-slate-400" />}

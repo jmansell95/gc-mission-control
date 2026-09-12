@@ -140,11 +140,11 @@ export default function EditTrainingInlineForm({ complianceItem, booking, catego
     setSaving(false);
   };
 
-  const inputCls = 'w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputCls = 'w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
   const labelCls = 'block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1';
 
   return (
-    <div className="rounded-xl border border-[#2E5A1A]/20 bg-[#2E5A1A]/5 p-3 space-y-2.5">
+    <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2.5">
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className={labelCls}>Date</label>
@@ -196,7 +196,7 @@ export default function EditTrainingInlineForm({ complianceItem, booking, catego
         {!confirmDelete ? (
           <>
             <button onClick={handleSave} disabled={saving || !!uploadingSide}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
               Save
             </button>
@@ -226,10 +226,10 @@ function FileTile({ label, fileUrl, fileName, uploading, onFile }) {
   return (
     <label className="block">
       <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-1">{label}</span>
-      <label className="flex flex-col items-center gap-1.5 p-2.5 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition h-full min-h-[110px] justify-center">
+      <label className="flex flex-col items-center gap-1.5 p-2.5 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition h-full min-h-[110px] justify-center">
         <input type="file" className="hidden" accept="image/*,application/pdf" onChange={e => onFile(e.target.files?.[0])} />
         {uploading ? (
-          <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
         ) : fileUrl ? (
           fileUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
             <img src={fileUrl} alt={fileName} className="w-full h-16 object-cover rounded-md" />
@@ -240,7 +240,7 @@ function FileTile({ label, fileUrl, fileName, uploading, onFile }) {
           <Upload className="w-5 h-5 text-slate-300" />
         )}
         <p className="text-[10px] text-slate-500 truncate w-full text-center">{fileName || 'Upload'}</p>
-        {fileUrl && <span className="text-[9px] text-[#2E5A1A] font-semibold">Replace</span>}
+        {fileUrl && <span className="text-[9px] text-primary font-semibold">Replace</span>}
       </label>
     </label>
   );

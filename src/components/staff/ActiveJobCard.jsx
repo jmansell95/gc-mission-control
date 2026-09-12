@@ -18,7 +18,7 @@ import WeatherToggleButton from '@/components/weather/WeatherToggleButton';
 const statusConfig = {
   assigned: { label: 'Assigned', icon: Clock, color: 'text-slate-600', bg: 'bg-gradient-to-r from-slate-50 to-slate-100/50' },
   started: { label: 'In Progress', icon: PlayCircle, color: 'text-blue-700', bg: 'bg-gradient-to-r from-blue-50 to-blue-100/40' },
-  completed: { label: 'Completed', icon: CheckCircle2, color: 'text-[#2E5A1A]', bg: 'bg-gradient-to-r from-[#2E5A1A]/8 to-[#8DC63F]/8' },
+  completed: { label: 'Completed', icon: CheckCircle2, color: 'text-primary', bg: 'bg-gradient-to-r from-[#2E5A1A]/8 to-[#8DC63F]/8' },
 };
 
 // The hero card for the active/next job today — big, focused, one primary action.
@@ -86,7 +86,7 @@ export default function ActiveJobCard({
     );
   } else if (isCompleted) {
     primaryButton = (
-      <div className="w-full flex items-center justify-center gap-2.5 px-5 py-5 bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 text-[#2E5A1A] rounded-2xl text-lg font-bold ring-1 ring-[#2E5A1A]/15">
+      <div className="w-full flex items-center justify-center gap-2.5 px-5 py-5 bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 text-primary rounded-2xl text-lg font-bold ring-1 ring-primary/15">
         <CheckCircle2 className="w-7 h-7" strokeWidth={2.5} /> Shift Completed
       </div>
     );
@@ -131,21 +131,21 @@ export default function ActiveJobCard({
         <h2 className="text-ui-heading font-bold text-slate-900 leading-tight tracking-tight">{job.name}</h2>
         <div className="mt-3 space-y-2">
           <div className="flex items-start gap-2 text-ui-body text-slate-600">
-            <MapPin className="w-5 h-5 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+            <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
             <span className="break-words">{job.location}</span>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-ui-body text-slate-600">
             <span className="inline-flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-[#2E5A1A]/60" /> {format(new Date(assignment.assigned_date), 'EEE dd MMM')}
+              <Calendar className="w-4 h-4 text-primary/60" /> {format(new Date(assignment.assigned_date), 'EEE dd MMM')}
             </span>
             {assignment.start_time && (
               <span className="inline-flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-[#2E5A1A]/60" /> {assignment.start_time}{assignment.end_time ? `–${assignment.end_time}` : ''}
+                <Clock className="w-4 h-4 text-primary/60" /> {assignment.start_time}{assignment.end_time ? `–${assignment.end_time}` : ''}
               </span>
             )}
             {vehicle && (
               <span className="inline-flex items-center gap-1.5">
-                <Truck className="w-4 h-4 text-[#2E5A1A]/60" /> <span className="font-mono font-medium">{vehicle.registration_number}</span>
+                <Truck className="w-4 h-4 text-primary/60" /> <span className="font-mono font-medium">{vehicle.registration_number}</span>
               </span>
             )}
           </div>
@@ -176,7 +176,7 @@ export default function ActiveJobCard({
         {isStarted && canPerformActions && !hasLeftSite && (
           <div className="flex gap-2.5 mt-3">
             <button onClick={() => onLeaveSite?.(assignment.id)} type="button"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A]/10 text-[#2E5A1A] rounded-2xl hover:bg-[#2E5A1A]/15 active:scale-95 transition text-ui-body font-semibold touch-manipulation">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 bg-primary/10 text-primary rounded-2xl hover:bg-primary/15 active:scale-95 transition text-ui-body font-semibold touch-manipulation">
               <DoorOpen className="w-5 h-5" /> Leave Site
             </button>
             {onAdHocVisit && (
@@ -230,17 +230,17 @@ export default function ActiveJobCard({
               <div className="space-y-2">
                 {client && (
                   <div className="flex items-start gap-2 text-sm text-slate-600">
-                    <Briefcase className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                    <Briefcase className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <span>Client: <span className="font-medium text-slate-700">{client.name}</span></span>
                   </div>
                 )}
                 {(job.site_contact_name || job.site_contact_phone) && (
                   <div className="flex items-start gap-2 text-sm text-slate-600">
-                    <Phone className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
                     <div>
                       {job.site_contact_name && <span className="font-medium text-slate-700">{job.site_contact_name}</span>}
                       {job.site_contact_phone && (
-                        <a href={`tel:${job.site_contact_phone}`} className="ml-1.5 inline-flex items-center gap-1 text-[#2E5A1A] font-semibold hover:underline">
+                        <a href={`tel:${job.site_contact_phone}`} className="ml-1.5 inline-flex items-center gap-1 text-primary font-semibold hover:underline">
                           {job.site_contact_phone}
                         </a>
                       )}
@@ -257,12 +257,12 @@ export default function ActiveJobCard({
               {/* Requisition list */}
               {job.requisition_list_url && (
                 <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-2 p-3 bg-[#2E5A1A]/10 rounded-xl border border-[#2E5A1A]/15 hover:bg-[#2E5A1A]/15 transition group">
+                  className="flex items-center justify-between gap-2 p-3 bg-primary/10 rounded-xl border border-primary/15 hover:bg-primary/15 transition group">
                   <div className="flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
-                    <span className="font-semibold text-[#2E5A1A] text-sm truncate">{job.requisition_list_name || 'Requisition List'}</span>
+                    <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="font-semibold text-primary text-sm truncate">{job.requisition_list_name || 'Requisition List'}</span>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 group-hover:translate-x-0.5 transition" />
+                  <ExternalLink className="w-4 h-4 text-primary flex-shrink-0 group-hover:translate-x-0.5 transition" />
                 </a>
               )}
 
@@ -351,8 +351,8 @@ export default function ActiveJobCard({
               {/* Briefing status */}
               <div className="pt-3 border-t border-slate-100 space-y-3">
                 {assignment.briefing_signed ? (
-                  <div className="bg-[#2E5A1A]/5 rounded-lg px-3 py-2.5">
-                    <div className="flex items-center gap-2 text-sm text-[#2E5A1A]">
+                  <div className="bg-primary/5 rounded-lg px-3 py-2.5">
+                    <div className="flex items-center gap-2 text-sm text-primary">
                       <ShieldCheck className="w-4 h-4 flex-shrink-0" />
                       <span className="font-medium">Briefing signed</span>
                       {assignment.briefing_signed_at && (
@@ -360,7 +360,7 @@ export default function ActiveJobCard({
                       )}
                     </div>
                     {!allCrewSigned && crewTotal > 1 && (
-                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#2E5A1A]/15 text-xs text-slate-500">
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-primary/15 text-xs text-slate-500">
                         <Clock className="w-3.5 h-3.5" />
                         <span>{crewSignedCount} of {crewTotal} crew signed off.</span>
                       </div>

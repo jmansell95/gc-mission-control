@@ -361,7 +361,7 @@ export default function SmartCertImport({ onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div>
             <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-              <Scan className="w-5 h-5 text-[#2E5A1A]" /> Smart Certificate Import
+              <Scan className="w-5 h-5 text-primary" /> Smart Certificate Import
               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                 <Sparkles className="w-3 h-3" /> AI Preview
               </span>
@@ -385,14 +385,14 @@ export default function SmartCertImport({ onClose }) {
               </div>
               <p className="text-lg font-bold text-slate-800">Import Complete</p>
               <p className="text-sm text-slate-500 mt-1">{validPreviews.length} certificate(s) committed to the system</p>
-              <button onClick={onClose} className="mt-6 px-6 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+              <button onClick={onClose} className="mt-6 px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
                 Done
               </button>
             </div>
           ) : screen === 'processing' ? (
             /* ── Processing screen — parallel progress grid ── */
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-[#2E5A1A]">
+              <div className="flex items-center gap-2 text-primary">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <p className="text-sm font-bold">Reading {files.length} PDFs in parallel…</p>
               </div>
@@ -445,7 +445,7 @@ export default function SmartCertImport({ onClose }) {
                       className={`relative rounded-xl border-2 p-3 flex flex-col items-center gap-2 transition text-left ${
                         p.error ? 'bg-red-50/50 border-red-200 cursor-default' :
                         p.retrying ? 'bg-amber-50/50 border-amber-200 cursor-wait' :
-                        'bg-white border-slate-200 hover:border-[#2E5A1A] hover:shadow-md cursor-pointer'
+                        'bg-white border-slate-200 hover:border-primary hover:shadow-md cursor-pointer'
                       }`}
                     >
                       <div className="w-12 h-14 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
@@ -469,7 +469,7 @@ export default function SmartCertImport({ onClose }) {
                 {/* Add more tile */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="rounded-xl border-2 border-dashed border-slate-300 p-3 flex flex-col items-center justify-center gap-2 min-h-[120px] hover:border-[#2E5A1A] hover:bg-emerald-50/30 transition"
+                  className="rounded-xl border-2 border-dashed border-slate-300 p-3 flex flex-col items-center justify-center gap-2 min-h-[120px] hover:border-primary hover:bg-emerald-50/30 transition"
                 >
                   <FilePlus className="w-6 h-6 text-slate-400" />
                   <span className="text-[11px] font-medium text-slate-500">Add More</span>
@@ -487,7 +487,7 @@ export default function SmartCertImport({ onClose }) {
                   return (
                     <button key={i} onClick={() => { setActiveIdx(i); setEditing(false); }}
                       className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                        i === activeIdx ? 'bg-[#2E5A1A] text-white shadow-sm' :
+                        i === activeIdx ? 'bg-primary text-white shadow-sm' :
                         p.error ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' :
                         'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}>
@@ -560,7 +560,7 @@ export default function SmartCertImport({ onClose }) {
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Extracted Data</p>
                         <button onClick={() => setEditing(!editing)}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${editing ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition ${editing ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                           <Edit3 className="w-3 h-3" /> {editing ? 'Editing' : 'Edit'}
                         </button>
                       </div>
@@ -577,23 +577,23 @@ export default function SmartCertImport({ onClose }) {
                             <div className="flex-1 min-w-0">
                               {editing && field.editable ? (
                                 field.isTextarea ? (
-                                  <textarea value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} rows={2} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <textarea value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} rows={2} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary" />
                                 ) : field.isDate ? (
-                                  <input type="date" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <input type="date" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary" />
                                 ) : field.isType ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary bg-white">
                                     {Object.entries(TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                                   </select>
                                 ) : field.isInspection ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary bg-white">
                                     {Object.entries(INSPECTION_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                                   </select>
                                 ) : field.isResult ? (
-                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A] bg-white">
+                                  <select value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary bg-white">
                                     <option value="pass">Pass</option><option value="fail">Fail</option><option value="advisory">Advisory</option><option value="n/a">N/A</option>
                                   </select>
                                 ) : (
-                                  <input type="text" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-[#2E5A1A]" />
+                                  <input type="text" value={value} onChange={e => updatePreview(activeIdx, field.key, e.target.value)} className="w-full px-2 py-1 border border-slate-300 rounded text-xs focus:outline-none focus:border-primary" />
                                 )
                               ) : (
                                 <div className="flex items-center gap-1.5 flex-wrap pt-1.5">
@@ -630,14 +630,14 @@ export default function SmartCertImport({ onClose }) {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`flex flex-col items-center justify-center gap-3 py-12 px-6 border-2 border-dashed rounded-2xl cursor-pointer transition ${
-                  dragActive ? 'border-[#2E5A1A] bg-emerald-50/50 scale-[1.01]' : 'border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/30'
+                  dragActive ? 'border-primary bg-emerald-50/50 scale-[1.01]' : 'border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/30'
                 }`}
               >
                 <motion.div
                   animate={dragActive ? { scale: 1.1, y: -4 } : { scale: 1, y: 0 }}
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center ${dragActive ? 'bg-[#2E5A1A]/10' : 'bg-slate-100'}`}
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center ${dragActive ? 'bg-primary/10' : 'bg-slate-100'}`}
                 >
-                  <Upload className={`w-8 h-8 ${dragActive ? 'text-[#2E5A1A]' : 'text-slate-400'}`} />
+                  <Upload className={`w-8 h-8 ${dragActive ? 'text-primary' : 'text-slate-400'}`} />
                 </motion.div>
                 <div className="text-center">
                   <p className="text-sm font-bold text-slate-700">{dragActive ? 'Drop your PDFs here' : 'Drag & drop PDF certificates'}</p>

@@ -199,7 +199,7 @@ export default function SiteLogPdfExport({ job, logs }) {
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2E5A1A] hover:bg-[#1c4a12] text-white rounded-xl font-semibold text-sm transition disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-semibold text-sm transition disabled:opacity-50"
               >
                 {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating…</> : <><FileDown className="w-4 h-4" /> Generate PDF</>}
               </button>

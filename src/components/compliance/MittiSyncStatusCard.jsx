@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { RefreshCw, CheckCircle2, AlertCircle, Loader2, FileStack, Clock, X, ChevronRight, Database, Search, Download } from 'lucide-react';
 import HubCard from '@/components/hubs/HubCard';
+import { Button } from '@/components/ui/button';
 
 const STEPS = [
   { key: 'templates', label: 'Sync Templates', icon: FileStack, desc: 'Fetching audit form templates from Mitti' },
@@ -153,13 +154,13 @@ export default function MittiSyncStatusCard() {
         action={
           <div className="flex items-center gap-2">
             {templates.length > 0 && (
-              <button onClick={() => setShowAllTemplates(true)} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+              <Button variant="secondary" size="sm" onClick={() => setShowAllTemplates(true)}>
                 <FileStack className="w-3.5 h-3.5" /> View All
-              </button>
+              </Button>
             )}
-            <button onClick={runSync} disabled={syncing} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-60">
+            <Button variant="default" size="sm" onClick={runSync} disabled={syncing}>
               {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Sync Now
-            </button>
+            </Button>
           </div>
         }>
         <div className="grid grid-cols-3 gap-3">
@@ -170,7 +171,7 @@ export default function MittiSyncStatusCard() {
         {templates.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {templates.slice(0, 8).map(t => <span key={t.template_id} className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 truncate max-w-[140px]">{t.name || t.template_id}</span>)}
-            {templates.length > 8 && <button onClick={() => setShowAllTemplates(true)} className="text-[10px] text-slate-400 hover:text-slate-600">+{templates.length - 8} more</button>}
+            {templates.length > 8 && <Button variant="link" size="sm" onClick={() => setShowAllTemplates(true)} className="text-[10px] text-slate-400 hover:text-slate-600">+{templates.length - 8} more</Button>}
           </div>
         )}
       </HubCard>
@@ -181,9 +182,9 @@ export default function MittiSyncStatusCard() {
           <div className="hub-glass rounded-3xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-pop-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-slate-900">Mitti Sync Progress</h3>
-              <button onClick={() => !syncing && setShowOverlay(false)} disabled={syncing} className="text-slate-400 hover:text-slate-600 disabled:opacity-40">
+              <Button variant="ghost" size="icon" onClick={() => !syncing && setShowOverlay(false)} disabled={syncing} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Step indicators */}
@@ -195,7 +196,7 @@ export default function MittiSyncStatusCard() {
                 return (
                   <React.Fragment key={step.key}>
                     <div className={`flex flex-col items-center gap-1 flex-1 ${i === 0 ? '' : 'flex-1'}`}>
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-100 text-emerald-600' : isActive ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition ${isDone ? 'bg-emerald-100 text-emerald-600' : isActive ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
                         {isDone ? <CheckCircle2 className="w-4 h-4" /> : isActive ? <Loader2 className="w-4 h-4 animate-spin" /> : <StepIcon className="w-4 h-4" />}
                       </div>
                       <span className={`text-[10px] font-semibold text-center leading-tight ${isDone ? 'text-emerald-600' : isActive ? 'text-slate-900' : 'text-slate-400'}`}>{step.label}</span>
@@ -257,9 +258,9 @@ export default function MittiSyncStatusCard() {
 
             {/* Done button */}
             {!syncing && syncStep >= 3 && (
-              <button onClick={() => setShowOverlay(false)} className="w-full mt-4 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition">
+              <Button variant="default" className="w-full mt-4" onClick={() => setShowOverlay(false)}>
                 Done
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -274,9 +275,9 @@ export default function MittiSyncStatusCard() {
                 <h3 className="text-base font-bold text-slate-900">All Synced Templates</h3>
                 <p className="text-xs text-slate-500">{templates.length} templates from Mitti</p>
               </div>
-              <button onClick={() => setShowAllTemplates(false)} className="text-slate-400 hover:text-slate-600">
+              <Button variant="ghost" size="icon" onClick={() => setShowAllTemplates(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
               {templates.map(t => (

@@ -50,7 +50,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
             const dimmed = (statusFilter?.size > 0 && s?.type && !statusFilter.has(s.type)) || (d.isWeekend && !showWeekends);
             return (
               <div key={d.dateStr} onClick={() => handleCellClick(resource, d.dateStr, s, isRig)}
-                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-60' : 'opacity-10') : ''} ${d.isToday ? 'ring-2 ring-[#2E5A1A] ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-110 transition-all flex items-center justify-center`}
+                className={`${cfg.bg} ${d.isWeekend ? (showWeekends ? 'opacity-60' : 'opacity-10') : ''} ${d.isToday ? 'ring-2 ring-primary ring-inset' : ''} ${dimmed ? 'opacity-20' : ''} cursor-pointer hover:brightness-110 transition-all flex items-center justify-center`}
                 style={{ width: `${CELL_WIDTH}px`, height: '100%', flexShrink: 0 }}>
                 {letter && <span className="text-[9px] font-bold text-white/90">{letter}</span>}
               </div>
@@ -83,10 +83,10 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
               Resource
             </div>
             {days.map(d => (
-              <div key={d.dateStr} className={`flex flex-col items-center justify-center border-r border-slate-200/60 ${d.isWeekend ? (showWeekends ? 'bg-slate-200/50' : 'opacity-30') : ''} ${d.isToday ? 'bg-[#2E5A1A]/10' : ''}`}
+              <div key={d.dateStr} className={`flex flex-col items-center justify-center border-r border-slate-200/60 ${d.isWeekend ? (showWeekends ? 'bg-slate-200/50' : 'opacity-30') : ''} ${d.isToday ? 'bg-primary/10' : ''}`}
                 style={{ width: `${CELL_WIDTH}px`, flexShrink: 0 }}>
                 <span className="text-[8px] font-bold text-slate-400 uppercase">{d.weekday}</span>
-                <span className={`text-xs font-bold ${d.isToday ? 'text-[#2E5A1A]' : 'text-slate-700'}`}>{d.day}</span>
+                <span className={`text-xs font-bold ${d.isToday ? 'text-primary' : 'text-slate-700'}`}>{d.day}</span>
               </div>
             ))}
           </div>
@@ -95,7 +95,7 @@ export default function MonthHeatmapGrid({ days, staffRows, rigRows, staffStatus
           {(() => {
             const grouped = groupStaffByWorkerType(staffRows);
             const groups = [
-              { key: 'direct_employee', label: 'Direct Employees', Icon: HardHat, color: 'text-[#2E5A1A]', collapsed: collapsedDirect, setCollapsed: setCollapsedDirect },
+              { key: 'direct_employee', label: 'Direct Employees', Icon: HardHat, color: 'text-primary', collapsed: collapsedDirect, setCollapsed: setCollapsedDirect },
               { key: 'subcontractor', label: 'Subcontractors', Icon: Building2, color: 'text-amber-600', collapsed: collapsedSub, setCollapsed: setCollapsedSub },
               { key: 'agency', label: 'Agency Workers', Icon: Briefcase, color: 'text-violet-600', collapsed: collapsedAgency, setCollapsed: setCollapsedAgency },
             ];

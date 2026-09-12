@@ -93,7 +93,7 @@ export default function AssetDeploymentsPanel({ assets = [] }) {
                   className="w-full px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2 hover:bg-slate-100/60 transition text-left"
                 >
                   <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`} />
-                  <MapPin className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-slate-900 text-sm truncate">{job.name || 'Unknown Job'}</p>
                     {job.location && <p className="text-xs text-slate-400 truncate">{job.location}</p>}
@@ -150,7 +150,7 @@ function SummaryTile({ icon: Icon, label, value, tone }) {
 
 function FilterPill({ active, onClick, label }) {
   return (
-    <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition ${active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
+    <button onClick={onClick} className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition ${active ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
       {label}
     </button>
   );

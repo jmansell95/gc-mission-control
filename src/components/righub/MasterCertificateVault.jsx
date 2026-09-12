@@ -198,7 +198,7 @@ export default function MasterCertificateVault({ assets = [], onOpenAsset }) {
                             <ExternalLink className="w-4 h-4" />
                           </a>
                           <button onClick={() => downloadOne(c.certificate_url, c.certificate_name || `${c._asset.name}-certificate`)} title="Download"
-                            className="p-1.5 text-slate-500 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition">
+                            className="p-1.5 text-slate-500 hover:text-primary hover:bg-primary/10 rounded-lg transition">
                             <Download className="w-4 h-4" />
                           </button>
                         </div>

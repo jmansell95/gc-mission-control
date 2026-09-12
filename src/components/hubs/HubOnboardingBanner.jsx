@@ -31,7 +31,7 @@ export default function HubOnboardingBanner({ hubKey, title, description, steps 
             <ol className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
               {steps.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 rounded-xl bg-white/10 px-3 py-2 text-ui-caption">
-                  <span className="w-5 h-5 rounded-full bg-white text-[#2E5A1A] font-bold text-ui-micro flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                  <span className="w-5 h-5 rounded-full bg-white text-primary font-bold text-ui-micro flex items-center justify-center flex-shrink-0">{i + 1}</span>
                   <span className="leading-snug">{s}</span>
                 </li>
               ))}
@@ -39,7 +39,7 @@ export default function HubOnboardingBanner({ hubKey, title, description, steps 
           )}
           <div className="mt-4 flex flex-wrap gap-2">
             {cta && (
-              <button type="button" onClick={cta.onClick} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white text-[#2E5A1A] text-ui-caption font-bold hover:bg-white/90 transition">{cta.label}</button>
+              <button type="button" onClick={cta.onClick} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white text-primary text-ui-caption font-bold hover:bg-white/90 transition">{cta.label}</button>
             )}
             <button type="button" onClick={dismiss} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-white/15 text-ui-caption font-semibold hover:bg-white/25 transition">
               <Check className="w-4 h-4" /> Got it

@@ -13,7 +13,7 @@ import { DISCIPLINE_CONFIG, getDisciplineConfig, getJobDisciplines } from '@/uti
  *   disciplines: array of discipline objects { type, status, ... }
  *   onChange: (newDisciplines) => void
  */
-const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-xs transition";
+const inputCls = "w-full px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-xs transition";
 
 const ALL_DISCIPLINE_TYPES = Object.keys(DISCIPLINE_CONFIG);
 
@@ -56,19 +56,19 @@ export default function DisciplineEditor({ disciplines, onChange }) {
             const cfg = getDisciplineConfig(d.type);
             const isPrimary = i === 0;
             return (
-              <div key={d.type} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${isPrimary ? 'border-[#2E5A1A]/30 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white'}`}>
+              <div key={d.type} className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${isPrimary ? 'border-primary/30 bg-primary/5' : 'border-slate-200 bg-white'}`}>
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
                   <span className="text-sm font-semibold text-slate-800 truncate">{cfg.label}</span>
                   {isPrimary && (
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2E5A1A] bg-[#2E5A1A]/10 px-1.5 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
                       <Star className="w-2.5 h-2.5" /> Primary
                     </span>
                   )}
                 </div>
                 {!isPrimary && (
                   <button type="button" onClick={() => setPrimary(i)} title="Make primary"
-                    className="p-1 text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded transition">
+                    className="p-1 text-slate-400 hover:text-primary hover:bg-primary/10 rounded transition">
                     <Star className="w-3.5 h-3.5" />
                   </button>
                 )}

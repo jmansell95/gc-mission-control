@@ -27,7 +27,7 @@ function RuleCard({ icon: Icon, iconBg, iconColor, title, description, value, on
       <div className="flex items-center gap-3">
         <input type="number" min={1} step={1} value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:border-[#2E5A1A]" />
+          className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:border-primary" />
         <span className="text-sm text-slate-500">{suffix}</span>
       </div>
       <p className="text-[11px] text-slate-400 mt-3">{hint}</p>
@@ -95,7 +95,7 @@ export default function ComplianceRulesSettings() {
         description="Default inspection intervals & expiry warnings for LOLER, PUWER & PAT — drives the asset compliance engine"
         actions={
           <button onClick={handleSave} disabled={saving || !dirty}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#245215] disabled:opacity-50 transition">
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[#245215] disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save rules
           </button>
         }
@@ -131,9 +131,9 @@ export default function ComplianceRulesSettings() {
           hint="Default 30 days. Drives the amber 'expiring' tile and the compliance attention panel." />
       </div>
 
-      <div className="mt-4 bg-[#2E5A1A]/5 border border-[#2E5A1A]/15 rounded-xl p-4">
+      <div className="mt-4 bg-primary/5 border border-primary/15 rounded-xl p-4">
         <p className="text-xs text-slate-600 leading-relaxed">
-          <span className="font-semibold text-[#2E5A1A]">How this works:</span> when you log a LOLER, PUWER or PAT inspection in an asset's Service History and don't enter a manual next-due date, the system auto-calculates the next expiry from these intervals. The warning window decides when assets turn amber before they go red. Change a value here and it applies immediately to every new record.
+          <span className="font-semibold text-primary">How this works:</span> when you log a LOLER, PUWER or PAT inspection in an asset's Service History and don't enter a manual next-due date, the system auto-calculates the next expiry from these intervals. The warning window decides when assets turn amber before they go red. Change a value here and it applies immediately to every new record.
         </p>
       </div>
     </div>

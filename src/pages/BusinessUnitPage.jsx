@@ -83,7 +83,7 @@ export default function BusinessUnitPage() {
       <div className="min-h-screen page-bg-vibrant flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-500 font-semibold">Business unit not found.</p>
-          <button onClick={() => navigate('/enterprise')} className="mt-3 text-sm font-bold text-[#2E5A1A]">Back to Dashboard</button>
+          <button onClick={() => navigate('/enterprise')} className="mt-3 text-sm font-bold text-primary">Back to Dashboard</button>
         </div>
       </div>
     );
@@ -208,7 +208,7 @@ export default function BusinessUnitPage() {
                   </div>
 
                   <div className="pt-2.5 border-t border-slate-100 flex items-center justify-end">
-                    <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#2E5A1A] group-hover:gap-2 transition-all">
+                    <span className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-primary group-hover:gap-2 transition-all">
                       Enter Business Stream <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </span>
                   </div>

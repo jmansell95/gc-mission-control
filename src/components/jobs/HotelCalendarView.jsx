@@ -36,7 +36,7 @@ export default function HotelCalendarView({ bookings }) {
   return (
     <div className="hub-glass rounded-2xl overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-        <Hotel className="w-4 h-4 text-[#2E5A1A]" />
+        <Hotel className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-semibold text-slate-900">Booking Calendar</h3>
         <div className="ml-auto flex items-center gap-1">
           <button onClick={goPrev} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 transition">
@@ -58,8 +58,8 @@ export default function HotelCalendarView({ bookings }) {
           const isToday = isSameDay(d, new Date());
           return (
             <div key={d.toISOString()} className={`px-2 py-2 text-center border-l border-slate-100 ${isToday ? 'bg-[#8DC63F]/10' : ''}`}>
-              <p className={`text-[10px] font-medium ${isToday ? 'text-[#2E5A1A]' : 'text-slate-400'}`}>{format(d, 'EEE')}</p>
-              <p className={`text-xs font-bold ${isToday ? 'text-[#2E5A1A]' : 'text-slate-600'}`}>{format(d, 'dd')}</p>
+              <p className={`text-[10px] font-medium ${isToday ? 'text-primary' : 'text-slate-400'}`}>{format(d, 'EEE')}</p>
+              <p className={`text-xs font-bold ${isToday ? 'text-primary' : 'text-slate-600'}`}>{format(d, 'dd')}</p>
             </div>
           );
         })}
@@ -73,14 +73,14 @@ export default function HotelCalendarView({ bookings }) {
           weekBookings.map((b, idx) => {
             const ci = parseISO(b.check_in_date + 'T00:00:00');
             const co = parseISO(b.check_out_date + 'T00:00:00');
-            const colors = ['bg-[#2E5A1A]', 'bg-blue-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
+            const colors = ['bg-primary', 'bg-blue-600', 'bg-violet-600', 'bg-amber-600', 'bg-rose-600', 'bg-cyan-600'];
             const color = colors[idx % colors.length];
             return (
               <div key={b.id} className="grid grid-cols-[140px_repeat(7,1fr)] gap-0 border-b border-slate-50 hover:bg-slate-50/30 transition">
                 <div className="px-3 py-2.5 flex items-center gap-1.5 min-w-0">
                   {bookingType(b) === 'airbnb'
                     ? <Home className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
-                    : <Hotel className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" />}
+                    : <Hotel className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
                   <span className="text-xs font-medium text-slate-700 truncate">{b.hotel_name}</span>
                 </div>
                 {days.map(d => {

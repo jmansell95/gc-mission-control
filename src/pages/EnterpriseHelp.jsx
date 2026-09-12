@@ -149,7 +149,7 @@ export default function EnterpriseHelp() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search help guides…"
-            className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-base focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+            className="w-full pl-10 pr-10 py-3 bg-white border border-slate-200 rounded-xl text-base focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
           />
           {search && (
             <button onClick={() => setSearch('')} type="button"
@@ -166,7 +166,7 @@ export default function EnterpriseHelp() {
             type="button"
             className={'px-3.5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition flex-shrink-0 '
               + (activeCategory === 'all'
-                ? 'bg-[#2E5A1A] text-white shadow-md'
+                ? 'bg-primary text-white shadow-md'
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50')}
           >
             All
@@ -178,7 +178,7 @@ export default function EnterpriseHelp() {
               type="button"
               className={'px-3.5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition flex-shrink-0 '
                 + (activeCategory === cat
-                  ? 'bg-[#2E5A1A] text-white shadow-md'
+                  ? 'bg-primary text-white shadow-md'
                   : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50')}
             >
               {CATEGORY_LABELS[cat]}
@@ -221,7 +221,7 @@ export default function EnterpriseHelp() {
                           <FileText className="w-5 h-5 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#2E5A1A] transition">{topic.title}</h3>
+                          <h3 className="text-sm font-bold text-slate-900 group-hover:text-primary transition">{topic.title}</h3>
                           {topic.summary && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{topic.summary}</p>}
                         </div>
                       </div>

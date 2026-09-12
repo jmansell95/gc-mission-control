@@ -253,7 +253,7 @@ export default function JobCostManager({ job, totalCost, staffCosts, isDrillingJ
         {job.start_date && job.end_date && job.status !== 'completed' && job.status !== 'cancelled' && (
           <div className="border-t border-slate-100 pt-3">
             <div className="flex items-center gap-2 mb-3">
-              <Calculator className="w-4 h-4 text-[#2E5A1A]" />
+              <Calculator className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Cost Forecast</p>
             </div>
             <CostForecastWidget job={job} />

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = {
   api_url: '',
@@ -174,7 +174,7 @@ export default function ConcurSyncSettings() {
       {/* API credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <Settings2 className="w-4 h-4 text-[#2E5A1A]" />
+          <Settings2 className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">API Credentials</h3>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -237,17 +237,17 @@ export default function ConcurSyncSettings() {
           </div>
         </label>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
         </div>
       </div>
 
       {/* Sync queue */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ArrowUpFromLine className="w-4 h-4 text-[#2E5A1A]" />
+          <ArrowUpFromLine className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Sync Queue</h3>
           <span className="ml-auto text-xs text-slate-400">{pendingCount} approved record{pendingCount !== 1 ? 's' : ''} pending</span>
         </div>
@@ -262,7 +262,7 @@ export default function ConcurSyncSettings() {
           </div>
         </div>
         <button onClick={handleExport} disabled={!config.client_id || pendingCount === 0 || exporting}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
           {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUpFromLine className="w-4 h-4" />} Export Batch to SAP Concur ({pendingCount})
         </button>
         {!config.client_id && <p className="text-[11px] text-amber-600 mt-2 text-center">Connect your API credentials first to enable batch export.</p>}
@@ -277,13 +277,13 @@ export default function ConcurSyncSettings() {
       {/* Reverse sync — reconcile exports back from Concur */}
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ArrowDownToLine className="w-4 h-4 text-[#2E5A1A]" />
+          <ArrowDownToLine className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Reverse Sync (Reconciliation)</h3>
           <span className="ml-auto text-xs text-slate-400">Pull report IDs & GL updates back from Concur</span>
         </div>
         <p className="text-xs text-slate-500 mb-3">Verifies each exported record landed in Concur, captures the Concur report ID and approval status, and pulls back any GL code Concur reassigned. Traces each expense to its Concur report.</p>
         <button onClick={handleReconcile} disabled={!config.client_id || reconciling}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-40 transition">
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-40 transition">
           {reconciling ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowDownToLine className="w-4 h-4" />} Reconcile from SAP Concur
         </button>
         {!config.client_id && <p className="text-[11px] text-amber-600 mt-2 text-center">Connect your API credentials first to enable reconciliation.</p>}

@@ -415,7 +415,7 @@ export default function PowerAppsMigrationRoadmap() {
           <h1 className="text-sm sm:text-base font-bold text-slate-900 truncate">Power Apps Migration Roadmap</h1>
           <span className="hidden sm:inline text-xs text-slate-500 flex-shrink-0">{pct}% complete ({doneSteps}/{totalSteps} steps)</span>
         </div>
-        <button onClick={handleDownloadPDF} disabled={generating} className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-[#1c4a12] transition flex-shrink-0 disabled:opacity-60">
+        <button onClick={handleDownloadPDF} disabled={generating} className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-primary text-white rounded-lg text-xs sm:text-sm font-semibold hover:bg-primary/90 transition flex-shrink-0 disabled:opacity-60">
           {generating ? (
             <>
               <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

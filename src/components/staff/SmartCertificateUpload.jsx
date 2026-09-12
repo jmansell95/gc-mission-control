@@ -6,7 +6,7 @@ import {
   Upload, Loader2, ScanLine, CheckCircle2, X, Sparkles, FileText, RefreshCw,
 } from 'lucide-react';
 
-const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 const labelClass = 'block text-xs font-medium text-slate-500 mb-1';
 
 /**
@@ -191,10 +191,10 @@ export default function SmartCertificateUpload({ staffId, staffName, categories 
       {stage === 'idle' && (
         <button
           onClick={() => fileRef.current?.click()}
-          className="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition group"
+          className="w-full flex flex-col items-center justify-center gap-2 py-6 border-2 border-dashed border-slate-200 rounded-xl hover:border-primary hover:bg-primary/5 transition group"
         >
-          <div className="w-12 h-12 rounded-full bg-[#2E5A1A]/10 flex items-center justify-center group-hover:bg-[#2E5A1A]/15 transition">
-            <ScanLine className="w-6 h-6 text-[#2E5A1A]" />
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition">
+            <ScanLine className="w-6 h-6 text-primary" />
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-slate-700">Scan Certificate / Card</p>
@@ -205,7 +205,7 @@ export default function SmartCertificateUpload({ staffId, staffName, categories 
 
       {(stage === 'uploading' || stage === 'scanning') && (
         <div className="flex flex-col items-center justify-center py-8 bg-slate-50 rounded-xl border border-slate-200">
-          <Loader2 className="w-8 h-8 animate-spin text-[#2E5A1A] mb-2" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
           <p className="text-sm font-semibold text-slate-700">
             {stage === 'uploading' ? 'Uploading document…' : 'Scanning with AI…'}
           </p>
@@ -238,7 +238,7 @@ function ReviewPanel({ form, setForm, categories, detected, fileName, fileUrl, o
     <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3 animate-slide-up">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#2E5A1A]" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <p className="text-sm font-bold text-slate-900">AI Detected Details</p>
           {detected?.confidence && (
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${confidenceColor}`}>
@@ -293,14 +293,14 @@ function ReviewPanel({ form, setForm, categories, detected, fileName, fileUrl, o
           <FileText className="w-3.5 h-3.5 text-slate-400" />
           <span className="truncate flex-1">{fileName}</span>
           {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-[#2E5A1A] hover:underline font-medium">View</a>
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">View</a>
           )}
         </div>
       )}
 
       <div className="flex gap-2 pt-1">
         <button onClick={onSave} disabled={saving}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm">
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
           {saving ? 'Saving…' : 'Confirm & Save'}
         </button>

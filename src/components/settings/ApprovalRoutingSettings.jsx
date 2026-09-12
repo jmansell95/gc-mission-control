@@ -96,7 +96,7 @@ export default function ApprovalRoutingSettings() {
   }
 
   if (isLoading) {
-    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>;
   }
 
   return (
@@ -111,7 +111,7 @@ export default function ApprovalRoutingSettings() {
         </div>
         <button
           onClick={seedDefaults} disabled={seeding}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition active:scale-95 disabled:opacity-50"
         >
           <Zap className="w-4 h-4" /> {seeding ? 'Seeding…' : 'Seed Defaults'}
         </button>
@@ -140,7 +140,7 @@ export default function ApprovalRoutingSettings() {
                       <p className="text-xs text-slate-500 mt-1">{MODE_META[draft?.approver_mode || c.approver_mode]?.desc}</p>
                     </div>
                     {!isEditing && (
-                      <button onClick={() => startEdit(c)} className="text-xs font-semibold text-[#2E5A1A] hover:underline">
+                      <button onClick={() => startEdit(c)} className="text-xs font-semibold text-primary hover:underline">
                         Edit
                       </button>
                     )}
@@ -186,7 +186,7 @@ export default function ApprovalRoutingSettings() {
                           <select
                             value={draft.permission_group_id}
                             onChange={(e) => setEditing(e => ({ ...e, [c.id]: { ...e[c.id], permission_group_id: e.target.value } }))}
-                            className="w-full mt-1.5 text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                            className="w-full mt-1.5 text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
                           >
                             <option value="">Select a group…</option>
                             {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -209,7 +209,7 @@ export default function ApprovalRoutingSettings() {
                           <input
                             type="number" min={0} value={draft.sla_hours}
                             onChange={(e) => setEditing(e => ({ ...e, [c.id]: { ...e[c.id], sla_hours: Number(e.target.value) } }))}
-                            className="w-full mt-1.5 text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                            className="w-full mt-1.5 text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
                           />
                           <p className="text-[10px] text-slate-400 mt-1">0 = no SLA</p>
                         </div>
@@ -231,7 +231,7 @@ export default function ApprovalRoutingSettings() {
                       <div className="flex items-center gap-2 pt-1">
                         <button
                           onClick={() => save(c)} disabled={saving === c.id}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-xl text-xs font-bold hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition active:scale-95 disabled:opacity-50"
                         >
                           {saving === c.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save
                         </button>
@@ -290,9 +290,9 @@ function StaffPicker({ label, selected, staff, onChange }) {
         {selectedStaff.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {selectedStaff.map(s => (
-              <span key={s.id} className="inline-flex items-center gap-1 bg-[#2E5A1A]/10 text-[#2E5A1A] text-xs font-semibold px-2 py-1 rounded-lg">
+              <span key={s.id} className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-1 rounded-lg">
                 {s.name}
-                <button onClick={() => remove(s.id)} className="hover:bg-[#2E5A1A]/20 rounded-full p-0.5">
+                <button onClick={() => remove(s.id)} className="hover:bg-primary/20 rounded-full p-0.5">
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -305,7 +305,7 @@ function StaffPicker({ label, selected, staff, onChange }) {
             onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
             placeholder="Search staff to add…"
-            className="w-full text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+            className="w-full text-sm rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           {open && filtered.length > 0 && (
             <div className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">

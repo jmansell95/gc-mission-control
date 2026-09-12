@@ -101,13 +101,13 @@ export default function AccessGroupStaffManager({ group, groups }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-[#2E5A1A]" />
+          <Users className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-900">Staff in this Group</h3>
           <span className="text-xs font-bold text-slate-400">({groupStaff.length})</span>
         </div>
         <button
           onClick={() => { setShowAdd(!showAdd); setSelectedToAdd([]); setAddSearch(''); }}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] active:scale-95 transition shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 active:scale-95 transition shadow-sm"
         >
           {showAdd ? <X className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
           {showAdd ? 'Cancel' : 'Add Staff'}
@@ -138,10 +138,10 @@ export default function AccessGroupStaffManager({ group, groups }) {
                   key={s.id}
                   onClick={() => toggleAddSelect(s.id)}
                   className={'w-full flex items-center gap-2 p-2 rounded-lg text-left transition ' +
-                    (isSelected ? 'bg-[#2E5A1A]/10 ring-1 ring-[#2E5A1A]/30' : 'hover:bg-white')}
+                    (isSelected ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-white')}
                 >
                   <div className={'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ' +
-                    (isSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300')}>
+                    (isSelected ? 'bg-primary border-primary' : 'border-slate-300')}>
                     {isSelected && <Check className="w-3 h-3 text-white" />}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -158,7 +158,7 @@ export default function AccessGroupStaffManager({ group, groups }) {
             <button
               onClick={() => bulkAddMutation.mutate(selectedToAdd)}
               disabled={bulkAddMutation.isPending}
-              className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] active:scale-95 disabled:opacity-50 transition"
+              className="w-full mt-2 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 active:scale-95 disabled:opacity-50 transition"
             >
               {bulkAddMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
               Add {selectedToAdd.length} staff to {group.name}

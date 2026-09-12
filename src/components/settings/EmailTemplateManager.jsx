@@ -109,7 +109,7 @@ export default function EmailTemplateManager() {
       {/* Template list */}
       {isLoading ? (
         <div className="text-center py-12">
-          <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mx-auto" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
         </div>
       ) : (
         <div className="space-y-3">
@@ -120,7 +120,7 @@ export default function EmailTemplateManager() {
               <div key={t.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 flex items-start gap-3">
                   <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 text-[#2E5A1A]" />
+                    <Mail className="w-5 h-5 text-primary" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -158,7 +158,7 @@ export default function EmailTemplateManager() {
                       <Eye className="w-4 h-4" />
                     </button>
                     <button onClick={() => handleEdit(t)}
-                      className="p-2 text-slate-400 hover:text-[#2E5A1A] hover:bg-emerald-50 rounded-lg transition" title="Edit">
+                      className="p-2 text-slate-400 hover:text-primary hover:bg-emerald-50 rounded-lg transition" title="Edit">
                       <Edit2 className="w-4 h-4" />
                     </button>
                     {!t.is_system && (
@@ -207,19 +207,19 @@ export default function EmailTemplateManager() {
                 <label className="block text-xs font-medium text-slate-700 mb-1">Template Key (machine name)</label>
                 <input type="text" value={formData.template_key} onChange={e => setFormData(f => ({ ...f, template_key: e.target.value.replace(/[^a-z0-9_]/gi, '_').toLowerCase() }))} required disabled={!!editingId}
                   placeholder="e.g. portal_invite_client"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-[#2E5A1A] disabled:bg-slate-50" />
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-primary disabled:bg-slate-50" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">Template Name</label>
                 <input type="text" value={formData.template_name} onChange={e => setFormData(f => ({ ...f, template_name: e.target.value }))} required
                   placeholder="e.g. Client Portal Invitation"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Category</label>
               <select value={formData.category} onChange={e => setFormData(f => ({ ...f, category: e.target.value }))}
-                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
                 {Object.entries(CATEGORY_META).map(([k, v]) => (
                   <option key={k} value={k}>{v.label}</option>
                 ))}
@@ -229,13 +229,13 @@ export default function EmailTemplateManager() {
               <label className="block text-xs font-medium text-slate-700 mb-1">Subject Line</label>
               <input type="text" value={formData.subject} onChange={e => setFormData(f => ({ ...f, subject: e.target.value }))} required
                 placeholder="e.g. Your project portal for {{job_name}} is ready"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Email Body (HTML)</label>
               <textarea value={formData.body_html} onChange={e => setFormData(f => ({ ...f, body_html: e.target.value }))} required rows={8}
                 placeholder="<div style='font-family:Arial,sans-serif'>...</div>"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-[#2E5A1A]" />
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-primary" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1">Available Variables</label>
@@ -243,7 +243,7 @@ export default function EmailTemplateManager() {
                 <input type="text" value={varInput} onChange={e => setVarInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addVariable(); } }}
                   placeholder="e.g. job_name"
-                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-[#2E5A1A]" />
+                  className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-primary" />
                 <button type="button" onClick={addVariable}
                   className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200">
                   <Plus className="w-4 h-4" />
@@ -264,7 +264,7 @@ export default function EmailTemplateManager() {
             </div>
             <label className="flex items-center gap-2 text-sm text-slate-700">
               <input type="checkbox" checked={formData.is_active} onChange={e => setFormData(f => ({ ...f, is_active: e.target.checked }))}
-                className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
               Active (available for dispatch)
             </label>
             <div className="flex justify-end gap-2 pt-2">

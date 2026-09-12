@@ -16,7 +16,7 @@ export default function RawPandaDataPanel({ rawFields }) {
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-2 text-left"
       >
-        <Database className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+        <Database className="w-4 h-4 text-primary flex-shrink-0" />
         <h3 className="text-sm font-extrabold text-slate-900 flex-1">Raw Asset Panda Data</h3>
         <span className="text-xs text-slate-400 font-medium">{entries.length} fields</span>
         <ChevronDown

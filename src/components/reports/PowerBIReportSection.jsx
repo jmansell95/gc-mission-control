@@ -72,7 +72,7 @@ function PowerBICard({ ds }) {
           </div>
         </div>
         <button onClick={() => downloadCsv((ds.label || ds.table_name) + '.csv', rows)}
-          className="text-xs font-semibold text-[#2E5A1A] hover:underline flex-shrink-0">Export</button>
+          className="text-xs font-semibold text-primary hover:underline flex-shrink-0">Export</button>
       </div>
 
       <div className="h-64">

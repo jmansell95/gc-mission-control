@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Loader2, Save, Check, AlertTriangle, RefreshCw, KeyRound, UserCheck, UserX } from 'lucide-react';
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const DEFAULT_CONFIG = { client_id: '', client_secret: '', tpp_id: '' };
 
@@ -137,7 +137,7 @@ export default function CISSettings() {
       {/* HMRC credentials */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-slate-800">HMRC CIS API Credentials</h3>
-        <p className="text-xs text-slate-500">Register your application at <a href="https://developer.service.hmrc.gov.uk" target="_blank" rel="noreferrer" className="text-[#2E5A1A] underline">developer.service.hmrc.gov.uk</a> to obtain a client ID and secret for the CIS API.</p>
+        <p className="text-xs text-slate-500">Register your application at <a href="https://developer.service.hmrc.gov.uk" target="_blank" rel="noreferrer" className="text-primary underline">developer.service.hmrc.gov.uk</a> to obtain a client ID and secret for the CIS API.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1">Client ID</label>
@@ -153,7 +153,7 @@ export default function CISSettings() {
             <p className="text-[11px] text-slate-400 mt-1">Your own company's UTR — used as the contractor identifier in verification requests.</p>
           </div>
         </div>
-        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Credentials
           {saved && <Check className="w-4 h-4 text-white" />}
         </button>
@@ -166,7 +166,7 @@ export default function CISSettings() {
           <h3 className="text-sm font-bold text-slate-800">Awaiting Verification</h3>
           <span className="ml-auto text-xs text-slate-400">{needingVerification.length} subcontractor(s) with a UTR</span>
           {needingVerification.length > 0 && config.client_id && (
-            <button onClick={handleVerifyAll} disabled={verifyingAll} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-50">
+            <button onClick={handleVerifyAll} disabled={verifyingAll} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-50">
               {verifyingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />} Verify All
             </button>
           )}
@@ -192,7 +192,7 @@ export default function CISSettings() {
                   <p className="text-[11px] text-slate-400 font-mono">UTR: {c.utr || '—'}</p>
                 </div>
                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_META[c.cis_status]?.cls || 'bg-slate-100 text-slate-600'}`}>{STATUS_META[c.cis_status]?.label || c.cis_status}</span>
-                <button onClick={() => handleVerify(c.id)} disabled={!config.client_id || verifyingId === c.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] disabled:opacity-40">
+                <button onClick={() => handleVerify(c.id)} disabled={!config.client_id || verifyingId === c.id} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 disabled:opacity-40">
                   {verifyingId === c.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldCheck className="w-3 h-3" />} Verify
                 </button>
               </div>

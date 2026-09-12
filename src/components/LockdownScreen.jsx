@@ -12,7 +12,7 @@ export default function LockdownScreen({ title, message }) {
     <div className="min-h-[60vh] flex items-center justify-center px-6 py-12">
       <div className="hub-glass rounded-3xl p-8 sm:p-12 text-center max-w-md animate-slide-up">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/15 flex items-center justify-center mx-auto mb-5">
-          <Lock className="w-8 h-8 text-[#2E5A1A]" />
+          <Lock className="w-8 h-8 text-primary" />
         </div>
         <h2 className="text-ui-subheading font-bold text-slate-900 mb-2">
           {title || 'You do not have access to this area'}

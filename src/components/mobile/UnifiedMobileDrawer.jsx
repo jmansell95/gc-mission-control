@@ -220,18 +220,18 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
                         onClick={() => item.onClick ? item.onClick() : handleNavigate(item.path)}
                         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition active:scale-[0.98] ${
                           item.active
-                            ? 'bg-[#2E5A1A]/8 text-[#2E5A1A]'
+                            ? 'bg-primary/8 text-primary'
                             : 'text-slate-700 hover:bg-slate-100/60'
                         }`}
                       >
-                        <Icon className={`w-5 h-5 flex-shrink-0 ${item.active ? 'text-[#2E5A1A]' : 'text-slate-400'}`} />
+                        <Icon className={`w-5 h-5 flex-shrink-0 ${item.active ? 'text-primary' : 'text-slate-400'}`} />
                         <span className="flex-1 text-ui-body font-semibold">{item.label}</span>
                         {item.badge != null && item.badge > 0 && (
                           <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-ui-micro font-bold flex items-center justify-center">
                             {item.badge > 99 ? '99+' : item.badge}
                           </span>
                         )}
-                        {item.active && <ChevronRight className="w-4 h-4 text-[#2E5A1A]" />}
+                        {item.active && <ChevronRight className="w-4 h-4 text-primary" />}
                       </button>
                     );
                   })}

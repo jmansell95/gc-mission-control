@@ -130,7 +130,7 @@ Return as JSON object with "forecasts" array.`,
     >
       {loading && !forecasts ? (
         <div className="flex flex-col items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin mb-2" />
+          <Loader2 className="w-6 h-6 text-primary animate-spin mb-2" />
           <p className="text-sm text-slate-500">Forecasting completion dates…</p>
         </div>
       ) : error ? (

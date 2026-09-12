@@ -114,7 +114,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
                     <FileText className="w-3 h-3" /> {afps.length} AFP{afps.length !== 1 ? 's' : ''}
                   </span>
                   {portfolioTotals.contractValue > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] text-[10px] font-bold">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
                       <Receipt className="w-3 h-3" /> Contract {fmt(portfolioTotals.contractValue)}
                     </span>
                   )}
@@ -169,7 +169,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
             </div>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <span className="inline-flex items-center gap-1 text-[10px] text-slate-600 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#2E5A1A]" /> Agreed ({agreedPct}%)
+                <span className="w-2.5 h-2.5 rounded-full bg-primary" /> Agreed ({agreedPct}%)
               </span>
               <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-medium">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 opacity-60" /> Assessed ({assessedPct}%)
@@ -236,7 +236,7 @@ export default function AFPPortfolioSummary({ job, onSelectAfp }) {
                   <AlertTriangle className="w-2.5 h-2.5" /> {fmt(disputed)} disputed
                 </div>
               )}
-              <div className="mt-2 flex items-center gap-1 text-[10px] text-[#2E5A1A] font-bold opacity-0 group-hover:opacity-100 transition">
+              <div className="mt-2 flex items-center gap-1 text-[10px] text-primary font-bold opacity-0 group-hover:opacity-100 transition">
                 Open AFP <ArrowRight className="w-3 h-3" />
               </div>
             </motion.button>

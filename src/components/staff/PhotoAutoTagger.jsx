@@ -107,7 +107,7 @@ export default function PhotoAutoTagger({ jobId, jobName, onUploaded }) {
   return (
     <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Camera className="w-5 h-5 text-[#2E5A1A]" />
+        <Camera className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-slate-800 text-sm">Photo Capture & Auto-Tagging</h3>
       </div>
 
@@ -132,7 +132,7 @@ export default function PhotoAutoTagger({ jobId, jobName, onUploaded }) {
           {/* Auto-tags */}
           {tagging ? (
             <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Loader2 className="w-4 h-4 animate-spin text-[#2E5A1A]" />
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
               <span>AI analyzing photo…</span>
             </div>
           ) : tags.suggested_caption ? (

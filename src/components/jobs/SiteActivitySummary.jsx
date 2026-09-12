@@ -147,7 +147,7 @@ export default function SiteActivitySummary({ job, invLogs, canSeeCosts, fin }) 
         {dailyMetreage.length > 0 && (
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-4 h-4 text-[#2E5A1A]" />
+              <Activity className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-semibold text-slate-900">Daily Drilling Progress</h3>
               <span className="ml-auto text-[10px] text-slate-400">Last 14 days</span>
             </div>

@@ -284,7 +284,7 @@ export default function KeyLogBookDocs() {
         subtitle="Webhook integration specification for automated data push"
         actions={
           <button onClick={generatePDF}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-[#2E5A1A] rounded-lg font-semibold text-sm hover:bg-white/90 active:scale-95 transition shadow-sm">
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-primary rounded-lg font-semibold text-sm hover:bg-white/90 active:scale-95 transition shadow-sm">
             <Download className="w-4 h-4" /> Download PDF
           </button>
         }

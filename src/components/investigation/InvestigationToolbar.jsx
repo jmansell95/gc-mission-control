@@ -34,7 +34,7 @@ export default function InvestigationToolbar({
         {showSelect && (
           <button
             onClick={onToggleBulk}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-[#2E5A1A] text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${bulkMode ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
             <CheckSquare className="w-3.5 h-3.5" /> {bulkMode ? 'Done' : 'Select'}
           </button>

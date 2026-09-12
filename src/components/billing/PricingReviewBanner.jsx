@@ -236,7 +236,7 @@ export default function PricingReviewBanner({ jobId }) {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search descriptions…"
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary"
                 />
               </div>
             </div>

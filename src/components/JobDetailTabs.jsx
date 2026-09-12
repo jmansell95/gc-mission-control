@@ -277,11 +277,11 @@ export default function JobDetailTabs({
             <DocumentManager job={job} />
             {job.requisition_list_url && (
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2"><FileText className="w-5 h-5 text-[#2E5A1A]" /><h3 className="font-semibold text-slate-900 text-ui-body">Requisition List</h3></div>
+                <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2"><FileText className="w-5 h-5 text-primary" /><h3 className="font-semibold text-slate-900 text-ui-body">Requisition List</h3></div>
                 <div className="px-5 py-4 space-y-2">
                   <p className="text-ui-body text-slate-700 truncate">{job.requisition_list_name || 'Requisition List'}</p>
                   <div className="flex gap-2">
-                    <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-[#2E5A1A] hover:bg-emerald-100 rounded-lg text-ui-caption font-medium transition"><Eye className="w-3.5 h-3.5" /> View</a>
+                    <a href={job.requisition_list_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-primary hover:bg-emerald-100 rounded-lg text-ui-caption font-medium transition"><Eye className="w-3.5 h-3.5" /> View</a>
                     <a href={job.requisition_list_url} download={job.requisition_list_name || 'requisition'} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-ui-caption font-medium transition"><Download className="w-3.5 h-3.5" /> Download</a>
                   </div>
                 </div>

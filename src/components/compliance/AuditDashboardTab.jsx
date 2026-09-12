@@ -33,7 +33,7 @@ export default function AuditDashboardTab() {
       ) : (
         <>
           <div className="flex items-center gap-2 pt-1">
-            <FileText className="w-4 h-4 text-[#2E5A1A]" />
+            <FileText className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-900">Audit Templates</h3>
             <span className="text-xs text-slate-400">· Click a template to drill into its audits</span>
           </div>

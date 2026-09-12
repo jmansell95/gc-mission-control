@@ -25,7 +25,7 @@ export default function JobStatusFilterBar({ jobs, statusFilter, onStatusChange,
               type="button"
               onClick={() => onStatusChange(btn.value)}
               className={`flex-shrink-0 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-ui-caption sm:text-ui-body font-semibold transition active:scale-[0.97] ${
-                active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2E5A1A]/30 hover:text-slate-900'
+                active ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:border-primary/30 hover:text-slate-900'
               }`}
             >
               {btn.label}
@@ -41,7 +41,7 @@ export default function JobStatusFilterBar({ jobs, statusFilter, onStatusChange,
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Search projects by name, location or reference…"
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-ui-body focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
         />
       </div>
     </div>

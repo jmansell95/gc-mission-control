@@ -213,7 +213,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
           )}
         </div>
         <button onClick={() => setCustomise(!customise)}
-          className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${customise ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-[#2E5A1A]/30'}`}>
+          className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition ${customise ? 'bg-primary text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-primary/30'}`}>
           {customise ? <><Check className="w-4 h-4" /> Done Customising</> : <><Settings2 className="w-4 h-4" /> Customise Dashboard</>}
         </button>
       </div>
@@ -227,7 +227,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
             const isHidden = hidden.includes(id);
             return (
               <button key={id} onClick={() => toggleHidden(id)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isHidden ? 'bg-slate-100 text-slate-400 line-through' : 'bg-[#2E5A1A]/10 text-[#2E5A1A] hover:bg-[#2E5A1A]/20'}`}>
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition ${isHidden ? 'bg-slate-100 text-slate-400 line-through' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>
                 {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 {config.title}
               </button>
@@ -260,7 +260,7 @@ export default function CommandCentreGrid({ blockRenderers }) {
                       <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`grid grid-cols-1 sm:grid-cols-2 gap-3 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-[#2E5A1A]/5 border-2 border-dashed border-[#2E5A1A]/30 p-2' : ''}`}
+                        className={`grid grid-cols-1 sm:grid-cols-2 gap-3 transition rounded-xl ${snapshot.isDraggingOver ? 'bg-primary/5 border-2 border-dashed border-primary/30 p-2' : ''}`}
                       >
                         {railBlocks.map((blockId, index) => {
                           const content = blockRenderers[blockId]?.();
@@ -277,19 +277,19 @@ export default function CommandCentreGrid({ blockRenderers }) {
                                 <div
                                   ref={prov.innerRef}
                                   {...prov.draggableProps}
-                                  className={`${colspanClass} relative h-full ${customise ? 'ring-2 ring-[#2E5A1A]/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
+                                  className={`${colspanClass} relative h-full ${customise ? 'ring-2 ring-primary/30 rounded-2xl pt-8' : ''} ${snap.isDragging ? 'z-50 shadow-2xl opacity-90' : ''}`}
                                 >
                                   {customise && (
                                     <div className="absolute top-2 left-2 z-30 flex items-center gap-1.5">
                                       {canDrag && (
                                         <div {...prov.dragHandleProps}
-                                          className="bg-[#2E5A1A] text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
+                                          className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-grab active:cursor-grabbing touch-manipulation">
                                           <GripVertical className="w-3.5 h-3.5" /> Drag
                                         </div>
                                       )}
                                       <button
                                         onClick={(e) => { e.stopPropagation(); cycleSize(blockId); }}
-                                        className="bg-white text-[#2E5A1A] px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-[#2E5A1A]/20 hover:bg-[#2E5A1A]/5 transition z-30 relative touch-manipulation"
+                                        className="bg-white text-primary px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg ring-1 ring-primary/20 hover:bg-primary/5 transition z-30 relative touch-manipulation"
                                         title={`Size: ${SIZE_LABEL[userSize]} (click to change)`}
                                       >
                                         <SizeIcon className="w-3.5 h-3.5" /> {SIZE_LABEL[userSize]}

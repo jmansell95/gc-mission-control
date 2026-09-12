@@ -216,7 +216,7 @@ export default function BillableItemsBasketModal({
                 value={poNumber}
                 onChange={e => setPoNumber(e.target.value)}
                 placeholder="e.g. PO-2026-001 (applies to all items)"
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30 focus:border-[#2E5A1A]"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
               />
             </div>
             <div>
@@ -224,7 +224,7 @@ export default function BillableItemsBasketModal({
               <select
                 value={supplierId}
                 onChange={e => setSupplierId(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">— No supplier —</option>
                 {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -242,7 +242,7 @@ export default function BillableItemsBasketModal({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search rate card by description, SOR ref or section…"
-              className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30"
+              className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               autoFocus
             />
           </div>
@@ -287,13 +287,13 @@ export default function BillableItemsBasketModal({
                           return (
                             <div
                               key={r.id}
-                              className={`rounded-xl border transition ${isSelected ? 'border-[#2E5A1A]/40 bg-[#2E5A1A]/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                              className={`rounded-xl border transition ${isSelected ? 'border-primary/40 bg-primary/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                             >
                               <div className="flex items-start gap-2.5 p-2.5">
                                 <button
                                   type="button"
                                   onClick={() => toggleItem(r)}
-                                  className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${isSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'bg-white border-slate-300 hover:border-slate-400'}`}
+                                  className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition ${isSelected ? 'bg-primary border-primary' : 'bg-white border-slate-300 hover:border-slate-400'}`}
                                 >
                                   {isSelected && <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />}
                                 </button>
@@ -319,7 +319,7 @@ export default function BillableItemsBasketModal({
                                         min="1"
                                         value={state.qty || '1'}
                                         onChange={e => updateItemState(r.id, 'qty', e.target.value)}
-                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                                       />
                                     </div>
                                     <div>
@@ -328,7 +328,7 @@ export default function BillableItemsBasketModal({
                                         type="date"
                                         value={state.start_date || ''}
                                         onChange={e => updateItemState(r.id, 'start_date', e.target.value)}
-                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                                       />
                                     </div>
                                     <div>
@@ -337,7 +337,7 @@ export default function BillableItemsBasketModal({
                                         type="date"
                                         value={state.end_date || ''}
                                         onChange={e => updateItemState(r.id, 'end_date', e.target.value)}
-                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
                                       />
                                     </div>
                                   </div>
@@ -360,8 +360,8 @@ export default function BillableItemsBasketModal({
           <div className="border-t border-slate-200/80 bg-white px-5 py-3 flex-shrink-0">
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-                  <ShoppingCart className="w-4 h-4 text-[#2E5A1A]" />
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <ShoppingCart className="w-4 h-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">{selectedItems.length} item{selectedItems.length !== 1 ? 's' : ''} in basket</p>
@@ -374,7 +374,7 @@ export default function BillableItemsBasketModal({
                 type="button"
                 onClick={handleCommit}
                 disabled={committing}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] active:scale-95 transition disabled:opacity-50 flex-shrink-0"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 active:scale-95 transition disabled:opacity-50 flex-shrink-0"
               >
                 {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 {committing ? 'Adding…' : `Add ${selectedItems.length} Item${selectedItems.length !== 1 ? 's' : ''}`}

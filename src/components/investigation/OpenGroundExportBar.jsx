@@ -110,7 +110,7 @@ export default function OpenGroundExportBar({ logs = [], jobs = [] }) {
             {exporting ? 'Building…' : 'Export AGS'}
           </button>
           <button onClick={handlePush} disabled={exportJobId === 'all' || pushing || !opengroundConnected}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0">
             {pushing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UploadCloud className="w-3.5 h-3.5" />}
             {pushing ? 'Pushing…' : 'Push'}
           </button>

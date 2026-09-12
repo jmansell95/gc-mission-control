@@ -146,7 +146,7 @@ export default function SiteManifestPDF({ jobId, jobName, onClose }) {
                 const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=4&data=${encodeURIComponent(qrData)}`;
                 return (
                   <div key={item.id} className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#2E5A1A] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ export default function SiteManifestPDF({ jobId, jobName, onClose }) {
           <div className="px-5 py-4 bg-slate-50 border-t border-slate-200 flex-shrink-0">
             <button
               onClick={handlePrint}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#2E5A1A] text-white rounded-xl font-bold text-sm hover:bg-[#1c4a12] transition shadow-sm active:scale-95"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition shadow-sm active:scale-95"
             >
               <Printer className="w-5 h-5" /> Print Manifest ({onSiteItems.length} items)
             </button>

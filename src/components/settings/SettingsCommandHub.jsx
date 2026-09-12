@@ -246,9 +246,9 @@ export default function SettingsCommandHub({ onNavigate, items }) {
         }`}
       >
         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-          isConfigured ? 'bg-emerald-50' : 'bg-[#2E5A1A]/10'
+          isConfigured ? 'bg-emerald-50' : 'bg-primary/10'
         }`}>
-          <Icon className={`w-4 h-4 ${isConfigured ? 'text-emerald-600' : 'text-[#2E5A1A]'}`} />
+          <Icon className={`w-4 h-4 ${isConfigured ? 'text-emerald-600' : 'text-primary'}`} />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold truncate text-slate-800">{item.label}</p>
@@ -267,8 +267,8 @@ export default function SettingsCommandHub({ onNavigate, items }) {
     return (
       <div key={cat.label}>
         <div className="flex items-center gap-2 mb-2.5 px-1">
-          <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-            <CatIcon className="w-3.5 h-3.5 text-[#2E5A1A]" />
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <CatIcon className="w-3.5 h-3.5 text-primary" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-800 leading-tight">{cat.label}</h3>
@@ -315,8 +315,8 @@ export default function SettingsCommandHub({ onNavigate, items }) {
           onClick={() => setManageMode(m => !m)}
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm ${
             manageMode
-              ? 'bg-[#2E5A1A] text-white hover:bg-[#244715]'
-              : 'bg-white border border-slate-200 text-slate-700 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
+              ? 'bg-primary text-white hover:bg-[#244715]'
+              : 'bg-white border border-slate-200 text-slate-700 hover:border-primary hover:text-primary'
           }`}
         >
           {manageMode ? <><SlidersHorizontal className="w-4 h-4" /> Done</> : <><SlidersHorizontal className="w-4 h-4" /> Manage</>}
@@ -344,7 +344,7 @@ export default function SettingsCommandHub({ onNavigate, items }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search settings..."
-          className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
+          className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
         />
         {query && (
           <button

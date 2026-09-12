@@ -244,7 +244,7 @@ export default function AuditDetailDrawer({ audit, onClose }) {
 
             {/* Action buttons row */}
             <div className="px-5 pb-3 flex items-center gap-2">
-              <button onClick={openMittiReport} className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold hover:bg-[#244715] transition shadow-sm">
+              <button onClick={openMittiReport} className="inline-flex items-center justify-center gap-2 flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-[#244715] transition shadow-sm">
                 <ExternalLink className="w-4 h-4" />
                 View Mitti Report
               </button>
@@ -262,7 +262,7 @@ export default function AuditDetailDrawer({ audit, onClose }) {
             {/* Loading state */}
             {detailLoading && (
               <div className="flex flex-col items-center justify-center py-16">
-                <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
                 <p className="text-sm font-semibold text-slate-700">Fetching full audit from Mitti…</p>
                 <p className="text-xs text-slate-400 mt-1">Loading individual check items and responses</p>
               </div>
@@ -329,7 +329,7 @@ export default function AuditDetailDrawer({ audit, onClose }) {
                   <div className="min-w-0">
                     <p className="text-[10px] text-slate-400 font-semibold uppercase">Job / Site</p>
                     {jobId ? (
-                      <a href={`/admin?job=${jobId}`} className="text-sm font-semibold text-[#2E5A1A] hover:underline truncate block">{jobName || 'View job'}</a>
+                      <a href={`/admin?job=${jobId}`} className="text-sm font-semibold text-primary hover:underline truncate block">{jobName || 'View job'}</a>
                     ) : (
                       <p className="text-sm font-semibold text-slate-700 truncate">{jobName || '—'}</p>
                     )}
@@ -393,7 +393,7 @@ export default function AuditDetailDrawer({ audit, onClose }) {
                   <AlertTriangle className="w-4 h-4 text-amber-500" />
                   <h4 className="text-sm font-bold text-slate-900">Action Items ({actionItems.length})</h4>
                   {Object.keys(actionDraft).length > 0 && (
-                    <button onClick={handleSaveActions} disabled={savingActions} className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#2E5A1A] text-white text-xs font-bold hover:bg-[#1c4a12] transition disabled:opacity-50">
+                    <button onClick={handleSaveActions} disabled={savingActions} className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 transition disabled:opacity-50">
                       {savingActions ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                       Save Changes
                     </button>
@@ -415,9 +415,9 @@ export default function AuditDetailDrawer({ audit, onClose }) {
                             <p className="text-sm text-slate-800 flex-1">{a.description || 'Untitled action'}</p>
                           </div>
                           <div className="grid grid-cols-3 gap-2">
-                            <input type="text" value={currentAssignee} onChange={(e) => updateActionField(i, 'assignee', e.target.value)} placeholder="Assignee" className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] bg-white" />
-                            <input type="date" value={currentDue} onChange={(e) => updateActionField(i, 'due_date', e.target.value)} className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] bg-white" />
-                            <select value={currentStatus} onChange={(e) => updateActionField(i, 'status', e.target.value)} className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A] bg-white">
+                            <input type="text" value={currentAssignee} onChange={(e) => updateActionField(i, 'assignee', e.target.value)} placeholder="Assignee" className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-primary bg-white" />
+                            <input type="date" value={currentDue} onChange={(e) => updateActionField(i, 'due_date', e.target.value)} className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-primary bg-white" />
+                            <select value={currentStatus} onChange={(e) => updateActionField(i, 'status', e.target.value)} className="px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-primary bg-white">
                               <option value="open">Open</option>
                               <option value="in_progress">In Progress</option>
                               <option value="closed">Closed</option>

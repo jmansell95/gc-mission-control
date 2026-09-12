@@ -130,7 +130,7 @@ export default function AfPPipelineWidget({ onSelectJob }) {
                   </div>
                   <button
                     onClick={() => onSelectJob?.(job)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#2E5A1A] text-white text-xs font-semibold hover:bg-[#1c4a12] transition flex-shrink-0"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0"
                   >
                     Invoice <ArrowRight className="w-3 h-3" />
                   </button>

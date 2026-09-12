@@ -25,7 +25,7 @@ export default function PortfolioMonthlyChart({ portfolioMonthly }) {
     <div className="hub-glass rounded-2xl p-4 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 text-[#2E5A1A] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <CalendarClock className="w-4 h-4" />
           </div>
           <div>
@@ -35,7 +35,7 @@ export default function PortfolioMonthlyChart({ portfolioMonthly }) {
         </div>
         <div className="text-right">
           <p className="text-[10px] font-bold text-slate-400 uppercase">Total Projected</p>
-          <p className="text-lg font-extrabold text-[#2E5A1A] tabular-nums">{fmtMoney(totalProjected)}</p>
+          <p className="text-lg font-extrabold text-primary tabular-nums">{fmtMoney(totalProjected)}</p>
         </div>
       </div>
 
@@ -90,17 +90,17 @@ export default function PortfolioMonthlyChart({ portfolioMonthly }) {
                 <td className="py-1.5 text-right tabular-nums text-slate-500">{m.working_days}</td>
                 <td className="py-1.5 text-center tabular-nums text-slate-600">{m.crew_count || '—'}</td>
                 <td className="py-1.5 text-center tabular-nums text-slate-600">{m.rig_count || '—'}</td>
-                <td className="py-1.5 text-right tabular-nums font-bold text-[#2E5A1A]">{fmtMoney(m.projected)}</td>
+                <td className="py-1.5 text-right tabular-nums font-bold text-primary">{fmtMoney(m.projected)}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-[#8DC63F] bg-[#8DC63F]/10">
-              <td className="py-1.5 font-bold text-[#2E5A1A]">Total</td>
-              <td className="py-1.5 text-right font-bold tabular-nums text-[#2E5A1A]">{portfolioMonthly.reduce((s, m) => s + m.working_days, 0)}</td>
+              <td className="py-1.5 font-bold text-primary">Total</td>
+              <td className="py-1.5 text-right font-bold tabular-nums text-primary">{portfolioMonthly.reduce((s, m) => s + m.working_days, 0)}</td>
               <td className="py-1.5"></td>
               <td className="py-1.5"></td>
-              <td className="py-1.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmtMoney(totalProjected)}</td>
+              <td className="py-1.5 text-right font-bold tabular-nums text-primary">{fmtMoney(totalProjected)}</td>
             </tr>
           </tfoot>
         </table>

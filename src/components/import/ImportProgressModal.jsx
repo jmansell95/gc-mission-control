@@ -97,7 +97,7 @@ export default function ImportProgressModal({
                     {isDone ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     ) : isActive ? (
-                      <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+                      <Loader2 className="w-5 h-5 text-primary animate-spin" />
                     ) : (
                       <div className="w-5 h-5 rounded-full border-2 border-slate-200" />
                     )}

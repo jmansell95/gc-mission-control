@@ -274,7 +274,7 @@ export default function GenerateInvoiceModal({ open, onClose, job, client, data,
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileCheck2 className="w-5 h-5 text-[#2E5A1A]" />
+            <FileCheck2 className="w-5 h-5 text-primary" />
             Raise Invoice — {job.name}
           </DialogTitle>
         </DialogHeader>
@@ -318,12 +318,12 @@ export default function GenerateInvoiceModal({ open, onClose, job, client, data,
           <div className="ml-auto w-full sm:w-64 space-y-1.5 text-sm">
             <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span className="font-medium tabular-nums">{gbp(netTotal)}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">VAT ({vatRate}%)</span><span className="font-medium tabular-nums">{gbp(vatTotal)}</span></div>
-            <div className="flex justify-between border-t border-slate-200 pt-1.5"><span className="font-bold text-[#2E5A1A]">Total Due</span><span className="font-bold text-[#2E5A1A] tabular-nums">{gbp(grossTotal)}</span></div>
+            <div className="flex justify-between border-t border-slate-200 pt-1.5"><span className="font-bold text-primary">Total Due</span><span className="font-bold text-primary tabular-nums">{gbp(grossTotal)}</span></div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <button onClick={handleRaise} disabled={saving || lines.length === 0}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileCheck2 className="w-4 h-4" />}
               Raise & Print Invoice
             </button>

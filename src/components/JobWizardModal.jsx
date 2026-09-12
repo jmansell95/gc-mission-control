@@ -16,7 +16,7 @@ import { getJobDisciplines, getDisciplineSubcategories } from '@/utils/jobDiscip
 import { getJobTypeColor, isDrillingJobType } from '@/utils/jobTeams';
 import { useDivision } from '@/contexts/DivisionContext';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 const STEPS = [
   { id: 1, label: 'Identity', icon: Briefcase },
@@ -392,7 +392,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-gradient-to-r from-[#2E5A1A]/5 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Briefcase className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -414,11 +414,11 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
               const Icon = s.icon;
               return (
                 <React.Fragment key={s.id}>
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition ${active ? 'bg-[#2E5A1A] text-white' : done ? 'bg-[#2E5A1A]/10 text-[#2E5A1A]' : 'bg-white text-slate-400 border border-slate-200'}`}>
+                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition ${active ? 'bg-primary text-white' : done ? 'bg-primary/10 text-primary' : 'bg-white text-slate-400 border border-slate-200'}`}>
                     {done ? <Check className="w-3.5 h-3.5" /> : <Icon className="w-3.5 h-3.5" />}
                     <span className="hidden sm:inline">{s.label}</span>
                   </div>
-                  {i < STEPS.length - 1 && <div className={`flex-1 h-0.5 rounded ${done ? 'bg-[#2E5A1A]/40' : 'bg-slate-200'}`} />}
+                  {i < STEPS.length - 1 && <div className={`flex-1 h-0.5 rounded ${done ? 'bg-primary/40' : 'bg-slate-200'}`} />}
                 </React.Fragment>
               );
             })}
@@ -446,7 +446,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                      <span className="inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-[#2E5A1A]" /> what3words Address</span>
+                      <span className="inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> what3words Address</span>
                     </label>
                     <input type="text" value={form.what3words || ''} onChange={e => set('what3words', e.target.value)} placeholder="e.g. filled.count.soap" className={`${inputCls} font-mono`} />
                     <p className="text-[11px] text-slate-400 mt-0.5">3 words separated by dots — pinpoints a 3m × 3m square. Used by field crews to find the exact site entrance.</p>
@@ -456,11 +456,11 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-sm font-medium text-slate-700">
-                          <span className="inline-flex items-center gap-1.5"><LayoutTemplate className="w-3.5 h-3.5 text-[#2E5A1A]" /> Start from a template</span>
+                          <span className="inline-flex items-center gap-1.5"><LayoutTemplate className="w-3.5 h-3.5 text-primary" /> Start from a template</span>
                           <span className="text-xs text-slate-400 font-normal">· pre-fills billing, teams & defaults</span>
                         </label>
                         {isSuperAdmin && (
-                          <button type="button" onClick={() => setManagerOpen(true)} className="text-xs text-[#2E5A1A] font-medium hover:underline inline-flex items-center gap-1 flex-shrink-0">
+                          <button type="button" onClick={() => setManagerOpen(true)} className="text-xs text-primary font-medium hover:underline inline-flex items-center gap-1 flex-shrink-0">
                             <Settings className="w-3 h-3" /> Manage
                           </button>
                         )}
@@ -476,12 +476,12 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                               onClick={() => applyTemplate(jt)}
                               className={`inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg border transition font-medium ${
                                 selected
-                                  ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'
                               }`}
                             >
                               {jt.label}
-                              {hasDefaults && <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-[#2E5A1A]'}`} />}
+                              {hasDefaults && <span className={`w-1.5 h-1.5 rounded-full ${selected ? 'bg-white' : 'bg-primary'}`} />}
                             </button>
                           );
                         })}
@@ -560,7 +560,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {/* Site GPS & Geofence — for Geotab auto-timesheet arrival/departure detection */}
                   <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/50 space-y-3">
                     <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-[#2E5A1A]" />
+                      <MapPin className="w-4 h-4 text-primary" />
                       <span className="text-sm font-semibold text-slate-800">Site GPS & Geofence</span>
                       <span className="text-xs text-slate-400 font-normal">· for Geotab auto-timesheets</span>
                     </div>
@@ -597,12 +597,12 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                         const selected = form.revenue_method === m.val;
                         return (
                           <button type="button" key={m.val} onClick={() => set('revenue_method', m.val)}
-                            className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition ${selected ? 'bg-[#2E5A1A]/5 border-[#2E5A1A] ring-1 ring-[#2E5A1A]/20' : 'bg-white border-slate-200 hover:border-[#2E5A1A]/40'}`}>
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${selected ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'}`}>
+                            className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition ${selected ? 'bg-primary/5 border-primary ring-1 ring-primary/20' : 'bg-white border-slate-200 hover:border-primary/40'}`}>
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${selected ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div className="min-w-0">
-                              <p className={`text-sm font-bold ${selected ? 'text-[#2E5A1A]' : 'text-slate-800'}`}>{m.label}</p>
+                              <p className={`text-sm font-bold ${selected ? 'text-primary' : 'text-slate-800'}`}>{m.label}</p>
                               <p className="text-[11px] text-slate-500">{m.desc}</p>
                             </div>
                           </button>
@@ -621,7 +621,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {(isDrilling || form.revenue_method === 'meterage_rate') && (
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                       <div className="flex items-center gap-2">
-                        <HardHat className="w-4 h-4 text-[#2E5A1A]" />
+                        <HardHat className="w-4 h-4 text-primary" />
                         <span className="text-sm font-semibold text-slate-800">Drilling Details</span>
                       </div>
                       <div>
@@ -629,7 +629,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                         <div className="grid grid-cols-4 gap-2">
                           {DRILLING_METHODS.map(m => (
                             <button type="button" key={m.val} onClick={() => set('drilling_method', m.val)}
-                              className={`px-2 py-2 rounded-lg border text-center transition ${form.drilling_method === m.val ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'}`}>
+                              className={`px-2 py-2 rounded-lg border text-center transition ${form.drilling_method === m.val ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'}`}>
                               <span className="block text-xs font-bold">{m.label}</span>
                               <span className="block text-[9px] opacity-70">{m.desc}</span>
                             </button>
@@ -667,7 +667,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {form.revenue_method === 'unit_rate' && (
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                       <div className="flex items-center gap-2">
-                        <FileCheck2 className="w-4 h-4 text-[#2E5A1A]" />
+                        <FileCheck2 className="w-4 h-4 text-primary" />
                         <span className="text-sm font-semibold text-slate-800">Unit Rate Pricing</span>
                       </div>
                       <div>
@@ -685,7 +685,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {form.revenue_method === 'flat_fee' && (
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                       <div className="flex items-center gap-2">
-                        <PoundSterling className="w-4 h-4 text-[#2E5A1A]" />
+                        <PoundSterling className="w-4 h-4 text-primary" />
                         <span className="text-sm font-semibold text-slate-800">Flat Fee</span>
                       </div>
                       <div>
@@ -706,7 +706,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {form.revenue_method === 'none' && (
                     <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
                       <div className="flex items-center gap-2">
-                        <Percent className="w-4 h-4 text-[#2E5A1A]" />
+                        <Percent className="w-4 h-4 text-primary" />
                         <span className="text-sm font-semibold text-slate-800">Markup on Cost</span>
                       </div>
                       <div>
@@ -761,7 +761,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
               {/* STEP 7 — Review */}
               {step === 7 && (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-[#2E5A1A]">
+                  <div className="flex items-center gap-2 text-primary">
                     <Sparkles className="w-4 h-4" />
                     <p className="text-sm font-semibold">Ready to {editingJob?.id ? 'update' : 'create'}</p>
                   </div>
@@ -797,7 +797,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {subAssignments.filter(a => a.subcontractor_id).length > 0 && (
                     <div className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-2">
                       <div className="flex items-center gap-2">
-                        <ArrowRightLeft className="w-4 h-4 text-[#2E5A1A]" />
+                        <ArrowRightLeft className="w-4 h-4 text-primary" />
                         <p className="text-sm font-semibold text-slate-800">Subcontractors ({subAssignments.filter(a => a.subcontractor_id).length})</p>
                       </div>
                       {subAssignments.filter(a => a.subcontractor_id).map((a, i) => {
@@ -826,7 +826,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
                   {stagedDocs.length > 0 && (
                     <div className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-[#2E5A1A]" />
+                        <FileText className="w-4 h-4 text-primary" />
                         <p className="text-sm font-semibold text-slate-800">Documents ({stagedDocs.length})</p>
                       </div>
                       {stagedDocs.map((f, i) => (
@@ -861,11 +861,11 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
             </button>
           )}
           {step < 7 ? (
-            <button type="button" onClick={() => stepValid() && setStep(step + 1)} disabled={!stepValid()} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-40 flex items-center justify-center gap-1.5">
+            <button type="button" onClick={() => stepValid() && setStep(step + 1)} disabled={!stepValid()} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-40 flex items-center justify-center gap-1.5">
               Continue <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
-            <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+            <button type="button" onClick={handleSubmit} disabled={saving} className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
               {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</> : <><Check className="w-4 h-4" /> {editingJob?.id ? 'Update Project' : 'Create Project'}</>}
             </button>
           )}
@@ -879,9 +879,9 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
 
 function ReviewRow({ label, value, highlight }) {
   return (
-    <div className={`flex items-start gap-2 px-3 py-2 rounded-lg ${highlight ? 'bg-[#2E5A1A]/5 border border-[#2E5A1A]/15' : 'bg-slate-50'}`}>
+    <div className={`flex items-start gap-2 px-3 py-2 rounded-lg ${highlight ? 'bg-primary/5 border border-primary/15' : 'bg-slate-50'}`}>
       <span className="text-xs text-slate-400 font-medium min-w-[75px]">{label}</span>
-      <span className={`text-sm flex-1 break-words ${highlight ? 'text-[#2E5A1A] font-bold' : 'text-slate-800 font-medium'}`}>{value || '—'}</span>
+      <span className={`text-sm flex-1 break-words ${highlight ? 'text-primary font-bold' : 'text-slate-800 font-medium'}`}>{value || '—'}</span>
     </div>
   );
 }
@@ -945,8 +945,8 @@ function JobSnapshotCard({ form, clients, jobTypes, fmtDate, methodLabel }) {
         {/* Billing summary */}
         <div className="pt-2 border-t border-slate-100 space-y-1">
           <div className="flex items-center gap-1.5">
-            <Receipt className="w-3 h-3 text-[#2E5A1A]" />
-            <span className="text-[10px] font-bold text-[#2E5A1A] uppercase tracking-wide">Billing</span>
+            <Receipt className="w-3 h-3 text-primary" />
+            <span className="text-[10px] font-bold text-primary uppercase tracking-wide">Billing</span>
           </div>
           <p className="text-[11px] text-slate-600 font-medium">{methodLabel}</p>
           {form.revenue_method === 'meterage_rate' && form.meterage_rate && <p className="text-[10px] text-slate-400">{`£${form.meterage_rate}/m${form.meterage_target ? ` · target ${form.meterage_target}m` : ''}`}</p>}

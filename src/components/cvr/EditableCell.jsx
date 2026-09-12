@@ -61,7 +61,7 @@ export default function EditableCell({ value, onSave, type = 'number', prefix = 
         onChange={e => setVal(e.target.value)}
         onBlur={handleSave}
         onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') { setEditing(false); setVal(value ?? ''); } }}
-        className={`w-full bg-white border border-[#2E5A1A] rounded px-1.5 py-0.5 text-xs tabular-nums outline-none ${className}`}
+        className={`w-full bg-white border border-primary rounded px-1.5 py-0.5 text-xs tabular-nums outline-none ${className}`}
         step={type === 'number' ? '0.01' : undefined}
       />
     );

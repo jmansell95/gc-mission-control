@@ -414,7 +414,7 @@ export default function BoreholeDrillDown({ job, jobType }) {
                     )}
                     <button
                       onClick={() => navigateToInvestigationHub(job.id, null, ref)}
-                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-[#2E5A1A] font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
+                      className="flex-1 flex items-center justify-center gap-1.5 text-[11px] text-slate-500 hover:text-primary font-medium py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition"
                     >
                       <ExternalLink className="w-3 h-3" /> Investigation Hub
                     </button>

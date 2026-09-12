@@ -234,7 +234,7 @@ function AssetCardBanner({ asset, heightClass = 'h-28' }) {
       )}
       {uploading && (
         <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-          <Loader2 className="w-5 h-5 text-[#2E5A1A] animate-spin" />
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
         </div>
       )}
     </div>
@@ -377,7 +377,7 @@ export default function AssetInventoryGrid({
       {showRigs && filteredRigs.length > 0 && (
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 px-1">
-            <Cog className="w-4 h-4 text-[#2E5A1A]" />
+            <Cog className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide">Rigs <span className="text-slate-400 font-normal normal-case tracking-normal">({filteredRigs.length})</span></h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -500,10 +500,10 @@ export default function AssetInventoryGrid({
                     <RigUtilizationSparkline rigId={rig.id} />
                     {rig.next_service_date && <p className="text-[10px] text-slate-400 mt-2 flex items-center gap-1"><ScanLine className="w-3 h-3" /> Next service {safeFmt(rig.next_service_date)}</p>}
                     <div className="mt-2 flex gap-1.5">
-                      <span role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); onCertVault(rig); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onCertVault(rig); } }} className="flex-1 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-[11px] font-semibold transition justify-center">
+                      <span role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); onCertVault(rig); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onCertVault(rig); } }} className="flex-1 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[11px] font-semibold transition justify-center">
                         <Lock className="w-3.5 h-3.5" /> Certs
                       </span>
-                      <button type="button" onClick={(e) => { e.stopPropagation(); onUploadCert?.(rig); }} className="flex-1 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A] hover:bg-[#244715] text-white rounded-lg text-[11px] font-semibold transition justify-center">
+                      <button type="button" onClick={(e) => { e.stopPropagation(); onUploadCert?.(rig); }} className="flex-1 inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-primary hover:bg-[#244715] text-white rounded-lg text-[11px] font-semibold transition justify-center">
                         <Upload className="w-3.5 h-3.5" /> Upload Cert
                       </button>
                     </div>
@@ -665,7 +665,7 @@ export default function AssetInventoryGrid({
                       </p>
                     )}
                     {!selectionMode && !compact && (
-                      <button type="button" onClick={(e) => { e.stopPropagation(); onUploadCert?.(equip); }} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A] hover:bg-[#244715] text-white rounded-lg text-[11px] font-semibold transition">
+                      <button type="button" onClick={(e) => { e.stopPropagation(); onUploadCert?.(equip); }} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-primary hover:bg-[#244715] text-white rounded-lg text-[11px] font-semibold transition">
                         <Upload className="w-3.5 h-3.5" /> Upload Cert
                       </button>
                     )}

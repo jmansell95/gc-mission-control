@@ -391,7 +391,7 @@ export default function BackupRestoreHub() {
                 <select
                   value={scheduleForm.division_id}
                   onChange={e => setScheduleForm(f => ({ ...f, division_id: e.target.value }))}
-                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A]"
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary"
                 >
                   <option value="">All Business Streams</option>
                   {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -406,7 +406,7 @@ export default function BackupRestoreHub() {
                     <button
                       key={f}
                       onClick={() => setScheduleForm(s => ({ ...s, frequency: f }))}
-                      className={'px-3 py-2.5 rounded-xl text-sm font-bold capitalize transition ' + (scheduleForm.frequency === f ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100')}
+                      className={'px-3 py-2.5 rounded-xl text-sm font-bold capitalize transition ' + (scheduleForm.frequency === f ? 'bg-primary text-white shadow-md' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100')}
                     >
                       {f}
                     </button>
@@ -422,7 +422,7 @@ export default function BackupRestoreHub() {
                     type="time"
                     value={scheduleForm.backup_time}
                     onChange={e => setScheduleForm(f => ({ ...f, backup_time: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A]"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary"
                   />
                 </div>
               )}
@@ -436,7 +436,7 @@ export default function BackupRestoreHub() {
                       <button
                         key={i}
                         onClick={() => setScheduleForm(f => ({ ...f, weekly_day: i }))}
-                        className={'py-2 rounded-lg text-xs font-bold transition ' + (scheduleForm.weekly_day === i ? 'bg-[#2E5A1A] text-white' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100')}
+                        className={'py-2 rounded-lg text-xs font-bold transition ' + (scheduleForm.weekly_day === i ? 'bg-primary text-white' : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100')}
                       >
                         {d}
                       </button>
@@ -454,7 +454,7 @@ export default function BackupRestoreHub() {
                     value={scheduleForm.cron_expression}
                     onChange={e => setScheduleForm(f => ({ ...f, cron_expression: e.target.value }))}
                     placeholder="0 2 * * 1-5"
-                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono text-slate-700 focus:outline-none focus:border-[#2E5A1A]"
+                    className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono text-slate-700 focus:outline-none focus:border-primary"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">e.g. "0 2 * * 1-5" = 2am Mon-Fri</p>
                 </div>
@@ -469,7 +469,7 @@ export default function BackupRestoreHub() {
                   onChange={e => setScheduleForm(f => ({ ...f, retention_count: e.target.value }))}
                   min="1"
                   max="365"
-                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A]"
+                  className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Older snapshots beyond this count are automatically deleted.</p>
               </div>
@@ -480,7 +480,7 @@ export default function BackupRestoreHub() {
               <button
                 onClick={handleCreateSchedule}
                 disabled={savingSchedule}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#2E5A1A] text-white text-sm font-bold shadow-md hover:bg-[#1c4a12] disabled:opacity-60 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-md hover:bg-primary/90 disabled:opacity-60 transition"
               >
                 {savingSchedule ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarClock className="w-4 h-4" />}
                 Create Schedule
@@ -498,13 +498,13 @@ export default function BackupRestoreHub() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by division, reason or creator…"
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
           />
         </div>
         <select
           value={filterDivision}
           onChange={e => setFilterDivision(e.target.value)}
-          className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A]"
+          className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary"
         >
           <option value="all">All Business Streams</option>
           {divisions.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}

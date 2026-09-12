@@ -21,7 +21,7 @@ const MODULE_CATEGORIES = [
 ];
 
 const LEVEL_STYLES = {
-  write: { active: 'bg-[#2E5A1A] text-white', icon: ShieldCheck, ring: 'ring-[#2E5A1A]' },
+  write: { active: 'bg-primary text-white', icon: ShieldCheck, ring: 'ring-primary' },
   read: { active: 'bg-amber-500 text-white', icon: Eye, ring: 'ring-amber-500' },
   none: { active: 'bg-slate-200 text-slate-600', icon: Lock, ring: 'ring-slate-300' },
 };
@@ -221,7 +221,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                         key={d.id}
                         onClick={() => setSelectedDivisionId(d.id)}
                         className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition ' +
-                          (active ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
+                          (active ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200')}
                       >
                         <span className="w-2 h-2 rounded-full" style={{ background: active ? 'rgba(255,255,255,0.5)' : (d.color || '#2E5A1A') }} />
                         {d.name}
@@ -262,7 +262,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
 
               {/* Stat bar */}
               <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 mb-4">
-                <div className="bg-[#2E5A1A]" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
+                <div className="bg-primary" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
                 <div className="bg-amber-400" style={{ width: `${stats.total ? (stats.read / stats.total) * 100 : 0}%` }} />
                 <div className="bg-slate-300" style={{ width: `${stats.total ? (stats.none / stats.total) * 100 : 0}%` }} />
               </div>
@@ -321,7 +321,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                 <button
                   onClick={() => saveMutation.mutate()}
                   disabled={!dirty || saveMutation.isPending}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm"
                 >
                   <Save className="w-4 h-4" /> {saveMutation.isPending ? 'Saving…' : `Save Lockdown for ${selectedDivision.name}`}
                 </button>
@@ -373,7 +373,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                   >
                     <span className="text-sm">{item.icon}</span>
                     <span className={'flex-1 truncate ' + (visible ? 'text-slate-700 font-medium' : 'text-slate-400 line-through')}>{item.label}</span>
-                    {level === 'write' && <ShieldCheck className="w-3 h-3 text-[#2E5A1A]" />}
+                    {level === 'write' && <ShieldCheck className="w-3 h-3 text-primary" />}
                     {readOnly && <Eye className="w-3 h-3 text-amber-500" />}
                     {!visible && <Lock className="w-3 h-3 text-slate-400" />}
                   </div>
@@ -418,7 +418,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
         {/* PANE 1: Hierarchy Selector */}
         <div className={'hub-glass rounded-2xl p-4 lg:max-h-[calc(100dvh-12rem)] lg:overflow-y-auto ' + (fixedGroup ? 'lg:col-span-4' : 'lg:col-span-3')}>
           <div className="flex items-center gap-2 mb-3">
-            <Layers className="w-4 h-4 text-[#2E5A1A]" />
+            <Layers className="w-4 h-4 text-primary" />
             <h3 className="text-sm font-bold text-slate-900">{fixedGroup ? 'Business Streams' : 'Hierarchy'}</h3>
             {fixedGroup && (
               <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1">
@@ -438,11 +438,11 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                   key={d.id}
                   onClick={() => setSelectedDivisionId(d.id)}
                   className={'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition ' +
-                    (active ? 'bg-[#2E5A1A]/10 ring-1 ring-[#2E5A1A]/30' : 'hover:bg-slate-50')}
+                    (active ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-slate-50')}
                 >
                   <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: d.color || '#2E5A1A' }} />
                   <div className="min-w-0 flex-1">
-                    <p className={'text-xs font-semibold truncate ' + (active ? 'text-[#2E5A1A]' : 'text-slate-700')}>{d.name}</p>
+                    <p className={'text-xs font-semibold truncate ' + (active ? 'text-primary' : 'text-slate-700')}>{d.name}</p>
                     <p className="text-[10px] text-slate-400">{d.code || d.division_type}{staffCount > 0 ? ` · ${staffCount} staff` : ''}</p>
                   </div>
                   {manifestCount > 0 && (
@@ -544,7 +544,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
               </div>
 
               <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 mb-4">
-                <div className="bg-[#2E5A1A]" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
+                <div className="bg-primary" style={{ width: `${stats.total ? (stats.write / stats.total) * 100 : 0}%` }} />
                 <div className="bg-amber-400" style={{ width: `${stats.total ? (stats.read / stats.total) * 100 : 0}%` }} />
                 <div className="bg-slate-300" style={{ width: `${stats.total ? (stats.none / stats.total) * 100 : 0}%` }} />
               </div>
@@ -601,7 +601,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                 <button
                   onClick={() => saveMutation.mutate()}
                   disabled={!dirty || saveMutation.isPending}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition shadow-sm"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition shadow-sm"
                 >
                   <Save className="w-4 h-4" /> {saveMutation.isPending ? 'Saving…' : 'Save Lockdown'}
                 </button>
@@ -650,7 +650,7 @@ export default function AccessMatrixEditor({ fixedGroup, inline = false, lockedD
                   >
                     <span className="text-sm">{item.icon}</span>
                     <span className={'flex-1 truncate ' + (visible ? 'text-slate-700 font-medium' : 'text-slate-400 line-through')}>{item.label}</span>
-                    {level === 'write' && <ShieldCheck className="w-3 h-3 text-[#2E5A1A]" />}
+                    {level === 'write' && <ShieldCheck className="w-3 h-3 text-primary" />}
                     {readOnly && <Eye className="w-3 h-3 text-amber-500" />}
                     {!visible && <Lock className="w-3 h-3 text-slate-400" />}
                   </div>

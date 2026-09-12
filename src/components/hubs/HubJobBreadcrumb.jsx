@@ -37,10 +37,10 @@ export default function HubJobBreadcrumb() {
     <div className="animate-slide-up">
       <Link
         to={`/admin?job=${jobId}`}
-        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-[#2E5A1A]/20 transition-all shadow-sm group"
+        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-primary/20 transition-all shadow-sm group"
       >
-        <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-[#2E5A1A] transition-colors" />
-        <FolderOpen className="w-4 h-4 text-[#2E5A1A]" />
+        <ArrowLeft className="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" />
+        <FolderOpen className="w-4 h-4 text-primary" />
         <span className="text-slate-500">Back to</span>
         <span className="text-slate-900 truncate max-w-[240px]">{jobName}</span>
       </Link>

@@ -233,7 +233,7 @@ export default function RigCompliancePanel({ job }) {
                           <button
                             onClick={() => handleDownload(cert, asset.name)}
                             disabled={!cert.document_url}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             {isDownloaded ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Download className="w-3.5 h-3.5" />}
                             {isDownloaded ? 'Accessed' : 'Download'}

@@ -176,8 +176,8 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
                 onClick={() => toggleCategoryFilter(cat.id)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition flex-shrink-0 ${
                   active
-                    ? 'bg-[#2E5A1A] text-white shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:border-[#2E5A1A] hover:text-[#2E5A1A]'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-primary hover:text-primary'
                 }`}
               >
                 {active && <Check className="w-3 h-3" />}
@@ -192,13 +192,13 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
       {/* Team filter + Manage Categories button */}
       <div className="flex flex-col sm:flex-row gap-2">
         <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}
-          className="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/10 focus:border-[#2E5A1A]">
+          className="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary">
           <option value="all">All Crews</option>
           {teams.map(t => <option key={t.id} value={t.id}>{teamName(t.id)}</option>)}
         </select>
         <button
           onClick={() => setBulkModal({ mode: 'manage' })}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition shadow-sm flex-shrink-0"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition shadow-sm flex-shrink-0"
         >
           <Tag className="w-4 h-4" /> Manage Categories
         </button>
@@ -273,7 +273,7 @@ export default function TrainingStaffCardGrid({ staff, teams, compliance, bookin
           <div className="w-px h-6 bg-white/20" />
           <button
             onClick={() => setBulkModal({ mode: 'assign', staffIds: selectedStaffIds })}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition"
           >
             <Plus className="w-3.5 h-3.5" /> Assign Categories
           </button>
@@ -340,13 +340,13 @@ function StaffCard({ m, teamName, categories, getQualStatus, compliance, bookedC
 
   return (
     <div className={`bg-white rounded-2xl border shadow-sm p-4 relative overflow-hidden transition group ${
-      selected ? 'border-[#2E5A1A] ring-2 ring-[#2E5A1A]/20' : 'border-slate-200/70 hover:shadow-md hover:border-[#2E5A1A]/30'
+      selected ? 'border-primary ring-2 ring-primary/20' : 'border-slate-200/70 hover:shadow-md hover:border-primary/30'
     }`}>
       <div className="flex items-center gap-3 mb-3">
         <button
           onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
           className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition ${
-            selected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 hover:border-[#2E5A1A]'
+            selected ? 'bg-primary border-primary' : 'border-slate-300 hover:border-primary'
           }`}
         >
           {selected && <Check className="w-3 h-3 text-white" />}
@@ -415,14 +415,14 @@ function StaffCard({ m, teamName, categories, getQualStatus, compliance, bookedC
         )}
         <button
           onClick={(e) => { e.stopPropagation(); onOpenCategories(); }}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-[#2E5A1A] hover:text-white text-slate-600 text-[11px] font-semibold transition"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-primary hover:text-white text-slate-600 text-[11px] font-semibold transition"
           title="Manage training categories"
         >
           <Tag className="w-3.5 h-3.5" /> Categories
         </button>
         <button
           onClick={onClick}
-          className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-[#2E5A1A]"
+          className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold text-primary"
         >
           View <ArrowRight className="w-3 h-3" />
         </button>
@@ -505,7 +505,7 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-2">
             <button onClick={onOpenProfile}
-              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition">
+              className="flex items-center justify-center gap-2 px-3 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition">
               <GraduationCap className="w-4 h-4" /> Full Profile
             </button>
             <button onClick={onAddCompleted}
@@ -530,7 +530,7 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
                     disabled={catSaving}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition disabled:opacity-50 ${
                       active
-                        ? 'bg-[#2E5A1A] text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-sm'
                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}
                   >
@@ -599,7 +599,7 @@ function StaffTrainingDrawer({ staff, teams, categories, compliance, bookings, c
                       )}
                       {(st === 'gap' || st === 'expired' || st === 'expiring') && (
                         <button onClick={() => onBookTraining([staff.id], cat.qualification_type)}
-                          className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition">
+                          className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-primary text-white hover:bg-primary/90 transition">
                           <UserPlus className="w-3 h-3" /> Book
                         </button>
                       )}

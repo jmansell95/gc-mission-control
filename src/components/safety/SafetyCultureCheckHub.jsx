@@ -115,7 +115,7 @@ export default function MittiCheckHub({ onNavigate }) {
         {onNavigate && (
           <button
             onClick={() => onNavigate('settings')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition"
           >
             <Zap className="w-4 h-4" /> Configure Integration
           </button>
@@ -191,7 +191,7 @@ export default function MittiCheckHub({ onNavigate }) {
       {/* Who completed what */}
       <div className="hub-glass rounded-2xl p-5 mb-5">
         <div className="flex items-center gap-2 mb-4">
-          <Users className="w-5 h-5 text-[#2E5A1A]" />
+          <Users className="w-5 h-5 text-primary" />
           <h3 className="font-bold text-slate-900">Who Completed What</h3>
           <span className="text-xs text-slate-400">Grouped by auditor</span>
         </div>
@@ -205,7 +205,7 @@ export default function MittiCheckHub({ onNavigate }) {
             {byAuditor.map((a) => (
               <div key={a.name} className="border border-slate-200 rounded-xl p-4 hover:shadow-sm transition">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-[#2E5A1A]/10 text-[#2E5A1A] flex items-center justify-center font-bold text-sm flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
                     {a.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
@@ -253,7 +253,7 @@ export default function MittiCheckHub({ onNavigate }) {
         <div className="flex gap-1.5 px-5 pt-3 pb-1 overflow-x-auto no-scrollbar">
           {filterChips.map((c) => (
             <button key={c.key} onClick={() => setFilter(c.key)} type="button"
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${filter === c.key ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${filter === c.key ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
               {c.label}
             </button>
           ))}

@@ -160,10 +160,10 @@ function LogRow({ log, onSelectLog, bulkMode, bulkSelected, toggleBulkSelect, sh
   return (
     <button
       onClick={() => bulkMode ? toggleBulkSelect(log.id) : onSelectLog(log.id)}
-      className={`w-full text-left flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition hover:bg-slate-50 ${bulkSelected ? 'bg-[#2E5A1A]/10' : ''}`}
+      className={`w-full text-left flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition hover:bg-slate-50 ${bulkSelected ? 'bg-primary/10' : ''}`}
     >
       {bulkMode && (
-        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 bg-white'}`}>
+        <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected ? 'bg-primary border-primary' : 'border-slate-300 bg-white'}`}>
           {bulkSelected && <CheckCircle2 className="w-3 h-3 text-white" />}
         </span>
       )}
@@ -199,12 +199,12 @@ function StrataList({ logs, onSelectLog, bulkMode, bulkSelected, toggleBulkSelec
           <button
             key={log.id}
             onClick={() => bulkMode ? toggleBulkSelect(log.id) : onSelectLog(log.id)}
-            className={`w-full text-left flex items-stretch gap-0 rounded-lg overflow-hidden border border-slate-100 hover:shadow-sm transition ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A]/10' : ''}`}
+            className={`w-full text-left flex items-stretch gap-0 rounded-lg overflow-hidden border border-slate-100 hover:shadow-sm transition ${bulkSelected.has(log.id) ? 'bg-primary/10' : ''}`}
           >
             <div className="w-2 flex-shrink-0" style={{ background: strataColors[log.strata_descriptor] || '#94a3b8' }} />
             <div className="flex-1 px-3 py-2 flex items-center gap-2.5">
               {bulkMode && (
-                <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 bg-white'}`}>
+                <span className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected.has(log.id) ? 'bg-primary border-primary' : 'border-slate-300 bg-white'}`}>
                   {bulkSelected.has(log.id) && <CheckCircle2 className="w-3 h-3 text-white" />}
                 </span>
               )}
@@ -226,17 +226,17 @@ function RemarksList({ logs, onSelectLog, bulkMode, bulkSelected, toggleBulkSele
       {logs.map(log => {
         const rc = reviewStatusConfig[log.manager_review_status || 'pending'];
         return (
-          <div key={log.id} className={`rounded-lg border border-slate-100 p-3 ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A]/10' : 'bg-slate-50/50'}`}>
+          <div key={log.id} className={`rounded-lg border border-slate-100 p-3 ${bulkSelected.has(log.id) ? 'bg-primary/10' : 'bg-slate-50/50'}`}>
             <div className="flex items-center gap-2 mb-1.5">
               {bulkMode && (
-                <button onClick={() => toggleBulkSelect(log.id)} className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected.has(log.id) ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300 bg-white'}`}>
+                <button onClick={() => toggleBulkSelect(log.id)} className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${bulkSelected.has(log.id) ? 'bg-primary border-primary' : 'border-slate-300 bg-white'}`}>
                   {bulkSelected.has(log.id) && <CheckCircle2 className="w-3 h-3 text-white" />}
                 </button>
               )}
               <span className="text-xs font-semibold text-slate-700">{log.date ? format(new Date(log.date), 'EEEE, dd MMM yyyy') : '—'}</span>
               {log.start_time && log.end_time && <span className="text-[11px] text-slate-500">{log.start_time}–{log.end_time}</span>}
               <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${rc.badge}`}>{rc.label}</span>
-              <button onClick={() => onSelectLog(log.id)} className="ml-auto text-[11px] text-[#2E5A1A] font-semibold hover:underline">View →</button>
+              <button onClick={() => onSelectLog(log.id)} className="ml-auto text-[11px] text-primary font-semibold hover:underline">View →</button>
             </div>
             <p className="text-sm text-slate-700">{log.description || '—'}</p>
             {log.raw_remarks && log.raw_remarks !== log.description && (

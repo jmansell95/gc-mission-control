@@ -70,7 +70,7 @@ export default function RevenueVelocityWidget() {
       action={
         <button
           onClick={() => navigate('/investigation')}
-          className="text-[11px] font-semibold text-[#2E5A1A] hover:underline"
+          className="text-[11px] font-semibold text-primary hover:underline"
         >
           Details
         </button>
@@ -133,8 +133,8 @@ export default function RevenueVelocityWidget() {
 
           {/* Projected completion */}
           {projectedDate && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A]/5 to-[#8DC63F]/5 border border-[#2E5A1A]/10">
-              <Calendar className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gradient-to-r from-[#2E5A1A]/5 to-[#8DC63F]/5 border border-primary/10">
+              <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
               <div>
                 <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Projected Completion</p>
                 <p className="text-sm font-bold text-slate-800">

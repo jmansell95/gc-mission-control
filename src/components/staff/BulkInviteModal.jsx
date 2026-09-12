@@ -102,7 +102,7 @@ export default function BulkInviteModal({ onClose }) {
                   </ul>
                 </div>
               )}
-              <button onClick={onClose} className="w-full px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg font-semibold text-sm hover:bg-[#1c4a12] transition">Done</button>
+              <button onClick={onClose} className="w-full px-4 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition">Done</button>
             </div>
           ) : (
             <>
@@ -113,7 +113,7 @@ export default function BulkInviteModal({ onClose }) {
                   onChange={(e) => setEmails(e.target.value)}
                   rows={6}
                   placeholder={'john@example.com\njane@example.com\nbob@example.com'}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm font-mono"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm font-mono"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
                   One email per line, or comma-separated. {emailList.length} valid{invalidCount > 0 && <span className="text-red-500"> · {invalidCount} invalid</span>}
@@ -122,10 +122,10 @@ export default function BulkInviteModal({ onClose }) {
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Access Level</label>
                 <div className="flex gap-2">
-                  <button onClick={() => setRole('user')} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition ${role === 'user' ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-300 text-slate-600'}`}>
+                  <button onClick={() => setRole('user')} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition ${role === 'user' ? 'bg-primary text-white border-primary' : 'bg-white border-slate-300 text-slate-600'}`}>
                     User (Field Staff)
                   </button>
-                  <button onClick={() => setRole('admin')} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition ${role === 'admin' ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-300 text-slate-600'}`}>
+                  <button onClick={() => setRole('admin')} className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition ${role === 'admin' ? 'bg-primary text-white border-primary' : 'bg-white border-slate-300 text-slate-600'}`}>
                     Admin
                   </button>
                 </div>
@@ -133,7 +133,7 @@ export default function BulkInviteModal({ onClose }) {
               <button
                 onClick={handleInvite}
                 disabled={running || emailList.length === 0}
-                className="w-full px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg font-semibold text-sm hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {running ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending {emailList.length} invites…</> : <><UserPlus className="w-4 h-4" /> Send {emailList.length} Invite{emailList.length === 1 ? '' : 's'}</>}
               </button>

@@ -213,7 +213,7 @@ export default function SupplierSpendReport({ filters }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -252,7 +252,7 @@ export default function SupplierSpendReport({ filters }) {
           <button onClick={() => handleExportCsv(jobBreakdown, [
             { key: 'job_name', label: 'Job' }, { key: 'count', label: 'Items' }, { key: 'total', label: 'Spend' },
           ], `${drillSupplier.name}_by_job.csv`)}
-            className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 text-[#2E5A1A] text-xs font-semibold hover:bg-emerald-100 transition">
+            className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 text-primary text-xs font-semibold hover:bg-emerald-100 transition">
             <Download className="w-3.5 h-3.5" /> CSV
           </button>
         </div>
@@ -278,7 +278,7 @@ export default function SupplierSpendReport({ filters }) {
                 <p className="text-sm font-extrabold text-slate-900">{fmt0(j.total)}</p>
                 <p className="text-[10px] text-slate-400">{drillSupplier.total > 0 ? Math.round((j.total / drillSupplier.total) * 100) : 0}% of supplier</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] transition" />
+              <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition" />
             </motion.button>
           ))}
           {jobBreakdown.length === 0 && (
@@ -296,7 +296,7 @@ export default function SupplierSpendReport({ filters }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="hub-glass rounded-2xl p-4">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center"><Truck className="w-4 h-4" /></div>
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-primary flex items-center justify-center"><Truck className="w-4 h-4" /></div>
             <p className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</p>
           </div>
           <p className="text-2xl font-extrabold text-slate-900">{fmt0(grandTotal)}</p>
@@ -333,7 +333,7 @@ export default function SupplierSpendReport({ filters }) {
           <Download className="w-4 h-4" /> Export CSV
         </button>
         <button onClick={handleExportPdf} disabled={exporting === 'pdf'}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2E5A1A] hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-[#244715] text-white text-sm font-semibold transition disabled:opacity-50 shadow-sm">
           {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />} Export PDF
         </button>
       </div>
@@ -352,7 +352,7 @@ export default function SupplierSpendReport({ filters }) {
         <div className="flex bg-slate-100 rounded-xl p-0.5 flex-shrink-0 sm:ml-auto">
           {[{ id: 'total', label: 'Total' }, { id: 'monthly', label: 'Monthly' }, { id: 'weekly', label: 'Weekly' }].map(g => (
             <button key={g.id} onClick={() => setGrouping(g.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${grouping === g.id ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${grouping === g.id ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
               {g.label}
             </button>
           ))}
@@ -401,7 +401,7 @@ export default function SupplierSpendReport({ filters }) {
                     <td className="px-3 py-2.5 font-semibold text-slate-900">{r.name}</td>
                     <td className="px-3 py-2.5">{supplierCategoryPill(r.category) || <span className="text-xs text-slate-400">—</span>}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">{r.count}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums font-bold text-[#2E5A1A]">{fmt0(r.total)}</td>
+                    <td className="px-3 py-2.5 text-right tabular-nums font-bold text-primary">{fmt0(r.total)}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">{grandTotal > 0 ? Math.round((r.total / grandTotal) * 100) : 0}%</td>
                   </tr>
                 ))
@@ -410,12 +410,12 @@ export default function SupplierSpendReport({ filters }) {
             {supplierRows.length > 0 && (
               <tfoot>
                 <tr className="bg-[#8DC63F]/20 border-t-2 border-[#8DC63F]">
-                  <td className="px-4 py-2.5 font-bold text-[#2E5A1A]">TOTAL</td>
+                  <td className="px-4 py-2.5 font-bold text-primary">TOTAL</td>
                   <td></td>
                   <td></td>
-                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{supplierRows.reduce((s, r) => s + r.count, 0)}</td>
-                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">{fmt0(grandTotal)}</td>
-                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-[#2E5A1A]">100%</td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{supplierRows.reduce((s, r) => s + r.count, 0)}</td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">{fmt0(grandTotal)}</td>
+                  <td className="px-3 py-2.5 text-right font-bold tabular-nums text-primary">100%</td>
                 </tr>
               </tfoot>
             )}

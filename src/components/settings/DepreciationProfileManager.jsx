@@ -118,7 +118,7 @@ export default function DepreciationProfileManager() {
           </button>
           <button
             onClick={() => startEdit('new')}
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#244715] transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[#244715] transition"
           >
             <Plus className="w-4 h-4" /> New Profile
           </button>
@@ -127,7 +127,7 @@ export default function DepreciationProfileManager() {
 
       {/* Profile cards by asset type */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" /></div>
+        <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {ASSET_TYPES.map(at => {
@@ -228,12 +228,12 @@ export default function DepreciationProfileManager() {
               <FieldInput label="Description (optional)" value={form.description} onChange={v => setForm({ ...form, description: v })} />
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={!!form.is_default} onChange={e => setForm({ ...form, is_default: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                  className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Set as default for this asset type</span>
               </label>
               <div className="flex gap-2 pt-2">
                 <button onClick={handleSave} disabled={saveMutation.isPending}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50">
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50">
                   {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Save
                 </button>
                 <button onClick={() => setEditing(null)} className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
@@ -261,7 +261,7 @@ function FieldInput({ label, type = 'text', value, onChange, placeholder }) {
     <div>
       <label className="text-xs font-medium text-slate-600 mb-1 block">{label}</label>
       <input type={type} value={value || ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+        className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary" />
     </div>
   );
 }

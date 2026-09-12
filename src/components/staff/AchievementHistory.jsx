@@ -177,7 +177,7 @@ export default function AchievementHistory({ staffId }) {
             {weekGroups.map((group, gi) => (
               <div key={group.week} className="relative mb-5 last:mb-0">
                 {/* Week dot */}
-                <div className="absolute -left-3.5 top-1 w-3 h-3 rounded-full bg-[#2E5A1A] ring-2 ring-white shadow-sm" />
+                <div className="absolute -left-3.5 top-1 w-3 h-3 rounded-full bg-primary ring-2 ring-white shadow-sm" />
 
                 {/* Week header */}
                 <div className="flex items-center gap-2 mb-2">

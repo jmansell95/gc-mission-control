@@ -186,7 +186,7 @@ export default function BoreholeDetailModal({ boreholeRef, logs, jobType, jobId,
             {jobId && (
               <button
                 onClick={() => { onClose(); navigateToInvestigationHub(jobId, null, boreholeRef); }}
-                className="inline-flex items-center gap-1 text-[#2E5A1A] hover:text-[#1c4a12] font-medium transition"
+                className="inline-flex items-center gap-1 text-primary hover:text-primary/90 font-medium transition"
               >
                 <ExternalLink className="w-3 h-3" /> View in Investigation Hub
               </button>

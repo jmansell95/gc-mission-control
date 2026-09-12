@@ -93,7 +93,7 @@ function PhaseSection({ index, title, content, isDone, onToggle, defaultOpen }) 
       </button>
       {open && (
         <div className="px-4 sm:px-6 pb-6 pt-1 border-t border-slate-100">
-          <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h3:text-base prose-h3:mt-5 prose-h3:text-[#2E5A1A] prose-h4:text-sm prose-h4:font-semibold prose-h4:text-slate-700 prose-p:text-[15px] prose-p:leading-relaxed prose-li:text-[15px] prose-li:my-0.5 prose-a:text-[#2E5A1A] prose-strong:text-slate-900 prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-emerald-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-th:border prose-th:border-slate-200 prose-td:border prose-td:border-slate-200">
+          <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h3:text-base prose-h3:mt-5 prose-h3:text-primary prose-h4:text-sm prose-h4:font-semibold prose-h4:text-slate-700 prose-p:text-[15px] prose-p:leading-relaxed prose-li:text-[15px] prose-li:my-0.5 prose-a:text-primary prose-strong:text-slate-900 prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-emerald-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-th:border prose-th:border-slate-200 prose-td:border prose-td:border-slate-200">
             <ReactMarkdown
               components={{
                 code: CodeBlock,
@@ -206,7 +206,7 @@ export default function AzureMigrationPlan() {
             </button>
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#1c4a12] transition shadow-md"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition shadow-md"
               title="Download PDF"
             >
               <Printer className="w-4 h-4" />
@@ -255,7 +255,7 @@ export default function AzureMigrationPlan() {
             {/* Intro */}
             {intro && (
               <div className="hub-glass rounded-2xl p-5 sm:p-7">
-                <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-2xl prose-h1:text-slate-900 prose-h2:text-lg prose-h2:text-[#2E5A1A] prose-p:text-[15px] prose-p:leading-relaxed prose-strong:text-slate-900 prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-emerald-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-th:border prose-th:border-slate-200 prose-td:border prose-td:border-slate-200">
+                <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-h1:text-2xl prose-h1:text-slate-900 prose-h2:text-lg prose-h2:text-primary prose-p:text-[15px] prose-p:leading-relaxed prose-strong:text-slate-900 prose-blockquote:border-l-[#2E5A1A] prose-blockquote:bg-emerald-50/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-table:text-sm prose-th:bg-slate-50 prose-th:font-semibold prose-th:border prose-th:border-slate-200 prose-td:border prose-td:border-slate-200">
                   <ReactMarkdown
                     components={{
                       code: CodeBlock,
@@ -283,7 +283,7 @@ export default function AzureMigrationPlan() {
 
             {/* Footer note */}
             <div className="hub-glass rounded-2xl p-5 flex items-start gap-3 bg-emerald-50/40 border-emerald-200/60">
-              <ListChecks className="w-5 h-5 text-[#2E5A1A] flex-shrink-0 mt-0.5" />
+              <ListChecks className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <p className="text-sm text-slate-600 leading-relaxed">
                 Your progress is saved on this device. Tick each phase as you complete it —
                 the bar above tracks your overall migration. Take it one phase at a time.

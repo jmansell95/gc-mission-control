@@ -48,7 +48,7 @@ export default function TrackingConsentCard({ staff, onSignNow, onDecline, onDis
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border-2 border-[#2E5A1A]/15 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl border-2 border-primary/15 shadow-sm overflow-hidden"
     >
       {/* Brand header strip */}
       <div className="hero-gradient px-4 py-3 text-white flex items-center gap-2.5">
@@ -95,7 +95,7 @@ export default function TrackingConsentCard({ staff, onSignNow, onDecline, onDis
             Later
           </button>
           <button onClick={onSignNow}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold active:scale-95 transition touch-manipulation hover:bg-[#1c4a12]">
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-xl text-sm font-bold active:scale-95 transition touch-manipulation hover:bg-primary/90">
             <ShieldCheck className="w-4 h-4" />
             Sign Now
           </button>

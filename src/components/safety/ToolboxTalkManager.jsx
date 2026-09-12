@@ -30,7 +30,7 @@ const CATEGORY_COLORS = {
   other: 'bg-slate-50 text-slate-700 ring-slate-200',
 };
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 export default function ToolboxTalkManager() {
   const [showForm, setShowForm] = useState(false);
@@ -218,7 +218,7 @@ export default function ToolboxTalkManager() {
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     {talk.status === 'scheduled' && (
-                      <button onClick={() => markDelivered(talk)} className="inline-flex items-center gap-1 px-2.5 h-8 text-xs font-semibold text-white bg-[#2E5A1A] rounded-lg hover:bg-[#1c4a12] transition" title="Confirm attendance & deliver">
+                      <button onClick={() => markDelivered(talk)} className="inline-flex items-center gap-1 px-2.5 h-8 text-xs font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition" title="Confirm attendance & deliver">
                         <ClipboardCheck className="w-3.5 h-3.5" /> Deliver
                       </button>
                     )}

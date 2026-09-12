@@ -168,10 +168,10 @@ export default function EnterpriseAccessManager({ profile }) {
 
       {/* View toggle */}
       <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 w-fit">
-        <button onClick={() => setViewMode('groups')} className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' + (viewMode === 'groups' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+        <button onClick={() => setViewMode('groups')} className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' + (viewMode === 'groups' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
           <KeyRound className="w-3.5 h-3.5" /> Access Groups
         </button>
-        <button onClick={() => setViewMode('crews')} className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' + (viewMode === 'crews' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+        <button onClick={() => setViewMode('crews')} className={'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ' + (viewMode === 'crews' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
           <Users className="w-3.5 h-3.5" /> Crews
         </button>
       </div>
@@ -202,7 +202,7 @@ export default function EnterpriseAccessManager({ profile }) {
                 className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
               />
             </div>
-            <button onClick={() => setEditing({ name: '', description: '', is_read_only: false, permissions: defaultPermissions() })} className="inline-flex items-center gap-1 px-2.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition shadow-sm flex-shrink-0">
+            <button onClick={() => setEditing({ name: '', description: '', is_read_only: false, permissions: defaultPermissions() })} className="inline-flex items-center gap-1 px-2.5 py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition shadow-sm flex-shrink-0">
               <Plus className="w-3.5 h-3.5" /> New
             </button>
           </div>
@@ -304,11 +304,11 @@ function GroupListItem({ group, active, staffCount, overrideCount, onClick }) {
     <button
       onClick={onClick}
       className={'w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition ' +
-        (active ? 'bg-[#2E5A1A]/10 ring-1 ring-[#2E5A1A]/30' : 'hover:bg-slate-50')}
+        (active ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-slate-50')}
     >
       {group.is_system ? <Crown className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" /> : <Users className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />}
       <div className="min-w-0 flex-1">
-        <p className={'text-xs font-semibold truncate ' + (active ? 'text-[#2E5A1A]' : 'text-slate-700')}>{group.name}</p>
+        <p className={'text-xs font-semibold truncate ' + (active ? 'text-primary' : 'text-slate-700')}>{group.name}</p>
         <div className="flex items-center gap-2 text-[10px] text-slate-400">
           {staffCount > 0 && <span className="flex items-center gap-0.5"><Users className="w-2.5 h-2.5" />{staffCount}</span>}
           {overrideCount > 0 && <span className="flex items-center gap-0.5 text-amber-600"><Lock className="w-2.5 h-2.5" />{overrideCount}</span>}

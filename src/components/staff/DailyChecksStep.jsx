@@ -128,7 +128,7 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
       <div className="hub-glass rounded-2xl p-3.5">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <ClipboardCheck className="w-4 h-4 text-[#2E5A1A]" />
+            <ClipboardCheck className="w-4 h-4 text-primary" />
             <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">Daily Pre-Work Checks</p>
           </div>
           <span className="text-xs font-bold text-slate-600 tabular-nums">{progress}%</span>
@@ -160,14 +160,14 @@ export default function DailyChecksStep({ assignment, job, staff, onConfirm, sav
                   className="flex-shrink-0 mt-0.5 active:scale-90 transition"
                 >
                   {isChecked ? (
-                    <CheckCircle2 className="w-6 h-6 text-[#2E5A1A]" />
+                    <CheckCircle2 className="w-6 h-6 text-primary" />
                   ) : (
                     <Square className="w-6 h-6 text-slate-300 hover:text-slate-400" />
                   )}
                 </button>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={`text-sm font-medium ${isChecked ? 'text-[#2E5A1A]' : 'text-slate-800'}`}>
+                    <p className={`text-sm font-medium ${isChecked ? 'text-primary' : 'text-slate-800'}`}>
                       {item.label}
                     </p>
                     {isRequired && (

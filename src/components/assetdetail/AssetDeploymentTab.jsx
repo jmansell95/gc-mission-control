@@ -29,7 +29,7 @@ export default function AssetDeploymentTab({ asset, assignments = [], jobs = [],
       {/* Assign button */}
       <button
         onClick={onAssign}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#2E5A1A] text-white font-semibold text-sm hover:bg-[#244715] transition shadow-sm"
+        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-[#244715] transition shadow-sm"
       >
         <Briefcase className="w-4 h-4" /> Assign to Job
       </button>

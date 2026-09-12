@@ -62,13 +62,13 @@ export default function FieldHomeHub() {
         <motion.div variants={slideUp}>
           <div className="flex items-center justify-between mb-2.5">
             <h2 className="text-ui-subheading font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-[#2E5A1A]" />
+              <span className="w-1 h-5 rounded-full bg-primary" />
               My Day
             </h2>
             {todaysAssignments?.length > 1 && (
               <button
                 onClick={() => navigate('/today-schedule')}
-                className="text-xs font-bold text-[#2E5A1A] flex items-center gap-0.5 active:scale-95 transition"
+                className="text-xs font-bold text-primary flex items-center gap-0.5 active:scale-95 transition"
               >
                 {todaysAssignments.length} jobs <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -85,7 +85,7 @@ export default function FieldHomeHub() {
         {/* === Quick Actions === */}
         <motion.div variants={slideUp}>
           <h2 className="text-ui-subheading font-bold text-slate-800 flex items-center gap-2 mb-2.5">
-            <span className="w-1 h-5 rounded-full bg-[#2E5A1A]" />
+            <span className="w-1 h-5 rounded-full bg-primary" />
             Quick Actions
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -100,12 +100,12 @@ export default function FieldHomeHub() {
           <motion.div variants={slideUp}>
             <div className="flex items-center justify-between mb-2.5">
               <h2 className="text-ui-subheading font-bold text-slate-800 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-[#2E5A1A]" />
+                <span className="w-1 h-5 rounded-full bg-primary" />
                 Coming Up
               </h2>
               <button
                 onClick={() => navigate('/today-schedule')}
-                className="text-xs font-bold text-[#2E5A1A] flex items-center gap-0.5 active:scale-95 transition"
+                className="text-xs font-bold text-primary flex items-center gap-0.5 active:scale-95 transition"
               >
                 All <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -142,7 +142,7 @@ function PrimaryJobCard({ data, onClick }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-[10px] font-bold uppercase tracking-wide text-[#2E5A1A] bg-[#2E5A1A]/10 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded-full">
               {format(new Date(assignment.assigned_date + 'T00:00:00'), 'EEE dd MMM')}
             </span>
           </div>
@@ -168,9 +168,9 @@ function PrimaryJobCard({ data, onClick }) {
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-xs font-bold text-[#2E5A1A]">View today's schedule</span>
-        <div className="w-8 h-8 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center">
-          <ChevronRight className="w-4 h-4 text-[#2E5A1A]" />
+        <span className="text-xs font-bold text-primary">View today's schedule</span>
+        <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+          <ChevronRight className="w-4 h-4 text-primary" />
         </div>
       </div>
     </motion.button>

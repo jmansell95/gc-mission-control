@@ -269,7 +269,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
               <span className={`w-1.5 h-1.5 rounded-full ${isFetching ? 'bg-amber-400 animate-pulse' : 'bg-emerald-500'}`} />
               {isFetching ? 'Syncing…' : `Synced ${dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}`}
               <span className="text-slate-300">·</span>
-              <span className="text-[#2E5A1A] font-semibold">Auto 20s</span>
+              <span className="text-primary font-semibold">Auto 20s</span>
             </p>
           </div>
         </div>
@@ -283,7 +283,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
               { val: 'stopped', label: 'Stopped', count: stoppedCount },
             ].map(opt => (
               <button key={opt.val} onClick={() => setFilterMoving(opt.val)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterMoving === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition ${filterMoving === opt.val ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
                 {opt.val === 'moving' && <Zap className="w-3 h-3" />}
                 {opt.val === 'stopped' && <Clock className="w-3 h-3" />}
                 {opt.label}
@@ -302,7 +302,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               max={new Date().toISOString().slice(0, 10)}
-              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              className="px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
         )}
@@ -337,7 +337,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
         )}
 
         <button onClick={handleSync} disabled={syncing}
-          className="flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+          className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 disabled:opacity-50 transition">
           {syncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Sync
         </button>
         <button onClick={() => refetchLive()}
@@ -358,7 +358,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
         <div className="lg:col-span-2 hub-glass rounded-2xl overflow-hidden">
           {liveLoading && isLiveMode ? (
             <div className="flex flex-col items-center justify-center" style={{ height: 600 }}>
-              <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
               <p className="text-sm text-slate-500">Loading live vehicle locations…</p>
             </div>
           ) : trackedCount === 0 && isLiveMode ? (
@@ -370,7 +370,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
           ) : (
             <>
               <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-100 bg-slate-50/80">
-                <Satellite className="w-4 h-4 text-[#2E5A1A]" />
+                <Satellite className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-bold text-slate-800">
                   {isLiveMode ? 'Live Fleet Map' : `Route: ${selectedVehicle?.registration_number || ''}`}
                 </h3>
@@ -429,7 +429,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   <div className="absolute bottom-3 left-3 z-[1000] bg-white/95 backdrop-blur rounded-lg shadow-lg border border-slate-200 px-3 py-2 text-[10px] space-y-1 pointer-events-none">
                     <p className="font-bold text-slate-700 text-[11px] mb-1">Legend</p>
                     <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded-full bg-[#2E5A1A] border-2 border-white flex items-center justify-center">
+                      <div className="w-4 h-4 rounded-full bg-primary border-2 border-white flex items-center justify-center">
                         <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><path d="M3 6h13v9H3z"/><path d="M16 9h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
                       </div>
                       <span className="text-slate-600">Vehicle (engine on)</span>
@@ -451,7 +451,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
             /* Vehicle list (live mode) */
             <div className="hub-glass rounded-2xl overflow-hidden">
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Car className="w-4 h-4 text-[#2E5A1A]" /> Vehicles ({liveVehicles.length})</p>
+                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Car className="w-4 h-4 text-primary" /> Vehicles ({liveVehicles.length})</p>
                 <span className="text-[10px] text-slate-400 flex items-center gap-1"><Filter className="w-3 h-3" /> {filterMoving}</span>
               </div>
               <div className="max-h-[540px] overflow-y-auto divide-y divide-slate-50">
@@ -480,7 +480,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
               {/* Trip list + playback (history mode) */}
               {historyLoading ? (
                 <div className="hub-glass rounded-2xl p-8 flex flex-col items-center">
-                  <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin mb-2" />
+                  <Loader2 className="w-6 h-6 text-primary animate-spin mb-2" />
                   <p className="text-xs text-slate-500">Loading trip history…</p>
                 </div>
               ) : trips.length === 0 ? (
@@ -494,14 +494,14 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                   {/* Trip list */}
                   <div className="hub-glass rounded-2xl overflow-hidden">
                     <div className="px-4 py-3 border-b border-slate-100">
-                      <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Route className="w-4 h-4 text-[#2E5A1A]" /> Trips ({trips.length})</p>
+                      <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5"><Route className="w-4 h-4 text-primary" /> Trips ({trips.length})</p>
                       <p className="text-[10px] text-slate-400 mt-0.5">{selectedDate}</p>
                     </div>
                     <div className="max-h-[240px] overflow-y-auto divide-y divide-slate-50">
                       {trips.map((t, i) => (
                         <button key={i}
                           onClick={() => setSelectedTripIndex(i)}
-                          className={`w-full text-left px-4 py-2.5 transition ${selectedTripIndex === i ? 'bg-[#2E5A1A]/5 border-l-2 border-[#2E5A1A]' : 'hover:bg-slate-50'}`}>
+                          className={`w-full text-left px-4 py-2.5 transition ${selectedTripIndex === i ? 'bg-primary/5 border-l-2 border-primary' : 'hover:bg-slate-50'}`}>
                           <div className="flex items-center justify-between gap-2">
                             <div className="min-w-0">
                               <p className="text-xs font-bold text-slate-700 tabular-nums">
@@ -510,7 +510,7 @@ export default function LiveTrackingTab({ initialVehicleId }) {
                               </p>
                               <p className="text-[10px] text-slate-400">{(t.distance_km || 0).toFixed(1)} km · {t.duration_minutes || 0} min</p>
                             </div>
-                            {selectedTripIndex === i && <span className="w-2 h-2 rounded-full bg-[#2E5A1A]" />}
+                            {selectedTripIndex === i && <span className="w-2 h-2 rounded-full bg-primary" />}
                           </div>
                         </button>
                       ))}

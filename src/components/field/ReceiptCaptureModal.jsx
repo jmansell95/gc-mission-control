@@ -132,9 +132,9 @@ export default function ReceiptCaptureModal({ open, onClose, staff, assignment, 
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+                  <label className="flex flex-col items-center justify-center gap-2 w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:border-primary hover:bg-primary/5 transition">
                     {uploading ? (
-                      <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
                     ) : (
                       <>
                         <Camera className="w-7 h-7 text-slate-400" />
@@ -168,7 +168,7 @@ export default function ReceiptCaptureModal({ open, onClose, staff, assignment, 
                   <PoundSterling className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="number" min="0" step="0.01" value={amount} onChange={e => setAmount(e.target.value)}
                     placeholder="0.00" autoFocus
-                    className="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl text-lg font-bold text-slate-900 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10" />
+                    className="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl text-lg font-bold text-slate-900 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
                 </div>
               </div>
 
@@ -177,7 +177,7 @@ export default function ReceiptCaptureModal({ open, onClose, staff, assignment, 
                 <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">Description (optional)</label>
                 <input type="text" value={description} onChange={e => setDescription(e.target.value)}
                   placeholder="What was it for?"
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10" />
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
               </div>
 
               <ConcurReminderBanner compact />

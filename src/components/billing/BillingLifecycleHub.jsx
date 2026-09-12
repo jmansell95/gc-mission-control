@@ -170,7 +170,7 @@ export default function BillingLifecycleHub({ onSelectJob }) {
         </div>
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-wide font-medium">Total Collected Revenue</p>
-          <p className="text-2xl font-bold text-[#2E5A1A] tabular-nums">{fmt(totalValue)}</p>
+          <p className="text-2xl font-bold text-primary tabular-nums">{fmt(totalValue)}</p>
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export default function BillingLifecycleHub({ onSelectJob }) {
                         )}
                         {stage.id === 'ready' && (
                           <button onClick={() => onSelectJob?.(job)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-medium hover:bg-[#1c4a12] transition">
+                            className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition">
                             <Send className="w-3 h-3" /> Invoice
                           </button>
                         )}

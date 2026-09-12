@@ -129,27 +129,27 @@ export default function MittiSettings() {
 
       {/* Get Started guide — shown until the webhook secret is set */}
       {!isConfigured && (
-        <div className="rounded-xl border border-[#2E5A1A]/20 bg-gradient-to-br from-[#2E5A1A]/5 to-white p-5">
+        <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-[#2E5A1A]/5 to-white p-5">
           <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-5 h-5 text-[#2E5A1A]" />
+            <BookOpen className="w-5 h-5 text-primary" />
             <h3 className="font-bold text-slate-900">Get Started — 3 Steps</h3>
             <span className="ml-auto text-xs text-slate-400">Everything is built and ready — add your details when you have them</span>
           </div>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#2E5A1A] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div>
+              <div className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</div>
               <div className="text-sm text-slate-600">
                 <span className="font-semibold text-slate-800">Enter a webhook secret below</span> — any strong password-like string. You'll set the same value in Mitti.
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#2E5A1A] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div>
+              <div className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</div>
               <div className="text-sm text-slate-600">
                 <span className="font-semibold text-slate-800">Copy the Webhook Endpoint URL</span> below and add it in Mitti → Integrations → Webhooks, appending <code className="px-1 bg-slate-100 rounded">?webhook_secret=YOUR_SECRET</code>.
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-[#2E5A1A] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</div>
+              <div className="w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</div>
               <div className="text-sm text-slate-600">
                 <span className="font-semibold text-slate-800">Enable the receiver</span> and Save. Your API token can be added later for pull-based sync — the system is ready whenever you are.
               </div>
@@ -183,7 +183,7 @@ export default function MittiSettings() {
       {/* Config form */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Webhook className="w-4 h-4 text-[#2E5A1A]" />
+          <Webhook className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-slate-900">Webhook Configuration</h3>
           {isConfigured ? (
             <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700"><CheckCircle2 className="w-3 h-3" /> Secret set</span>
@@ -360,7 +360,7 @@ export default function MittiSettings() {
               Save Configuration
             </button>
             <button onClick={handleSyncNow} disabled={syncing || !form?.api_token}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-semibold hover:border-primary hover:text-primary transition disabled:opacity-50"
               title={!form?.api_token ? 'Add an API token first' : 'Pull recent audits from Mitti now'}>
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Sync Now

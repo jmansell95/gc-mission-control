@@ -77,13 +77,13 @@ export default function AuditTrailHub() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search by job name, reference, location or project manager..."
-              className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+              className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
             />
           </div>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 bg-white transition"
+            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white transition"
           >
             <option value="all">All statuses</option>
             <option value="planning">Planning</option>
@@ -103,7 +103,7 @@ export default function AuditTrailHub() {
       <div className="space-y-2">
         {isLoading && (
           <div className="text-center py-16">
-            <div className="inline-block w-8 h-8 border-4 border-[#2E5A1A]/20 border-t-[#2E5A1A] rounded-full animate-spin"></div>
+            <div className="inline-block w-8 h-8 border-4 border-primary/20 border-t-[#2E5A1A] rounded-full animate-spin"></div>
             <p className="text-sm text-slate-400 mt-3">Loading audit jobs…</p>
           </div>
         )}
@@ -134,7 +134,7 @@ export default function AuditTrailHub() {
                 className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-50/70 transition text-left"
               >
                 {isExpanded
-                  ? <ChevronDown className="w-5 h-5 text-[#2E5A1A] flex-shrink-0" />
+                  ? <ChevronDown className="w-5 h-5 text-primary flex-shrink-0" />
                   : <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -184,7 +184,7 @@ function StatTile({ label, value }) {
 function StatusBadge({ status }) {
   const styles = {
     planning: 'bg-blue-100 text-blue-700 border-blue-200',
-    in_progress: 'bg-[#2E5A1A]/15 text-[#2E5A1A] border-[#2E5A1A]/20',
+    in_progress: 'bg-primary/15 text-primary border-primary/20',
     decommissioning: 'bg-amber-100 text-amber-700 border-amber-200',
     completed: 'bg-slate-100 text-slate-600 border-slate-200',
     on_hold: 'bg-orange-100 text-orange-700 border-orange-200',
@@ -192,7 +192,7 @@ function StatusBadge({ status }) {
   };
   const dotColors = {
     planning: 'bg-blue-500',
-    in_progress: 'bg-[#2E5A1A]',
+    in_progress: 'bg-primary',
     decommissioning: 'bg-amber-500',
     completed: 'bg-slate-400',
     on_hold: 'bg-orange-500',

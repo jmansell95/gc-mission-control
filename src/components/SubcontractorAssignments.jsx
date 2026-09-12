@@ -29,7 +29,7 @@ const RATE_BASIS = [
   { val: 'item_cost', label: 'Item Cost' },
 ];
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 function computePurchaseCost(a) {
   const rate = parseFloat(a.purchase_rate) || 0;
@@ -94,10 +94,10 @@ export default function SubcontractorAssignments({ assignments, onChange, contra
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center gap-2 mb-1">
-        <Building2 className="w-4 h-4 text-[#2E5A1A]" />
+        <Building2 className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-slate-800">Subcontractor Assignments</h3>
         <button type="button" onClick={addAssignment}
-          className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition">
+          className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition">
           <Plus className="w-3.5 h-3.5" /> Add Subcontractor
         </button>
       </div>
@@ -122,7 +122,7 @@ export default function SubcontractorAssignments({ assignments, onChange, contra
           </div>
           <div className="text-center">
             <p className="text-[9px] text-slate-400 uppercase font-medium">Margin ({avgMarginPct.toFixed(0)}%)</p>
-            <p className="text-sm font-bold text-[#2E5A1A] tabular-nums">{fmt(totals.margin)}</p>
+            <p className="text-sm font-bold text-primary tabular-nums">{fmt(totals.margin)}</p>
           </div>
         </div>
       )}
@@ -328,7 +328,7 @@ function SubcontractorAssignmentCard({ assignment, index, onChange, onRemove, co
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase">Margin</p>
-                  <p className="text-sm font-bold text-[#2E5A1A] tabular-nums">{fmt(marginNet)} <span className="text-[10px] font-normal">({marginPct.toFixed(1)}%)</span></p>
+                  <p className="text-sm font-bold text-primary tabular-nums">{fmt(marginNet)} <span className="text-[10px] font-normal">({marginPct.toFixed(1)}%)</span></p>
                 </div>
               </div>
               {hasZeroMargin && (

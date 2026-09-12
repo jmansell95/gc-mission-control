@@ -264,7 +264,7 @@ function DeleteBusinessUnitModal({ bu, initialChildren, allDivisions, onCancel, 
                   <select
                     value=""
                     onChange={e => { const v = e.target.value; reassign(c.id, v === '__standalone__' ? null : v); }}
-                    className="text-xs font-semibold rounded-lg border border-slate-200 px-2 py-1.5 text-slate-700 focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100 outline-none"
+                    className="text-xs font-semibold rounded-lg border border-slate-200 px-2 py-1.5 text-slate-700 focus:border-primary focus:ring-2 focus:ring-emerald-100 outline-none"
                   >
                     <option value="">Reassign to…</option>
                     {otherBUs.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}

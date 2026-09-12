@@ -129,7 +129,7 @@ export default function AFPSummaryHeader({ afp, job, totals, lineItems, category
           </div>
           <div className="flex items-center gap-3 mt-1.5 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[10px] text-slate-500">
-              <span className="w-2 h-2 rounded-full bg-[#2E5A1A]" /> Agreed ({agreedPct}%)
+              <span className="w-2 h-2 rounded-full bg-primary" /> Agreed ({agreedPct}%)
             </span>
             <span className="inline-flex items-center gap-1 text-[10px] text-slate-500">
               <span className="w-2 h-2 rounded-full bg-emerald-400 opacity-60" /> Assessed ({assessedPct}%)

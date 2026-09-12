@@ -117,7 +117,7 @@ export default function AllRigsModal({ rigs, onClose }) {
               >
                 {/* Rank */}
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                  rank <= 3 ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'
+                  rank <= 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
                   {rank}
                 </div>
@@ -171,7 +171,7 @@ export default function AllRigsModal({ rigs, onClose }) {
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   <button
                     onClick={() => handleViewDetail(stat.rigId)}
-                    className="px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] transition flex items-center gap-1"
+                    className="px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 transition flex items-center gap-1"
                   >
                     <ExternalLink className="w-3 h-3" />
                     Detail

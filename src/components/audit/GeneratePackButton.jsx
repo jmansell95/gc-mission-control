@@ -80,7 +80,7 @@ export default function GeneratePackButton({ job, clientName }) {
                   className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 transition text-left disabled:opacity-50"
                 >
                   <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    {isGenerating ? <Loader2 className="w-4 h-4 text-[#2E5A1A] animate-spin" /> : <Icon className="w-4 h-4 text-[#2E5A1A]" />}
+                    {isGenerating ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Icon className="w-4 h-4 text-primary" />}
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-slate-900">{pt.label}</p>

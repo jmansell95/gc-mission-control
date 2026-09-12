@@ -108,18 +108,18 @@ function ReportCard({ title, icon: Icon, data, type, rows }) {
     <div className="hub-glass rounded-2xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#2E5A1A] flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-primary flex items-center justify-center flex-shrink-0">
             <Icon className="w-4 h-4" />
           </div>
           <h3 className="text-sm font-bold text-slate-900 truncate">{title}</h3>
         </div>
-        <button onClick={() => downloadCsv(title + '.csv', rows)} className="text-xs font-semibold text-[#2E5A1A] hover:underline flex-shrink-0">Export</button>
+        <button onClick={() => downloadCsv(title + '.csv', rows)} className="text-xs font-semibold text-primary hover:underline flex-shrink-0">Export</button>
       </div>
 
       <div className="h-64">
         {type === 'stat' ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-4xl font-extrabold text-[#2E5A1A] tabular-nums">£{Math.round(data[0]?.value || 0).toLocaleString()}</p>
+            <p className="text-4xl font-extrabold text-primary tabular-nums">£{Math.round(data[0]?.value || 0).toLocaleString()}</p>
           </div>
         ) : type === 'pie' ? (
           <ResponsiveContainer width="100%" height="100%">

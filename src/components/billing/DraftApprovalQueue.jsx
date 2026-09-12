@@ -219,7 +219,7 @@ export default function DraftApprovalQueue() {
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => toggleSelect(inv.id)}
-                    className="mt-1 w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A] flex-shrink-0 cursor-pointer"
+                    className="mt-1 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary flex-shrink-0 cursor-pointer"
                   />
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : inv.id)}
@@ -247,7 +247,7 @@ export default function DraftApprovalQueue() {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-bold text-[#2E5A1A] tabular-nums">{gbp(inv.gross_total)}</p>
+                    <p className="text-sm font-bold text-primary tabular-nums">{gbp(inv.gross_total)}</p>
                     <p className="text-[10px] text-slate-400">{(inv.line_items || []).length} {(inv.line_items || []).length === 1 ? 'line' : 'lines'}</p>
                   </div>
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -272,7 +272,7 @@ export default function DraftApprovalQueue() {
                     <button
                       onClick={() => approve(inv)}
                       disabled={busyId === inv.id || isEditing}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition disabled:opacity-50"
                     >
                       {busyId === inv.id
                         ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -292,7 +292,7 @@ export default function DraftApprovalQueue() {
                           <button
                             onClick={() => saveLines(inv)}
                             disabled={busyId === inv.id}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold bg-primary text-white rounded-lg hover:bg-primary/90 transition disabled:opacity-50"
                           >
                             {busyId === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                             Save
@@ -402,7 +402,7 @@ export default function DraftApprovalQueue() {
                                 : inv.vat_total)}
                             </td>
                           </tr>
-                          <tr className="text-[#2E5A1A]">
+                          <tr className="text-primary">
                             <td colSpan={3} className="px-3 py-2 text-right font-bold">Gross Total</td>
                             <td className="px-3 py-2 text-right font-extrabold tabular-nums">
                               {gbp(isEditing
@@ -426,10 +426,10 @@ export default function DraftApprovalQueue() {
       {selectedIds.length > 0 && !showBulkConfirm && (
         <div className="fixed bottom-0 left-0 right-0 z-40 animate-slide-up">
           <div className="mx-auto max-w-3xl m-4">
-            <div className="hub-glass rounded-2xl shadow-2xl border-[#2E5A1A]/20 px-5 py-3.5 flex items-center gap-4">
+            <div className="hub-glass rounded-2xl shadow-2xl border-primary/20 px-5 py-3.5 flex items-center gap-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center">
-                  <span className="text-sm font-extrabold text-[#2E5A1A]">{selectedIds.length}</span>
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-extrabold text-primary">{selectedIds.length}</span>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">{selectedIds.length} selected</p>
@@ -445,7 +445,7 @@ export default function DraftApprovalQueue() {
               </button>
               <button
                 onClick={() => setShowBulkConfirm(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition glow-brand"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-primary text-white hover:bg-primary/90 transition glow-brand"
               >
                 <Send className="w-3.5 h-3.5" />
                 Approve & Send All
@@ -466,7 +466,7 @@ export default function DraftApprovalQueue() {
               <div>
                 <h2 className="text-base font-bold text-slate-900">Approve & send {selectedIds.length} invoices?</h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  You're about to send <strong className="text-slate-900">{selectedIds.length}</strong> draft invoice{selectedIds.length === 1 ? '' : 's'} with a total value of <strong className="text-[#2E5A1A]">{gbp(selectedTotalGross)}</strong> to the respective clients. This cannot be undone.
+                  You're about to send <strong className="text-slate-900">{selectedIds.length}</strong> draft invoice{selectedIds.length === 1 ? '' : 's'} with a total value of <strong className="text-primary">{gbp(selectedTotalGross)}</strong> to the respective clients. This cannot be undone.
                 </p>
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function DraftApprovalQueue() {
               <button
                 onClick={bulkApprove}
                 disabled={bulkBusy}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50"
               >
                 {bulkBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {bulkBusy ? 'Sending…' : `Approve & Send ${selectedIds.length}`}

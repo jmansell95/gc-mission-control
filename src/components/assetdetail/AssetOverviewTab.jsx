@@ -92,7 +92,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
         {/* Identity card */}
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-            <Cog className="w-4 h-4 text-[#2E5A1A]" /> Identity
+            <Cog className="w-4 h-4 text-primary" /> Identity
           </h3>
           {asset.fleet_number && <InfoRow icon={Hash} label="FAA / Fleet No." value={asset.fleet_number} mono />}
           <InfoRow icon={Hash} label="Serial / Tag" value={asset.serial_number} mono />
@@ -118,7 +118,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
         {/* Compliance + Maintenance */}
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#2E5A1A]" /> Health
+            <Activity className="w-4 h-4 text-primary" /> Health
           </h3>
           <div className="flex flex-col items-center gap-4">
             <ComplianceCountdownRing expiryDate={asset.compliance_expiry_date} size={128} />
@@ -148,7 +148,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {(asset.make || asset.model || asset.length != null || asset.fuel_type || asset.condition || asset.hours_used != null) && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-[#2E5A1A]" /> Specifications
+            <Wrench className="w-4 h-4 text-primary" /> Specifications
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {asset.make && <SpecTile icon={Cog} label="Make" value={asset.make} />}
@@ -164,7 +164,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {/* Current deployment */}
       <div className="hub-glass rounded-2xl p-4">
         <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#2E5A1A]" /> Current Deployment
+          <MapPin className="w-4 h-4 text-primary" /> Current Deployment
         </h3>
         {currentDeployment && currentJob ? (
           <div className="flex items-center gap-3 bg-blue-50 rounded-xl p-3 border border-blue-100">
@@ -196,7 +196,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {asset.asset_type === 'rig' && linkedItems.length > 0 && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-            <Link2 className="w-4 h-4 text-[#2E5A1A]" /> Linked Equipment ({linkedItems.length})
+            <Link2 className="w-4 h-4 text-primary" /> Linked Equipment ({linkedItems.length})
           </h3>
           <div className="space-y-2">
             {linkedItems.map(item => {
@@ -241,7 +241,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {asset.tooling_notes && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-2 flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-[#2E5A1A]" /> Tooling Notes
+            <Wrench className="w-4 h-4 text-primary" /> Tooling Notes
           </h3>
           <p className="text-sm text-slate-600 whitespace-pre-wrap">{asset.tooling_notes}</p>
         </div>
@@ -251,7 +251,7 @@ export default function AssetOverviewTab({ asset, linkedItems = [], parentRig, c
       {asset.notes && (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-2 flex items-center gap-2">
-            <Database className="w-4 h-4 text-[#2E5A1A]" /> Notes
+            <Database className="w-4 h-4 text-primary" /> Notes
           </h3>
           <p className="text-sm text-slate-600 whitespace-pre-wrap">{asset.notes}</p>
         </div>

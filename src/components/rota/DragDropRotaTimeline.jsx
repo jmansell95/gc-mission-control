@@ -115,7 +115,7 @@ export default function DragDropRotaTimeline({ weekStart: propWeekStart }) {
       {/* Week navigation */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-[#2E5A1A]" />
+          <Calendar className="w-5 h-5 text-primary" />
           <h3 className="font-bold text-slate-800">Drag & Drop Rota</h3>
           <span className="text-xs text-slate-400">Week of {format(new Date(weekStart), 'dd MMM yyyy')}</span>
         </div>

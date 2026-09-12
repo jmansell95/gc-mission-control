@@ -115,7 +115,7 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
 
         {isLoading ? (
           <div className="flex flex-col items-center py-16">
-            <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mb-3" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
             <p className="text-sm text-slate-500">Fetching optimal routes from Google Maps…</p>
           </div>
         ) : (
@@ -165,7 +165,7 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
 
             {/* Legend */}
             <div className="flex flex-wrap items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5"><span className="w-4 h-1 rounded-full bg-[#2E5A1A]" /> Actual Driven</span>
+              <span className="flex items-center gap-1.5"><span className="w-4 h-1 rounded-full bg-primary" /> Actual Driven</span>
               <span className="flex items-center gap-1.5"><span className="w-4 h-0.5 border-t-2 border-dashed border-cyan-500" /> Google Optimal A→B</span>
               {stops.length > 0 && (
                 <button onClick={() => setShowStops(s => !s)} className="flex items-center gap-1.5">
@@ -178,8 +178,8 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
             {/* Summary tiles */}
             <div className="grid grid-cols-3 gap-2.5">
               <div className="hub-glass rounded-xl p-3">
-                <div className="flex items-center gap-1.5 mb-1"><Route className="w-3.5 h-3.5 text-[#2E5A1A]" /><p className="text-[10px] uppercase font-semibold text-slate-400">Actual</p></div>
-                <p className="text-lg font-bold text-[#2E5A1A] tabular-nums">{actualKm}<span className="text-xs font-normal"> km</span></p>
+                <div className="flex items-center gap-1.5 mb-1"><Route className="w-3.5 h-3.5 text-primary" /><p className="text-[10px] uppercase font-semibold text-slate-400">Actual</p></div>
+                <p className="text-lg font-bold text-primary tabular-nums">{actualKm}<span className="text-xs font-normal"> km</span></p>
                 <p className="text-[10px] text-slate-400 flex items-center gap-1"><Clock className="w-3 h-3" /> {comparison?.actual_duration_min || 0} min</p>
               </div>
               <div className="hub-glass rounded-xl p-3">
@@ -203,7 +203,7 @@ export default function RouteComparisonDialog({ trip, breadcrumbs = [], onClose 
 
             {/* Delta analysis */}
             <div className="hub-glass rounded-xl p-3">
-              <p className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Gauge className="w-3.5 h-3.5 text-[#2E5A1A]" /> Deviation Analysis</p>
+              <p className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Gauge className="w-3.5 h-3.5 text-primary" /> Deviation Analysis</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2">
                   {Number(deltaKm) > 0 ? (

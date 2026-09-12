@@ -74,7 +74,7 @@ export default function AFPTab({ job }) {
             {drillingItems.length > 0 && (
               <div className="hub-glass rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-slate-200 flex items-center gap-2">
-                  <Drill className="w-4 h-4 text-[#2E5A1A]" />
+                  <Drill className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-bold text-slate-900">Drilling Breakdown</h3>
                   <span className="text-[11px] text-slate-400">{drillingItems.length} items</span>
                 </div>

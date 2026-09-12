@@ -100,7 +100,7 @@ export default function DayDetailContent({ resource, dateStr, status, onClose, o
       {/* Assign button */}
       <button
         onClick={handleAssign}
-        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#2E5A1A] text-white text-sm font-bold hover:bg-[#1c4a12] transition shadow-sm"
+        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition shadow-sm"
       >
         <CalendarPlus className="w-4 h-4" /> Assign to Job
       </button>

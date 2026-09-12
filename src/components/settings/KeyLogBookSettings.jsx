@@ -61,7 +61,7 @@ export default function KeyLogBookSettings() {
       {/* Manual AGS upload */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <UploadCloud className="w-4 h-4 text-[#2E5A1A]" />
+          <UploadCloud className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Manual AGS Upload</h3>
           <span className="text-xs text-slate-400">— re-import a file or upload if auto-sync isn't set up</span>
         </div>

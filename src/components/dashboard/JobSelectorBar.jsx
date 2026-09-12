@@ -45,10 +45,10 @@ export default function JobSelectorBar({ onSelectJob }) {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setOpen(o => !o)}
-          className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 transition text-left bg-white text-slate-600 border-slate-200 hover:border-[#2E5A1A]/40 hover:bg-[#2E5A1A]/5"
+          className="w-full flex items-center gap-2.5 px-4 py-3 rounded-xl border-2 transition text-left bg-white text-slate-600 border-slate-200 hover:border-primary/40 hover:bg-primary/5"
         >
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#2E5A1A]/10">
-            <Briefcase className="w-5 h-5 text-[#2E5A1A]" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/10">
+            <Briefcase className="w-5 h-5 text-primary" />
           </div>
           <div className="text-left flex-1 min-w-0">
             <p className="text-ui-body font-bold leading-tight">Find a Job</p>
@@ -68,7 +68,7 @@ export default function JobSelectorBar({ onSelectJob }) {
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search by name, location or reference…"
-                  className="w-full pl-9 pr-3 py-2 text-ui-body bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:border-[#2E5A1A] focus:bg-white"
+                  className="w-full pl-9 pr-3 py-2 text-ui-body bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:border-primary focus:bg-white"
                 />
               </div>
             </div>
@@ -81,7 +81,7 @@ export default function JobSelectorBar({ onSelectJob }) {
                   <button
                     key={j.id}
                     onClick={() => handleSelect(j)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#2E5A1A]/5 transition text-left border-b border-slate-50 last:border-0"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-primary/5 transition text-left border-b border-slate-50 last:border-0"
                   >
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${st.dot}`} />
                     <div className="flex-1 min-w-0">

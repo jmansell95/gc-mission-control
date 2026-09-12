@@ -84,7 +84,7 @@ export default function AssetFinancialTab({ asset }) {
       {depreciationData.length > 0 ? (
         <div className="hub-glass rounded-2xl p-4">
           <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-            <TrendingDown className="w-4 h-4 text-[#2E5A1A]" /> Depreciation Schedule
+            <TrendingDown className="w-4 h-4 text-primary" /> Depreciation Schedule
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={depreciationData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>

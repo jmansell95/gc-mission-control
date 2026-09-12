@@ -88,7 +88,7 @@ export default function DepreciationScheduleTable({ asset }) {
       <div className="hub-glass rounded-2xl p-6 text-center">
         <TrendingDown className="w-8 h-8 text-slate-300 mx-auto mb-2" />
         <p className="text-sm text-slate-400">No depreciation data — set acquisition cost and date to begin.</p>
-        <button onClick={() => setEditing(true)} className="mt-3 inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold">
+        <button onClick={() => setEditing(true)} className="mt-3 inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-semibold">
           <Edit3 className="w-3.5 h-3.5" /> Configure Depreciation
         </button>
       </div>
@@ -102,13 +102,13 @@ export default function DepreciationScheduleTable({ asset }) {
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
-          <TrendingDown className="w-4 h-4 text-[#2E5A1A]" />
+          <TrendingDown className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-extrabold text-slate-900">Depreciation Schedule</h3>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{meta.label}</span>
         </div>
         {editing ? (
           <div className="flex gap-1">
-            <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold disabled:opacity-50">
+            <button onClick={handleSave} disabled={saving} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold disabled:opacity-50">
               {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Save
             </button>
             <button onClick={() => setEditing(false)} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
@@ -134,7 +134,7 @@ export default function DepreciationScheduleTable({ asset }) {
             <div className="flex gap-1.5 flex-wrap">
               {METHODS.map(m => (
                 <button key={m.id} onClick={() => setForm({ ...form, depreciation_method: m.id })}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${form.depreciation_method === m.id ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${form.depreciation_method === m.id ? 'bg-primary text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                   {m.label}
                 </button>
               ))}
@@ -222,7 +222,7 @@ function EditField({ label, type, value, onChange }) {
     <div>
       <label className="text-[10px] font-semibold text-slate-500 uppercase mb-1 block">{label}</label>
       <input type={type} value={value || ''} onChange={e => onChange(e.target.value)}
-        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+        className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary" />
     </div>
   );
 }

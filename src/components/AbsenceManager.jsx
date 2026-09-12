@@ -235,12 +235,12 @@ export default function AbsenceManager() {
             <div className="flex gap-1.5 flex-wrap">
               {['all', 'pending', 'approved', 'rejected'].map(f => (
                 <button key={f} onClick={() => setStatusFilter(f)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition capitalize ${statusFilter === f ? 'bg-[#2E5A1A] text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition capitalize ${statusFilter === f ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
                   {f}
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
+            <button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium">
               <Plus className="w-4 h-4" /> Log Absence
             </button>
           </div>
@@ -280,7 +280,7 @@ export default function AbsenceManager() {
                   </div>
                 </div>
                 <div className="flex gap-2 pt-1">
-                  <button type="submit" className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm">Submit Request</button>
+                  <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium text-sm">Submit Request</button>
                   <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
                 </div>
               </form>
@@ -380,7 +380,7 @@ export default function AbsenceManager() {
                 <Sparkles className="w-4 h-4" /> {bulkLoading ? 'Adding…' : 'Add Weekends for All Staff'}
               </button>
             </div>
-            <button onClick={() => setShowRecurringForm(!showRecurringForm)} className="flex items-center gap-2 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-medium">
+            <button onClick={() => setShowRecurringForm(!showRecurringForm)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-medium">
               <Plus className="w-4 h-4" /> Add Recurring Day Off
             </button>
           </div>
@@ -408,7 +408,7 @@ export default function AbsenceManager() {
                   <div className="flex flex-wrap gap-2">
                     {DAY_LABELS.map((label, d) => (
                       <button type="button" key={d} onClick={() => toggleDay(d)}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#5A8C1E]'}`}>
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition ${recurringForm.days_of_week.includes(d) ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:border-[#5A8C1E]'}`}>
                         {label}
                       </button>
                     ))}
@@ -416,7 +416,7 @@ export default function AbsenceManager() {
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button type="submit" disabled={!recurringForm.staff_id || recurringForm.days_of_week.length === 0}
-                    className="px-4 py-2 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition font-medium text-sm disabled:opacity-50">Save</button>
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition font-medium text-sm disabled:opacity-50">Save</button>
                   <button type="button" onClick={() => setShowRecurringForm(false)} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium text-sm">Cancel</button>
                 </div>
               </form>

@@ -15,7 +15,7 @@ function inputClass(hasError) {
   return 'mt-1 w-full px-3 py-2.5 rounded-xl border outline-none text-sm font-medium transition ' +
     (hasError
       ? 'border-rose-300 ring-1 ring-rose-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100'
-      : 'border-slate-200 focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10');
+      : 'border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10');
 }
 
 /* ───────────────────────── Step 1: Identity ───────────────────────── */
@@ -100,10 +100,10 @@ export function StepHubs({ form, setForm }) {
           const tabs = HUB_TABS[h] || [];
           const hubTabs = form.enabled_tabs?.[h] || [];
           return (
-            <div key={h} className={'rounded-xl border-2 transition ' + (enabled ? 'border-[#2E5A1A] bg-emerald-50/30' : 'border-slate-200')}>
+            <div key={h} className={'rounded-xl border-2 transition ' + (enabled ? 'border-primary bg-emerald-50/30' : 'border-slate-200')}>
               <button type="button" onClick={() => toggleHub(h)} className="w-full flex items-center justify-between p-3 text-left">
                 <div className="flex items-center gap-2.5">
-                  <span className={'w-5 h-5 rounded-md flex items-center justify-center transition flex-shrink-0 ' + (enabled ? 'bg-[#2E5A1A]' : 'bg-slate-200')}>
+                  <span className={'w-5 h-5 rounded-md flex items-center justify-center transition flex-shrink-0 ' + (enabled ? 'bg-primary' : 'bg-slate-200')}>
                     {enabled && <Check className="w-3 h-3 text-white" />}
                   </span>
                   <div>
@@ -112,7 +112,7 @@ export function StepHubs({ form, setForm }) {
                   </div>
                 </div>
                 {enabled && tabs.length > 0 && (
-                  <span className="text-[10px] font-bold text-[#2E5A1A] bg-[#2E5A1A]/10 px-2 py-0.5 rounded-full flex-shrink-0">{hubTabs.length}/{tabs.length} tabs</span>
+                  <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">{hubTabs.length}/{tabs.length} tabs</span>
                 )}
               </button>
               {enabled && tabs.length > 0 && (
@@ -120,7 +120,7 @@ export function StepHubs({ form, setForm }) {
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Tabs in this hub</span>
                     <button type="button" onClick={() => toggleAllTabs(h, hubTabs.length < tabs.length)}
-                      className="text-[10px] font-semibold text-[#2E5A1A] hover:underline">
+                      className="text-[10px] font-semibold text-primary hover:underline">
                       {hubTabs.length < tabs.length ? 'Select all' : 'Deselect all'}
                     </button>
                   </div>
@@ -130,7 +130,7 @@ export function StepHubs({ form, setForm }) {
                       return (
                         <button key={t.id} type="button" onClick={() => toggleTab(h, t.id)}
                           className={'inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition ' +
-                            (tabOn ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>
+                            (tabOn ? 'bg-primary text-white border-primary' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')}>
                           {tabOn && <Check className="w-3 h-3" />}
                           {t.label}
                         </button>

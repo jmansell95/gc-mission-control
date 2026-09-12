@@ -186,7 +186,7 @@ export default function MissingRatesWidget() {
                           value={rateForm.price}
                           onChange={e => setRateForm({ ...rateForm, price: e.target.value })}
                           placeholder="250.00"
-                          className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary"
                         />
                       </div>
                       <div>
@@ -197,14 +197,14 @@ export default function MissingRatesWidget() {
                           value={rateForm.cost_price}
                           onChange={e => setRateForm({ ...rateForm, cost_price: e.target.value })}
                           placeholder="180.00"
-                          className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]"
+                          className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary"
                         />
                       </div>
                     </div>
                     <button
                       onClick={() => handleQuickAdd(s)}
                       disabled={saving}
-                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-primary/90 disabled:opacity-50 transition"
                     >
                       {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                       Save Personal Day Rate

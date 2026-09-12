@@ -30,7 +30,7 @@ export default function IdleVehiclesWidget() {
         </div>
         <div className="flex items-center gap-2">
           <select value={threshold} onChange={e => setThreshold(Number(e.target.value))}
-            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-primary">
             <option value={14}>14 days</option>
             <option value={30}>30 days</option>
             <option value={60}>60 days</option>

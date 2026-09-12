@@ -119,7 +119,7 @@ export default function AssetComplianceReport() {
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-bold text-slate-900 flex items-center gap-2"><FileCheck2 className="w-5 h-5 text-[#2E5A1A]" /> LOLER / PUWER / PAT Compliance Report</h3>
+          <h3 className="font-bold text-slate-900 flex items-center gap-2"><FileCheck2 className="w-5 h-5 text-primary" /> LOLER / PUWER / PAT Compliance Report</h3>
           <p className="text-sm text-slate-500 mt-0.5">Full asset compliance register with expiry tracking — print or email for audits and HSE submissions.</p>
         </div>
         <div className="flex gap-2">
@@ -128,7 +128,7 @@ export default function AssetComplianceReport() {
             <Printer className="w-4 h-4" /> Print
           </button>
           <button onClick={openEmail} disabled={isLoading}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
             <Mail className="w-4 h-4" /> Email
           </button>
         </div>
@@ -153,12 +153,12 @@ export default function AssetComplianceReport() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-4">
         <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
-          className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2E5A1A]">
+          className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-primary">
           <option value="all">All Categories</option>
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-[#2E5A1A]">
+          className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white focus:outline-none focus:border-primary">
           <option value="all">All Statuses</option>
           {Object.entries(STATUS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
@@ -220,23 +220,23 @@ export default function AssetComplianceReport() {
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={() => !sending && setEmailOpen(false)}>
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-5" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-slate-900 flex items-center gap-2"><Mail className="w-5 h-5 text-[#2E5A1A]" /> Email Compliance Report</h3>
+              <h3 className="font-bold text-slate-900 flex items-center gap-2"><Mail className="w-5 h-5 text-primary" /> Email Compliance Report</h3>
               <button onClick={() => !sending && setEmailOpen(false)} className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"><X className="w-5 h-5" /></button>
             </div>
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Recipient (registered app user)</label>
                 <input type="email" value={recipient} onChange={e => setRecipient(e.target.value)} placeholder="name@example.com"
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100" />
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Subject</label>
                 <input type="text" value={subject} onChange={e => setSubject(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-emerald-100" />
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-emerald-100" />
               </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={handleSendEmail} disabled={sending || !recipient.trim()}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl hover:bg-[#1c4a12] transition text-sm font-semibold disabled:opacity-50">
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 transition text-sm font-semibold disabled:opacity-50">
                   <Send className="w-3.5 h-3.5" /> {sending ? 'Sending…' : 'Send Report'}
                 </button>
                 <button onClick={() => !sending && setEmailOpen(false)} disabled={sending}

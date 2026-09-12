@@ -103,7 +103,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
                 <p className="text-sm font-semibold text-slate-800">Profile Photo</p>
                 <p className="text-xs text-slate-500 mt-0.5">Shown in the sidebar and on your profile.</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold cursor-pointer hover:brightness-110 transition">
                     <Camera className="w-3.5 h-3.5" />
                     {form.avatar_url ? 'Change' : 'Upload'}
                     <input type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
@@ -123,7 +123,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
           {/* Read-only identity fields */}
           <div className="hub-glass rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-2.5 mb-1">
-              <ShieldCheck className="w-4 h-4 text-[#2E5A1A]" />
+              <ShieldCheck className="w-4 h-4 text-primary" />
               <p className="text-sm font-semibold text-slate-700">Identity</p>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
@@ -148,7 +148,7 @@ export default function StaffProfileEditDrawer({ open, onOpenChange, staff }) {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="07XXX XXX XXX"
-                className="w-full px-3.5 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+                className="w-full px-3.5 py-3 border border-slate-300 rounded-lg text-base sm:text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
               />
             </div>
 

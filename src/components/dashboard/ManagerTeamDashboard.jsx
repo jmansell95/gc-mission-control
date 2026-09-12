@@ -164,13 +164,13 @@ export default function ManagerTeamDashboard() {
 
             {selectedStaffId === s.id && (
               <div className="mt-3 pt-3 border-t border-slate-100 space-y-1.5 animate-slide-up">
-                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-[#2E5A1A]">
+                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-primary">
                   Open staff profile <ChevronRight className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}&tab=timesheets`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-[#2E5A1A]">
+                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}&tab=timesheets`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-primary">
                   Review timesheets <ChevronRight className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}&tab=compliance`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-[#2E5A1A]">
+                <button onClick={(e) => { e.stopPropagation(); window.location.href = `/staff?staff=${s.id}&tab=compliance`; }} className="flex items-center justify-between w-full text-xs font-semibold text-slate-600 hover:text-primary">
                   View compliance <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>

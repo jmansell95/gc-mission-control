@@ -58,7 +58,7 @@ export default function FieldCommsButton() {
         )}
         {/* Pulse ring for attention */}
         {unreadCount > 0 && (
-          <span className="absolute inset-0 rounded-2xl bg-[#2E5A1A] animate-ping opacity-20" style={{ animationDuration: '2s' }} />
+          <span className="absolute inset-0 rounded-2xl bg-primary animate-ping opacity-20" style={{ animationDuration: '2s' }} />
         )}
       </button>
 

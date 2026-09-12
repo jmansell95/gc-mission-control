@@ -178,7 +178,7 @@ export default function JobScheduleOverview({ job, primaryType, assignedStaff, r
                                     const rig = rigs.find(g => g.id === rota.rig_asset_id);
                                     return (
                                       <button key={rota.id} onClick={() => member && setSelectedMember(member)}
-                                        className="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs shadow-sm hover:shadow-md hover:border-[#2E5A1A]/30 transition text-left min-w-[200px]">
+                                        className="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs shadow-sm hover:shadow-md hover:border-primary/30 transition text-left min-w-[200px]">
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                           <User className="w-3.5 h-3.5 text-slate-400" />
                                           <span className="font-semibold text-slate-800">{member?.name || 'Unknown'}</span>
@@ -187,7 +187,7 @@ export default function JobScheduleOverview({ job, primaryType, assignedStaff, r
                                           {rota.status === 'started' && <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium"><PlayCircle className="w-3 h-3" /> Started</span>}
                                           {rota.status === 'completed' && <span className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium"><CheckCircle2 className="w-3 h-3" /> Done</span>}
                                         </div>
-                                        {rig && <div className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-[#2E5A1A]"><Cog className="w-3 h-3" /> {rig.name}</div>}
+                                        {rig && <div className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-primary"><Cog className="w-3 h-3" /> {rig.name}</div>}
                                         {rota.progress_notes && <div className="flex items-start gap-1.5 mt-1.5 pl-5"><MessageSquare className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /><p className="text-slate-500 leading-relaxed">{rota.progress_notes}</p></div>}
                                       </button>
                                     );

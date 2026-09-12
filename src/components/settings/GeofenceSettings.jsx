@@ -8,7 +8,7 @@ import {
 import SettingsSectionHeader from '@/components/SettingsSectionHeader';
 import { useToast } from '@/components/ui/use-toast';
 
-const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 
 const DEFAULT_CONFIG = {
   enabled: true,
@@ -106,7 +106,7 @@ export default function GeofenceSettings() {
       {/* Radius configuration */}
       <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-[#2E5A1A]" />
+          <MapPin className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-slate-800">Default Geofence Radius</h3>
         </div>
         <p className="text-xs text-slate-500">
@@ -131,7 +131,7 @@ export default function GeofenceSettings() {
               onClick={() => setConfig({ ...config, default_radius_meters: r })}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
                 config.default_radius_meters === r
-                  ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]'
+                  ? 'bg-primary text-white border-primary'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -154,7 +154,7 @@ export default function GeofenceSettings() {
             onChange={(e) => setConfig({ ...config, auto_arrival_on_rota: e.target.checked })}
             className="w-4 h-4 accent-[#2E5A1A]"
           />
-          <LogIn className="w-4 h-4 text-[#2E5A1A]" />
+          <LogIn className="w-4 h-4 text-primary" />
           <div>
             <p className="text-sm font-medium text-slate-700">Auto check-in on arrival</p>
             <p className="text-[11px] text-slate-400">When a vehicle enters its assigned job's geofence, automatically set "arrived on site" on the crew's rota assignment — no manual check-in needed.</p>
@@ -196,11 +196,11 @@ export default function GeofenceSettings() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition"
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Settings
           </button>
-          {saved && <span className="text-sm text-[#2E5A1A] font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
+          {saved && <span className="text-sm text-primary font-medium flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span>}
           <button
             onClick={handleTestBatch}
             disabled={testing}

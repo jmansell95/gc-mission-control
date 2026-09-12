@@ -89,9 +89,9 @@ export default function IncidentTimelineTab({ onReportIncident }) {
         <div className="flex flex-wrap gap-2 mb-3">
           <div className="relative flex-1 min-w-[160px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]" />
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-primary" />
           </div>
-          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary">
             <option value="all">All types</option>
             <option value="failure">Failed Audits</option>
             <option value="near_miss">Near Miss</option>
@@ -100,14 +100,14 @@ export default function IncidentTimelineTab({ onReportIncident }) {
             <option value="dangerous_occurrence">Dangerous Occurrence</option>
             <option value="environmental">Environmental</option>
           </select>
-          <select value={severityFilter} onChange={e => setSeverityFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+          <select value={severityFilter} onChange={e => setSeverityFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary">
             <option value="all">All severities</option>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
             <option value="critical">Critical</option>
           </select>
-          <select value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+          <select value={dateFilter} onChange={e => setDateFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary">
             <option value="all">All dates</option>
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>

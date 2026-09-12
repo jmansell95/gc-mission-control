@@ -256,7 +256,7 @@ export default function ImportDashboard() {
           {/* Active-only status filter info */}
           <div className="hub-glass rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Filter className="w-4 h-4 text-[#2E5A1A]" />
+              <Filter className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-bold text-slate-800">Status Filter</h3>
               <span className="text-xs text-slate-400 ml-auto">
                 {activeOnly ? 'Only active jobs (planning + in-progress) will be imported' : 'All statuses will be imported'}

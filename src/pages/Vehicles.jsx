@@ -184,11 +184,11 @@ export default function Vehicles({ focusVehicleId }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by reg, name, VIN or driver..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10" />
+              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <button onClick={() => setShowNumbers(true)} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition"><PhoneCall className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Numbers</span></button>
-            <button onClick={() => navigate('/admin', { state: { section: 'settings', settingsTab: 'vehicles' } })} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-[#2E5A1A] hover:text-[#2E5A1A] transition"><ExternalLink className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Settings</span></button>
+            <button onClick={() => setShowNumbers(true)} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-primary hover:text-primary transition"><PhoneCall className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Numbers</span></button>
+            <button onClick={() => navigate('/admin', { state: { section: 'settings', settingsTab: 'vehicles' } })} className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg font-semibold text-xs hover:border-primary hover:text-primary transition"><ExternalLink className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Settings</span></button>
           </div>
         </div>
         {/* Filter button groups — scrollable on mobile */}
@@ -202,7 +202,7 @@ export default function Vehicles({ focusVehicleId }) {
               { val: 'unknown', label: 'Not Synced' },
             ].map(opt => (
               <button key={opt.val} onClick={() => setStatusFilter(opt.val)}
-                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${statusFilter === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${statusFilter === opt.val ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
                 {opt.label}
               </button>
             ))}
@@ -215,7 +215,7 @@ export default function Vehicles({ focusVehicleId }) {
               { val: 'both', label: 'Both' },
             ].map(opt => (
               <button key={opt.val} onClick={() => setSourceFilter(opt.val)}
-                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${sourceFilter === opt.val ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}>
+                className={`px-3 py-1.5 rounded-md text-sm font-semibold transition whitespace-nowrap ${sourceFilter === opt.val ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
                 {opt.label}
               </button>
             ))}

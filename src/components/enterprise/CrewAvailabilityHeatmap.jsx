@@ -64,12 +64,12 @@ export default function CrewAvailabilityHeatmap() {
       <div className="mb-4 p-3 rounded-xl bg-gradient-to-br from-slate-50 to-blue-50/30 border border-slate-100">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <Cog className="w-3.5 h-3.5 text-[#2E5A1A]" />
+            <Cog className="w-3.5 h-3.5 text-primary" />
             <span className="text-xs font-bold text-slate-700">Rigs in the Field Today</span>
           </div>
           <button
             onClick={() => navigate('/enterprise/crew-availability')}
-            className="text-[10px] font-bold text-[#2E5A1A] hover:underline flex items-center gap-0.5"
+            className="text-[10px] font-bold text-primary hover:underline flex items-center gap-0.5"
           >
             View Heatmap <ArrowRight className="w-3 h-3" />
           </button>

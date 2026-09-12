@@ -151,7 +151,7 @@ export default function BulkTrainingImportModal({ onClose }) {
     setCommitting(false);
   };
 
-  const inputCls = 'w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10';
+  const inputCls = 'w-full px-2.5 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/60 backdrop-blur-md p-4" onClick={onClose}>
@@ -177,19 +177,19 @@ export default function BulkTrainingImportModal({ onClose }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">1. Select Crew ({selectedStaffIds.length})</p>
-              <button onClick={toggleAll} className="text-[11px] font-semibold text-[#2E5A1A] hover:underline">
+              <button onClick={toggleAll} className="text-[11px] font-semibold text-primary hover:underline">
                 {allSelected ? 'Clear all' : 'Select all'}
               </button>
             </div>
             <input value={staffSearch} onChange={e => setStaffSearch(e.target.value)} placeholder="Search crew…"
-              className="w-full px-3 py-2 mb-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A]" />
+              className="w-full px-3 py-2 mb-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-primary" />
             <div className="max-h-32 overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-50">
               {filteredStaff.slice(0, 50).map(s => {
                 const checked = selectedStaffIds.includes(s.id);
                 return (
                   <button key={s.id} onClick={() => toggleStaff(s.id)}
-                    className={'w-full flex items-center gap-2.5 p-2 text-left transition ' + (checked ? 'bg-[#2E5A1A]/5' : 'hover:bg-slate-50')}>
-                    <div className={'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ' + (checked ? 'bg-[#2E5A1A] border-[#2E5A1A]' : 'border-slate-300')}>
+                    className={'w-full flex items-center gap-2.5 p-2 text-left transition ' + (checked ? 'bg-primary/5' : 'hover:bg-slate-50')}>
+                    <div className={'w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ' + (checked ? 'bg-primary border-primary' : 'border-slate-300')}>
                       {checked && <CheckCircle2 className="w-3 h-3 text-white" />}
                     </div>
                     <span className="text-xs font-medium text-slate-700 truncate">{s.name}</span>
@@ -202,9 +202,9 @@ export default function BulkTrainingImportModal({ onClose }) {
           {/* Step 2: Upload files */}
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">2. Upload Certificates</p>
-            <label className="flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-[#2E5A1A] hover:bg-[#2E5A1A]/5 transition">
+            <label className="flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition">
               <input type="file" className="hidden" multiple accept="image/*,application/pdf" onChange={e => handleFileSelect(e.target.files)} />
-              {uploading ? <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" /> : <Upload className="w-6 h-6 text-slate-400" />}
+              {uploading ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : <Upload className="w-6 h-6 text-slate-400" />}
               <p className="text-sm font-medium text-slate-600">{uploading ? 'Uploading…' : 'Drop certificate files here or click to browse'}</p>
               <p className="text-[10px] text-slate-400">Images or PDFs · AI will detect type, name, dates, provider</p>
             </label>
@@ -289,7 +289,7 @@ export default function BulkTrainingImportModal({ onClose }) {
             <button onClick={onClose} className="px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Cancel</button>
             {results && (
               <button onClick={handleCommit} disabled={committing || results.results.length === 0}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition">
                 {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 {committing ? 'Committing…' : `Commit ${results.results.length} Record${results.results.length !== 1 ? 's' : ''}`}
               </button>

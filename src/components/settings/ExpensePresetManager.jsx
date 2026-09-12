@@ -22,7 +22,7 @@ const CATEGORIES = [
 const ICON_OPTIONS = ['Fuel', 'Coffee', 'Package', 'Car', 'Wrench', 'Receipt', 'FileText', 'PoundSterling'];
 const COLOR_OPTIONS = ['amber', 'emerald', 'blue', 'violet', 'rose', 'cyan', 'slate'];
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 /**
  * ExpensePresetManager — admin CRUD for mobile quick-add expense presets.
@@ -85,7 +85,7 @@ export default function ExpensePresetManager() {
         icon={Receipt}
         title="Expense Presets"
         description="Quick-add buttons shown to crews on the End-of-Shift expense step. Define the label, category, default amount, VAT rate and SAP Concur GL code for each preset."
-        actions={<button onClick={startNew} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition"><Plus className="w-4 h-4" /> Add Preset</button>}
+        actions={<button onClick={startNew} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition"><Plus className="w-4 h-4" /> Add Preset</button>}
       />
 
       {isLoading ? (
@@ -121,7 +121,7 @@ export default function ExpensePresetManager() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1 flex-shrink-0">
-                    <button onClick={() => startEdit(p)} className="p-1.5 text-slate-400 hover:text-[#2E5A1A] hover:bg-slate-50 rounded-lg transition">
+                    <button onClick={() => startEdit(p)} className="p-1.5 text-slate-400 hover:text-primary hover:bg-slate-50 rounded-lg transition">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button onClick={() => toggleActive(p)} className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition" title={p.is_active ? 'Hide' : 'Show'}>
@@ -199,8 +199,8 @@ export default function ExpensePresetManager() {
                       const Icon = map[name];
                       return (
                         <button key={name} type="button" onClick={() => setEditing({ ...editing, icon: name })}
-                          className={`p-2 rounded-lg border flex items-center justify-center transition ${editing.icon === name ? 'bg-[#2E5A1A]/10 border-[#2E5A1A]' : 'bg-white border-slate-200'}`}>
-                          <Icon className={`w-4 h-4 ${editing.icon === name ? 'text-[#2E5A1A]' : 'text-slate-400'}`} />
+                          className={`p-2 rounded-lg border flex items-center justify-center transition ${editing.icon === name ? 'bg-primary/10 border-primary' : 'bg-white border-slate-200'}`}>
+                          <Icon className={`w-4 h-4 ${editing.icon === name ? 'text-primary' : 'text-slate-400'}`} />
                         </button>
                       );
                     })}
@@ -235,7 +235,7 @@ export default function ExpensePresetManager() {
             </div>
             <div className="flex items-center gap-2 px-5 py-4 border-t border-slate-100 sticky bottom-0 bg-white">
               <button onClick={() => setShowForm(false)} className="px-4 py-2.5 text-slate-500 hover:text-slate-700 text-sm font-medium">Cancel</button>
-              <button onClick={save} disabled={!editing.label?.trim()} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 transition">
+              <button onClick={save} disabled={!editing.label?.trim()} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition">
                 <Save className="w-4 h-4" /> {editing.id ? 'Update' : 'Create'} Preset
               </button>
             </div>

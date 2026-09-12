@@ -91,7 +91,7 @@ export default function LogServiceModal({ asset, onClose }) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between z-10">
           <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-            <Wrench className="w-5 h-5 text-[#2E5A1A]" /> Log Service
+            <Wrench className="w-5 h-5 text-primary" /> Log Service
           </h3>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
             <X className="w-5 h-5 text-slate-400" />
@@ -111,7 +111,7 @@ export default function LogServiceModal({ asset, onClose }) {
                     key={t.value}
                     onClick={() => setForm(f => ({ ...f, record_type: t.value }))}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition ${
-                      active ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                      active ? 'bg-primary text-white border-primary' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <Icon className="w-4 h-4" /> {t.label}
@@ -129,7 +129,7 @@ export default function LogServiceModal({ asset, onClose }) {
                 type="date"
                 value={form.date}
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
             </div>
             <div>
@@ -137,7 +137,7 @@ export default function LogServiceModal({ asset, onClose }) {
               <select
                 value={form.result}
                 onChange={e => setForm(f => ({ ...f, result: e.target.value }))}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] bg-white"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white"
               >
                 {RESULTS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
               </select>
@@ -152,7 +152,7 @@ export default function LogServiceModal({ asset, onClose }) {
               value={form.tested_by}
               onChange={e => setForm(f => ({ ...f, tested_by: e.target.value }))}
               placeholder="Name or company"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default function LogServiceModal({ asset, onClose }) {
                 value={form.hours_reading}
                 onChange={e => setForm(f => ({ ...f, hours_reading: e.target.value }))}
                 placeholder="e.g. 1250"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
             </div>
           )}
@@ -178,7 +178,7 @@ export default function LogServiceModal({ asset, onClose }) {
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               placeholder="Service details, findings, recommendations..."
               rows={3}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 resize-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 resize-none"
             />
           </div>
         </div>
@@ -195,7 +195,7 @@ export default function LogServiceModal({ asset, onClose }) {
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#244715] transition flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-[#244715] transition flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" /> Done
               </button>
@@ -208,7 +208,7 @@ export default function LogServiceModal({ asset, onClose }) {
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="flex-1 py-2.5 rounded-xl bg-[#2E5A1A] text-white text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-[#244715] transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {saving ? 'Saving...' : 'Log Service'}

@@ -126,7 +126,7 @@ export default function DeliverTalkModal({ talk, onClose, onDelivered }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search staff…"
-              className="w-full h-9 pl-9 pr-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A]"
+              className="w-full h-9 pl-9 pr-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -141,7 +141,7 @@ export default function DeliverTalkModal({ talk, onClose, onDelivered }) {
                     type="checkbox"
                     checked={isConfirmed}
                     onChange={() => toggleConfirm(s.id)}
-                    className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]"
+                    className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                   />
                   <span className="text-sm text-slate-700 flex-1">{s.name}</span>
                   {s.job_title && <span className="text-xs text-slate-400">{s.job_title}</span>}
@@ -163,7 +163,7 @@ export default function DeliverTalkModal({ talk, onClose, onDelivered }) {
                 onChange={e => setWalkInInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addWalkIn(); } }}
                 placeholder="Type a name and press Enter…"
-                className="flex-1 h-9 px-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A]"
+                className="flex-1 h-9 px-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary"
               />
               <button type="button" onClick={addWalkIn} className="px-3 h-9 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 transition">Add</button>
             </div>
@@ -190,7 +190,7 @@ export default function DeliverTalkModal({ talk, onClose, onDelivered }) {
             <button
               onClick={handleDeliver}
               disabled={saving || (confirmedCount + walkInNames.length) === 0}
-              className="inline-flex items-center gap-1.5 px-4 h-9 bg-[#2E5A1A] text-white rounded-xl text-sm font-semibold hover:bg-[#1c4a12] disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="inline-flex items-center gap-1.5 px-4 h-9 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               <CheckCircle2 className="w-4 h-4" />
               {saving ? 'Saving…' : 'Mark Delivered'}

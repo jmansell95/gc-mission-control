@@ -247,7 +247,7 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
                 <p className="text-xs font-semibold text-slate-800">Linked Toolkit & Equipment</p>
                 <p className="text-[10px] text-slate-400">{linkedItems.length} item{linkedItems.length !== 1 ? 's' : ''} — click any to open its record</p>
               </div>
-              <button onClick={() => setShowLinker(s => !s)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-xs font-semibold transition">
+              <button onClick={() => setShowLinker(s => !s)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-semibold transition">
                 <Plus className="w-3.5 h-3.5" /> Link
               </button>
             </div>
@@ -334,7 +334,7 @@ export default function RigDetailDrawer({ rig, allAssets = [], onClose, onOpenEq
                 <p className="text-xs font-semibold text-slate-800">Child Assets</p>
                 <p className="text-[10px] text-slate-400">{childAssets.length} linked — click any to drill into its certificate</p>
               </div>
-              <button onClick={() => setShowChildLinker(s => !s)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-xs font-semibold transition">
+              <button onClick={() => setShowChildLinker(s => !s)} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-semibold transition">
                 <Plus className="w-3.5 h-3.5" /> Link
               </button>
             </div>

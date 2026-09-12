@@ -104,7 +104,7 @@ export default function ClientFormModal({ open, onClose, editing, clients }) {
     }
   };
 
-  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] text-sm';
+  const inputCls = 'w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary text-sm';
   const labelCls = 'block text-xs font-semibold text-slate-600 mb-1.5';
   const sectionTitle = 'text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5';
   const gridCls = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5';
@@ -164,11 +164,11 @@ export default function ClientFormModal({ open, onClose, editing, clients }) {
             </div>
             <div className="sm:col-span-2 lg:col-span-2 flex items-center gap-4 flex-wrap self-end pb-1">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.is_partner || false} onChange={e => set('is_partner', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.is_partner || false} onChange={e => set('is_partner', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Partner consultancy</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.is_holding || false} onChange={e => set('is_holding', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-[#2E5A1A] focus:ring-[#2E5A1A]" />
+                <input type="checkbox" checked={form.is_holding || false} onChange={e => set('is_holding', e.target.checked)} className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" />
                 <span className="text-sm text-slate-700">Holding / parent group</span>
               </label>
               {form.is_partner && (
@@ -205,7 +205,7 @@ export default function ClientFormModal({ open, onClose, editing, clients }) {
             </div>
             <div className="sm:col-span-2 lg:col-span-3 border-t border-slate-100 pt-3">
               <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
-                <MapPin className="w-4 h-4 text-[#2E5A1A]" /> Yard Location
+                <MapPin className="w-4 h-4 text-primary" /> Yard Location
                 <span className="text-xs text-slate-400 font-normal">(for Geotab geofence arrival/departure detection)</span>
               </label>
               <div className="flex items-center gap-2 flex-wrap">

@@ -97,14 +97,14 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
             <button
               type="button"
               onClick={() => setMode('ad_hoc')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition ${mode === 'ad_hoc' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition ${mode === 'ad_hoc' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
             >
               <AlertCircle className="w-4 h-4" /> Ad-hoc Task
             </button>
             <button
               type="button"
               onClick={() => setMode('template')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition ${mode === 'template' ? 'bg-white text-[#2E5A1A] shadow-sm' : 'text-slate-500'}`}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-bold transition ${mode === 'template' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}
             >
               <Repeat className="w-4 h-4" /> From Template
             </button>
@@ -116,7 +116,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
               <select
                 value={selectedTemplateId}
                 onChange={e => setSelectedTemplateId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="">Choose a template…</option>
                 {templates.filter(t => t.is_active).map(t => (
@@ -137,7 +137,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Check rig compliance before mobilisation"
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
@@ -147,7 +147,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
                   onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   placeholder="Instructions for the task…"
                   rows={3}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </>
@@ -161,7 +161,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
                 type="date"
                 value={form.due_date}
                 onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div>
@@ -170,7 +170,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
                 type="time"
                 value={form.due_time}
                 onChange={e => setForm(f => ({ ...f, due_time: e.target.value }))}
-                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
@@ -199,7 +199,7 @@ export default function AssignTaskModal({ staff, templates = [], onClose, onAssi
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition active:scale-95 disabled:opacity-50"
             >
               <Send className="w-4 h-4" /> {saving ? 'Assigning…' : 'Assign & Notify'}
             </button>

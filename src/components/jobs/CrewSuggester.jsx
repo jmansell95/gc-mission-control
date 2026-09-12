@@ -116,7 +116,7 @@ export default function CrewSuggester({ job, onAssign }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm">
-        <Sparkles className="w-4 h-4 text-[#2E5A1A]" />
+        <Sparkles className="w-4 h-4 text-primary" />
         <p className="font-semibold text-slate-700">Suggested Crew</p>
         <span className="text-xs text-slate-400">· ranked by team match, availability, certs & experience</span>
       </div>
@@ -134,7 +134,7 @@ export default function CrewSuggester({ job, onAssign }) {
               <div
                 key={s.id}
                 className={`flex items-center gap-3 p-3 rounded-xl border transition ${
-                  isAssigned ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-[#2E5A1A]/30'
+                  isAssigned ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200 hover:border-primary/30'
                 }`}
               >
                 {/* Rank */}
@@ -178,7 +178,7 @@ export default function CrewSuggester({ job, onAssign }) {
                     isAssigned
                       ? 'bg-emerald-600 text-white cursor-default'
                       : s.available
-                      ? 'bg-[#2E5A1A] text-white hover:bg-[#1c4a12]'
+                      ? 'bg-primary text-white hover:bg-primary/90'
                       : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                   }`}
                 >

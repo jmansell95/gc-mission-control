@@ -62,7 +62,7 @@ export default function StaffIDCard() {
       {/* Staff selector */}
       <div>
         <label className="text-xs font-medium text-slate-600 mb-1.5 block">Select Staff Member</label>
-        <select value={selectedId || ''} onChange={e => setSelectedId(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-[#2E5A1A]">
+        <select value={selectedId || ''} onChange={e => setSelectedId(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary">
           <option value="">Choose a staff member...</option>
           {activeStaff.map(s => <option key={s.id} value={s.id}>{s.name}{s.job_title ? ` — ${s.job_title}` : ''}</option>)}
         </select>
@@ -120,7 +120,7 @@ export default function StaffIDCard() {
 
           {/* Actions */}
           <div className="flex gap-2 justify-center">
-            <button onClick={handlePrint} className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white text-sm font-medium rounded-lg hover:bg-[#1c4a12] transition">
+            <button onClick={handlePrint} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition">
               <Printer className="w-4 h-4" /> Print Card
             </button>
             <a href={qrUrl(buildQrPayload(selected), 400)} download={`id-card-${selected.name?.replace(/\s+/g, '-').toLowerCase()}.png`} className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition">

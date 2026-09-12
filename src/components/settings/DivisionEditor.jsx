@@ -124,7 +124,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
     }
   };
 
-  const inputCls = 'mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 outline-none text-sm';
+  const inputCls = 'mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none text-sm';
   const labelCls = 'text-xs font-bold text-slate-500 uppercase tracking-wide';
 
   return createPortal(
@@ -177,7 +177,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
                 <div className="mt-1.5 grid grid-cols-3 gap-1.5">
                   {DIVISION_TYPES.map(t => (
                     <button key={t.value} type="button" onClick={() => setHubsFromType(t.value)}
-                      className={'flex items-center gap-1.5 px-2.5 py-2 rounded-lg border text-xs font-semibold transition ' + (form.division_type === t.value ? 'border-[#2E5A1A] bg-emerald-50 text-[#2E5A1A]' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
+                      className={'flex items-center gap-1.5 px-2.5 py-2 rounded-lg border text-xs font-semibold transition ' + (form.division_type === t.value ? 'border-primary bg-emerald-50 text-primary' : 'border-slate-200 text-slate-600 hover:bg-slate-50')}>
                       <span className="w-2.5 h-2.5 rounded-full" style={{ background: t.color }} /> {t.label}
                     </button>
                   ))}
@@ -283,7 +283,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
 
                 {/* Reset to type default */}
                 <button type="button" onClick={() => setForm(f => ({ ...f, nav_items: [...(DIVISION_TYPE_NAV_DEFAULTS[f.division_type] || DIVISION_TYPE_NAV_DEFAULTS.general)] }))}
-                  className="mt-3 text-xs font-semibold text-[#2E5A1A] hover:underline">
+                  className="mt-3 text-xs font-semibold text-primary hover:underline">
                   Reset to {DIVISION_TYPES.find(t => t.value === form.division_type)?.label || 'General'} default
                 </button>
               </div>
@@ -298,7 +298,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
               <div className="mt-1.5 grid grid-cols-2 gap-1.5">
                 {ALL_HUBS.map(h => (
                   <button key={h} type="button" onClick={() => toggleHub(h)}
-                    className={'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition ' + (form.enabled_hubs.includes(h) ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}>
+                    className={'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition ' + (form.enabled_hubs.includes(h) ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200')}>
                     <span className={'w-4 h-4 rounded flex items-center justify-center ' + (form.enabled_hubs.includes(h) ? 'bg-white/20' : 'bg-slate-200')}>
                       {form.enabled_hubs.includes(h) && <Check className="w-3 h-3" />}
                     </span>
@@ -355,7 +355,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Integrations</p>
                 <p className="text-[11px] text-slate-400">
                   All integrations (Geotab, SafetyCulture, Asset Panda, OpenGround, KeyLogBook, etc.) are now managed
-                  centrally from <span className="font-semibold text-[#2E5A1A]">Enterprise Settings → Integrations</span>.
+                  centrally from <span className="font-semibold text-primary">Enterprise Settings → Integrations</span>.
                   This ensures every division uses the same configuration.
                 </p>
               </div>
@@ -386,7 +386,7 @@ function SettingToggle({ label, desc, value, onChange }) {
       <button
         type="button"
         onClick={() => onChange(!value)}
-        className={'relative w-11 h-6 rounded-full transition flex-shrink-0 ' + (value ? 'bg-[#2E5A1A]' : 'bg-slate-300')}
+        className={'relative w-11 h-6 rounded-full transition flex-shrink-0 ' + (value ? 'bg-primary' : 'bg-slate-300')}
       >
         <span className={'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition ' + (value ? 'translate-x-5' : '')} />
       </button>

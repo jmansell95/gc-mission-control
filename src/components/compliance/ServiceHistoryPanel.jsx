@@ -162,7 +162,7 @@ export default function ServiceHistoryPanel({ assetId, assetName, assetType }) {
       <div className="flex items-center justify-between mb-2.5">
         <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Inspection & Service History</p>
         <button onClick={() => showForm ? setShowForm(false) : openForm()} type="button"
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2E5A1A]/10 hover:bg-[#2E5A1A]/20 text-[#2E5A1A] rounded-lg text-xs font-semibold transition">
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-semibold transition">
           <Plus className="w-3.5 h-3.5" /> Log Service
         </button>
       </div>

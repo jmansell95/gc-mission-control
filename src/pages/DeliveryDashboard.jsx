@@ -341,7 +341,7 @@ export default function DeliveryDashboard() {
           </div>
           <p className="text-slate-700 font-bold text-lg">No driver profile found</p>
           <p className="text-slate-400 text-sm mt-1">Contact your supervisor to get set up.</p>
-          <button onClick={() => navigate('/staff-schedule')} className="mt-4 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition active:scale-95">
+          <button onClick={() => navigate('/staff-schedule')} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition active:scale-95">
             Back to Schedule
           </button>
         </div>

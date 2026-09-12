@@ -157,7 +157,7 @@ export default function AssetDetailPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <Package className="w-12 h-12 text-slate-300 mb-3" />
         <p className="text-slate-500 font-semibold">Asset not found</p>
-        <button onClick={() => navigate('/assets')} className="mt-4 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold">
+        <button onClick={() => navigate('/assets')} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold">
           Back to Assets
         </button>
       </div>
@@ -213,10 +213,10 @@ export default function AssetDetailPage() {
                   <button
                     key={a.label}
                     onClick={a.onClick}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-[#2E5A1A] hover:bg-emerald-50/40 text-sm font-semibold text-slate-700 transition group"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-primary hover:bg-emerald-50/40 text-sm font-semibold text-slate-700 transition group"
                   >
                     <span className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition">
-                      <Icon className="w-4 h-4 text-[#2E5A1A]" />
+                      <Icon className="w-4 h-4 text-primary" />
                     </span>
                     {a.label}
                   </button>
@@ -240,7 +240,7 @@ export default function AssetDetailPage() {
                     onClick={() => setActiveTab(t.key)}
                     className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition touch-manipulation ${
                       active
-                        ? 'bg-[#2E5A1A] text-white shadow-md shadow-emerald-900/10'
+                        ? 'bg-primary text-white shadow-md shadow-emerald-900/10'
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
                     }`}
                   >
@@ -270,7 +270,7 @@ export default function AssetDetailPage() {
                 {/* Master compliance rollup (for rigs with linked equipment) */}
                 {rollup && rollup.total > 1 && (
                   <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
-                    <ShieldCheck className="w-6 h-6 text-[#2E5A1A]" />
+                    <ShieldCheck className="w-6 h-6 text-primary" />
                     <div>
                       <p className="text-sm font-bold text-slate-900">System Compliance: {rollup.master}</p>
                       <p className="text-xs text-slate-500">
@@ -312,7 +312,7 @@ export default function AssetDetailPage() {
             {activeTab === 'activity' && (
               <div className="hub-glass rounded-2xl p-4">
                 <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#2E5A1A]" /> Movement & Activity Timeline
+                  <Clock className="w-4 h-4 text-primary" /> Movement & Activity Timeline
                 </h3>
                 <AssetMovementHistory asset={asset} assets={vaultAssets} />
               </div>
@@ -333,7 +333,7 @@ export default function AssetDetailPage() {
                 className="flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold text-slate-600 active:scale-90 transition touch-manipulation min-w-[44px] min-h-[44px] justify-center"
               >
                 <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-[#2E5A1A]" />
+                  <Icon className="w-5 h-5 text-primary" />
                 </span>
                 {a.label}
               </button>
@@ -372,7 +372,7 @@ export default function AssetDetailPage() {
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 animate-pop-in">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                <QrCode className="w-5 h-5 text-[#2E5A1A]" /> QR Code
+                <QrCode className="w-5 h-5 text-primary" /> QR Code
               </h3>
               <button onClick={() => setShowQR(false)} className="p-1.5 rounded-lg hover:bg-slate-100 transition">
                 <X className="w-5 h-5 text-slate-400" />

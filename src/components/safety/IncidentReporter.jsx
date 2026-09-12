@@ -10,7 +10,7 @@ import HubCard from '@/components/hubs/HubCard';
 import HubLoadingState from '@/components/hubs/HubLoadingState';
 import HubEmptyState from '@/components/hubs/HubEmptyState';
 
-const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10";
+const inputCls = "w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10";
 
 const INCIDENT_TYPES = [
   { val: 'near_miss', label: 'Near Miss' },
@@ -340,7 +340,7 @@ function IncidentForm({ jobs, staff, onClose, onSaved }) {
             <div className="grid grid-cols-3 gap-2">
               {INCIDENT_TYPES.map(t => (
                 <button key={t.val} type="button" onClick={() => set('incident_type', t.val)}
-                  className={`px-2 py-2 rounded-xl border text-xs font-semibold transition ${form.incident_type === t.val ? 'bg-[#2E5A1A] text-white border-[#2E5A1A]' : 'bg-white border-slate-200 text-slate-600 hover:border-[#2E5A1A]/40'}`}>
+                  className={`px-2 py-2 rounded-xl border text-xs font-semibold transition ${form.incident_type === t.val ? 'bg-primary text-white border-primary' : 'bg-white border-slate-200 text-slate-600 hover:border-primary/40'}`}>
                   {t.label}
                 </button>
               ))}

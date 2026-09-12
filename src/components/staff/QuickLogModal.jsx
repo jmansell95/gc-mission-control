@@ -40,7 +40,7 @@ export default function QuickLogModal({ open, onClose, staff, jobs = [], default
             <select
               value={selectedJobId}
               onChange={e => setSelectedJobId(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-medium bg-slate-50 focus:outline-none focus:border-[#2E5A1A]"
+              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-medium bg-slate-50 focus:outline-none focus:border-primary"
             >
               {jobs.map(j => (
                 <option key={j.id} value={j.id}>{j.name}</option>

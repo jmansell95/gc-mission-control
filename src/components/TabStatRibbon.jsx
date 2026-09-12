@@ -10,8 +10,8 @@ export default function TabStatRibbon({ stats = [], icon: Icon, title, action })
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100">
         {Icon && (
-          <div className="w-7 h-7 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-3.5 h-3.5 text-[#2E5A1A]" />
+          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Icon className="w-3.5 h-3.5 text-primary" />
           </div>
         )}
         {title && <h3 className="text-ui-body font-semibold text-slate-900">{title}</h3>}

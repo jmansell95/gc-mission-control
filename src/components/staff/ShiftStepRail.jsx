@@ -48,9 +48,9 @@ export default function ShiftStepRail({ steps, currentStep, currentStepIndex, on
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                   done
-                    ? 'bg-[#2E5A1A] text-white'
+                    ? 'bg-primary text-white'
                     : active
-                    ? 'bg-white border-2 border-[#2E5A1A] text-[#2E5A1A]'
+                    ? 'bg-white border-2 border-primary text-primary'
                     : 'bg-slate-100 text-slate-400'
                 }`}
               >
@@ -59,14 +59,14 @@ export default function ShiftStepRail({ steps, currentStep, currentStepIndex, on
               <div className="min-w-0 flex-1">
                 <p
                   className={`text-sm font-bold leading-tight ${
-                    active ? 'text-[#2E5A1A]' : done ? 'text-slate-700' : 'text-slate-400'
+                    active ? 'text-primary' : done ? 'text-slate-700' : 'text-slate-400'
                   }`}
                 >
                   {meta.label}
                 </p>
                 <p className="text-[11px] text-slate-400 leading-tight mt-0.5">{meta.desc}</p>
               </div>
-              {done && <CheckCircle2 className="w-4 h-4 text-[#2E5A1A] flex-shrink-0 mt-1" />}
+              {done && <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-1" />}
             </button>
           );
         })}

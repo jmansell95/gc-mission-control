@@ -101,7 +101,7 @@ export default function RigDrillDownModal({ rigName, isDrillerFallback, logs = [
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition ${
-                tab === t.id ? 'bg-[#2E5A1A] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                tab === t.id ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               <t.icon className="w-3.5 h-3.5" /> {t.label}

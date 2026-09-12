@@ -121,7 +121,7 @@ export default function DisciplineBuilder({ disciplines, onChange, teams = [] })
           </div>
         </div>
         {items.length > 0 && (
-          <span className="text-[11px] font-bold text-[#2E5A1A] bg-[#2E5A1A]/10 px-2.5 py-1 rounded-full">
+          <span className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
             {items.length} track{items.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -145,7 +145,7 @@ export default function DisciplineBuilder({ disciplines, onChange, teams = [] })
                   <Icon className="w-4 h-4" />
                 </div>
                 <span className={`text-xs font-bold ${tone.text} text-center leading-tight`}>{cfg.label}</span>
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Plus className="w-3 h-3" />
                 </div>
               </button>
@@ -180,7 +180,7 @@ export default function DisciplineBuilder({ disciplines, onChange, teams = [] })
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-slate-900">{cfg.label}</span>
                       {isPrimary && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[#2E5A1A] bg-[#2E5A1A]/15 px-1.5 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-primary bg-primary/15 px-1.5 py-0.5 rounded-full">
                           <Star className="w-2.5 h-2.5 fill-current" /> Primary
                         </span>
                       )}
@@ -204,7 +204,7 @@ export default function DisciplineBuilder({ disciplines, onChange, teams = [] })
                         type="button"
                         onClick={() => setPrimary(i)}
                         title="Make primary discipline"
-                        className="p-1.5 text-slate-400 hover:text-[#2E5A1A] hover:bg-[#2E5A1A]/10 rounded-lg transition"
+                        className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition"
                       >
                         <Star className="w-3.5 h-3.5" />
                       </button>

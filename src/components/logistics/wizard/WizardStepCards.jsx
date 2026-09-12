@@ -24,7 +24,7 @@ export default function WizardStepCards({ options, onSelect }) {
             className={`group relative text-left rounded-2xl border-2 p-5 transition-all animate-slide-up ${
               opt.disabled
                 ? 'border-slate-200 bg-slate-50 opacity-50 cursor-not-allowed'
-                : 'border-slate-200 bg-white hover:border-[#2E5A1A]/40 hover:bg-[#2E5A1A]/[0.03] hover:shadow-md active:scale-[0.98]'
+                : 'border-slate-200 bg-white hover:border-primary/40 hover:bg-primary/[0.03] hover:shadow-md active:scale-[0.98]'
             }`}
           >
             <div className="flex items-start gap-3.5">
@@ -43,7 +43,7 @@ export default function WizardStepCards({ options, onSelect }) {
                 <p className="text-sm text-slate-500 mt-1 leading-snug">{opt.description}</p>
               </div>
               {!opt.disabled && (
-                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#2E5A1A] transition flex-shrink-0 mt-1" />
+                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition flex-shrink-0 mt-1" />
               )}
             </div>
             {opt.disabled && (

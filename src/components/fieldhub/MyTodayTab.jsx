@@ -85,7 +85,7 @@ export default function MyTodayTab({ staffProfile, allAssets = [] }) {
     <div className="space-y-4">
       {/* Date header */}
       <div className="flex items-center gap-2 text-sm">
-        <CalendarDays className="w-4 h-4 text-[#2E5A1A]" />
+        <CalendarDays className="w-4 h-4 text-primary" />
         <span className="font-bold text-slate-700">{format(new Date(), 'EEEE, dd MMM yyyy')}</span>
         <span className="text-slate-300">·</span>
         <span className="text-slate-400 font-medium">{assignments.length} {assignments.length === 1 ? 'job' : 'jobs'}</span>

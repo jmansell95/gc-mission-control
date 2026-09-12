@@ -19,9 +19,9 @@ const AGENTS = [
     icon: HardHat,
     gradient: 'from-[#2E5A1A] to-[#5A8C1E]',
     glow: 'glow-brand',
-    accent: 'text-[#2E5A1A]',
-    bg: 'bg-[#2E5A1A]/5',
-    border: 'border-[#2E5A1A]/20',
+    accent: 'text-primary',
+    bg: 'bg-primary/5',
+    border: 'border-primary/20',
   },
   {
     id: 'assistant',

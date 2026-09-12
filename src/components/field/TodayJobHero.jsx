@@ -20,7 +20,7 @@ export default function TodayJobHero({ assignment, job, client, staffName }) {
         <p className="text-sm font-bold text-slate-900 mb-1">No jobs today</p>
         <p className="text-xs text-slate-500 mb-3">Check upcoming shifts or contact your manager.</p>
         <button onClick={() => navigate('/upcoming')} type="button"
-          className="text-xs font-semibold text-[#2E5A1A] hover:underline">
+          className="text-xs font-semibold text-primary hover:underline">
           View upcoming →
         </button>
       </div>
@@ -59,13 +59,13 @@ export default function TodayJobHero({ assignment, job, client, staffName }) {
         <div className="flex items-center gap-3 text-xs text-slate-500">
           {assignment.start_time && (
             <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-[#2E5A1A]/60" />
+              <Clock className="w-3.5 h-3.5 text-primary/60" />
               <span className="font-medium">{assignment.start_time}</span>
             </div>
           )}
           {client?.name && (
             <div className="flex items-center gap-1 min-w-0">
-              <Users className="w-3.5 h-3.5 text-[#2E5A1A]/60 flex-shrink-0" />
+              <Users className="w-3.5 h-3.5 text-primary/60 flex-shrink-0" />
               <span className="truncate">{client.name}</span>
             </div>
           )}

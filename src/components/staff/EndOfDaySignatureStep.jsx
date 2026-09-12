@@ -41,9 +41,9 @@ export default function EndOfDaySignatureStep({ summary, onSigned, saving }) {
   return (
     <div className="space-y-4">
       {/* Declaration header */}
-      <div className="flex items-start gap-3 bg-[#2E5A1A]/5 rounded-2xl p-4">
-        <div className="w-10 h-10 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-          <FileSignature className="w-5 h-5 text-[#2E5A1A]" />
+      <div className="flex items-start gap-3 bg-primary/5 rounded-2xl p-4">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <FileSignature className="w-5 h-5 text-primary" />
         </div>
         <div>
           <p className="text-sm font-bold text-slate-900">End-of-Day Declaration</p>
@@ -92,7 +92,7 @@ export default function EndOfDaySignatureStep({ summary, onSigned, saving }) {
       <button
         onClick={handleConfirm}
         disabled={!signature || saving}
-        className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-[#2E5A1A] text-white rounded-2xl hover:bg-[#1c4a12] active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
+        className="w-full flex items-center justify-center gap-2 px-5 py-4 bg-primary text-white rounded-2xl hover:bg-primary/90 active:scale-95 transition text-base font-bold disabled:opacity-50 touch-manipulation"
       >
         {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         {saving ? 'Submitting…' : 'Sign & Submit Shift'}

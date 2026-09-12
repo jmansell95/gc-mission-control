@@ -137,7 +137,7 @@ export default function EarlyLeaveApprovalCard({ job, rotas, allStaff }) {
                     <button
                       onClick={() => handleApprove(rota.id)}
                       disabled={processing === rota.id || !signatures[rota.id]}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-xl text-xs font-bold hover:bg-[#244715] disabled:opacity-50 transition"
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-[#244715] disabled:opacity-50 transition"
                     >
                       {processing === rota.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
                       {processing === rota.id ? 'Processing…' : 'Approve & Sign'}

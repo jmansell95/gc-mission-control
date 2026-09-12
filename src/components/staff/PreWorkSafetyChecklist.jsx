@@ -177,7 +177,7 @@ export default function PreWorkSafetyChecklist({
                         done
                           ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
                           : isCurrent
-                          ? 'bg-[#2E5A1A] text-white shadow-md shadow-[#2E5A1A]/30'
+                          ? 'bg-primary text-white shadow-md shadow-[#2E5A1A]/30'
                           : 'bg-slate-100 text-slate-400'
                       }`}
                     >
@@ -189,7 +189,7 @@ export default function PreWorkSafetyChecklist({
                     </div>
                     <span
                       className={`text-[10px] font-bold uppercase tracking-wide max-w-[60px] truncate ${
-                        done ? 'text-emerald-600' : isCurrent ? 'text-[#2E5A1A]' : 'text-slate-400'
+                        done ? 'text-emerald-600' : isCurrent ? 'text-primary' : 'text-slate-400'
                       }`}
                     >
                       {step.label}
@@ -222,7 +222,7 @@ export default function PreWorkSafetyChecklist({
               {/* Step title */}
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-[#2E5A1A] uppercase tracking-wide">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wide">
                     Step {currentStepIdx + 1} of {steps.length}
                   </span>
                   {!currentStep.required && (

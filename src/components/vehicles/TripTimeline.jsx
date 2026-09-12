@@ -57,7 +57,7 @@ export default function TripTimeline({ vehicleId }) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center py-8">
-        <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin mb-2" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin mb-2" />
         <p className="text-xs text-slate-400">Loading trip history...</p>
       </div>
     );

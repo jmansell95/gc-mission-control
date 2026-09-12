@@ -79,7 +79,7 @@ export default function StaffTaskList() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 text-[#2E5A1A] animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
@@ -194,12 +194,12 @@ function TaskCard({ task, expanded, onToggle, completing, completionNote, onNote
               onChange={e => onNoteChange(e.target.value)}
               placeholder="Add a completion note (optional)..."
               rows={2}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <button
               onClick={onComplete}
               disabled={completing}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-[#2E5A1A] text-white hover:bg-[#1c4a12] transition active:scale-95 disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-primary/90 transition active:scale-95 disabled:opacity-50"
             >
               {completing ? (
                 <>

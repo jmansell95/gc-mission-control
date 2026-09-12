@@ -208,7 +208,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
                 )}
                 <SelectSeparator />
                 <SelectItem value="__new">
-                  <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5 text-[#2E5A1A] flex-shrink-0" /> Create new group…</span>
+                  <span className="flex items-center gap-2"><Plus className="w-3.5 h-3.5 text-primary flex-shrink-0" /> Create new group…</span>
                 </SelectItem>
               </AccessSelect>
             </div>
@@ -216,14 +216,14 @@ export default function StaffPermissionPopup({ staff, onClose }) {
 
           {/* New group fields */}
           {isNew && (
-            <div className="space-y-3 p-3 rounded-xl bg-[#2E5A1A]/[0.04] border border-[#2E5A1A]/15">
+            <div className="space-y-3 p-3 rounded-xl bg-primary/[0.04] border border-primary/15">
               <div>
                 <label className="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wide">Group Name</label>
                 <input
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder="e.g. Senior Drillers"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
@@ -232,7 +232,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
                   value={newGroupDesc}
                   onChange={(e) => setNewGroupDesc(e.target.value)}
                   placeholder="What can this group do?"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function StaffPermissionPopup({ staff, onClose }) {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending || !dirty || (isNew && !newGroupName.trim())}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-xl text-sm font-bold hover:bg-[#1c4a12] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
           >
             {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saveMutation.isPending ? 'Saving…' : 'Save Permissions'}

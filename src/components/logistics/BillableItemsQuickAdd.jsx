@@ -149,13 +149,13 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
               value={poNumber}
               onChange={(e) => setPoNumber(e.target.value)}
               placeholder="PO number (groups these items)"
-              className="flex-1 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20 focus:border-[#2E5A1A]"
+              className="flex-1 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+            className="px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             {Object.entries(CATEGORY_META).map(([k, v]) => (
               <option key={k} value={k}>{v.label}</option>
@@ -173,7 +173,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search rate card…"
-                className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/20"
+                className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div className="space-y-2">
@@ -198,7 +198,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                               key={rci.id}
                               onClick={() => addToBasket(rci)}
                               className={`flex items-center justify-between w-full px-2.5 py-2 rounded-lg text-left transition ${
-                                inBasket ? 'bg-[#2E5A1A]/5 ring-1 ring-[#2E5A1A]/20' : 'hover:bg-slate-50'
+                                inBasket ? 'bg-primary/5 ring-1 ring-primary/20' : 'hover:bg-slate-50'
                               }`}
                             >
                               <div className="min-w-0 flex-1">
@@ -208,7 +208,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <span className="text-xs font-bold text-slate-700">{fmt(rci.cost_price || rci.price)}</span>
                                 {inBasket ? (
-                                  <span className="w-5 h-5 rounded-full bg-[#2E5A1A] text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                                  <span className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">✓</span>
                                 ) : (
                                   <Plus className="w-4 h-4 text-slate-400" />
                                 )}
@@ -251,7 +251,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                         type="number"
                         value={b.qty}
                         onChange={(e) => updateBasketItem(b.rateCardItem.id, 'qty', e.target.value)}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
                       />
                     </div>
                     <div>
@@ -260,7 +260,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                         type="number"
                         value={b.unitCost}
                         onChange={(e) => updateBasketItem(b.rateCardItem.id, 'unitCost', e.target.value)}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
                       />
                     </div>
                     <div>
@@ -269,7 +269,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                         type="date"
                         value={b.startDate}
                         onChange={(e) => updateBasketItem(b.rateCardItem.id, 'startDate', e.target.value)}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
                       />
                     </div>
                     <div>
@@ -278,7 +278,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
                         type="date"
                         value={b.endDate}
                         onChange={(e) => updateBasketItem(b.rateCardItem.id, 'endDate', e.target.value)}
-                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-[#2E5A1A]/30"
+                        className="w-full px-2 py-1 text-xs bg-slate-50 border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/30"
                       />
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
           <button
             onClick={handleCommit}
             disabled={committing || basket.length === 0}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#2E5A1A] text-white rounded-xl font-semibold text-sm hover:bg-[#1c4a12] active:scale-95 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold text-sm hover:bg-primary/90 active:scale-95 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {committing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
             Add {basket.length} Item{basket.length !== 1 ? 's' : ''}

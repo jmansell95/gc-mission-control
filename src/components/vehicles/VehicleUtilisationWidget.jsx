@@ -34,10 +34,10 @@ export default function VehicleUtilisationWidget() {
         </div>
         <div className="flex items-center gap-2">
           <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)}
-            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-[#2E5A1A]" />
+            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-primary" />
           <span className="text-xs text-slate-300">→</span>
           <input type="date" value={toDate} onChange={e => setToDate(e.target.value)}
-            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-[#2E5A1A]" />
+            className="px-2 py-1 border border-slate-200 rounded-lg text-xs text-slate-600 focus:outline-none focus:border-primary" />
           <button onClick={() => refetch()} disabled={isFetching}
             className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition disabled:opacity-50">
             <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />

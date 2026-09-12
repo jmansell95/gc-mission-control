@@ -118,7 +118,7 @@ export default function DutiesSummaryCard({ staffId, enabled = true }) {
         {/* Header */}
         <div className="px-4 py-3 flex items-center gap-2.5 border-b border-slate-100/80">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">
-            <ClipboardList className="w-4 h-4 text-[#2E5A1A]" strokeWidth={2.5} />
+            <ClipboardList className="w-4 h-4 text-primary" strokeWidth={2.5} />
           </div>
           <p className="text-sm font-bold text-slate-900 flex-1">My Duties</p>
           {overdue > 0 && (

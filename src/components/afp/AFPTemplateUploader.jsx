@@ -127,10 +127,10 @@ export default function AFPTemplateUploader({ onClose }) {
           {/* Upload area */}
           {!parsedPreview && (
             <label className="block">
-              <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-[#2E5A1A] hover:bg-green-50/30 transition">
+              <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-primary hover:bg-green-50/30 transition">
                 {uploading || parsing ? (
                   <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin" />
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
                     <p className="text-sm font-semibold text-slate-600">
                       {uploading ? 'Uploading…' : 'Parsing template…'}
                     </p>

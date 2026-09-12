@@ -14,7 +14,7 @@ export default function HubEmptyState({ icon: Icon, title, description, action, 
   return (
     <div className={`hub-glass rounded-3xl text-center animate-slide-up ${compact ? 'p-6' : 'p-10 sm:p-12'}`}>
       <div className={`${compact ? 'w-12 h-12 mb-3' : 'w-16 h-16 mb-4'} rounded-2xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/15 flex items-center justify-center mx-auto`}>
-        {Icon && <Icon className={`${compact ? 'w-5 h-5' : 'w-7 h-7'} text-[#2E5A1A]`} />}
+        {Icon && <Icon className={`${compact ? 'w-5 h-5' : 'w-7 h-7'} text-primary`} />}
       </div>
       <h3 className={`${compact ? 'text-ui-body' : 'text-ui-subheading'} font-bold text-slate-900 mb-1`}>{title}</h3>
       {description && <p className="text-ui-body text-slate-500 max-w-sm mx-auto">{description}</p>}
@@ -24,7 +24,7 @@ export default function HubEmptyState({ icon: Icon, title, description, action, 
             <button
               type="button"
               onClick={action.onClick}
-              className="inline-flex items-center gap-1.5 h-9 px-3 bg-[#2E5A1A] text-white rounded-xl text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.98] transition shadow-sm"
+              className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl text-ui-caption font-semibold hover:bg-[#244715] active:scale-[0.98] transition shadow-sm"
             >
               {action.label}
             </button>

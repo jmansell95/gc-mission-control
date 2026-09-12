@@ -19,7 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { complianceDaysUntil } from '@/utils/complianceDate';
 import { CardGridSkeleton } from '@/components/StateViews';
 
-const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 text-sm transition";
+const inputCls = "w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
 // Maps a permission group to the platform user role needed for RLS.
 // Only "Super Admin" / "Admin" groups need platform-level admin; everything
@@ -155,7 +155,7 @@ export default function StaffCommand() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
             <Users className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function StaffCommand() {
           <button onClick={() => setShowBulkInvite(true)} className="inline-flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition text-sm font-semibold">
             <UserPlus className="w-4 h-4" /> Bulk Invite
           </button>
-          <button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg hover:bg-[#1c4a12] transition text-sm font-semibold shadow-sm">
+          <button onClick={() => setShowAdd(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition text-sm font-semibold shadow-sm">
             <Plus className="w-4 h-4" /> Add Crew Member
           </button>
         </div>
@@ -195,7 +195,7 @@ export default function StaffCommand() {
               const linked = getUserForStaff(m);
               const isSel = m.id === selectedId;
               return (
-                <button key={m.id} onClick={() => { setSelectedId(m.id); setDetailOpen(true); }} className={`w-full text-left flex items-center gap-3 px-3 py-3 border-b border-slate-50 transition ${isSel ? 'bg-[#2E5A1A]/5 border-l-[3px] border-l-[#2E5A1A]' : 'hover:bg-slate-50'}`}>
+                <button key={m.id} onClick={() => { setSelectedId(m.id); setDetailOpen(true); }} className={`w-full text-left flex items-center gap-3 px-3 py-3 border-b border-slate-50 transition ${isSel ? 'bg-primary/5 border-l-[3px] border-l-[#2E5A1A]' : 'hover:bg-slate-50'}`}>
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#8DC63F] flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-xs">{m.name.charAt(0)}</span>
                   </div>
@@ -247,7 +247,7 @@ export default function StaffCommand() {
               const Icon = t.icon;
               const active = tab === t.id;
               return (
-                <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${active ? 'border-[#2E5A1A] text-[#2E5A1A]' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 px-3 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap ${active ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
                   <Icon className="w-4 h-4" /> {t.label}
                   {t.id === 'compliance' && selectedCompliance.length > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded-full">{selectedCompliance.length}</span>}
                   {t.id === 'training' && selectedTraining.length > 0 && <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded-full">{selectedTraining.length}</span>}
@@ -306,7 +306,7 @@ export default function StaffCommand() {
                 <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0" />
                 <p className="text-xs text-blue-700 font-medium">Access managed at enterprise level via Settings → Access Levels.</p>
               </div>
-              <button type="submit" disabled={adding} className="w-full px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50 flex items-center justify-center gap-2">
+              <button type="submit" disabled={adding} className="w-full px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50 flex items-center justify-center gap-2">
                 {adding ? <><Loader2 className="w-4 h-4 animate-spin" /> Adding…</> : <><Save className="w-4 h-4" /> Add & Send Invite</>}
               </button>
             </form>
@@ -423,7 +423,7 @@ function ProfileTab({ staff: m, user, teams, permissionGroups, vehicles, staffLi
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
-        <button type="submit" disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition disabled:opacity-50">
+        <button type="submit" disabled={saving} className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
         </button>
         <button type="button" onClick={onInvite} disabled={inviteLoading} className="inline-flex items-center gap-1.5 px-3 py-2 text-blue-700 bg-blue-50 rounded-lg text-sm font-medium hover:bg-blue-100 transition disabled:opacity-50">
@@ -451,15 +451,15 @@ function TrainingTab({ bookings, courses, staffId, staffName }) {
         const course = courses.find(c => c.id === b.course_id);
         return (
           <div key={b.id} className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 rounded-lg">
-            <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-4 h-4 text-[#2E5A1A]" />
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <GraduationCap className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-slate-800 truncate">{course?.name || 'Training course'}</p>
               <p className="text-xs text-slate-400">{course?.date ? format(new Date(course.date + 'T00:00'), 'dd MMM yyyy') : ''} {course?.location ? `· ${course.location}` : ''}</p>
             </div>
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${statusColor[b.status] || 'bg-slate-100'}`}>{b.status}</span>
-            {b.certificate_url && <a href={b.certificate_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#2E5A1A] hover:underline">View cert</a>}
+            {b.certificate_url && <a href={b.certificate_url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">View cert</a>}
           </div>
         );
       })}
@@ -529,7 +529,7 @@ function Field({ label, children }) {
 
 function ToggleChip({ active, onClick, icon: Icon, label }) {
   return (
-    <button type="button" onClick={onClick} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${active ? 'bg-[#2E5A1A]/10 text-[#2E5A1A] border-[#2E5A1A]/30' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
+    <button type="button" onClick={onClick} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition ${active ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
       <Icon className="w-3.5 h-3.5" /> {label} {active ? 'on' : 'off'}
     </button>
   );

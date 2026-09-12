@@ -114,7 +114,7 @@ export default function AFPVariationLifecycle({ item, canEdit, onAutoSave }) {
                     type="date"
                     defaultValue={stage.date || ''}
                     onBlur={(e) => handleDateChange(stage.key, e.target.value)}
-                    className="text-[9px] px-1 py-0.5 border border-slate-200 rounded bg-white focus:outline-none focus:border-[#2E5A1A] w-[90px]"
+                    className="text-[9px] px-1 py-0.5 border border-slate-200 rounded bg-white focus:outline-none focus:border-primary w-[90px]"
                   />
                 ) : (
                   <span className="text-[9px] text-slate-500 tabular-nums">{fmtDate(stage.date)}</span>

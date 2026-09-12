@@ -125,8 +125,8 @@ export default function EquipmentSignOutModal({ open, onClose, assets = [], staf
           {/* Header */}
           <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-3.5 flex items-center justify-between z-10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center">
-                <ShieldCheck className="w-4 h-4 text-[#2E5A1A]" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900">Sign Out to Job</h3>
@@ -201,12 +201,12 @@ export default function EquipmentSignOutModal({ open, onClose, assets = [], staf
                         type="button"
                         className={`w-full flex items-center gap-3 p-3 rounded-xl border transition text-left active:scale-[0.99] ${
                           selectedJobId === job.id
-                            ? 'border-[#2E5A1A] bg-[#2E5A1A]/5 ring-1 ring-[#2E5A1A]/20'
+                            ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
                             : 'border-slate-200 bg-white hover:border-slate-300'
                         }`}
                       >
                         <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          selectedJobId === job.id ? 'bg-[#2E5A1A] text-white' : 'bg-slate-100 text-slate-500'
+                          selectedJobId === job.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'
                         }`}>
                           <MapPin className="w-4 h-4" />
                         </div>
@@ -214,7 +214,7 @@ export default function EquipmentSignOutModal({ open, onClose, assets = [], staf
                           <p className="text-sm font-bold text-slate-900 truncate">{job.name}</p>
                           <p className="text-xs text-slate-500 truncate">{job.location}</p>
                         </div>
-                        {selectedJobId === job.id && <CheckCircle2 className="w-5 h-5 text-[#2E5A1A] flex-shrink-0" />}
+                        {selectedJobId === job.id && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -228,7 +228,7 @@ export default function EquipmentSignOutModal({ open, onClose, assets = [], staf
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                className="flex-1 py-3.5 bg-[#2E5A1A] text-white rounded-xl font-bold text-sm hover:bg-[#1c4a12] transition disabled:opacity-50 inline-flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation"
+                className="flex-1 py-3.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition disabled:opacity-50 inline-flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation"
               >
                 {saving
                   ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing Out…</>

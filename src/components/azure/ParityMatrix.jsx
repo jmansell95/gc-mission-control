@@ -135,7 +135,7 @@ export default function ParityMatrix() {
       {/* Header + progress */}
       <div className="hub-glass rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-3">
-          <CheckCircle2 className="w-5 h-5 text-[#2E5A1A]" />
+          <CheckCircle2 className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-bold text-slate-900">1:1 Parity Matrix</h2>
           <span className="ml-auto text-xs font-bold text-slate-500 tabular-nums">
             {doneCount}/{totalCount} verified · {progressPct}%
@@ -163,7 +163,7 @@ export default function ParityMatrix() {
               key={t.id}
               onClick={() => { setTab(t.id); setQuery(''); }}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition ${
-                active ? 'bg-[#2E5A1A] text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                active ? 'bg-primary text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -184,7 +184,7 @@ export default function ParityMatrix() {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder={`Search ${TABS.find(t => t.id === tab)?.label?.toLowerCase()}...`}
-          className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/10 transition"
+          className="w-full pl-10 pr-10 py-3 rounded-xl bg-white border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
         />
         {query && (
           <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-200">
@@ -198,7 +198,7 @@ export default function ParityMatrix() {
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">
           {TABS.find(t => t.id === tab)?.label} — {tabDoneCount}/{itemsForTab.length} verified
         </p>
-        <button onClick={markAll} className="text-xs font-semibold text-[#2E5A1A] hover:underline">
+        <button onClick={markAll} className="text-xs font-semibold text-primary hover:underline">
           Mark all complete
         </button>
       </div>

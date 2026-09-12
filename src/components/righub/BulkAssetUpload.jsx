@@ -150,7 +150,7 @@ export default function BulkAssetUpload({ onClose }) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>
             <h3 className="font-bold text-slate-900 text-lg flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-[#2E5A1A]" /> Bulk Upload Assets
+              <FileSpreadsheet className="w-5 h-5 text-primary" /> Bulk Upload Assets
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Upload a CSV to create multiple assets at once</p>
           </div>
@@ -182,7 +182,7 @@ export default function BulkAssetUpload({ onClose }) {
                   ))}
                 </div>
               )}
-              <button onClick={onClose} className="w-full py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-semibold hover:bg-[#1c4a12] transition">
+              <button onClick={onClose} className="w-full py-2.5 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition">
                 Done
               </button>
             </div>

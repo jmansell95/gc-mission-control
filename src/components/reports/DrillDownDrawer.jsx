@@ -73,7 +73,7 @@ export default function DrillDownDrawer({ title, breadcrumb = [], records = [], 
           <div className="flex items-center gap-3 mt-2">
             <span className="text-xs text-slate-500">{records.length} record{records.length !== 1 ? 's' : ''}</span>
             <button onClick={handleExport}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-[#2E5A1A] text-xs font-semibold hover:bg-emerald-100 transition">
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-primary text-xs font-semibold hover:bg-emerald-100 transition">
               <Download className="w-3 h-3" /> Export CSV
             </button>
           </div>

@@ -90,17 +90,17 @@ export default function SystemAuditLogViewer() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search by record summary, entity, actor or ID..."
-              className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+              className="w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
             />
           </div>
           <select value={entityFilter} onChange={e => setEntityFilter(e.target.value)}
-            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary bg-white">
             {entityNames.map(n => (
               <option key={n} value={n}>{n === 'all' ? 'All entities' : n}</option>
             ))}
           </select>
           <select value={actionFilter} onChange={e => setActionFilter(e.target.value)}
-            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#2E5A1A] bg-white">
+            className="px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-primary bg-white">
             <option value="all">All actions</option>
             <option value="create">Creates</option>
             <option value="update">Updates</option>
@@ -116,7 +116,7 @@ export default function SystemAuditLogViewer() {
       <div className="space-y-2">
         {isLoading && (
           <div className="text-center py-16">
-            <Loader2 className="w-8 h-8 text-[#2E5A1A] animate-spin mx-auto" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
             <p className="text-sm text-slate-400 mt-3">Loading audit trail…</p>
           </div>
         )}
@@ -139,7 +139,7 @@ export default function SystemAuditLogViewer() {
                 className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50/70 transition text-left"
               >
                 {isExpanded
-                  ? <ChevronDown className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+                  ? <ChevronDown className="w-4 h-4 text-primary flex-shrink-0" />
                   : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${meta.cls}`}>
                   <ActionIcon className="w-4 h-4" />

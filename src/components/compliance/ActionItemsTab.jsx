@@ -152,16 +152,16 @@ export default function ActionItemsTab() {
       <div className="flex flex-wrap gap-2 items-center">
         <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search action items…" className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#2E5A1A]" />
+          <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search action items…" className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-primary" />
         </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A]">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary">
           <option value="open">Open + In Progress</option>
           <option value="all">All statuses</option>
           <option value="open">Open only</option>
           <option value="in_progress">In Progress</option>
           <option value="closed">Closed</option>
         </select>
-        <select value={assigneeFilter} onChange={e => setAssigneeFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-[#2E5A1A] max-w-[160px]">
+        <select value={assigneeFilter} onChange={e => setAssigneeFilter(e.target.value)} className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-600 focus:outline-none focus:border-primary max-w-[160px]">
           <option value="all">All assignees</option>
           {assignees.map(a => <option key={a} value={a}>{a}</option>)}
         </select>

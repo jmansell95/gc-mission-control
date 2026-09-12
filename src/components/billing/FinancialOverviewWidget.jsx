@@ -241,8 +241,8 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
       {/* AfP vs Invoice explainer banner */}
       <div className="hub-glass rounded-2xl p-4 border-l-4 border-l-[#2E5A1A]">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-            <Wallet className="w-5 h-5 text-[#2E5A1A]" />
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Wallet className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold text-slate-900">Applications for Payment vs Invoices</p>
@@ -250,7 +250,7 @@ export default function FinancialOverviewWidget({ onSelectTab }) {
               <strong>Applications for Payment (AfP)</strong> are formal requests for payment based on work completed —
               they are <em>not</em> tax invoices. The client certifies the AfP, then you raise a <strong>VAT Invoice</strong>.
               The <span className="font-semibold text-blue-600">AfP Pipeline</span> above shows completed jobs not yet invoiced.
-              Use the <span className="font-semibold text-[#2E5A1A]">Billing Readiness</span> step to convert AfP into invoices.
+              Use the <span className="font-semibold text-primary">Billing Readiness</span> step to convert AfP into invoices.
             </p>
           </div>
         </div>

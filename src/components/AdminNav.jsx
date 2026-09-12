@@ -313,11 +313,11 @@ export default function AdminNav({ activeSection, setActiveSection, onSettingsTa
                     )}
                     <button onClick={() => { openScanner(); setProfileMenuOpen(false); }} type="button"
                       className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
-                      <ScanLine className="w-4 h-4 text-[#2E5A1A]" /> Scan Asset
+                      <ScanLine className="w-4 h-4 text-primary" /> Scan Asset
                     </button>
                     <button onClick={() => { openHub(); setProfileMenuOpen(false); }} type="button"
                       className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">
-                      <Sparkles className="w-4 h-4 text-[#2E5A1A]" /> AI Hubs
+                      <Sparkles className="w-4 h-4 text-primary" /> AI Hubs
                     </button>
                     <button onClick={() => { navigate('/reports'); setProfileMenuOpen(false); }} type="button"
                       className="w-full flex items-center gap-3 px-4 py-2 text-ui-body font-medium text-slate-700 hover:bg-slate-50 transition text-left">

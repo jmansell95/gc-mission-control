@@ -167,7 +167,7 @@ export default function CrewProfilesTab() {
                     <button
                       onClick={() => handleCreateFromUser(u)}
                       disabled={actioningId === u.id}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:brightness-110 transition disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-semibold hover:brightness-110 transition disabled:opacity-50"
                     >
                       {actioningId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
                       Create
@@ -196,7 +196,7 @@ export default function CrewProfilesTab() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search crew…"
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-[#2E5A1A] focus:ring-2 focus:ring-[#2E5A1A]/20 transition"
+              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
             />
           </div>
         </div>
@@ -217,14 +217,14 @@ export default function CrewProfilesTab() {
                 <button
                   key={s.id}
                   onClick={() => setEditing(s)}
-                  className="w-full text-left hub-glass rounded-xl p-3.5 flex items-center gap-3 hover:border-[#2E5A1A]/40 transition group"
+                  className="w-full text-left hub-glass rounded-xl p-3.5 flex items-center gap-3 hover:border-primary/40 transition group"
                 >
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center text-white font-bold text-xs shadow-sm overflow-hidden">
                     {s.avatar_url ? <img src={s.avatar_url} alt={s.name} className="w-full h-full object-cover" /> : initials}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-[#2E5A1A] transition">{s.name}</p>
+                      <p className="text-sm font-semibold text-slate-900 truncate group-hover:text-primary transition">{s.name}</p>
                       {!s.is_active && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 text-slate-500 font-medium">Inactive</span>}
                     </div>
                     <p className="text-xs text-slate-500 truncate">

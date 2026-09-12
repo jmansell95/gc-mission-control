@@ -25,7 +25,7 @@ const CATEGORY_ACCENTS = {
   vehicle: { bg: 'bg-indigo-50', border: 'border-indigo-200', iconBg: 'bg-indigo-100', iconText: 'text-indigo-600', titleText: 'text-indigo-900', btn: 'bg-indigo-600 hover:bg-indigo-700' },
   powra: { bg: 'bg-amber-50', border: 'border-amber-200', iconBg: 'bg-amber-100', iconText: 'text-amber-600', titleText: 'text-amber-900', btn: 'bg-amber-600 hover:bg-amber-700' },
   equipment: { bg: 'bg-emerald-50', border: 'border-emerald-200', iconBg: 'bg-emerald-100', iconText: 'text-emerald-600', titleText: 'text-emerald-900', btn: 'bg-emerald-600 hover:bg-emerald-700' },
-  general: { bg: 'bg-slate-50', border: 'border-slate-200', iconBg: 'bg-slate-100', iconText: 'text-slate-600', titleText: 'text-slate-900', btn: 'bg-[#2E5A1A] hover:bg-[#1c4a12]' },
+  general: { bg: 'bg-slate-50', border: 'border-slate-200', iconBg: 'bg-slate-100', iconText: 'text-slate-600', titleText: 'text-slate-900', btn: 'bg-primary hover:bg-primary/90' },
 };
 
 export default function SafetyFormsList({ step }) {

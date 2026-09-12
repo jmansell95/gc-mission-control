@@ -43,7 +43,7 @@ export default function RigMeterageModal({ rigs = [], onClose }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-5 animate-pop-in">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-[#2E5A1A] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
               <Ruler className="w-4 h-4 text-white" />
             </div>
             <h3 className="text-base font-bold text-slate-900">Log Meterage</h3>
@@ -59,7 +59,7 @@ export default function RigMeterageModal({ rigs = [], onClose }) {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Rig</label>
               <select value={selectedRigId} onChange={e => setSelectedRigId(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30">
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30">
                 {eligibleRigs.map(r => (
                   <option key={r.rigId} value={r.rigId}>{r.rig?.name || 'Unknown'} — {r.job?.name || 'No job'}</option>
                 ))}
@@ -68,10 +68,10 @@ export default function RigMeterageModal({ rigs = [], onClose }) {
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block">Metres drilled</label>
               <input type="number" step="0.1" value={metres} onChange={e => setMetres(e.target.value)} placeholder="e.g. 12.5"
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2E5A1A]/30" />
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             <button onClick={handleSave} disabled={saving}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#2E5A1A] text-white rounded-lg text-sm font-bold hover:bg-[#244715] disabled:opacity-50 transition">
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-[#244715] disabled:opacity-50 transition">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ruler className="w-4 h-4" />}
               Save Meterage
             </button>

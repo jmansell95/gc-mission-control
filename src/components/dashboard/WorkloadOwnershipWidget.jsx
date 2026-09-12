@@ -132,16 +132,16 @@ export default function WorkloadOwnershipWidget({ onNavigate }) {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => onNavigate?.('jobs')}
-            className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-[#2E5A1A]/30 hover:bg-[#2E5A1A]/5 transition text-left group"
+            className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-primary/5 transition text-left group"
           >
-            <div className="w-10 h-10 rounded-lg bg-[#2E5A1A]/10 flex items-center justify-center flex-shrink-0">
-              <Briefcase className="w-5 h-5 text-[#2E5A1A]" />
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-5 h-5 text-primary" />
             </div>
             <div className="min-w-0">
               <div className="text-2xl font-bold text-slate-900 leading-none tabular-nums">{directJobs.length}</div>
               <div className="text-[11px] text-slate-500 font-medium mt-0.5">Direct Jobs</div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#2E5A1A] ml-auto transition" />
+            <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary ml-auto transition" />
           </button>
 
           <button

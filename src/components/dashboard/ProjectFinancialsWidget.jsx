@@ -93,11 +93,11 @@ export default function ProjectFinancialsWidget({ onNavigate }) {
         <div className="space-y-3">
           {/* Project selector + full breakdown link */}
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-[#2E5A1A] flex-shrink-0" />
+            <Building2 className="w-4 h-4 text-primary flex-shrink-0" />
             <select
               value={effectiveProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:outline-none focus:border-[#2E5A1A] bg-white"
+              className="flex-1 min-w-0 px-2.5 py-1.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 focus:outline-none focus:border-primary bg-white"
             >
               {projectOptions.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}{p.reference ? ` (${p.reference})` : ''}</option>
@@ -105,7 +105,7 @@ export default function ProjectFinancialsWidget({ onNavigate }) {
             </select>
             {onNavigate && (
               <button onClick={() => onNavigate('billing')}
-                className="flex items-center gap-1 px-2.5 py-1.5 bg-[#2E5A1A] text-white rounded-lg text-xs font-semibold hover:bg-[#1c4a12] transition flex-shrink-0 whitespace-nowrap">
+                className="flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white rounded-lg text-xs font-semibold hover:bg-primary/90 transition flex-shrink-0 whitespace-nowrap">
                 Full Breakdown <ArrowRight className="w-3 h-3" />
               </button>
             )}
@@ -141,9 +141,9 @@ export default function ProjectFinancialsWidget({ onNavigate }) {
               <p className="text-[10px] text-amber-600 font-medium uppercase tracking-wide">Unbilled</p>
               <p className="text-sm font-bold text-amber-700 tabular-nums mt-0.5">{fmtGbp(totals.unbilled)}</p>
             </div>
-            <div className="bg-[#2E5A1A]/5 rounded-lg p-2.5 text-center">
-              <p className="text-[10px] text-[#2E5A1A] font-medium uppercase tracking-wide">Realised</p>
-              <p className="text-sm font-bold text-[#2E5A1A] tabular-nums mt-0.5">{totals.realizationPct}%</p>
+            <div className="bg-primary/5 rounded-lg p-2.5 text-center">
+              <p className="text-[10px] text-primary font-medium uppercase tracking-wide">Realised</p>
+              <p className="text-sm font-bold text-primary tabular-nums mt-0.5">{totals.realizationPct}%</p>
             </div>
           </div>
 
@@ -174,7 +174,7 @@ export default function ProjectFinancialsWidget({ onNavigate }) {
                       </span>
                     )}
                     {r.hasSor && (
-                      <span className="text-[9px] bg-[#2E5A1A]/10 text-[#2E5A1A] px-1 py-0.5 rounded-full font-semibold flex-shrink-0 inline-flex items-center gap-0.5">
+                      <span className="text-[9px] bg-primary/10 text-primary px-1 py-0.5 rounded-full font-semibold flex-shrink-0 inline-flex items-center gap-0.5">
                         <Layers className="w-2.5 h-2.5" /> SOR
                       </span>
                     )}

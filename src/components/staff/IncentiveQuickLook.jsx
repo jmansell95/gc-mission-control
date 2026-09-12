@@ -78,7 +78,7 @@ export default function IncentiveQuickLook({ staffId, teamId }) {
         </div>
 
         {/* Chevron */}
-        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-[#2E5A1A] group-hover:translate-x-0.5 transition flex-shrink-0" />
+        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition flex-shrink-0" />
       </div>
     </button>
   );
