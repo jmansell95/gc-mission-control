@@ -15,6 +15,7 @@ import JobDocumentsStep from '@/components/jobs/JobDocumentsStep';
 import { getJobDisciplines, getDisciplineSubcategories } from '@/utils/jobDisciplines';
 import { getJobTypeColor, isDrillingJobType } from '@/utils/jobTeams';
 import { useDivision } from '@/contexts/DivisionContext';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
 const inputCls = "w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 text-sm transition";
 
@@ -72,6 +73,7 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
   const [managerOpen, setManagerOpen] = useState(false);
   const queryClient = useQueryClient();
   const { activeDivisionId, isSuperAdmin } = useDivision();
+  const { get: getEffectiveSetting } = useEffectiveSettings();
 
   const { data: clients = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list(), enabled: open });
   const { data: contractors = [] } = useQuery({ queryKey: ['contractors'], queryFn: () => base44.entities.Contractor.list(), enabled: open });
@@ -86,7 +88,10 @@ export default function JobWizardModal({ open, onClose, onCreated, editingJob })
       setBoqLines([]);
       setOriginalBoqIds([]);
       setStagedDocs([]);
-      setForm(editingJob ? { ...emptyForm, ...editingJob, disciplines: getJobDisciplines(editingJob) } : emptyForm);
+      setForm(editingJob
+        ? { ...emptyForm, ...editingJob, disciplines: getJobDisciplines(editingJob) }
+        : { ...emptyForm, vat_rate: getEffectiveSetting('default_vat_rate') ?? 20, markup_percentage: getEffectiveSetting('default_markup_percentage') != null ? String(getEffectiveSetting('default_markup_percentage')) : '' }
+      );
       if (editingJob?.id) {
         base44.entities.JobBillOfQuantities.filter({ job_id: editingJob.id }, 'sort_order', 500).then(lines => {
           const mapped = lines.map(l => ({

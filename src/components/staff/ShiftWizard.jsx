@@ -23,6 +23,7 @@ import { useMittiCheckLinks } from '@/hooks/useMittiCheckLinks';
 import { useMittiCheckStatus } from '@/hooks/useMittiCheckStatus';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useGeofenceDetection } from '@/hooks/useGeofenceDetection';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
 const fmtDur = (mins) => {
   const m = Math.round(Number(mins) || 0);
@@ -265,7 +266,9 @@ export default function ShiftWizard({
   const [saving, setSaving] = useState(false);
   const [arriveData, setArriveData] = useState({ departHome: '', arriveSite: '' });
 
-  const needsBriefing = assignment
+  const { get: getEffectiveSetting } = useEffectiveSettings();
+  const briefingRequired = getEffectiveSetting('require_briefing_signature') ?? true;
+  const needsBriefing = briefingRequired && assignment
     ? !assignment.briefing_signed &&
       !visibleAssignments.some(a => a.job_id === assignment.job_id && a.briefing_signed && a.id !== assignment.id)
     : false;

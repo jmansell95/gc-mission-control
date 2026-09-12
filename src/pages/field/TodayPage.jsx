@@ -43,6 +43,7 @@ import { useFieldData } from '@/components/field/FieldDataProvider';
 import { useQuery } from '@tanstack/react-query';
 import QuickActionsBar from '@/components/field/QuickActionsBar';
 import CelebrationOverlay from '@/components/field/CelebrationOverlay';
+import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
 export default function TodayPage() {
   const navigate = useNavigate();
@@ -56,6 +57,8 @@ export default function TodayPage() {
     gpsTracking, gpsHasFix, gpsPointsQueued, gpsErrorType,
     queryClient,
   } = ctx;
+
+  const { get: getEffectiveSetting } = useEffectiveSettings();
 
   const [shiftWizard, setShiftWizard] = useState(null);
   const [earlyLeaveAssignment, setEarlyLeaveAssignment] = useState(null);
@@ -378,7 +381,8 @@ export default function TodayPage() {
     return <OutsideSiteHours openTime={SITE_OPEN_TIME} closeTime={SITE_SUBMISSION_CLOSE_TIME} mode="closed" />;
   }
   const inSubmissionWindow = isWithinSubmissionWindow() && !staff?.is_admin && !isPlatformAdmin;
-  const canPerformActions = (isWithinSiteHours() || staff?.is_admin || isPlatformAdmin) && !inSubmissionWindow;
+  const canEditTimesheet = (getEffectiveSetting('allow_timesheet_edit') ?? true) || staff?.is_admin || isPlatformAdmin;
+  const canPerformActions = canEditTimesheet && (isWithinSiteHours() || staff?.is_admin || isPlatformAdmin) && !inSubmissionWindow;
 
   // ── Derived ──
   const visibleWeekStarts = rotaWeeks.filter(w => w.status === 'published' && !w.superseded).map(w => w.week_start);
