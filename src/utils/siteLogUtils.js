@@ -68,10 +68,29 @@ export function formatLondonDate(dateStr) {
 // virtual row for display. Combines descriptions and raw_remarks, keeps the
 // longest duration / latest end time. Display-only — stored records are not
 // altered (the backend parser merge handles future imports cleanly).
+//
+// Two-phase merge:
+//   1. Exact dedup — same borehole + date + start_time + description → keep one
+//      (catches stored duplicates from older imports that survived re-pushes)
+//   2. Time merge — same borehole + start_time but different descriptions →
+//      combine descriptions with ' · ' so overlapping activities display as one
 export function mergeDuplicateLogs(logs) {
   if (!logs || logs.length <= 1) return logs;
+
+  // Phase 1: exact dedup (same borehole + date + start_time + description)
+  const exactSeen = new Set();
+  const deduped = logs.filter(l => {
+    const key = `${l.borehole_ref || ''}|${l.date || ''}|${l.start_time || ''}|${(l.description || '').trim().toLowerCase()}`;
+    if (exactSeen.has(key)) return false;
+    exactSeen.add(key);
+    return true;
+  });
+
+  if (deduped.length <= 1) return deduped;
+
+  // Phase 2: time merge (same borehole + start_time, different descriptions)
   const groups = new Map();
-  for (const l of logs) {
+  for (const l of deduped) {
     const key = `${l.borehole_ref || ''}|${l.start_time || ''}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(l);

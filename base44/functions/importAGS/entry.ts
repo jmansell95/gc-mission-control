@@ -1685,6 +1685,38 @@ Deno.serve(async (req) => {
       logs.push(...nonKlb, ...mergedKlb);
     }
 
+    // ── Cross-source dedup: remove exact duplicates between ags_import and
+    // keylogbook_remarks ──
+    // When a KeyLogBook file contains both structured time groups (DLOG/PTIM)
+    // AND remark text for the same borehole+date+time, the structured activity
+    // (ags_import) and the parsed remark (keylogbook_remarks) can produce
+    // overlapping entries. The uncoveredChunks filter already prevents this for
+    // future imports, but stored duplicates from older imports can survive a
+    // re-push if the borehole-scoped overwrite misses edge cases. This final
+    // pass removes any remaining exact duplicates (same borehole + date +
+    // start_time + description) across ALL sources, keeping the first.
+    const dedupKeys = new Set<string>();
+    const dedupedLogs = logs.filter(l => {
+      // Only dedup timed activities (keylogbook_remarks + any ags_import
+      // activities that happen to have start_time). Technical logs (strata,
+      // core, samples) don't have start_time and are deduped by logSignature.
+      if (!l.start_time) return true;
+      const key = [
+        l.borehole_ref || '',
+        l.date || '',
+        l.start_time || '',
+        (l.description || '').trim().toLowerCase(),
+      ].join('|');
+      if (dedupKeys.has(key)) return false;
+      dedupKeys.add(key);
+      return true;
+    });
+    if (dedupedLogs.length < logs.length) {
+      counts.duplicates += logs.length - dedupedLogs.length;
+      logs.length = 0;
+      logs.push(...dedupedLogs);
+    }
+
     // Organise: sort by date, then start time, then borehole ref so the
     // imported logs read chronologically day-by-day, activity-by-activity.
     logs.sort((a, b) => {

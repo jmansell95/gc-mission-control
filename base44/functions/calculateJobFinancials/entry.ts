@@ -1,6 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { loadJobRateCardItems, findBestRateCardMatch, type RateCardItemLike } from '../../shared/jobRateMatcher.ts';
 import { resolveHireCharges } from '../../shared/supplierRateMatcher.ts';
+import {
+  parseDepthBandedRates as sharedParseDepthBandedRates,
+  splitDepthIntoBands as sharedSplitDepthIntoBands,
+  findPerMetreDrillingRate as sharedFindPerMetreDrillingRate,
+  DEFAULT_CP_DIAMETER,
+  DEFAULT_ROTARY_DIAMETER,
+  type DepthBandedRate,
+} from '../../shared/depthBandedRates.ts';
 
 // ============================================================
 // calculateJobFinancials — the zero-touch auto-financials engine
@@ -142,56 +150,14 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // ── Depth-banded drilling rate parser ──
-    // EWR/Phenna rate cards price per-metre drilling by depth band AND diameter:
-    //   "4 — Advance borehole between existing ground level and 10m depth 150mm"  → 0–10m, 150mm
-    //   "5 — As Item B4 but between 10m and 20m depth 150mm"                        → 10–20m, 150mm
-    // This parses those descriptions into structured bands for exact per-band pricing.
-    interface DepthBandedRate {
-      depth_from: number; depth_to: number; diameter: number;
-      price: number; description: string; id: string; source: string;
-    }
-    const parseDepthBandedRates = (pool: RateCardItemLike[], methodPrefix: string, source: string): DepthBandedRate[] => {
-      if (!pool || pool.length === 0) return [];
-      const banded = pool.filter(i =>
-        i.unit === 'm' &&
-        i.price != null && !isNaN(Number(i.price)) &&
-        String(i.subcategory || '').includes(methodPrefix) &&
-        /advance borehole|as item b\d|rotary drill/i.test(i.description) &&
-        !/backfill|standpipe|install|grout|piezo|inclined|extra over|setting up|standing|break out/i.test(i.description)
-      );
-      const rates: DepthBandedRate[] = [];
-      for (const i of banded) {
-        const d = String(i.description || '');
-        let m = d.match(/between\s+(\d+)m\s+and\s+(\d+)m\s+depth\s+(\d+)mm/i);
-        if (m) { rates.push({ depth_from: +m[1], depth_to: +m[2], diameter: +m[3], price: Number(i.price), description: i.description, id: i.id, source }); continue; }
-        m = d.match(/between existing ground level and\s+(\d+)m\s+depth\s+(\d+)mm/i);
-        if (m) { rates.push({ depth_from: 0, depth_to: +m[1], diameter: +m[2], price: Number(i.price), description: i.description, id: i.id, source }); continue; }
-        m = d.match(/less than\s+(\d+)m.*?(\d+)mm/i);
-        if (m) { rates.push({ depth_from: 0, depth_to: +m[1], diameter: +m[2], price: Number(i.price), description: i.description, id: i.id, source }); continue; }
-      }
-      const seen = new Set<string>();
-      return rates.filter(r => {
-        const key = `${r.depth_from}-${r.depth_to}-${r.diameter}`;
-        if (seen.has(key)) return false;
-        seen.add(key); return true;
-      }).sort((a, b) => a.depth_from - b.depth_from || a.diameter - b.diameter);
-    };
+    // Delegate to the shared depthBandedRates module (single source of truth,
+    // also used by the AFP population pipeline).
+    const parseDepthBandedRates = (pool: RateCardItemLike[], methodPrefix: string, source: string): DepthBandedRate[] =>
+      sharedParseDepthBandedRates(pool, methodPrefix, source);
 
     // Single-rate fallback (for rate cards without depth bands)
-    const findPerMetreDrillingRate = (method: string, pool: RateCardItemLike[]): RateCardItemLike | null => {
-      if (!pool || pool.length === 0) return null;
-      const methodPrefix = method === 'rotary' ? 'Rotary Drilling' : 'CP Drilling';
-      const perMetre = pool.filter(i =>
-        i.unit === 'm' && i.price != null && !isNaN(Number(i.price)) &&
-        String(i.subcategory || '').includes(methodPrefix)
-      );
-      if (perMetre.length === 0) return null;
-      const advance = perMetre.filter(i =>
-        /advance borehole|rotary drill/i.test(i.description) &&
-        !/backfill|standpipe|install|grout|piezo|inclined|extra over/i.test(i.description)
-      );
-      return advance[0] || perMetre[0];
-    };
+    const findPerMetreDrillingRate = (method: string, pool: RateCardItemLike[]): RateCardItemLike | null =>
+      sharedFindPerMetreDrillingRate(method, pool);
 
     // Build depth-banded rate tables (project first, then global fills gaps)
     const cpBandedRates: DepthBandedRate[] = [
@@ -238,23 +204,8 @@ export default async function(req: Request): Promise<Response> {
     };
 
     // Per-borehole meterage tracking (with depth-band split)
-    // Default drilling diameter: 150mm for CP (standard SI borehole), 100mm for rotary core
-    const DEFAULT_CP_DIAMETER = 150;
-    const DEFAULT_ROTARY_DIAMETER = 100;
-    const splitDepthIntoBands = (dFrom: number, dTo: number, bandSize = 10): Record<string, number> => {
-      const bands: Record<string, number> = {};
-      let bandStart = Math.floor(dFrom / bandSize) * bandSize;
-      while (bandStart < dTo) {
-        const segFrom = Math.max(bandStart, dFrom);
-        const segTo = Math.min(bandStart + bandSize, dTo);
-        if (segTo > segFrom) {
-          const key = `${bandStart}-${bandStart + bandSize}`;
-          bands[key] = Math.round(((bands[key] || 0) + (segTo - segFrom)) * 100) / 100;
-        }
-        bandStart += bandSize;
-      }
-      return bands;
-    };
+    // splitDepthIntoBands + DEFAULT diameters come from the shared module.
+    const splitDepthIntoBands = sharedSplitDepthIntoBands;
     const bhMap: Record<string, { borehole_ref: string; metres: number; entries: number; method: string; band_metres: Record<string, number> }> = {};
 
     for (const log of logs) {

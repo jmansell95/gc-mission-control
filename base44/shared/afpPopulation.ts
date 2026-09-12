@@ -11,6 +11,7 @@
 // JobAssetAssignment (plant hire, grouped by asset).
 
 import { resolveRate, loadActiveContract } from './rateResolver.ts';
+import { loadDrillingRateCards, priceDrillingLog, inferBoreholeMethod } from './depthBandedRates.ts';
 
 export function toNum(v: any): number {
   const n = Number(v);
@@ -63,9 +64,16 @@ export async function resolveDraftAfpForJob(base44: any, jobId: string, recordDa
 // Return null when the record is not billable and should be skipped.
 
 export function buildFromInvestigationLog(afpId: string, jobId: string, log: any): any {
-  const metres = toNum(log.metres_drilled) ||
-    (log.depth_to != null && log.depth_from != null ? toNum(log.depth_to) - toNum(log.depth_from) : 0);
-  const units = toNum(log.units_completed) || metres || 1;
+  // Only borehole_progress and core_inspection represent drilling advance
+  // (metres drilled). Other log types (strata, SPT, samples, installations,
+  // readings) are data points — NOT billable per metre. Pricing them as
+  // drilling metres caused zero-rated clutter and double-counted revenue.
+  const isDrillingAdvance = log.log_type === 'borehole_progress' || log.log_type === 'core_inspection';
+  const metres = isDrillingAdvance
+    ? (toNum(log.metres_drilled) ||
+       (log.depth_to != null && log.depth_from != null ? toNum(log.depth_to) - toNum(log.depth_from) : 0))
+    : 0;
+  const units = isDrillingAdvance ? (toNum(log.units_completed) || metres || 1) : 0;
   const chargeAmount = toNum(log.charge_amount);
   const breakdown = parseBreakdown(log.charge_breakdown);
   const rateCardItemId = breakdown.rate_card_item_id || null;
@@ -79,6 +87,13 @@ export function buildFromInvestigationLog(afpId: string, jobId: string, log: any
     source: 'driller_log', source_date: log.date, source_id: log.id,
     is_manual: false, dispute_status: 'none',
     original_amount: chargeAmount, agreed_amount: isNoCharge ? 0 : chargeAmount,
+    // Carry the log_type + depth + borehole_ref so the pricing step can
+    // apply depth-banded per-metre rates to drilling-advance logs only.
+    _log_type: log.log_type,
+    _depth_from: log.depth_from,
+    _depth_to: log.depth_to,
+    _borehole_ref: log.borehole_ref,
+    _drilling_method: log.drilling_method,
   };
 }
 
@@ -484,26 +499,40 @@ export async function bulkPopulateAFP(base44: any, afpId: string, userName: stri
     });
   }
 
-  // ── Pricing step: resolve rates for driller_log items with rate=0 ──
-  // Imported KeyLogBook AGS logs have no billing data — price them against
-  // the job rate card → global Master Price List via the rate resolver.
-  for (const item of newItems) {
-    if (item.source === 'driller_log' && toNum(item.rate) === 0 && toNum(item.amount) === 0) {
-      try {
-        const resolved = await resolveRate(base44, {
-          job_id: afp.job_id,
-          description: item.item,
-          quantity: item.qty,
-          activeContract,
-          job_date: item.source_date,
-        });
-        if (resolved && resolved.unit_price > 0) {
-          item.rate = resolved.unit_price;
-          item.amount = Math.round(resolved.unit_price * toNum(item.qty) * 100) / 100;
-          item.original_amount = item.amount;
-          item.agreed_amount = item.amount;
+  // ── Depth-banded per-metre pricing for drilling logs ──
+  // KeyLogBook-imported drilling logs (borehole_progress, core_inspection)
+  // have no billing data — price them against the job rate card → global
+  // Master Price List using depth-banded per-metre rates (the same logic
+  // calculateJobFinancials uses). Each log's depth range is split into 10m
+  // bands and each band is matched to the correct depth/diameter rate.
+  // Non-drilling logs (strata, SPT, samples) stay at zero — they're data
+  // points, not billable metres.
+  const drillingItems = newItems.filter(
+    (li) => li.source === 'driller_log' && toNum(li.rate) === 0 && toNum(li.amount) === 0 && (li._log_type === 'borehole_progress' || li._log_type === 'core_inspection'),
+  );
+  if (drillingItems.length > 0) {
+    const job = await base44.entities.Job.get(afp.job_id);
+    const jobMeterageRate = toNum(job?.meterage_rate);
+    const rateCards = await loadDrillingRateCards(base44, afp.job_id, jobMeterageRate);
+    for (const item of drillingItems) {
+      const dFrom = toNum(item._depth_from);
+      const dTo = toNum(item._depth_to);
+      if (dTo <= dFrom) continue;
+      const method = item._drilling_method || inferBoreholeMethod([{ log_type: item._log_type, drilling_method: item._drilling_method }]);
+      const bandedRates = method === 'rotary' ? rateCards.rotaryBandedRates : rateCards.cpBandedRates;
+      const singleRate = method === 'rotary' ? rateCards.rotarySingleRate : rateCards.cpSingleRate;
+      const priced = priceDrillingLog(dFrom, dTo, method || 'cp', bandedRates, singleRate, rateCards.jobMeterageRate);
+      if (priced.amount > 0) {
+        item.rate = priced.rate;
+        item.amount = priced.amount;
+        item.original_amount = priced.amount;
+        item.agreed_amount = priced.amount;
+        // Enrich the description with the borehole ref + method for clarity
+        const ref = item._borehole_ref || '';
+        if (ref && item.item.startsWith('Imported from')) {
+          item.item = `Drilling — ${ref} (${method === 'rotary' ? 'Rotary' : 'CP'}, ${Math.round((dTo - dFrom) * 10) / 10}m)`;
         }
-      } catch (_) { /* rate resolution failed — leave at 0 */ }
+      }
     }
   }
 
