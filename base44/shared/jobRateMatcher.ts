@@ -124,6 +124,50 @@ export function findBestRateCardMatch(
   return bestScore >= 0.6 ? best : null;
 }
 
+// ── Pre-tokenized fast matcher (for high-volume loops) ──
+// Pre-tokenizing rate card items ONCE and reusing the token sets across
+// thousands of logs avoids millions of redundant tokenize() calls.
+// Used by calculateJobFinancials which processes 2,000+ logs per job.
+
+export interface PreTokenizedItem extends RateCardItemLike {
+  _tokenSet: Set<string>;
+}
+
+export function preTokenizeRateItems(items: RateCardItemLike[]): PreTokenizedItem[] {
+  return (items || [])
+    .filter((i) => i.is_active !== false && i.price != null && !isNaN(Number(i.price)))
+    .map((i) => ({
+      ...i,
+      _tokenSet: new Set(tokenize(i.description)),
+    }));
+}
+
+export function findBestMatchFast(
+  description: string,
+  preTokenized: PreTokenizedItem[]
+): PreTokenizedItem | null {
+  if (!description || !preTokenized || preTokenized.length === 0) return null;
+  const activityTokens = tokenize(description);
+  if (activityTokens.length === 0) return null;
+  let best: PreTokenizedItem | null = null;
+  let bestScore = 0;
+  for (const item of preTokenized) {
+    if (item._tokenSet.size === 0) continue;
+    let hits = 0;
+    for (const t of activityTokens) {
+      if (item._tokenSet.has(t)) hits++;
+    }
+    if (hits === 0 || hits < 2) continue;
+    const recall = hits / activityTokens.length;
+    const score = recall >= 0.6 ? recall : recall * 0.5;
+    if (score > bestScore) {
+      bestScore = score;
+      best = item;
+    }
+  }
+  return bestScore >= 0.6 ? best : null;
+}
+
 // Filter rate card items by effective date — picks the rate that was active
 // on the job's actual working date. Items without effective_date are always
 // included (backward compatible). Items with expiry_date before the job date
