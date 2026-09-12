@@ -129,7 +129,7 @@ export default function BillableItemsQuickAdd({ jobId, job, rateCardItems = [], 
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] flex items-center justify-center">
-              <ShoppingCart className="w-4.5 h-4.5 text-white" />
+              <ShoppingCart className="w-4 h-4 text-white" />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 text-base">Quick Add Billable Items</h2>

@@ -165,11 +165,27 @@ export function buildFromHotelBooking(afpId: string, jobId: string, booking: any
 export function buildFromJobCostItem(afpId: string, jobId: string, item: any): any | null {
   // Exclude contractor/client-supplied (non-billable — no cost or charge to us)
   if (item.category === 'contractor_supplied' || item.category === 'client_supplied') return null;
+  // Skip items linked to a SiteAsset — these are already billed via the
+  // JobAssetAssignment path (rebuildAssetLine / asset assignment loop in
+  // bulkPopulateAFP), which correctly resolves the day rate and calculates
+  // rate × days. Including them here would double-count the same equipment.
+  if (item.site_asset_id) return null;
   const unitCost = item.price_confirmed && item.negotiated_unit_cost != null
     ? toNum(item.negotiated_unit_cost)
     : toNum(item.unit_cost);
   const qty = toNum(item.quantity) || 1;
-  const amount = Math.round(unitCost * qty * 100) / 100;
+  // Day-rate items: amount = unitCost × qty × days on site (start_date → end_date).
+  // Matches the billingTotal function used by the logistics hub so the AFP
+  // line item total matches what the hub displays.
+  let amount = unitCost * qty;
+  if (item.unit_label === 'day' && item.start_date && item.end_date) {
+    const start = new Date(String(item.start_date).slice(0, 10) + 'T00:00:00');
+    const end = new Date(String(item.end_date).slice(0, 10) + 'T00:00:00');
+    const ms = end.getTime() - start.getTime();
+    const days = Math.floor(ms / 86400000) + 1;
+    if (days > 0) amount = unitCost * qty * days;
+  }
+  amount = Math.round(amount * 100) / 100;
   const isLabour = item.category === 'labour';
   return {
     afp_id: afpId, job_id: jobId,

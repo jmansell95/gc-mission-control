@@ -92,7 +92,7 @@ export default function SubTabExpansion({ hubKey, subTabPermissions = {}, onChan
                     {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   </button>
                 ) : (
-                  <span className="w-4.5 flex-shrink-0" />
+                  <span className="w-4 flex-shrink-0" />
                 )}
                 <span className="text-xs font-semibold text-slate-600 flex-1 truncate">{tab.label}</span>
                 <LevelToggle current={current} onChange={(level) => onChange(tabPermKey, level)} />

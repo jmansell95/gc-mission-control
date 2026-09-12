@@ -43,7 +43,7 @@ export default function LoanResourceDrawer({ resource, resourceType, divisions, 
         <div className="flex items-center justify-between px-4 sm:px-5 pt-3 pb-3 border-b border-slate-100 sticky top-0 bg-white rounded-t-3xl sm:rounded-t-2xl z-10">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-              <ArrowRightLeft className="w-4.5 h-4.5 text-white" />
+              <ArrowRightLeft className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-extrabold text-slate-900 truncate">Loan Resource</h3>
