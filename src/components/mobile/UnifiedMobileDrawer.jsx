@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Users, HelpCircle, X, ChevronRight, LogOut,
   Grid3x3, Briefcase, Calendar, Boxes, Car, FlaskConical, ShieldCheck,
   PoundSterling, FileBarChart, Settings, ArrowLeftRight, Sparkles, Wrench,
+  Building2, Layers, ArrowRight, Globe,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -13,6 +14,7 @@ import { useInbox } from '@/hooks/useInbox';
 import { useAIHub } from '@/components/ai/AIHub';
 import { canAccessSection } from '@/utils/access';
 import { STANDALONE_ROUTES } from '@/utils/standaloneRoutes';
+import { getNavContext } from '@/utils/navContext';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
 const ALL_HUBS = [
@@ -30,19 +32,35 @@ const ALL_HUBS = [
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
+// Enterprise-level links — shown ONLY in the enterprise context.
+// These are the /enterprise/* routes, completely separate from stream-level hubs.
+const ENTERPRISE_LINKS = [
+  { label: 'Enterprise Overview', icon: Globe, path: '/enterprise' },
+  { label: 'Operations', icon: Briefcase, path: '/enterprise/operations' },
+  { label: 'Staff', icon: Users, path: '/enterprise/staff' },
+  { label: 'Fleet', icon: Car, path: '/enterprise/fleet' },
+  { label: 'Financial', icon: PoundSterling, path: '/enterprise/financial' },
+  { label: 'Compliance', icon: ShieldCheck, path: '/enterprise/compliance' },
+  { label: 'Crew Availability', icon: CalendarClock, path: '/enterprise/crew-availability' },
+  { label: 'Resource Pool', icon: Layers, path: '/enterprise/resource-pool' },
+  { label: 'Settings', icon: Settings, path: '/enterprise/settings' },
+  { label: 'Help', icon: HelpCircle, path: '/enterprise/help' },
+];
+
 /**
- * UnifiedMobileDrawer — the single mobile navigation component.
+ * UnifiedMobileDrawer — context-aware slide-out navigation.
  *
- * Renders a floating hamburger button (top-left) and a slide-out drawer
- * containing all navigation links, role-aware:
- *  - Field staff: Today, Upcoming, Scan, Profile, Duties, Deliveries
- *  - Admin staff: all hubs (Dashboard, Projects, Scheduling, etc.)
- *  - Everyone: Help, Sign Out
+ * Detects the current route's navigation context and renders the appropriate
+ * set of links:
  *
- * Replaces both the MobileAppShell bottom tab bar + MoreSheet and the
- * FieldShell's separate FieldDrawer. Exactly one instance should be
- * mounted per mobile view — MobileAppShell renders it for PWA/APK builds,
- * and FieldShell renders it for mobile-browser field routes.
+ *   • 'enterprise' — enterprise-level links only + a prominent "Enter My
+ *     Stream" button. No field links, no stream-level hub links.
+ *   • 'stream' — field links + admin links + hub links + a prominent
+ *     "Back to Enterprise" button at the top (for enterprise admins).
+ *
+ * This prevents navigation context leaking between the enterprise and stream
+ * levels — you never see "Admin Dashboard" while in the Enterprise Dashboard,
+ * and you never see field tabs while at the enterprise level.
  */
 export default function UnifiedMobileDrawer({ open, onClose }) {
   const navigate = useNavigate();
@@ -52,6 +70,8 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
   const { counts: inboxCounts } = useInbox();
   const { openHub } = useAIHub();
   const [profile, setProfile] = useState(null);
+
+  const ctx = getNavContext(location.pathname);
 
   useEffect(() => {
     (async () => {
@@ -63,9 +83,6 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
   }, []);
 
   const isPlatformAdmin = authUser?.role === 'admin' || authUser?.role === 'director';
-  // Enterprise admins (directors, BS admins with managed_division_ids) get full
-  // hub access — without this, a non-platform-admin enterprise user whose profile
-  // loads with system_role='field' would see all hub links vanish from the drawer.
   const isAdminFlag = isPlatformAdmin || isEnterpriseAdmin;
   const isAdmin = isAdminFlag || profile?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(profile?.system_role);
   const inboxCount = inboxCounts?.total || 0;
@@ -103,7 +120,7 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
 
-  // Accessible admin hubs (filtered by role + division + readiness)
+  // Accessible admin hubs (filtered by role + division + readiness) — stream context only
   const accessibleHubs = useMemo(() => {
     return ALL_HUBS.filter((hub) => {
       if (!canAccessSection(profile, hub.id, isAdminFlag)) return false;
@@ -113,8 +130,30 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
     });
   }, [profile, isAdminFlag, activeDivision, isHubEnabled]);
 
-  // Build sections
+  // Build sections based on navigation context
   const sections = useMemo(() => {
+    // === ENTERPRISE CONTEXT ===
+    if (ctx === 'enterprise') {
+      return [
+        {
+          title: 'Enterprise',
+          items: ENTERPRISE_LINKS.map((link) => ({
+            label: link.label,
+            icon: link.icon,
+            onClick: () => handleNavigate(link.path),
+            active: isActive(link.path),
+          })),
+        },
+        {
+          title: 'Account',
+          items: [
+            { label: 'Sign Out', icon: LogOut, onClick: handleSignOut, active: false },
+          ],
+        },
+      ];
+    }
+
+    // === STREAM CONTEXT ===
     const secs = [];
 
     // Field section — always shown
@@ -165,13 +204,14 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
     });
 
     return secs;
-  }, [profile, isAdmin, accessibleHubs, inboxCount, location.pathname, location.state]);
+  }, [ctx, profile, isAdmin, accessibleHubs, inboxCount, location.pathname, location.state]);
 
   const displayName = profile?.name || authUser?.full_name || authUser?.email || 'User';
+  const showEnterStream = ctx === 'enterprise';
+  const showBackToEnterprise = ctx === 'stream' && (isEnterpriseAdmin || isPlatformAdmin);
 
   return (
     <>
-      {/* Drawer — controlled by parent (MobileNavShell) */}
       {open && (
         <>
           <div
@@ -197,8 +237,37 @@ export default function UnifiedMobileDrawer({ open, onClose }) {
               </button>
             </div>
 
-            {/* Enterprise switch */}
-            {(isEnterpriseAdmin || permittedDivisions.length > 1) && (
+            {/* Context switch buttons */}
+            {/* Enterprise context: "Enter My Stream" — prominent branded gradient */}
+            {showEnterStream && (
+              <div className="px-3 pt-3">
+                <button
+                  onClick={() => handleNavigate('/admin')}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl command-gradient text-white active:scale-[0.98] transition shadow-lg"
+                >
+                  <Building2 className="w-5 h-5 text-white" />
+                  <span className="text-sm font-bold flex-1 text-left">Enter My Stream</span>
+                  <ArrowRight className="w-5 h-5 text-white/90" />
+                </button>
+              </div>
+            )}
+
+            {/* Stream context: "Back to Enterprise" — prominent amber gradient at the top */}
+            {showBackToEnterprise && (
+              <div className="px-3 pt-3">
+                <button
+                  onClick={() => handleNavigate('/enterprise')}
+                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white active:scale-[0.98] transition shadow-lg"
+                >
+                  <Globe className="w-5 h-5 text-white" />
+                  <span className="text-sm font-bold flex-1 text-left">Back to Enterprise</span>
+                  <ArrowRight className="w-5 h-5 text-white/90" />
+                </button>
+              </div>
+            )}
+
+            {/* Stream switch (for multi-division users in stream context) */}
+            {ctx === 'stream' && (isEnterpriseAdmin || permittedDivisions.length > 1) && !showBackToEnterprise && (
               <div className="px-3 pt-3">
                 <button
                   onClick={() => { onClose(); navigate('/enterprise'); }}

@@ -14,7 +14,9 @@ import AppLayout from '@/components/AppLayout';
 import HubReadinessGate from '@/components/HubReadinessGate';
 import { MobileAppProvider } from '@/contexts/MobileAppContext';
 import AppShell from '@/components/mobile/AppShell';
+import EnterpriseShell from '@/components/mobile/EnterpriseShell';
 import Home from './pages/Home';
+import ChooseWorkspace from './pages/ChooseWorkspace';
 import InboxPage from './pages/InboxPage';
 import PendingAccess from './pages/PendingAccess';
 import Onboarding from './pages/Onboarding';
@@ -154,6 +156,10 @@ const AuthenticatedApp = () => {
         <Route path="/oauth/consent" element={<OAuthConsent />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route path="/portal" element={<PortalDashboard />} />
+        {/* Standalone choice screen — OUTSIDE AppShell so it renders with zero
+            app chrome (no bottom bar, no drawer, no header). Home.jsx
+            redirects here when an enterprise admin hasn't chosen yet. */}
+        <Route path="/choose-workspace" element={<ChooseWorkspace />} />
         <Route element={<AppShell />}>
           <Route path="/" element={<KioskScannerRedirect><Home /></KioskScannerRedirect>} />
           <Route path="/pending-access" element={<PendingAccess />} />
@@ -194,17 +200,23 @@ const AuthenticatedApp = () => {
           </Route>
           <Route path="/help" element={<HelpGuide audience="office" />} />
           <Route path="/help-field" element={<HelpGuide audience="field" />} />
-          <Route path="/enterprise" element={<RouteGuard><EnterpriseDashboard /></RouteGuard>} />
-          <Route path="/enterprise/business-unit/:id" element={<RouteGuard><BusinessUnitPage /></RouteGuard>} />
-          <Route path="/enterprise/settings" element={<RouteGuard><EnterpriseSettings /></RouteGuard>} />
-          <Route path="/enterprise/help" element={<RouteGuard><EnterpriseHelp /></RouteGuard>} />
-          <Route path="/enterprise/staff" element={<RouteGuard><EnterpriseStaffHub /></RouteGuard>} />
-          <Route path="/enterprise/fleet" element={<RouteGuard><EnterpriseFleetHub /></RouteGuard>} />
-          <Route path="/enterprise/operations" element={<RouteGuard><EnterpriseOperationsHub /></RouteGuard>} />
-          <Route path="/enterprise/financial" element={<RouteGuard><EnterpriseFinancialHub /></RouteGuard>} />
-          <Route path="/enterprise/compliance" element={<RouteGuard><EnterpriseComplianceHub /></RouteGuard>} />
-          <Route path="/enterprise/crew-availability" element={<RouteGuard><EnterpriseCrewAvailabilityPage /></RouteGuard>} />
-          <Route path="/enterprise/resource-pool" element={<RouteGuard><EnterpriseResourcePoolPage /></RouteGuard>} />
+          {/* Enterprise routes — wrapped in EnterpriseShell so they get the
+              enterprise mobile nav (minimal Menu button + enterprise drawer)
+              instead of the field bottom bar. On PWA/APK, MobileAppShell
+              already provides the context-aware MobileNavShell. */}
+          <Route element={<EnterpriseShell />}>
+            <Route path="/enterprise" element={<RouteGuard><EnterpriseDashboard /></RouteGuard>} />
+            <Route path="/enterprise/business-unit/:id" element={<RouteGuard><BusinessUnitPage /></RouteGuard>} />
+            <Route path="/enterprise/settings" element={<RouteGuard><EnterpriseSettings /></RouteGuard>} />
+            <Route path="/enterprise/help" element={<RouteGuard><EnterpriseHelp /></RouteGuard>} />
+            <Route path="/enterprise/staff" element={<RouteGuard><EnterpriseStaffHub /></RouteGuard>} />
+            <Route path="/enterprise/fleet" element={<RouteGuard><EnterpriseFleetHub /></RouteGuard>} />
+            <Route path="/enterprise/operations" element={<RouteGuard><EnterpriseOperationsHub /></RouteGuard>} />
+            <Route path="/enterprise/financial" element={<RouteGuard><EnterpriseFinancialHub /></RouteGuard>} />
+            <Route path="/enterprise/compliance" element={<RouteGuard><EnterpriseComplianceHub /></RouteGuard>} />
+            <Route path="/enterprise/crew-availability" element={<RouteGuard><EnterpriseCrewAvailabilityPage /></RouteGuard>} />
+            <Route path="/enterprise/resource-pool" element={<RouteGuard><EnterpriseResourcePoolPage /></RouteGuard>} />
+          </Route>
           <Route element={<AppLayout />}>
             <Route path="/admin/profile" element={<RouteGuard><DesktopProfile /></RouteGuard>} />
             <Route path="/subcontractor" element={<RouteGuard><SubcontractorDashboard /></RouteGuard>} />

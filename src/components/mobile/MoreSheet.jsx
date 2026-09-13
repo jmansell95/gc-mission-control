@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, X, LogOut, Grid3x3, Briefcase, Calendar, Users, Truck, Boxes,
   Car, FlaskConical, ShieldCheck, PoundSterling, FileBarChart, Settings,
   CalendarDays, User, HelpCircle, ArrowLeftRight, ScanLine,
-  ChevronRight,
+  ChevronRight, Building2, Layers, ArrowRight, Globe,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -12,6 +12,7 @@ import { canAccessSection } from '@/utils/access';
 import { STANDALONE_ROUTES } from '@/utils/standaloneRoutes';
 import { useDivision } from '@/contexts/DivisionContext';
 import { useReadiness } from '@/hooks/useReadiness';
+import { getNavContext } from '@/utils/navContext';
 import ProfileAvatar from '@/components/ui/ProfileAvatar';
 
 const ALL_HUBS = [
@@ -37,13 +38,29 @@ const HUB_GROUPS = [
   { label: 'System', ids: ['settings'] },
 ];
 
+const ENTERPRISE_LINKS = [
+  { label: 'Enterprise Overview', icon: Globe, path: '/enterprise' },
+  { label: 'Operations', icon: Briefcase, path: '/enterprise/operations' },
+  { label: 'Staff', icon: Users, path: '/enterprise/staff' },
+  { label: 'Fleet', icon: Car, path: '/enterprise/fleet' },
+  { label: 'Financial', icon: PoundSterling, path: '/enterprise/financial' },
+  { label: 'Compliance', icon: ShieldCheck, path: '/enterprise/compliance' },
+  { label: 'Crew Availability', icon: CalendarDays, path: '/enterprise/crew-availability' },
+  { label: 'Resource Pool', icon: Layers, path: '/enterprise/resource-pool' },
+  { label: 'Settings', icon: Settings, path: '/enterprise/settings' },
+  { label: 'Help', icon: HelpCircle, path: '/enterprise/help' },
+];
+
 export default function MoreSheet({ isOpen, onClose, tabs }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user: authUser, logout } = useAuth();
   const { isHubEnabled, activeDivision, isSuperAdmin, isEnterpriseAdmin, permittedDivisions } = useDivision();
   const { isComingSoon, isLocked } = useReadiness();
   const [profile, setProfile] = useState(null);
   const [query, setQuery] = useState('');
+
+  const ctx = getNavContext(location.pathname);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,12 +73,8 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
   }, [isOpen]);
 
   const isPlatformAdmin = authUser?.role === 'admin' || authUser?.role === 'director';
-  // Enterprise admins (directors, BS admins with managed_division_ids) get full
-  // hub access — without this, a non-platform-admin enterprise user whose profile
-  // loads with system_role='field' would see all hub links vanish from the drawer.
   const isAdminFlag = isPlatformAdmin || isEnterpriseAdmin;
 
-  // Filter hubs by access, lockdown, division, and search query
   const accessibleHubs = useMemo(() => {
     const q = query.toLowerCase().trim();
     return ALL_HUBS.filter((hub) => {
@@ -76,8 +89,6 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
       comingSoon: isComingSoon(hub.id),
     }));
   }, [profile, isAdminFlag, isLocked, activeDivision, isHubEnabled, isComingSoon, query]);
-
-  const tabPaths = new Set(tabs.filter((t) => t.path).map((t) => t.path));
 
   const handleHubClick = (hubId) => {
     onClose();
@@ -98,26 +109,27 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
 
   if (!isOpen) return null;
 
+  const showEnterStream = ctx === 'enterprise';
+  const showBackToEnterprise = ctx === 'stream' && (isEnterpriseAdmin || isPlatformAdmin);
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-slide-up"
         onClick={onClose}
       />
-      {/* Panel */}
       <div
         className="relative bg-white rounded-t-3xl shadow-2xl max-h-[85dvh] flex flex-col animate-slide-up"
         style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       >
-        {/* Handle */}
         <div className="flex justify-center pt-2.5 pb-1">
           <div className="w-10 h-1 rounded-full bg-slate-300" />
         </div>
 
-        {/* Header */}
         <div className="px-4 pb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">More</h2>
+          <h2 className="text-lg font-bold text-slate-900">
+            {ctx === 'enterprise' ? 'Enterprise Menu' : 'More'}
+          </h2>
           <button
             onClick={onClose}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 active:scale-90 transition"
@@ -126,29 +138,57 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2.5">
-            <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search hubs…"
-              className="flex-1 bg-transparent text-sm focus:outline-none text-slate-700 placeholder:text-slate-400"
-            />
-            {query && (
-              <button onClick={() => setQuery('')} className="text-slate-400">
-                <X className="w-4 h-4" />
-              </button>
-            )}
+        {/* Context switch buttons */}
+        {showEnterStream && (
+          <div className="px-4 pb-3">
+            <button
+              onClick={() => { onClose(); navigate('/admin'); }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl command-gradient text-white active:scale-[0.98] transition shadow-lg"
+            >
+              <Building2 className="w-5 h-5 text-white" />
+              <span className="text-sm font-bold flex-1 text-left">Enter My Stream</span>
+              <ArrowRight className="w-5 h-5 text-white/90" />
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Scrollable content */}
+        {showBackToEnterprise && (
+          <div className="px-4 pb-3">
+            <button
+              onClick={() => { onClose(); navigate('/enterprise'); }}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white active:scale-[0.98] transition shadow-lg"
+            >
+              <Globe className="w-5 h-5 text-white" />
+              <span className="text-sm font-bold flex-1 text-left">Back to Enterprise</span>
+              <ArrowRight className="w-5 h-5 text-white/90" />
+            </button>
+          </div>
+        )}
+
+        {/* Search — stream context only (enterprise has fewer links, no need) */}
+        {ctx === 'stream' && (
+          <div className="px-4 pb-3">
+            <div className="flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2.5">
+              <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search hubs…"
+                className="flex-1 bg-transparent text-sm focus:outline-none text-slate-700 placeholder:text-slate-400"
+              />
+              {query && (
+                <button onClick={() => setQuery('')} className="text-slate-400">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto px-4 pb-4">
-          {/* Enterprise switch */}
-          {(isEnterpriseAdmin || permittedDivisions.length > 1) && (
+          {/* Enterprise switch (legacy — for multi-division users in stream context without Back to Enterprise) */}
+          {ctx === 'stream' && (isEnterpriseAdmin || permittedDivisions.length > 1) && !showBackToEnterprise && (
             <button
               onClick={() => { onClose(); navigate('/enterprise'); }}
               className="w-full flex items-center gap-3 px-3 py-3 mb-3 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/50 ring-1 ring-amber-200 text-amber-800 active:scale-[0.98] transition"
@@ -159,8 +199,38 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
             </button>
           )}
 
-          {/* Hub groups */}
-          {HUB_GROUPS.map((group) => {
+          {/* === ENTERPRISE CONTEXT === */}
+          {ctx === 'enterprise' && (
+            <div className="mb-4">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 px-1 mb-1.5">
+                Enterprise
+              </p>
+              <div className="bg-slate-50 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                {ENTERPRISE_LINKS.map((link) => {
+                  const Icon = link.icon;
+                  const active = location.pathname === link.path;
+                  return (
+                    <button
+                      key={link.path}
+                      onClick={() => { onClose(); navigate(link.path); }}
+                      className="w-full flex items-center gap-3 px-3 py-3 active:bg-slate-100 transition"
+                    >
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm ${active ? 'bg-primary/10' : 'bg-white'}`}>
+                        <Icon className={`w-[18px] h-[18px] ${active ? 'text-primary' : 'text-slate-600'}`} />
+                      </div>
+                      <span className={`text-sm font-medium flex-1 text-left ${active ? 'text-primary' : 'text-slate-700'}`}>
+                        {link.label}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-slate-300" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* === STREAM CONTEXT === Hub groups */}
+          {ctx === 'stream' && HUB_GROUPS.map((group) => {
             const items = accessibleHubs.filter((h) => group.ids.includes(h.id));
             if (items.length === 0) return null;
             return (
@@ -197,21 +267,23 @@ export default function MoreSheet({ isOpen, onClose, tabs }) {
             );
           })}
 
-          {/* Personal section */}
-          <div className="mb-4">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 px-1 mb-1.5">
-              Personal
-            </p>
-            <div className="bg-slate-50 rounded-2xl overflow-hidden divide-y divide-slate-100">
-              <MoreRow icon={CalendarDays} label="My Schedule" onClick={() => { onClose(); navigate('/staff-schedule'); }} />
-              <MoreRow icon={User} label="My Profile" onClick={() => { onClose(); navigate('/staff-profile'); }} />
-              {profile?.delivery_dashboard_enabled && (
-                <MoreRow icon={Truck} label="Driver Hub" onClick={() => { onClose(); navigate('/deliveries'); }} />
-              )}
-              <MoreRow icon={ScanLine} label="Scan Asset" onClick={() => { onClose(); navigate('/scanner'); }} />
-              <MoreRow icon={HelpCircle} label="Help Guides" onClick={() => { onClose(); navigate(isPlatformAdmin || (profile?.system_role && profile.system_role !== 'field') ? '/help' : '/help-field'); }} />
+          {/* Personal section — stream context only */}
+          {ctx === 'stream' && (
+            <div className="mb-4">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 px-1 mb-1.5">
+                Personal
+              </p>
+              <div className="bg-slate-50 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                <MoreRow icon={CalendarDays} label="My Schedule" onClick={() => { onClose(); navigate('/staff-schedule'); }} />
+                <MoreRow icon={User} label="My Profile" onClick={() => { onClose(); navigate('/staff-profile'); }} />
+                {profile?.delivery_dashboard_enabled && (
+                  <MoreRow icon={Truck} label="Driver Hub" onClick={() => { onClose(); navigate('/deliveries'); }} />
+                )}
+                <MoreRow icon={ScanLine} label="Scan Asset" onClick={() => { onClose(); navigate('/scanner'); }} />
+                <MoreRow icon={HelpCircle} label="Help Guides" onClick={() => { onClose(); navigate(isPlatformAdmin || (profile?.system_role && profile.system_role !== 'field') ? '/help' : '/help-field'); }} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer — profile + logout */}
