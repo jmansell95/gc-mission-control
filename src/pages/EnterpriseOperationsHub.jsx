@@ -5,7 +5,7 @@ import { Activity, Truck, Package, Wrench, MapPin, Clock, CheckCircle2, AlertTri
 import { motion } from 'framer-motion';
 import EnterpriseHubShell from '@/components/enterprise/EnterpriseHubShell';
 import KpiSkeleton from '@/components/enterprise/KpiSkeleton';
-import SectionTitle from '@/components/enterprise/SectionTitle';
+import HubCard from '@/components/hubs/HubCard';
 import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import { useDivision } from '@/contexts/DivisionContext';
 
@@ -68,18 +68,16 @@ export default function EnterpriseOperationsHub() {
       )}
 
       {/* Delivery Status */}
-      <div className="hub-glass rounded-2xl p-4 sm:p-5">
-        <SectionTitle icon={Package} title="Delivery Status" subtitle="Live delivery pipeline across all streams" gradient="from-blue-500 to-cyan-600" />
+      <HubCard icon={Package} title="Delivery Status" subtitle="Live delivery pipeline across all streams" tone="blue">
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
           <StatusTile label="Active" value={g.activeDeliveries || 0} icon={Clock} color="blue" />
           <StatusTile label="Completed" value={g.completedDeliveries || 0} icon={CheckCircle2} color="emerald" />
           <StatusTile label="Pending TS" value={g.pendingTs || 0} icon={AlertTriangle} color="amber" />
         </div>
-      </div>
+      </HubCard>
 
       {/* Per-Stream Operations */}
-      <div className="hub-glass rounded-2xl p-4 sm:p-5">
-        <SectionTitle icon={MapPin} title="Operations by Stream" subtitle="Active jobs, deliveries and rigs per business stream" gradient="from-amber-500 to-orange-600" />
+      <HubCard icon={MapPin} title="Operations by Stream" subtitle="Active jobs, deliveries and rigs per business stream" tone="amber">
         {isLoading ? (
           <WidgetLoadingState rows={3} variant="list" />
         ) : divisionStats.length === 0 ? (
@@ -108,7 +106,7 @@ export default function EnterpriseOperationsHub() {
             ))}
           </div>
         )}
-      </div>
+      </HubCard>
     </EnterpriseHubShell>
   );
 }
