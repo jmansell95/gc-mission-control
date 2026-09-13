@@ -4,14 +4,16 @@ import confetti from 'canvas-confetti';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, ChevronLeft, ChevronRight, Check, Loader2, Rocket, Building2, Layers, Plug } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, Loader2, Rocket, Building2, Layers, Plug, Sparkles } from 'lucide-react';
 import { defaultsForType, toProperCase } from './divisionWizardData';
 import DivisionPreviewCard from './DivisionPreviewCard';
 import { StepIdentity, StepHubs, StepIntegrations, StepReview } from './WizardSteps';
+import StepLoading from './StepLoading';
 
 const STEPS = [
   { id: 'identity', label: 'Identity', icon: Building2 },
   { id: 'hubs', label: 'Hubs', icon: Layers },
+  { id: 'loading', label: 'Loading', icon: Sparkles },
   { id: 'integrations', label: 'Connect', icon: Plug },
   { id: 'review', label: 'Launch', icon: Rocket },
 ];
@@ -29,6 +31,7 @@ const EMPTY_FORM = {
   settings: _generalDefaults.settings,
   enabled_hubs: [],
   enabled_tabs: {},
+  login_animation_config: {},
 };
 
 export default function DivisionWizard({ onClose, onCreated }) {
@@ -87,6 +90,7 @@ export default function DivisionWizard({ onClose, onCreated }) {
       nav_items: [...(template.nav_items || [])],
       settings: { ...(template.settings || {}) },
       landing_page: template.landing_page || '',
+      login_animation_config: { ...(template.login_animation_config || {}) },
     }));
     setSelectedTemplateId(template.id);
   };
@@ -126,7 +130,7 @@ export default function DivisionWizard({ onClose, onCreated }) {
     }
   };
 
-  const StepComponent = [StepIdentity, StepHubs, StepIntegrations, StepReview][step];
+  const StepComponent = [StepIdentity, StepHubs, StepLoading, StepIntegrations, StepReview][step];
 
   return (
     <div className="fixed inset-0 z-[70] bg-blue-950/60 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>

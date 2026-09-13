@@ -1,45 +1,61 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import GeotechScene from './GeotechScene';
-import LandWaterScene from './LandWaterScene';
-import InfrastructureScene from './InfrastructureScene';
-import LabScene from './LabScene';
-import EnvironmentalScene from './EnvironmentalScene';
-import SurveysScene from './SurveysScene';
-import StructuralScene from './StructuralScene';
-import RenewablesScene from './RenewablesScene';
-import GeneralScene from './GeneralScene';
-import RoadCareScene from './RoadCareScene';
+import ParticleField from '@/components/login/ParticleField';
+import FlowingLines from '@/components/login/FlowingLines';
+import GradientMesh from '@/components/login/GradientMesh';
+import { loadScene } from '@/hooks/useDivisionLoginConfig';
 
 /**
- * DivisionLoadingScreen — full-screen animated splash shown when entering ANY
- * division. The animated scene is selected automatically from the division's
- * type (geotechnical → drilling rig, land_water → boat, etc.), and the
- * division's tagline/description is shown as the subtitle. New divisions
- * created via the wizard inherit their type's scene automatically — no manual
- * configuration needed.
+ * DivisionLoadingScreen — full-screen animated splash shown when entering
+ * ANY division (switching business streams) and as a preview from the
+ * division editor/wizard.
+ *
+ * Reads the division's login_animation_config to determine:
+ *  - animation_type: themed_scene | particle_field | flowing_lines |
+ *    gradient_mesh | custom_media | none
+ *  - primary/secondary/accent colours
+ *  - welcome text, tagline, logo URL
+ *  - duration (ms), transition style, progress bar visibility
+ *  - custom_media_url + custom_media_type (image or video)
+ *
+ * Falls back to the division's color/name/tagline when config is not set,
+ * and to the division_type's themed scene when animation_type is themed_scene.
  */
-const SCENES = {
-  geotechnical: GeotechScene,
-  land_water: LandWaterScene,
-  infrastructure: InfrastructureScene,
-  road_care: RoadCareScene,
-  lde: LabScene,
-  environmental: EnvironmentalScene,
-  surveys: SurveysScene,
-  structural: StructuralScene,
-  renewables: RenewablesScene,
-  general: GeneralScene,
-};
-
-export default function DivisionLoadingScreen({ division, onComplete, duration = 3600 }) {
+export default function DivisionLoadingScreen({ division, onComplete, duration }) {
+  const [SceneComponent, setSceneComponent] = useState(null);
   const [progress, setProgress] = useState(0);
 
+  const cfg = division?.login_animation_config || {};
+  const animationType = cfg.animation_type || 'themed_scene';
+  const primaryColor = cfg.primary_color || division?.color || '#2E5A1A';
+  const secondaryColor = cfg.secondary_color || '#1c4a12';
+  const accentColor = cfg.accent_color || '#8DC63F';
+  const welcomeText = cfg.welcome_text || `${division?.name || 'Business Stream'} is loading`;
+  const tagline = cfg.tagline || division?.tagline || division?.description || '';
+  const logoUrl = cfg.logo_url || division?.logo_url || null;
+  const actualDuration = duration || cfg.duration_ms || 3600;
+  const showProgressBar = cfg.show_progress_bar !== false;
+  const customMediaUrl = cfg.custom_media_url || null;
+  const customMediaType = cfg.custom_media_type || 'image';
+
+  // Load scene component for themed_scene
+  useEffect(() => {
+    if (animationType === 'themed_scene' && division?.division_type) {
+      let cancelled = false;
+      loadScene(division.division_type).then(Comp => {
+        if (!cancelled) setSceneComponent(() => Comp);
+      });
+      return () => { cancelled = true; };
+    }
+    setSceneComponent(null);
+  }, [animationType, division?.division_type]);
+
+  // Progress bar + completion
   useEffect(() => {
     const start = Date.now();
     const interval = setInterval(() => {
       const elapsed = Date.now() - start;
-      const pct = Math.min(100, (elapsed / duration) * 100);
+      const pct = Math.min(100, (elapsed / actualDuration) * 100);
       setProgress(pct);
       if (pct >= 100) {
         clearInterval(interval);
@@ -47,12 +63,9 @@ export default function DivisionLoadingScreen({ division, onComplete, duration =
       }
     }, 30);
     return () => clearInterval(interval);
-  }, [duration, onComplete]);
+  }, [actualDuration, onComplete]);
 
-  const divColor = division?.color || '#2E5A1A';
-  const divName = division?.name || 'Business Stream';
-  const subtitle = division?.tagline || division?.description || '';
-  const Scene = SCENES[division?.division_type] || GeneralScene;
+  const baseGradient = `linear-gradient(155deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
 
   return (
     <motion.div
@@ -61,52 +74,91 @@ export default function DivisionLoadingScreen({ division, onComplete, duration =
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
-      style={{ background: `linear-gradient(155deg, ${divColor} 0%, ${divColor}cc 40%, #0a120a 100%)` }}
+      style={{ background: baseGradient }}
     >
-      {/* Ambient glow */}
-      <motion.div
-        className="absolute w-[28rem] h-[28rem] rounded-full blur-3xl"
-        style={{ background: 'radial-gradient(circle, rgba(141,198,63,0.22) 0%, transparent 70%)' }}
-        animate={{ scale: [1, 1.18, 1], opacity: [0.4, 0.65, 0.4] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      {/* Animated scene */}
-      <motion.div
-        className="relative w-72 h-72 mb-6 z-10"
-        initial={{ scale: 0.85, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
-        <Scene color={divColor} />
-      </motion.div>
-
-      {/* Division name */}
-      <motion.h2
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="text-xl font-extrabold text-white tracking-tight mb-1 z-10"
-      >
-        {divName} is loading
-      </motion.h2>
-      {subtitle && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-sm text-white/60 font-medium mb-6 z-10 text-center max-w-xs px-4"
-        >
-          {subtitle}
-        </motion.p>
+      {/* Animation layer */}
+      {animationType === 'themed_scene' && SceneComponent && (
+        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+          <div style={{ width: '60vw', maxWidth: 500, maxHeight: '60vh' }}>
+            <SceneComponent color={accentColor} />
+          </div>
+        </div>
+      )}
+      {animationType === 'particle_field' && (
+        <ParticleField primaryColor={primaryColor} accentColor={accentColor} count={60} />
+      )}
+      {animationType === 'flowing_lines' && (
+        <FlowingLines primaryColor={primaryColor} accentColor={accentColor} count={16} />
+      )}
+      {animationType === 'gradient_mesh' && (
+        <GradientMesh primaryColor={primaryColor} secondaryColor={secondaryColor} accentColor={accentColor} />
+      )}
+      {animationType === 'custom_media' && customMediaUrl && (
+        customMediaType === 'video' ? (
+          <video
+            src={customMediaUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <img
+            src={customMediaUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )
       )}
 
-      {/* Progress bar */}
-      <div className="w-56 h-1.5 bg-white/15 rounded-full overflow-hidden z-10">
-        <div
-          className="h-full rounded-full transition-all duration-75 ease-out"
-          style={{ background: `linear-gradient(to right, ${divColor}, #ffffff)`, width: `${progress}%` }}
-        />
+      {/* Vignette for text readability */}
+      <div
+        className="absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.4) 100%)' }}
+      />
+
+      {/* Content layer */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6">
+        {logoUrl && (
+          <motion.img
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, duration: 0.4, ease: 'easeOut' }}
+            src={logoUrl}
+            alt={division?.name || 'Logo'}
+            className="h-16 w-auto object-contain drop-shadow-2xl mb-4"
+          />
+        )}
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-xl font-extrabold text-white tracking-tight mb-1"
+        >
+          {welcomeText}
+        </motion.h2>
+        {tagline && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-sm text-white/60 font-medium mb-6 text-center max-w-xs px-4"
+          >
+            {tagline}
+          </motion.p>
+        )}
+        {showProgressBar && (
+          <div className="w-56 h-1.5 bg-white/15 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-75 ease-out"
+              style={{
+                background: `linear-gradient(to right, ${accentColor}, #ffffff)`,
+                width: `${progress}%`,
+              }}
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   );

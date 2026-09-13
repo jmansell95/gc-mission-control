@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, ChevronDown, Check, Layers, Plus } from 'lucide-react';
 import { useDivision } from '@/contexts/DivisionContext';
+import DivisionLoadingScreen from '@/components/divisionLoading/DivisionLoadingScreen';
 
 /**
  * DivisionSwitcher — a visual control that shows the active division (or
@@ -20,6 +21,7 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
   const navigate = useNavigate();
   const { permittedDivisions, activeDivision, activeDivisionId, setActiveDivision, isEnterpriseAdmin, isSuperAdmin, isLoading } = useDivision();
   const [open, setOpen] = useState(false);
+  const [loadingDivision, setLoadingDivision] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -30,9 +32,25 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
   }, [open]);
 
   const select = (id) => {
+    if (id) {
+      const div = permittedDivisions.find(d => d.id === id);
+      if (div) {
+        setOpen(false);
+        setLoadingDivision(div);
+        return;
+      }
+    }
     setActiveDivision(id);
     setOpen(false);
     navigate(id ? '/admin' : '/enterprise');
+  };
+
+  const handleLoadingComplete = () => {
+    if (loadingDivision) {
+      setActiveDivision(loadingDivision.id);
+      navigate('/admin');
+    }
+    setLoadingDivision(null);
   };
 
   if (isLoading) {
@@ -186,6 +204,12 @@ export default function DivisionSwitcher({ variant = 'sidebar' }) {
             </div>
           )}
         </div>
+      )}
+      {loadingDivision && (
+        <DivisionLoadingScreen
+          division={loadingDivision}
+          onComplete={handleLoadingComplete}
+        />
       )}
     </div>
   );

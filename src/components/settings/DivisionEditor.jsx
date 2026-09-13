@@ -6,7 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Building2, X, Check, Loader2, Layers, Settings as SettingsIcon, Navigation,
   Palette, ChevronUp, ChevronDown, GripVertical, ToggleLeft, ToggleRight,
+  Sparkles,
 } from 'lucide-react';
+import LoadingAnimationConfigEditor from '@/components/settings/LoadingAnimationConfigEditor';
 import { NAV_ITEM_REGISTRY, ALL_NAV_ITEM_IDS, DIVISION_TYPE_NAV_DEFAULTS } from '@/utils/divisionNav';
 import { DIVISION_TYPES, ALL_HUBS, HUB_LABELS } from '@/components/wizard/divisionWizardData';
 import { ENTERPRISE_SETTING_FIELDS, SETTING_CATEGORIES } from '@/lib/enterpriseSettingsConfig';
@@ -25,6 +27,7 @@ function toProperCase(str) {
 
 const SUB_TABS = [
   { id: 'general', label: 'General', icon: Building2 },
+  { id: 'loading', label: 'Loading', icon: Sparkles },
   { id: 'navigation', label: 'Navigation', icon: Navigation },
   { id: 'hubs', label: 'Hubs', icon: Layers },
   { id: 'settings', label: 'Settings', icon: SettingsIcon },
@@ -56,6 +59,7 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
       allow_timesheet_edit: true,
     },
     settings_overrides: division?.settings_overrides || {},
+    login_animation_config: division?.login_animation_config || {},
   }));
   const [saving, setSaving] = useState(false);
 
@@ -288,6 +292,18 @@ export default function DivisionEditor({ division, onClose, onSaved }) {
                   className={inputCls} />
               </div>
             </div>
+          )}
+
+          {/* ═══ Loading Animation ═══ */}
+          {subTab === 'loading' && (
+            <LoadingAnimationConfigEditor
+              config={form.login_animation_config || {}}
+              onChange={(newCfg) => setForm({ ...form, login_animation_config: newCfg })}
+              divisionType={form.division_type}
+              divisionColor={form.color}
+              divisionName={form.name}
+              divisionTagline={form.tagline}
+            />
           )}
 
           {/* ═══ Navigation ═══ */}
