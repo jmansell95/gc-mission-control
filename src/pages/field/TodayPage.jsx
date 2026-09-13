@@ -9,10 +9,11 @@ import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
 import EndOfDayCard from '@/components/staff/EndOfDayCard';
 import { useToast } from '@/components/ui/use-toast';
 import { saveOrQueue } from '@/utils/offlineSync';
-import { isWithinSiteHours, isWithinSubmissionWindow, isAfterSubmissionClose, SITE_OPEN_TIME, SITE_SUBMISSION_CLOSE_TIME } from '@/utils/siteHours';
+import { isWithinSiteHours, isBeforeSiteOpen, isWithinSubmissionWindow, isAfterSubmissionClose, SITE_OPEN_TIME, SITE_SUBMISSION_CLOSE_TIME } from '@/utils/siteHours';
 import OutsideSiteHours from '@/components/staff/OutsideSiteHours';
 import ShiftWizard from '@/components/staff/ShiftWizard';
 import EarlyLeaveModal from '@/components/staff/EarlyLeaveModal';
+import TravelTimeModal from '@/components/staff/TravelTimeModal';
 import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import NextJobPrompt from '@/components/staff/NextJobPrompt';
 import AdHocVisitModal from '@/components/staff/AdHocVisitModal';
@@ -28,7 +29,6 @@ import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import StartMyDayHero from '@/components/staff/StartMyDayHero';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
-import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
 import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
@@ -59,9 +59,12 @@ export default function TodayPage() {
   const [showAdHocVisit, setShowAdHocVisit] = useState(false);
   const [showSafetyChecklist, setShowSafetyChecklist] = useState(false);
   const [safetyChecklistAssignment, setSafetyChecklistAssignment] = useState(null);
-  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [showTravelModal, setShowTravelModal] = useState(false);
+  const [travelAssignment, setTravelAssignment] = useState(null);
+  const [travelDayType, setTravelDayType] = useState('monday');
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // ── Header stats for the greeting header ──
   const _headerStats = [
     { label: 'Today', value: todaysAssignments?.length || 0, icon: CalendarDays, gradient: 'stat-gradient-brand' },
     { label: 'Upcoming', value: upcomingAssignments?.length || 0, icon: CalendarClock, gradient: 'stat-gradient-sky' },
@@ -292,7 +295,6 @@ export default function TodayPage() {
   };
 
   const handleStartAttempt = (assignmentId) => handleOpenShiftWizard(assignmentId);
-  const handleRigSignIn = (assignmentId) => handleOpenShiftWizard(assignmentId);
 
   const handleBriefingComplete = ({ offline } = {}) => {
     queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
@@ -612,13 +614,6 @@ export default function TodayPage() {
             setSafetyChecklistAssignment(null);
             handleOpenShiftWizard(safetyChecklistAssignment.id);
           }}
-        />
-      )}
-
-      {showConsentModal && (
-        <TrackingConsentModal
-          open={showConsentModal} onClose={() => setShowConsentModal(false)}
-          onDecline={() => setShowConsentModal(false)} staff={staff}
         />
       )}
 

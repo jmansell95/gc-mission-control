@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
   ClipboardList, Printer, Truck, MapPin, Clock,
-  CheckCircle2, Circle, Package, Navigation,
+  CheckCircle2, Circle, Package, Navigation, ArrowLeft,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import PickListModal from '@/components/logistics/PickListModal';
@@ -92,6 +92,12 @@ export default function ScannerPickListsMode({ staff, onBack }) {
           { label: 'In Progress', value: stats.picking, icon: Package, gradient: 'stat-gradient-blue' },
           { label: 'Complete', value: stats.complete, icon: CheckCircle2, gradient: 'stat-gradient-emerald' },
         ]}
+        actions={
+          <button onClick={onBack} type="button"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition active:scale-95 touch-manipulation">
+            <ArrowLeft className="w-4 h-4" /> Scanner
+          </button>
+        }
       />
 
       {/* List */}

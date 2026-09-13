@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import {
   Store, Package, Plus, Loader2, CheckCircle2,
   XCircle, AlertCircle, Send, Trash2, ChevronUp, ChevronDown, ScanLine,
-  ClipboardList, Box,
+  ClipboardList, Box, ArrowLeft,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import BarcodeScanner from '@/components/staff/BarcodeScanner';
@@ -208,6 +208,12 @@ export default function GoodsInDeliveryNote({ staff, onBack }) {
           { label: 'Matched', value: matchedCount, icon: CheckCircle2, gradient: 'stat-gradient-emerald' },
           { label: 'Total Qty', value: totalReceived, icon: Package, gradient: 'stat-gradient-brand' },
         ]}
+        actions={
+          <button onClick={onBack} type="button"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/20 text-white hover:bg-white/30 transition active:scale-95 touch-manipulation">
+            <ArrowLeft className="w-4 h-4" /> Scanner
+          </button>
+        }
       />
 
       {/* Main content */}
