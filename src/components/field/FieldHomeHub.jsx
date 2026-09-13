@@ -57,7 +57,7 @@ export default function FieldHomeHub() {
     <div className="pb-6">
       <FieldGreetingHeader staff={staff} stats={stats} accentColor={activeDivision?.color} />
 
-      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="px-4 sm:px-6 mt-4 space-y-4">
+      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 space-y-4">
         {/* === My Day — Today's Primary Job === */}
         <motion.div variants={slideUp}>
           <div className="flex items-center justify-between mb-2.5">

@@ -31,7 +31,7 @@ export default function FieldGreetingHeader({ staff, stats = [], actions, accent
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="hero-vibrant rounded-3xl mx-4 sm:mx-6 mt-4 p-5 text-white relative overflow-hidden"
+      className="field-hero rounded-3xl mx-4 sm:mx-6 mt-4 p-5 text-white relative overflow-hidden"
     >
       {accentColor && (
         <div className="h-1 w-full absolute top-0 left-0 right-0 rounded-t-3xl" style={{ background: accentColor }} />

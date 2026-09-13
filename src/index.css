@@ -173,10 +173,10 @@
     input, select, textarea { font-size: 15px; }
   }
 
-  /* Comfortable tap targets on touch devices */
+  /* Comfortable tap targets on touch devices — 44px per Apple HIG / Material guidelines */
   @media (pointer: coarse) {
     button:not(:disabled), [role="button"]:not(:disabled) {
-      min-height: 40px;
+      min-height: 44px;
     }
   }
 
@@ -404,6 +404,23 @@
   /* === Modern Sidebar — refined dark charcoal-green, less vibrant === */
   .sidebar-modern {
     background: linear-gradient(180deg, #2E5A1A 0%, #1c4a12 100%);
+  }
+
+  /* === Field Hero — sky/teal/blue outdoor gradient for the Field Experience
+     greeting header. Distinct from the dark-green admin hero-vibrant so
+     field crew see a bright, outdoor-feel header that matches field-bg. === */
+  .field-hero {
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(14, 165, 233, 0.35) 0%, transparent 50%),
+      radial-gradient(100% 100% at 100% 0%, rgba(16, 185, 129, 0.28) 0%, transparent 50%),
+      radial-gradient(80% 80% at 50% 100%, rgba(59, 130, 246, 0.22) 0%, transparent 60%),
+      linear-gradient(135deg, hsl(199 89% 24%) 0%, hsl(200 85% 30%) 40%, hsl(174 70% 32%) 70%, hsl(199 89% 26%) 100%);
+  }
+  .dark .field-hero {
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(14, 165, 233, 0.25) 0%, transparent 50%),
+      radial-gradient(100% 100% at 100% 0%, rgba(16, 185, 129, 0.20) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(200 60% 16%) 0%, hsl(200 55% 20%) 40%, hsl(174 45% 20%) 70%, hsl(200 60% 18%) 100%);
   }
 
   /* === Vibrant Hero — colorful multi-stop gradient for modern headers === */
