@@ -2,12 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  ArrowLeft, ClipboardList, Printer, Truck, MapPin, Clock,
+  ClipboardList, Printer, Truck, MapPin, Clock,
   CheckCircle2, Circle, Package, Navigation,
 } from 'lucide-react';
 import { isToday } from 'date-fns';
 import PickListModal from '@/components/logistics/PickListModal';
 import { buildPickListHtml, printPickListHtml } from '@/components/logistics/pickListHtml';
+import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
 
 /**
  * Scanner "Pick Lists" mode — surfaces today's warehouse pick lists inside the
@@ -17,7 +18,7 @@ import { buildPickListHtml, printPickListHtml } from '@/components/logistics/pic
  * Reuses the same `depot-pick-lists` query key as the Depot Pick Lists page so
  * the PickListModal's post-sign-off invalidation refreshes this list in place.
  */
-export default function ScannerPickListsMode({ onBack }) {
+export default function ScannerPickListsMode({ staff, onBack }) {
   const queryClient = useQueryClient();
   const [openDelivery, setOpenDelivery] = useState(null);
 
@@ -83,27 +84,15 @@ export default function ScannerPickListsMode({ onBack }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-[#F5FBF6] flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-2.5 safe-area-top flex-shrink-0">
-        <button onClick={onBack} className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition flex-shrink-0 active:scale-95 touch-manipulation">
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
-        </button>
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center shadow-sm flex-shrink-0">
-          <ClipboardList className="w-4 h-4 text-white" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-base font-bold text-slate-900 leading-tight">Warehouse Pick Lists</h1>
-          <p className="text-[11px] text-slate-500">Today's deliveries · {stats.total} to pick</p>
-        </div>
-      </header>
-
-      {/* Stats strip */}
-      <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex gap-2 flex-shrink-0 overflow-x-auto no-scrollbar">
-        <StatPill icon={Clock} label="Pending" value={stats.pending} color="amber" />
-        <StatPill icon={Package} label="In Progress" value={stats.picking} color="blue" />
-        <StatPill icon={CheckCircle2} label="Complete" value={stats.complete} color="emerald" />
-      </div>
+    <div className="fixed top-0 left-0 right-0 bottom-16 field-bg flex flex-col">
+      <FieldGreetingHeader
+        staff={staff}
+        stats={[
+          { label: 'Pending', value: stats.pending, icon: Clock, gradient: 'stat-gradient-amber' },
+          { label: 'In Progress', value: stats.picking, icon: Package, gradient: 'stat-gradient-blue' },
+          { label: 'Complete', value: stats.complete, icon: CheckCircle2, gradient: 'stat-gradient-emerald' },
+        ]}
+      />
 
       {/* List */}
       <div className="flex-1 overflow-y-auto">
@@ -140,7 +129,7 @@ export default function ScannerPickListsMode({ onBack }) {
                   const status = pickStatus(d);
                   const itemCount = (d.items || '').split(/\n|,(?=\s)/).filter(x => x.trim()).length || 0;
                   return (
-                    <div key={d.id} className="hub-glass rounded-2xl p-4 space-y-3">
+                    <div key={d.id} className="field-card p-4 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 mb-1">
@@ -227,20 +216,6 @@ export default function ScannerPickListsMode({ onBack }) {
           onClose={handleClose}
         />
       )}
-    </div>
-  );
-}
-
-function StatPill({ icon: Icon, label, value, color }) {
-  const colors = {
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  };
-  return (
-    <div className={`flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold ${colors[color]}`}>
-      <Icon className="w-3.5 h-3.5" />
-      <span className="tabular-nums">{value}</span> {label}
     </div>
   );
 }

@@ -3,13 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Store, ArrowLeft, Package, Plus, Search, Loader2, CheckCircle2,
+  Store, Package, Plus, Loader2, CheckCircle2,
   XCircle, AlertCircle, Send, Trash2, ChevronUp, ChevronDown, ScanLine,
   ClipboardList, Box,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import BarcodeScanner from '@/components/staff/BarcodeScanner';
 import { playSuccess, playError, playConfirm } from '@/utils/scanFeedback';
+import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
 
 const CATEGORY_META = {
   ppe: { label: 'PPE', tint: 'bg-amber-50 text-amber-700 border-amber-200' },
@@ -28,7 +29,7 @@ const CATEGORY_META = {
  *
  * Props: onBack
  */
-export default function GoodsInDeliveryNote({ onBack }) {
+export default function GoodsInDeliveryNote({ staff, onBack }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [supplierName, setSupplierName] = useState('');
@@ -199,28 +200,21 @@ export default function GoodsInDeliveryNote({ onBack }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between flex-shrink-0 safe-area-top">
-        <div className="flex items-center gap-2.5">
-          <button onClick={onBack} className="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition active:scale-95">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Store className="w-5 h-5 text-amber-700" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-900 leading-tight">Goods In</h1>
-            <p className="text-xs text-slate-400">Delivery note → scan → stock</p>
-          </div>
-        </div>
-      </header>
+    <div className="fixed top-0 left-0 right-0 bottom-16 field-bg flex flex-col">
+      <FieldGreetingHeader
+        staff={staff}
+        stats={[
+          { label: 'Lines', value: lineItems.length, icon: ClipboardList, gradient: lineItems.length > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
+          { label: 'Matched', value: matchedCount, icon: CheckCircle2, gradient: 'stat-gradient-emerald' },
+          { label: 'Total Qty', value: totalReceived, icon: Package, gradient: 'stat-gradient-brand' },
+        ]}
+      />
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto w-full p-4 space-y-4 pb-32">
           {/* Delivery note header */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 space-y-3">
+          <div className="field-card p-4 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
               <ClipboardList className="w-4 h-4 text-amber-600" />
               <p className="text-sm font-bold text-slate-900">Delivery Note</p>
@@ -252,7 +246,7 @@ export default function GoodsInDeliveryNote({ onBack }) {
           </div>
 
           {/* Scanner */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 relative">
+          <div className="field-card p-4 relative">
             <BarcodeScanner
               onScan={handleScan}
               onSearch={(v) => { setSearch(v); setShowCatalog(true); setScanError(''); }}
@@ -275,7 +269,7 @@ export default function GoodsInDeliveryNote({ onBack }) {
 
           {/* Catalog picker (collapsible) */}
           {showCatalog && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+            <div className="field-card p-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   {isLoading ? 'Loading…' : `${filtered.length} items`}
@@ -318,7 +312,7 @@ export default function GoodsInDeliveryNote({ onBack }) {
 
           {/* Line items */}
           {lineItems.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+            <div className="field-card p-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                   <Box className="w-4 h-4 text-amber-600" />
@@ -408,7 +402,7 @@ export default function GoodsInDeliveryNote({ onBack }) {
 
       {/* Sticky commit bar */}
       {lineItems.length > 0 && (
-        <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 flex-shrink-0 safe-area-bottom z-50">
+        <footer className="fixed bottom-16 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex-shrink-0 safe-area-bottom z-50">
           <div className="max-w-2xl mx-auto">
             <button
               onClick={handleCommit}

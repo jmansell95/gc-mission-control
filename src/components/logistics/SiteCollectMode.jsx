@@ -53,7 +53,7 @@ export default function SiteCollectMode({ staff, onOpenScanner }) {
         <button
           key={d.id}
           onClick={() => onOpenScanner(d)}
-          className="w-full flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-4 hover:border-blue-400 hover:shadow-md transition active:scale-[0.98] text-left"
+          className="w-full flex items-center gap-3 field-card p-4 hover:border-blue-400 transition active:scale-[0.98] text-left"
         >
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${d.status === 'in_progress' ? 'bg-blue-600' : 'bg-blue-100'}`}>
             {d.status === 'in_progress' ? (

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, CalendarClock, Clock, HardHat, ShieldCheck, AlertTriangle, ScanLine, Package, Play, Car, PoundSterling, Receipt } from 'lucide-react';
-import { format, startOfWeek } from 'date-fns';
+import { Calendar, CalendarDays, CalendarClock, Clock, HardHat } from 'lucide-react';
+import { format } from 'date-fns';
 import { EmptyState, Skeleton, SkeletonText } from '@/components/StateViews';
 import AssignmentCard from '@/components/staff/AssignmentCard';
 import DepotAssignmentCard from '@/components/staff/DepotAssignmentCard';
@@ -10,7 +10,6 @@ import EndOfDayCard from '@/components/staff/EndOfDayCard';
 import { useToast } from '@/components/ui/use-toast';
 import { saveOrQueue } from '@/utils/offlineSync';
 import { isWithinSiteHours, isBeforeSiteOpen, isWithinSubmissionWindow, isAfterSubmissionClose, SITE_OPEN_TIME, SITE_SUBMISSION_CLOSE_TIME } from '@/utils/siteHours';
-import { complianceDaysUntil } from '@/utils/complianceDate';
 import OutsideSiteHours from '@/components/staff/OutsideSiteHours';
 import ShiftWizard from '@/components/staff/ShiftWizard';
 import EarlyLeaveModal from '@/components/staff/EarlyLeaveModal';
@@ -19,29 +18,21 @@ import ScheduleSplash from '@/components/staff/ScheduleSplash';
 import NextJobPrompt from '@/components/staff/NextJobPrompt';
 import AdHocVisitModal from '@/components/staff/AdHocVisitModal';
 import TodayPrepStrip from '@/components/staff/TodayPrepStrip';
-import SyncHUD from '@/components/staff/SyncHUD';
 import FieldPageShell from '@/components/field/FieldPageShell';
 import FieldContainer from '@/components/field/FieldContainer';
 import StaffHeaderActions from '@/components/field/StaffHeaderActions';
 import RedAlertBanner from '@/components/safety/RedAlertBanner';
 import StaffAlerts from '@/components/staff/StaffAlerts';
 import ActiveJobCard from '@/components/staff/ActiveJobCard';
-import IncentiveQuickLook from '@/components/staff/IncentiveQuickLook';
 import DrillingWeatherWidget from '@/components/DrillingWeatherWidget';
-import RigSignInScanner from '@/components/staff/RigSignInScanner';
 import KeyLogBookPromptBanner from '@/components/staff/KeyLogBookPromptBanner';
 import PreWorkSafetyChecklist from '@/components/staff/PreWorkSafetyChecklist';
 import StartMyDayHero from '@/components/staff/StartMyDayHero';
-import DutiesSummaryCard from '@/components/staff/DutiesSummaryCard';
 import ArrivalPromptBanner from '@/components/staff/ArrivalPromptBanner';
-import TrackingConsentModal from '@/components/staff/TrackingConsentModal';
-import TrackingConsentCard from '@/components/staff/TrackingConsentCard';
 import DeliveryHeroToday from '@/components/staff/DeliveryHeroToday';
 import DepotDutyCollapsible from '@/components/staff/DepotDutyCollapsible';
 import TrackingIndicator from '@/components/staff/TrackingIndicator';
 import { useFieldData } from '@/components/field/FieldDataProvider';
-import { useQuery } from '@tanstack/react-query';
-import QuickActionsBar from '@/components/field/QuickActionsBar';
 import CelebrationOverlay from '@/components/field/CelebrationOverlay';
 import useEffectiveSettings from '@/hooks/useEffectiveSettings';
 
@@ -66,41 +57,17 @@ export default function TodayPage() {
   const [showScheduleSummary, setShowScheduleSummary] = useState(false);
   const [showNextJobPrompt, setShowNextJobPrompt] = useState(false);
   const [showAdHocVisit, setShowAdHocVisit] = useState(false);
-  const [showComplianceAlert, setShowComplianceAlert] = useState(false);
-  const [showRigScanner, setShowRigScanner] = useState(false);
   const [showSafetyChecklist, setShowSafetyChecklist] = useState(false);
   const [safetyChecklistAssignment, setSafetyChecklistAssignment] = useState(null);
-  const [showConsentModal, setShowConsentModal] = useState(false);
   const [showTravelModal, setShowTravelModal] = useState(false);
   const [travelAssignment, setTravelAssignment] = useState(null);
   const [travelDayType, setTravelDayType] = useState('monday');
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // ── Week stats for the greeting header (moved from FieldDashboard) ──
-  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-  const { data: myTimesheets = [] } = useQuery({
-    queryKey: ['my-week-timesheets', staff?.id, weekStart],
-    queryFn: () => base44.entities.Timesheet.filter({ staff_id: staff.id }),
-    enabled: !!staff?.id,
-  });
-  const { data: myCosts = [] } = useQuery({
-    queryKey: ['my-week-costs', staff?.id, weekStart],
-    queryFn: () => base44.entities.DailyCost.filter({ staff_id: staff.id }),
-    enabled: !!staff?.id,
-  });
-  const _weekMinutes = (myTimesheets || [])
-    .filter(t => t.week_start === weekStart && t.status !== 'deleted' && t.status !== 'rejected' && t.status !== 'merged')
-    .reduce((s, t) => s + (Number(t.task_duration_minutes) || 0), 0);
-  const _weekHours = _weekMinutes / 60;
-  const _hourlyRate = staff?.day_rate ? staff.day_rate / 8 : 0;
-  const _weekEarnings = _weekHours * _hourlyRate;
-  const _pendingReceipts = (myCosts || []).filter(c => c.week_start === weekStart && c.status === 'submitted').length;
-  const _fmtDur = (mins) => { const m = Math.round(Number(mins) || 0); const h = Math.floor(m / 60), r = m % 60; return h && r ? `${h}h ${r}m` : h ? `${h}h` : m > 0 ? `${r}m` : '0h'; };
-  const _fmtMoney = (n) => '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  // ── Header stats for the greeting header ──
   const _headerStats = [
-    { label: 'Hours', value: _fmtDur(_weekMinutes), icon: Clock, gradient: 'stat-gradient-brand' },
-    { label: 'Earnings', value: staff?.day_rate ? _fmtMoney(_weekEarnings) : '—', icon: PoundSterling, gradient: 'stat-gradient-emerald' },
-    { label: 'Receipts', value: _pendingReceipts, icon: Receipt, gradient: _pendingReceipts > 0 ? 'stat-gradient-amber' : 'stat-gradient-slate' },
+    { label: 'Today', value: todaysAssignments?.length || 0, icon: CalendarDays, gradient: 'stat-gradient-brand' },
+    { label: 'Upcoming', value: upcomingAssignments?.length || 0, icon: CalendarClock, gradient: 'stat-gradient-sky' },
   ];
 
   // ── Handlers (preserved exactly from StaffDashboard) ──
@@ -328,7 +295,6 @@ export default function TodayPage() {
   };
 
   const handleStartAttempt = (assignmentId) => handleOpenShiftWizard(assignmentId);
-  const handleRigSignIn = (assignmentId) => handleOpenShiftWizard(assignmentId);
 
   const handleBriefingComplete = ({ offline } = {}) => {
     queryClient.invalidateQueries({ queryKey: ['staff-assignments'] });
@@ -461,10 +427,7 @@ export default function TodayPage() {
             </div>
           </div>
         )}
-        <SyncHUD />
-        <TrackingConsentCard staff={staff} onSignNow={() => setShowConsentModal(true)} />
         <KeyLogBookPromptBanner staff={staff} />
-        <QuickActionsBar />
 
         {nextTodayAssignment && !staff?.is_admin && nextTodayAssignment.assignment_type !== 'yard_depot' && (nextTodayAssignment.status || 'assigned') !== 'completed' && (
           <ArrivalPromptBanner
@@ -487,91 +450,6 @@ export default function TodayPage() {
         )}
 
         <StaffAlerts isOnline={ctx.isOnline} staff={staff} />
-
-        {staff?.id && !staff?.is_admin && (
-          <DutiesSummaryCard staffId={staff.id} enabled={!!nextTodayAssignment} />
-        )}
-
-        {(() => {
-          const myItems = myCompliance.filter(i => i.reference_id === staff?.id || i.reference_name === staff?.name);
-          const expired = myItems.filter(i => {
-            if (!i.expiry_date || i.status_override !== 'auto') return false;
-            const days = complianceDaysUntil(i.expiry_date);
-            return days !== null && days < 0;
-          });
-          const expiring = myItems.filter(i => {
-            if (!i.expiry_date || i.status_override !== 'auto') return false;
-            const days = complianceDaysUntil(i.expiry_date);
-            return days !== null && days >= 0 && days <= 30;
-          });
-          const hasCSCS = myItems.some(i => i.qualification_type === 'cscs_card' || /cscs/i.test(i.title));
-          if (expired.length === 0 && expiring.length === 0 && hasCSCS) return null;
-          const isUrgent = expired.length > 0 || !hasCSCS;
-          const summaryLabel = expired.length > 0 ? `${expired.length} compliance item${expired.length > 1 ? 's' : ''} expired` : expiring.length > 0 ? `${expiring.length} item${expiring.length > 1 ? 's' : ''} expiring soon` : 'CSCS card not on file';
-          return (
-            <div className={`rounded-2xl border overflow-hidden ${isUrgent ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
-              <button onClick={() => setShowComplianceAlert(v => !v)} type="button"
-                className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition ${isUrgent ? 'text-red-900' : 'text-amber-900'}`}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isUrgent ? 'bg-red-100' : 'bg-amber-100'}`}>
-                  <AlertTriangle className={`w-5 h-5 ${isUrgent ? 'text-red-500' : 'text-amber-500'}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold">{summaryLabel}</p>
-                  <p className="text-xs opacity-80 mt-0.5">{showComplianceAlert ? 'Tap to collapse' : 'Tap to expand details'}</p>
-                </div>
-                <ShieldCheck className={`w-5 h-5 flex-shrink-0 ${isUrgent ? 'text-red-400' : 'text-amber-400'}`} />
-              </button>
-              {showComplianceAlert && (
-                <button onClick={() => navigate('/staff-profile')} type="button"
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold border-t transition ${isUrgent ? 'text-red-700 bg-red-100/50 hover:bg-red-100 border-red-200' : 'text-amber-700 bg-amber-100/50 hover:bg-amber-100 border-amber-200'}`}>
-                  View in profile
-                </button>
-              )}
-            </div>
-          );
-        })()}
-
-        {staff?.id && !staff?.is_admin && (
-          <IncentiveQuickLook staffId={staff.id} teamId={staff.team_id} />
-        )}
-
-        {isPlatformAdmin && (
-          <button onClick={() => setShiftWizard({ assignmentId: 'preview', previewMode: true })} type="button"
-            className="w-full flex items-center gap-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl px-4 py-4 text-white active:scale-95 transition touch-manipulation shadow-lg shadow-amber-500/25">
-            <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-              <Play className="w-5 h-5 text-white" strokeWidth={2.5} />
-            </div>
-            <div className="text-left min-w-0">
-              <p className="text-sm font-bold leading-tight">Preview Shift Flow</p>
-              <p className="text-[11px] text-white/75 truncate font-medium">Walk through the crew experience</p>
-            </div>
-          </button>
-        )}
-
-        {staff?.id && !staff?.is_admin && (
-          <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => setShowRigScanner(true)} type="button"
-              className="flex items-center gap-3 bg-gradient-to-br from-[#2E5A1A] to-[#1c4a12] rounded-2xl px-4 py-4 text-white active:scale-95 transition touch-manipulation shadow-lg shadow-[#2E5A1A]/25 glow-brand">
-              <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                <ScanLine className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-sm font-bold leading-tight">Scan Rig QR</p>
-                <p className="text-[11px] text-white/75 truncate font-medium">Sign into your rig</p>
-              </div>
-            </button>
-            <button onClick={() => navigate('/scanner')} type="button"
-              className="flex items-center gap-3 bg-white border border-slate-200/80 rounded-2xl px-4 py-4 active:scale-95 transition touch-manipulation hover:border-primary/30 shadow-sm shadow-slate-900/[0.04]">
-              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A]/10 to-[#8DC63F]/10 flex items-center justify-center flex-shrink-0">
-                <Package className="w-5 h-5 text-primary" strokeWidth={2.5} />
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-sm font-bold leading-tight text-slate-900">Sign Out Gear</p>
-                <p className="text-[11px] text-slate-400 truncate font-medium">Scan to your job</p>
-              </div>
-            </button>
-          </div>
-        )}
 
         {assignmentsLoading ? (
           <div className="space-y-4">
@@ -723,14 +601,6 @@ export default function TodayPage() {
 
       <AdHocVisitModal open={showAdHocVisit} onClose={() => setShowAdHocVisit(false)} onSubmit={handleAdHocVisit} jobs={jobs} />
 
-      {showRigScanner && (
-        <RigSignInScanner
-          open={showRigScanner} onClose={() => setShowRigScanner(false)}
-          staffId={staff?.id} assignments={visibleAssignments} jobs={jobs} rigs={rigs} allStaff={allStaff}
-          onSignIn={handleRigSignIn}
-        />
-      )}
-
       {showSafetyChecklist && safetyChecklistAssignment && (
         <PreWorkSafetyChecklist
           open={showSafetyChecklist}
@@ -744,13 +614,6 @@ export default function TodayPage() {
             setSafetyChecklistAssignment(null);
             handleOpenShiftWizard(safetyChecklistAssignment.id);
           }}
-        />
-      )}
-
-      {showConsentModal && (
-        <TrackingConsentModal
-          open={showConsentModal} onClose={() => setShowConsentModal(false)}
-          onDecline={() => setShowConsentModal(false)} staff={staff}
         />
       )}
 

@@ -2,13 +2,11 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  CalendarDays, ScanLine, ClipboardList, UserCircle, Wrench,
-  Inbox, MapPin, Clock, Truck, ChevronRight,
+  CalendarDays, MapPin, Clock, ChevronRight, Wrench,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
 import { useFieldData } from '@/components/field/FieldDataProvider';
-import { useInbox } from '@/hooks/useInbox';
 import { staggerContainer, slideUp, bounceTap } from '@/lib/fieldAnimations';
 
 /**
@@ -23,10 +21,7 @@ export default function FieldHomeHub() {
   const navigate = useNavigate();
   const ctx = useFieldData();
   const { staff, isPlatformAdmin, activeDivision, todaysAssignments, upcomingAssignments, jobs, clients, rigs } = ctx || {};
-  const { counts: inboxCounts } = useInbox();
-
   const isAdmin = isPlatformAdmin || staff?.is_admin || ['super_admin', 'admin', 'management', 'read_only'].includes(staff?.system_role);
-  const inboxCount = inboxCounts?.total || 0;
 
   // Today's primary job (first assignment of the day)
   const primaryJob = useMemo(() => {
@@ -41,16 +36,6 @@ export default function FieldHomeHub() {
   const stats = [
     { label: 'Today', value: todaysAssignments?.length || 0, icon: CalendarDays, gradient: 'stat-gradient-brand' },
     { label: 'Upcoming', value: upcomingAssignments?.length || 0, icon: Clock, gradient: 'stat-gradient-sky' },
-    ...(inboxCount > 0 ? [{ label: 'Inbox', value: inboxCount, icon: Inbox, gradient: 'stat-gradient-rose' }] : []),
-  ];
-
-  const quickActions = [
-    { label: 'Scan Asset', icon: ScanLine, path: '/scanner', gradient: 'stat-gradient-emerald' },
-    { label: 'My Duties', icon: ClipboardList, path: '/my-duties', gradient: 'stat-gradient-amber' },
-    { label: 'Field Tools', icon: Wrench, path: '/tools', gradient: 'stat-gradient-sky' },
-    { label: 'My Profile', icon: UserCircle, path: '/staff-profile', gradient: 'stat-gradient-violet' },
-    ...(staff?.delivery_dashboard_enabled ? [{ label: 'Deliveries', icon: Truck, path: '/deliveries', gradient: 'stat-gradient-blue' }] : []),
-    ...(isAdmin ? [{ label: 'Inbox', icon: Inbox, path: '/inbox', gradient: 'stat-gradient-rose', badge: inboxCount }] : []),
   ];
 
   return (
@@ -80,19 +65,6 @@ export default function FieldHomeHub() {
           ) : (
             <EmptyDayCard isAdmin={isAdmin} />
           )}
-        </motion.div>
-
-        {/* === Quick Actions === */}
-        <motion.div variants={slideUp}>
-          <h2 className="text-ui-subheading font-bold text-slate-800 flex items-center gap-2 mb-2.5">
-            <span className="w-1 h-5 rounded-full bg-primary" />
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {quickActions.map((action) => (
-              <QuickActionCard key={action.label} action={action} onClick={() => navigate(action.path)} />
-            ))}
-          </div>
         </motion.div>
 
         {/* === Upcoming Preview === */}
@@ -189,28 +161,6 @@ function EmptyDayCard({ isAdmin }) {
         {isAdmin ? 'Check the rota or contact your manager.' : 'Enjoy your day — check back later or contact your manager.'}
       </p>
     </div>
-  );
-}
-
-// === Quick Action Card ===
-function QuickActionCard({ action, onClick }) {
-  const Icon = action.icon;
-  return (
-    <motion.button
-      {...bounceTap}
-      onClick={onClick}
-      className="field-card p-4 flex flex-col items-center gap-2.5 text-center touch-manipulation relative"
-    >
-      <div className={`relative w-12 h-12 rounded-2xl ${action.gradient} flex items-center justify-center shadow-md`}>
-        <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
-        {action.badge > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
-            {action.badge > 9 ? '9+' : action.badge}
-          </span>
-        )}
-      </div>
-      <span className="text-xs font-bold text-slate-700">{action.label}</span>
-    </motion.button>
   );
 }
 

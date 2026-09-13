@@ -408,11 +408,11 @@ export default function AssetScannerPage() {
   };
 
   if (mode === 'goods-in') {
-    return <GoodsInDeliveryNote onBack={() => setMode('assets')} />;
+    return <GoodsInDeliveryNote staff={staffProfile} onBack={() => setMode('assets')} />;
   }
 
   if (mode === 'pick-lists') {
-    return <ScannerPickListsMode onBack={() => setMode('assets')} />;
+    return <ScannerPickListsMode staff={staffProfile} onBack={() => setMode('assets')} />;
   }
 
   if (mode === 'site-collect') {
