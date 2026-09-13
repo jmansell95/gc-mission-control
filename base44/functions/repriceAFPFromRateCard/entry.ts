@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { resolveRate, loadActiveContract } from '../../shared/rateResolver.ts';
+import { resolveFromSnapshot, loadActiveContract } from '../../shared/rateResolver.ts';
+import { loadJobRateCardItems, preTokenizeRateItems, findBestMatchFast } from '../../shared/jobRateMatcher.ts';
 
 /**
  * repriceAFPFromRateCard — re-resolves all auto-populated (non-manual)
@@ -12,6 +13,10 @@ import { resolveRate, loadActiveContract } from '../../shared/rateResolver.ts';
  *
  * Disputed/counter-offered/agreed items are NOT re-priced (they're in
  * active negotiation — re-pricing would reset the agreed amount).
+ *
+ * Optimized: pre-loads rate card items ONCE and uses the fast pre-tokenized
+ * matcher across all line items, instead of calling resolveRate per item
+ * (which re-fetches the rate card from the API every time).
  *
  * Input:  { afp_id: string }
  * Output: { success, repriced, skipped, total }
@@ -41,6 +46,12 @@ export default async function(req: Request): Promise<Response> {
     const activeContract = await loadActiveContract(base44.asServiceRole, afp.job_id);
     const lineItems = await base44.entities.AFPLineItem.filter({ afp_id }, 'sort_order', 500);
 
+    // ── Pre-load rate card items ONCE (job-scoped + global) ──
+    // This avoids 268+ individual API calls when repricing a large AFP.
+    const jobDate = afp.period_start_date || job.start_date || null;
+    const rateCardItems = await loadJobRateCardItems(base44, afp.job_id, jobDate);
+    const preTokenized = preTokenizeRateItems(rateCardItems);
+
     let repriced = 0;
     let skipped = 0;
     const updates: any[] = [];
@@ -63,15 +74,25 @@ export default async function(req: Request): Promise<Response> {
       }
 
       const qty = toNum(li.qty) || 1;
-      const jobDate = li.source_date || afp.period_start_date || job.start_date || null;
+      const desc = String(li.item);
 
-      const resolved = await resolveRate(base44.asServiceRole, {
-        job_id: afp.job_id,
-        description: String(li.item),
-        quantity: qty,
-        activeContract,
-        job_date: jobDate,
-      });
+      // Level 1 — contract snapshot (frozen rates)
+      let resolved = null;
+      if (activeContract?.rate_snapshot) {
+        resolved = resolveFromSnapshot(desc, activeContract.rate_snapshot, qty);
+      }
+
+      // Level 2 + 3 — job / global rate cards (fast pre-tokenized matcher)
+      if (!resolved) {
+        const match = findBestMatchFast(desc, preTokenized);
+        if (match) {
+          const unitPrice = Number(match.price) || 0;
+          resolved = {
+            total: Math.round(unitPrice * qty * 100) / 100,
+            unit_price: unitPrice,
+          };
+        }
+      }
 
       if (resolved && resolved.total > 0) {
         const newRate = qty > 0 ? Math.round((resolved.total / qty) * 100) / 100 : resolved.unit_price;
