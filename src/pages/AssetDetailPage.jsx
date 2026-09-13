@@ -6,11 +6,14 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   Wrench, AlertTriangle, Briefcase, QrCode,
   Package, ShieldCheck, FileText, Clock, X, Plug,
+  ArrowLeft, Pencil, RefreshCw, Hash, Weight, Upload,
+  Cog, Anchor,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { rollupCompliance } from '@/utils/rigRollup';
+import { COMPLIANCE_META, ASSET_TYPE_META } from '@/utils/rigRollup';
+import AssetColourDot from '@/components/assethub/AssetColourDot';
 
-import AssetDetailHero from '@/components/assetdetail/AssetDetailHero';
 import AssetOverviewTab from '@/components/assetdetail/AssetOverviewTab';
 import AssetDeploymentTab from '@/components/assetdetail/AssetDeploymentTab';
 import AssetFinancialTab from '@/components/assetdetail/AssetFinancialTab';
@@ -29,6 +32,22 @@ import PATTestForm from '@/components/pat/PATTestForm';
 import { useAssetRealtime } from '@/hooks/useAssetRealtime';
 import { trackRecentlyViewedAsset } from '@/components/assethub/recentlyViewed';
 
+const TYPE_ICON = { rig: Cog, machinery: Wrench, trailer: Package, lifting: Anchor, portable_appliance: Plug };
+const TYPE_GRADIENT = {
+  rig: 'from-emerald-500 to-emerald-700',
+  machinery: 'from-violet-500 to-purple-700',
+  trailer: 'from-amber-500 to-orange-600',
+  lifting: 'from-teal-500 to-cyan-700',
+  portable_appliance: 'from-amber-400 to-yellow-600',
+};
+
+const COMPLIANCE_RING = {
+  compliant: { color: '#10b981', pct: 100 },
+  expiring: { color: '#f59e0b', pct: 70 },
+  expired: { color: '#ef4444', pct: 25 },
+  unknown: { color: '#94a3b8', pct: 8 },
+};
+
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Package },
   { key: 'compliance', label: 'Compliance', icon: ShieldCheck },
@@ -37,6 +56,107 @@ const TABS = [
   { key: 'financial', label: 'Financial', icon: FileText },
   { key: 'activity', label: 'Activity', icon: Clock },
 ];
+
+/** Unified hero — works on all screen sizes */
+function AssetHero({ asset, onBack, onEdit, onRecert, onQR, onRefresh, refreshing }) {
+  if (!asset) return null;
+  const Icon = TYPE_ICON[asset.asset_type] || Wrench;
+  const meta = COMPLIANCE_META[asset.compliance_status || 'unknown'];
+  const CompIcon = asset.compliance_status === 'expired' ? ShieldCheck
+    : asset.compliance_status === 'expiring' ? AlertTriangle
+    : asset.compliance_status === 'unknown' ? Package
+    : ShieldCheck;
+  const grad = TYPE_GRADIENT[asset.asset_type] || 'from-slate-500 to-slate-700';
+  const ring = COMPLIANCE_RING[asset.compliance_status || 'unknown'] || COMPLIANCE_RING.unknown;
+  const photo = asset.panda_image_urls?.[0];
+  const photoUrl = photo?.medium || photo?.url;
+
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (ring.pct / 100) * circumference;
+
+  return (
+    <div className="hub-glass rounded-2xl overflow-hidden">
+      <div className={`h-1.5 bg-gradient-to-r ${grad}`} />
+      <div className="flex items-center justify-between px-4 pt-3 pb-1">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 text-slate-500 hover:text-primary text-xs font-semibold transition min-h-[36px]">
+          <ArrowLeft className="w-4 h-4" /> Assets
+        </button>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {onEdit && (
+            <button onClick={onEdit} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold text-slate-600 transition min-h-[36px]">
+              <Pencil className="w-3.5 h-3.5" /> Edit
+            </button>
+          )}
+          {onRecert && (
+            <button onClick={onRecert} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-lg text-xs font-bold transition shadow-sm min-h-[36px]">
+              <Upload className="w-3.5 h-3.5" /> Cert
+            </button>
+          )}
+          {onQR && (
+            <button onClick={onQR} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold text-slate-600 transition min-h-[36px]">
+              <QrCode className="w-3.5 h-3.5" /> QR
+            </button>
+          )}
+          {asset.panda_asset_id && onRefresh && (
+            <button onClick={onRefresh} disabled={refreshing} className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold text-slate-600 transition disabled:opacity-60 min-h-[36px]">
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} /> {refreshing ? 'Sync' : 'Sync'}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-4 px-4 pb-3 pt-2">
+        <div className="relative w-20 h-20 flex-shrink-0">
+          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="4" />
+            <circle cx="32" cy="32" r={radius} fill="none" stroke={ring.color} strokeWidth="4" strokeLinecap="round"
+              strokeDasharray={circumference} strokeDashoffset={dashOffset} className="transition-all duration-700 ease-out" />
+          </svg>
+          <div className="absolute inset-2.5 rounded-full overflow-hidden flex items-center justify-center"
+            style={{ background: `linear-gradient(135deg, ${ring.color}18, ${ring.color}06)` }}>
+            {photoUrl ? (
+              <img src={photoUrl} alt={asset.name} className="w-full h-full object-cover" />
+            ) : (
+              <Icon className="w-8 h-8" style={{ color: ring.color }} />
+            )}
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <AssetColourDot colour={asset.colour} size={16} />
+            <h1 className="font-extrabold text-slate-900 text-lg lg:text-xl truncate leading-tight">{asset.name}</h1>
+            {asset.fleet_number && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 whitespace-nowrap">
+                <Hash className="w-3 h-3" /> FAA {asset.fleet_number}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-slate-500 truncate mt-0.5">
+            {[asset.make, asset.model].filter(Boolean).join(' · ') || (ASSET_TYPE_META[asset.asset_type]?.label || asset.asset_type)}
+            {asset.equipment_type ? ` · ${asset.equipment_type}` : ''}
+            {asset.rig_type && asset.rig_type !== 'n/a' ? ` · ${asset.rig_type.toUpperCase()}` : ''}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 px-4 pb-4 flex-wrap">
+        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full"
+          style={{ background: `${ring.color}15`, color: ring.color }}>
+          <CompIcon className="w-3.5 h-3.5" /> {meta.label}
+        </span>
+        {asset.is_active === false && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+            <AlertTriangle className="w-3.5 h-3.5" /> Inactive
+          </span>
+        )}
+        {asset.weight_kg != null && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">
+            <Weight className="w-3.5 h-3.5" /> {Math.round(asset.weight_kg)} kg
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AssetDetailPage() {
   const { id } = useParams();
@@ -54,6 +174,7 @@ export default function AssetDetailPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [showPATTest, setShowPATTest] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [showActions, setShowActions] = useState(false);
 
   const staffProfile = useMemo(() => ({ name: user?.full_name || user?.email || 'Manager' }), [user]);
 
@@ -63,7 +184,6 @@ export default function AssetDetailPage() {
     enabled: !!id,
   });
 
-  // Track this asset as recently viewed (for the AssetHub quick-reopen strip)
   useEffect(() => {
     if (asset?.id && asset?.name) {
       trackRecentlyViewedAsset({ id: asset.id, name: asset.name, asset_type: asset.asset_type, colour: asset.colour });
@@ -91,7 +211,6 @@ export default function AssetDetailPage() {
     [asset, allAssets]
   );
 
-  // For equipment (non-rig): find the parent rig this item is linked to
   const parentRig = useMemo(
     () => !asset || asset.asset_type === 'rig' ? null : allAssets.find(r => r.asset_type === 'rig' && (r.linked_equipment_ids || []).includes(asset.id)),
     [asset, allAssets]
@@ -122,7 +241,6 @@ export default function AssetDetailPage() {
     queryClient.invalidateQueries({ queryKey: ['asset-deployments', id] });
   };
 
-  // Pull the latest object fields + photos from Asset Panda and cache them.
   const handleRefreshFromPanda = async () => {
     if (!asset?.panda_asset_id) return;
     setRefreshing(true);
@@ -157,7 +275,7 @@ export default function AssetDetailPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
         <Package className="w-12 h-12 text-slate-300 mb-3" />
         <p className="text-slate-500 font-semibold">Asset not found</p>
-        <button onClick={() => navigate('/assets')} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold">
+        <button onClick={() => navigate('/assets')} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold min-h-[44px]">
           Back to Assets
         </button>
       </div>
@@ -174,10 +292,10 @@ export default function AssetDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen">
-      {/* Mobile hero */}
-      <div className="lg:hidden p-3 space-y-3">
-        <AssetDetailHero
+    <div className="min-h-screen pb-24 lg:pb-8">
+      {/* Unified hero — same on all screen sizes */}
+      <div className="px-3 lg:px-6 pt-3 lg:pt-6 max-w-7xl mx-auto">
+        <AssetHero
           asset={asset}
           onBack={() => navigate('/assets')}
           onEdit={() => setShowEditor(true)}
@@ -187,141 +305,109 @@ export default function AssetDetailPage() {
           refreshing={refreshing}
         />
         {asset.panda_asset_id && (
-          <AssetPandaImageGallery asset={asset} />
+          <div className="mt-3">
+            <AssetPandaImageGallery asset={asset} />
+          </div>
         )}
       </div>
 
-      {/* Two-column layout (desktop) */}
-      <div className="lg:flex lg:max-w-7xl lg:mx-auto">
-        {/* Left rail — desktop only */}
-        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
-          <div className="lg:sticky lg:top-0 lg:max-h-screen lg:overflow-y-auto p-4 space-y-3">
-            <AssetDetailHero
-              asset={asset}
-              onBack={() => navigate('/assets')}
-              onEdit={() => setShowEditor(true)}
-              onRecert={() => setShowRecert(true)}
-              onQR={() => setShowQR(true)}
-              onRefresh={handleRefreshFromPanda}
-              refreshing={refreshing}
-            />
-            {/* Quick action buttons */}
-            <div className="space-y-2">
-              {quickActions.map(a => {
-                const Icon = a.icon;
-                return (
-                  <button
-                    key={a.label}
-                    onClick={a.onClick}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-primary hover:bg-emerald-50/40 text-sm font-semibold text-slate-700 transition group"
-                  >
-                    <span className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition">
-                      <Icon className="w-4 h-4 text-primary" />
-                    </span>
-                    {a.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right content */}
-        <div className="flex-1 min-w-0">
-          {/* Sticky tab bar */}
-          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80">
-            <div className="flex gap-1 px-3 py-2.5 overflow-x-auto no-scrollbar">
-              {TABS.map(t => {
-                const Icon = t.icon;
-                const active = activeTab === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    onClick={() => setActiveTab(t.key)}
-                    className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition touch-manipulation ${
-                      active
-                        ? 'bg-primary text-white shadow-md shadow-emerald-900/10'
-                        : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${active ? 'text-emerald-300' : 'text-slate-400'}`} /> {t.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tab content */}
-          <div className="p-3 lg:p-6 pb-28 lg:pb-8 space-y-4">
-            {activeTab === 'overview' && (
-              <AssetOverviewTab
-                asset={asset}
-                linkedItems={linkedItems}
-                parentRig={parentRig}
-                currentDeployment={currentDeployment}
-                currentJob={currentJob}
-                onOpenLinked={(linkedId) => navigate(`/assets/${linkedId}`)}
-                onOpenRig={(rig) => navigate(`/assets/${rig.id}`)}
-              />
-            )}
-
-            {activeTab === 'compliance' && (
-              <div className="space-y-4">
-                {/* Master compliance rollup (for rigs with linked equipment) */}
-                {rollup && rollup.total > 1 && (
-                  <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
-                    <ShieldCheck className="w-6 h-6 text-primary" />
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">System Compliance: {rollup.master}</p>
-                      <p className="text-xs text-slate-500">
-                        {rollup.counts.compliant} compliant · {rollup.counts.expiring} expiring · {rollup.counts.expired} expired · {rollup.counts.unknown} unknown
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <CertificateVault
-                  assetIds={vaultAssetIds}
-                  assetNames={vaultAssetNames}
-                  assets={vaultAssets}
-                />
-                <CompliancePackGenerator asset={asset} linkedItems={linkedItems} />
-              </div>
-            )}
-
-            {activeTab === 'service' && (
-              <ServiceHistoryPanel
-                assetId={asset.id}
-                assetName={asset.name}
-                assetType={asset.asset_type}
-              />
-            )}
-
-            {activeTab === 'deployment' && (
-              <AssetDeploymentTab
-                asset={asset}
-                assignments={assignments}
-                jobs={jobs}
-                onAssign={() => setShowAssignJob(true)}
-              />
-            )}
-
-            {activeTab === 'financial' && (
-              <AssetFinancialTab asset={asset} />
-            )}
-
-            {activeTab === 'activity' && (
-              <div className="hub-glass rounded-2xl p-4">
-                <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" /> Movement & Activity Timeline
-                </h3>
-                <AssetMovementHistory asset={asset} assets={vaultAssets} />
-              </div>
-            )}
-          </div>
+      {/* Quick action bar — horizontal scroll on mobile, row on desktop */}
+      <div className="px-3 lg:px-6 mt-3 max-w-7xl mx-auto">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {quickActions.map(a => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.label}
+                onClick={a.onClick}
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-primary hover:bg-emerald-50/40 text-sm font-semibold text-slate-700 transition flex-shrink-0 min-h-[44px]"
+              >
+                <span className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <Icon className="w-4 h-4 text-primary" />
+                </span>
+                {a.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Mobile bottom quick-action bar */}
+      {/* Sticky tab bar */}
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 mt-3">
+        <div className="flex gap-1 px-3 lg:px-6 py-2.5 overflow-x-auto no-scrollbar max-w-7xl mx-auto">
+          {TABS.map(t => {
+            const Icon = t.icon;
+            const active = activeTab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition min-h-[44px] ${
+                  active ? 'bg-primary text-white shadow-md' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${active ? 'text-emerald-300' : 'text-slate-400'}`} /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      <div className="px-3 lg:px-6 py-4 lg:py-6 max-w-7xl mx-auto space-y-4">
+        {activeTab === 'overview' && (
+          <AssetOverviewTab
+            asset={asset}
+            linkedItems={linkedItems}
+            parentRig={parentRig}
+            currentDeployment={currentDeployment}
+            currentJob={currentJob}
+            onOpenLinked={(linkedId) => navigate(`/assets/${linkedId}`)}
+            onOpenRig={(rig) => navigate(`/assets/${rig.id}`)}
+          />
+        )}
+
+        {activeTab === 'compliance' && (
+          <div className="space-y-4">
+            {rollup && rollup.total > 1 && (
+              <div className="hub-glass rounded-2xl p-4 flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+                <div>
+                  <p className="text-sm font-bold text-slate-900">System Compliance: {rollup.master}</p>
+                  <p className="text-xs text-slate-500">
+                    {rollup.counts.compliant} compliant · {rollup.counts.expiring} expiring · {rollup.counts.expired} expired · {rollup.counts.unknown} unknown
+                  </p>
+                </div>
+              </div>
+            )}
+            <CertificateVault assetIds={vaultAssetIds} assetNames={vaultAssetNames} assets={vaultAssets} />
+            <CompliancePackGenerator asset={asset} linkedItems={linkedItems} />
+          </div>
+        )}
+
+        {activeTab === 'service' && (
+          <ServiceHistoryPanel assetId={asset.id} assetName={asset.name} assetType={asset.asset_type} />
+        )}
+
+        {activeTab === 'deployment' && (
+          <AssetDeploymentTab asset={asset} assignments={assignments} jobs={jobs} onAssign={() => setShowAssignJob(true)} />
+        )}
+
+        {activeTab === 'financial' && (
+          <AssetFinancialTab asset={asset} />
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="hub-glass rounded-2xl p-4">
+            <h3 className="text-sm font-extrabold text-slate-900 mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary" /> Movement & Activity Timeline
+            </h3>
+            <AssetMovementHistory asset={asset} assets={vaultAssets} />
+          </div>
+        )}
+      </div>
+
+      {/* Mobile bottom action bar */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200 safe-area-bottom shadow-[0_-4px_20px_-4px_rgba(15,23,42,0.08)]">
         <div className="flex items-center justify-around px-1.5 py-2">
           {quickActions.map(a => {
@@ -330,7 +416,7 @@ export default function AssetDetailPage() {
               <button
                 key={a.label}
                 onClick={a.onClick}
-                className="flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold text-slate-600 active:scale-90 transition touch-manipulation min-w-[44px] min-h-[44px] justify-center"
+                className="flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-semibold text-slate-600 active:scale-90 transition min-w-[44px] min-h-[44px] justify-center"
               >
                 <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
                   <Icon className="w-5 h-5 text-primary" />
@@ -346,26 +432,9 @@ export default function AssetDetailPage() {
       {showLogService && <LogServiceModal asset={asset} onClose={() => setShowLogService(false)} />}
       {showReportFault && <ReportFaultModal asset={asset} staffProfile={staffProfile} onClose={() => setShowReportFault(false)} />}
       {showAssignJob && <AssignToJobModal asset={asset} onClose={() => setShowAssignJob(false)} />}
-      {showRecert && (
-        <RecertActionModal
-          asset={asset}
-          onClose={() => setShowRecert(false)}
-          onSaved={() => invalidateAll()}
-        />
-      )}
-      {showEditor && (
-        <AssetComplianceEditor
-          asset={asset}
-          onClose={() => { setShowEditor(false); invalidateAll(); }}
-        />
-      )}
-      {showPATTest && (
-        <PATTestForm
-          asset={asset}
-          onClose={() => setShowPATTest(false)}
-          onSaved={() => invalidateAll()}
-        />
-      )}
+      {showRecert && <RecertActionModal asset={asset} onClose={() => setShowRecert(false)} onSaved={() => invalidateAll()} />}
+      {showEditor && <AssetComplianceEditor asset={asset} onClose={() => { setShowEditor(false); invalidateAll(); }} />}
+      {showPATTest && <PATTestForm asset={asset} onClose={() => setShowPATTest(false)} onSaved={() => invalidateAll()} />}
       {showQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-md" onClick={() => setShowQR(false)} />

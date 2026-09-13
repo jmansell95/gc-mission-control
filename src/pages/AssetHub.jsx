@@ -3,11 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  Cog, Wrench, Package, Truck, Anchor, Plug,
-  Plus, Search, Boxes, ScanLine, X, TrendingUp, TrendingDown, RefreshCw, Lock, ShieldCheck,
-  CheckSquare, Upload, Database, MapPin, QrCode, Trash2, CircleDot, Warehouse, AlertTriangle, Weight, LayoutGrid,
+  Cog, Wrench, Package, Anchor, Plug,
+  Plus, ScanLine, X, ShieldCheck,
+  Upload, Database, MapPin, QrCode, Weight, Boxes, Lock,
 } from 'lucide-react';
-import ConsumableInventoryManager from '@/components/settings/ConsumableInventoryManager';
 import ConsumablesView from '@/components/assethub/ConsumablesView';
 import { rollupCompliance, daysUntil } from '@/utils/rigRollup';
 import RigDetailDrawer from '@/components/righub/RigDetailDrawer';
@@ -30,10 +29,6 @@ import BulkQRPrinter from '@/components/assetcommand/BulkQRPrinter';
 import BulkWeightModal from '@/components/assethub/BulkWeightModal';
 import PATTestingPanel from '@/components/pat/PATTestingPanel';
 import ScrapPilePanel from '@/components/assetcommand/ScrapPilePanel';
-import AssetInventoryGrid from '@/components/assethub/AssetInventoryGrid';
-import RecentlyViewedStrip from '@/components/assethub/RecentlyViewedStrip';
-import BulkActionsBar from '@/components/assethub/BulkActionsBar';
-import PrintWeightRegister from '@/components/assethub/PrintWeightRegister';
 import AssetDeploymentsPanel from '@/components/assethub/AssetDeploymentsPanel';
 import PredictiveMaintenanceWidget from '@/components/vehicles/PredictiveMaintenanceWidget';
 import PredictiveInsightsWidget from '@/components/dashboard/PredictiveInsightsWidget';
@@ -43,16 +38,12 @@ import HubShell from '@/components/HubShell';
 import SubPills from '@/components/SubPills';
 import { ASSETS_HELP_TOPICS, ASSETS_ONBOARDING, ASSETS_QUICK_LINKS } from '@/components/assethub/assetsHubContent';
 import RunReportButton from '@/components/reports/RunReportButton';
+import PrintWeightRegister from '@/components/assethub/PrintWeightRegister';
+import RecentlyViewedStrip from '@/components/assethub/RecentlyViewedStrip';
+import BulkActionsBar from '@/components/assethub/BulkActionsBar';
+import AssetFilterBar from '@/components/assethub/AssetFilterBar';
+import AssetGrid from '@/components/assethub/AssetGrid';
 import { useAssetRealtime } from '@/hooks/useAssetRealtime';
-
-const CATEGORIES = [
-  { id: 'all', label: 'All', icon: Boxes },
-  { id: 'rig', label: 'Rigs', icon: Cog },
-  { id: 'lifting', label: 'Lifting', icon: Anchor },
-  { id: 'machinery', label: 'Machinery', icon: Wrench },
-  { id: 'trailer', label: 'Trailers', icon: Package },
-  { id: 'portable_appliance', label: 'PAT', icon: Plug },
-];
 
 export default function AssetHub() {
   const navigate = useNavigate();
@@ -85,30 +76,22 @@ export default function AssetHub() {
 
   const { data: allAssets = [], isLoading } = useQuery({
     queryKey: ['site-assets'],
-    queryFn: async () => {
-      // Load beyond the default 500-record cap so locally-created assets
-      // buried under a large Asset Panda sync resurface in the inventory.
-      return await base44.entities.SiteAsset.filter({}, '-created_date', 2000);
-    },
+    queryFn: async () => base44.entities.SiteAsset.filter({}, '-created_date', 2000),
   });
 
-  // Vehicles are managed in the dedicated Fleet Hub — exclude them from the Assets inventory
   const assets = useMemo(() => allAssets.filter(a => a.asset_type !== 'vehicle'), [allAssets]);
-
   const rigs = useMemo(() => assets.filter(a => a.asset_type === 'rig'), [assets]);
   const equipment = useMemo(() => assets.filter(a => a.asset_type !== 'rig'), [assets]);
 
   const pandaCount = useMemo(() => assets.filter(a => a.panda_asset_id).length, [assets]);
   const localCount = useMemo(() => assets.filter(a => !a.panda_asset_id).length, [assets]);
 
-  // Category counts
   const categoryCounts = useMemo(() => {
     const c = { all: assets.length, rig: 0, lifting: 0, machinery: 0, trailer: 0, portable_appliance: 0 };
     assets.forEach(a => { if (c[a.asset_type] != null) c[a.asset_type]++; });
     return c;
   }, [assets]);
 
-  // Compliance stats
   const recertCount = useMemo(() => assets.filter(a => {
     const d = daysUntil(a.compliance_expiry_date);
     const sd = daysUntil(a.next_service_date);
@@ -127,7 +110,6 @@ export default function AssetHub() {
     return c;
   }, [assets]);
 
-  // 4 consolidated tab groups (down from 7 flat tabs)
   const TAB_GROUPS = [
     { id: 'inventory', label: 'Inventory', icon: Boxes, sub: [
       { id: 'inventory', label: 'All Assets', icon: Boxes, count: assets.length },
@@ -148,20 +130,17 @@ export default function AssetHub() {
 
   const openAdd = () => { setEditorAsset(null); setEditorOpen(true); };
 
-  // Bulk cert helpers — mirrors the grid's filter logic so the bulk bar
-  // count matches what's visible on screen.
+  // Bulk cert helpers
   const filteredEquipForBulk = useMemo(() => equipment.filter(a => {
     if (depotOnly && !(a.storage_location || '').toLowerCase().match(/depot|yard|dartford/)) return false;
     if (sourceFilter === 'panda' && !a.panda_asset_id) return false;
     if (sourceFilter === 'local' && a.panda_asset_id) return false;
     if (category !== 'all' && category !== 'rig' && a.asset_type !== category) return false;
     if (compFilter !== 'all' && (a.compliance_status || 'unknown') !== compFilter) return false;
-    // Deployment filter
     const inDepot = (a.storage_location || '').toLowerCase().match(/depot|yard|dartford/);
     if (deployFilter === 'in_depot' && !inDepot) return false;
     if (deployFilter === 'on_site' && (inDepot || a.is_active === false)) return false;
     if (deployFilter === 'inactive' && a.is_active !== false) return false;
-    // Lifecycle filter
     if (lifecycleFilter !== 'all') {
       const ls = a.lifecycle_status || 'active';
       if (lifecycleFilter === 'due_for_replacement' && !(a.replacement_date && Math.floor((new Date(a.replacement_date) - new Date()) / 86400000) <= 90)) return false;
@@ -177,12 +156,10 @@ export default function AssetHub() {
   const stats = assets.length > 0 ? [
     { icon: Boxes, label: 'Total Assets', value: assets.length, sublabel: 'Excl. vehicles', color: 'brand' },
     { icon: Database, label: 'Panda Synced', value: pandaCount, sublabel: 'From Asset Panda', color: 'amber' },
-    { icon: CircleDot, label: 'Locally Created', value: localCount, sublabel: 'Manual entries', color: 'blue' },
     { icon: Cog, label: 'Rigs', value: categoryCounts.rig, sublabel: 'Drilling units', color: 'amber' },
     { icon: Anchor, label: 'Lifting', value: categoryCounts.lifting, sublabel: 'LOLER gear', color: 'blue' },
-    { icon: Wrench, label: 'Machinery', value: categoryCounts.machinery, sublabel: 'Plant & equip', color: 'violet' },
     { icon: ShieldCheck, label: 'Compliant', value: fleetCounts.compliant, sublabel: `${Math.round(fleetHealthPct)}% of known`, color: 'emerald' },
-    { icon: AlertTriangle, label: 'Needs Recert', value: recertCount, sublabel: 'Expired/expiring', color: recertCount > 0 ? 'rose' : 'slate' },
+    { icon: ShieldCheck, label: 'Needs Recert', value: recertCount, sublabel: 'Expired/expiring', color: recertCount > 0 ? 'rose' : 'slate' },
   ] : [];
 
   return (
@@ -201,12 +178,24 @@ export default function AssetHub() {
         <div className="flex items-center gap-2 flex-wrap">
           <PrintWeightRegister assets={assets} />
           <RunReportButton hub="assets" />
-          <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Scanner</button>
-          <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><QrCode className="w-3.5 h-3.5" /> QR Labels</button>
-          <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><ScanLine className="w-3.5 h-3.5" /> Smart Import</button>
-          <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm"><Upload className="w-3.5 h-3.5" /> Bulk Upload</button>
-          <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm"><Weight className="w-3.5 h-3.5" /> Bulk Weights</button>
-          <button onClick={openAdd} className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm"><Plus className="w-3.5 h-3.5" /> Add Asset</button>
+          <button onClick={() => navigate('/scanner')} className="inline-flex items-center gap-1.5 h-9 px-3 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm min-h-[36px]">
+            <ScanLine className="w-3.5 h-3.5" /> Scanner
+          </button>
+          <button onClick={() => setShowBulkQR(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm min-h-[36px]">
+            <QrCode className="w-3.5 h-3.5" /> QR Labels
+          </button>
+          <button onClick={() => setShowSmartImport(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm min-h-[36px]">
+            <ScanLine className="w-3.5 h-3.5" /> Smart Import
+          </button>
+          <button onClick={() => setShowBulkUpload(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-primary hover:text-primary transition shadow-sm min-h-[36px]">
+            <Upload className="w-3.5 h-3.5" /> Bulk Upload
+          </button>
+          <button onClick={() => setShowBulkWeight(true)} className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-semibold text-xs hover:border-blue-600 hover:text-blue-600 transition shadow-sm min-h-[36px]">
+            <Weight className="w-3.5 h-3.5" /> Bulk Weights
+          </button>
+          <button onClick={openAdd} className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-primary text-white rounded-xl font-semibold text-xs hover:bg-[#244715] transition shadow-sm min-h-[36px]">
+            <Plus className="w-3.5 h-3.5" /> Add Asset
+          </button>
         </div>
       }
       tabs={TAB_GROUPS.map(g => ({ id: g.id, label: g.label, icon: g.icon, badge: g.id === 'compliance' ? recertCount : undefined, count: g.id === 'inventory' ? assets.length : undefined }))}
@@ -217,10 +206,24 @@ export default function AssetHub() {
 
       {view === 'consumables' ? (
         <ErrorBoundary><ConsumablesView /></ErrorBoundary>
+      ) : view === 'deployments' ? (
+        <ErrorBoundary><AssetDeploymentsPanel assets={assets} /></ErrorBoundary>
+      ) : view === 'compliance' ? (
+        <ErrorBoundary>
+          <div className="space-y-4">
+            <RecertPipeline assets={assets} onRecert={(a) => setRecertAsset(a)} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3 px-1">Certificate Vault</h3>
+              <MasterCertificateVault assets={assets} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
+            </div>
+          </div>
+        </ErrorBoundary>
+      ) : view === 'pat_testing' ? (
+        <ErrorBoundary><PATTestingPanel /></ErrorBoundary>
       ) : (
         <>
-          {/* Fleet health strip — refined brand card with sync + health visuals */}
-          <div className="hub-glass rounded-hub px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+          {/* Fleet health strip */}
+          <div className="hub-glass rounded-2xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex w-9 h-9 rounded-xl stat-gradient-brand items-center justify-center flex-shrink-0">
                 <ShieldCheck className="w-4 h-4 text-white" />
@@ -239,103 +242,43 @@ export default function AssetHub() {
             </div>
           </div>
 
-          {/* Filters (inventory tab only) */}
-          {view === 'inventory' && (
-            <div className="bg-white rounded-hub border border-slate-200 shadow-sm p-hub-card-pad-sm space-y-3">
-              {/* Category pills */}
-              <div className="flex gap-1.5 flex-wrap">
-                {CATEGORIES.map(cat => {
-                  const CIcon = cat.icon;
-                  const active = category === cat.id;
-                  const count = categoryCounts[cat.id] || 0;
-                  return (
-                    <button key={cat.id} onClick={() => setCategory(cat.id)} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition ${active ? 'bg-primary text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                      <CIcon className="w-3.5 h-3.5" /> {cat.label}
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${active ? 'bg-white/20' : 'bg-white text-slate-400'}`}>{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Search + filters */}
-              <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
-                <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or serial..." className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10" />
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  <select value={compFilter} onChange={e => setCompFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
-                    <option value="all">All Status</option>
-                    <option value="compliant">Compliant</option>
-                    <option value="expiring">Expiring</option>
-                    <option value="expired">Expired</option>
-                    <option value="unknown">Unknown</option>
-                  </select>
-                  <div className="flex gap-1 p-1 bg-slate-100 rounded-lg">
-                    {[
-                      { val: 'all', label: 'All', Icon: Boxes },
-                      { val: 'panda', label: 'Panda', Icon: Database },
-                      { val: 'local', label: 'Local', Icon: CircleDot },
-                    ].map(opt => {
-                      const OIcon = opt.Icon;
-                      const active = sourceFilter === opt.val;
-                      return (
-                        <button key={opt.val} onClick={() => setSourceFilter(opt.val)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${active ? 'bg-white text-primary shadow-sm' : 'text-slate-500'}`}>
-                          <OIcon className="w-3 h-3" /> {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button onClick={() => setDepotOnly(d => !d)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${depotOnly ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
-                    <Warehouse className="w-4 h-4" /> {depotOnly ? 'Depot Only' : 'Depot'}
-                  </button>
-                  <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
-                    <option value="none">No grouping</option>
-                    <option value="type">Group by Type</option>
-                    <option value="location">Group by Location</option>
-                    <option value="status">Group by Status</option>
-                    <option value="panda_group">Group by Panda Group</option>
-                  </select>
-                  <select value={deployFilter} onChange={(e) => setDeployFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
-                    <option value="all">All Locations</option>
-                    <option value="in_depot">In Depot</option>
-                    <option value="on_site">On Site / Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <select value={lifecycleFilter} onChange={(e) => setLifecycleFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
-                    <option value="all">All Lifecycle</option>
-                    <option value="active">Active</option>
-                    <option value="aging">Aging</option>
-                    <option value="due_for_replacement">Due for Replacement</option>
-                    <option value="disposed">Disposed</option>
-                  </select>
-                  <select value={maintenanceFilter} onChange={(e) => setMaintenanceFilter(e.target.value)} className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-primary bg-white">
-                    <option value="all">All Maintenance</option>
-                    <option value="on_track">On Track</option>
-                    <option value="due_soon">Due Soon</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="no_interval">No Interval</option>
-                  </select>
-                  <button onClick={() => setCompact(c => !c)} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${compact ? 'bg-primary text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`} title="Toggle compact card view">
-                    <LayoutGrid className="w-4 h-4" /> {compact ? 'Compact' : 'Detailed'}
-                  </button>
-                  {category !== 'rig' && (
-                    <button onClick={() => { setSelectionMode(m => !m); setSelected(new Set()); }} className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition flex-shrink-0 ${selectionMode ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-50'}`}>
-                      <CheckSquare className="w-4 h-4" /> {selectionMode ? 'Done' : 'Select'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Filter bar */}
+          <AssetFilterBar
+            category={category}
+            setCategory={setCategory}
+            categoryCounts={categoryCounts}
+            search={search}
+            setSearch={setSearch}
+            compFilter={compFilter}
+            setCompFilter={setCompFilter}
+            sourceFilter={sourceFilter}
+            setSourceFilter={setSourceFilter}
+            depotOnly={depotOnly}
+            setDepotOnly={setDepotOnly}
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
+            deployFilter={deployFilter}
+            setDeployFilter={setDeployFilter}
+            lifecycleFilter={lifecycleFilter}
+            setLifecycleFilter={setLifecycleFilter}
+            maintenanceFilter={maintenanceFilter}
+            setMaintenanceFilter={setMaintenanceFilter}
+            compact={compact}
+            setCompact={setCompact}
+            selectionMode={selectionMode}
+            setSelectionMode={setSelectionMode}
+            showSelection={category !== 'rig'}
+          />
 
-          {/* Content */}
+          {/* Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">{[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-40 w-full rounded-xl" />)}</div>
-          ) : view === 'inventory' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-64 w-full rounded-2xl" />)}
+            </div>
+          ) : (
             <>
               <RecentlyViewedStrip onOpen={(a) => navigate(`/assets/${a.id}`)} />
-              <AssetInventoryGrid
+              <AssetGrid
                 assets={assets}
                 rigs={rigs}
                 category={category}
@@ -357,44 +300,10 @@ export default function AssetHub() {
                 onUploadCert={(a) => setRecertAsset(a)}
               />
             </>
-          ) : view === 'deployments' ? (
-            <ErrorBoundary><AssetDeploymentsPanel assets={assets} /></ErrorBoundary>
-          ) : view === 'compliance' ? (
-            <ErrorBoundary>
-              <div className="space-y-6">
-                <RecertPipeline assets={assets} onRecert={(a) => setRecertAsset(a)} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
-                <div>
-                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide mb-3 px-1">Certificate Vault</h3>
-                  <MasterCertificateVault assets={assets} onOpenAsset={(a) => navigate(`/assets/${a.id}`)} />
-                </div>
-              </div>
-            </ErrorBoundary>
-          ) : view === 'pat_testing' ? (
-            <ErrorBoundary>
-              <PATTestingPanel />
-            </ErrorBoundary>
-          ) : view === 'performance' ? (
-            <ErrorBoundary>
-              <div className="space-y-6">
-                <FleetUtilizationHeatmap assets={assets} />
-                <DrillingEfficiencyPanel assets={assets} />
-                <AssetUtilizationTrends />
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <PredictiveMaintenanceWidget onSelectVehicle={(v) => navigate('/fleet')} />
-                  <PredictiveInsightsWidget onNavigate={(section) => navigate('/admin', { state: { section } })} />
-                </div>
-              </div>
-            </ErrorBoundary>
-          ) : view === 'lifecycle' ? (
-            <ErrorBoundary>
-              <DepreciationSchedule />
-            </ErrorBoundary>
-          ) : view === 'scrap' ? (
-            <ErrorBoundary><ScrapPilePanel /></ErrorBoundary>
-          ) : null}
+          )}
 
           {/* Bulk action bar */}
-          {selectionMode && view === 'inventory' && filteredEquipForBulk.length > 0 && (
+          {selectionMode && filteredEquipForBulk.length > 0 && (
             <BulkActionsBar
               selectedAssets={filteredEquipForBulk.filter(a => selected.has(a.id))}
               totalAvailable={filteredEquipForBulk.length}
@@ -415,24 +324,45 @@ export default function AssetHub() {
       {certVaultRig && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-8 sm:pt-4">
           <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-md" onClick={() => setCertVaultRig(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto animate-pop-in">
             <div className="sticky top-0 bg-white rounded-t-2xl z-10 border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0"><div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0"><Lock className="w-4 h-4 text-white" /></div><div className="min-w-0"><h3 className="font-bold text-slate-900 truncate">{certVaultRig.name} — Certificates</h3><p className="text-[11px] text-slate-400 truncate">Rig & all linked equipment</p></div></div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-4 h-4 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-slate-900 truncate">{certVaultRig.name} — Certificates</h3>
+                  <p className="text-[11px] text-slate-400 truncate">Rig & all linked equipment</p>
+                </div>
+              </div>
               <button onClick={() => setCertVaultRig(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition"><X className="w-4 h-4 text-slate-500" /></button>
             </div>
-            <div className="p-4"><CertificateVault assets={[certVaultRig, ...(certVaultRig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean)]} assetIds={[certVaultRig.id, ...(certVaultRig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean).map(a => a.id)]} assetNames={{ [certVaultRig.id]: certVaultRig.name, ...(certVaultRig.linked_equipment_ids || []).reduce((m, id) => { const a = assets.find(x => x.id === id); if (a) m[id] = a.name; return m; }, {}) }} /></div>
+            <div className="p-4">
+              <CertificateVault
+                assets={[certVaultRig, ...(certVaultRig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean)]}
+                assetIds={[certVaultRig.id, ...(certVaultRig.linked_equipment_ids || []).map(id => assets.find(a => a.id === id)).filter(Boolean).map(a => a.id)]}
+                assetNames={{ [certVaultRig.id]: certVaultRig.name, ...(certVaultRig.linked_equipment_ids || []).reduce((m, id) => { const a = assets.find(x => x.id === id); if (a) m[id] = a.name; return m; }, {}) }}
+              />
+            </div>
           </div>
         </div>
       )}
       {bulkCerts && (
         <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-8 sm:pt-4">
           <div className="absolute inset-0 bg-blue-950/60 backdrop-blur-md" onClick={() => setBulkCerts(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto">
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-y-auto animate-pop-in">
             <div className="sticky top-0 bg-white rounded-t-2xl z-10 border-b border-slate-200 px-5 py-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0"><div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0"><Lock className="w-4 h-4 text-white" /></div><div className="min-w-0"><h3 className="font-bold text-slate-900 truncate">{bulkCerts.length} Assets — Certificates</h3></div></div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2E5A1A] to-[#5A8C1E] flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-bold text-slate-900 truncate">{bulkCerts.length} Assets — Certificates</h3>
+              </div>
               <button onClick={() => setBulkCerts(null)} className="p-1.5 hover:bg-slate-100 rounded-lg transition"><X className="w-4 h-4 text-slate-500" /></button>
             </div>
-            <div className="p-4"><CertificateVault assets={bulkCerts} assetIds={bulkCerts.map(a => a.id)} assetNames={Object.fromEntries(bulkCerts.map(a => [a.id, a.name]))} /></div>
+            <div className="p-4">
+              <CertificateVault assets={bulkCerts} assetIds={bulkCerts.map(a => a.id)} assetNames={Object.fromEntries(bulkCerts.map(a => [a.id, a.name]))} />
+            </div>
           </div>
         </div>
       )}
