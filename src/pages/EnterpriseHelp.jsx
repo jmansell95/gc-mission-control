@@ -121,7 +121,7 @@ export default function EnterpriseHelp() {
           </div>
         </div>
       </div>
-      <div className="px-4 pt-5 pb-24 lg:pt-8 lg:px-8 lg:pb-10 space-y-5 max-w-5xl mx-auto">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-5 pb-24 lg:pt-8 lg:pb-10 space-y-5 max-w-[1600px] mx-auto">
         {/* Back link + title */}
         <div className="flex items-center gap-3 mb-2">
           <button onClick={() => navigate(-1)} type="button"

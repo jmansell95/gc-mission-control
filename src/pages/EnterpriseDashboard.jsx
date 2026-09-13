@@ -153,8 +153,8 @@ export default function EnterpriseDashboard() {
         <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-emerald-50/40" />
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 15% 20%, #2E5A1A 0%, transparent 45%), radial-gradient(circle at 85% 80%, #8DC63F 0%, transparent 50%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-[#2E5A1A] to-transparent" />
-        <div className="relative px-4 lg:px-6 pt-5 lg:pt-8 pb-6">
-          <div className="max-w-7xl mx-auto">
+        <div className="relative px-3 sm:px-4 md:px-6 lg:px-8 pt-5 lg:pt-8 pb-6">
+          <div className="max-w-[1600px] mx-auto">
             {/* Title row */}
             <div className="flex items-center justify-between gap-3 mb-5">
               <div className="flex items-center gap-3 min-w-0">
@@ -233,7 +233,7 @@ export default function EnterpriseDashboard() {
       </div>
 
       {/* ─── Body ─── */}
-      <div className="px-4 lg:px-6 pb-8 lg:pb-6 space-y-4 max-w-7xl mx-auto">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pb-8 lg:pb-6 space-y-4 max-w-[1600px] mx-auto">
 
         {/* Quick Access */}
         <div className="hub-glass rounded-2xl p-4 sm:p-5 mt-5 sm:mt-8 relative z-10">

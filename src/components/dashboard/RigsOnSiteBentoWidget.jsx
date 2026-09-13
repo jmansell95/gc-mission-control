@@ -12,7 +12,6 @@ import WidgetLoadingState from '@/components/dashboard/WidgetLoadingState';
 import WidgetEmptyState from '@/components/dashboard/WidgetEmptyState';
 import AllRigsModal from '@/components/dashboard/AllRigsModal';
 import AnimatedNumber from '@/components/hubs/AnimatedNumber';
-import WidgetActionFooter from '@/components/dashboard/WidgetActionFooter';
 import { useDivision } from '@/contexts/DivisionContext';
 import { computeRigEarnings } from '@/utils/rigEarnings';
 
@@ -388,11 +387,6 @@ export default function RigsOnSiteBentoWidget({ onJobBreakdown }) {
               })}
             </div>
 
-            {/* Footer — deep-link + quick-action */}
-            <WidgetActionFooter
-              deepLinkLabel="Fleet Hub"
-              onDeepLink={() => navigate('/fleet?filter=today')}
-            />
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowAllRigs(true); }}

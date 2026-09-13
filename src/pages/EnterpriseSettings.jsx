@@ -135,7 +135,7 @@ export default function EnterpriseSettings() {
         </div>
       </div>
 
-      <div className="px-4 pt-5 pb-8 lg:pt-8 lg:px-8 lg:pb-10 space-y-5 max-w-7xl mx-auto">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-5 pb-8 lg:pt-8 lg:pb-10 space-y-5 max-w-[1600px] mx-auto">
         {/* Page title — generous breathing room after the header */}
         <div className="space-y-4">
           <div className="flex items-start gap-3">

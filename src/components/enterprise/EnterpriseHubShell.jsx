@@ -17,7 +17,7 @@ export default function EnterpriseHubShell({ title, subtitle, icon: Icon, accent
     <div className="min-h-screen page-bg-vibrant">
       <EnterpriseHeader />
 
-      <div className="px-4 lg:px-6 pt-4 lg:pt-6 max-w-7xl mx-auto safe-area-top">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 pt-3 lg:pt-6 max-w-[1600px] mx-auto safe-area-top">
         <HubHeader
           icon={Icon}
           title={title}
@@ -36,7 +36,7 @@ export default function EnterpriseHubShell({ title, subtitle, icon: Icon, accent
       </div>
 
       {/* Body */}
-      <div className="px-4 lg:px-6 py-5 lg:py-6 max-w-7xl mx-auto space-y-4">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 py-5 lg:py-6 max-w-[1600px] mx-auto space-y-4">
         {children}
       </div>
     </div>
