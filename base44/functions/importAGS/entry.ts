@@ -501,7 +501,10 @@ function chainActivitiesWithShiftWindows(
         const startMins = timeToMins(act.start_time);
         const endMins = timeToMins(act.end_time);
         if (startMins != null && endMins != null) {
-          act.duration_minutes = endMins > startMins ? endMins - startMins : (endMins + 1440) - startMins;
+          // When end === start, duration is 0 (instantaneous/missing end), NOT 24h.
+          if (endMins > startMins) act.duration_minutes = endMins - startMins;
+          else if (endMins < startMins) act.duration_minutes = (endMins + 1440) - startMins;
+          else act.duration_minutes = 0;
         }
       }
     }
@@ -602,7 +605,10 @@ function parseStructuredTimeGroups(groups: Record<string, GroupData>, shiftWindo
         const startMins = timeToMins(startTime);
         const endMins = timeToMins(endTime);
         if (startMins != null && endMins != null) {
-          durationMinutes = endMins > startMins ? endMins - startMins : (endMins + 1440) - startMins;
+          // When end === start, duration is 0 (instantaneous/missing end), NOT 24h.
+          if (endMins > startMins) durationMinutes = endMins - startMins;
+          else if (endMins < startMins) durationMinutes = (endMins + 1440) - startMins;
+          else durationMinutes = 0;
         }
       }
 

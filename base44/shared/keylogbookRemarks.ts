@@ -77,10 +77,11 @@ export function parseRemarks(rawText: string): ParsedActivity[] {
     const endMins = timeToMins(endTime);
     let duration = 0;
     if (startMins != null && endMins != null) {
-      // Handle midnight-crossing shifts (e.g. 22:00→06:00 = 480 min, not 0)
-      duration = endMins > startMins
-        ? endMins - startMins
-        : (endMins + 1440) - startMins;
+      // Handle midnight-crossing shifts (e.g. 22:00→06:00 = 480 min, not 0).
+      // When end === start, duration is 0 (instantaneous/missing end), NOT 24h.
+      if (endMins > startMins) duration = endMins - startMins;
+      else if (endMins < startMins) duration = (endMins + 1440) - startMins;
+      else duration = 0;
     }
     activities.push({ start_time: startTime, end_time: endTime, duration_minutes: duration, raw_description: description });
   }
