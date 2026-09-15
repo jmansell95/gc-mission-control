@@ -1,190 +1,111 @@
-# GC Mission Control — Power Platform Package
+# GC Mission Control — Power Platform Migration
 
-Two separate pieces of work live in this folder — read this section first to see
-which one you actually want.
+Native rebuild of GC Mission Control (the Base44 app in this repo) as a Power Apps
+/ Dataverse app, done in phases. Each phase adds a batch of tables you import
+directly into Power Apps — no Base44 dependency, nothing embedded.
 
-## `GCMissionControl_PCF.zip` — embed the real app (start here)
+## The only mechanism that actually works: CSV import
 
-This is a **PCF (Power Apps Component Framework) custom control**, built with
-Microsoft's official `pac pcf` + MSBuild toolchain (not hand-authored XML — this is
-the same officially-supported mechanism real ISVs use to ship controls in AppSource,
-so it's much higher-confidence than the table-creation package below). It embeds
-the actual GC Mission Control app (running at `https://gc-mission-control.base44.app`,
-still backed by Base44) inside a Power Apps Canvas app screen or model-driven form
-via an iframe.
+Two other approaches were tried and ruled out this session — worth knowing so
+nobody re-attempts them:
 
-**Import it:**
-1. make.powerapps.com → **Solutions** → **Import solution** → browse to
-   `GCMissionControl_PCF.zip` → Next → Import.
-2. Open (or create) a **Canvas app** → on a screen, **Insert** → **Get more
-   components** → **Code** tab → find "MissionControlEmbed" → **Import**.
-3. Drag it onto the screen, then resize it to fill the screen (set `X`/`Y` to 0,
-   `Width`/`Height` to `Parent.Width`/`Parent.Height`).
-4. The `App URL` property can be left blank (defaults to the production URL above)
-   or set to point at a different Base44 environment later.
-5. Save and Publish.
+- **Hand-authored solution XML for new tables.** Four different fixes all failed
+  identically. Microsoft's own guidance: *"You cannot create brand new custom
+  tables by hand-writing customizations.xml — that's not supported."* It only
+  works for editing forms/views/ribbons/sitemap on tables that **already exist**.
+- **PCF-embedded iframe of the live Base44 app** (`GCMissionControl_PCF.zip`,
+  `pcf-missioncontrol/`, `pcf-solution/` — kept in the repo but not the active
+  plan). Builds fine, but embeds the *existing* Base44-backed app rather than
+  building anything native, and needs an environment admin setting most accounts
+  don't have on by default. Parked, not deleted, in case it's wanted later.
 
-**The one real risk**: if `gc-mission-control.base44.app` sends an
-`X-Frame-Options` or `Content-Security-Policy: frame-ancestors` header blocking
-being iframed, the control will show a "did not load" message instead of the app.
-This session's network couldn't reach that domain to check in advance — if this
-happens, the fix is to bundle the app's built JS/CSS directly into the control
-instead of using an iframe (more work — React Router and Vite's asset paths need
-adapting to run inside the control's container rather than as a standalone page —
-but doable; say if you hit this and we'll do that next).
+**What works, proven by Phase 1**: Power Apps' **Tables → New table → From
+Excel/CSV**. Upload a CSV with the right headers and a couple of sample rows,
+and it creates a correctly-typed table — fully supported, no XML, no import
+errors.
 
-**What this is not**: a replacement for the Base44 backend. The app keeps running
-against Base44 exactly as it does today — Power Apps is just the window it's shown
-in. If the goal is zero Base44 dependency, that's the second piece of work below.
+## Phases
 
-Source: `pcf-missioncontrol/` (the control) and `pcf-solution/` (the solution
-project that packages it — rebuild with `dotnet build` inside
-`pcf-solution/MissionControlSolution/` after editing the control).
+| Phase | Tables | Status |
+|---|---|---|
+| 1 | Job, Site Asset, Staff Member, Client, Contractor, Job Asset Assignment | ✅ Imported |
+| 2 | Team, Rota Week, Rota Assignment, Staff Shift Pattern, Absence, Training Course, Training Requirement, CVR | 📦 Ready to import |
 
-## `GCMissionControl_Phase1.zip` — native Dataverse migration (Phase 1, in progress)
+CSVs live in `csv-tables/phase<N>/`. Each table's columns are a pragmatic subset
+of the real entity in `base44/entities/*.jsonc` — nested arrays/objects
+(e.g. `Job.disciplines`, `RotaAssignment`'s signature/audit-timestamp fields)
+don't map to flat CSV/Dataverse columns and were left out; add them as JSON-text
+columns or child tables later if actually needed.
 
-This is a real, importable Dataverse solution generated with Microsoft's
-own Power Platform CLI (`pac`), built to eventually recreate GC Mission Control
-(the Base44 app in this repo) as a fully native app inside Power Apps, with no
-Base44 dependency at all.
+### Importing a phase
 
-**This session had no credentials or connector into any Power Apps / Power Platform
-environment**, so nothing here has been imported or tested against a live tenant.
-Everything was built and validated offline: packed and re-unpacked with `pac solution
-pack`/`unpack` (Microsoft's SolutionPackager) to confirm the XML is well-formed and
-self-consistent. Treat this as a strong first draft, not a guarantee — a first import
-can still surface tenant-specific fixups.
+For each CSV in the phase's folder, in make.powerapps.com:
+1. **Tables → New table → From Excel/CSV** → upload the CSV.
+2. Delete the two sample data rows afterwards (Data tab → select rows → delete)
+   — they're only there so Power Apps infers sensible column types.
+3. Import tables in an order where lookup targets already exist where possible
+   (e.g. Team and Job before Rota Assignment) — it's not strictly required since
+   lookups are fixed up afterwards anyway, just tidier.
 
-## What's in Phase 1
+### Fixing up lookup columns
 
-Six Dataverse tables, mirroring the core of the real app's data model
-(`base44/entities/*.jsonc` in the repo root), with real 1:N relationships between them:
+CSV import can't create relationships, so every column that should be a lookup
+imports as plain text. After import, for each one: **New column → Lookup** → pick
+the target table → then delete the old text column of the same name.
 
-| Table | Logical name | Mirrors | Key relationships |
-|---|---|---|---|
-| Job | `gc_job` | `Job.jsonc` | → Client, → Contractor |
-| Site Asset | `gc_siteasset` | `SiteAsset.jsonc` | (rigs, trailers, machinery, lifting gear) |
-| Staff Member | `gc_staff` | `Staff.jsonc` | → Agency (Contractor), → Manager (self) |
-| Client | `gc_client` | `Client.jsonc` | → Parent Client (self) |
-| Contractor | `gc_contractor` | `Contractor.jsonc` | (sub-contractors & agencies) |
-| Job Asset Assignment | `gc_jobassetassignment` | `JobAssetAssignment.jsonc` | → Job, → Asset, → Vehicle |
+**Phase 1:**
+| Table | Text column | → Lookup to |
+|---|---|---|
+| Job | Client | Client |
+| Job | Contractor | Contractor |
+| Staff Member | Agency | Contractor |
+| Staff Member | Manager | Staff Member (self) |
+| Client | Parent Client | Client (self) |
+| Job Asset Assignment | Job | Job |
+| Job Asset Assignment | Asset | Site Asset |
+| Job Asset Assignment | Vehicle | Site Asset |
 
-Each table carries a pragmatic subset of the real entity's fields (the full fields are
-listed in `base44/entities/*.jsonc` — some have 40-75 fields; nested arrays/objects
-like `Job.disciplines` or `SiteAsset.panda_raw_fields` were left out of Phase 1 since
-Dataverse columns are flat, not JSON blobs — they'll need child tables or JSON-text
-columns in a later phase).
+**Phase 2:**
+| Table | Text column | → Lookup to |
+|---|---|---|
+| Team | Parent Team | Team (self) |
+| Team | Supervisor | Staff Member |
+| Rota Assignment | Job | Job |
+| Rota Assignment | Staff | Staff Member |
+| Rota Assignment | Vehicle | Site Asset |
+| Rota Assignment | Rig Asset | Site Asset |
+| Staff Shift Pattern | Staff | Staff Member |
+| Absence | Staff | Staff Member |
+| CVR (Cost Value Report) | Job | Job |
 
-Forms and views were left at Dataverse's auto-generated defaults rather than
-hand-authored — that FormXml/SavedQuery format is intricate and this session couldn't
-verify a hand-built one actually renders correctly in Studio, so it's safer to let
-the platform generate the default Main form and views on import, then customize those
-visually in App Designer (very quick, no XML involved).
+### Seeing it as an app
 
-## What's deliberately NOT in Phase 1
+**Apps → New app → Model-driven** → in App Designer, add every table you've
+imported so far under **Site map** → **Publish**. Real Power Apps screens
+(grids, forms, filtering, related-record views), natively, no XML — re-publish
+after each new phase to add its tables to the same app.
 
-- The other **~126 entities** from `base44/entities/` (compliance, timesheets, rota,
-  billing, training, financials, borehole/geotech, logistics, etc.)
-- The **250+ backend functions** in `base44/functions/` — these need to become Power
-  Automate flows or Dataverse plugins one by one; they're business logic, not schema.
-- The **3 AI agents** (scheduling assistant, drilling intelligence, staff assistant) —
-  would map to Copilot Studio or an Azure OpenAI-backed flow.
-- **External integrations** (WhatsApp, SharePoint sync, Asset Panda, Geotab, Holman,
-  Bob HR, Concur, Met Office, Stripe, Power BI, OpenGround, Companies House, Zapier)
-  — each needs real API credentials from Ground Control to wire up; none of that can
-  be built without you in the loop.
-- A **Canvas App** UI. An early attempt at hand-authoring one was abandoned — the
-  `.msapp` source format is an undocumented, version-fragile binary format with no
-  way to verify it actually opens correctly in Studio from this session. A
-  **model-driven app** was used instead (see below): same "real web app in the
-  browser" outcome, but built from the same well-documented XML as the tables, so it
-  round-trips cleanly through Microsoft's own tooling.
-- Field-level **choice (picklist) columns** — status/type fields like `gc_job.status`
-  are plain text for now rather than dropdowns, to avoid guessing option-set value
-  numbering blind. Easy to upgrade once you can test an import.
+### Not in scope yet
 
-## How to import
+- The other ~118 entities beyond phases 1-2 (compliance detail, billing/financials,
+  logistics, borehole/geotech, safety, HR, etc.) — more phases, same CSV process.
+- The 250+ backend functions in `base44/functions/` — these are business logic
+  (Power Automate flows or Dataverse plugins), not schema; a separate effort once
+  enough of the data model exists to drive them.
+- The 3 AI agents and the external integrations (WhatsApp, SharePoint, Asset
+  Panda, Geotab, Stripe, etc.) — each needs real credentials from you to wire up.
+- Choice (picklist) columns — status/type fields are plain text for now to avoid
+  guessing option-set numbering; upgrade candidates once more of the app exists.
 
-1. Go to [make.powerapps.com](https://make.powerapps.com), select the target
-   environment.
-2. **Solutions** → **Import solution** → browse to `GCMissionControl_Phase1.zip` →
-   Next → Import. This creates the publisher ("GroundControl", prefix `gc`) and the
-   six tables.
-3. Once imported, build the actual app screen in two minutes of clicking, no XML:
-   **Apps** → **New app** → **Model-driven** → give it a name → in App Designer, add
-   all six tables as **Site map** entries → **Publish**. That's your web app,
-   immediately usable at its own URL, with list/detail/edit screens, filtering, and
-   related-record grids for every table, generated for you.
-4. Open the relevant table's form in App Designer if you want to reorder fields or
-   add a picklist for `status`/`asset_type`/`worker_type` etc. — quick, visual, no
-   redeploy needed.
+## Adding a phase / rebuilding CSVs
 
-## Update: the solution-import approach doesn't work for new tables
-
-Four rounds of hand-editing `Entities/*/Entity.xml` all failed with the identical
-`PrimaryName attribute not found for Entity` error, despite fixing element order,
-the primary-name flag name, and the `unmodified` flag in turn — a strong sign the
-importer wasn't even reaching the attribute content. Research confirmed why:
-**Microsoft does not support defining brand-new tables by hand-editing
-`customizations.xml` at all.** That mechanism only works for editing specific
-aspects (forms, views, ribbons, sitemap) of tables that already exist — never for
-creating one from nothing. No amount of further XML tweaking was ever going to fix
-this; `GCMissionControl_Phase1.zip` and the `Entities/` folder are being kept in
-this repo for reference/history, but they cannot be imported successfully as-is.
-
-**What actually works instead: create each table from a CSV/Excel file.** Power
-Apps' "Start with data" table creation reads column headers and sample rows to
-build a table with correctly-typed columns — fully supported, no XML involved.
-Six ready-to-upload CSVs (one per table, headers matching the schema above, two
-sample data rows for type inference) are in `csv-tables/`.
-
-**Steps per table** (Tables → New table → **From Excel/CSV** in
-make.powerapps.com):
-1. Upload the matching CSV — do Client and Contractor first, since Job, Staff,
-   and Job Asset Assignment all reference them.
-2. Delete the two sample data rows Power Apps imports along with the columns
-   (Data tab on the table, select rows, delete) — they're only there to make type
-   inference pick sensible column types.
-3. The lookup columns listed below import as plain text — replace each with a
-   real **Lookup** column (New column → Lookup → pick the target table) once
-   both sides of the relationship exist, then delete the text version:
-   - Job: `Client` → Client, `Contractor` → Contractor
-   - Staff Member: `Agency` → Contractor, `Manager` → Staff Member (self-lookup)
-   - Client: `Parent Client` → Client (self-lookup)
-   - Job Asset Assignment: `Job` → Job, `Asset` → Site Asset, `Vehicle` → Site Asset
-
-Once the six tables exist, Phase 2 additional tables can use the same CSV
-approach — and *editing* forms/views on tables that already exist is one of the
-things solution-XML packaging is actually supported for, so that mechanism isn't
-wasted, just not usable for table creation itself.
-
-## Rebuilding the package
-
-`gen_solution.py` (in this folder) generates `solution/src/Entities/*` and
-`solution/src/Other/Relationships.xml` from a declarative Python schema at the top of
-the file — that's the place to add more tables/fields for Phase 2 rather than
-hand-editing the generated XML. After editing, regenerate and repack:
+`gen_csv.py` is the canonical tool — a declarative Python schema (`PHASES` dict at
+the top) generates every CSV. To add Phase 3: add a new `3: {...}` entry following
+the existing pattern, then:
 
 ```bash
-python3 gen_solution.py
-cd solution
-pac solution pack --folder ./src --zipfile ../GCMissionControl_Phase1.zip --packagetype Unmanaged
+python3 gen_csv.py 3
 ```
 
-(Requires the .NET SDK and `dotnet tool install --global Microsoft.PowerApps.CLI.Tool
---version 1.34.3` — later versions failed to install in this sandbox; worth retrying
-newer versions in an environment with unrestricted NuGet access.)
-
-## Suggested Phase 2+ order
-
-1. Wire real **choice columns** and **views** for the six existing tables (needs a
-   live tenant to verify option-set numbering behaves as expected).
-2. Add the next tier of entities: `RotaWeek`, `StaffShift`, `ComplianceConfig`,
-   `TrainingRequirement`, `CVR`, `Absence` — the scheduling/compliance core.
-3. Pick 5-10 of the highest-value backend functions (e.g.
-   `calculateJobFinancials`, `checkComplianceExpiry`, `generateRecurringDuties`) and
-   rebuild them as Power Automate cloud flows triggered from Dataverse.
-4. Only after the data model and core flows are proven in your tenant, revisit a
-   Canvas App for a more bespoke UI than the model-driven default — at that point a
-   real `.msapp` from Studio can be exported and used as a starting point instead of
-   guessing the format blind.
+`gen_solution.py` and `solution/` (the old hand-authored-XML attempt) are kept for
+history only — don't use them for new tables, per above.
