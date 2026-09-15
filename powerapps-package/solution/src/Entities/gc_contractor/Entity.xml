@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Contractor" LanguageCode="1033">gc_contractor</Name>
+  <EntityInfo>
+    <entity Name="gc_contractor">
+      <LocalizedNames>
+        <LocalizedName description="Contractor" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Contractors" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Sub-contractor or agency supplying labour/plant to Ground Control." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_ContractorId">
+      <Type>primarykey</Type>
+      <Name>gc_contractorid</Name>
+      <LogicalName>gc_contractorid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Contractor" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Contractor Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_ContractorType">
+      <Type>nvarchar</Type>
+      <Name>gc_contractor_type</Name>
+      <LogicalName>gc_contractor_type</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contractor Type" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="subcontractor / agency." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ContactName">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_name</Name>
+      <LogicalName>gc_contact_name</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary contact person." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ContactEmail">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_email</Name>
+      <LogicalName>gc_contact_email</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Email" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Contact email address." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ContactPhone">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_phone</Name>
+      <LogicalName>gc_contact_phone</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Phone" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Contact phone number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_OnboardingStatus">
+      <Type>nvarchar</Type>
+      <Name>gc_onboarding_status</Name>
+      <LogicalName>gc_onboarding_status</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Onboarding Status" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Onboarding lifecycle status." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_CompanyRegNumber">
+      <Type>nvarchar</Type>
+      <Name>gc_company_reg_number</Name>
+      <LogicalName>gc_company_reg_number</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Company Reg Number" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Companies House registration number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_VatNumber">
+      <Type>nvarchar</Type>
+      <Name>gc_vat_number</Name>
+      <LogicalName>gc_vat_number</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="VAT Number" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="VAT registration number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_InsuranceProvider">
+      <Type>nvarchar</Type>
+      <Name>gc_insurance_provider</Name>
+      <LogicalName>gc_insurance_provider</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Insurance Provider" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Name of the public liability insurer." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_InsuranceExpiry">
+      <Type>datetime</Type>
+      <Name>gc_insurance_expiry</Name>
+      <LogicalName>gc_insurance_expiry</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Insurance Expiry" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Expiry date of the public liability insurance policy." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_DefaultDailyRate">
+      <Type>decimal</Type>
+      <Name>gc_default_daily_rate</Name>
+      <LogicalName>gc_default_daily_rate</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Default Daily Rate" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Default daily charge rate for this contractor's crew." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_CisStatus">
+      <Type>nvarchar</Type>
+      <Name>gc_cis_status</Name>
+      <LogicalName>gc_cis_status</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="CIS Status" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="HMRC CIS verification result." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Notes">
+      <Type>ntext</Type>
+      <Name>gc_notes</Name>
+      <LogicalName>gc_notes</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Notes" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Additional notes." languagecode="1033" />
+      </Descriptions>
+      <Length>4000</Length>
+      <Format>textarea</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_contractors</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>

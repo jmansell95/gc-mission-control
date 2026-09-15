@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="gc_client_job">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_job</ReferencingEntityName>
+    <ReferencedEntityName>gc_client</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_client</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_contractor_job">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_job</ReferencingEntityName>
+    <ReferencedEntityName>gc_contractor</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_contractor</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_contractor_staff">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_staff</ReferencingEntityName>
+    <ReferencedEntityName>gc_contractor</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_agency</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_staff_staff">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_staff</ReferencingEntityName>
+    <ReferencedEntityName>gc_staff</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_manager</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_client_client">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_client</ReferencingEntityName>
+    <ReferencedEntityName>gc_client</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_parent_client</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_job_jobassetassignment">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_jobassetassignment</ReferencingEntityName>
+    <ReferencedEntityName>gc_job</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_job</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_siteasset_jobassetassignment">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_jobassetassignment</ReferencingEntityName>
+    <ReferencedEntityName>gc_siteasset</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_asset</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+  <EntityRelationship Name="gc_siteasset_jobassetassignment_vehicle">
+    <EntityRelationshipType>OneToMany</EntityRelationshipType>
+    <IsCustomizable>1</IsCustomizable>
+    <IsValidForAdvancedFind>0</IsValidForAdvancedFind>
+    <ReferencingEntityName>gc_jobassetassignment</ReferencingEntityName>
+    <ReferencedEntityName>gc_siteasset</ReferencedEntityName>
+    <CascadeAssign>NoCascade</CascadeAssign>
+    <CascadeDelete>RemoveLink</CascadeDelete>
+    <CascadeReparent>NoCascade</CascadeReparent>
+    <CascadeShare>NoCascade</CascadeShare>
+    <CascadeUnshare>NoCascade</CascadeUnshare>
+    <CascadeRollupView>NoCascade</CascadeRollupView>
+    <IsHierarchical>0</IsHierarchical>
+    <ReferencingAttributeName>gc_vehicle</ReferencingAttributeName>
+    <RelationshipDescription>
+      <Descriptions />
+    </RelationshipDescription>
+    <EntityRelationshipRoles />
+  </EntityRelationship>
+</EntityRelationships>

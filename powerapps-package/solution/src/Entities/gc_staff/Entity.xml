@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Staff Member" LanguageCode="1033">gc_staff</Name>
+  <EntityInfo>
+    <entity Name="gc_staff">
+      <LocalizedNames>
+        <LocalizedName description="Staff Member" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Staff Members" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Ground Control employee, agency or subcontractor worker." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_StaffId">
+      <Type>primarykey</Type>
+      <Name>gc_staffid</Name>
+      <LogicalName>gc_staffid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Staff Member" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Staff Member Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_Email">
+      <Type>nvarchar</Type>
+      <Name>gc_email</Name>
+      <LogicalName>gc_email</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Email" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Staff member email address." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Phone">
+      <Type>nvarchar</Type>
+      <Name>gc_phone</Name>
+      <LogicalName>gc_phone</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Phone" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Staff member phone number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_JobTitle">
+      <Type>nvarchar</Type>
+      <Name>gc_job_title</Name>
+      <LogicalName>gc_job_title</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Job Title" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Staff member's job title / role." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_WorkerType">
+      <Type>nvarchar</Type>
+      <Name>gc_worker_type</Name>
+      <LogicalName>gc_worker_type</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Worker Type" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="employee / agency / subcontractor." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Company">
+      <Type>nvarchar</Type>
+      <Name>gc_company</Name>
+      <LogicalName>gc_company</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Company" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="The company this external worker is from." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_DayRate">
+      <Type>decimal</Type>
+      <Name>gc_day_rate</Name>
+      <LogicalName>gc_day_rate</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Day Rate" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Internal cost price per day for this staff member." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_Agency">
+      <Type>lookup</Type>
+      <Name>gc_agency</Name>
+      <LogicalName>gc_agency</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Agency" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Linked Contractor (Agency) record." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_contractor</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_Manager">
+      <Type>lookup</Type>
+      <Name>gc_manager</Name>
+      <LogicalName>gc_manager</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Manager" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Staff member who approves this person's timesheets." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_staff</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_TeamId">
+      <Type>nvarchar</Type>
+      <Name>gc_team_id</Name>
+      <LogicalName>gc_team_id</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Team" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Team/group assignment." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_SystemRole">
+      <Type>nvarchar</Type>
+      <Name>gc_system_role</Name>
+      <LogicalName>gc_system_role</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="System Role" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="App-level access role." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_NiNumber">
+      <Type>nvarchar</Type>
+      <Name>gc_ni_number</Name>
+      <LogicalName>gc_ni_number</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="NI Number" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="National Insurance Number." languagecode="1033" />
+      </Descriptions>
+      <Length>50</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_DateOfBirth">
+      <Type>datetime</Type>
+      <Name>gc_date_of_birth</Name>
+      <LogicalName>gc_date_of_birth</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Date of Birth" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Staff member date of birth." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_IsActive">
+      <Type>bit</Type>
+      <Name>gc_is_active</Name>
+      <LogicalName>gc_is_active</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Is Active" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Whether staff member is active." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_staffs</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>

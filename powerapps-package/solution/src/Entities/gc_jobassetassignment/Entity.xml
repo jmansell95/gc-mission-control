@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Job Asset Assignment" LanguageCode="1033">gc_jobassetassignment</Name>
+  <EntityInfo>
+    <entity Name="gc_jobassetassignment">
+      <LocalizedNames>
+        <LocalizedName description="Job Asset Assignment" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Job Asset Assignments" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Links a Site Asset to a Job for a period of time." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_JobassetassignmentId">
+      <Type>primarykey</Type>
+      <Name>gc_jobassetassignmentid</Name>
+      <LogicalName>gc_jobassetassignmentid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Job Asset Assignment" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Job Asset Assignment Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_Job">
+      <Type>lookup</Type>
+      <Name>gc_job</Name>
+      <LogicalName>gc_job</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Job" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Job this asset is assigned to." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_job</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_Asset">
+      <Type>lookup</Type>
+      <Name>gc_asset</Name>
+      <LogicalName>gc_asset</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Asset" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Site Asset assigned to this job." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_siteasset</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_Vehicle">
+      <Type>lookup</Type>
+      <Name>gc_vehicle</Name>
+      <LogicalName>gc_vehicle</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Vehicle" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Vehicle the gear was loaded onto when signed out." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_siteasset</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_Role">
+      <Type>nvarchar</Type>
+      <Name>gc_role</Name>
+      <LogicalName>gc_role</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Role" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Role this asset plays on the job (primary_rig / trailer / lifting / machinery)." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Status">
+      <Type>nvarchar</Type>
+      <Name>gc_status</Name>
+      <LogicalName>gc_status</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Status" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="assigned / on_site / returned." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_AssignedDate">
+      <Type>datetime</Type>
+      <Name>gc_assigned_date</Name>
+      <LogicalName>gc_assigned_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Assigned Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date the asset was assigned to the job." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ArrivedOnSiteDate">
+      <Type>datetime</Type>
+      <Name>gc_arrived_on_site_date</Name>
+      <LogicalName>gc_arrived_on_site_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Arrived On Site Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date the asset arrived on site." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ReturnedDate">
+      <Type>datetime</Type>
+      <Name>gc_returned_date</Name>
+      <LogicalName>gc_returned_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Returned Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date the asset was returned / off-hired." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Notes">
+      <Type>ntext</Type>
+      <Name>gc_notes</Name>
+      <LogicalName>gc_notes</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Notes" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Notes about this asset assignment." languagecode="1033" />
+      </Descriptions>
+      <Length>4000</Length>
+      <Format>textarea</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_jobassetassignments</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>

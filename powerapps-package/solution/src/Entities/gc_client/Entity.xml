@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Client" LanguageCode="1033">gc_client</Name>
+  <EntityInfo>
+    <entity Name="gc_client">
+      <LocalizedNames>
+        <LocalizedName description="Client" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Clients" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Client company that commissions Ground Control work." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_ClientId">
+      <Type>primarykey</Type>
+      <Name>gc_clientid</Name>
+      <LogicalName>gc_clientid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Client" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Client Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_ParentClient">
+      <Type>lookup</Type>
+      <Name>gc_parent_client</Name>
+      <LogicalName>gc_parent_client</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Parent Client" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Parent group client." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_client</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_IsHolding">
+      <Type>bit</Type>
+      <Name>gc_is_holding</Name>
+      <LogicalName>gc_is_holding</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Is Holding Company" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="True when this client is a parent/holding group." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+    <attribute PhysicalName="gc_ContactName">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_name</Name>
+      <LogicalName>gc_contact_name</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary contact person." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ContactEmail">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_email</Name>
+      <LogicalName>gc_contact_email</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Email" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Contact email." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ContactPhone">
+      <Type>nvarchar</Type>
+      <Name>gc_contact_phone</Name>
+      <LogicalName>gc_contact_phone</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contact Phone" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Contact phone number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_YardAddress">
+      <Type>nvarchar</Type>
+      <Name>gc_yard_address</Name>
+      <LogicalName>gc_yard_address</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Yard Address" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Address of the client's yard, depot or collection point." languagecode="1033" />
+      </Descriptions>
+      <Length>400</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_IsPartner">
+      <Type>bit</Type>
+      <Name>gc_is_partner</Name>
+      <LogicalName>gc_is_partner</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Is Partner" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="True when this client is a partner consultancy." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_clients</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>

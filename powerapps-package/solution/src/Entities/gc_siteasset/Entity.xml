@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Site Asset" LanguageCode="1033">gc_siteasset</Name>
+  <EntityInfo>
+    <entity Name="gc_siteasset">
+      <LocalizedNames>
+        <LocalizedName description="Site Asset" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Site Assets" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Rig, trailer, machinery, lifting gear or other tracked asset." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_SiteassetId">
+      <Type>primarykey</Type>
+      <Name>gc_siteassetid</Name>
+      <LogicalName>gc_siteassetid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Site Asset" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Site Asset Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_AssetType">
+      <Type>nvarchar</Type>
+      <Name>gc_asset_type</Name>
+      <LogicalName>gc_asset_type</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Asset Type" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="rig / trailer / lifting / machinery / vehicle." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_EquipmentType">
+      <Type>nvarchar</Type>
+      <Name>gc_equipment_type</Name>
+      <LogicalName>gc_equipment_type</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Equipment Type" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Equipment type (e.g. Overshot Tool, Sling)." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_SerialNumber">
+      <Type>nvarchar</Type>
+      <Name>gc_serial_number</Name>
+      <LogicalName>gc_serial_number</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Serial Number" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Manufacturer serial number, asset tag or registration." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_FleetNumber">
+      <Type>nvarchar</Type>
+      <Name>gc_fleet_number</Name>
+      <LogicalName>gc_fleet_number</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Fleet Number" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary fleet reference number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Make">
+      <Type>nvarchar</Type>
+      <Name>gc_make</Name>
+      <LogicalName>gc_make</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Make" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Manufacturer / make of the asset." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Model">
+      <Type>nvarchar</Type>
+      <Name>gc_model</Name>
+      <LogicalName>gc_model</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Model" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Model of the asset." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_IsRig">
+      <Type>bit</Type>
+      <Name>gc_is_rig</Name>
+      <LogicalName>gc_is_rig</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Is Rig" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="True when this asset is a drilling rig." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+    <attribute PhysicalName="gc_Colour">
+      <Type>nvarchar</Type>
+      <Name>gc_colour</Name>
+      <LogicalName>gc_colour</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Colour" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Identifying colour of the asset." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ComplianceStatus">
+      <Type>nvarchar</Type>
+      <Name>gc_compliance_status</Name>
+      <LogicalName>gc_compliance_status</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Compliance Status" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Current compliance status." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ComplianceExpiryDate">
+      <Type>datetime</Type>
+      <Name>gc_compliance_expiry_date</Name>
+      <LogicalName>gc_compliance_expiry_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Compliance Expiry Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date the asset's compliance expires." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_LastServiceDate">
+      <Type>datetime</Type>
+      <Name>gc_last_service_date</Name>
+      <LogicalName>gc_last_service_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Last Service Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date of the last service/inspection." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_NextServiceDate">
+      <Type>datetime</Type>
+      <Name>gc_next_service_date</Name>
+      <LogicalName>gc_next_service_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Next Service Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Date the next service is due." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_ResponsiblePerson">
+      <Type>nvarchar</Type>
+      <Name>gc_responsible_person</Name>
+      <LogicalName>gc_responsible_person</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Responsible Person" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Person responsible for this asset." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_StorageLocation">
+      <Type>nvarchar</Type>
+      <Name>gc_storage_location</Name>
+      <LogicalName>gc_storage_location</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Storage Location" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Where the asset lives when not on a job." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_IsActive">
+      <Type>bit</Type>
+      <Name>gc_is_active</Name>
+      <LogicalName>gc_is_active</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Is Active" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Whether this asset is available for job assignment." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+    <attribute PhysicalName="gc_CostPrice">
+      <Type>decimal</Type>
+      <Name>gc_cost_price</Name>
+      <LogicalName>gc_cost_price</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Cost Price" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Internal cost price for this asset in GBP." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_ChargeOutPrice">
+      <Type>decimal</Type>
+      <Name>gc_charge_out_price</Name>
+      <LogicalName>gc_charge_out_price</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Charge Out Price" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Optional charge-out (sell) price in GBP." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_Notes">
+      <Type>ntext</Type>
+      <Name>gc_notes</Name>
+      <LogicalName>gc_notes</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Notes" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Additional notes about this asset." languagecode="1033" />
+      </Descriptions>
+      <Length>4000</Length>
+      <Format>textarea</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_siteassets</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>

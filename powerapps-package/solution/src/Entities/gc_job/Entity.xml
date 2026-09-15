@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name LocalizedName="Job" LanguageCode="1033">gc_job</Name>
+  <EntityInfo>
+    <entity Name="gc_job">
+      <LocalizedNames>
+        <LocalizedName description="Job" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="Jobs" languagecode="1033" />
+      </LocalizedCollectionNames>
+      <Descriptions>
+        <Description description="Ground Control project/job record." languagecode="1033" />
+      </Descriptions>
+      <attributes>
+    <attribute PhysicalName="gc_JobId">
+      <Type>primarykey</Type>
+      <Name>gc_jobid</Name>
+      <LogicalName>gc_jobid</LogicalName>
+      <RequiredLevel>systemrequired</RequiredLevel>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
+      <IsCustomField>1</IsCustomField>
+      <IsCustomizable>0</IsCustomizable>
+      <DisplayNames>
+        <DisplayName description="Job" languagecode="1033" />
+      </DisplayNames>
+    </attribute>
+    <attribute PhysicalName="gc_Name">
+      <Type>nvarchar</Type>
+      <Name>gc_name</Name>
+      <LogicalName>gc_name</LogicalName>
+      <RequiredLevel>required</RequiredLevel>
+      <IsPrimaryField>1</IsPrimaryField>
+      <Length>200</Length>
+      <IsCustomField>1</IsCustomField>
+      <ImeMode>auto</ImeMode>
+      <Format>text</Format>
+      <DisplayNames>
+        <DisplayName description="Job Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary name field" languagecode="1033" />
+      </Descriptions>
+    </attribute>
+    <attribute PhysicalName="gc_JobReference">
+      <Type>nvarchar</Type>
+      <Name>gc_job_reference</Name>
+      <LogicalName>gc_job_reference</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Job Reference" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project reference or PO number." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Location">
+      <Type>nvarchar</Type>
+      <Name>gc_location</Name>
+      <LogicalName>gc_location</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Location" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Site location/address." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Status">
+      <Type>nvarchar</Type>
+      <Name>gc_status</Name>
+      <LogicalName>gc_status</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Status" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="planning / in_progress / decommissioning / completed / on_hold / cancelled." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_JobType">
+      <Type>nvarchar</Type>
+      <Name>gc_job_type</Name>
+      <LogicalName>gc_job_type</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Job Type" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Primary discipline/type key." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_StartDate">
+      <Type>datetime</Type>
+      <Name>gc_start_date</Name>
+      <LogicalName>gc_start_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Start Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project start date." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_EndDate">
+      <Type>datetime</Type>
+      <Name>gc_end_date</Name>
+      <LogicalName>gc_end_date</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="End Date" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project end date." languagecode="1033" />
+      </Descriptions>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_Client">
+      <Type>lookup</Type>
+      <Name>gc_client</Name>
+      <LogicalName>gc_client</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Client" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Associated client." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_client</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_Contractor">
+      <Type>lookup</Type>
+      <Name>gc_contractor</Name>
+      <LogicalName>gc_contractor</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Contractor" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Associated contractor." languagecode="1033" />
+      </Descriptions>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_contractor</LookupType>
+      </LookupTypes>
+    </attribute>
+    <attribute PhysicalName="gc_ProjectManager">
+      <Type>nvarchar</Type>
+      <Name>gc_project_manager</Name>
+      <LogicalName>gc_project_manager</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Project Manager" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project manager responsible for the project." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_SiteContactName">
+      <Type>nvarchar</Type>
+      <Name>gc_site_contact_name</Name>
+      <LogicalName>gc_site_contact_name</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Site Contact Name" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="On-site contact name." languagecode="1033" />
+      </Descriptions>
+      <Length>200</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_SiteContactPhone">
+      <Type>nvarchar</Type>
+      <Name>gc_site_contact_phone</Name>
+      <LogicalName>gc_site_contact_phone</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Site Contact Phone" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="On-site contact phone number." languagecode="1033" />
+      </Descriptions>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+    <attribute PhysicalName="gc_BudgetAmount">
+      <Type>decimal</Type>
+      <Name>gc_budget_amount</Name>
+      <LogicalName>gc_budget_amount</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Budget Amount" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project budget in GBP." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_ActualCost">
+      <Type>decimal</Type>
+      <Name>gc_actual_cost</Name>
+      <LogicalName>gc_actual_cost</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Actual Cost" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Manually recorded actual cost in GBP." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_Meterage">
+      <Type>decimal</Type>
+      <Name>gc_meterage</Name>
+      <LogicalName>gc_meterage</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Meterage" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Total metres drilled for drilling projects." languagecode="1033" />
+      </Descriptions>
+      <MinValue>-100000000</MinValue>
+      <MaxValue>100000000</MaxValue>
+      <Precision>2</Precision>
+    </attribute>
+    <attribute PhysicalName="gc_PortalEnabled">
+      <Type>bit</Type>
+      <Name>gc_portal_enabled</Name>
+      <LogicalName>gc_portal_enabled</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Portal Enabled" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Whether client portal access is enabled." languagecode="1033" />
+      </Descriptions>
+      <defaultvalue>0</defaultvalue>
+      <LocLabels>
+        <LocLabel languagecode="1033">
+          <Value1 Text="Yes" />
+          <Value0 Text="No" />
+        </LocLabel>
+      </LocLabels>
+    </attribute>
+    <attribute PhysicalName="gc_Notes">
+      <Type>ntext</Type>
+      <Name>gc_notes</Name>
+      <LogicalName>gc_notes</LogicalName>
+      <RequiredLevel>none</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
+      <DisplayNames>
+        <DisplayName description="Notes" languagecode="1033" />
+      </DisplayNames>
+      <Descriptions>
+        <Description description="Project notes and details." languagecode="1033" />
+      </Descriptions>
+      <Length>4000</Length>
+      <Format>textarea</Format>
+      <ImeMode>auto</ImeMode>
+    </attribute>
+      </attributes>
+      <EntitySetName>gc_jobs</EntitySetName>
+      <IsActivity>0</IsActivity>
+      <IsCustomEntity>1</IsCustomEntity>
+      <IsCustomizable>1</IsCustomizable>
+      <IsRenameable>1</IsRenameable>
+      <IsAvailableOffline>1</IsAvailableOffline>
+      <OwnershipTypeMask>UserOwned</OwnershipTypeMask>
+      <IsAuditEnabled>1</IsAuditEnabled>
+      <IsValidForAdvancedFind>1</IsValidForAdvancedFind>
+      <IsVisibleInMobile>1</IsVisibleInMobile>
+      <IsVisibleInMobileClient>1</IsVisibleInMobileClient>
+      <IsReadOnlyInMobileClient>0</IsReadOnlyInMobileClient>
+      <IsOfflineInMobileClient>0</IsOfflineInMobileClient>
+    </entity>
+  </EntityInfo>
+  <Roles />
+  <FormXml />
+  <SavedQueries />
+</Entity>
