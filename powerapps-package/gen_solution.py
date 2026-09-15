@@ -134,13 +134,26 @@ def esc(s):
     return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
              .replace('"', "&quot;"))
 
-def attr_xml(field_name, ftype, display, desc):
+def attr_xml(field_name, ftype, display, desc, is_primary=False):
+    """Every attribute follows the SAME element sequence, varying only in which
+    type-specific blocks are present: Type, Name, LogicalName, RequiredLevel,
+    IsCustomField, [IsPrimaryField], <type-specific>, DisplayNames, Descriptions.
+    A live import failed ("PrimaryName attribute not found") when the primary
+    name field used a different element order than every other field — Dataverse's
+    server-side importer appears to be strict about sequence even though the local
+    SolutionPackager round-trip did not care. Keeping one consistent order for every
+    attribute avoids that class of bug entirely."""
     logical = f"{PREFIX}_{field_name}"
     physical = f"{PREFIX}_{''.join(w.capitalize() for w in field_name.split('_'))}"
-    common = (
+    primary_flag = '      <IsPrimaryField>1</IsPrimaryField>\n' if is_primary else ''
+    head = (
+        f'      <Name>{logical}</Name>\n'
         f'      <LogicalName>{logical}</LogicalName>\n'
-        f'      <RequiredLevel>none</RequiredLevel>\n'
+        f'      <RequiredLevel>{"required" if is_primary else "none"}</RequiredLevel>\n'
         f'      <IsCustomField>1</IsCustomField>\n'
+        f'{primary_flag}'
+    )
+    tail = (
         f'      <DisplayNames>\n'
         f'        <DisplayName description="{esc(display)}" languagecode="1033" />\n'
         f'      </DisplayNames>\n'
@@ -150,33 +163,21 @@ def attr_xml(field_name, ftype, display, desc):
     )
     if ftype.startswith("text"):
         length = ftype[4:] or "200"
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>nvarchar</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <Length>{length}</Length>\n'
             f'      <Format>text</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>nvarchar</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "memo":
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>ntext</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <Length>4000</Length>\n'
             f'      <Format>textarea</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>ntext</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "bool":
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>bit</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <defaultvalue>0</defaultvalue>\n'
             f'      <LocLabels>\n'
             f'        <LocLabel languagecode="1033">\n'
@@ -184,43 +185,31 @@ def attr_xml(field_name, ftype, display, desc):
             f'          <Value0 Text="No" />\n'
             f'        </LocLabel>\n'
             f'      </LocLabels>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>bit</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "decimal":
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>decimal</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <MinValue>-100000000</MinValue>\n'
             f'      <MaxValue>100000000</MaxValue>\n'
             f'      <Precision>2</Precision>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>decimal</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "date":
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>datetime</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <Format>DateOnly</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>datetime</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype.startswith("lookup:"):
         target = ftype.split(":", 1)[1]
         target_logical = f"{PREFIX}_{target}"
-        return (
-            f'    <attribute PhysicalName="{physical}">\n'
-            f'      <Type>lookup</Type>\n'
-            f'      <Name>{logical}</Name>\n'
-            f'{common}'
+        body = (
             f'      <LookupStyle>single</LookupStyle>\n'
             f'      <LookupTypes>\n'
             f'        <LookupType>{target_logical}</LookupType>\n'
             f'      </LookupTypes>\n'
-            f'    </attribute>\n'
         )
+        return f'    <attribute PhysicalName="{physical}">\n      <Type>lookup</Type>\n{head}{body}{tail}    </attribute>\n'
     raise ValueError(f"unknown field type {ftype}")
 
 
@@ -235,6 +224,10 @@ def entity_xml(key, spec):
     name_physical = f"{PREFIX}_Name"
     name_logical = f"{PREFIX}_name"
 
+    # Same element sequence as attr_xml() (Type, Name, LogicalName, RequiredLevel,
+    # IsCustomField, [IsPrimaryField], type-specific, DisplayNames, Descriptions) —
+    # the primary key needs its own block since "primarykey" isn't a type attr_xml()
+    # handles, but it must still match the order every other attribute uses.
     attrs = []
     attrs.append(
         f'    <attribute PhysicalName="{pk_physical}">\n'
@@ -242,34 +235,16 @@ def entity_xml(key, spec):
         f'      <Name>{pk_logical}</Name>\n'
         f'      <LogicalName>{pk_logical}</LogicalName>\n'
         f'      <RequiredLevel>systemrequired</RequiredLevel>\n'
-        f'      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>\n'
-        f'      <ImeMode>auto</ImeMode>\n'
         f'      <IsCustomField>1</IsCustomField>\n'
         f'      <IsCustomizable>0</IsCustomizable>\n'
+        f'      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>\n'
+        f'      <ImeMode>auto</ImeMode>\n'
         f'      <DisplayNames>\n'
         f'        <DisplayName description="{esc(display)}" languagecode="1033" />\n'
         f'      </DisplayNames>\n'
         f'    </attribute>\n'
     )
-    attrs.append(
-        f'    <attribute PhysicalName="{name_physical}">\n'
-        f'      <Type>nvarchar</Type>\n'
-        f'      <Name>{name_logical}</Name>\n'
-        f'      <LogicalName>{name_logical}</LogicalName>\n'
-        f'      <RequiredLevel>required</RequiredLevel>\n'
-        f'      <IsPrimaryField>1</IsPrimaryField>\n'
-        f'      <Length>200</Length>\n'
-        f'      <IsCustomField>1</IsCustomField>\n'
-        f'      <ImeMode>auto</ImeMode>\n'
-        f'      <Format>text</Format>\n'
-        f'      <DisplayNames>\n'
-        f'        <DisplayName description="{esc(display)} Name" languagecode="1033" />\n'
-        f'      </DisplayNames>\n'
-        f'      <Descriptions>\n'
-        f'        <Description description="Primary name field" languagecode="1033" />\n'
-        f'      </Descriptions>\n'
-        f'    </attribute>\n'
-    )
+    attrs.append(attr_xml("name", "text200", f"{display} Name", "Primary name field", is_primary=True))
     for field_name, ftype, fdisplay, fdesc in spec["fields"]:
         attrs.append(attr_xml(field_name, ftype, fdisplay, fdesc))
 

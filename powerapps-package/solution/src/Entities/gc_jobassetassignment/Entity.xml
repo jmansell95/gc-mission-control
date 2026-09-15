@@ -18,10 +18,10 @@
       <Name>gc_jobassetassignmentid</Name>
       <LogicalName>gc_jobassetassignmentid</LogicalName>
       <RequiredLevel>systemrequired</RequiredLevel>
-      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
-      <ImeMode>auto</ImeMode>
       <IsCustomField>1</IsCustomField>
       <IsCustomizable>0</IsCustomizable>
+      <DisplayMask>ValidForForm|ValidForGrid</DisplayMask>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Job Asset Assignment" languagecode="1033" />
       </DisplayNames>
@@ -31,11 +31,11 @@
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
       <RequiredLevel>required</RequiredLevel>
+      <IsCustomField>1</IsCustomField>
       <IsPrimaryField>1</IsPrimaryField>
       <Length>200</Length>
-      <IsCustomField>1</IsCustomField>
-      <ImeMode>auto</ImeMode>
       <Format>text</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Job Asset Assignment Name" languagecode="1033" />
       </DisplayNames>
@@ -49,16 +49,16 @@
       <LogicalName>gc_job</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_job</LookupType>
+      </LookupTypes>
       <DisplayNames>
         <DisplayName description="Job" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Job this asset is assigned to." languagecode="1033" />
       </Descriptions>
-      <LookupStyle>single</LookupStyle>
-      <LookupTypes>
-        <LookupType>gc_job</LookupType>
-      </LookupTypes>
     </attribute>
     <attribute PhysicalName="gc_Asset">
       <Type>lookup</Type>
@@ -66,16 +66,16 @@
       <LogicalName>gc_asset</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_siteasset</LookupType>
+      </LookupTypes>
       <DisplayNames>
         <DisplayName description="Asset" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Site Asset assigned to this job." languagecode="1033" />
       </Descriptions>
-      <LookupStyle>single</LookupStyle>
-      <LookupTypes>
-        <LookupType>gc_siteasset</LookupType>
-      </LookupTypes>
     </attribute>
     <attribute PhysicalName="gc_Vehicle">
       <Type>lookup</Type>
@@ -83,16 +83,16 @@
       <LogicalName>gc_vehicle</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <LookupStyle>single</LookupStyle>
+      <LookupTypes>
+        <LookupType>gc_siteasset</LookupType>
+      </LookupTypes>
       <DisplayNames>
         <DisplayName description="Vehicle" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Vehicle the gear was loaded onto when signed out." languagecode="1033" />
       </Descriptions>
-      <LookupStyle>single</LookupStyle>
-      <LookupTypes>
-        <LookupType>gc_siteasset</LookupType>
-      </LookupTypes>
     </attribute>
     <attribute PhysicalName="gc_Role">
       <Type>nvarchar</Type>
@@ -100,15 +100,15 @@
       <LogicalName>gc_role</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Role" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Role this asset plays on the job (primary_rig / trailer / lifting / machinery)." languagecode="1033" />
       </Descriptions>
-      <Length>100</Length>
-      <Format>text</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
     <attribute PhysicalName="gc_Status">
       <Type>nvarchar</Type>
@@ -116,15 +116,15 @@
       <LogicalName>gc_status</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Length>100</Length>
+      <Format>text</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Status" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="assigned / on_site / returned." languagecode="1033" />
       </Descriptions>
-      <Length>100</Length>
-      <Format>text</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
     <attribute PhysicalName="gc_AssignedDate">
       <Type>datetime</Type>
@@ -132,14 +132,14 @@
       <LogicalName>gc_assigned_date</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Assigned Date" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Date the asset was assigned to the job." languagecode="1033" />
       </Descriptions>
-      <Format>DateOnly</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
     <attribute PhysicalName="gc_ArrivedOnSiteDate">
       <Type>datetime</Type>
@@ -147,14 +147,14 @@
       <LogicalName>gc_arrived_on_site_date</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Arrived On Site Date" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Date the asset arrived on site." languagecode="1033" />
       </Descriptions>
-      <Format>DateOnly</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
     <attribute PhysicalName="gc_ReturnedDate">
       <Type>datetime</Type>
@@ -162,14 +162,14 @@
       <LogicalName>gc_returned_date</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Format>DateOnly</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Returned Date" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Date the asset was returned / off-hired." languagecode="1033" />
       </Descriptions>
-      <Format>DateOnly</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
     <attribute PhysicalName="gc_Notes">
       <Type>ntext</Type>
@@ -177,15 +177,15 @@
       <LogicalName>gc_notes</LogicalName>
       <RequiredLevel>none</RequiredLevel>
       <IsCustomField>1</IsCustomField>
+      <Length>4000</Length>
+      <Format>textarea</Format>
+      <ImeMode>auto</ImeMode>
       <DisplayNames>
         <DisplayName description="Notes" languagecode="1033" />
       </DisplayNames>
       <Descriptions>
         <Description description="Notes about this asset assignment." languagecode="1033" />
       </Descriptions>
-      <Length>4000</Length>
-      <Format>textarea</Format>
-      <ImeMode>auto</ImeMode>
     </attribute>
       </attributes>
       <EntitySetName>gc_jobassetassignments</EntitySetName>
