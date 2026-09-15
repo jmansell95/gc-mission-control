@@ -32,7 +32,7 @@
       <LogicalName>gc_name</LogicalName>
       <RequiredLevel>required</RequiredLevel>
       <IsCustomField>1</IsCustomField>
-      <IsPrimaryField>1</IsPrimaryField>
+      <IsPrimaryName>1</IsPrimaryName>
       <Length>200</Length>
       <Format>text</Format>
       <ImeMode>auto</ImeMode>

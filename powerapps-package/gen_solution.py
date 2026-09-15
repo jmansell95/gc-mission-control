@@ -137,7 +137,7 @@ def esc(s):
 def attr_xml(field_name, ftype, display, desc, is_primary=False):
     """Every attribute follows the SAME element sequence, varying only in which
     type-specific blocks are present: Type, Name, LogicalName, RequiredLevel,
-    IsCustomField, [IsPrimaryField], <type-specific>, DisplayNames, Descriptions.
+    IsCustomField, [IsPrimaryName], <type-specific>, DisplayNames, Descriptions.
     A live import failed ("PrimaryName attribute not found") when the primary
     name field used a different element order than every other field — Dataverse's
     server-side importer appears to be strict about sequence even though the local
@@ -145,7 +145,7 @@ def attr_xml(field_name, ftype, display, desc, is_primary=False):
     attribute avoids that class of bug entirely."""
     logical = f"{PREFIX}_{field_name}"
     physical = f"{PREFIX}_{''.join(w.capitalize() for w in field_name.split('_'))}"
-    primary_flag = '      <IsPrimaryField>1</IsPrimaryField>\n' if is_primary else ''
+    primary_flag = '      <IsPrimaryName>1</IsPrimaryName>\n' if is_primary else ''
     head = (
         f'      <Name>{logical}</Name>\n'
         f'      <LogicalName>{logical}</LogicalName>\n'
@@ -225,7 +225,7 @@ def entity_xml(key, spec):
     name_logical = f"{PREFIX}_name"
 
     # Same element sequence as attr_xml() (Type, Name, LogicalName, RequiredLevel,
-    # IsCustomField, [IsPrimaryField], type-specific, DisplayNames, Descriptions) —
+    # IsCustomField, [IsPrimaryName], type-specific, DisplayNames, Descriptions) —
     # the primary key needs its own block since "primarykey" isn't a type attr_xml()
     # handles, but it must still match the order every other attribute uses.
     attrs = []
