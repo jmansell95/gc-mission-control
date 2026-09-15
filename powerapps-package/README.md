@@ -1,8 +1,52 @@
-# GC Mission Control — Power Platform Package (Phase 1)
+# GC Mission Control — Power Platform Package
 
-This folder contains a real, importable Dataverse solution generated with Microsoft's
+Two separate pieces of work live in this folder — read this section first to see
+which one you actually want.
+
+## `GCMissionControl_PCF.zip` — embed the real app (start here)
+
+This is a **PCF (Power Apps Component Framework) custom control**, built with
+Microsoft's official `pac pcf` + MSBuild toolchain (not hand-authored XML — this is
+the same officially-supported mechanism real ISVs use to ship controls in AppSource,
+so it's much higher-confidence than the table-creation package below). It embeds
+the actual GC Mission Control app (running at `https://gc-mission-control.base44.app`,
+still backed by Base44) inside a Power Apps Canvas app screen or model-driven form
+via an iframe.
+
+**Import it:**
+1. make.powerapps.com → **Solutions** → **Import solution** → browse to
+   `GCMissionControl_PCF.zip` → Next → Import.
+2. Open (or create) a **Canvas app** → on a screen, **Insert** → **Get more
+   components** → **Code** tab → find "MissionControlEmbed" → **Import**.
+3. Drag it onto the screen, then resize it to fill the screen (set `X`/`Y` to 0,
+   `Width`/`Height` to `Parent.Width`/`Parent.Height`).
+4. The `App URL` property can be left blank (defaults to the production URL above)
+   or set to point at a different Base44 environment later.
+5. Save and Publish.
+
+**The one real risk**: if `gc-mission-control.base44.app` sends an
+`X-Frame-Options` or `Content-Security-Policy: frame-ancestors` header blocking
+being iframed, the control will show a "did not load" message instead of the app.
+This session's network couldn't reach that domain to check in advance — if this
+happens, the fix is to bundle the app's built JS/CSS directly into the control
+instead of using an iframe (more work — React Router and Vite's asset paths need
+adapting to run inside the control's container rather than as a standalone page —
+but doable; say if you hit this and we'll do that next).
+
+**What this is not**: a replacement for the Base44 backend. The app keeps running
+against Base44 exactly as it does today — Power Apps is just the window it's shown
+in. If the goal is zero Base44 dependency, that's the second piece of work below.
+
+Source: `pcf-missioncontrol/` (the control) and `pcf-solution/` (the solution
+project that packages it — rebuild with `dotnet build` inside
+`pcf-solution/MissionControlSolution/` after editing the control).
+
+## `GCMissionControl_Phase1.zip` — native Dataverse migration (Phase 1, in progress)
+
+This is a real, importable Dataverse solution generated with Microsoft's
 own Power Platform CLI (`pac`), built to eventually recreate GC Mission Control
-(the Base44 app in this repo) as a web app inside Power Apps.
+(the Base44 app in this repo) as a fully native app inside Power Apps, with no
+Base44 dependency at all.
 
 **This session had no credentials or connector into any Power Apps / Power Platform
 environment**, so nothing here has been imported or tested against a live tenant.
