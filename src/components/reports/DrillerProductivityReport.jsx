@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import {
-  Drill, HardHat, Gauge, TrendingUp, PoundSterling, Layers,
+  Drill, HardHat, Gauge, TrendingUp, PoundSterling,
   Download, FileText, Loader2, ChevronDown, ChevronRight,
-  Activity, Clock, Target, Award, Users, Wrench,
+  Activity, Clock, Users, Wrench,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -22,7 +22,7 @@ function KpiTile({ icon: Icon, label, value, sub, gradient }) {
     <div className="insight-card rounded-2xl p-4 relative overflow-hidden">
       <div className={`absolute top-0 right-0 w-20 h-20 rounded-full ${gradient} opacity-10 -mr-8 -mt-8`} />
       <div className={`w-9 h-9 rounded-xl ${gradient} flex items-center justify-center mb-2 shadow-sm`}>
-        <Icon className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
+        <Icon className="w-4 h-4 text-white" strokeWidth={2.5} />
       </div>
       <p className="text-2xl font-extrabold text-slate-900 tabular-nums leading-none">{value}</p>
       <p className="text-[11px] font-bold text-slate-500 mt-1">{label}</p>
@@ -45,7 +45,7 @@ function DrillerCard({ driller, isExpanded, onToggle }) {
     <div className="insight-card rounded-2xl overflow-hidden">
       <button onClick={onToggle} className="w-full p-4 flex items-center gap-3 text-left hover:bg-slate-50/50 transition">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2E5A1A] to-[#4d7c2a] flex items-center justify-center flex-shrink-0 shadow-sm">
-          <HardHat className="w-5.5 h-5.5 text-white" strokeWidth={2.5} />
+          <HardHat className="w-5 h-5 text-white" strokeWidth={2.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">

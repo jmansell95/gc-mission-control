@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wrench, CloudSun, MoveHorizontal, Compass, Flashlight, Ruler,
-  Calculator, ArrowLeftRight, Gauge, MapPin, CircleDot, ChevronRight,
+  Calculator, ArrowLeftRight, Gauge, MapPin, CircleDot,
 } from 'lucide-react';
-import FieldGreetingHeader from '@/components/field/FieldGreetingHeader';
+import FieldPageShell from '@/components/field/FieldPageShell';
+import FieldContainer from '@/components/field/FieldContainer';
 import { useFieldData } from '@/components/field/FieldDataProvider';
 import { staggerContainer, slideUp } from '@/lib/fieldAnimations';
 import WeatherTool from '@/components/field/tools/WeatherTool';
@@ -38,9 +39,47 @@ export default function ToolsPage() {
   const { staff, activeDivision } = ctx || {};
 
   return (
-    <div className="min-h-full">
+    <FieldPageShell
+      staff={staff}
+      stats={[]}
+      transparent
+      contentClassName="pb-24"
+      accentColor={activeDivision?.color}
+    >
+      <FieldContainer space="5">
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+        >
+          {TOOLS.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <motion.button
+                key={tool.id}
+                variants={slideUp}
+                whileTap={{ scale: 0.94 }}
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                onClick={() => setActiveTool(tool.id)}
+                className="field-card p-4 flex flex-col items-start gap-2 text-left"
+              >
+                <div className={`w-12 h-12 rounded-2xl ${tool.gradient} flex items-center justify-center shadow-md`}>
+                  <Icon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800">{tool.label}</p>
+                  <p className="text-[11px] text-slate-500 leading-tight">{tool.desc}</p>
+                </div>
+              </motion.button>
+            );
+          })}
+        </motion.div>
+      </FieldContainer>
+
       <AnimatePresence mode="wait">
-        {ActiveComponent ? (
+        {ActiveComponent && (
           <motion.div
             key="tool"
             initial={{ x: '100%', opacity: 0.5 }}
@@ -51,48 +90,8 @@ export default function ToolsPage() {
           >
             <ActiveComponent onClose={() => setActiveTool(null)} />
           </motion.div>
-        ) : (
-          <motion.div
-            key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="p-4 space-y-4"
-          >
-            <FieldGreetingHeader staff={staff} accentColor={activeDivision?.color} />
-
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              className="grid grid-cols-2 gap-3"
-            >
-              {TOOLS.map((tool) => {
-                const Icon = tool.icon;
-                return (
-                  <motion.button
-                    key={tool.id}
-                    variants={slideUp}
-                    whileTap={{ scale: 0.94 }}
-                    whileHover={{ scale: 1.03 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    onClick={() => setActiveTool(tool.id)}
-                    className="field-card p-4 flex flex-col items-start gap-2 text-left"
-                  >
-                    <div className={`w-12 h-12 rounded-2xl ${tool.gradient} flex items-center justify-center shadow-md`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-800">{tool.label}</p>
-                      <p className="text-[11px] text-slate-500 leading-tight">{tool.desc}</p>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </FieldPageShell>
   );
 }

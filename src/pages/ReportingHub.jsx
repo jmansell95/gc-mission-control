@@ -11,6 +11,7 @@ import UniversalReportFilters from '@/components/reports/UniversalReportFilters'
 import ReportSidebar, { REPORT_CATEGORIES } from '@/components/reports/ReportSidebar';
 import ReportNativeSection from '@/components/reports/ReportNativeSection';
 import RigPerformanceReport from '@/components/reports/RigPerformanceReport';
+import DrillerProductivityReport from '@/components/reports/DrillerProductivityReport';
 import CrewPerformanceReport from '@/components/reports/CrewPerformanceReport';
 import PowerBIReportSection from '@/components/reports/PowerBIReportSection';
 import ReportTemplateLibrary from '@/components/reports/ReportTemplateLibrary';
@@ -44,11 +45,12 @@ export default function ReportingHub() {
   const isPowerBI = category === 'powerbi';
   const isTemplates = category === 'templates';
   const isRigPerf = category === 'rig_performance';
+  const isDrillerProd = category === 'driller_productivity';
   const isCrewPerf = category === 'crew_performance';
   const isSupplierSpend = category === 'supplier_spend';
   const isAvailability = category === 'availability';
   const isRemainingWork = category === 'remaining_work';
-  const isSpecial = isPowerBI || isTemplates || isRigPerf || isCrewPerf || isSupplierSpend || isAvailability || isRemainingWork;
+  const isSpecial = isPowerBI || isTemplates || isRigPerf || isDrillerProd || isCrewPerf || isSupplierSpend || isAvailability || isRemainingWork;
 
   // Apply date preset to get actual date range
   const getEffectiveDateRange = () => {
@@ -182,7 +184,7 @@ export default function ReportingHub() {
       quickLinks={REPORTS_QUICK_LINKS}
     >
       {/* Summary stat tiles — hidden on special tabs */}
-      {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && <ReportStatTiles data={data} />}
+      {!isPowerBI && !isTemplates && !isRigPerf && !isDrillerProd && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && <ReportStatTiles data={data} />}
 
       {/* Filter bar — hidden on Templates and Custom Builder tabs */}
       {!isTemplates && (
@@ -201,7 +203,7 @@ export default function ReportingHub() {
 
         <div className="flex-1 min-w-0 space-y-4">
           {/* Save-as-template button for native categories */}
-          {!isPowerBI && !isTemplates && !isRigPerf && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && (
+          {!isPowerBI && !isTemplates && !isRigPerf && !isDrillerProd && !isCrewPerf && !isSupplierSpend && !isAvailability && !isRemainingWork && (
             <div className="flex justify-end">
               <button onClick={() => setShowSave(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-primary hover:text-primary text-slate-600 text-xs font-semibold transition">
@@ -213,6 +215,7 @@ export default function ReportingHub() {
           {isPowerBI ? <PowerBIReportSection />
             : isTemplates ? <ReportTemplateLibrary onSchedule={setScheduleTpl} onBuildCustom={() => setShowCustom(true)} />
             : isRigPerf ? <RigPerformanceReport filters={effectiveFilters} />
+            : isDrillerProd ? <DrillerProductivityReport filters={effectiveFilters} />
             : isCrewPerf ? <CrewPerformanceReport filters={effectiveFilters} />
             : isSupplierSpend ? <SupplierSpendReport filters={effectiveFilters} />
             : isAvailability ? <AvailabilityReport filters={effectiveFilters} />

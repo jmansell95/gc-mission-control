@@ -2,7 +2,7 @@ import React from 'react';
 import {
   LayoutDashboard, BarChart3, PoundSterling, Briefcase, Car, Users,
   ShieldCheck, Boxes, FlaskConical, Truck, Bookmark, Drill, HardHat, Store, Grid3x3, CalendarClock,
-  HardHat as HardHatIcon,
+  Gauge,
 } from 'lucide-react';
 
 export const REPORT_CATEGORIES = [
@@ -17,8 +17,8 @@ export const REPORT_CATEGORIES = [
   { id: 'geotech', label: 'Geotech', icon: FlaskConical },
   { id: 'logistics', label: 'Logistics', icon: Truck },
   { id: 'rig_performance', label: 'Rig Performance', icon: Drill },
-  { id: 'driller_productivity', label: 'Driller Productivity', icon: HardHat },
-  { id: 'crew_performance', label: 'Crew Performance', icon: HardHatIcon },
+  { id: 'driller_productivity', label: 'Driller Productivity', icon: Gauge },
+  { id: 'crew_performance', label: 'Crew Performance', icon: HardHat },
   { id: 'availability', label: 'Availability', icon: Grid3x3 },
   { id: 'remaining_work', label: 'Remaining Work', icon: CalendarClock },
   { id: 'powerbi', label: 'Power BI', icon: BarChart3 },
