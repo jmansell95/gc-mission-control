@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Site Asset" LanguageCode="1033">gc_siteasset</Name>
   <EntityInfo>
-    <entity Name="gc_siteasset">
+    <entity Name="gc_siteasset" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Site Asset" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Rig, trailer, machinery, lifting gear or other tracked asset." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_SiteassetId">
+    <attribute PhysicalName="gc_SiteassetId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_siteassetid</Name>
       <LogicalName>gc_siteassetid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Site Asset" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_AssetType">
+    <attribute PhysicalName="gc_AssetType" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_asset_type</Name>
       <LogicalName>gc_asset_type</LogicalName>
@@ -59,7 +59,7 @@
         <Description description="rig / trailer / lifting / machinery / vehicle." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_EquipmentType">
+    <attribute PhysicalName="gc_EquipmentType" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_equipment_type</Name>
       <LogicalName>gc_equipment_type</LogicalName>
@@ -75,7 +75,7 @@
         <Description description="Equipment type (e.g. Overshot Tool, Sling)." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_SerialNumber">
+    <attribute PhysicalName="gc_SerialNumber" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_serial_number</Name>
       <LogicalName>gc_serial_number</LogicalName>
@@ -91,7 +91,7 @@
         <Description description="Manufacturer serial number, asset tag or registration." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_FleetNumber">
+    <attribute PhysicalName="gc_FleetNumber" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_fleet_number</Name>
       <LogicalName>gc_fleet_number</LogicalName>
@@ -107,7 +107,7 @@
         <Description description="Primary fleet reference number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Make">
+    <attribute PhysicalName="gc_Make" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_make</Name>
       <LogicalName>gc_make</LogicalName>
@@ -123,7 +123,7 @@
         <Description description="Manufacturer / make of the asset." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Model">
+    <attribute PhysicalName="gc_Model" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_model</Name>
       <LogicalName>gc_model</LogicalName>
@@ -139,7 +139,7 @@
         <Description description="Model of the asset." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_IsRig">
+    <attribute PhysicalName="gc_IsRig" unmodified="0">
       <Type>bit</Type>
       <Name>gc_is_rig</Name>
       <LogicalName>gc_is_rig</LogicalName>
@@ -159,7 +159,7 @@
         <Description description="True when this asset is a drilling rig." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Colour">
+    <attribute PhysicalName="gc_Colour" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_colour</Name>
       <LogicalName>gc_colour</LogicalName>
@@ -175,7 +175,7 @@
         <Description description="Identifying colour of the asset." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ComplianceStatus">
+    <attribute PhysicalName="gc_ComplianceStatus" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_compliance_status</Name>
       <LogicalName>gc_compliance_status</LogicalName>
@@ -191,7 +191,7 @@
         <Description description="Current compliance status." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ComplianceExpiryDate">
+    <attribute PhysicalName="gc_ComplianceExpiryDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_compliance_expiry_date</Name>
       <LogicalName>gc_compliance_expiry_date</LogicalName>
@@ -206,7 +206,7 @@
         <Description description="Date the asset's compliance expires." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_LastServiceDate">
+    <attribute PhysicalName="gc_LastServiceDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_last_service_date</Name>
       <LogicalName>gc_last_service_date</LogicalName>
@@ -221,7 +221,7 @@
         <Description description="Date of the last service/inspection." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_NextServiceDate">
+    <attribute PhysicalName="gc_NextServiceDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_next_service_date</Name>
       <LogicalName>gc_next_service_date</LogicalName>
@@ -236,7 +236,7 @@
         <Description description="Date the next service is due." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ResponsiblePerson">
+    <attribute PhysicalName="gc_ResponsiblePerson" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_responsible_person</Name>
       <LogicalName>gc_responsible_person</LogicalName>
@@ -252,7 +252,7 @@
         <Description description="Person responsible for this asset." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_StorageLocation">
+    <attribute PhysicalName="gc_StorageLocation" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_storage_location</Name>
       <LogicalName>gc_storage_location</LogicalName>
@@ -268,7 +268,7 @@
         <Description description="Where the asset lives when not on a job." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_IsActive">
+    <attribute PhysicalName="gc_IsActive" unmodified="0">
       <Type>bit</Type>
       <Name>gc_is_active</Name>
       <LogicalName>gc_is_active</LogicalName>
@@ -288,7 +288,7 @@
         <Description description="Whether this asset is available for job assignment." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_CostPrice">
+    <attribute PhysicalName="gc_CostPrice" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_cost_price</Name>
       <LogicalName>gc_cost_price</LogicalName>
@@ -304,7 +304,7 @@
         <Description description="Internal cost price for this asset in GBP." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ChargeOutPrice">
+    <attribute PhysicalName="gc_ChargeOutPrice" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_charge_out_price</Name>
       <LogicalName>gc_charge_out_price</LogicalName>
@@ -320,7 +320,7 @@
         <Description description="Optional charge-out (sell) price in GBP." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Notes">
+    <attribute PhysicalName="gc_Notes" unmodified="0">
       <Type>ntext</Type>
       <Name>gc_notes</Name>
       <LogicalName>gc_notes</LogicalName>

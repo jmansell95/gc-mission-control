@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Client" LanguageCode="1033">gc_client</Name>
   <EntityInfo>
-    <entity Name="gc_client">
+    <entity Name="gc_client" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Client" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Client company that commissions Ground Control work." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_ClientId">
+    <attribute PhysicalName="gc_ClientId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_clientid</Name>
       <LogicalName>gc_clientid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Client" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ParentClient">
+    <attribute PhysicalName="gc_ParentClient" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_parent_client</Name>
       <LogicalName>gc_parent_client</LogicalName>
@@ -60,7 +60,7 @@
         <Description description="Parent group client." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_IsHolding">
+    <attribute PhysicalName="gc_IsHolding" unmodified="0">
       <Type>bit</Type>
       <Name>gc_is_holding</Name>
       <LogicalName>gc_is_holding</LogicalName>
@@ -80,7 +80,7 @@
         <Description description="True when this client is a parent/holding group." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactName">
+    <attribute PhysicalName="gc_ContactName" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_name</Name>
       <LogicalName>gc_contact_name</LogicalName>
@@ -96,7 +96,7 @@
         <Description description="Primary contact person." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactEmail">
+    <attribute PhysicalName="gc_ContactEmail" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_email</Name>
       <LogicalName>gc_contact_email</LogicalName>
@@ -112,7 +112,7 @@
         <Description description="Contact email." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactPhone">
+    <attribute PhysicalName="gc_ContactPhone" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_phone</Name>
       <LogicalName>gc_contact_phone</LogicalName>
@@ -128,7 +128,7 @@
         <Description description="Contact phone number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_YardAddress">
+    <attribute PhysicalName="gc_YardAddress" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_yard_address</Name>
       <LogicalName>gc_yard_address</LogicalName>
@@ -144,7 +144,7 @@
         <Description description="Address of the client's yard, depot or collection point." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_IsPartner">
+    <attribute PhysicalName="gc_IsPartner" unmodified="0">
       <Type>bit</Type>
       <Name>gc_is_partner</Name>
       <LogicalName>gc_is_partner</LogicalName>

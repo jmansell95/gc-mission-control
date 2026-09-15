@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Job" LanguageCode="1033">gc_job</Name>
   <EntityInfo>
-    <entity Name="gc_job">
+    <entity Name="gc_job" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Job" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Ground Control project/job record." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_JobId">
+    <attribute PhysicalName="gc_JobId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_jobid</Name>
       <LogicalName>gc_jobid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Job" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_JobReference">
+    <attribute PhysicalName="gc_JobReference" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_job_reference</Name>
       <LogicalName>gc_job_reference</LogicalName>
@@ -59,7 +59,7 @@
         <Description description="Project reference or PO number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Location">
+    <attribute PhysicalName="gc_Location" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_location</Name>
       <LogicalName>gc_location</LogicalName>
@@ -75,7 +75,7 @@
         <Description description="Site location/address." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Status">
+    <attribute PhysicalName="gc_Status" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_status</Name>
       <LogicalName>gc_status</LogicalName>
@@ -91,7 +91,7 @@
         <Description description="planning / in_progress / decommissioning / completed / on_hold / cancelled." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_JobType">
+    <attribute PhysicalName="gc_JobType" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_job_type</Name>
       <LogicalName>gc_job_type</LogicalName>
@@ -107,7 +107,7 @@
         <Description description="Primary discipline/type key." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_StartDate">
+    <attribute PhysicalName="gc_StartDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_start_date</Name>
       <LogicalName>gc_start_date</LogicalName>
@@ -122,7 +122,7 @@
         <Description description="Project start date." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_EndDate">
+    <attribute PhysicalName="gc_EndDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_end_date</Name>
       <LogicalName>gc_end_date</LogicalName>
@@ -137,7 +137,7 @@
         <Description description="Project end date." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Client">
+    <attribute PhysicalName="gc_Client" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_client</Name>
       <LogicalName>gc_client</LogicalName>
@@ -154,7 +154,7 @@
         <Description description="Associated client." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Contractor">
+    <attribute PhysicalName="gc_Contractor" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_contractor</Name>
       <LogicalName>gc_contractor</LogicalName>
@@ -171,7 +171,7 @@
         <Description description="Associated contractor." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ProjectManager">
+    <attribute PhysicalName="gc_ProjectManager" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_project_manager</Name>
       <LogicalName>gc_project_manager</LogicalName>
@@ -187,7 +187,7 @@
         <Description description="Project manager responsible for the project." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_SiteContactName">
+    <attribute PhysicalName="gc_SiteContactName" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_site_contact_name</Name>
       <LogicalName>gc_site_contact_name</LogicalName>
@@ -203,7 +203,7 @@
         <Description description="On-site contact name." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_SiteContactPhone">
+    <attribute PhysicalName="gc_SiteContactPhone" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_site_contact_phone</Name>
       <LogicalName>gc_site_contact_phone</LogicalName>
@@ -219,7 +219,7 @@
         <Description description="On-site contact phone number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_BudgetAmount">
+    <attribute PhysicalName="gc_BudgetAmount" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_budget_amount</Name>
       <LogicalName>gc_budget_amount</LogicalName>
@@ -235,7 +235,7 @@
         <Description description="Project budget in GBP." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ActualCost">
+    <attribute PhysicalName="gc_ActualCost" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_actual_cost</Name>
       <LogicalName>gc_actual_cost</LogicalName>
@@ -251,7 +251,7 @@
         <Description description="Manually recorded actual cost in GBP." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Meterage">
+    <attribute PhysicalName="gc_Meterage" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_meterage</Name>
       <LogicalName>gc_meterage</LogicalName>
@@ -267,7 +267,7 @@
         <Description description="Total metres drilled for drilling projects." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_PortalEnabled">
+    <attribute PhysicalName="gc_PortalEnabled" unmodified="0">
       <Type>bit</Type>
       <Name>gc_portal_enabled</Name>
       <LogicalName>gc_portal_enabled</LogicalName>
@@ -287,7 +287,7 @@
         <Description description="Whether client portal access is enabled." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Notes">
+    <attribute PhysicalName="gc_Notes" unmodified="0">
       <Type>ntext</Type>
       <Name>gc_notes</Name>
       <LogicalName>gc_notes</LogicalName>

@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Job Asset Assignment" LanguageCode="1033">gc_jobassetassignment</Name>
   <EntityInfo>
-    <entity Name="gc_jobassetassignment">
+    <entity Name="gc_jobassetassignment" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Job Asset Assignment" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Links a Site Asset to a Job for a period of time." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_JobassetassignmentId">
+    <attribute PhysicalName="gc_JobassetassignmentId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_jobassetassignmentid</Name>
       <LogicalName>gc_jobassetassignmentid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Job Asset Assignment" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Job">
+    <attribute PhysicalName="gc_Job" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_job</Name>
       <LogicalName>gc_job</LogicalName>
@@ -60,7 +60,7 @@
         <Description description="Job this asset is assigned to." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Asset">
+    <attribute PhysicalName="gc_Asset" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_asset</Name>
       <LogicalName>gc_asset</LogicalName>
@@ -77,7 +77,7 @@
         <Description description="Site Asset assigned to this job." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Vehicle">
+    <attribute PhysicalName="gc_Vehicle" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_vehicle</Name>
       <LogicalName>gc_vehicle</LogicalName>
@@ -94,7 +94,7 @@
         <Description description="Vehicle the gear was loaded onto when signed out." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Role">
+    <attribute PhysicalName="gc_Role" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_role</Name>
       <LogicalName>gc_role</LogicalName>
@@ -110,7 +110,7 @@
         <Description description="Role this asset plays on the job (primary_rig / trailer / lifting / machinery)." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Status">
+    <attribute PhysicalName="gc_Status" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_status</Name>
       <LogicalName>gc_status</LogicalName>
@@ -126,7 +126,7 @@
         <Description description="assigned / on_site / returned." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_AssignedDate">
+    <attribute PhysicalName="gc_AssignedDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_assigned_date</Name>
       <LogicalName>gc_assigned_date</LogicalName>
@@ -141,7 +141,7 @@
         <Description description="Date the asset was assigned to the job." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ArrivedOnSiteDate">
+    <attribute PhysicalName="gc_ArrivedOnSiteDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_arrived_on_site_date</Name>
       <LogicalName>gc_arrived_on_site_date</LogicalName>
@@ -156,7 +156,7 @@
         <Description description="Date the asset arrived on site." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ReturnedDate">
+    <attribute PhysicalName="gc_ReturnedDate" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_returned_date</Name>
       <LogicalName>gc_returned_date</LogicalName>
@@ -171,7 +171,7 @@
         <Description description="Date the asset was returned / off-hired." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Notes">
+    <attribute PhysicalName="gc_Notes" unmodified="0">
       <Type>ntext</Type>
       <Name>gc_notes</Name>
       <LogicalName>gc_notes</LogicalName>

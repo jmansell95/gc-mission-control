@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Staff Member" LanguageCode="1033">gc_staff</Name>
   <EntityInfo>
-    <entity Name="gc_staff">
+    <entity Name="gc_staff" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Staff Member" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Ground Control employee, agency or subcontractor worker." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_StaffId">
+    <attribute PhysicalName="gc_StaffId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_staffid</Name>
       <LogicalName>gc_staffid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Staff Member" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Email">
+    <attribute PhysicalName="gc_Email" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_email</Name>
       <LogicalName>gc_email</LogicalName>
@@ -59,7 +59,7 @@
         <Description description="Staff member email address." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Phone">
+    <attribute PhysicalName="gc_Phone" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_phone</Name>
       <LogicalName>gc_phone</LogicalName>
@@ -75,7 +75,7 @@
         <Description description="Staff member phone number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_JobTitle">
+    <attribute PhysicalName="gc_JobTitle" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_job_title</Name>
       <LogicalName>gc_job_title</LogicalName>
@@ -91,7 +91,7 @@
         <Description description="Staff member's job title / role." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_WorkerType">
+    <attribute PhysicalName="gc_WorkerType" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_worker_type</Name>
       <LogicalName>gc_worker_type</LogicalName>
@@ -107,7 +107,7 @@
         <Description description="employee / agency / subcontractor." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Company">
+    <attribute PhysicalName="gc_Company" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_company</Name>
       <LogicalName>gc_company</LogicalName>
@@ -123,7 +123,7 @@
         <Description description="The company this external worker is from." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_DayRate">
+    <attribute PhysicalName="gc_DayRate" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_day_rate</Name>
       <LogicalName>gc_day_rate</LogicalName>
@@ -139,7 +139,7 @@
         <Description description="Internal cost price per day for this staff member." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Agency">
+    <attribute PhysicalName="gc_Agency" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_agency</Name>
       <LogicalName>gc_agency</LogicalName>
@@ -156,7 +156,7 @@
         <Description description="Linked Contractor (Agency) record." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Manager">
+    <attribute PhysicalName="gc_Manager" unmodified="0">
       <Type>lookup</Type>
       <Name>gc_manager</Name>
       <LogicalName>gc_manager</LogicalName>
@@ -173,7 +173,7 @@
         <Description description="Staff member who approves this person's timesheets." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_TeamId">
+    <attribute PhysicalName="gc_TeamId" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_team_id</Name>
       <LogicalName>gc_team_id</LogicalName>
@@ -189,7 +189,7 @@
         <Description description="Team/group assignment." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_SystemRole">
+    <attribute PhysicalName="gc_SystemRole" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_system_role</Name>
       <LogicalName>gc_system_role</LogicalName>
@@ -205,7 +205,7 @@
         <Description description="App-level access role." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_NiNumber">
+    <attribute PhysicalName="gc_NiNumber" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_ni_number</Name>
       <LogicalName>gc_ni_number</LogicalName>
@@ -221,7 +221,7 @@
         <Description description="National Insurance Number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_DateOfBirth">
+    <attribute PhysicalName="gc_DateOfBirth" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_date_of_birth</Name>
       <LogicalName>gc_date_of_birth</LogicalName>
@@ -236,7 +236,7 @@
         <Description description="Staff member date of birth." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_IsActive">
+    <attribute PhysicalName="gc_IsActive" unmodified="0">
       <Type>bit</Type>
       <Name>gc_is_active</Name>
       <LogicalName>gc_is_active</LogicalName>

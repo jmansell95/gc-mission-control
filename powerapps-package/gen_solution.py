@@ -168,14 +168,14 @@ def attr_xml(field_name, ftype, display, desc, is_primary=False):
             f'      <Format>text</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>nvarchar</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>nvarchar</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "memo":
         body = (
             f'      <Length>4000</Length>\n'
             f'      <Format>textarea</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>ntext</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>ntext</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "bool":
         body = (
             f'      <defaultvalue>0</defaultvalue>\n'
@@ -186,20 +186,20 @@ def attr_xml(field_name, ftype, display, desc, is_primary=False):
             f'        </LocLabel>\n'
             f'      </LocLabels>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>bit</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>bit</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "decimal":
         body = (
             f'      <MinValue>-100000000</MinValue>\n'
             f'      <MaxValue>100000000</MaxValue>\n'
             f'      <Precision>2</Precision>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>decimal</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>decimal</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype == "date":
         body = (
             f'      <Format>DateOnly</Format>\n'
             f'      <ImeMode>auto</ImeMode>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>datetime</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>datetime</Type>\n{head}{body}{tail}    </attribute>\n'
     if ftype.startswith("lookup:"):
         target = ftype.split(":", 1)[1]
         target_logical = f"{PREFIX}_{target}"
@@ -209,7 +209,7 @@ def attr_xml(field_name, ftype, display, desc, is_primary=False):
             f'        <LookupType>{target_logical}</LookupType>\n'
             f'      </LookupTypes>\n'
         )
-        return f'    <attribute PhysicalName="{physical}">\n      <Type>lookup</Type>\n{head}{body}{tail}    </attribute>\n'
+        return f'    <attribute PhysicalName="{physical}" unmodified="0">\n      <Type>lookup</Type>\n{head}{body}{tail}    </attribute>\n'
     raise ValueError(f"unknown field type {ftype}")
 
 
@@ -230,7 +230,7 @@ def entity_xml(key, spec):
     # handles, but it must still match the order every other attribute uses.
     attrs = []
     attrs.append(
-        f'    <attribute PhysicalName="{pk_physical}">\n'
+        f'    <attribute PhysicalName="{pk_physical}" unmodified="0">\n'
         f'      <Type>primarykey</Type>\n'
         f'      <Name>{pk_logical}</Name>\n'
         f'      <LogicalName>{pk_logical}</LogicalName>\n'
@@ -254,7 +254,7 @@ def entity_xml(key, spec):
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="{esc(display)}" LanguageCode="1033">{logical}</Name>
   <EntityInfo>
-    <entity Name="{logical}">
+    <entity Name="{logical}" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="{esc(display)}" languagecode="1033" />
       </LocalizedNames>

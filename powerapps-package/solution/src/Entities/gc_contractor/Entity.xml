@@ -2,7 +2,7 @@
 <Entity xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Name LocalizedName="Contractor" LanguageCode="1033">gc_contractor</Name>
   <EntityInfo>
-    <entity Name="gc_contractor">
+    <entity Name="gc_contractor" unmodified="0">
       <LocalizedNames>
         <LocalizedName description="Contractor" languagecode="1033" />
       </LocalizedNames>
@@ -13,7 +13,7 @@
         <Description description="Sub-contractor or agency supplying labour/plant to Ground Control." languagecode="1033" />
       </Descriptions>
       <attributes>
-    <attribute PhysicalName="gc_ContractorId">
+    <attribute PhysicalName="gc_ContractorId" unmodified="0">
       <Type>primarykey</Type>
       <Name>gc_contractorid</Name>
       <LogicalName>gc_contractorid</LogicalName>
@@ -26,7 +26,7 @@
         <DisplayName description="Contractor" languagecode="1033" />
       </DisplayNames>
     </attribute>
-    <attribute PhysicalName="gc_Name">
+    <attribute PhysicalName="gc_Name" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_name</Name>
       <LogicalName>gc_name</LogicalName>
@@ -43,7 +43,7 @@
         <Description description="Primary name field" languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContractorType">
+    <attribute PhysicalName="gc_ContractorType" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contractor_type</Name>
       <LogicalName>gc_contractor_type</LogicalName>
@@ -59,7 +59,7 @@
         <Description description="subcontractor / agency." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactName">
+    <attribute PhysicalName="gc_ContactName" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_name</Name>
       <LogicalName>gc_contact_name</LogicalName>
@@ -75,7 +75,7 @@
         <Description description="Primary contact person." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactEmail">
+    <attribute PhysicalName="gc_ContactEmail" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_email</Name>
       <LogicalName>gc_contact_email</LogicalName>
@@ -91,7 +91,7 @@
         <Description description="Contact email address." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_ContactPhone">
+    <attribute PhysicalName="gc_ContactPhone" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_contact_phone</Name>
       <LogicalName>gc_contact_phone</LogicalName>
@@ -107,7 +107,7 @@
         <Description description="Contact phone number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_OnboardingStatus">
+    <attribute PhysicalName="gc_OnboardingStatus" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_onboarding_status</Name>
       <LogicalName>gc_onboarding_status</LogicalName>
@@ -123,7 +123,7 @@
         <Description description="Onboarding lifecycle status." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_CompanyRegNumber">
+    <attribute PhysicalName="gc_CompanyRegNumber" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_company_reg_number</Name>
       <LogicalName>gc_company_reg_number</LogicalName>
@@ -139,7 +139,7 @@
         <Description description="Companies House registration number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_VatNumber">
+    <attribute PhysicalName="gc_VatNumber" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_vat_number</Name>
       <LogicalName>gc_vat_number</LogicalName>
@@ -155,7 +155,7 @@
         <Description description="VAT registration number." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_InsuranceProvider">
+    <attribute PhysicalName="gc_InsuranceProvider" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_insurance_provider</Name>
       <LogicalName>gc_insurance_provider</LogicalName>
@@ -171,7 +171,7 @@
         <Description description="Name of the public liability insurer." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_InsuranceExpiry">
+    <attribute PhysicalName="gc_InsuranceExpiry" unmodified="0">
       <Type>datetime</Type>
       <Name>gc_insurance_expiry</Name>
       <LogicalName>gc_insurance_expiry</LogicalName>
@@ -186,7 +186,7 @@
         <Description description="Expiry date of the public liability insurance policy." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_DefaultDailyRate">
+    <attribute PhysicalName="gc_DefaultDailyRate" unmodified="0">
       <Type>decimal</Type>
       <Name>gc_default_daily_rate</Name>
       <LogicalName>gc_default_daily_rate</LogicalName>
@@ -202,7 +202,7 @@
         <Description description="Default daily charge rate for this contractor's crew." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_CisStatus">
+    <attribute PhysicalName="gc_CisStatus" unmodified="0">
       <Type>nvarchar</Type>
       <Name>gc_cis_status</Name>
       <LogicalName>gc_cis_status</LogicalName>
@@ -218,7 +218,7 @@
         <Description description="HMRC CIS verification result." languagecode="1033" />
       </Descriptions>
     </attribute>
-    <attribute PhysicalName="gc_Notes">
+    <attribute PhysicalName="gc_Notes" unmodified="0">
       <Type>ntext</Type>
       <Name>gc_notes</Name>
       <LogicalName>gc_notes</LogicalName>
