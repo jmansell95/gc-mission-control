@@ -75,6 +75,45 @@ visually in App Designer (very quick, no XML involved).
    add a picklist for `status`/`asset_type`/`worker_type` etc. — quick, visual, no
    redeploy needed.
 
+## Update: the solution-import approach doesn't work for new tables
+
+Four rounds of hand-editing `Entities/*/Entity.xml` all failed with the identical
+`PrimaryName attribute not found for Entity` error, despite fixing element order,
+the primary-name flag name, and the `unmodified` flag in turn — a strong sign the
+importer wasn't even reaching the attribute content. Research confirmed why:
+**Microsoft does not support defining brand-new tables by hand-editing
+`customizations.xml` at all.** That mechanism only works for editing specific
+aspects (forms, views, ribbons, sitemap) of tables that already exist — never for
+creating one from nothing. No amount of further XML tweaking was ever going to fix
+this; `GCMissionControl_Phase1.zip` and the `Entities/` folder are being kept in
+this repo for reference/history, but they cannot be imported successfully as-is.
+
+**What actually works instead: create each table from a CSV/Excel file.** Power
+Apps' "Start with data" table creation reads column headers and sample rows to
+build a table with correctly-typed columns — fully supported, no XML involved.
+Six ready-to-upload CSVs (one per table, headers matching the schema above, two
+sample data rows for type inference) are in `csv-tables/`.
+
+**Steps per table** (Tables → New table → **From Excel/CSV** in
+make.powerapps.com):
+1. Upload the matching CSV — do Client and Contractor first, since Job, Staff,
+   and Job Asset Assignment all reference them.
+2. Delete the two sample data rows Power Apps imports along with the columns
+   (Data tab on the table, select rows, delete) — they're only there to make type
+   inference pick sensible column types.
+3. The lookup columns listed below import as plain text — replace each with a
+   real **Lookup** column (New column → Lookup → pick the target table) once
+   both sides of the relationship exist, then delete the text version:
+   - Job: `Client` → Client, `Contractor` → Contractor
+   - Staff Member: `Agency` → Contractor, `Manager` → Staff Member (self-lookup)
+   - Client: `Parent Client` → Client (self-lookup)
+   - Job Asset Assignment: `Job` → Job, `Asset` → Site Asset, `Vehicle` → Site Asset
+
+Once the six tables exist, Phase 2 additional tables can use the same CSV
+approach — and *editing* forms/views on tables that already exist is one of the
+things solution-XML packaging is actually supported for, so that mechanism isn't
+wasted, just not usable for table creation itself.
+
 ## Rebuilding the package
 
 `gen_solution.py` (in this folder) generates `solution/src/Entities/*` and

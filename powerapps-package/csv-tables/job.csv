@@ -1,0 +1,3 @@
+Job Name,Job Reference,Location,Status,Job Type,Start Date,End Date,Client,Contractor,Project Manager,Site Contact Name,Site Contact Phone,Budget Amount,Actual Cost,Meterage,Portal Enabled,Notes
+Example One,Sample value one,Sample value one,Sample value one,Sample value one,2026-01-15,2026-01-15,(leave blank for now),(leave blank for now),Sample value one,Sample value one,Sample value one,1000.00,1000.00,1000.00,Yes,"Free-text notes go here, can be a longer paragraph of detail."
+Example Two,Sample value two,Sample value two,Sample value two,Sample value two,2026-02-20,2026-02-20,(leave blank for now),(leave blank for now),Sample value two,Sample value two,Sample value two,2500.50,2500.50,2500.50,No,More free-text notes as a second example row.

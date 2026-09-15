@@ -1,0 +1,3 @@
+Client Name,Parent Client,Is Holding Company,Contact Name,Contact Email,Contact Phone,Yard Address,Is Partner
+Example One,(leave blank for now),Yes,Sample value one,Sample value one,Sample value one,"123 Example Street, Sample Town, SM1 2PL",Yes
+Example Two,(leave blank for now),No,Sample value two,Sample value two,Sample value two,"456 Other Road, Othertown, OT9 8ZZ",No
