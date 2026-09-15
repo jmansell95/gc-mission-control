@@ -145,12 +145,19 @@ export default function WeeklyRotaBuilder({ selectedWeek: propSelectedWeek, setS
   const { data: rotas = [] } = useQuery({
     queryKey: ['rotas', weekStartStr, activeDivisionId || 'overview'],
     queryFn: async () => {
-      const res = await base44.functions.invoke('getDivisionScopedData', {
-        entity: 'RotaAssignment',
-        division_id: activeDivisionId,
-        filter: { week_start: weekStartStr },
-      });
-      return res.data?.data || [];
+      try {
+        const res = await base44.functions.invoke('getDivisionScopedData', {
+          entity: 'RotaAssignment',
+          division_id: activeDivisionId,
+          filter: { week_start: weekStartStr },
+        });
+        return res.data?.data || [];
+      } catch {
+        // Fallback to direct query with client-side division filter.
+        const directFilter = { week_start: weekStartStr };
+        if (activeDivisionId) directFilter.division_id = activeDivisionId;
+        return await base44.entities.RotaAssignment.filter(directFilter);
+      }
     }
   });
 

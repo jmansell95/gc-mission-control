@@ -35,16 +35,25 @@ export function useScopedEntity(entity, options = {}) {
   return useQuery({
     queryKey: ['scoped', entity, activeDivisionId || 'overview', ...(queryKey || [])],
     queryFn: async () => {
-      const res = await base44.functions.invoke('getDivisionScopedData', {
-        entity,
-        division_id: activeDivisionId,
-        filter: filter || {},
-        sort,
-        limit,
-      });
-      // The function returns { data: items }; res.data is the Axios body,
-      // so the array lives at res.data.data.
-      return res.data?.data || [];
+      try {
+        const res = await base44.functions.invoke('getDivisionScopedData', {
+          entity,
+          division_id: activeDivisionId,
+          filter: filter || {},
+          sort,
+          limit,
+        });
+        // The function returns { data: items }; res.data is the Axios body,
+        // so the array lives at res.data.data.
+        return res.data?.data || [];
+      } catch {
+        // Fallback to direct entity query with client-side division filter.
+        // Used when the backend function is unavailable (plan restriction).
+        const directFilter = { ...(filter || {}) };
+        if (activeDivisionId) directFilter.division_id = activeDivisionId;
+        const items = await base44.entities[entity].filter(directFilter, sort, limit);
+        return items || [];
+      }
     },
     enabled,
   });
